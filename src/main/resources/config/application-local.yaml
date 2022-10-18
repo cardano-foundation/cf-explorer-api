@@ -1,0 +1,46 @@
+# Infrastructure domain
+infrastructure:
+  host: 192.168.1.206
+
+spring:
+  # Datasource specific configs
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://${infrastructure.host}:54321/explorer_api?currentSchema=dev
+    username: cardano
+    password: c290YXRla0AxMjMK
+    driver-class-name: org.postgresql.Driver
+    # Hikari specific configs
+    hikari:
+      pool-name: explorer-api-pool
+      minimum-idle: 10 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximum-pool-size: 20 #maximum pool size
+      idle-timeout: 300000 #maximum idle time for connection
+      max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      auto-commit: false #default auto-commit behavior.
+      connection-init-sql: SELECT 1
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+  # JPA specific configs
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: dev
+        show_sql: true
+        format_sql: true
