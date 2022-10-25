@@ -77,6 +77,7 @@ pipeline {
                     }
                 }
                 sh "docker-compose --env-file ${envFileDeploy} up -d --build"
+                sh "docker images -f 'dangling=true' -q --no-trunc | xargs docker rmi"
                 echo 'Deployment Done!!!'
             }
         }
