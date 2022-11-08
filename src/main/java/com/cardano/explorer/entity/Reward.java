@@ -1,6 +1,6 @@
 package com.cardano.explorer.entity;
 
-import com.cardano.explorer.common.RewardType;
+import com.cardano.explorer.common.enumeration.RewardType;
 import com.cardano.explorer.validation.Lovelace;
 import java.math.BigDecimal;
 import javax.persistence.Column;

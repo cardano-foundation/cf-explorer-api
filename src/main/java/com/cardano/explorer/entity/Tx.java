@@ -48,6 +48,9 @@ public class Tx extends BaseEntity {
   @EqualsAndHashCode.Exclude
   private Block block;
 
+  @Column(name = "block_id", updatable=false, insertable=false)
+  private Long blockId;
+
   @Column(name = "block_index", nullable = false)
   @Word31Type
   private Long blockIndex;

@@ -1,6 +1,6 @@
 package com.cardano.explorer.entity;
 
-import com.cardano.explorer.common.SyncStateType;
+import com.cardano.explorer.common.enumeration.SyncStateType;
 import com.cardano.explorer.validation.Word63Type;
 import javax.persistence.Column;
 import javax.persistence.Entity;

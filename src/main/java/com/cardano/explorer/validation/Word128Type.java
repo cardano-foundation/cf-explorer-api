@@ -27,11 +27,7 @@ class Word128TypeValidator implements ConstraintValidator<Word128Type, BigDecima
 
   @Override
   public boolean isValid(BigDecimal decimal, ConstraintValidatorContext constraintValidatorContext) {
-    if (decimal.compareTo(new BigDecimal("0")) < 0
-        || decimal.compareTo(new BigDecimal("340282366920938463463374607431768211455")) > 0) {
-      return false;
-    } else {
-      return true;
-    }
+    return decimal.compareTo(new BigDecimal("0")) >= 0
+        && decimal.compareTo(new BigDecimal("340282366920938463463374607431768211455")) <= 0;
   }
 }
