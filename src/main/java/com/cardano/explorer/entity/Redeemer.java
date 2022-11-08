@@ -1,6 +1,6 @@
 package com.cardano.explorer.entity;
 
-import com.cardano.explorer.common.ScriptPurposeType;
+import com.cardano.explorer.common.enumeration.ScriptPurposeType;
 import com.cardano.explorer.validation.Hash28Type;
 import com.cardano.explorer.validation.Lovelace;
 import com.cardano.explorer.validation.Word31Type;

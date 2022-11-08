@@ -1,6 +1,6 @@
 package com.cardano.explorer.entity;
 
-import com.cardano.explorer.common.ScriptType;
+import com.cardano.explorer.common.enumeration.ScriptType;
 import com.cardano.explorer.validation.Hash32Type;
 import com.cardano.explorer.validation.Word31Type;
 import javax.persistence.Column;

@@ -21,6 +21,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "block", uniqueConstraints = {
@@ -51,11 +52,12 @@ public class Block extends BaseEntity {
   private Integer epochSlotNo;
 
   @Column(name = "block_no", nullable = false)
-  private Long blockNo;
+  @Word31Type
+  private Integer blockNo;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "previous_id", foreignKey = @ForeignKey(name = "block_previous_id_fkey") )
+  @JoinColumn(name = "previous_id", foreignKey = @ForeignKey(name = "block_previous_id_fkey"))
   @EqualsAndHashCode.Exclude
   private Block previous;
 
@@ -86,6 +88,7 @@ public class Block extends BaseEntity {
 
   @Column(name = "vrf_key")
   @Lob
+  @Type(type = "org.hibernate.type.TextType")
   private String vrfKey;
 
   @Column(name = "op_cert")
