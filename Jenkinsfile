@@ -23,7 +23,7 @@ pipeline {
                 script {
                     def envFile
                     if (env.BRANCH_NAME == 'develop') {
-                        envFile = readProperties file: '/tmp/env-dev.properties'
+                        envFile = readProperties file: '/tmp/env-explorer-api-dev.properties'
                     }
                     if (env.BRANCH_NAME == 'test') {
                         envFile = readProperties file: '/tmp/env-test.properties'
@@ -67,7 +67,7 @@ pipeline {
                 echo 'Deploying....'
                 script {
                     if (env.BRANCH_NAME == 'develop') {
-                        envFileDeploy = '/tmp/env-dev.env'
+                        envFileDeploy = '/tmp/env-explorer-api-dev.env'
                     }
                     if (env.BRANCH_NAME == 'test') {
                         envFileDeploy = '/tmp/env-test.env'
