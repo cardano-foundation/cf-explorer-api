@@ -51,7 +51,7 @@ public class BlockServiceImpl implements BlockService {
     Integer count = blockRepository.countAll().orElse(0);
     List<Block> blocks = new ArrayList<>();
     if(count > 0) {
-       blockRepository.findAllBlock(pageable);
+      blocks = blockRepository.findAllBlock(pageable);
     }
     Page<Block> page = new PageImpl<>(blocks, pageable , count);
 //    Page<Block> page = blockRepository.findAll(pageable);

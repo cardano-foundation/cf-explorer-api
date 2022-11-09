@@ -29,10 +29,21 @@ public class EpochServiceImpl implements EpochService {
   @Override
   @Transactional(readOnly = true)
   public EpochResponse getEpochDetail(Integer no) {
-      Epoch epoch = epochRepository.findByNo(no).orElseThrow(
-          () -> new BusinessException(BusinessCode.NOT_FOUND)
-      );
-      return epochMapper.epochToEpochResponse(epoch);
+    Epoch epoch = epochRepository.findByNo(no).orElseThrow(
+        () -> new BusinessException(BusinessCode.NOT_FOUND)
+    );
+    EpochResponse response = epochMapper.epochToEpochResponse(epoch);
+    var rewardTime = LocalDateTime.now(ZoneId.of("UTC")).minusDays(10);
+    var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
+        () -> new BusinessException(BusinessCode.NOT_FOUND));
+    if(currentEpoch.equals(response.getNo())) {
+      response.setStatus(EpochStatus.IN_PROGRESS);
+    } else if(rewardTime.isBefore(response.getEndTime())) {
+      response.setStatus(EpochStatus.REWARDING);
+    } else {
+      response.setStatus(EpochStatus.FINISHED);
+    }
+    return response;
   }
 
   @Override
