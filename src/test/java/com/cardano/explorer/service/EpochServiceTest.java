@@ -45,6 +45,7 @@ class EpochServiceTest {
 
   @Test
   void whenGetCurrentEpoch_shouldReturnEpochNoCurrent() {
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(200));
     var response =
         epochService.getCurrentEpoch();
     assertThat(response).isNotNull();
