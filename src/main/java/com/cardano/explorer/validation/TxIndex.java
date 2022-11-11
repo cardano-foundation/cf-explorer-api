@@ -10,16 +10,17 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
-@Target({ ElementType.FIELD})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = TxIndexValidator.class)
 @Documented
 public @interface TxIndex {
+
   String message() default "The value must be TxIndex";
 
-  Class<?>[] groups() default { };
+  Class<?>[] groups() default {};
 
-  Class<? extends Payload>[] payload() default { };
+  Class<? extends Payload>[] payload() default {};
 }
 
 class TxIndexValidator implements ConstraintValidator<TxIndex, Short> {

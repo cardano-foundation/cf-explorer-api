@@ -62,12 +62,12 @@ public class EpochParam extends BaseEntity {
 
   @Column(name = "key_deposit", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal keyDeposit;
 
   @Column(name = "pool_deposit", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal poolDeposit;
 
   @Column(name = "max_epoch", nullable = false)
@@ -104,12 +104,12 @@ public class EpochParam extends BaseEntity {
 
   @Column(name = "min_utxo_value", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal minUtxoValue;
 
   @Column(name = "min_pool_cost", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal minPoolCost;
 
   @Column(name = "nonce")
@@ -118,7 +118,7 @@ public class EpochParam extends BaseEntity {
 
   @Column(name = "coins_per_utxo_size")
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal coinsPerUtxoSize;
 
   @ManyToOne(fetch = FetchType.LAZY)

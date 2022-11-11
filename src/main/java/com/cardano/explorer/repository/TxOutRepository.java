@@ -3,15 +3,15 @@ package com.cardano.explorer.repository;
 import com.cardano.explorer.entity.Tx;
 import com.cardano.explorer.entity.TxOut;
 import com.cardano.explorer.entity.projection.AddressInputOutput;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface TxOutRepository extends JpaRepository<TxOut, Long> {
 
 
-  List<AddressInputOutput> findByTxInOrderByIndexAsc(List<Tx> tx);
+  List<AddressInputOutput> findByTxInOrderByIndexAsc(Collection<Tx> tx);
 
 
   @Query("SELECT tx.id as txId, txOut.address as address"
@@ -20,5 +20,5 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + "   INNER JOIN Tx tx on tx.id = txIn.txIn.id and txIn.txOutIndex = txOut.index"
       + "   WHERE tx.id IN :txIds"
       + "   ORDER BY txIn.id asc")
-  List<AddressInputOutput> findAddressInputByTxIdIn(Set<Long> txIds);
+  List<AddressInputOutput> findAddressInputByTxIdIn(Collection<Long> txIds);
 }

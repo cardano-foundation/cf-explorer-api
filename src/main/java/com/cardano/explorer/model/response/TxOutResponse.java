@@ -1,4 +1,4 @@
-package com.cardano.explorer.model;
+package com.cardano.explorer.model.response;
 
 import lombok.Getter;
 import lombok.Setter;

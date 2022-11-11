@@ -5,8 +5,9 @@ import com.cardano.explorer.entity.Tx;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface TxRepository extends JpaRepository<Tx, Long> {
+public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationExecutor<Tx> {
 
   List<Tx> findByBlockIn(List<Block> blocks);
 

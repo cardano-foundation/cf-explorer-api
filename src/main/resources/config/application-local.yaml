@@ -44,12 +44,5 @@ spring:
         default_schema: public
         show_sql: true
         format_sql: true
-  cache:
-    type: redis
-    redis:
-      time-to-live: 10000
-  redis:
-    host: localhost
-    port: 6380
   flyway:
     enabled: false

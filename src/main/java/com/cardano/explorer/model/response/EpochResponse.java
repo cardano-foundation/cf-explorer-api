@@ -1,4 +1,4 @@
-package com.cardano.explorer.model;
+package com.cardano.explorer.model.response;
 
 import com.cardano.explorer.common.enumeration.EpochStatus;
 import java.math.BigDecimal;

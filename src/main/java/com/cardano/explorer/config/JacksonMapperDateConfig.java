@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JacksonMapperDateConfig {
+
   private static final String DATE_FORMAT = "yyyy/MM/dd";
   private static final String DATE_TIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
 
@@ -17,7 +18,8 @@ public class JacksonMapperDateConfig {
     return builder -> {
       builder.simpleDateFormat(DATE_TIME_FORMAT);
       builder.serializers(new LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_FORMAT)));
-      builder.serializers(new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+      builder.serializers(
+          new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
     };
   }
 

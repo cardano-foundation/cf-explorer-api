@@ -1,8 +1,8 @@
 package com.cardano.explorer.mapper;
 
 import com.cardano.explorer.entity.Tx;
-import com.cardano.explorer.model.TxFilterResponse;
-import com.cardano.explorer.model.TxResponse;
+import com.cardano.explorer.model.response.TxFilterResponse;
+import com.cardano.explorer.model.response.TxResponse;
 import com.sotatek.cardano.ledgersync.util.HexUtil;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -12,7 +12,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface TxMapper {
 
-  @Mapping(target = "epochNo", source= "block.epochNo")
+  @Mapping(target = "epochNo", source = "block.epochNo")
   @Mapping(target = "slot", source = "block.slotNo")
   @Mapping(target = "blockNo", source = "block.blockNo")
   @Mapping(target = "totalOutput", source = "outSum")

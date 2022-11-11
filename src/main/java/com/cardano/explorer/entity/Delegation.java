@@ -21,7 +21,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name = "delegation", uniqueConstraints = {
     @UniqueConstraint(name = "unique_delegation",
-        columnNames = {"tx_id","cert_index"})
+        columnNames = {"tx_id", "cert_index"})
 })
 @Getter
 @Setter

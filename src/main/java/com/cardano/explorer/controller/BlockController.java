@@ -1,9 +1,10 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
-import com.cardano.explorer.model.BaseFilterResponse;
-import com.cardano.explorer.model.BlockFilterResponse;
-import com.cardano.explorer.model.BlockResponse;
+import com.cardano.explorer.model.request.BlockFilterRequest;
+import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.BlockFilterResponse;
+import com.cardano.explorer.model.response.BlockResponse;
 import com.cardano.explorer.service.BlockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,7 +16,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,27 +29,20 @@ public class BlockController {
   @LogMessage
   @Operation(summary = "Get a block detail by its no")
   public BlockResponse getBlockDetail(
-      @PathVariable @Parameter(description="Block number") Integer no) {
+      @PathVariable @Parameter(description = "Block number") Integer no) {
     return blockService.getBlockDetail(no);
   }
 
-  @GetMapping
-  @LogMessage
-  @Operation(summary = "Get blocks by epoch no")
-  public BaseFilterResponse<BlockFilterResponse> getBlockByEpochNo(
-      @RequestParam @Parameter(description="Epoch number") Integer epochNo,
-      @ParameterObject @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC)
-      Pageable pageable) {
-    return blockService.getBlockByEpochNo(epochNo, pageable);
-  }
-
-//  @Cacheable(value = "block_page", key = "#pageable.pageNumber+''+#pageable.pageSize+''+#pageable.sort")
+  //  @Cacheable(value = "block_list", key = "#pageable.pageNumber+''+#pageable.pageSize+''+#pageable.sort+''+#epochNo")
   @GetMapping("/list")
   @LogMessage
-  @Operation(summary = "Get all block")
-  public BaseFilterResponse<BlockFilterResponse> getAllBlock(@ParameterObject
-      @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return blockService.getAllBlock(pageable);
+  @Operation(summary = "Filter block")
+  public BaseFilterResponse<BlockFilterResponse> filter(
+      @Parameter(description = "Condition for filter (Set all properties to null for get all)")
+      BlockFilterRequest request,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return blockService.filterBlock(pageable, request);
   }
 
 }

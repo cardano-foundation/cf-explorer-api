@@ -10,19 +10,21 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
-@Target({ ElementType.FIELD})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = Addr29TypeValidator.class)
 @Documented
 public @interface Addr29Type {
+
   String message() default "The value must be addr29type";
 
-  Class<?>[] groups() default { };
+  Class<?>[] groups() default {};
 
-  Class<? extends Payload>[] payload() default { };
+  Class<? extends Payload>[] payload() default {};
 }
 
-class Addr29TypeValidator  implements ConstraintValidator<Addr29Type, byte[]> {
+class Addr29TypeValidator implements ConstraintValidator<Addr29Type, byte[]> {
+
   @Override
   public boolean isValid(byte[] bytes, ConstraintValidatorContext constraintValidatorContext) {
     return bytes.length == 29;

@@ -1,8 +1,8 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
-import com.cardano.explorer.model.BaseFilterResponse;
-import com.cardano.explorer.model.EpochResponse;
+import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.EpochResponse;
 import com.cardano.explorer.service.EpochService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,7 +27,7 @@ public class EpochController {
   @LogMessage
   @Operation(summary = "Get a epoch detail by its no")
   public EpochResponse getEpochDetail(@PathVariable
-      @Parameter(description="Epoch Number") Integer no) {
+  @Parameter(description = "Epoch Number") Integer no) {
     return epochService.getEpochDetail(no);
   }
 
@@ -41,8 +41,9 @@ public class EpochController {
   @GetMapping("/list")
   @LogMessage
   @Operation(summary = "Get all epoch")
-  public BaseFilterResponse<EpochResponse> getAll(@ParameterObject
-            @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+  public BaseFilterResponse<EpochResponse> filter(
+      @ParameterObject @PageableDefault(sort = {"id"},
+          direction = Sort.Direction.DESC) Pageable pageable) {
     return epochService.filterEpoch(pageable);
   }
 }

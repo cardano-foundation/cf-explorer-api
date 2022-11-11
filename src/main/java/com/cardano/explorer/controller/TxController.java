@@ -1,9 +1,10 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
-import com.cardano.explorer.model.BaseFilterResponse;
-import com.cardano.explorer.model.TxFilterResponse;
-import com.cardano.explorer.model.TxResponse;
+import com.cardano.explorer.model.request.TxFilterRequest;
+import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.TxFilterResponse;
+import com.cardano.explorer.model.response.TxResponse;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,21 +25,23 @@ public class TxController {
 
   private final TxService txService;
 
-//  @Cacheable(value = "tx_page", key = "#pageable.pageNumber+''+#pageable.pageSize+''+#pageable.sort")
+  //  @Cacheable(value = "tx_page", key = "#pageable.pageNumber+''+#pageable.pageSize+''+#pageable.sort")
   @GetMapping("/list")
   @LogMessage
-  @Operation(summary = "Get all transaction")
-  public BaseFilterResponse<TxFilterResponse> getAllTransaction(@ParameterObject
-            @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC)
-            Pageable pageable) {
-    return txService.getAll(pageable);
+  @Operation(summary = "Filter transaction")
+  public BaseFilterResponse<TxFilterResponse> filter(
+      @Parameter(description = "Condition for filter (Set all properties to null for get all)")
+      TxFilterRequest request,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return txService.filterTx(pageable, request);
   }
 
   @GetMapping("/{hash}")
   @LogMessage
   @Operation(summary = "Get transaction detail by hash")
   public TxResponse getTransactionDetail(@PathVariable
-      @Parameter(description="Hash value of transaction") String hash) {
+  @Parameter(description = "Hash value of transaction") String hash) {
     return txService.getTxDetailByHash(hash);
   }
 }
