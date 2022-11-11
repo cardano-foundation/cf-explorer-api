@@ -5,8 +5,8 @@ import com.cardano.explorer.entity.Epoch;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.exception.BusinessException;
 import com.cardano.explorer.mapper.EpochMapper;
-import com.cardano.explorer.model.BaseFilterResponse;
-import com.cardano.explorer.model.EpochResponse;
+import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.EpochResponse;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.service.EpochService;
 import java.time.LocalDateTime;
@@ -36,9 +36,9 @@ public class EpochServiceImpl implements EpochService {
     var rewardTime = LocalDateTime.now(ZoneId.of("UTC")).minusDays(10);
     var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
         () -> new BusinessException(BusinessCode.NOT_FOUND));
-    if(currentEpoch.equals(response.getNo())) {
+    if (currentEpoch.equals(response.getNo())) {
       response.setStatus(EpochStatus.IN_PROGRESS);
-    } else if(rewardTime.isBefore(response.getEndTime())) {
+    } else if (rewardTime.isBefore(response.getEndTime())) {
       response.setStatus(EpochStatus.REWARDING);
     } else {
       response.setStatus(EpochStatus.FINISHED);
@@ -50,8 +50,8 @@ public class EpochServiceImpl implements EpochService {
   @Transactional(readOnly = true)
   public Integer getCurrentEpoch() {
     return epochRepository.findCurrentEpochNo().orElseThrow(
-          () -> new BusinessException(BusinessCode.NOT_FOUND)
-      );
+        () -> new BusinessException(BusinessCode.NOT_FOUND)
+    );
   }
 
   @Override
@@ -64,9 +64,9 @@ public class EpochServiceImpl implements EpochService {
     List<EpochResponse> epochResponses = epochs.stream().
         map(epoch -> {
           EpochResponse response = epochMapper.epochToEpochResponse(epoch);
-          if(currentEpoch.equals(response.getNo())) {
+          if (currentEpoch.equals(response.getNo())) {
             response.setStatus(EpochStatus.IN_PROGRESS);
-          } else if(rewardTime.isBefore(response.getEndTime())) {
+          } else if (rewardTime.isBefore(response.getEndTime())) {
             response.setStatus(EpochStatus.REWARDING);
           } else {
             response.setStatus(EpochStatus.FINISHED);

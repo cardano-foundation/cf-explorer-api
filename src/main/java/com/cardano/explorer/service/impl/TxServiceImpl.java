@@ -7,13 +7,16 @@ import com.cardano.explorer.entity.projection.AddressInputOutput;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.exception.BusinessException;
 import com.cardano.explorer.mapper.TxMapper;
-import com.cardano.explorer.model.BaseFilterResponse;
-import com.cardano.explorer.model.TxFilterResponse;
-import com.cardano.explorer.model.TxResponse;
+import com.cardano.explorer.model.request.TxFilterRequest;
+import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.TxFilterResponse;
+import com.cardano.explorer.model.response.TxResponse;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.TxService;
+import com.cardano.explorer.specification.BlockSpecification;
+import com.cardano.explorer.specification.TxSpecification;
 import com.sotatek.cardano.ledgersync.util.HexUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,23 +40,28 @@ public class TxServiceImpl implements TxService {
   private final BlockRepository blockRepository;
   private final TxMapper txMapper;
 
+  private final TxSpecification txSpecification;
+
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TxFilterResponse> getAll(Pageable pageable) {
-    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
-    Page<Tx> txPage = txRepository.findAll(pageable);
+  public BaseFilterResponse<TxFilterResponse> filterTx(Pageable pageable, TxFilterRequest request) {
 
-    // get block information for each transaction
-    List<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
-        .collect(Collectors.toList());
-    List<Block> blocks = blockRepository.findBlockByIdIn(blockIdList);
+    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
+    Page<Tx> txPage;
+    if (request != null) {
+      txPage = txRepository.findAll(txSpecification.getFilter(request), pageable);
+    } else {
+      txPage = txRepository.findAll(pageable);
+    }
+    Set<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
+        .collect(Collectors.toSet());
+    var conditions = Specification.where(BlockSpecification.hasIdIn(blockIdList));
+    List<Block> blocks = blockRepository.findAll(conditions);
     Map<Long, Block> mapBlock = blocks.stream()
         .collect(Collectors.toMap(Block::getId, Function.identity()));
     txPage.getContent().forEach(tx -> tx.setBlock(mapBlock.get(tx.getBlockId())));
 
-
     List<TxFilterResponse> txFilterResponses = mapDataFromTxToResponse(txPage.getContent());
-
     response.setData(txFilterResponses);
     response.setCurrentPage(pageable.getPageNumber());
     response.setTotalPages(txPage.getTotalPages());

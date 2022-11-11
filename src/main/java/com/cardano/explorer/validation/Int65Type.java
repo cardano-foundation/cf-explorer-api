@@ -11,21 +11,24 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
-@Target({ ElementType.FIELD})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = Int65TypeValidator.class)
 @Documented
 public @interface Int65Type {
+
   String message() default "The value must be Int65Type";
 
-  Class<?>[] groups() default { };
+  Class<?>[] groups() default {};
 
-  Class<? extends Payload>[] payload() default { };
+  Class<? extends Payload>[] payload() default {};
 }
+
 class Int65TypeValidator implements ConstraintValidator<Int65Type, BigDecimal> {
 
   @Override
-  public boolean isValid(BigDecimal decimal, ConstraintValidatorContext constraintValidatorContext) {
+  public boolean isValid(BigDecimal decimal,
+      ConstraintValidatorContext constraintValidatorContext) {
     return decimal.compareTo(new BigDecimal("-18446744073709551615")) >= 0
         && decimal.compareTo(new BigDecimal("18446744073709551615")) <= 0;
   }

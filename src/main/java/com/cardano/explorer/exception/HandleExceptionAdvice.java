@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Log4j2
 @ControllerAdvice
 public final class HandleExceptionAdvice {
+
   @ExceptionHandler(BusinessException.class)
-  public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException businessException) {
+  public ResponseEntity<ErrorResponse> handleBusinessException(
+      BusinessException businessException) {
     HttpStatus httpStatus = businessException.getErrorResponse().getStatus();
     log.error("Exception Detail: {} and rootCause: {}",
         businessException.getErrorResponse().getMessage(),
@@ -37,7 +39,8 @@ public final class HandleExceptionAdvice {
   public ResponseEntity<ErrorResponse> handleBusinessException(Throwable exception) {
     BusinessException businessException = new BusinessException(BusinessCode.INTERNAL_SERVER);
     HttpStatus httpStatus = businessException.getErrorResponse().getStatus();
-    log.error("Exception global with message: {} status: {} exception: {}", exception.getMessage(), httpStatus, exception.getLocalizedMessage());
+    log.error("Exception global with message: {} status: {} exception: {}", exception.getMessage(),
+        httpStatus, exception.getLocalizedMessage());
     return new ResponseEntity<>(businessException.getErrorResponse(), httpStatus);
   }
 }

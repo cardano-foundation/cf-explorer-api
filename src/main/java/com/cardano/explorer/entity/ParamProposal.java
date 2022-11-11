@@ -72,12 +72,12 @@ public class ParamProposal extends BaseEntity {
 
   @Column(name = "key_deposit")
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal keyDeposit;
 
   @Column(name = "pool_deposit")
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal poolDeposit;
 
   @Column(name = "max_epoch")
@@ -116,12 +116,12 @@ public class ParamProposal extends BaseEntity {
 
   @Column(name = "min_utxo_value")
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal minUtxoValue;
 
   @Column(name = "min_pool_cost")
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal minPoolCost;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -179,7 +179,7 @@ public class ParamProposal extends BaseEntity {
 
   @Column(name = "coins_per_utxo_size")
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal coinsPerUtxoSize;
 
 }

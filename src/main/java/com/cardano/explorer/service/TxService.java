@@ -1,18 +1,21 @@
 package com.cardano.explorer.service;
 
-import com.cardano.explorer.model.BaseFilterResponse;
-import com.cardano.explorer.model.TxFilterResponse;
-import com.cardano.explorer.model.TxResponse;
+import com.cardano.explorer.model.request.TxFilterRequest;
+import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.TxFilterResponse;
+import com.cardano.explorer.model.response.TxResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface TxService {
+
   /**
    * Get list transaction with paging
    *
    * @param pageable page information
+   * @param request  request condition
    * @return list transaction information in this page
    */
-  BaseFilterResponse<TxFilterResponse> getAll(Pageable pageable);
+  BaseFilterResponse<TxFilterResponse> filterTx(Pageable pageable, TxFilterRequest request);
 
   /**
    * Get transaction information detail by hash

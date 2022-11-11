@@ -13,19 +13,16 @@ public class LoggerAspect {
 
   @Around("@annotation(LogMessage)")
   public Object aroundAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
-    log.info( "Method {} has started!!!!!", joinPoint.getSignature().getName());
-    try
-    {
+    log.info("Method {} has started!!!!!", joinPoint.getSignature().getName());
+    try {
       long startTime = System.currentTimeMillis();
       Object value = joinPoint.proceed();
       long endTime = System.currentTimeMillis();
       log.info("Method {} running in {} ms",
           joinPoint.getSignature().getName(), (endTime - startTime));
       return value;
-    }
-    finally
-    {
-      log.info("Method {} has ended!!!!!", joinPoint.getSignature().getName() );
+    } finally {
+      log.info("Method {} has ended!!!!!", joinPoint.getSignature().getName());
     }
   }
 }

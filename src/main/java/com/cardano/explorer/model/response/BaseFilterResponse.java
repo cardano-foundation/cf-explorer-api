@@ -1,4 +1,4 @@
-package com.cardano.explorer.model;
+package com.cardano.explorer.model.response;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BaseFilterResponse<T> implements Serializable {
+
   private List<T> data;
   private long totalItems;
   private int totalPages;

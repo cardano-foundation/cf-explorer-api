@@ -6,13 +6,13 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @SpringBootApplication
-@EnableAspectJAutoProxy(proxyTargetClass=true)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 //@EnableJpaAuditing
 @EnableCaching
 public class ExplorerApiApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ExplorerApiApplication.class, args);
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(ExplorerApiApplication.class, args);
+  }
 
 }

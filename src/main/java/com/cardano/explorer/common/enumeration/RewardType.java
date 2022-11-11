@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Getter
 public enum RewardType {
@@ -21,6 +21,7 @@ public enum RewardType {
   String value;
 
   private static final Map<String, RewardType> rewardTypeMap = new HashMap<>();
+
   static {
     for (RewardType type : RewardType.values()) {
       rewardTypeMap.put(type.value, type);

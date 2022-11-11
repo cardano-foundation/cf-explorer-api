@@ -1,4 +1,4 @@
-package com.cardano.explorer.model;
+package com.cardano.explorer.model.response;
 
 import java.time.LocalDateTime;
 import lombok.Getter;

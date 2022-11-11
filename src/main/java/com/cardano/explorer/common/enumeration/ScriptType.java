@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Getter
 public enum ScriptType {
@@ -19,11 +19,13 @@ public enum ScriptType {
   String value;
 
   private static final Map<String, ScriptType> rewardTypeMap = new HashMap<>();
+
   static {
     for (ScriptType type : ScriptType.values()) {
       rewardTypeMap.put(type.value, type);
     }
   }
+
   public static ScriptType fromValue(String value) {
     return rewardTypeMap.get(value);
   }

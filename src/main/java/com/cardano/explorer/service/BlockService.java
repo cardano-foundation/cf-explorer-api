@@ -1,8 +1,9 @@
 package com.cardano.explorer.service;
 
-import com.cardano.explorer.model.BaseFilterResponse;
-import com.cardano.explorer.model.BlockFilterResponse;
-import com.cardano.explorer.model.BlockResponse;
+import com.cardano.explorer.model.request.BlockFilterRequest;
+import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.BlockFilterResponse;
+import com.cardano.explorer.model.response.BlockResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface BlockService {
@@ -19,16 +20,9 @@ public interface BlockService {
    * Get list block with paging
    *
    * @param pageable page information
+   * @param request request condition
    * @return list block information in this page
    */
-  BaseFilterResponse<BlockFilterResponse> getAllBlock(Pageable pageable);
-
-  /**
-   * Get information of block having epoch no
-   *
-   * @param epochNo  epoch no
-   * @param pageable page information
-   * @return list block information in this page
-   */
-  BaseFilterResponse<BlockFilterResponse> getBlockByEpochNo(Integer epochNo, Pageable pageable);
+  BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable,
+      BlockFilterRequest request);
 }

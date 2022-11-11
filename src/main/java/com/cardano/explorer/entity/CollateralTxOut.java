@@ -26,7 +26,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name = "collateral_tx_out", uniqueConstraints = {
     @UniqueConstraint(name = "unique_col_txout",
-        columnNames = {"tx_id","index"})
+        columnNames = {"tx_id", "index"})
 })
 @Getter
 @Setter
@@ -69,7 +69,7 @@ public class CollateralTxOut extends BaseEntity {
 
   @Column(name = "value", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal value;
 
   @Column(name = "data_hash")

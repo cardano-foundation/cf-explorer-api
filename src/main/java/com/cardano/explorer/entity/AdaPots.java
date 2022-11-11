@@ -44,32 +44,32 @@ public class AdaPots extends BaseEntity {
 
   @Column(name = "treasury", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal treasury;
 
   @Column(name = "reserves", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal reserves;
 
   @Column(name = "rewards", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal rewards;
 
   @Column(name = "utxo", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal utxo;
 
   @Column(name = "deposits", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal deposits;
 
   @Column(name = "fees", nullable = false)
   @Lovelace
-  @Digits(integer=20, fraction=0)
+  @Digits(integer = 20, fraction = 0)
   private BigDecimal fees;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

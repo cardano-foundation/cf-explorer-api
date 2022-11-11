@@ -32,7 +32,7 @@ public class Epoch extends BaseEntity {
 
   @Column(name = "out_sum", nullable = false)
   @Word128Type
-  @Digits(integer=39, fraction=0)
+  @Digits(integer = 39, fraction = 0)
   private BigDecimal outSum;
 
   @Column(name = "fees", nullable = false)
