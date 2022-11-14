@@ -43,3 +43,10 @@ spring:
         format_sql: true
   flyway:
     enabled: false
+
+rsa:
+  key:
+    public-key-file: /key/public_key
+
+authentication:
+  ignore-check: false
