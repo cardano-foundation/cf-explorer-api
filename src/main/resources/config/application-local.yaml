@@ -56,4 +56,4 @@ rsa:
     public-key-file: /key/public_key
 
 authentication:
-  ignore-check: false
+  ignore-check: true #ignore authentication check
