@@ -46,3 +46,14 @@ spring:
         format_sql: true
   flyway:
     enabled: false
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 3000ms
+
+rsa:
+  key:
+    public-key-file: /key/public_key
+
+authentication:
+  ignore-check: false
