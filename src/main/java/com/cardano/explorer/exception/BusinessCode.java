@@ -1,17 +1,31 @@
 package com.cardano.explorer.exception;
 
-import org.springframework.http.HttpStatus;
+import com.sotatek.cardanocommonapi.exceptions.enums.ErrorCode;
 
-public class BusinessCode {
+public enum BusinessCode implements ErrorCode {
+  INTERNAL_ERROR("INTERNAL-SERVER", "Something went wrong"),
+  EPOCH_NOT_FOUND("404-EPOCH_NOT_FOUND", "Epoch not found"),
+  BLOCK_NOT_FOUND("404-BLOCK_NOT_FOUND", "Block not found"),
+  TRANSACTION_NOT_FOUND("404-TRANSACTION_NOT_FOUND", "Transaction not found");
 
-  private BusinessCode() {
+  private final String code;
+  private final String desc;
+
+  BusinessCode(String code, String desc) {
+    this.code = code;
+    this.desc = desc;
   }
 
-  public static final ErrorResponse INTERNAL_SERVER =
-      new ErrorResponse("INTERNAL-SERVER", "Something went wrong",
-          HttpStatus.INTERNAL_SERVER_ERROR);
+  public String getCode() {
+    return this.code;
+  }
 
-  public static final ErrorResponse NOT_FOUND =
-      new ErrorResponse("404", "Cam not find object for request", HttpStatus.NOT_FOUND);
+  public String getDesc() {
+    return this.desc;
+  }
+
+  public String getServicePrefix() {
+    return "BC";
+  }
 
 }

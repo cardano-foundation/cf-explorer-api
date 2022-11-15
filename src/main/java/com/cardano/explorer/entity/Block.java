@@ -51,7 +51,7 @@ public class Block extends BaseEntity {
   @Word31Type
   private Integer epochSlotNo;
 
-  @Column(name = "block_no", nullable = false)
+  @Column(name = "block_no")
   @Word31Type
   private Integer blockNo;
 
