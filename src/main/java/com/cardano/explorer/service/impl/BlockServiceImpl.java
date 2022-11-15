@@ -43,7 +43,13 @@ public class BlockServiceImpl implements BlockService {
     Block block = blockRepository.findByBlockNo(no).orElseThrow(
         () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
     );
-    return blockMapper.blockToBlockResponse(block);
+    BlockResponse blockResponse = blockMapper.blockToBlockResponse(block);
+    List<Tx> txList = block.getTxList();
+    blockResponse.setTotalOutput(
+        txList.stream().map(Tx::getOutSum).reduce(BigDecimal.ZERO, BigDecimal::add));
+    blockResponse.setTotalFees(
+        txList.stream().map(Tx::getFee).reduce(BigDecimal.ZERO, BigDecimal::add));
+    return blockResponse;
   }
 
   @Override

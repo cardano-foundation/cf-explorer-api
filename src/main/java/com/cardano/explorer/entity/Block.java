@@ -4,6 +4,7 @@ import com.cardano.explorer.validation.Hash32Type;
 import com.cardano.explorer.validation.Word31Type;
 import com.cardano.explorer.validation.Word63Type;
 import java.sql.Timestamp;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +12,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -98,5 +100,8 @@ public class Block extends BaseEntity {
   @Column(name = "op_cert_counter")
   @Word63Type
   private Long opCertCounter;
+
+  @OneToMany(mappedBy = "block")
+  private List<Tx> txList;
 
 }

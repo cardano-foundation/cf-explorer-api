@@ -147,7 +147,7 @@ public class TxServiceImpl implements TxService {
   }
 
   /**
-   *
+   * Get stake address info from address
    *
    * @param addressInputOutputList List address input or output info
    * @return list stake address input or ouput info
