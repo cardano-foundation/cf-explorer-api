@@ -5,11 +5,12 @@ import com.cardano.explorer.entity.Block;
 import com.cardano.explorer.entity.Tx;
 import com.cardano.explorer.entity.projection.AddressInputOutput;
 import com.cardano.explorer.exception.BusinessCode;
-import com.cardano.explorer.exception.BusinessException;
 import com.cardano.explorer.mapper.TxMapper;
+import com.cardano.explorer.mapper.TxOutMapper;
 import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
+import com.cardano.explorer.model.response.TxOutResponse;
 import com.cardano.explorer.model.response.TxResponse;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.TxOutRepository;
@@ -18,6 +19,8 @@ import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.specification.BlockSpecification;
 import com.cardano.explorer.specification.TxSpecification;
 import com.sotatek.cardano.ledgersync.util.HexUtil;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +43,8 @@ public class TxServiceImpl implements TxService {
   private final BlockRepository blockRepository;
   private final TxMapper txMapper;
 
+  private final TxOutMapper txOutMapper;
+
   private final TxSpecification txSpecification;
 
   @Override
@@ -61,7 +66,7 @@ public class TxServiceImpl implements TxService {
         .collect(Collectors.toMap(Block::getId, Function.identity()));
     txPage.getContent().forEach(tx -> tx.setBlock(mapBlock.get(tx.getBlockId())));
 
-    List<TxFilterResponse> txFilterResponses = mapDataFromTxToResponse(txPage.getContent());
+    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage.getContent());
     response.setData(txFilterResponses);
     response.setCurrentPage(pageable.getPageNumber());
     response.setTotalPages(txPage.getTotalPages());
@@ -75,17 +80,16 @@ public class TxServiceImpl implements TxService {
    * @param txList list tx entity
    * @return list tx response
    */
-  private List<TxFilterResponse> mapDataFromTxToResponse(List<Tx> txList) {
+  private List<TxFilterResponse> mapDataFromTxListToResponseList(List<Tx> txList) {
 
     //get addresses input
     Set<Long> txIdSet = txList.stream().map(Tx::getId).collect(Collectors.toSet());
-    List<AddressInputOutput> txInList = txOutRepository.findAddressInputByTxIdIn(txIdSet);
+    List<AddressInputOutput> txInList = txOutRepository.findAddressInputListByTxId(txIdSet);
     Map<Long, List<AddressInputOutput>> addressInMap = txInList.stream()
         .collect(Collectors.groupingBy(AddressInputOutput::getTxId));
 
     //get addresses output
-    List<AddressInputOutput> txOutList = txOutRepository.findByTxInOrderByIndexAsc(
-        txList);
+    List<AddressInputOutput> txOutList = txOutRepository.findAddressOutputListByTxId(txIdSet);
     Map<Long, List<AddressInputOutput>> addressOutMap = txOutList.stream()
         .collect(Collectors.groupingBy(AddressInputOutput::getTxId));
 
@@ -115,15 +119,51 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public TxResponse getTxDetailByHash(String hash) {
-    Tx tx = txRepository.findByHash(HexUtil.decodeHexString(hash)).orElseThrow(
-        () -> new BusinessException(BusinessCode.NOT_FOUND)
+    byte[] txHash = HexUtil.decodeHexString(hash);
+    Tx tx = txRepository.findByHash(
+        txHash).orElseThrow(
+        () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)
     );
     Integer currentBlockNo = blockRepository.findCurrentBlock().orElseThrow(
-        () -> new BusinessException(BusinessCode.NOT_FOUND)
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
     txResponse.setConfirmation(currentBlockNo - txResponse.getBlockNo());
     txResponse.setStatus(TxStatus.SUCCESS);
+
+    // get address input output
+    List<AddressInputOutput> addressInputInfo = txOutRepository.getTxAddressInputInfo(txHash);
+    List<AddressInputOutput> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(txHash);
+
+    txResponse.setUtxOInputList(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
+        Collectors.toList()));
+    txResponse.setUtxOOutputList(addressOutputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
+        Collectors.toList()));
+
+    txResponse.setStakeAddressTxInputList(getStakeAddressInfo(addressInputInfo));
+    txResponse.setStakeAddressTxOutputList(getStakeAddressInfo(addressOutputInfo));
+
     return txResponse;
+  }
+
+  /**
+   *
+   *
+   * @param addressInputOutputList List address input or output info
+   * @return list stake address input or ouput info
+   */
+  private static List<TxOutResponse> getStakeAddressInfo(List<AddressInputOutput> addressInputOutputList) {
+    var addressInputMap = addressInputOutputList.stream().collect(Collectors.groupingBy(
+        AddressInputOutput::getStakeAddress,
+        Collectors.reducing(BigDecimal.ZERO, AddressInputOutput::getValue, BigDecimal::add)
+    ));
+    List<TxOutResponse> stakeAddressTxInputList = new ArrayList<>();
+    addressInputMap.forEach(
+        (key, value) -> stakeAddressTxInputList.add(TxOutResponse.builder()
+          .address(key)
+          .value(value)
+          .build())
+    );
+    return stakeAddressTxInputList;
   }
 }

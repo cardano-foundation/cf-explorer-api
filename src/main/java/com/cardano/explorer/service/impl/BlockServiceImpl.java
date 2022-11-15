@@ -3,7 +3,6 @@ package com.cardano.explorer.service.impl;
 import com.cardano.explorer.entity.Block;
 import com.cardano.explorer.entity.Tx;
 import com.cardano.explorer.exception.BusinessCode;
-import com.cardano.explorer.exception.BusinessException;
 import com.cardano.explorer.mapper.BlockMapper;
 import com.cardano.explorer.model.request.BlockFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
@@ -13,6 +12,7 @@ import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.BlockService;
 import com.cardano.explorer.specification.BlockSpecification;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class BlockServiceImpl implements BlockService {
   @Transactional(readOnly = true)
   public BlockResponse getBlockDetail(Integer no) {
     Block block = blockRepository.findByBlockNo(no).orElseThrow(
-        () -> new BusinessException(BusinessCode.NOT_FOUND)
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
     );
     return blockMapper.blockToBlockResponse(block);
   }
