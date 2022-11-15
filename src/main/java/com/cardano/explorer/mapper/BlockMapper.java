@@ -7,12 +7,15 @@ import com.sotatek.cardano.ledgersync.util.HexUtil;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface BlockMapper {
 
+  @Mapping(target = "slotLeader", source = "slotLeader.hash")
   BlockResponse blockToBlockResponse(Block block);
 
+  @Mapping(target = "slotLeader", source = "slotLeader.hash")
   BlockFilterResponse blockToBlockFilterResponse(Block block);
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
