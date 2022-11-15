@@ -3,7 +3,7 @@ spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${HOST}:${PORT_DB}/cexplorer?currentSchema=public
+    url: jdbc:postgresql://${HOST}:${PORT_DB}/cardano_mainnet?currentSchema=public
     username: ${USERNAME_DB}
     password: ${PASSWORD_DB}
     driver-class-name: org.postgresql.Driver
