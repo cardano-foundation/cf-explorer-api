@@ -1,9 +1,6 @@
 package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.common.enumeration.TxStatus;
-import com.cardano.explorer.entity.Block;
-import com.cardano.explorer.entity.Tx;
-import com.cardano.explorer.entity.projection.AddressInputOutput;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.TxMapper;
 import com.cardano.explorer.mapper.TxOutMapper;
@@ -12,13 +9,15 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxOutResponse;
 import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.projection.AddressInputOutput;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.specification.BlockSpecification;
 import com.cardano.explorer.specification.TxSpecification;
-import com.sotatek.cardano.ledgersync.util.HexUtil;
+import com.sotatek.cardano.common.entity.Block;
+import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -119,9 +118,7 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public TxResponse getTxDetailByHash(String hash) {
-    byte[] txHash = HexUtil.decodeHexString(hash);
-    Tx tx = txRepository.findByHash(
-        txHash).orElseThrow(
+    Tx tx = txRepository.findByHash(hash).orElseThrow(
         () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)
     );
     Integer currentBlockNo = blockRepository.findCurrentBlock().orElseThrow(
@@ -132,8 +129,8 @@ public class TxServiceImpl implements TxService {
     txResponse.setStatus(TxStatus.SUCCESS);
 
     // get address input output
-    List<AddressInputOutput> addressInputInfo = txOutRepository.getTxAddressInputInfo(txHash);
-    List<AddressInputOutput> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(txHash);
+    List<AddressInputOutput> addressInputInfo = txOutRepository.getTxAddressInputInfo(hash);
+    List<AddressInputOutput> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(hash);
 
     txResponse.setUtxOInputList(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
         Collectors.toList()));

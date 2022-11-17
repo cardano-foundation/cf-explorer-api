@@ -1,9 +1,8 @@
 package com.cardano.explorer.mapper;
 
-import com.cardano.explorer.entity.Block;
 import com.cardano.explorer.model.response.BlockFilterResponse;
 import com.cardano.explorer.model.response.BlockResponse;
-import com.sotatek.cardano.ledgersync.util.HexUtil;
+import com.sotatek.cardano.common.entity.Block;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import org.mapstruct.Mapper;
@@ -20,10 +19,6 @@ public interface BlockMapper {
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
     return timestamp == null ? null : timestamp.toLocalDateTime();
-  }
-
-  default String fromByteaHash(byte[] hash) {
-    return hash == null ? null : HexUtil.encodeHexString(hash);
   }
 
 }

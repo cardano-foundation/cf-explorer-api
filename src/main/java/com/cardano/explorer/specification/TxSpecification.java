@@ -2,9 +2,9 @@ package com.cardano.explorer.specification;
 
 import static org.springframework.data.jpa.domain.Specification.where;
 
-import com.cardano.explorer.entity.Block;
-import com.cardano.explorer.entity.Tx;
 import com.cardano.explorer.model.request.TxFilterRequest;
+import com.sotatek.cardano.common.entity.Block;
+import com.sotatek.cardano.common.entity.Tx;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;

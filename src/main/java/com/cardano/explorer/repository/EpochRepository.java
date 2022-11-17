@@ -1,6 +1,6 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.entity.Epoch;
+import com.sotatek.cardano.common.entity.Epoch;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

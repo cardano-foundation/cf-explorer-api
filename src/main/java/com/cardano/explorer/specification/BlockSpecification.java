@@ -2,8 +2,8 @@ package com.cardano.explorer.specification;
 
 import static org.springframework.data.jpa.domain.Specification.where;
 
-import com.cardano.explorer.entity.Block;
 import com.cardano.explorer.model.request.BlockFilterRequest;
+import com.sotatek.cardano.common.entity.Block;
 import java.util.Collection;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
