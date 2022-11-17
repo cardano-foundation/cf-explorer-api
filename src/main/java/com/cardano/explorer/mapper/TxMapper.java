@@ -1,9 +1,8 @@
 package com.cardano.explorer.mapper;
 
-import com.cardano.explorer.entity.Tx;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxResponse;
-import com.sotatek.cardano.ledgersync.util.HexUtil;
+import com.sotatek.cardano.common.entity.Tx;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import org.mapstruct.Mapper;
@@ -23,10 +22,6 @@ public interface TxMapper {
   @Mapping(target = "time", source = "block.time")
   @Mapping(target = "totalOutput", source = "outSum")
   TxResponse txToTxResponse(Tx tx);
-
-  default String fromByteaHash(byte[] hash) {
-    return hash == null ? null : HexUtil.encodeHexString(hash);
-  }
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
     return timestamp == null ? null : timestamp.toLocalDateTime();

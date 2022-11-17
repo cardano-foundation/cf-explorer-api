@@ -1,4 +1,4 @@
-package com.cardano.explorer.entity.projection;
+package com.cardano.explorer.projection;
 
 import java.math.BigDecimal;
 

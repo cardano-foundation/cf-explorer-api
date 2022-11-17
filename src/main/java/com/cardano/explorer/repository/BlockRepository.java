@@ -1,6 +1,6 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.entity.Block;
+import com.sotatek.cardano.common.entity.Block;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +16,7 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
     JpaSpecificationExecutor<Block> {
 
   @EntityGraph(attributePaths = {"slotLeader", "txList"})
-  Optional<Block> findByBlockNo(Integer no);
+  Optional<Block> findByBlockNo(Long no);
 
   @EntityGraph(attributePaths = {"slotLeader"})
   Page<Block> findAll(Pageable pageable);
