@@ -9,6 +9,8 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxOutResponse;
 import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.tx.SummaryResponse;
+import com.cardano.explorer.model.response.tx.UTxOResponse;
 import com.cardano.explorer.projection.AddressInputOutput;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.TxOutRepository;
@@ -125,20 +127,25 @@ public class TxServiceImpl implements TxService {
         () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
-    txResponse.setConfirmation(currentBlockNo - txResponse.getBlockNo());
-    txResponse.setStatus(TxStatus.SUCCESS);
+    txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
+    txResponse.getTx().setStatus(TxStatus.SUCCESS);
 
     // get address input output
     List<AddressInputOutput> addressInputInfo = txOutRepository.getTxAddressInputInfo(hash);
     List<AddressInputOutput> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(hash);
+    UTxOResponse uTxOs = UTxOResponse.builder()
+        .inputs(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
+        Collectors.toList()))
+        .outputs(addressOutputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
+            Collectors.toList()))
+        .build();
+    txResponse.setUTxOs(uTxOs);
 
-    txResponse.setUtxOInputList(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
-        Collectors.toList()));
-    txResponse.setUtxOOutputList(addressOutputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
-        Collectors.toList()));
-
-    txResponse.setStakeAddressTxInputList(getStakeAddressInfo(addressInputInfo));
-    txResponse.setStakeAddressTxOutputList(getStakeAddressInfo(addressOutputInfo));
+    SummaryResponse summary = SummaryResponse.builder()
+        .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
+        .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
+        .build();
+    txResponse.setSummary(summary);
 
     return txResponse;
   }
