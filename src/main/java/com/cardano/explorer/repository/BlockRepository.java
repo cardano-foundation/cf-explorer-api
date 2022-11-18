@@ -1,5 +1,6 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.config.LogMessage;
 import com.sotatek.cardano.common.entity.Block;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -23,5 +24,6 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
   Page<Block> findAll(Specification specification, Pageable pageable);
 
   @Query(value = "SELECT max(blockNo) FROM Block")
+  @LogMessage
   Optional<Integer> findCurrentBlock();
 }

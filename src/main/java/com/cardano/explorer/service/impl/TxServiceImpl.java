@@ -9,16 +9,19 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxOutResponse;
 import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.tx.ContractResponse;
 import com.cardano.explorer.model.response.tx.SummaryResponse;
 import com.cardano.explorer.model.response.tx.UTxOResponse;
 import com.cardano.explorer.projection.AddressInputOutput;
 import com.cardano.explorer.repository.BlockRepository;
+import com.cardano.explorer.repository.RedeemerRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.specification.BlockSpecification;
 import com.cardano.explorer.specification.TxSpecification;
 import com.sotatek.cardano.common.entity.Block;
+import com.sotatek.cardano.common.entity.Redeemer;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
@@ -43,10 +46,9 @@ public class TxServiceImpl implements TxService {
   private final TxOutRepository txOutRepository;
   private final BlockRepository blockRepository;
   private final TxMapper txMapper;
-
   private final TxOutMapper txOutMapper;
-
   private final TxSpecification txSpecification;
+  private final RedeemerRepository redeemerRepository;
 
   @Override
   @Transactional(readOnly = true)
@@ -145,6 +147,10 @@ public class TxServiceImpl implements TxService {
         .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
         .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
         .build();
+    List<Redeemer> redeemers = redeemerRepository.findByTx(tx);
+    txResponse.setContracts(
+        redeemers.stream().map(redeemer -> new ContractResponse(redeemer.getScriptHash()))
+            .collect(Collectors.toList()));
     txResponse.setSummary(summary);
 
     return txResponse;
