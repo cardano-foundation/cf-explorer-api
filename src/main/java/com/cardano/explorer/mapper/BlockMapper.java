@@ -14,7 +14,6 @@ public interface BlockMapper {
   @Mapping(target = "slotLeader", source = "slotLeader.hash")
   BlockResponse blockToBlockResponse(Block block);
 
-  @Mapping(target = "slotLeader", source = "slotLeader.hash")
   BlockFilterResponse blockToBlockFilterResponse(Block block);
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
