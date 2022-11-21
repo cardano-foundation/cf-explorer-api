@@ -16,8 +16,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "pool_offline_data", uniqueConstraints = {
@@ -30,6 +32,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @SuperBuilder(toBuilder = true)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PoolOfflineData extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -48,6 +51,7 @@ public class PoolOfflineData extends BaseEntity {
 
   @Column(name = "json", nullable = false)
   @Lob
+  @Type(type = "org.hibernate.type.TextType")
   private String json;
 
   @Column(name = "bytes", nullable = false)
