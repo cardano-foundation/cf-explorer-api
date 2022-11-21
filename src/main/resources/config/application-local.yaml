@@ -40,10 +40,18 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
+        cache:
+          use_second_level_cache: true
+          region:
+            factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: public
         show_sql: true
         format_sql: true
+      javax:
+        persistence:
+          sharedCache:
+            mode: ENABLE_SELECTIVE
   flyway:
     enabled: false
   redis:
