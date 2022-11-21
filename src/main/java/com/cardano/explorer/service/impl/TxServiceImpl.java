@@ -13,6 +13,7 @@ import com.cardano.explorer.model.response.tx.ContractResponse;
 import com.cardano.explorer.model.response.tx.SummaryResponse;
 import com.cardano.explorer.model.response.tx.UTxOResponse;
 import com.cardano.explorer.projection.AddressInputOutput;
+import com.cardano.explorer.projection.TxContract;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.RedeemerRepository;
 import com.cardano.explorer.repository.TxOutRepository;
@@ -21,8 +22,8 @@ import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.specification.BlockSpecification;
 import com.cardano.explorer.specification.TxSpecification;
 import com.sotatek.cardano.common.entity.Block;
-import com.sotatek.cardano.common.entity.Redeemer;
 import com.sotatek.cardano.common.entity.Tx;
+import com.sotatek.cardano.common.enumeration.ScriptPurposeType;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -147,10 +148,15 @@ public class TxServiceImpl implements TxService {
         .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
         .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
         .build();
-    List<Redeemer> redeemers = redeemerRepository.findByTx(tx);
+    List<TxContract> redeemers = redeemerRepository.findContractByTx(tx);
     txResponse.setContracts(
-        redeemers.stream().map(redeemer -> new ContractResponse(redeemer.getScriptHash()))
-            .collect(Collectors.toList()));
+        redeemers.stream().map(redeemer -> {
+          if(redeemer.getPurpose().equals(ScriptPurposeType.SPEND)) {
+            return new ContractResponse(redeemer.getScriptHash());
+          } else {
+            return new ContractResponse(redeemer.getAddress());
+          }
+        }).collect(Collectors.toList()));
     txResponse.setSummary(summary);
 
     return txResponse;
@@ -160,7 +166,7 @@ public class TxServiceImpl implements TxService {
    * Get stake address info from address
    *
    * @param addressInputOutputList List address input or output info
-   * @return list stake address input or ouput info
+   * @return list stake address input or output info
    */
   private static List<TxOutResponse> getStakeAddressInfo(List<AddressInputOutput> addressInputOutputList) {
     var addressInputMap = addressInputOutputList.stream().collect(Collectors.groupingBy(
