@@ -6,9 +6,9 @@ spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:5433/cexplorer?currentSchema=public
-    username: postgres
-    password: v8hlDV0yMAHHlIurYupj
+    url: jdbc:postgresql://${infrastructure.host}:54321/explorer_api?currentSchema=dev
+    username: explorer_api_read
+    password: MTIzNDU2NzhhQUA=READ
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
@@ -40,23 +40,15 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        cache:
-          use_second_level_cache: true
-          region:
-            factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: public
+        default_schema: dev
         show_sql: true
         format_sql: true
-      javax:
-        persistence:
-          sharedCache:
-            mode: ENABLE_SELECTIVE
   flyway:
     enabled: false
   redis:
     host: localhost
-    port: 6379
+    port: 6380
     timeout: 3000ms
 
 rsa:

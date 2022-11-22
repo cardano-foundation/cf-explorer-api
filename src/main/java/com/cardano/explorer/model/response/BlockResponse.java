@@ -1,5 +1,6 @@
 package com.cardano.explorer.model.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,10 @@ public class BlockResponse {
 
   private String hash;
 
+  private LocalDateTime time;
+
+  private Long txCount;
+
   private Integer epochNo;
 
   private Integer blockNo;
@@ -18,14 +23,10 @@ public class BlockResponse {
 
   private Integer epochSlotNo;
 
-  private Integer size;
+  private BigDecimal totalFees;
 
-  private Long txCount;
+  private BigDecimal totalOutput;
 
-  private LocalDateTime time;
-
-  private Integer previousBlock;
-
-  private Integer nextBlock;
+  private String slotLeader;
 
 }

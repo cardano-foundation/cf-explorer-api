@@ -14,7 +14,7 @@ public interface BlockService {
    * @param no block no
    * @return block information detail
    */
-  BlockResponse getBlockDetail(Integer no);
+  BlockResponse getBlockDetail(Long no);
 
   /**
    * Get list block with paging
