@@ -19,7 +19,7 @@ public interface TxMapper {
 
   @Mapping(target = "tx.hash", source = "hash")
   @Mapping(target = "tx.blockNo", source = "block.blockNo")
-  @Mapping(target = "tx.blockSlot", source = "block.slotNo")
+  @Mapping(target = "tx.epochSlot", source = "block.epochSlotNo")
   @Mapping(target = "tx.epochNo", source = "block.epochNo")
   @Mapping(target = "tx.time", source = "block.time")
   @Mapping(target = "tx.fee", source = "fee")

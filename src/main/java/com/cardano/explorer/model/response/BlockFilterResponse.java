@@ -14,6 +14,10 @@ public class BlockFilterResponse implements Serializable {
 
   private Long slotNo;
 
+  private Integer epochNo;
+
+  private Integer epochSlotNo;
+
   private String hash;
 
   private LocalDateTime time;
@@ -23,5 +27,7 @@ public class BlockFilterResponse implements Serializable {
   private BigDecimal totalFees;
 
   private BigDecimal totalOutput;
+
+  private String slotLeader;
 
 }

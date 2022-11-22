@@ -7,14 +7,18 @@ import com.cardano.explorer.mapper.TxOutMapper;
 import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
-import com.cardano.explorer.model.response.TxOutResponse;
+import com.cardano.explorer.model.response.tx.CollateralResponse;
+import com.cardano.explorer.model.response.tx.TxOutResponse;
 import com.cardano.explorer.model.response.TxResponse;
 import com.cardano.explorer.model.response.tx.ContractResponse;
 import com.cardano.explorer.model.response.tx.SummaryResponse;
 import com.cardano.explorer.model.response.tx.UTxOResponse;
-import com.cardano.explorer.projection.AddressInputOutput;
+import com.cardano.explorer.projection.AddressInputOutputProjection;
+import com.cardano.explorer.projection.CollateralInputOutputProjection;
 import com.cardano.explorer.projection.TxContract;
 import com.cardano.explorer.repository.BlockRepository;
+import com.cardano.explorer.repository.CollateralTxInRepository;
+import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.RedeemerRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
@@ -38,6 +42,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +55,10 @@ public class TxServiceImpl implements TxService {
   private final TxOutMapper txOutMapper;
   private final TxSpecification txSpecification;
   private final RedeemerRepository redeemerRepository;
+
+  private final EpochRepository epochRepository;
+
+  private final CollateralTxInRepository collateralTxInRepository;
 
   @Override
   @Transactional(readOnly = true)
@@ -88,14 +97,14 @@ public class TxServiceImpl implements TxService {
 
     //get addresses input
     Set<Long> txIdSet = txList.stream().map(Tx::getId).collect(Collectors.toSet());
-    List<AddressInputOutput> txInList = txOutRepository.findAddressInputListByTxId(txIdSet);
-    Map<Long, List<AddressInputOutput>> addressInMap = txInList.stream()
-        .collect(Collectors.groupingBy(AddressInputOutput::getTxId));
+    List<AddressInputOutputProjection> txInList = txOutRepository.findAddressInputListByTxId(txIdSet);
+    Map<Long, List<AddressInputOutputProjection>> addressInMap = txInList.stream()
+        .collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
 
     //get addresses output
-    List<AddressInputOutput> txOutList = txOutRepository.findAddressOutputListByTxId(txIdSet);
-    Map<Long, List<AddressInputOutput>> addressOutMap = txOutList.stream()
-        .collect(Collectors.groupingBy(AddressInputOutput::getTxId));
+    List<AddressInputOutputProjection> txOutList = txOutRepository.findAddressOutputListByTxId(txIdSet);
+    Map<Long, List<AddressInputOutputProjection>> addressOutMap = txOutList.stream()
+        .collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
 
     List<TxFilterResponse> txFilterResponses = new ArrayList<>();
     for (Tx tx : txList) {
@@ -103,14 +112,14 @@ public class TxServiceImpl implements TxService {
       TxFilterResponse txResponse = txMapper.txToTxFilterResponse(tx);
       if (addressOutMap.containsKey(txId)) {
         txResponse.setAddressesOutput(
-            addressOutMap.get(tx.getId()).stream().map(AddressInputOutput::getAddress)
+            addressOutMap.get(tx.getId()).stream().map(AddressInputOutputProjection::getAddress)
                 .collect(Collectors.toList()));
       } else {
         txResponse.setAddressesOutput(new ArrayList<>());
       }
       if (addressInMap.containsKey(txId)) {
         txResponse.setAddressesInput(
-            addressInMap.get(tx.getId()).stream().map(AddressInputOutput::getAddress)
+            addressInMap.get(tx.getId()).stream().map(AddressInputOutputProjection::getAddress)
                 .collect(Collectors.toList()));
       } else {
         txResponse.setAddressesInput(new ArrayList<>());
@@ -130,48 +139,98 @@ public class TxServiceImpl implements TxService {
         () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
+    // TO DO
+    /*Epoch epoch = epochRepository.findByNo(txResponse.getTx().getEpochNo()).orElseThrow(
+        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
+    );*/
+    txResponse.getTx().setMaxEpochSlot(432000);
     txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
     txResponse.getTx().setStatus(TxStatus.SUCCESS);
 
     // get address input output
-    List<AddressInputOutput> addressInputInfo = txOutRepository.getTxAddressInputInfo(hash);
-    List<AddressInputOutput> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(hash);
-    UTxOResponse uTxOs = UTxOResponse.builder()
-        .inputs(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
-        Collectors.toList()))
-        .outputs(addressOutputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
-            Collectors.toList()))
-        .build();
-    txResponse.setUTxOs(uTxOs);
-
-    SummaryResponse summary = SummaryResponse.builder()
-        .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
-        .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
-        .build();
-    List<TxContract> redeemers = redeemerRepository.findContractByTx(tx);
-    txResponse.setContracts(
-        redeemers.stream().map(redeemer -> {
-          if(redeemer.getPurpose().equals(ScriptPurposeType.SPEND)) {
-            return new ContractResponse(redeemer.getScriptHash());
-          } else {
-            return new ContractResponse(redeemer.getAddress());
-          }
-        }).collect(Collectors.toList()));
-    txResponse.setSummary(summary);
-
+    getSummaryAndUTxOs(hash, txResponse);
+    getContracts(tx, txResponse);
+    getCollaterals(tx, txResponse);
     return txResponse;
+  }
+
+  /**
+   * Get transaction collaterals info
+   *
+   * @param tx transaction
+   * @param txResponse response data of transaction
+   */
+  private void getCollaterals(Tx tx, TxResponse txResponse) {
+    List<CollateralInputOutputProjection> collateralInputs = collateralTxInRepository.findTxCollateralInput(
+        tx);
+    List<CollateralResponse> collateralInputResponses = collateralInputs.stream().map(
+        collateralInputOutputProjection -> CollateralResponse.builder()
+            .txHash(collateralInputOutputProjection.getTxHash())
+            .amount(collateralInputOutputProjection.getValue())
+            .address(collateralInputOutputProjection.getAddress())
+            .build()
+    ).collect(Collectors.toList());
+    if(!CollectionUtils.isEmpty(collateralInputResponses)) {
+      txResponse.setCollaterals(collateralInputResponses);
+    }
+  }
+
+  /**
+   * Get transaction contracts info
+   *
+   * @param tx transaction
+   * @param txResponse response data of transaction
+   */
+  private void getContracts(Tx tx, TxResponse txResponse) {
+    List<TxContract> redeemers = redeemerRepository.findContractByTx(tx);
+    List<ContractResponse> contractResponses = redeemers.stream().map(redeemer -> {
+      if(redeemer.getPurpose().equals(ScriptPurposeType.SPEND)) {
+        return new ContractResponse(redeemer.getAddress());
+      } else {
+        return new ContractResponse(redeemer.getScriptHash());
+      }
+    }).collect(Collectors.toList());
+    if(!CollectionUtils.isEmpty(contractResponses)) {
+      txResponse.setContracts(contractResponses);
+    }
+  }
+
+  /**
+   * Get transaction summary and UTxOs info
+   *
+   * @param hash hash value of transaction
+   * @param txResponse response data of transaction
+   */
+  private void getSummaryAndUTxOs(String hash, TxResponse txResponse) {
+    List<AddressInputOutputProjection> addressInputInfo = txOutRepository.getTxAddressInputInfo(hash);
+    List<AddressInputOutputProjection> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(hash);
+    if(!CollectionUtils.isEmpty(addressInputInfo) && !CollectionUtils.isEmpty(addressOutputInfo)) {
+      UTxOResponse uTxOs = UTxOResponse.builder()
+          .inputs(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
+              Collectors.toList()))
+          .outputs(addressOutputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
+              Collectors.toList()))
+          .build();
+      txResponse.setUTxOs(uTxOs);
+      SummaryResponse summary = SummaryResponse.builder()
+          .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
+          .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
+          .build();
+      txResponse.setSummary(summary);
+    }
+
   }
 
   /**
    * Get stake address info from address
    *
-   * @param addressInputOutputList List address input or output info
+   * @param addressInputOutputProjectionList List address input or output info
    * @return list stake address input or output info
    */
-  private static List<TxOutResponse> getStakeAddressInfo(List<AddressInputOutput> addressInputOutputList) {
-    var addressInputMap = addressInputOutputList.stream().collect(Collectors.groupingBy(
-        AddressInputOutput::getStakeAddress,
-        Collectors.reducing(BigDecimal.ZERO, AddressInputOutput::getValue, BigDecimal::add)
+  private static List<TxOutResponse> getStakeAddressInfo(List<AddressInputOutputProjection> addressInputOutputProjectionList) {
+    var addressInputMap = addressInputOutputProjectionList.stream().collect(Collectors.groupingBy(
+        AddressInputOutputProjection::getStakeAddress,
+        Collectors.reducing(BigDecimal.ZERO, AddressInputOutputProjection::getValue, BigDecimal::add)
     ));
     List<TxOutResponse> stakeAddressTxInputList = new ArrayList<>();
     addressInputMap.forEach(

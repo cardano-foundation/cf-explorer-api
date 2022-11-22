@@ -21,7 +21,9 @@ public class TxInfoResponse {
 
   private Integer blockNo;
 
-  private Integer blockSlot;
+  private Integer epochSlot;
+
+  private Integer maxEpochSlot;
 
   private Integer epochNo;
 

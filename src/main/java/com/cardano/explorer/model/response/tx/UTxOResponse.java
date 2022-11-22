@@ -1,6 +1,5 @@
 package com.cardano.explorer.model.response.tx;
 
-import com.cardano.explorer.model.response.TxOutResponse;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

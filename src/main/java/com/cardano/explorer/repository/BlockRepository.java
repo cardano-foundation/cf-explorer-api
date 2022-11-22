@@ -20,12 +20,13 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
   @EntityGraph(attributePaths = {"slotLeader", "txList"})
   Optional<Block> findByBlockNo(Long no);
 
+  @EntityGraph(attributePaths = {"slotLeader"})
   Page<Block> findAll(Pageable pageable);
 
+  @EntityGraph(attributePaths = {"slotLeader"})
   Page<Block> findAll(Specification specification, Pageable pageable);
 
   @Query(value = "SELECT max(blockNo) FROM Block")
-  @LogMessage
   Optional<Integer> findCurrentBlock();
 
   @Query(value = "SELECT max(epochSlotNo) FROM Block WHERE epochNo = :epochNo")
