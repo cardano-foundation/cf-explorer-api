@@ -2,9 +2,11 @@ package com.cardano.explorer.projection;
 
 import java.math.BigDecimal;
 
-public interface AddressInputOutput {
+public interface AddressInputOutputProjection {
 
   Long getTxId();
+
+  String getTxHash();
 
   String getAddress();
 

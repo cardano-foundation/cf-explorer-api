@@ -1,6 +1,6 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.projection.AddressInputOutput;
+import com.cardano.explorer.projection.AddressInputOutputProjection;
 import com.sotatek.cardano.common.entity.TxOut;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +15,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " INNER JOIN Tx tx ON tx.id = txOut.tx.id"
       + " WHERE tx.id IN :txIds"
       + " ORDER BY txOut.index ASC")
-  List<AddressInputOutput> findAddressOutputListByTxId(Collection<Long> txIds);
+  List<AddressInputOutputProjection> findAddressOutputListByTxId(Collection<Long> txIds);
 
 
   @Query("SELECT tx.id AS txId, txOut.address AS address"
@@ -24,7 +24,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + "   INNER JOIN Tx tx ON tx.id = txIn.txInput.id AND txIn.txOutIndex = txOut.index"
       + "   WHERE tx.id IN :txIds"
       + "   ORDER BY txIn.id ASC")
-  List<AddressInputOutput> findAddressInputListByTxId(Collection<Long> txIds);
+  List<AddressInputOutputProjection> findAddressInputListByTxId(Collection<Long> txIds);
 
   @Query("SELECT txOut.address AS address, COALESCE(stake.view, txOut.address) AS stakeAddress,"
       + "   txOut.value AS value"
@@ -33,10 +33,10 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " ON txOut.stakeAddress = stake "
       + " INNER JOIN Tx tx ON txOut.tx = tx"
       + " WHERE tx.hash = :hash")
-  List<AddressInputOutput> getTxAddressOutputInfo(String hash);
+  List<AddressInputOutputProjection> getTxAddressOutputInfo(String hash);
 
 
-  @Query("SELECT txOut.address AS address,"
+  @Query("SELECT txOut.address AS address, txIn.txOut.hash AS txHash,"
       + "   COALESCE(stake.view,txOut.address) AS stakeAddress,"
       + "   txOut.value AS value"
       + " FROM TxOut txOut "
@@ -45,5 +45,5 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN StakeAddress stake "
       + " ON txOut.stakeAddress = stake"
       + " WHERE tx.hash = :hash")
-  List<AddressInputOutput> getTxAddressInputInfo(String hash);
+  List<AddressInputOutputProjection> getTxAddressInputInfo(String hash);
 }
