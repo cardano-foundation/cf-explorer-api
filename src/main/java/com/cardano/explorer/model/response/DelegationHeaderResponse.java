@@ -13,7 +13,7 @@ public class DelegationHeaderResponse implements Serializable {
 
   private Integer epochNo;
 
-  private String countDownEndTime;
+  private Long countDownEndTime;
 
   private Integer epochSlotNo;
 
