@@ -76,8 +76,7 @@ pipeline {
                         envFileDeploy = '/tmp/env-prod.env'
                     }
                 }
-//                 sh "docker-compose --env-file ${envFileDeploy} up -d --build --exit-code-from cardano-explorer-api"
-                sh "docker-compose --env-file ${envFileDeploy} up -d --build --wait running"
+                sh "docker-compose --env-file ${envFileDeploy} up -d --build"
                 sh "docker images -f 'dangling=true' -q --no-trunc | xargs docker rmi"
                 echo 'Deployment Done!!!'
             }
