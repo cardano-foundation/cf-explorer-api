@@ -2,7 +2,9 @@ package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.EpochResponse;
+import com.cardano.explorer.model.response.dashboard.EpochSummary;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface EpochService {
 
@@ -30,4 +32,7 @@ public interface EpochService {
    * @return Epoch List in this page
    */
   BaseFilterResponse<EpochResponse> filterEpoch(Pageable pageable);
+
+  @Transactional(readOnly = true)
+  EpochSummary getCurrentEpochSummary();
 }
