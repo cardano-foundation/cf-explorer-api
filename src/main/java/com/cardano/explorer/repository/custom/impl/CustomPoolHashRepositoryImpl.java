@@ -1,6 +1,5 @@
 package com.cardano.explorer.repository.custom.impl;
 
-import com.cardano.explorer.model.request.DelegationFilterRequest;
 import com.cardano.explorer.repository.custom.CustomPoolHashRepository;
 import com.sotatek.cardano.common.entity.PoolHash;
 import com.sotatek.cardano.common.entity.PoolOfflineData;
@@ -26,18 +25,17 @@ public class CustomPoolHashRepositoryImpl implements CustomPoolHashRepository {
   private static final String PREFIX_POOL_NAME = "{\"name\": \"";
 
   @Override
-  public List<Long> findAllPoolHashId(DelegationFilterRequest delegationFilterRequest) {
+  public List<Long> findAllPoolHashId(Integer page, Integer size, String search) {
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<PoolOfflineData> cq = cb.createQuery(PoolOfflineData.class);
     Root<PoolOfflineData> poolOffR = cq.from(PoolOfflineData.class);
     Join<PoolOfflineData, PoolHash> poolHashJoin = poolOffR.join("pool");
     List<Predicate> predicates = new ArrayList<>();
-    String filter = delegationFilterRequest.getSearch();
-    if (Boolean.FALSE.equals(StringUtils.isNullOrEmpty(filter))) {
+    if (Boolean.FALSE.equals(StringUtils.isNullOrEmpty(search))) {
       predicates.add(
-          cb.like(cb.lower(poolOffR.get("json")), PREFIX_POOL_NAME + filter.toLowerCase() + "%"));
-      if (Boolean.TRUE.equals(StringUtils.isNumeric(filter))) {
-        predicates.add(cb.equal(poolHashJoin.get("id"), filter));
+          cb.like(cb.lower(poolOffR.get("json")), PREFIX_POOL_NAME + search.toLowerCase() + "%"));
+      if (Boolean.TRUE.equals(StringUtils.isNumeric(search))) {
+        predicates.add(cb.equal(poolHashJoin.get("id"), search));
       }
     }
     if (!predicates.isEmpty()) {
@@ -47,9 +45,8 @@ public class CustomPoolHashRepositoryImpl implements CustomPoolHashRepository {
     cq.groupBy(poolHashJoin.get("id"));
     cq.orderBy(cb.asc(poolHashJoin.get("id")));
     Query query = entityManager.createQuery(cq);
-    query.setFirstResult(
-        (delegationFilterRequest.getPage() - 1) * delegationFilterRequest.getSize());
-    query.setMaxResults(delegationFilterRequest.getSize());
+    query.setFirstResult((page - 1) * size);
+    query.setMaxResults(size);
     List<Long> poolIds = query.getResultList();
     return poolIds;
   }
