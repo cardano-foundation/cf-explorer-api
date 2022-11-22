@@ -1,9 +1,6 @@
 package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.common.enumeration.TxStatus;
-import com.cardano.explorer.entity.Block;
-import com.cardano.explorer.entity.Tx;
-import com.cardano.explorer.entity.projection.AddressInputOutput;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.TxMapper;
 import com.cardano.explorer.mapper.TxOutMapper;
@@ -12,13 +9,21 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxOutResponse;
 import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.tx.ContractResponse;
+import com.cardano.explorer.model.response.tx.SummaryResponse;
+import com.cardano.explorer.model.response.tx.UTxOResponse;
+import com.cardano.explorer.projection.AddressInputOutput;
+import com.cardano.explorer.projection.TxContract;
 import com.cardano.explorer.repository.BlockRepository;
+import com.cardano.explorer.repository.RedeemerRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.specification.BlockSpecification;
 import com.cardano.explorer.specification.TxSpecification;
-import com.sotatek.cardano.ledgersync.util.HexUtil;
+import com.sotatek.cardano.common.entity.Block;
+import com.sotatek.cardano.common.entity.Tx;
+import com.sotatek.cardano.common.enumeration.ScriptPurposeType;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -42,10 +47,9 @@ public class TxServiceImpl implements TxService {
   private final TxOutRepository txOutRepository;
   private final BlockRepository blockRepository;
   private final TxMapper txMapper;
-
   private final TxOutMapper txOutMapper;
-
   private final TxSpecification txSpecification;
+  private final RedeemerRepository redeemerRepository;
 
   @Override
   @Transactional(readOnly = true)
@@ -119,38 +123,50 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public TxResponse getTxDetailByHash(String hash) {
-    byte[] txHash = HexUtil.decodeHexString(hash);
-    Tx tx = txRepository.findByHash(
-        txHash).orElseThrow(
+    Tx tx = txRepository.findByHash(hash).orElseThrow(
         () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)
     );
     Integer currentBlockNo = blockRepository.findCurrentBlock().orElseThrow(
         () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
-    txResponse.setConfirmation(currentBlockNo - txResponse.getBlockNo());
-    txResponse.setStatus(TxStatus.SUCCESS);
+    txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
+    txResponse.getTx().setStatus(TxStatus.SUCCESS);
 
     // get address input output
-    List<AddressInputOutput> addressInputInfo = txOutRepository.getTxAddressInputInfo(txHash);
-    List<AddressInputOutput> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(txHash);
+    List<AddressInputOutput> addressInputInfo = txOutRepository.getTxAddressInputInfo(hash);
+    List<AddressInputOutput> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(hash);
+    UTxOResponse uTxOs = UTxOResponse.builder()
+        .inputs(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
+        Collectors.toList()))
+        .outputs(addressOutputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
+            Collectors.toList()))
+        .build();
+    txResponse.setUTxOs(uTxOs);
 
-    txResponse.setUtxOInputList(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
-        Collectors.toList()));
-    txResponse.setUtxOOutputList(addressOutputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
-        Collectors.toList()));
-
-    txResponse.setStakeAddressTxInputList(getStakeAddressInfo(addressInputInfo));
-    txResponse.setStakeAddressTxOutputList(getStakeAddressInfo(addressOutputInfo));
+    SummaryResponse summary = SummaryResponse.builder()
+        .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
+        .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
+        .build();
+    List<TxContract> redeemers = redeemerRepository.findContractByTx(tx);
+    txResponse.setContracts(
+        redeemers.stream().map(redeemer -> {
+          if(redeemer.getPurpose().equals(ScriptPurposeType.SPEND)) {
+            return new ContractResponse(redeemer.getScriptHash());
+          } else {
+            return new ContractResponse(redeemer.getAddress());
+          }
+        }).collect(Collectors.toList()));
+    txResponse.setSummary(summary);
 
     return txResponse;
   }
 
   /**
-   *
+   * Get stake address info from address
    *
    * @param addressInputOutputList List address input or output info
-   * @return list stake address input or ouput info
+   * @return list stake address input or output info
    */
   private static List<TxOutResponse> getStakeAddressInfo(List<AddressInputOutput> addressInputOutputList) {
     var addressInputMap = addressInputOutputList.stream().collect(Collectors.groupingBy(

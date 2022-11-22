@@ -1,8 +1,7 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.entity.PoolHash;
-import com.cardano.explorer.entity.PoolUpdate;
-import com.cardano.explorer.repository.custom.CustomPoolUpdateRepository;
+import com.sotatek.cardano.common.entity.PoolHash;
+import com.sotatek.cardano.common.entity.PoolUpdate;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,11 +10,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long>,
-    CustomPoolUpdateRepository {
+public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
   @Query(value = "SELECT sum(pu.pledge) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId")
-  Optional<BigDecimal> sumPledgeByPool(@Param(("poolId")) Long poolId);
+  Optional<BigDecimal> sumPledgeByPool(@Param("poolId") Long poolId);
 
   Optional<PoolUpdate> findFirstByPoolHash(PoolHash poolHash);
+
+  @Query(value = "SELECT sa.view FROM PoolUpdate pu JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id WHERE pu.poolHash.id = :poolId")
+  Optional<String> findRewardAccountByPool(@Param("poolId") Long poolId);
+
+  @Query(value = "SELECT sa.view FROM PoolOwner po JOIN PoolUpdate pu ON po.poolUpdate.id = pu.id JOIN StakeAddress sa ON po.stakeAddress.id = sa.id WHERE pu.poolHash.id = :poolId")
+  Optional<String> findOwnerAccountByPool(@Param("poolId") Long poolId);
 }

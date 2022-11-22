@@ -1,13 +1,13 @@
 package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.common.enumeration.EpochStatus;
-import com.cardano.explorer.entity.Epoch;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.EpochMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.EpochResponse;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.service.EpochService;
+import com.sotatek.cardano.common.entity.Epoch;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

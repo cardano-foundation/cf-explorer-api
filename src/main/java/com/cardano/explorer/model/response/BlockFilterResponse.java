@@ -12,6 +12,10 @@ public class BlockFilterResponse implements Serializable {
 
   private Integer blockNo;
 
+  private Long slotNo;
+
+  private String hash;
+
   private LocalDateTime time;
 
   private Long txCount;

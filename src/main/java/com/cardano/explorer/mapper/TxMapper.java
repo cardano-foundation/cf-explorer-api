@@ -1,9 +1,8 @@
 package com.cardano.explorer.mapper;
 
-import com.cardano.explorer.entity.Tx;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxResponse;
-import com.sotatek.cardano.ledgersync.util.HexUtil;
+import com.sotatek.cardano.common.entity.Tx;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import org.mapstruct.Mapper;
@@ -18,15 +17,14 @@ public interface TxMapper {
   @Mapping(target = "totalOutput", source = "outSum")
   TxFilterResponse txToTxFilterResponse(Tx tx);
 
-  @Mapping(target = "blockNo", source = "block.blockNo")
-  @Mapping(target = "epochNo", source = "block.epochNo")
-  @Mapping(target = "time", source = "block.time")
-  @Mapping(target = "totalOutput", source = "outSum")
+  @Mapping(target = "tx.hash", source = "hash")
+  @Mapping(target = "tx.blockNo", source = "block.blockNo")
+  @Mapping(target = "tx.blockSlot", source = "block.slotNo")
+  @Mapping(target = "tx.epochNo", source = "block.epochNo")
+  @Mapping(target = "tx.time", source = "block.time")
+  @Mapping(target = "tx.fee", source = "fee")
+  @Mapping(target = "tx.totalOutput", source = "outSum")
   TxResponse txToTxResponse(Tx tx);
-
-  default String fromByteaHash(byte[] hash) {
-    return hash == null ? null : HexUtil.encodeHexString(hash);
-  }
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
     return timestamp == null ? null : timestamp.toLocalDateTime();

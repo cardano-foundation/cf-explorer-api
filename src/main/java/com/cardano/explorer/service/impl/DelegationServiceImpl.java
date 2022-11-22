@@ -1,9 +1,5 @@
 package com.cardano.explorer.service.impl;
 
-import com.cardano.explorer.entity.Epoch;
-import com.cardano.explorer.entity.PoolHash;
-import com.cardano.explorer.entity.PoolOfflineData;
-import com.cardano.explorer.entity.PoolUpdate;
 import com.cardano.explorer.model.request.DelegationFilterRequest;
 import com.cardano.explorer.model.response.DelegationHeaderResponse;
 import com.cardano.explorer.model.response.PoolDetailResponse;
@@ -16,6 +12,10 @@ import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolOfflineDataRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.service.DelegationService;
+import com.sotatek.cardano.common.entity.Epoch;
+import com.sotatek.cardano.common.entity.PoolHash;
+import com.sotatek.cardano.common.entity.PoolOfflineData;
+import com.sotatek.cardano.common.entity.PoolUpdate;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import com.sotatek.cardanocommonapi.utils.DateUtils;
@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -56,10 +55,8 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public ResponseEntity<DelegationHeaderResponse> getDataForDelegationHeader() {
-    Epoch epoch = epochRepository.findByCurrentEpochNo();
-    if (Objects.isNull(epoch)) {
-      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
-    }
+    Epoch epoch = epochRepository.findByCurrentEpochNo()
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Integer epochNo = epoch.getNo();
     Timestamp endTime = epoch.getEndTime();
     Long countDownTime = Timestamp.from(Instant.now()).getTime() - endTime.getTime();
@@ -116,8 +113,10 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setTickerName(poolOff.getTickerName());
 //    poolDetailResponse.setPoolSize(poolStakeRepository.findTotalStakeByPoolId(poolId)
 //        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
-    poolDetailResponse.setRewardAccount(poolUpdateRepository.findRewardAccountByPool(poolId));
-    poolDetailResponse.setOwnerAccount(poolUpdateRepository.findOwnerAccountByPool(poolId));
+    poolDetailResponse.setRewardAccount(poolUpdateRepository.findRewardAccountByPool(poolId)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
+    poolDetailResponse.setOwnerAccount(poolUpdateRepository.findOwnerAccountByPool(poolId)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
     poolDetailResponse.setPledge(poolUpdateRepository.sumPledgeByPool(poolId)
@@ -125,7 +124,7 @@ public class DelegationServiceImpl implements DelegationService {
     PoolUpdate poolUpdate = poolUpdateRepository.findFirstByPoolHash(poolHash)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     poolDetailResponse.setCost(poolUpdate.getFixedCost());
-    poolDetailResponse.setMargin(poolUpdate.getMargin());
+    poolDetailResponse.setMargin(poolUpdate.getMargin() * 100);
     poolDetailResponse.setLifetimeBlock(epochStakeRepository.countBlockByPoolId(poolId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
 

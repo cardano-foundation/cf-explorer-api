@@ -1,9 +1,9 @@
 package com.cardano.explorer.repository.custom.impl;
 
-import com.cardano.explorer.entity.PoolHash;
-import com.cardano.explorer.entity.PoolOfflineData;
 import com.cardano.explorer.model.request.DelegationFilterRequest;
 import com.cardano.explorer.repository.custom.CustomPoolHashRepository;
+import com.sotatek.cardano.common.entity.PoolHash;
+import com.sotatek.cardano.common.entity.PoolOfflineData;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
