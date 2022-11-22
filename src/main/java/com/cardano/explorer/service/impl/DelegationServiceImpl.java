@@ -20,7 +20,7 @@ import com.sotatek.cardano.common.entity.PoolOfflineData;
 import com.sotatek.cardano.common.entity.PoolUpdate;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
-import com.sotatek.cardanocommonapi.utils.DateUtils;
+import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -60,7 +60,6 @@ public class DelegationServiceImpl implements DelegationService {
     Integer epochNo = epoch.getNo();
     Timestamp endTime = epoch.getEndTime();
     Long countDownTime = Timestamp.from(Instant.now()).getTime() - endTime.getTime();
-    String countDownStr = DateUtils.formatTimeToDayHourMinute(countDownTime);
     Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo)
         .orElseThrow(() -> new BusinessException(
             CommonErrorCode.UNKNOWN_ERROR));
@@ -71,7 +70,7 @@ public class DelegationServiceImpl implements DelegationService {
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     return ResponseEntity.ok(
         DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
-            .liveStake(totalStake).delegators(delegators).countDownEndTime(countDownStr).build());
+            .liveStake(totalStake).delegators(delegators).countDownEndTime(countDownTime).build());
   }
 
   @Override
@@ -132,6 +131,9 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   private String getNameValueFromJson(String json) {
+    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(json))) {
+      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
+    }
     JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
     return jsonObject.get("name").getAsString();
   }
