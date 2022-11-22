@@ -1,6 +1,6 @@
 package com.cardano.explorer.service.impl;
 
-import com.cardano.explorer.model.request.DelegationFilterRequest;
+import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.DelegationHeaderResponse;
 import com.cardano.explorer.model.response.PoolDetailResponse;
 import com.cardano.explorer.model.response.PoolResponse;
@@ -28,9 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -74,13 +71,14 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public ResponseEntity<Page<PoolResponse>> getDataForPoolTable(
-      DelegationFilterRequest delegationFilterRequest) {
-    List<Long> poolIds = poolHashRepository.findAllPoolHashId(delegationFilterRequest);
+  public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(Integer page,
+      Integer size, String search) {
+    List<Long> poolIds = poolHashRepository.findAllPoolHashId(page, size, search);
     if (poolIds == null) {
       log.warn("Pool list is empty");
-      return ResponseEntity.ok(Page.empty());
+      return null;
     }
+    BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     List<PoolResponse> pools = poolIds.stream().map(PoolResponse::new)
         .collect(Collectors.toList());
     pools.forEach(pool -> {
@@ -97,7 +95,9 @@ public class DelegationServiceImpl implements DelegationService {
     });
     Integer totalEle = poolHashRepository.countPoolHash()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    return ResponseEntity.ok(new PageImpl<>(pools, Pageable.unpaged(), totalEle));
+    response.setTotalItems(totalEle);
+    response.setData(pools);
+    return ResponseEntity.ok(response);
   }
 
   @Override
