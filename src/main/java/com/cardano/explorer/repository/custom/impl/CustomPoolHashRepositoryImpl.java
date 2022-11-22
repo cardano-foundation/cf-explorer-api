@@ -23,6 +23,7 @@ public class CustomPoolHashRepositoryImpl implements CustomPoolHashRepository {
 
   private final EntityManager entityManager;
 
+  private static final String PREFIX_POOL_NAME = "{\"name\": \"";
 
   @Override
   public List<Long> findAllPoolHashId(DelegationFilterRequest delegationFilterRequest) {
@@ -33,10 +34,8 @@ public class CustomPoolHashRepositoryImpl implements CustomPoolHashRepository {
     List<Predicate> predicates = new ArrayList<>();
     String filter = delegationFilterRequest.getSearch();
     if (Boolean.FALSE.equals(StringUtils.isNullOrEmpty(filter))) {
-      Predicate predicate = cb.like(
-          cb.function("jsonb_extract_path_text", String.class, poolOffR.get("json"),
-              cb.literal("name")), "%" + filter + "%");
-      predicates.add(predicate);
+      predicates.add(
+          cb.like(cb.lower(poolOffR.get("json")), PREFIX_POOL_NAME + filter.toLowerCase() + "%"));
       if (Boolean.TRUE.equals(StringUtils.isNumeric(filter))) {
         predicates.add(cb.equal(poolHashJoin.get("id"), filter));
       }
