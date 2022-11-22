@@ -4,9 +4,15 @@ import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.dashboard.TxSummary;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface TxService {
+
+  @Transactional(readOnly = true)
+  List<TxSummary> findLatestTxSummary();
 
   /**
    * Get list transaction with paging
