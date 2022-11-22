@@ -5,13 +5,17 @@ import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.EpochMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.EpochResponse;
+import com.cardano.explorer.model.response.dashboard.EpochSummary;
+import com.cardano.explorer.projection.EpochSummaryProjection;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.service.EpochService;
 import com.sotatek.cardano.common.entity.Epoch;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -76,5 +80,24 @@ public class EpochServiceImpl implements EpochService {
 
     return new BaseFilterResponse<>(epochResponses, epochs.getTotalElements(),
         epochs.getTotalPages(), pageable.getPageNumber());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public EpochSummary getCurrentEpochSummary() {
+
+    return epochRepository
+        .findCurrentEpochSummary()
+        .map(epochSummaryProjection -> {
+          var slot =
+              (Instant.now().toEpochMilli() - epochSummaryProjection.getStartTime().getTime())
+                  / 100;
+          return EpochSummary.builder()
+              .no(epochSummaryProjection.getNo())
+              .slot((int) slot)
+              .totalSlot(epochSummaryProjection.getMaxSlot())
+              .build();
+        })
+        .orElse(EpochSummary.builder().slot(0).no(0).totalSlot(0).build());
   }
 }
