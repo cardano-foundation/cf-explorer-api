@@ -11,4 +11,7 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
   @Query(value = "SELECT max(no) FROM Epoch")
   Optional<Integer> findCurrentEpochNo();
+
+  @Query(value = "SELECT ep FROM Epoch ep WHERE ep.no = (SELECT max(no) FROM Epoch)")
+  Optional<Epoch> findByCurrentEpochNo();
 }
