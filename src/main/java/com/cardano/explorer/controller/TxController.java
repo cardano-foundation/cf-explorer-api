@@ -5,14 +5,17 @@ import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.dashboard.TxSummary;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,4 +47,12 @@ public class TxController {
   @Parameter(description = "Hash value of transaction") String hash) {
     return txService.getTxDetailByHash(hash);
   }
+
+  @GetMapping("/current")
+  @LogMessage
+  @Operation(summary = "Get current epoch")
+  public ResponseEntity<List<TxSummary>> findCurrentEpoch(){
+    return ResponseEntity.ok(txService.findLatestTxSummary());
+  }
+
 }

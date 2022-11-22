@@ -7,15 +7,17 @@ import com.cardano.explorer.mapper.TxOutMapper;
 import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
+import com.cardano.explorer.model.response.dashboard.TxSummary;
 import com.cardano.explorer.model.response.tx.CollateralResponse;
 import com.cardano.explorer.model.response.tx.TxOutResponse;
 import com.cardano.explorer.model.response.TxResponse;
 import com.cardano.explorer.model.response.tx.ContractResponse;
 import com.cardano.explorer.model.response.tx.SummaryResponse;
 import com.cardano.explorer.model.response.tx.UTxOResponse;
+import com.cardano.explorer.projection.TxIOProjection;
+import com.cardano.explorer.projection.TxContractProjection;
 import com.cardano.explorer.projection.AddressInputOutputProjection;
 import com.cardano.explorer.projection.CollateralInputOutputProjection;
-import com.cardano.explorer.projection.TxContract;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.CollateralTxInRepository;
 import com.cardano.explorer.repository.EpochRepository;
@@ -26,18 +28,23 @@ import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.specification.BlockSpecification;
 import com.cardano.explorer.specification.TxSpecification;
 import com.sotatek.cardano.common.entity.Block;
+import com.sotatek.cardano.common.entity.Epoch;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.enumeration.ScriptPurposeType;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -59,6 +66,58 @@ public class TxServiceImpl implements TxService {
   private final EpochRepository epochRepository;
 
   private final CollateralTxInRepository collateralTxInRepository;
+
+  private static final int SUMMARY_SIZE = 7;
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<TxSummary> findLatestTxSummary() {
+    Page<Long> txIds = txRepository.findLatestTxId(PageRequest.of(BigInteger.ZERO.intValue(), SUMMARY_SIZE));
+    List<TxSummary> summaries = new ArrayList<>();
+
+    if (txIds.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    List<TxIOProjection> txs = txRepository.findLatestTxIO(txIds.toList());
+
+    txs.forEach(tx -> {
+      Optional<TxSummary> searchedSummary = summaries.stream().filter(summary ->
+          summary.getHash().equals(tx.getHash())
+      ).findFirst();
+
+      if (searchedSummary.isEmpty()) {
+
+        var from = new ArrayList<String>();
+        from.add(tx.getFromAddress());
+
+        var to = new ArrayList<String>();
+        to.add(tx.getToAddress());
+
+        final TxSummary summary = TxSummary.builder()
+            .blockNo(tx.getBlockNo())
+            .hash(tx.getHash())
+            .amount(tx.getAmount().doubleValue())
+            .fromAddress(from)
+            .toAddress(to)
+            .build();
+
+        summaries.add(summary);
+        return;
+      }
+
+      final TxSummary summary = searchedSummary.get();
+      if (!summary.getFromAddress().contains(tx.getFromAddress())) {
+        summary.getFromAddress().add(tx.getFromAddress());
+      }
+
+      if (!summary.getToAddress().contains(tx.getToAddress())) {
+        summary.getToAddress().add(tx.getToAddress());
+      }
+    });
+
+    return summaries;
+  }
 
   @Override
   @Transactional(readOnly = true)
@@ -139,11 +198,11 @@ public class TxServiceImpl implements TxService {
         () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
-    // TO DO
-    /*Epoch epoch = epochRepository.findByNo(txResponse.getTx().getEpochNo()).orElseThrow(
+
+    Epoch epoch = epochRepository.findByNo(txResponse.getTx().getEpochNo()).orElseThrow(
         () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
-    );*/
-    txResponse.getTx().setMaxEpochSlot(432000);
+    );
+    txResponse.getTx().setMaxEpochSlot(epoch.getMaxSlot());
     txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
     txResponse.getTx().setStatus(TxStatus.SUCCESS);
 
@@ -182,7 +241,7 @@ public class TxServiceImpl implements TxService {
    * @param txResponse response data of transaction
    */
   private void getContracts(Tx tx, TxResponse txResponse) {
-    List<TxContract> redeemers = redeemerRepository.findContractByTx(tx);
+    List<TxContractProjection> redeemers = redeemerRepository.findContractByTx(tx);
     List<ContractResponse> contractResponses = redeemers.stream().map(redeemer -> {
       if(redeemer.getPurpose().equals(ScriptPurposeType.SPEND)) {
         return new ContractResponse(redeemer.getAddress());

@@ -1,6 +1,6 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.projection.TxContract;
+import com.cardano.explorer.projection.TxContractProjection;
 import com.sotatek.cardano.common.entity.Redeemer;
 import com.sotatek.cardano.common.entity.Tx;
 import java.util.List;
@@ -13,5 +13,5 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " FROM Redeemer re"
       + " INNER JOIN TxOut tout ON re.tx = tout.tx AND re.index = tout.index "
       + " WHERE re.tx = :tx")
-  List<TxContract> findContractByTx(Tx tx);
+  List<TxContractProjection> findContractByTx(Tx tx);
 }
