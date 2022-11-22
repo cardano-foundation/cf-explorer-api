@@ -12,6 +12,8 @@ import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolOfflineDataRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.service.DelegationService;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sotatek.cardano.common.entity.Epoch;
 import com.sotatek.cardano.common.entity.PoolHash;
 import com.sotatek.cardano.common.entity.PoolOfflineData;
@@ -26,8 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -132,13 +132,7 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   private String getNameValueFromJson(String json) {
-    String name = null;
-    try {
-      final JSONObject jsonObj = new JSONObject(json);
-      name = jsonObj.getString("name");
-    } catch (JSONException e) {
-      log.error("Error when parse json: " + e.getMessage());
-    }
-    return name;
+    JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
+    return jsonObject.get("name").getAsString();
   }
 }
