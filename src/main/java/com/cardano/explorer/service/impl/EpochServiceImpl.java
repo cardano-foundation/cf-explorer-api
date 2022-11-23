@@ -6,7 +6,6 @@ import com.cardano.explorer.mapper.EpochMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.EpochResponse;
 import com.cardano.explorer.model.response.dashboard.EpochSummary;
-import com.cardano.explorer.projection.EpochSummaryProjection;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.service.EpochService;
 import com.sotatek.cardano.common.entity.Epoch;
@@ -27,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class EpochServiceImpl implements EpochService {
 
+  public static final int MILLI = 1000;
   private final EpochRepository epochRepository;
   private final EpochMapper epochMapper;
 
@@ -91,7 +91,7 @@ public class EpochServiceImpl implements EpochService {
         .map(epochSummaryProjection -> {
           var slot =
               (Instant.now().toEpochMilli() - epochSummaryProjection.getStartTime().getTime())
-                  / 100;
+                  / MILLI;
           return EpochSummary.builder()
               .no(epochSummaryProjection.getNo())
               .slot((int) slot)
