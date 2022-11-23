@@ -50,4 +50,27 @@ public class CustomPoolHashRepositoryImpl implements CustomPoolHashRepository {
     List<Long> poolIds = query.getResultList();
     return poolIds;
   }
+
+  @Override
+  public Long totalPoolHashId(Integer page, Integer size, String search) {
+    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+    Root<PoolOfflineData> poolOffR = cq.from(PoolOfflineData.class);
+    Join<PoolOfflineData, PoolHash> poolHashJoin = poolOffR.join("pool");
+    List<Predicate> predicates = new ArrayList<>();
+    if (Boolean.FALSE.equals(StringUtils.isNullOrEmpty(search))) {
+      predicates.add(
+          cb.like(cb.lower(poolOffR.get("json")), PREFIX_POOL_NAME + search.toLowerCase() + "%"));
+      if (Boolean.TRUE.equals(StringUtils.isNumeric(search))) {
+        predicates.add(cb.equal(poolHashJoin.get("id"), search));
+      }
+    }
+    if (!predicates.isEmpty()) {
+      cq.where(cb.or(predicates.toArray(new Predicate[0])));
+    }
+    cq.distinct(true);
+    cq.select(cb.count(poolHashJoin.get("id")));
+    Query query = entityManager.createQuery(cq);
+    return (Long) query.getSingleResult();
+  }
 }
