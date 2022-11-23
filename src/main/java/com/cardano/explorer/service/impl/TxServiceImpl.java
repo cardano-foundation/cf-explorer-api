@@ -54,6 +54,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -98,7 +99,7 @@ public class TxServiceImpl implements TxService {
   public List<TxSummary> findLatestTxSummary() {
     Page<Long> txIds = txRepository.findLatestTxId(
         PageRequest.of(BigInteger.ZERO.intValue(),
-            SUMMARY_SIZE ,
+            SUMMARY_SIZE,
             Sort.by(BaseEntity_.ID).descending()));
 
     if (txIds.isEmpty()) {
@@ -160,26 +161,22 @@ public class TxServiceImpl implements TxService {
       return Collections.emptyList();
     }
 
-    List<TxGraph> graphs = new ArrayList<>();
+    return txs.stream()
+        .collect(
+            Collectors.groupingByConcurrent(
+                tx ->
+                    TimeUtil.formatDate(tx.getTime()),
+                Collectors.summingInt(TxGraphProjection::getTransactionNo)
+            ))
+        .entrySet()
+        .stream()
+        .map(entry -> TxGraph.builder()
+            .date(entry.getKey())
+            .txs(entry.getValue())
+            .build())
+        .sorted(Comparator.comparing(TxGraph::getDate))
+        .collect(Collectors.toList());
 
-    txs.forEach(tx -> {
-      Optional<TxGraph> txGraph = graphs.stream()
-          .filter(graph -> graph.getDate().equals(TimeUtil.formatDate(tx.getTime())))
-          .findFirst();
-
-      if (txGraph.isEmpty()) {
-        graphs.add(TxGraph.builder()
-            .date(TimeUtil.formatDate(tx.getTime()))
-            .txs(tx.getTransactionNo())
-            .build());
-        return;
-      }
-
-      TxGraph graph = txGraph.get();
-      graph.setTxs(graph.getTxs() + tx.getTransactionNo());
-    });
-
-    return graphs;
   }
 
   @Override
