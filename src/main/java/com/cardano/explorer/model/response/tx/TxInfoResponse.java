@@ -15,23 +15,16 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class TxInfoResponse {
+
   private String hash;
-
   private LocalDateTime time;
-
   private Integer blockNo;
-
   private Integer epochSlot;
-
   private Integer maxEpochSlot;
-
   private Integer epochNo;
-
   private TxStatus status;
-
   private Integer confirmation;
-
   private BigDecimal fee;
-
   private BigDecimal totalOutput;
+
 }

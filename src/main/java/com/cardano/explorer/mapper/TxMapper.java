@@ -12,6 +12,7 @@ import org.mapstruct.Mapping;
 public interface TxMapper {
 
   @Mapping(target = "epochNo", source = "block.epochNo")
+  @Mapping(target = "epochSlotNo", source = "block.epochSlotNo")
   @Mapping(target = "slot", source = "block.slotNo")
   @Mapping(target = "blockNo", source = "block.blockNo")
   @Mapping(target = "totalOutput", source = "outSum")

@@ -23,4 +23,6 @@ public class EpochResponse {
   private LocalDateTime startTime;
 
   private LocalDateTime endTime;
+
+  private Integer maxSlot;
 }
