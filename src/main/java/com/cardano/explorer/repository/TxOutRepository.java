@@ -36,7 +36,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
   List<AddressInputOutputProjection> getTxAddressOutputInfo(String hash);
 
 
-  @Query("SELECT txOut.address AS address, "
+  @Query("SELECT txOut.address AS address, txIn.txOut.hash AS txHash,"
       + "   COALESCE(stake.view,txOut.address) AS stakeAddress,"
       + "   txOut.value AS value"
       + " FROM TxOut txOut "
