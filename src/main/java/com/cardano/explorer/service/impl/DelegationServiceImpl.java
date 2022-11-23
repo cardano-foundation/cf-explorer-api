@@ -56,18 +56,18 @@ public class DelegationServiceImpl implements DelegationService {
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Integer epochNo = epoch.getNo();
     Timestamp endTime = epoch.getEndTime();
-    Long countDownTime = Timestamp.from(Instant.now()).getTime() - endTime.getTime();
+    long countDownTime = endTime.getTime() - Timestamp.from(Instant.now()).getTime();
     Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo)
         .orElseThrow(() -> new BusinessException(
             CommonErrorCode.UNKNOWN_ERROR));
     BigDecimal totalStake = epochStakeRepository.totalValueStakeByEpochNo(epochNo)
         .orElseThrow(() -> new BusinessException(
             CommonErrorCode.UNKNOWN_ERROR));
-    Integer delegators = delegationRepository.numberDelegators(Long.valueOf(epochNo))
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    Integer delegators = delegationRepository.numberDelegators(Long.valueOf(epochNo));
     return ResponseEntity.ok(
         DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
-            .liveStake(totalStake).delegators(delegators).countDownEndTime(countDownTime).build());
+            .liveStake(totalStake).delegators(delegators)
+            .countDownEndTime(countDownTime > 0 ? countDownTime : 0).build());
   }
 
   @Override
@@ -82,8 +82,7 @@ public class DelegationServiceImpl implements DelegationService {
     List<PoolResponse> pools = poolIds.stream().map(PoolResponse::new)
         .collect(Collectors.toList());
     pools.forEach(pool -> {
-      pool.setPledge(poolUpdateRepository.sumPledgeByPool(pool.getPoolId())
-          .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
+      pool.setPledge(poolUpdateRepository.sumPledgeByPool(pool.getPoolId()));
       PoolHash poolHash = poolHashRepository.findById(pool.getPoolId())
           .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
       PoolOfflineData poolOff = poolOfflineDataRepository.findFirstByPool(poolHash)
@@ -93,8 +92,7 @@ public class DelegationServiceImpl implements DelegationService {
 //          .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
       //Todo continue processing
     });
-    Integer totalEle = poolHashRepository.countPoolHash()
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    Long totalEle = poolHashRepository.totalPoolHashId(page, size, search);
     response.setTotalItems(totalEle);
     response.setData(pools);
     return ResponseEntity.ok(response);
@@ -112,20 +110,17 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setTickerName(poolOff.getTickerName());
 //    poolDetailResponse.setPoolSize(poolStakeRepository.findTotalStakeByPoolId(poolId)
 //        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
-    poolDetailResponse.setRewardAccount(poolUpdateRepository.findRewardAccountByPool(poolId)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
-    poolDetailResponse.setOwnerAccount(poolUpdateRepository.findOwnerAccountByPool(poolId)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
-    poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
-    poolDetailResponse.setPledge(poolUpdateRepository.sumPledgeByPool(poolId)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
-    PoolUpdate poolUpdate = poolUpdateRepository.findFirstByPoolHash(poolHash)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    poolDetailResponse.setRewardAccount(
+        poolUpdateRepository.findRewardAccountByPool(poolId));//Todo confirm
+    poolDetailResponse.setOwnerAccount(
+        poolUpdateRepository.findOwnerAccountByPool(poolId));//Todo confirm
+    poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
+    poolDetailResponse.setPledge(poolUpdateRepository.sumPledgeByPool(poolId));
+    PoolUpdate poolUpdate = poolUpdateRepository.findFirstByPoolHash(poolHash);
     poolDetailResponse.setCost(poolUpdate.getFixedCost());
     poolDetailResponse.setMargin(poolUpdate.getMargin() * 100);
-    poolDetailResponse.setLifetimeBlock(epochStakeRepository.countBlockByPoolId(poolId)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR)));
+    poolDetailResponse.setEpochBlock(epochStakeRepository.countBlockByCurrentEpoch());
+    poolDetailResponse.setLifetimeBlock(epochStakeRepository.countBlockByPoolId(poolId));
 
     return ResponseEntity.ok(poolDetailResponse);
   }
