@@ -13,13 +13,13 @@ import org.springframework.stereotype.Repository;
 public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
   @Query(value = "SELECT sum(pu.pledge) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId")
-  Optional<BigDecimal> sumPledgeByPool(@Param("poolId") Long poolId);
+  BigDecimal sumPledgeByPool(@Param("poolId") Long poolId);
 
-  Optional<PoolUpdate> findFirstByPoolHash(PoolHash poolHash);
+  PoolUpdate findFirstByPoolHash(PoolHash poolHash);
 
-  @Query(value = "SELECT sa.view FROM PoolUpdate pu JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id WHERE pu.poolHash.id = :poolId")
-  Optional<String> findRewardAccountByPool(@Param("poolId") Long poolId);
+  @Query(value = "SELECT sa.view FROM PoolUpdate pu JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id WHERE pu.poolHash.id = :poolId GROUP BY sa.view")
+  String findRewardAccountByPool(@Param("poolId") Long poolId);
 
-  @Query(value = "SELECT sa.view FROM PoolOwner po JOIN PoolUpdate pu ON po.poolUpdate.id = pu.id JOIN StakeAddress sa ON po.stakeAddress.id = sa.id WHERE pu.poolHash.id = :poolId")
-  Optional<String> findOwnerAccountByPool(@Param("poolId") Long poolId);
+  @Query(value = "SELECT sa.view FROM PoolOwner po JOIN PoolUpdate pu ON po.poolUpdate.id = pu.id JOIN StakeAddress sa ON po.stakeAddress.id = sa.id WHERE pu.poolHash.id = :poolId GROUP BY sa.view")
+  String findOwnerAccountByPool(@Param("poolId") Long poolId);
 }

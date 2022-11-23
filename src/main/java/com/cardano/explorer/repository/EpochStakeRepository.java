@@ -14,6 +14,9 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
   @Query(value = "SELECT sum(amount) FROM EpochStake WHERE epochNo = :epochNo")
   Optional<BigDecimal> totalValueStakeByEpochNo(@Param("epochNo") Integer epochNo);
 
-  @Query(value = "SELECT count(tx.blockId) FROM Tx tx WHERE tx.id in (SELECT sa.tx.id FROM EpochStake es JOIN StakeAddress sa ON es.addr.id = sa.id JOIN Tx tx ON sa.tx.id = tx.id WHERE es.pool.id = :poolId GROUP BY sa.tx.id)")
-  Optional<Integer> countBlockByPoolId(@Param("poolId") Long poolId);
+  @Query(value = "SELECT count(bk.id) from Block bk WHERE bk.epochNo in (SELECT es.epochNo FROM PoolHash ph JOIN EpochStake es on ph.id = es.pool.id WHERE ph.id = :poolId GROUP BY es.epochNo)")
+  Integer countBlockByPoolId(@Param("poolId") Long poolId);
+
+  @Query(value = "select count(bk.id) from Block bk WHERE bk.epochNo = (SELECT max(ep.no) FROM Epoch ep)")
+  Integer countBlockByCurrentEpoch();
 }
