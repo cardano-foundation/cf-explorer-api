@@ -1,8 +1,10 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
 import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.Tx;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +14,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationExecutor<Tx> {
 
@@ -20,7 +23,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   @EntityGraph(attributePaths = {"block"})
   Optional<Tx> findByHash(String hash);
 
-  @Query(value = "SELECT tx.id FROM Tx tx ORDER BY tx.id DESC ")
+  @Query(value = "SELECT tx.id FROM Tx tx ")
   Page<Long> findLatestTxId(Pageable pageable);
 
 
@@ -39,4 +42,9 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "ORDER BY b.blockNo DESC, txi.txOutputId DESC")
   List<TxIOProjection> findLatestTxIO(Collection<Long> txIds);
 
+  @Query(value = "SELECT b.time as time, b.txCount as transactionNo "
+      + "FROM Block b "
+      + "WHERE b.time >= :time "
+      + "ORDER BY b.time")
+  List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
 }
