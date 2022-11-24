@@ -15,6 +15,7 @@ public interface TxMapper {
   @Mapping(target = "epochSlotNo", source = "block.epochSlotNo")
   @Mapping(target = "slot", source = "block.slotNo")
   @Mapping(target = "blockNo", source = "block.blockNo")
+  @Mapping(target = "time", source = "block.time")
   @Mapping(target = "totalOutput", source = "outSum")
   TxFilterResponse txToTxFilterResponse(Tx tx);
 
