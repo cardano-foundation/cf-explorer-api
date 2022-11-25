@@ -1,9 +1,11 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
-import com.cardano.explorer.model.response.DelegationHeaderResponse;
-import com.cardano.explorer.model.response.PoolDetailResponse;
-import com.cardano.explorer.model.response.PoolResponse;
+import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
+import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
+import com.cardano.explorer.model.response.pool.PoolDetailListResponse;
+import com.cardano.explorer.model.response.pool.PoolResponse;
+import com.cardano.explorer.model.response.pool.PoolTxResponse;
 import com.cardano.explorer.service.DelegationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +35,26 @@ public class DelegationController {
   }
 
   @GetMapping("/pool-detail/{poolId}")
-  public ResponseEntity<PoolDetailResponse> getDataForPoolDetail(@PathVariable Long poolId) {
+  public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(@PathVariable Long poolId) {
     return delegationService.getDataForPoolDetail(poolId);
+  }
+
+  @GetMapping("/pool-detail-list")
+  public ResponseEntity<PoolDetailListResponse> getListForPoolDetail(
+      @RequestParam("pool") Long poolId, @RequestParam("page") Integer page,
+      @RequestParam("size") Integer size) {
+    return delegationService.getListForPoolDetail(page, size, poolId);
+  }
+
+  @GetMapping("/pool-registration")
+  public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
+      @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+    return delegationService.getDataForPoolRegistration(page, size);
+  }
+
+  @GetMapping("/pool-de-registration")
+  public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
+      @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+    return delegationService.getDataForPoolDeRegistration(page, size);
   }
 }

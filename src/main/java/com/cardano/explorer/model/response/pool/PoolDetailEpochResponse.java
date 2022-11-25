@@ -1,4 +1,4 @@
-package com.cardano.explorer.model.response;
+package com.cardano.explorer.model.response.pool;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -11,7 +11,7 @@ public class PoolDetailEpochResponse implements Serializable {
 
   private Integer epoch;
 
-  private Integer block;
+  private Long block;
 
   private BigDecimal stakeAmount;
 
@@ -20,4 +20,9 @@ public class PoolDetailEpochResponse implements Serializable {
   private BigDecimal fee;
 
   private Double ros;
+
+  public PoolDetailEpochResponse(PoolDetailEpoch poolEpoch) {
+    this.epoch = poolEpoch.getEpochNo();
+    this.block = poolEpoch.getCountBlock();
+  }
 }
