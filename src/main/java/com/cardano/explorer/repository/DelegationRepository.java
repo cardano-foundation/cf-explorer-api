@@ -1,7 +1,6 @@
 package com.cardano.explorer.repository;
 
 import com.sotatek.cardano.common.entity.Delegation;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,9 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
-  @Query("SELECT count(de) FROM Delegation de WHERE de.activeEpochNo = :activeEpochNo")
-  Integer numberDelegators(@Param("activeEpochNo") Long activeEpochNo);
+  @Query("SELECT count(de.id) FROM Delegation de")
+  Integer numberDelegatorsAllPool();
 
-  @Query("SELECT count(de) FROM Delegation de WHERE de.poolHash.id = :poolId")
+  @Query("SELECT count(de.id) FROM Delegation de WHERE de.poolHash.id = :poolId")
   Integer numberDelegatorsByPool(@Param("poolId") Long poolId);
 }
