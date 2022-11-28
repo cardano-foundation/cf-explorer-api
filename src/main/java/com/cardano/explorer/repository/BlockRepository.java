@@ -27,5 +27,5 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
   Optional<Integer> findCurrentBlock();
 
   @Query(value = "SELECT max(epochSlotNo) FROM Block WHERE epochNo = :epochNo")
-  Optional<Integer> findCurrentSlotByEpochNo(@Param("epochNo") Integer epochNo);
+  Integer findCurrentSlotByEpochNo(@Param("epochNo") Integer epochNo);
 }

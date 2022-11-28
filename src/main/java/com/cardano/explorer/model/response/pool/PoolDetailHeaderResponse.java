@@ -1,15 +1,14 @@
-package com.cardano.explorer.model.response;
+package com.cardano.explorer.model.response.pool;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.domain.Page;
 
 @Getter
 @Setter
-public class PoolDetailResponse implements Serializable {
+public class PoolDetailHeaderResponse implements Serializable {
 
   private String poolName;
 
@@ -46,6 +45,4 @@ public class PoolDetailResponse implements Serializable {
   private Integer epochBlock;
 
   private Integer lifetimeBlock;
-
-  private Page<PoolDetailEpochResponse> epoch;
 }

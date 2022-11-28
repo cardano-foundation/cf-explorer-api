@@ -12,10 +12,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
-  @Query("SELECT count(de) FROM Delegation de WHERE de.activeEpochNo = :activeEpochNo")
-  Integer numberDelegators(@Param("activeEpochNo") Long activeEpochNo);
+  @Query("SELECT count(de.id) FROM Delegation de")
+  Integer numberDelegatorsAllPool();
 
-  @Query("SELECT count(de) FROM Delegation de WHERE de.poolHash.id = :poolId")
+  @Query("SELECT count(de.id) FROM Delegation de WHERE de.poolHash.id = :poolId")
   Integer numberDelegatorsByPool(@Param("poolId") Long poolId);
 
   @EntityGraph(attributePaths = {"poolHash", "address"})

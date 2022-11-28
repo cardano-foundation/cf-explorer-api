@@ -2,9 +2,11 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.projection.EpochSummaryProjection;
 import com.sotatek.cardano.common.entity.Epoch;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
@@ -20,4 +22,7 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
   @Query(value = "SELECT ep FROM Epoch ep WHERE ep.no = (SELECT max(no) FROM Epoch)")
   Optional<Epoch> findByCurrentEpochNo();
+
+  @Query(value = "SELECT ep.fees FROM Epoch ep WHERE ep.no = :epochNo")
+  BigDecimal findFeeByEpochNo(@Param("epochNo") Integer epochNo);
 }
