@@ -5,6 +5,7 @@ import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.dashboard.TxGraph;
 import com.cardano.explorer.model.response.dashboard.TxSummary;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,4 +56,10 @@ public class TxController {
     return ResponseEntity.ok(txService.findLatestTxSummary());
   }
 
+  @GetMapping("/graph")
+  @LogMessage
+  @Operation(summary = "Get Number Transaction On Last 15 Days")
+  public ResponseEntity<List<TxGraph>> getNumberTransactionOnLast15Days() {
+    return ResponseEntity.ok(txService.getTxsAfterTime());
+  }
 }
