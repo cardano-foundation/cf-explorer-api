@@ -12,4 +12,6 @@ import lombok.Setter;
 public class PoolDetailListResponse implements Serializable {
 
   private BaseFilterResponse<PoolDetailEpochResponse> epoch;
+
+  private PoolDetailAnalyticsResponse analytics;
 }

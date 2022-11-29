@@ -1,7 +1,7 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.model.response.pool.PoolDetailEpoch;
-import com.cardano.explorer.model.response.pool.TrxPool;
+import com.cardano.explorer.model.response.pool.custom.PoolDetailEpoch;
+import com.cardano.explorer.model.response.pool.custom.TrxPool;
 import com.cardano.explorer.repository.custom.CustomPoolHashRepository;
 import com.sotatek.cardano.common.entity.PoolHash;
 import java.util.List;
@@ -21,8 +21,12 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long>,
   Optional<Integer> countPoolHash();
 
   @Query(value =
-      "SELECT bk.epochNo AS epochNo, count(bk.id) AS countBlock FROM Block bk WHERE bk.epochNo "
-          + "IN (SELECT es.epochNo FROM PoolHash ph JOIN EpochStake es ON es.pool.id = ph.id WHERE ph.id = :poolId) GROUP BY bk.epochNo")
+      "SELECT bk.epochNo AS epochNo, count(bk.id) AS countBlock FROM PoolHash ph "
+          + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
+          + "JOIN Block bk ON bk.slotLeader.id = sl.id "
+          + "WHERE ph.id = :poolId "
+          + "GROUP BY bk.epochNo "
+          + "ORDER BY bk.epochNo ASC")
   Page<PoolDetailEpoch> findEpochByPool(@Param("poolId") Long poolId, Pageable pageable);
 
   @Query(value = "SELECT count(DISTINCT bk.epochNo) FROM Block bk WHERE bk.epochNo "
