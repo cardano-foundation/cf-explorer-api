@@ -4,6 +4,7 @@ import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
 import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.Tx;
+import com.sotatek.cardano.common.entity.Tx_;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +21,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
 
   List<Tx> findByBlockIn(List<Block> blocks);
 
-  @EntityGraph(attributePaths = {"block"})
+  @EntityGraph(attributePaths = {Tx_.BLOCK})
   Optional<Tx> findByHash(String hash);
 
   @Query(value = "SELECT tx.id FROM Tx tx ")
