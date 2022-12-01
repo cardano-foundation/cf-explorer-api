@@ -3,7 +3,9 @@ package com.cardano.explorer.specification;
 import static org.springframework.data.jpa.domain.Specification.where;
 
 import com.cardano.explorer.model.request.BlockFilterRequest;
+import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.Block;
+import com.sotatek.cardano.common.entity.Block_;
 import java.util.Collection;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -34,7 +36,7 @@ public final class BlockSpecification extends BaseSpecification<Block, BlockFilt
     if (epochNo == null) {
       return null;
     }
-    return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("epochNo"), epochNo);
+    return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(Block_.EPOCH_NO), epochNo);
   }
 
   /**
@@ -44,7 +46,7 @@ public final class BlockSpecification extends BaseSpecification<Block, BlockFilt
    * @return specification for id in list condition
    */
   public static Specification<Block> hasIdIn(Collection<Long> blockIds) {
-    return (root, query, criteriaBuilder) -> (root.get("id").in(blockIds));
+    return (root, query, criteriaBuilder) -> (root.get(BaseEntity_.ID).in(blockIds));
   }
 
 

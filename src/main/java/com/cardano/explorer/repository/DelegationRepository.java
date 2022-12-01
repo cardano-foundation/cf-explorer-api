@@ -3,6 +3,7 @@ package com.cardano.explorer.repository;
 import com.cardano.explorer.model.response.pool.custom.DelegatorDataChart;
 import com.cardano.explorer.model.response.pool.custom.PoolDetailDelegator;
 import com.sotatek.cardano.common.entity.Delegation;
+import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.Tx;
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,7 +24,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   @Query("SELECT count(de.id) FROM Delegation de WHERE de.poolHash.id = :poolId")
   Integer numberDelegatorsByPool(@Param("poolId") Long poolId);
 
-  @EntityGraph(attributePaths = {"poolHash", "address"})
+  @EntityGraph(attributePaths = {Delegation_.POOL_HASH, Delegation_.ADDRESS})
   List<Delegation> findByTx(Tx tx);
 
   @Query(value =
