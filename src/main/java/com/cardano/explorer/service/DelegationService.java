@@ -1,8 +1,8 @@
 package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.PoolDetailDelegatorResponse;
 import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
-import com.cardano.explorer.model.response.pool.PoolDetailDelegatorsResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailEpochResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
@@ -79,7 +79,8 @@ public interface DelegationService {
    * @param poolId,page,size
    * @return PoolDetailDelegatorsResponse
    */
-  ResponseEntity<PoolDetailDelegatorsResponse> getDelegatorsForPoolDetail(Integer page,
+  ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorsForPoolDetail(
+      Integer page,
       Integer size,
       Long poolId);
 }
