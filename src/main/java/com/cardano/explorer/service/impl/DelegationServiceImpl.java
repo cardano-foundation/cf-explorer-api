@@ -3,7 +3,6 @@ package com.cardano.explorer.service.impl;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.PoolDetailDelegatorResponse;
 import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
-import com.cardano.explorer.model.response.pool.PoolDetailDelegatorsResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailEpochResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
@@ -273,7 +272,8 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public ResponseEntity<PoolDetailDelegatorsResponse> getDelegatorsForPoolDetail(Integer page,
+  public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorsForPoolDetail(
+      Integer page,
       Integer size, Long poolId) {
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
     Page<PoolDetailDelegator> delegatorPage = delegationRepository.getAllDelegatorByPool(poolId,
@@ -293,11 +293,7 @@ public class DelegationServiceImpl implements DelegationService {
       delegatorResponse.setTotalItems(delegatorPage.getTotalElements());
       delegatorResponse.setData(delegatorList);
     }
-    Long countEpoch = poolHashRepository.findEpochByPool(poolId, PageRequest.of(0, 1))
-        .getTotalElements();
-    return ResponseEntity.ok(
-        PoolDetailDelegatorsResponse.builder().delegators(delegatorResponse).totalEpoch(countEpoch)
-            .build());
+    return ResponseEntity.ok(delegatorResponse);
   }
 
   private String getNameValueFromJson(String json) {
