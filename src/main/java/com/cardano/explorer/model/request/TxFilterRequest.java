@@ -8,5 +8,6 @@ import lombok.Setter;
 public class TxFilterRequest {
 
   private Integer blockNo;
+  private String address;
 
 }
