@@ -1,8 +1,8 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.PoolDetailDelegatorResponse;
 import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
-import com.cardano.explorer.model.response.pool.PoolDetailDelegatorsResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailEpochResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
@@ -55,7 +55,7 @@ public class DelegationController {
   }
 
   @GetMapping("/pool-detail-delegators")
-  public ResponseEntity<PoolDetailDelegatorsResponse> getDelegatorForPoolDetail(
+  public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
       @RequestParam("pool") Long poolId, @Param("page") Integer page, @Param("size") Integer size) {
     return delegationService.getDelegatorsForPoolDetail(page, size, poolId);
   }
