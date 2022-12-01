@@ -43,7 +43,6 @@ public class CustomPoolHashRepositoryImpl implements CustomPoolHashRepository {
     }
     cq.select(poolHashJoin.get("id"));
     cq.groupBy(poolHashJoin.get("id"));
-    cq.orderBy(cb.asc(poolHashJoin.get("id")));
     Query query = entityManager.createQuery(cq);
     query.setFirstResult((page - 1) * size);
     query.setMaxResults(size);

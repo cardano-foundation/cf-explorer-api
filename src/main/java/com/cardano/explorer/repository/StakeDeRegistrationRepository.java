@@ -1,6 +1,6 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.model.response.pool.TrxBlockEpoch;
+import com.cardano.explorer.model.response.pool.custom.TrxBlockEpoch;
 import com.sotatek.cardano.common.entity.StakeDeregistration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
