@@ -1,4 +1,4 @@
-package com.cardano.explorer.model.response.pool;
+package com.cardano.explorer.model.response.pool.custom;
 
 import java.math.BigDecimal;
 

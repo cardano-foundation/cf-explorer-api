@@ -1,5 +1,6 @@
 package com.cardano.explorer.model.response.pool;
 
+import com.cardano.explorer.model.response.pool.custom.TrxBlockEpoch;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;

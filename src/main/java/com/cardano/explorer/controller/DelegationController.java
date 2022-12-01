@@ -2,12 +2,15 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
+import com.cardano.explorer.model.response.pool.PoolDetailDelegatorsResponse;
+import com.cardano.explorer.model.response.pool.PoolDetailEpochResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
-import com.cardano.explorer.model.response.pool.PoolDetailListResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
 import com.cardano.explorer.model.response.pool.PoolTxResponse;
+import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import com.cardano.explorer.service.DelegationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,16 +37,27 @@ public class DelegationController {
     return delegationService.getDataForPoolTable(page, size, search);
   }
 
-  @GetMapping("/pool-detail/{poolId}")
+  @GetMapping("/pool-detail-header/{poolId}")
   public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(@PathVariable Long poolId) {
     return delegationService.getDataForPoolDetail(poolId);
   }
 
-  @GetMapping("/pool-detail-list")
-  public ResponseEntity<PoolDetailListResponse> getListForPoolDetail(
-      @RequestParam("pool") Long poolId, @RequestParam("page") Integer page,
-      @RequestParam("size") Integer size) {
-    return delegationService.getListForPoolDetail(page, size, poolId);
+  @GetMapping("/pool-detail-analytics")
+  public ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(
+      @RequestParam("pool") Long poolId) {
+    return delegationService.getAnalyticsForPoolDetail(poolId);
+  }
+
+  @GetMapping("/pool-detail-epochs")
+  public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
+      @RequestParam("pool") Long poolId, @Param("page") Integer page, @Param("size") Integer size) {
+    return delegationService.getEpochListForPoolDetail(page, size, poolId);
+  }
+
+  @GetMapping("/pool-detail-delegators")
+  public ResponseEntity<PoolDetailDelegatorsResponse> getDelegatorForPoolDetail(
+      @RequestParam("pool") Long poolId, @Param("page") Integer page, @Param("size") Integer size) {
+    return delegationService.getDelegatorsForPoolDetail(page, size, poolId);
   }
 
   @GetMapping("/pool-registration")
