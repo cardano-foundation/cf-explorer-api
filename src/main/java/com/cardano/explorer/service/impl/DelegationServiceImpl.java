@@ -125,7 +125,7 @@ public class DelegationServiceImpl implements DelegationService {
     PoolDetailHeaderResponse poolDetailResponse = new PoolDetailHeaderResponse();
     PoolHash poolHash = poolHashRepository.findById(poolId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    poolDetailResponse.setPoolView(poolHash.getView());
+    poolDetailResponse.setPoolView(poolHash.getHashRaw());
     PoolOfflineData poolOff = poolOfflineDataRepository.findFirstByPool(poolHash)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     poolDetailResponse.setPoolName(getNameValueFromJson(poolOff.getJson()));
@@ -150,7 +150,7 @@ public class DelegationServiceImpl implements DelegationService {
       poolDetailResponse.setMargin(poolUpdates.get(ZERO).getMargin());
       poolDetailResponse.setPledge(poolUpdates.get(ZERO).getPledge());
     }
-    poolDetailResponse.setEpochBlock(epochStakeRepository.countBlockByCurrentEpoch());
+    poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
     return ResponseEntity.ok(poolDetailResponse);
   }

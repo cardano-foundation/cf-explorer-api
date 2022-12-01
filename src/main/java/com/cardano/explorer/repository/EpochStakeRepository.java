@@ -14,9 +14,6 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
   BigDecimal totalStakeByEpochNoAndPool(@Param("epochNo") Integer epochNo,
       @Param("poolId") Long poolId);
 
-  @Query(value = "SELECT count(bk.id) FROM Block bk WHERE bk.epochNo = (SELECT max(ep.no) FROM Epoch ep)")
-  Integer countBlockByCurrentEpoch();
-
   @Query(value = "SELECT sum(amount) FROM EpochStake")
   BigDecimal totalStakeAllPool();
 
