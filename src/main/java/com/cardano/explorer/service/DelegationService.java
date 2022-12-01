@@ -2,10 +2,12 @@ package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
+import com.cardano.explorer.model.response.pool.PoolDetailDelegatorsResponse;
+import com.cardano.explorer.model.response.pool.PoolDetailEpochResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
-import com.cardano.explorer.model.response.pool.PoolDetailListResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
 import com.cardano.explorer.model.response.pool.PoolTxResponse;
+import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface DelegationService {
@@ -36,12 +38,13 @@ public interface DelegationService {
   ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(Long poolId);
 
   /**
-   * Get detail pool for delegate pools detail
+   * Get detail pool epoch list for delegate pools detail
    *
    * @param poolId
-   * @return PoolDetailListResponse
+   * @return PoolDetailEpochResponse
    */
-  ResponseEntity<PoolDetailListResponse> getListForPoolDetail(Integer page, Integer size,
+  ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
+      Integer page, Integer size,
       Long poolId);
 
   /**
@@ -61,4 +64,22 @@ public interface DelegationService {
    */
   ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(Integer page,
       Integer size);
+
+  /**
+   * Get detail pool analytics for delegate pools detail
+   *
+   * @param poolId
+   * @return PoolDetailAnalyticsResponse
+   */
+  ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(Long poolId);
+
+  /**
+   * Get detail pool delegator list for delegate pools detail
+   *
+   * @param poolId,page,size
+   * @return PoolDetailDelegatorsResponse
+   */
+  ResponseEntity<PoolDetailDelegatorsResponse> getDelegatorsForPoolDetail(Integer page,
+      Integer size,
+      Long poolId);
 }

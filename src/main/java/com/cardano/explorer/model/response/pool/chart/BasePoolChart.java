@@ -1,6 +1,6 @@
-package com.cardano.explorer.model.response.pool;
+package com.cardano.explorer.model.response.pool.chart;
 
-import java.util.Map;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,5 +12,5 @@ public abstract class BasePoolChart<K, T> {
 
   private T lowest;
 
-  private Map<K, T> dataByDays;
+  private List<K> dataByDays;
 }
