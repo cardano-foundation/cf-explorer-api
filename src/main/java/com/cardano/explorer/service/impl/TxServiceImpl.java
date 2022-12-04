@@ -16,6 +16,7 @@ import com.cardano.explorer.model.response.dashboard.TxSummary;
 import com.cardano.explorer.model.response.tx.CollateralResponse;
 import com.cardano.explorer.model.response.tx.ContractResponse;
 import com.cardano.explorer.model.response.tx.SummaryResponse;
+import com.cardano.explorer.model.response.tx.TxMintingResponse;
 import com.cardano.explorer.model.response.tx.TxOutResponse;
 import com.cardano.explorer.model.response.tx.UTxOResponse;
 import com.cardano.explorer.model.response.tx.WithdrawalResponse;
@@ -269,7 +270,7 @@ public class TxServiceImpl implements TxService {
     txResponse.getTx().setStatus(TxStatus.SUCCESS);
 
     // get address input output
-    getSummaryAndUTxOs(hash, txResponse);
+    getSummaryAndUTxOs(tx, txResponse);
     getContracts(tx, txResponse);
     getCollaterals(tx, txResponse);
     getWithdrawals(tx, txResponse);
@@ -281,12 +282,12 @@ public class TxServiceImpl implements TxService {
   /**
    * Get transaction mints info
    *
-   * @param tx transaction
+   * @param tx         transaction
    * @param txResponse response data of transaction
    */
   private void getMints(Tx tx, TxResponse txResponse) {
     List<MaTxMint> maTxMints = maTxMintRepository.findByTx(tx);
-    if(!CollectionUtils.isEmpty(maTxMints)) {
+    if (!CollectionUtils.isEmpty(maTxMints)) {
       txResponse.setMints(
           maTxMints.stream().map(maTxMintMapper::fromMaTxMint).collect(Collectors.toList()));
     }
@@ -295,12 +296,12 @@ public class TxServiceImpl implements TxService {
   /**
    * Get transaction delegations info
    *
-   * @param tx transaction
+   * @param tx         transaction
    * @param txResponse response data of transaction
    */
   private void getDelegations(Tx tx, TxResponse txResponse) {
     List<Delegation> delegations = delegationRepository.findByTx(tx);
-    if(!CollectionUtils.isEmpty(delegations)) {
+    if (!CollectionUtils.isEmpty(delegations)) {
       txResponse.setDelegations(delegations.stream().map(delegationMapper::fromDelegation)
           .collect(Collectors.toList()));
     }
@@ -309,12 +310,12 @@ public class TxServiceImpl implements TxService {
   /**
    * Get transaction withdrawals info
    *
-   * @param tx transaction
+   * @param tx         transaction
    * @param txResponse response data of transaction
    */
   private void getWithdrawals(Tx tx, TxResponse txResponse) {
     List<Withdrawal> withdrawals = withdrawalRepository.findByTx(tx);
-    if(!CollectionUtils.isEmpty(withdrawals)) {
+    if (!CollectionUtils.isEmpty(withdrawals)) {
       List<String> addressToList = txResponse.getUTxOs().getOutputs().stream()
           .map(TxOutResponse::getAddress).collect(Collectors.toList());
       List<WithdrawalResponse> withdrawalResponses = withdrawals.stream().map(withdrawal -> {
@@ -371,49 +372,86 @@ public class TxServiceImpl implements TxService {
   /**
    * Get transaction summary and UTxOs info
    *
-   * @param hash       hash value of transaction
+   * @param tx         transaction
    * @param txResponse response data of transaction
    */
-  private void getSummaryAndUTxOs(String hash, TxResponse txResponse) {
+  private void getSummaryAndUTxOs(Tx tx, TxResponse txResponse) {
     List<AddressInputOutputProjection> addressInputInfo = txOutRepository.getTxAddressInputInfo(
-        hash);
+        tx);
+    Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputMap = addressInputInfo.stream()
+        .collect(Collectors.groupingBy(
+            txOutMapper::fromAddressInputOutput
+        ));
     List<AddressInputOutputProjection> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(
-        hash);
-    if (!CollectionUtils.isEmpty(addressInputInfo) && !CollectionUtils.isEmpty(addressOutputInfo)) {
-      UTxOResponse uTxOs = UTxOResponse.builder()
-          .inputs(addressInputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
-              Collectors.toList()))
-          .outputs(addressOutputInfo.stream().map(txOutMapper::fromAddressInputOutput).collect(
-              Collectors.toList()))
-          .build();
-      txResponse.setUTxOs(uTxOs);
-      SummaryResponse summary = SummaryResponse.builder()
-          .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
-          .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
-          .build();
-      txResponse.setSummary(summary);
-    }
+        tx);
+    Map<TxOutResponse, List<AddressInputOutputProjection>> addressOutputMap = addressOutputInfo.stream()
+        .collect(Collectors.groupingBy(
+            txOutMapper::fromAddressInputOutput
+        ));
+    List<TxOutResponse> uTxOOutputs = mappingProjectionToAddress(addressOutputMap);
+    List<TxOutResponse> uTxOInputs = mappingProjectionToAddress(addressInputMap);
+    UTxOResponse uTxOs = UTxOResponse.builder()
+        .inputs(uTxOInputs)
+        .outputs(uTxOOutputs)
+        .build();
+    txResponse.setUTxOs(uTxOs);
+    SummaryResponse summary = SummaryResponse.builder()
+        .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
+        .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
+        .build();
+    txResponse.setSummary(summary);
 
+  }
+
+  /**
+   * Map data from AddressInputOutputProjection to TxOutResponse
+   *
+   * @param addressInputOutputMap address projection map
+   * @return address response
+   */
+  private List<TxOutResponse> mappingProjectionToAddress(
+      Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputOutputMap) {
+    List<TxOutResponse> uTxOs = new ArrayList<>(addressInputOutputMap.keySet());
+    for (TxOutResponse uTxO : uTxOs) {
+      List<TxMintingResponse> tokens = addressInputOutputMap.get(uTxO).stream().map(
+          maTxMintMapper::fromAddressInputOutputProjection
+      ).collect(Collectors.toList());
+      if (!CollectionUtils.isEmpty(tokens)) {
+        uTxO.setTokens(tokens);
+      }
+    }
+    return uTxOs;
   }
 
   /**
    * Get stake address info from address
    *
-   * @param addressInputOutputProjectionList List address input or output info
+   * @param addressInfo List address input or output info
    * @return list stake address input or output info
    */
-  private static List<TxOutResponse> getStakeAddressInfo(
-      List<AddressInputOutputProjection> addressInputOutputProjectionList) {
-    var addressInputMap = addressInputOutputProjectionList.stream().collect(Collectors.groupingBy(
-        AddressInputOutputProjection::getStakeAddress,
-        Collectors.reducing(BigDecimal.ZERO, AddressInputOutputProjection::getValue,
+  private List<TxOutResponse> getStakeAddressInfo(
+      List<AddressInputOutputProjection> addressInfo) {
+
+    Map<TxOutResponse, List<AddressInputOutputProjection>> addressMap = addressInfo.stream()
+        .collect(Collectors.groupingBy(
+            txOutMapper::fromStakeAddressInputOutput
+        ));
+    Map<String, List<AddressInputOutputProjection>> addressTokenMap = addressInfo.stream()
+        .collect(Collectors.groupingBy(
+            AddressInputOutputProjection::getStakeAddress
+        ));
+    var addressValueMap = addressMap.keySet().stream().collect(Collectors.groupingBy(
+        TxOutResponse::getAddress,
+        Collectors.reducing(BigDecimal.ZERO, TxOutResponse::getValue,
             BigDecimal::add)
     ));
     List<TxOutResponse> stakeAddressTxInputList = new ArrayList<>();
-    addressInputMap.forEach(
+    addressValueMap.forEach(
         (key, value) -> stakeAddressTxInputList.add(TxOutResponse.builder()
             .address(key)
             .value(value)
+            .tokens(addressTokenMap.get(key).stream()
+                .map(maTxMintMapper::fromAddressInputOutputProjection).collect(Collectors.toList()))
             .build())
     );
     return stakeAddressTxInputList;

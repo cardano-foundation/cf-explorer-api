@@ -1,6 +1,7 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.projection.AddressInputOutputProjection;
+import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.TxOut;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -29,25 +30,27 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
   List<AddressInputOutputProjection> findAddressInputListByTxId(Collection<Long> txIds);
 
   @Query("SELECT txOut.address AS address, COALESCE(stake.view, txOut.address) AS stakeAddress,"
-      + "   txOut.value AS value"
+      + "   txOut.value AS value, maTxOut.quantity as assetQuantity,"
+      + "   asset.name as assetName, asset.fingerprint as assetId"
       + " FROM TxOut txOut "
-      + " LEFT JOIN StakeAddress stake "
-      + " ON txOut.stakeAddress = stake "
-      + " INNER JOIN Tx tx ON txOut.tx = tx"
-      + " WHERE tx.hash = :hash")
-  List<AddressInputOutputProjection> getTxAddressOutputInfo(String hash);
+      + " LEFT JOIN StakeAddress stake ON txOut.stakeAddress = stake "
+      + " LEFT JOIN MaTxOut maTxOut ON maTxOut.txOut = txOut"
+      + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
+      + " WHERE txOut.tx = :tx")
+  List<AddressInputOutputProjection> getTxAddressOutputInfo(Tx tx);
 
 
   @Query("SELECT txOut.address AS address, txIn.txOut.hash AS txHash,"
       + "   COALESCE(stake.view,txOut.address) AS stakeAddress,"
-      + "   txOut.value AS value"
+      + "   txOut.value AS value, maTxOut.quantity as assetQuantity,"
+      + "   asset.name as assetName, asset.fingerprint as assetId"
       + " FROM TxOut txOut "
       + " INNER JOIN TxIn txIn ON txOut.tx = txIn.txOut AND txIn.txOutIndex = txOut.index "
-      + " INNER JOIN Tx tx ON tx = txIn.txInput"
-      + " LEFT JOIN StakeAddress stake "
-      + " ON txOut.stakeAddress = stake"
-      + " WHERE tx.hash = :hash")
-  List<AddressInputOutputProjection> getTxAddressInputInfo(String hash);
+      + " LEFT JOIN StakeAddress stake ON txOut.stakeAddress = stake"
+      + " LEFT JOIN MaTxOut maTxOut ON maTxOut.txOut = txOut"
+      + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
+      + " WHERE txIn.txInput = :tx")
+  List<AddressInputOutputProjection> getTxAddressInputInfo(Tx tx);
 
   @Query("SELECT COALESCE(SUM(value), 0) AS value FROM TxOut WHERE address = :address")
   Optional<BigDecimal> getAddressTotalOutput(String address);

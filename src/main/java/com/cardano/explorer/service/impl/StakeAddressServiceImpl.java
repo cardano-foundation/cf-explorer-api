@@ -20,6 +20,7 @@ import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class StakeAddressServiceImpl implements StakeAddressService {
   private final PoolOfflineDataRepository poolOfflineDataRepository;
 
   @Override
+  @Transactional(readOnly = true)
   public StakeAddressResponse getStakeAddress(String address) {
     StakeAddressResponse stakeAddressResponse = new StakeAddressResponse();
     try {

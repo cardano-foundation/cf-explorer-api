@@ -13,4 +13,10 @@ public interface AddressInputOutputProjection {
   String getStakeAddress();
 
   BigDecimal getValue();
+
+  BigDecimal getAssetQuantity();
+
+  String getAssetName();
+
+  String getAssetId();
 }

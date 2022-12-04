@@ -9,5 +9,6 @@ public class TxFilterRequest {
 
   private Integer blockNo;
   private String address;
+  private String tokenId;
 
 }

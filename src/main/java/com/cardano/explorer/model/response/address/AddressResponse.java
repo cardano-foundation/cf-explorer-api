@@ -1,5 +1,6 @@
 package com.cardano.explorer.model.response.address;
 
+import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ public class AddressResponse {
   private String address;
   private Integer txCount;
   private BigDecimal balance;
-  private List<AddressTokenResponse> tokens;
+  private List<TokenAddressResponse> tokens;
   private String stakeAddress;
 
 }
