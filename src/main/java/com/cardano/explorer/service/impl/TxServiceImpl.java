@@ -191,16 +191,21 @@ public class TxServiceImpl implements TxService {
     } else {
       txPage = txRepository.findAll(pageable);
     }
-    Set<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
-        .collect(Collectors.toSet());
-    var conditions = Specification.where(BlockSpecification.hasIdIn(blockIdList));
-    List<Block> blocks = blockRepository.findAll(conditions);
-    Map<Long, Block> mapBlock = blocks.stream()
-        .collect(Collectors.toMap(Block::getId, Function.identity()));
-    txPage.getContent().forEach(tx -> tx.setBlock(mapBlock.get(tx.getBlockId())));
+    if(!CollectionUtils.isEmpty(txPage.getContent())) {
+      Set<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
+          .collect(Collectors.toSet());
+      var conditions = Specification.where(BlockSpecification.hasIdIn(blockIdList));
+      List<Block> blocks = blockRepository.findAll(conditions);
+      Map<Long, Block> mapBlock = blocks.stream()
+          .collect(Collectors.toMap(Block::getId, Function.identity()));
+      txPage.getContent().forEach(tx -> tx.setBlock(mapBlock.get(tx.getBlockId())));
 
-    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage.getContent());
-    response.setData(txFilterResponses);
+      List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(
+          txPage.getContent());
+      response.setData(txFilterResponses);
+    } else {
+      response.setData(new ArrayList<>());
+    }
     response.setCurrentPage(pageable.getPageNumber());
     response.setTotalPages(txPage.getTotalPages());
     response.setTotalItems(txPage.getTotalElements());

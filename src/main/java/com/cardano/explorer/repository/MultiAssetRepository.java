@@ -25,7 +25,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       + " ORDER BY (output.quantity - COALESCE(input.quantity, 0)) DESC")
   Page<AddressTokenProjection> findAddressByToken(String fingerprint, Pageable pageable);
 
-  @Query("SELECT output.id.fingerprint AS address,"
+  @Query("SELECT output.id.fingerprint AS fingerprint,"
       + " output.tokenName AS tokenName,"
       + " (output.quantity - COALESCE(input.quantity, 0)) AS quantity"
       + " FROM AddressTokenOutput output"

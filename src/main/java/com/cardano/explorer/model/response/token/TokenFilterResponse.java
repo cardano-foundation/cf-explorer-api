@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class TokenFilterResponse implements Serializable {
   private String name;
+  private String displayName;
   private String policy;
   private String fingerprint;
   private Integer txCount;
