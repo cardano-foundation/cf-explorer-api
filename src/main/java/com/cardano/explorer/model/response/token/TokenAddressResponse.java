@@ -11,7 +11,8 @@ import lombok.Setter;
 @JsonInclude(Include.NON_NULL)
 public class TokenAddressResponse {
   private String address;
-  private String tokenName;
+  private String name;
+  private String displayName;
   private String fingerprint;
   private BigDecimal quantity;
 }

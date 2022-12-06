@@ -11,22 +11,14 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", imports={HexUtils.class})
 public interface TokenMapper {
-  @Mapping(target = "name",
-      expression = "java(HexUtils.fromHex(multiAsset.getName()))")
-  @Mapping(target = "policy", expression = "java(multiAsset.getFingerprint())")
-  @Mapping(target = "fingerprint", expression = "java(multiAsset.getFingerprint())")
+  @Mapping(target = "displayName", expression = "java(HexUtils.fromHex(multiAsset.getName()))")
   TokenFilterResponse fromMultiAssetToFilterResponse(MultiAsset multiAsset);
 
-  @Mapping(target = "name",
-      expression = "java(HexUtils.fromHex(multiAsset.getName()))")
-  @Mapping(target = "policy", expression = "java(multiAsset.getFingerprint())")
-  @Mapping(target = "fingerprint", expression = "java(multiAsset.getFingerprint())")
+  @Mapping(target = "displayName", expression = "java(HexUtils.fromHex(multiAsset.getName()))")
   TokenResponse fromMultiAssetToResponse(MultiAsset multiAsset);
 
-  @Mapping(target = "tokenName",
-      expression = "java(HexUtils.fromHex(projection.getTokenName()))")
-  @Mapping(target = "address", expression = "java(projection.getAddress())")
-  @Mapping(target = "fingerprint", expression = "java(projection.getFingerprint())")
+  @Mapping(target = "displayName", expression = "java(HexUtils.fromHex(projection.getTokenName()))")
+  @Mapping(target = "name", source = "tokenName")
   TokenAddressResponse fromAddressTokenProjection(AddressTokenProjection projection);
 
 }

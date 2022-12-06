@@ -11,9 +11,11 @@ import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.TxOut;
 import com.sotatek.cardano.common.entity.TxOut_;
 import com.sotatek.cardano.common.entity.Tx_;
+import java.util.Objects;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +31,8 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
   @Override
   public Specification<Tx> getFilter(TxFilterRequest request) {
     return (root, query, cb) -> where(hasBlockId(request.getBlockNo())
-        .or(hasAddress(request.getAddress()))
-        .or(hasToken(request.getTokenId())))
+        .and(hasAddress(request.getAddress()))
+        .and(hasToken(request.getTokenId())))
         .toPredicate(root, query, cb);
   }
 
@@ -42,7 +44,7 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
    */
   public static Specification<Tx> hasBlockId(Integer blockNo) {
     return (root, query, criteriaBuilder) -> {
-      if (blockNo == null) {
+      if (Objects.isNull(blockNo)) {
         return null;
       }
 
@@ -60,7 +62,7 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
    */
   public static Specification<Tx> hasAddress(String address) {
     return (root, query, criteriaBuilder) -> {
-      if (address == null) {
+      if (StringUtils.isEmpty(address)) {
         return null;
       }
       ListJoin<Tx, TxOut> txOutJoin = root.joinList(Tx_.TX_OUT_LIST, JoinType.INNER);
@@ -76,7 +78,7 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
    */
   public static Specification<Tx> hasToken(String tokenId) {
     return (root, query, criteriaBuilder) -> {
-      if (tokenId == null) {
+      if (StringUtils.isEmpty(tokenId)) {
         return null;
       }
       ListJoin<Tx, TxOut> txOutJoin = root.joinList(Tx_.TX_OUT_LIST, JoinType.INNER);
