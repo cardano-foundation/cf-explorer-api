@@ -6,7 +6,6 @@ import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailEpochResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
-import com.cardano.explorer.model.response.pool.PoolTxResponse;
 import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import com.cardano.explorer.service.DelegationService;
 import lombok.RequiredArgsConstructor;
@@ -58,17 +57,5 @@ public class DelegationController {
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
       @RequestParam("pool") Long poolId, @Param("page") Integer page, @Param("size") Integer size) {
     return delegationService.getDelegatorsForPoolDetail(page, size, poolId);
-  }
-
-  @GetMapping("/pool-registration")
-  public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
-      @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-    return delegationService.getDataForPoolRegistration(page, size);
-  }
-
-  @GetMapping("/pool-de-registration")
-  public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
-      @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-    return delegationService.getDataForPoolDeRegistration(page, size);
   }
 }
