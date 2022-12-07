@@ -135,14 +135,8 @@ public class DelegationServiceImpl implements DelegationService {
     if (!createdTime.isEmpty()) {
       poolDetailResponse.setCreateDate(createdTime.toList().get(ZERO));
     }
-    List<String> rewardAddressList = poolUpdateRepository.findRewardAccountByPool(poolId);
-    if (rewardAddressList != null && !rewardAddressList.isEmpty()) {
-      poolDetailResponse.setRewardAccount(rewardAddressList.get(ZERO));
-    }
-    List<String> ownerAddressList = poolUpdateRepository.findOwnerAccountByPool(poolId);
-    if (ownerAddressList != null && !ownerAddressList.isEmpty()) {
-      poolDetailResponse.setOwnerAccount(ownerAddressList.get(ZERO));
-    }
+    poolDetailResponse.setRewardAccounts(poolUpdateRepository.findRewardAccountByPool(poolId));
+    poolDetailResponse.setOwnerAccounts(poolUpdateRepository.findOwnerAccountByPool(poolId));
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
     List<PoolUpdate> poolUpdates = poolUpdateRepository.findAllByPoolId(poolId);
     if (poolUpdates != null && !poolUpdates.isEmpty()) {
@@ -232,13 +226,11 @@ public class DelegationServiceImpl implements DelegationService {
   public ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(Long poolId) {
     //Todo set current epoch filter
     EpochChartResponse epochChart = new EpochChartResponse();
-    List<BigDecimal> maxStake = poolHashRepository.maxValueEpochChart(poolId,
-        PageRequest.of(0, 1));
+    List<BigDecimal> maxStake = poolHashRepository.maxValueEpochChart(poolId, PageRequest.of(0, 1));
     if (!maxStake.isEmpty()) {
       epochChart.setHighest(maxStake.get(ZERO));
     }
-    List<BigDecimal> minStake = poolHashRepository.minValueEpochChart(poolId,
-        PageRequest.of(0, 1));
+    List<BigDecimal> minStake = poolHashRepository.minValueEpochChart(poolId, PageRequest.of(0, 1));
     if (!minStake.isEmpty()) {
       epochChart.setLowest(minStake.get(ZERO));
     }
@@ -263,8 +255,7 @@ public class DelegationServiceImpl implements DelegationService {
         poolId, PageRequest.of(0, 5));
     if (!delegatorDataCharts.isEmpty()) {
       delegatorChart.setDataByDays(
-          delegatorDataCharts.stream().map(DelegatorChartList::new).collect(
-              Collectors.toList()));
+          delegatorDataCharts.stream().map(DelegatorChartList::new).collect(Collectors.toList()));
     }
     return ResponseEntity.ok(
         PoolDetailAnalyticsResponse.builder().epochChart(epochChart).delegatorChart(delegatorChart)
@@ -273,8 +264,7 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorsForPoolDetail(
-      Integer page,
-      Integer size, Long poolId) {
+      Integer page, Integer size, Long poolId) {
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
     Page<PoolDetailDelegator> delegatorPage = delegationRepository.getAllDelegatorByPool(poolId,
         PageRequest.of(page - 1, size));
