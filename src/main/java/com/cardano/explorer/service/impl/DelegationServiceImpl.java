@@ -47,7 +47,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -78,7 +77,7 @@ public class DelegationServiceImpl implements DelegationService {
   private static final Integer ZERO = 0;
 
   @Override
-  public ResponseEntity<DelegationHeaderResponse> getDataForDelegationHeader() {
+  public DelegationHeaderResponse getDataForDelegationHeader() {
     Epoch epoch = epochRepository.findByCurrentEpochNo()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Integer epochNo = epoch.getNo();
@@ -87,15 +86,14 @@ public class DelegationServiceImpl implements DelegationService {
     Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo);
     BigDecimal totalStake = epochStakeRepository.totalStakeAllPool();
     Integer delegators = delegationRepository.numberDelegatorsAllPool();
-    return ResponseEntity.ok(
-        DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
-            .liveStake(totalStake).delegators(delegators)
-            .countDownEndTime(countDownTime > ZERO ? countDownTime : ZERO).build());
+    return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
+        .liveStake(totalStake).delegators(delegators)
+        .countDownEndTime(countDownTime > ZERO ? countDownTime : ZERO).build();
   }
 
   @Override
-  public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(Integer page,
-      Integer size, String search) {
+  public BaseFilterResponse<PoolResponse> getDataForPoolTable(Integer page, Integer size,
+      String search) {
     List<Long> poolIds = poolHashRepository.findAllPoolHashId(page, size, search);
     if (poolIds == null) {
       log.warn("Pool list is empty");
@@ -117,11 +115,11 @@ public class DelegationServiceImpl implements DelegationService {
     Long totalEle = poolHashRepository.totalPoolHashId(page, size, search);
     response.setTotalItems(totalEle);
     response.setData(pools);
-    return ResponseEntity.ok(response);
+    return response;
   }
 
   @Override
-  public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(Long poolId) {
+  public PoolDetailHeaderResponse getDataForPoolDetail(Long poolId) {
     PoolDetailHeaderResponse poolDetailResponse = new PoolDetailHeaderResponse();
     PoolHash poolHash = poolHashRepository.findById(poolId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
@@ -146,12 +144,12 @@ public class DelegationServiceImpl implements DelegationService {
     }
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
-    return ResponseEntity.ok(poolDetailResponse);
+    return poolDetailResponse;
   }
 
   @Override
-  public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
-      Integer page, Integer size, Long poolId) {
+  public BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Integer page,
+      Integer size, Long poolId) {
     BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
     Page<PoolDetailEpoch> epochOfPoolPage = poolHashRepository.findEpochByPool(poolId,
         PageRequest.of(page - 1, size));
@@ -167,12 +165,11 @@ public class DelegationServiceImpl implements DelegationService {
     });
     epochRes.setData(epochOfPools);
     epochRes.setTotalItems(epochOfPoolPage.getTotalElements());
-    return ResponseEntity.ok(epochRes);
+    return epochRes;
   }
 
   @Override
-  public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(Integer page,
-      Integer size) {
+  public BaseFilterResponse<PoolTxResponse> getDataForPoolRegistration(Integer page, Integer size) {
     BaseFilterResponse<PoolTxResponse> response = new BaseFilterResponse<>();
     Page<TrxBlockEpoch> trxBlockEpochPage = stakeRegistrationRepository.getDataForPoolRegistration(
         PageRequest.of(page - 1, size));
@@ -193,12 +190,12 @@ public class DelegationServiceImpl implements DelegationService {
     });
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
-    return ResponseEntity.ok(response);
+    return response;
   }
 
   @Override
-  public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
-      Integer page, Integer size) {
+  public BaseFilterResponse<PoolTxResponse> getDataForPoolDeRegistration(Integer page,
+      Integer size) {
     BaseFilterResponse<PoolTxResponse> response = new BaseFilterResponse<>();
     Page<TrxBlockEpoch> trxBlockEpochPage = stakeDeRegistrationRepository.getDataForPoolDeRegistration(
         PageRequest.of(page - 1, size));
@@ -219,11 +216,11 @@ public class DelegationServiceImpl implements DelegationService {
     });
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
-    return ResponseEntity.ok(response);
+    return response;
   }
 
   @Override
-  public ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(Long poolId) {
+  public PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(Long poolId) {
     //Todo set current epoch filter
     EpochChartResponse epochChart = new EpochChartResponse();
     List<BigDecimal> maxStake = poolHashRepository.maxValueEpochChart(poolId, PageRequest.of(0, 1));
@@ -257,14 +254,13 @@ public class DelegationServiceImpl implements DelegationService {
       delegatorChart.setDataByDays(
           delegatorDataCharts.stream().map(DelegatorChartList::new).collect(Collectors.toList()));
     }
-    return ResponseEntity.ok(
-        PoolDetailAnalyticsResponse.builder().epochChart(epochChart).delegatorChart(delegatorChart)
-            .build());
+    return PoolDetailAnalyticsResponse.builder().epochChart(epochChart)
+        .delegatorChart(delegatorChart).build();
   }
 
   @Override
-  public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorsForPoolDetail(
-      Integer page, Integer size, Long poolId) {
+  public BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Integer page,
+      Integer size, Long poolId) {
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
     Page<PoolDetailDelegator> delegatorPage = delegationRepository.getAllDelegatorByPool(poolId,
         PageRequest.of(page - 1, size));
@@ -283,7 +279,7 @@ public class DelegationServiceImpl implements DelegationService {
       delegatorResponse.setTotalItems(delegatorPage.getTotalElements());
       delegatorResponse.setData(delegatorList);
     }
-    return ResponseEntity.ok(delegatorResponse);
+    return delegatorResponse;
   }
 
   private String getNameValueFromJson(String json) {

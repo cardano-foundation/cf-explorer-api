@@ -20,12 +20,12 @@ public class PoolController {
   @GetMapping("/registration")
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
       @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-    return delegationService.getDataForPoolRegistration(page, size);
+    return ResponseEntity.ok(delegationService.getDataForPoolRegistration(page, size));
   }
 
   @GetMapping("/de-registration")
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
       @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-    return delegationService.getDataForPoolDeRegistration(page, size);
+    return ResponseEntity.ok(delegationService.getDataForPoolDeRegistration(page, size));
   }
 }

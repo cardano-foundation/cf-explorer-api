@@ -8,7 +8,6 @@ import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
 import com.cardano.explorer.model.response.pool.PoolTxResponse;
 import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
-import org.springframework.http.ResponseEntity;
 
 public interface DelegationService {
 
@@ -18,7 +17,7 @@ public interface DelegationService {
    * @param
    * @return DelegationHeaderResponse
    */
-  ResponseEntity<DelegationHeaderResponse> getDataForDelegationHeader();
+  DelegationHeaderResponse getDataForDelegationHeader();
 
   /**
    * Get list pool for delegate pools
@@ -26,8 +25,7 @@ public interface DelegationService {
    * @param page,size,search
    * @return BaseFilterResponse<PoolResponse>
    */
-  ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(Integer page, Integer size,
-      String search);
+  BaseFilterResponse<PoolResponse> getDataForPoolTable(Integer page, Integer size, String search);
 
   /**
    * Get detail pool for delegate pools detail
@@ -35,7 +33,7 @@ public interface DelegationService {
    * @param poolId
    * @return PoolDetailHeaderResponse
    */
-  ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(Long poolId);
+  PoolDetailHeaderResponse getDataForPoolDetail(Long poolId);
 
   /**
    * Get detail pool epoch list for delegate pools detail
@@ -43,8 +41,7 @@ public interface DelegationService {
    * @param poolId
    * @return PoolDetailEpochResponse
    */
-  ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
-      Integer page, Integer size,
+  BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Integer page, Integer size,
       Long poolId);
 
   /**
@@ -53,8 +50,7 @@ public interface DelegationService {
    * @param page,size
    * @return PoolTxResponse
    */
-  ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(Integer page,
-      Integer size);
+  BaseFilterResponse<PoolTxResponse> getDataForPoolRegistration(Integer page, Integer size);
 
   /**
    * Get pool de registration list
@@ -62,8 +58,7 @@ public interface DelegationService {
    * @param page,size
    * @return PoolTxResponse
    */
-  ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(Integer page,
-      Integer size);
+  BaseFilterResponse<PoolTxResponse> getDataForPoolDeRegistration(Integer page, Integer size);
 
   /**
    * Get detail pool analytics for delegate pools detail
@@ -71,7 +66,7 @@ public interface DelegationService {
    * @param poolId
    * @return PoolDetailAnalyticsResponse
    */
-  ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(Long poolId);
+  PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(Long poolId);
 
   /**
    * Get detail pool delegator list for delegate pools detail
@@ -79,8 +74,6 @@ public interface DelegationService {
    * @param poolId,page,size
    * @return PoolDetailDelegatorsResponse
    */
-  ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorsForPoolDetail(
-      Integer page,
-      Integer size,
-      Long poolId);
+  BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Integer page,
+      Integer size, Long poolId);
 }
