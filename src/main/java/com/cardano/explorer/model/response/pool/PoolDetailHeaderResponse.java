@@ -3,6 +3,7 @@ package com.cardano.explorer.model.response.pool;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,9 +19,9 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Timestamp createDate;
 
-  private String rewardAccount;
+  private List<String> rewardAccounts;
 
-  private String ownerAccount;
+  private List<String> ownerAccounts;
 
   private BigDecimal poolSize;
 
