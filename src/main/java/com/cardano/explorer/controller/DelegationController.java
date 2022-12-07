@@ -26,36 +26,36 @@ public class DelegationController {
 
   @GetMapping("/header")
   public ResponseEntity<DelegationHeaderResponse> getDataForDelegationHeader() {
-    return delegationService.getDataForDelegationHeader();
+    return ResponseEntity.ok(delegationService.getDataForDelegationHeader());
   }
 
   @GetMapping("/pool-list")
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
       @RequestParam("page") Integer page, @RequestParam("size") Integer size,
       @RequestParam("search") String search) {
-    return delegationService.getDataForPoolTable(page, size, search);
+    return ResponseEntity.ok(delegationService.getDataForPoolTable(page, size, search));
   }
 
   @GetMapping("/pool-detail-header/{poolId}")
   public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(@PathVariable Long poolId) {
-    return delegationService.getDataForPoolDetail(poolId);
+    return ResponseEntity.ok(delegationService.getDataForPoolDetail(poolId));
   }
 
   @GetMapping("/pool-detail-analytics")
   public ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(
       @RequestParam("pool") Long poolId) {
-    return delegationService.getAnalyticsForPoolDetail(poolId);
+    return ResponseEntity.ok(delegationService.getAnalyticsForPoolDetail(poolId));
   }
 
   @GetMapping("/pool-detail-epochs")
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
       @RequestParam("pool") Long poolId, @Param("page") Integer page, @Param("size") Integer size) {
-    return delegationService.getEpochListForPoolDetail(page, size, poolId);
+    return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(page, size, poolId));
   }
 
   @GetMapping("/pool-detail-delegators")
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
       @RequestParam("pool") Long poolId, @Param("page") Integer page, @Param("size") Integer size) {
-    return delegationService.getDelegatorsForPoolDetail(page, size, poolId);
+    return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(page, size, poolId));
   }
 }
