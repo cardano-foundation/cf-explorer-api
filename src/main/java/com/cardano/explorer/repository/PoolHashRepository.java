@@ -78,4 +78,11 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long>,
       + "GROUP BY CAST(bk.time AS date) "
       + "ORDER BY sum(tu.value) ASC")
   List<BigDecimal> minValueEpochChart(@Param("poolId") Long poolId, Pageable pageable);
+
+  @Query(value = "SELECT ph.id FROM Block bk " +
+          "JOIN SlotLeader sl ON sl.id = bk.slotLeader.id " +
+          "JOIN PoolHash ph ON ph.id = sl.poolHash.id " +
+          "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id " +
+          "WHERE bk.id IN :blockIds ")
+  List<Long> getListPoolIdIn(@Param("blockIds") List<Long> blockIds);
 }
