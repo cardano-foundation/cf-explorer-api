@@ -2,6 +2,7 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.custom.DelegatorDataChart;
 import com.cardano.explorer.model.response.pool.custom.PoolDetailDelegator;
+import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
 import com.sotatek.cardano.common.entity.Delegation;
 import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.Tx;
@@ -75,4 +76,21 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + "JOIN TxOut tu ON tu.tx.id = ti.txOut.id AND ti.txOutIndex = tu.index "
       + "WHERE dg.id = :delegatorId")
   BigDecimal getTotalValueByDelegator(@Param("delegatorId") Long delegatorId);
+
+  /**
+   * Get pool delegation summary information by list pool hash id order by pool hash id ascending
+   * @return list of pool delegation summary information
+   */
+  @Query(value =
+      "SELECT ph.id as poolId, pod.json as json, pu.pledge as pledge, pu.fixedCost as fee, SUM(es.amount) as poolSize "
+          + "FROM PoolHash ph "
+          + "JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
+          + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
+          + "JOIN EpochStake es ON es.pool.id = ph.id "
+          + "WHERE pu.activeEpochNo = "
+          + "(SELECT MAX(pu.activeEpochNo) FROM pu.activeEpochNo WHERE pu.poolHash.id = ph.id) AND "
+          + "pod.id = (SELECT MAX(pod.id) FROM PoolOfflineData pod WHERE pod.pool.id = ph.id) "
+          + "GROUP BY ph.id, pod.json, pu.pledge, pu.fixedCost "
+          + "ORDER BY poolSize DESC ")
+  List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(Pageable pageable);
 }
