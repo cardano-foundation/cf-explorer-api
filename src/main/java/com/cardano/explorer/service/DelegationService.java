@@ -8,6 +8,7 @@ import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
 import com.cardano.explorer.model.response.pool.PoolTxResponse;
 import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
+import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
 public interface DelegationService {
@@ -77,4 +78,12 @@ public interface DelegationService {
    */
   BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Pageable pageable,
       Long poolId);
+
+  /**
+   * Find Top {number} (default 3) Pool Delegation
+   *
+   * @param pageable page information
+   * @return
+   */
+  Set<PoolResponse> findTopDelegationPool(Pageable pageable);
 }

@@ -2,6 +2,7 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.DelegatorChartProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorProjection;
+import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
 import com.sotatek.cardano.common.entity.Delegation;
 import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.Tx;
@@ -47,4 +48,21 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
   @Query("SELECT count(de.id) FROM Delegation de WHERE de.activeEpochNo = :epochNo")
   Integer numberDelegatorsAllPoolByEpochNo(@Param("epochNo") Long epochNo);
+
+  /**
+   * Get pool delegation summary information by list pool hash id order by pool hash id ascending
+   *
+   * @return list of pool delegation summary information
+   */
+  @Query(value =
+      "SELECT ph.id as poolId, pod.json as json, pu.pledge as pledge, pu.fixedCost as fee, ph.poolSize as poolSize "
+          + "FROM PoolHash ph "
+          + "JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
+          + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
+          + "WHERE pu.activeEpochNo = "
+          + "(SELECT MAX(pu.activeEpochNo) FROM pu.activeEpochNo WHERE pu.poolHash.id = ph.id) AND "
+          + "pod.id = (SELECT MAX(pod.id) FROM PoolOfflineData pod WHERE pod.pool.id = ph.id) AND "
+          + "ph.poolSize IS NOT NULL "
+          + "ORDER BY poolSize DESC ")
+  List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(Pageable pageable);
 }

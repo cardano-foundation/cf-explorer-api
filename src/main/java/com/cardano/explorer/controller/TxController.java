@@ -51,7 +51,7 @@ public class TxController {
 
   @GetMapping("/current")
   @LogMessage
-  @Operation(summary = "Get current epoch")
+  @Operation(summary = "Get current transactions")
   public ResponseEntity<List<TxSummary>> findCurrentEpoch(){
     return ResponseEntity.ok(txService.findLatestTxSummary());
   }
