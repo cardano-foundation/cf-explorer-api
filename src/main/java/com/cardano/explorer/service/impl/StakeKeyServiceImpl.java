@@ -61,11 +61,13 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       Map<Long, List<PoolOfflineData>> mapPoolIdPoolName = listAllPoolOfflineName.stream()
               .collect(Collectors.groupingBy(item -> item.getPool().getId(), Collectors.toList()));
       for(int i = 0; i < responseList.size(); i++){
-        responseList.get(i).setPoolNames(mapPoolIdPoolName
-                .get(poolIds.get(i))
-                .stream()
-                .map(item -> getNameValueFromJson(item.getJson()))
-                .collect(Collectors.toList()));
+        if(poolIds.size() > i){
+          responseList.get(i).setPoolNames(mapPoolIdPoolName
+                  .get(poolIds.get(i))
+                  .stream()
+                  .map(item -> getNameValueFromJson(item.getJson()))
+                  .collect(Collectors.toList()));
+        }
       }
     }
     response.setData(responseList);
