@@ -14,6 +14,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -25,7 +26,7 @@ public class CustomPoolHashRepositoryImpl implements CustomPoolHashRepository {
   private static final String PREFIX_POOL_NAME = "{\"name\": \"";
 
   @Override
-  public List<Long> findAllPoolHashId(Integer page, Integer size, String search) {
+  public List<Long> findAllPoolHashId(Pageable pageable, String search) {
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<PoolOfflineData> cq = cb.createQuery(PoolOfflineData.class);
     Root<PoolOfflineData> poolOffR = cq.from(PoolOfflineData.class);
@@ -44,14 +45,14 @@ public class CustomPoolHashRepositoryImpl implements CustomPoolHashRepository {
     cq.select(poolHashJoin.get("id"));
     cq.groupBy(poolHashJoin.get("id"));
     Query query = entityManager.createQuery(cq);
-    query.setFirstResult((page - 1) * size);
-    query.setMaxResults(size);
+    query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
+    query.setMaxResults(pageable.getPageSize());
     List<Long> poolIds = query.getResultList();
     return poolIds;
   }
 
   @Override
-  public Long totalPoolHashId(Integer page, Integer size, String search) {
+  public Long totalPoolHashId(String search) {
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> cq = cb.createQuery(Long.class);
     Root<PoolOfflineData> poolOffR = cq.from(PoolOfflineData.class);

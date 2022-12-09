@@ -1,6 +1,6 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.model.response.pool.custom.TrxBlockEpoch;
+import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.StakeRegistration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,5 +17,5 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
           + "JOIN Tx tx ON tx.id = sr.tx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
           + "GROUP BY tx.id, tx.hash, bk.time, bk.id ")
-  Page<TrxBlockEpoch> getDataForPoolRegistration(Pageable pageable);
+  Page<TxBlockEpochProjection> getDataForPoolRegistration(Pageable pageable);
 }

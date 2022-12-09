@@ -1,6 +1,6 @@
 package com.cardano.explorer.model.response.pool;
 
-import com.cardano.explorer.model.response.pool.custom.PoolDetailEpoch;
+import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class PoolDetailEpochResponse implements Serializable {
 
   private Double ros;
 
-  public PoolDetailEpochResponse(PoolDetailEpoch poolEpoch) {
+  public PoolDetailEpochResponse(PoolDetailEpochProjection poolEpoch) {
     this.epoch = poolEpoch.getEpochNo();
     this.block = poolEpoch.getCountBlock();
   }

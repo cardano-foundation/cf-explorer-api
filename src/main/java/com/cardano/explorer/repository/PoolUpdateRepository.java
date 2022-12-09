@@ -15,14 +15,14 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   List<BigDecimal> findPledgeByPool(@Param("poolId") Long poolId);
 
   @Query(value =
-      "SELECT sa.hashRaw FROM PoolUpdate pu JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-          + "WHERE pu.poolHash.id = :poolId GROUP BY sa.hashRaw")
+      "SELECT sa.view FROM PoolUpdate pu JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+          + "WHERE pu.poolHash.id = :poolId GROUP BY sa.view")
   List<String> findRewardAccountByPool(@Param("poolId") Long poolId);
 
   @Query(value =
-      "SELECT sa.hashRaw FROM PoolOwner po JOIN PoolUpdate pu ON po.poolUpdate.id = pu.id "
+      "SELECT sa.view FROM PoolOwner po JOIN PoolUpdate pu ON po.poolUpdate.id = pu.id "
           + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
-          + "WHERE pu.poolHash.id = :poolId GROUP BY sa.hashRaw")
+          + "WHERE pu.poolHash.id = :poolId GROUP BY sa.view")
   List<String> findOwnerAccountByPool(@Param("poolId") Long poolId);
 
   @Query(value = "SELECT pu FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId ORDER BY pu.activeEpochNo DESC")

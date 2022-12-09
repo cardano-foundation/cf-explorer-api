@@ -1,10 +1,11 @@
 package com.cardano.explorer.repository.custom;
 
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface CustomPoolHashRepository {
 
-  List<Long> findAllPoolHashId(Integer page, Integer size, String search);
+  List<Long> findAllPoolHashId(Pageable pageable, String search);
 
-  Long totalPoolHashId(Integer page, Integer size, String search);
+  Long totalPoolHashId(String search);
 }

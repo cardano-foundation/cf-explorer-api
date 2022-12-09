@@ -1,8 +1,8 @@
-package com.cardano.explorer.model.response.pool.custom;
+package com.cardano.explorer.model.response.pool.projection;
 
 import java.math.BigDecimal;
 
-public interface TrxPool {
+public interface TxPoolProjection {
 
   BigDecimal getPledge();
 

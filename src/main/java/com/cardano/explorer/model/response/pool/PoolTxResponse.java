@@ -1,6 +1,6 @@
 package com.cardano.explorer.model.response.pool;
 
-import com.cardano.explorer.model.response.pool.custom.TrxBlockEpoch;
+import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -33,7 +33,7 @@ public class PoolTxResponse implements Serializable {
 
   private String stakeKey;
 
-  public PoolTxResponse(TrxBlockEpoch trxBlockEpoch) {
+  public PoolTxResponse(TxBlockEpochProjection trxBlockEpoch) {
     this.txId = trxBlockEpoch.getTxId();
     this.txHash = trxBlockEpoch.getTxHash();
     this.txTime = trxBlockEpoch.getTxTime();
