@@ -49,4 +49,11 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long>,
 
   @Query(value = "SELECT ph.poolSize FROM PoolHash ph WHERE ph.id = :poolId")
   BigDecimal getPoolSizeByPoolId(@Param("poolId") Long poolId);
+
+  @Query(value = "SELECT ph.id FROM Block bk " +
+      "JOIN SlotLeader sl ON sl.id = bk.slotLeader.id " +
+      "JOIN PoolHash ph ON ph.id = sl.poolHash.id " +
+      "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id " +
+      "WHERE bk.id IN :blockIds ")
+  List<Long> getListPoolIdIn(@Param("blockIds") List<Long> blockIds);
 }

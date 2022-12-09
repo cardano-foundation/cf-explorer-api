@@ -19,6 +19,7 @@ import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorPr
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.TxPoolProjection;
+import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
@@ -40,15 +41,19 @@ import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -80,6 +85,10 @@ public class DelegationServiceImpl implements DelegationService {
   private final RewardRepository rewardRepository;
 
   private static final Integer ZERO = 0;
+  private static final Integer DEFAULT_EPOCH_STAKE = 20;
+
+  @Value("${spring.data.web.pageable.default-page-size}")
+  private int defaultSize;
 
   private static final String PREFIX_POOL_NAME = "{\"name\": \"";
 
@@ -133,6 +142,36 @@ public class DelegationServiceImpl implements DelegationService {
     response.setTotalItems(poolIdPage.getTotalElements());
     response.setData(pools);
     return response;
+  }
+
+  @Override
+  public Set<PoolResponse> findTopDelegationPool(Pageable pageable) {
+
+    if (pageable.getPageSize() > defaultSize) {
+      pageable = PageRequest.of(0, defaultSize);
+    }
+
+    List<PoolDelegationSummaryProjection> pools = delegationRepository.findDelegationPoolsSummary(
+        pageable);
+
+    return pools.stream().map(pool -> {
+
+          String poolName = getNameValueFromJson(pool.getJson());
+
+          return PoolResponse.builder()
+              .poolId(pool.getPoolId())
+              .poolName(poolName)
+              .poolSize(pool.getPoolSize())
+              .reward(BigInteger.ZERO.doubleValue())
+              .saturation(BigInteger.ZERO.doubleValue())
+              .feeAmount(pool.getFee())
+              .feePercent(BigInteger.ZERO.doubleValue())
+              .pledge(pool.getPledge())
+              .build();
+        })
+        .sorted(((o1, o2) -> o2.getPoolSize().compareTo(o1.getPoolSize())))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+
   }
 
   @Override

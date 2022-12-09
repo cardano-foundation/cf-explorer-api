@@ -25,4 +25,7 @@ public interface PoolOfflineDataRepository extends JpaRepository<PoolOfflineData
 
   @Query(value = "SELECT po.json FROM PoolOfflineData po WHERE po.pool.id = :poolId ORDER BY po.id DESC")
   List<String> findAllByPool(@Param("poolId") Long poolId);
+
+  @Query(value = "SELECT po FROM PoolOfflineData po WHERE po.pool.id IN :poolIds ORDER BY po.id DESC")
+  List<PoolOfflineData> findAllByListPool(@Param("poolIds") List<Long> poolIds);
 }
