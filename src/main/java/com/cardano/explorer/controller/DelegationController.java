@@ -9,7 +9,9 @@ import com.cardano.explorer.model.response.pool.PoolResponse;
 import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import com.cardano.explorer.service.DelegationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,9 +33,9 @@ public class DelegationController {
 
   @GetMapping("/pool-list")
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
-      @RequestParam("page") Integer page, @RequestParam("size") Integer size,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
       @RequestParam("search") String search) {
-    return ResponseEntity.ok(delegationService.getDataForPoolTable(page, size, search));
+    return ResponseEntity.ok(delegationService.getDataForPoolTable(pageable, search));
   }
 
   @GetMapping("/pool-detail-header/{poolId}")
@@ -49,13 +51,15 @@ public class DelegationController {
 
   @GetMapping("/pool-detail-epochs")
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
-      @RequestParam("pool") Long poolId, @Param("page") Integer page, @Param("size") Integer size) {
-    return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(page, size, poolId));
+      @RequestParam("pool") Long poolId,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(pageable, poolId));
   }
 
   @GetMapping("/pool-detail-delegators")
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
-      @RequestParam("pool") Long poolId, @Param("page") Integer page, @Param("size") Integer size) {
-    return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(page, size, poolId));
+      @RequestParam("pool") Long poolId,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(pageable, poolId));
   }
 }

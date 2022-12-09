@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public abstract class BaseChartList<K, V> {
 
-  private K timeChart;
+  private K xChart;
 
-  private V dataChart;
+  private V yChart;
 }

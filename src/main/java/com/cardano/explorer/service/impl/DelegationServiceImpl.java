@@ -12,12 +12,13 @@ import com.cardano.explorer.model.response.pool.chart.DelegatorChartResponse;
 import com.cardano.explorer.model.response.pool.chart.EpochChartList;
 import com.cardano.explorer.model.response.pool.chart.EpochChartResponse;
 import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
-import com.cardano.explorer.model.response.pool.custom.DelegatorDataChart;
-import com.cardano.explorer.model.response.pool.custom.EpochDataChart;
-import com.cardano.explorer.model.response.pool.custom.PoolDetailDelegator;
-import com.cardano.explorer.model.response.pool.custom.PoolDetailEpoch;
-import com.cardano.explorer.model.response.pool.custom.TrxBlockEpoch;
-import com.cardano.explorer.model.response.pool.custom.TrxPool;
+import com.cardano.explorer.model.response.pool.projection.BasePoolChartProjection;
+import com.cardano.explorer.model.response.pool.projection.DelegatorChartProjection;
+import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
+import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
+import com.cardano.explorer.model.response.pool.projection.TxPoolProjection;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
@@ -41,12 +42,16 @@ import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -76,6 +81,8 @@ public class DelegationServiceImpl implements DelegationService {
 
   private static final Integer ZERO = 0;
 
+  private static final String PREFIX_POOL_NAME = "{\"name\": \"";
+
   @Override
   public DelegationHeaderResponse getDataForDelegationHeader() {
     Epoch epoch = epochRepository.findByCurrentEpochNo()
@@ -84,36 +91,46 @@ public class DelegationServiceImpl implements DelegationService {
     Timestamp endTime = epoch.getEndTime();
     long countDownTime = endTime.getTime() - Timestamp.from(Instant.now()).getTime();
     Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo);
-    BigDecimal totalStake = epochStakeRepository.totalStakeAllPool();
-    Integer delegators = delegationRepository.numberDelegatorsAllPool();
+    BigDecimal totalStake = epochStakeRepository.totalStakeAllPoolByEpochNo(epochNo);
+    Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
+        Long.valueOf(epochNo));
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
         .liveStake(totalStake).delegators(delegators)
         .countDownEndTime(countDownTime > ZERO ? countDownTime : ZERO).build();
   }
 
   @Override
-  public BaseFilterResponse<PoolResponse> getDataForPoolTable(Integer page, Integer size,
-      String search) {
-    List<Long> poolIds = poolHashRepository.findAllPoolHashId(page, size, search);
-    if (poolIds == null) {
-      log.warn("Pool list is empty");
-      return null;
-    }
+  public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
-    List<PoolResponse> pools = poolIds.stream().map(PoolResponse::new).collect(Collectors.toList());
+    Page<Long> poolIdPage;
+    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(search))) {
+      poolIdPage = poolHashRepository.findAllByPoolId(null, pageable);
+    } else {
+      if (Boolean.TRUE.equals(StringUtils.isNumeric(search))) {
+        poolIdPage = poolHashRepository.findAllByPoolId(Long.valueOf(search), pageable);
+      } else {
+        poolIdPage = poolHashRepository.findAllByPoolName((PREFIX_POOL_NAME + search).toLowerCase(),
+            pageable);
+      }
+    }
+    if (Objects.isNull(poolIdPage)) {
+      log.warn("Pool list is empty");
+      return response;
+    }
+    List<PoolResponse> pools = poolIdPage.stream().map(PoolResponse::new)
+        .collect(Collectors.toList());
     pools.forEach(pool -> {
       List<BigDecimal> pledges = poolUpdateRepository.findPledgeByPool(pool.getPoolId());
-      if (pledges != null && !pledges.isEmpty()) {
+      if (Objects.nonNull(pledges) && !pledges.isEmpty()) {
         pool.setPledge(pledges.get(ZERO));
       }
       List<String> poolNames = poolOfflineDataRepository.findAllByPool(pool.getPoolId());
-      if (poolNames != null && !poolNames.isEmpty()) {
+      if (Objects.nonNull(poolNames) && !poolNames.isEmpty()) {
         pool.setPoolName(getNameValueFromJson(poolNames.get(ZERO)));
       }
-      pool.setPoolSize(epochStakeRepository.totalStakeByPool(pool.getPoolId()));
+      pool.setPoolSize(poolHashRepository.getPoolSizeByPoolId(pool.getPoolId()));
     });
-    Long totalEle = poolHashRepository.totalPoolHashId(page, size, search);
-    response.setTotalItems(totalEle);
+    response.setTotalItems(poolIdPage.getTotalElements());
     response.setData(pools);
     return response;
   }
@@ -128,7 +145,7 @@ public class DelegationServiceImpl implements DelegationService {
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     poolDetailResponse.setPoolName(getNameValueFromJson(poolOff.getJson()));
     poolDetailResponse.setTickerName(poolOff.getTickerName());
-    poolDetailResponse.setPoolSize(epochStakeRepository.totalStakeByPool(poolId));
+    poolDetailResponse.setPoolSize(poolHash.getPoolSize());
     Page<Timestamp> createdTime = blockRepository.getTimeCreatedPool(poolId, PageRequest.of(0, 1));
     if (!createdTime.isEmpty()) {
       poolDetailResponse.setCreateDate(createdTime.toList().get(ZERO));
@@ -137,7 +154,7 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setOwnerAccounts(poolUpdateRepository.findOwnerAccountByPool(poolId));
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
     List<PoolUpdate> poolUpdates = poolUpdateRepository.findAllByPoolId(poolId);
-    if (poolUpdates != null && !poolUpdates.isEmpty()) {
+    if (Objects.nonNull(poolUpdates) && !poolUpdates.isEmpty()) {
       poolDetailResponse.setCost(poolUpdates.get(ZERO).getFixedCost());
       poolDetailResponse.setMargin(poolUpdates.get(ZERO).getMargin());
       poolDetailResponse.setPledge(poolUpdates.get(ZERO).getPledge());
@@ -148,11 +165,11 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Integer page,
-      Integer size, Long poolId) {
+  public BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
+      Long poolId) {
     BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
-    Page<PoolDetailEpoch> epochOfPoolPage = poolHashRepository.findEpochByPool(poolId,
-        PageRequest.of(page - 1, size));
+    Page<PoolDetailEpochProjection> epochOfPoolPage = poolHashRepository.findEpochByPool(poolId,
+        pageable);
     List<PoolDetailEpochResponse> epochOfPools = epochOfPoolPage.stream()
         .map(PoolDetailEpochResponse::new).collect(Collectors.toList());
     epochOfPools.forEach(epochOfPool -> {
@@ -169,21 +186,21 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public BaseFilterResponse<PoolTxResponse> getDataForPoolRegistration(Integer page, Integer size) {
+  public BaseFilterResponse<PoolTxResponse> getDataForPoolRegistration(Pageable pageable) {
     BaseFilterResponse<PoolTxResponse> response = new BaseFilterResponse<>();
-    Page<TrxBlockEpoch> trxBlockEpochPage = stakeRegistrationRepository.getDataForPoolRegistration(
-        PageRequest.of(page - 1, size));
+    Page<TxBlockEpochProjection> trxBlockEpochPage = stakeRegistrationRepository.getDataForPoolRegistration(
+        pageable);
     List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new)
         .collect(Collectors.toList());
     poolTxRes.forEach(poolTx -> {
-      List<TrxPool> trxPools = poolHashRepository.getDataForPoolTx(poolTx.getBlock());
-      if (trxPools != null && !trxPools.isEmpty()) {
-        TrxPool trxPool = trxPools.get(ZERO);
+      List<TxPoolProjection> trxPools = poolHashRepository.getDataForPoolTx(poolTx.getBlock());
+      if (Objects.nonNull(trxPools) && !trxPools.isEmpty()) {
+        TxPoolProjection trxPool = trxPools.get(ZERO);
         poolTx.setPledge(trxPool.getPledge());
         poolTx.setCost(trxPool.getCost());
         poolTx.setMargin(trxPool.getMargin());
         List<String> poolNames = poolOfflineDataRepository.findAllByPool(trxPool.getPoolId());
-        if (poolNames != null && !poolNames.isEmpty()) {
+        if (Objects.nonNull(poolNames) && !poolNames.isEmpty()) {
           poolTx.setPoolName(getNameValueFromJson(poolNames.get(ZERO)));
         }
       }
@@ -194,22 +211,21 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public BaseFilterResponse<PoolTxResponse> getDataForPoolDeRegistration(Integer page,
-      Integer size) {
+  public BaseFilterResponse<PoolTxResponse> getDataForPoolDeRegistration(Pageable pageable) {
     BaseFilterResponse<PoolTxResponse> response = new BaseFilterResponse<>();
-    Page<TrxBlockEpoch> trxBlockEpochPage = stakeDeRegistrationRepository.getDataForPoolDeRegistration(
-        PageRequest.of(page - 1, size));
+    Page<TxBlockEpochProjection> trxBlockEpochPage = stakeDeRegistrationRepository.getDataForPoolDeRegistration(
+        pageable);
     List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new)
         .collect(Collectors.toList());
     poolTxRes.forEach(poolTx -> {
-      List<TrxPool> trxPools = poolHashRepository.getDataForPoolTx(poolTx.getBlock());
-      if (trxPools != null && !trxPools.isEmpty()) {
-        TrxPool trxPool = trxPools.get(ZERO);
+      List<TxPoolProjection> trxPools = poolHashRepository.getDataForPoolTx(poolTx.getBlock());
+      if (Objects.nonNull(trxPools) && !trxPools.isEmpty()) {
+        TxPoolProjection trxPool = trxPools.get(ZERO);
         poolTx.setPledge(trxPool.getPledge());
         poolTx.setCost(trxPool.getCost());
         poolTx.setMargin(trxPool.getMargin());
         List<String> poolNames = poolOfflineDataRepository.findAllByPool(trxPool.getPoolId());
-        if (poolNames != null && !poolNames.isEmpty()) {
+        if (Objects.nonNull(poolNames) && !poolNames.isEmpty()) {
           poolTx.setPoolName(getNameValueFromJson(poolNames.get(0)));
         }
       }
@@ -221,60 +237,55 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(Long poolId) {
-    //Todo set current epoch filter
     EpochChartResponse epochChart = new EpochChartResponse();
-    List<BigDecimal> maxStake = poolHashRepository.maxValueEpochChart(poolId, PageRequest.of(0, 1));
-    if (!maxStake.isEmpty()) {
-      epochChart.setHighest(maxStake.get(ZERO));
-    }
-    List<BigDecimal> minStake = poolHashRepository.minValueEpochChart(poolId, PageRequest.of(0, 1));
-    if (!minStake.isEmpty()) {
-      epochChart.setLowest(minStake.get(ZERO));
-    }
-    List<EpochDataChart> epochDataCharts = poolHashRepository.getFiveLastDateEpochChart(poolId,
-        PageRequest.of(0, 5));
+    List<EpochChartProjection> epochDataCharts = epochStakeRepository.getDataForEpochChart(poolId);
     if (!epochDataCharts.isEmpty()) {
       epochChart.setDataByDays(
           epochDataCharts.stream().map(EpochChartList::new).collect(Collectors.toList()));
+      Optional<EpochChartProjection> maxEpochOpt = epochDataCharts.stream()
+          .max(Comparator.comparing(EpochChartProjection::getChartValue));
+      epochChart.setHighest(maxEpochOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
+      Optional<EpochChartProjection> minEpochOpt = epochDataCharts.stream()
+          .min(Comparator.comparing(EpochChartProjection::getChartValue));
+      epochChart.setLowest(minEpochOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
     }
     DelegatorChartResponse delegatorChart = new DelegatorChartResponse();
-    List<Long> maxDelegator = delegationRepository.maxValueDelegatorChart(poolId,
-        PageRequest.of(0, 1));
-    if (!maxDelegator.isEmpty()) {
-      delegatorChart.setHighest(maxDelegator.get(ZERO));
-    }
-    List<Long> minDelegator = delegationRepository.minValueDelegatorChart(poolId,
-        PageRequest.of(0, 1));
-    if (!minDelegator.isEmpty()) {
-      delegatorChart.setLowest(minDelegator.get(ZERO));
-    }
-    List<DelegatorDataChart> delegatorDataCharts = delegationRepository.getFiveLastDateDelegatorChart(
-        poolId, PageRequest.of(0, 5));
+    List<DelegatorChartProjection> delegatorDataCharts = delegationRepository.getDataForDelegatorChart(
+        poolId);
     if (!delegatorDataCharts.isEmpty()) {
       delegatorChart.setDataByDays(
           delegatorDataCharts.stream().map(DelegatorChartList::new).collect(Collectors.toList()));
+      Optional<DelegatorChartProjection> maxDelegatorOpt = delegatorDataCharts.stream()
+          .max(Comparator.comparing(DelegatorChartProjection::getChartValue));
+      delegatorChart.setHighest(
+          maxDelegatorOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
+      Optional<DelegatorChartProjection> minDelegatorOpt = delegatorDataCharts.stream()
+          .min(Comparator.comparing(DelegatorChartProjection::getChartValue));
+      delegatorChart.setLowest(
+          minDelegatorOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
     }
     return PoolDetailAnalyticsResponse.builder().epochChart(epochChart)
         .delegatorChart(delegatorChart).build();
   }
 
   @Override
-  public BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Integer page,
-      Integer size, Long poolId) {
+  public BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(
+      Pageable pageable, Long poolId) {
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
-    Page<PoolDetailDelegator> delegatorPage = delegationRepository.getAllDelegatorByPool(poolId,
-        PageRequest.of(page - 1, size));
+    Page<PoolDetailDelegatorProjection> delegatorPage = delegationRepository.getAllDelegatorByPool(
+        poolId, pageable);
     if (!delegatorPage.isEmpty()) {
       List<PoolDetailDelegatorResponse> delegatorList = delegatorPage.stream()
           .map(PoolDetailDelegatorResponse::new).collect(Collectors.toList());
       delegatorList.forEach(delegator -> {
-        PoolDetailDelegator dgTimeAndFee = delegationRepository.getTimeAndFeeByDelegator(
+        PoolDetailDelegatorProjection dgTimeAndFee = delegationRepository.getTimeAndFeeByDelegator(
             delegator.getId());
-        if (dgTimeAndFee != null) {
+        if (Objects.nonNull(dgTimeAndFee)) {
           delegator.setTime(dgTimeAndFee.getTime());
           delegator.setFee(dgTimeAndFee.getFee());
         }
-        delegator.setTotalStake(delegationRepository.getTotalValueByDelegator(delegator.getId()));
+        delegator.setTotalStake(
+            epochStakeRepository.totalStakeByAddressAndPool(delegator.getStakeAddressId(), poolId));
       });
       delegatorResponse.setTotalItems(delegatorPage.getTotalElements());
       delegatorResponse.setData(delegatorList);
