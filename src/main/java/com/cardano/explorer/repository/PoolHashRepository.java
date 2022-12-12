@@ -2,7 +2,6 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.TxPoolProjection;
-import com.cardano.explorer.repository.custom.CustomPoolHashRepository;
 import com.sotatek.cardano.common.entity.PoolHash;
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,8 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PoolHashRepository extends JpaRepository<PoolHash, Long>,
-    CustomPoolHashRepository {
+public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value =
       "SELECT bk.epochNo AS epochNo, count(bk.id) AS countBlock FROM PoolHash ph "
