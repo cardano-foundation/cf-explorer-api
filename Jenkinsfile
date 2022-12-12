@@ -4,6 +4,7 @@ def usernameDb
 def passwordDb
 def environment
 def envFileDeploy
+def composeFile
 def hostSonarqube
 def projectKeyExplorerApi
 def loginExplorerApi
@@ -67,15 +68,19 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'develop') {
                         envFileDeploy = '/tmp/env-dev.env'
+                        composeFile = 'docker-compose.yml'
+                        
                     }
                     if (env.BRANCH_NAME == 'test') {
                         envFileDeploy = '/tmp/env-test.env'
+                        composeFile = 'docker-compose-test.yml'
                     }
                     if (env.BRANCH_NAME == 'prod') {
                         envFileDeploy = '/tmp/env-prod.env'
+                        composeFile = 'docker-compose.yml'
                     }
                 }
-                sh "docker-compose --env-file ${envFileDeploy} up -d --build"
+                sh "docker-compose --env-file ${envFileDeploy} -f ${composeFile} up -d --build"
                 sh "docker images -f 'dangling=true' -q --no-trunc | xargs --no-run-if-empty docker rmi"
                 echo 'Deployment Done!!!'
             }
