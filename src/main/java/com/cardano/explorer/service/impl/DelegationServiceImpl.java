@@ -26,6 +26,7 @@ import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.EpochStakeRepository;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolOfflineDataRepository;
+import com.cardano.explorer.repository.PoolOwnerRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
@@ -84,6 +85,9 @@ public class DelegationServiceImpl implements DelegationService {
 
   private final RewardRepository rewardRepository;
 
+
+  private final PoolOwnerRepository poolOwnerRepository;
+
   private static final Integer ZERO = 0;
   private static final Integer DEFAULT_EPOCH_STAKE = 20;
 
@@ -112,19 +116,13 @@ public class DelegationServiceImpl implements DelegationService {
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     Page<Long> poolIdPage;
-    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(search))) {
-      poolIdPage = poolHashRepository.findAllByPoolId(null, pageable);
+    if (Boolean.TRUE.equals(StringUtils.isNotBlank(search))) {
+      poolIdPage = Boolean.TRUE.equals(StringUtils.isNumeric(search))
+          ? poolHashRepository.findAllByPoolId(Long.valueOf(search), pageable)
+          : poolHashRepository.findAllByPoolName((PREFIX_POOL_NAME + search).toLowerCase(),
+              pageable);
     } else {
-      if (Boolean.TRUE.equals(StringUtils.isNumeric(search))) {
-        poolIdPage = poolHashRepository.findAllByPoolId(Long.valueOf(search), pageable);
-      } else {
-        poolIdPage = poolHashRepository.findAllByPoolName((PREFIX_POOL_NAME + search).toLowerCase(),
-            pageable);
-      }
-    }
-    if (Objects.isNull(poolIdPage)) {
-      log.warn("Pool list is empty");
-      return response;
+      poolIdPage = poolHashRepository.findAllByPoolId(null, pageable);
     }
     List<PoolResponse> pools = poolIdPage.stream().map(PoolResponse::new)
         .collect(Collectors.toList());
@@ -231,19 +229,7 @@ public class DelegationServiceImpl implements DelegationService {
         pageable);
     List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new)
         .collect(Collectors.toList());
-    poolTxRes.forEach(poolTx -> {
-      List<TxPoolProjection> trxPools = poolHashRepository.getDataForPoolTx(poolTx.getBlock());
-      if (Objects.nonNull(trxPools) && !trxPools.isEmpty()) {
-        TxPoolProjection trxPool = trxPools.get(ZERO);
-        poolTx.setPledge(trxPool.getPledge());
-        poolTx.setCost(trxPool.getCost());
-        poolTx.setMargin(trxPool.getMargin());
-        List<String> poolNames = poolOfflineDataRepository.findAllByPool(trxPool.getPoolId());
-        if (Objects.nonNull(poolNames) && !poolNames.isEmpty()) {
-          poolTx.setPoolName(getNameValueFromJson(poolNames.get(ZERO)));
-        }
-      }
-    });
+    setValueForPoolRegistration(poolTxRes);
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
     return response;
@@ -256,19 +242,7 @@ public class DelegationServiceImpl implements DelegationService {
         pageable);
     List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new)
         .collect(Collectors.toList());
-    poolTxRes.forEach(poolTx -> {
-      List<TxPoolProjection> trxPools = poolHashRepository.getDataForPoolTx(poolTx.getBlock());
-      if (Objects.nonNull(trxPools) && !trxPools.isEmpty()) {
-        TxPoolProjection trxPool = trxPools.get(ZERO);
-        poolTx.setPledge(trxPool.getPledge());
-        poolTx.setCost(trxPool.getCost());
-        poolTx.setMargin(trxPool.getMargin());
-        List<String> poolNames = poolOfflineDataRepository.findAllByPool(trxPool.getPoolId());
-        if (Objects.nonNull(poolNames) && !poolNames.isEmpty()) {
-          poolTx.setPoolName(getNameValueFromJson(poolNames.get(0)));
-        }
-      }
-    });
+    setValueForPoolRegistration(poolTxRes);
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
     return response;
@@ -338,5 +312,24 @@ public class DelegationServiceImpl implements DelegationService {
     }
     JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
     return jsonObject.get("name").getAsString();
+  }
+
+  private void setValueForPoolRegistration(List<PoolTxResponse> poolTxRes) {
+    poolTxRes.forEach(poolTx -> {
+      List<TxPoolProjection> trxPools = poolHashRepository.getDataForPoolTx(poolTx.getBlock());
+      if (Objects.nonNull(trxPools) && !trxPools.isEmpty()) {
+        TxPoolProjection trxPool = trxPools.get(ZERO);
+        poolTx.setPledge(trxPool.getPledge());
+        poolTx.setCost(trxPool.getCost());
+        poolTx.setMargin(trxPool.getMargin());
+        List<String> poolNames = poolOfflineDataRepository.findAllByPool(trxPool.getPoolId());
+        if (Objects.nonNull(poolNames) && !poolNames.isEmpty()) {
+          poolTx.setPoolName(getNameValueFromJson(poolNames.get(ZERO)));
+        }
+        Set<Long> poolUpdateIds = trxPools.stream().map(TxPoolProjection::getPoolUpdateId).collect(
+            Collectors.toSet());
+        poolTx.setStakeKey(poolOwnerRepository.getStakeKeyList(poolUpdateIds));
+      }
+    });
   }
 }

@@ -11,4 +11,6 @@ public interface TxPoolProjection {
   BigDecimal getCost();
 
   Long getPoolId();
+
+  Long getPoolUpdateId();
 }
