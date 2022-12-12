@@ -3,7 +3,7 @@ spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${HOST}:${PORT_DB}/explorer_api?currentSchema=dev
+    url: jdbc:postgresql://${HOST}:${PORT_DB}/explorer_api?currentSchema=${SPRING_PROFILES_ACTIVE}
     username: ${USERNAME_DB}
     password: ${PASSWORD_DB}
     driver-class-name: org.postgresql.Driver
@@ -38,7 +38,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: dev
+        default_schema: ${SPRING_PROFILES_ACTIVE}
         show_sql: false
         format_sql: true
   flyway:
