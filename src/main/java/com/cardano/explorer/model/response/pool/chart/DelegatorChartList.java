@@ -1,12 +1,11 @@
 package com.cardano.explorer.model.response.pool.chart;
 
-import com.cardano.explorer.model.response.pool.custom.DelegatorDataChart;
-import java.util.Date;
+import com.cardano.explorer.model.response.pool.projection.DelegatorChartProjection;
 
-public class DelegatorChartList extends BaseChartList<Date, Long> {
+public class DelegatorChartList extends BaseChartList<Long, Long> {
 
-  public DelegatorChartList(DelegatorDataChart delegatorDataChart) {
-    this.setTimeChart(delegatorDataChart.getTime());
-    this.setDataChart(delegatorDataChart.getChartValue());
+  public DelegatorChartList(DelegatorChartProjection delegatorChart) {
+    this.setXChart(delegatorChart.getChartKey());
+    this.setYChart(delegatorChart.getChartValue());
   }
 }

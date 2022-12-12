@@ -1,14 +1,13 @@
 package com.cardano.explorer.model.response.pool.chart;
 
-import com.cardano.explorer.model.response.pool.custom.EpochDataChart;
+import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
 import java.math.BigDecimal;
-import java.util.Date;
 
 
-public class EpochChartList extends BaseChartList<Date, BigDecimal> {
+public class EpochChartList extends BaseChartList<Integer, BigDecimal> {
 
-  public EpochChartList(EpochDataChart epochDataChart) {
-    this.setTimeChart(epochDataChart.getTime());
-    this.setDataChart(epochDataChart.getChartValue());
+  public EpochChartList(EpochChartProjection epochChart) {
+    this.setXChart(epochChart.getChartKey());
+    this.setYChart(epochChart.getChartValue());
   }
 }

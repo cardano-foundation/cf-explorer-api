@@ -1,8 +1,8 @@
-package com.cardano.explorer.model.response.pool.custom;
+package com.cardano.explorer.model.response.pool.projection;
 
 import java.sql.Timestamp;
 
-public interface TrxBlockEpoch {
+public interface TxBlockEpochProjection {
 
   Long getTxId();
 
