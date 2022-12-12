@@ -24,10 +24,10 @@ public interface DelegationService {
   /**
    * Get list pool for delegate pools
    *
-   * @param page,size,search
+   * @param pageable,search
    * @return BaseFilterResponse<PoolResponse>
    */
-  BaseFilterResponse<PoolResponse> getDataForPoolTable(Integer page, Integer size, String search);
+  BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search);
 
   /**
    * Get detail pool for delegate pools detail
@@ -43,24 +43,24 @@ public interface DelegationService {
    * @param poolId
    * @return PoolDetailEpochResponse
    */
-  BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Integer page, Integer size,
+  BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
       Long poolId);
 
   /**
    * Get pool registration list
    *
-   * @param page,size
+   * @param pageable
    * @return PoolTxResponse
    */
-  BaseFilterResponse<PoolTxResponse> getDataForPoolRegistration(Integer page, Integer size);
+  BaseFilterResponse<PoolTxResponse> getDataForPoolRegistration(Pageable pageable);
 
   /**
    * Get pool de registration list
    *
-   * @param page,size
+   * @param pageable
    * @return PoolTxResponse
    */
-  BaseFilterResponse<PoolTxResponse> getDataForPoolDeRegistration(Integer page, Integer size);
+  BaseFilterResponse<PoolTxResponse> getDataForPoolDeRegistration(Pageable pageable);
 
   /**
    * Get detail pool analytics for delegate pools detail
@@ -73,11 +73,11 @@ public interface DelegationService {
   /**
    * Get detail pool delegator list for delegate pools detail
    *
-   * @param poolId,page,size
+   * @param poolId,pageable
    * @return PoolDetailDelegatorsResponse
    */
-  BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Integer page,
-      Integer size, Long poolId);
+  BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Pageable pageable,
+      Long poolId);
 
   /**
    * Find Top {number} (default 3) Pool Delegation
