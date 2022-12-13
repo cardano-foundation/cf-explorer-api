@@ -30,6 +30,7 @@ import com.cardano.explorer.repository.CollateralTxInRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
+import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.repository.RedeemerRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
@@ -91,6 +92,8 @@ public class TxServiceImpl implements TxService {
   private final DelegationMapper delegationMapper;
   private final MaTxMintRepository maTxMintRepository;
   private final MaTxMintMapper maTxMintMapper;
+
+  private final MultiAssetRepository multiAssetRepository;
 
   private static final int SUMMARY_SIZE = 4;
   private static final long MINUS_DAYS = 15;
