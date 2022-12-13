@@ -15,24 +15,22 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   Optional<MultiAsset> findByFingerprint(String fingerprint);
 
-  @Query("SELECT output.id.address AS address,"
-      + " (output.quantity - COALESCE(input.quantity, 0)) AS quantity"
-      + " FROM AddressTokenOutput output"
-      + " LEFT JOIN AddressTokenInput input"
-      + " ON output.id.address = input.id.address"
-      + " AND output.id.fingerprint = input.id.fingerprint"
-      + " WHERE output.id.fingerprint = :fingerprint AND (output.quantity - COALESCE(input.quantity, 0)) > 0 "
-      + " ORDER BY (output.quantity - COALESCE(input.quantity, 0)) DESC")
+  @Query("SELECT token.address AS address,"
+      + " sum(COALESCE(token.balance, 0)) AS quantity"
+      + " FROM AddressToken token"
+      + " WHERE token.multiAsset.fingerprint = :fingerprint "
+      + " GROUP BY token.address"
+      + " HAVING sum(token.balance) > 0"
+      + " ORDER BY sum(token.balance) DESC")
   Page<AddressTokenProjection> findAddressByToken(String fingerprint, Pageable pageable);
 
-  @Query("SELECT output.id.fingerprint AS fingerprint,"
-      + " output.tokenName AS tokenName,"
-      + " (output.quantity - COALESCE(input.quantity, 0)) AS quantity"
-      + " FROM AddressTokenOutput output"
-      + " LEFT JOIN AddressTokenInput input"
-      + " ON output.id.fingerprint = input.id.fingerprint"
-      + " AND output.id.address = input.id.address"
-      + " WHERE output.id.address = :address AND (output.quantity - COALESCE(input.quantity, 0)) > 0"
-      + " ORDER BY (output.quantity - COALESCE(input.quantity, 0)) DESC")
+  @Query("SELECT token.multiAsset.fingerprint AS fingerprint,"
+      + " token.multiAsset.name AS tokenName,"
+      + " sum(COALESCE(token.balance, 0)) AS quantity"
+      + " FROM AddressToken token"
+      + " WHERE token.address = :address "
+      + " GROUP BY token.multiAsset.fingerprint, token.multiAsset.name"
+      + " HAVING sum(token.balance) > 0"
+      + " ORDER BY sum(token.balance) DESC")
   List<AddressTokenProjection> findTokenByAddress(String address);
 }

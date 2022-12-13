@@ -3,12 +3,14 @@ package com.cardano.explorer.specification;
 import static org.springframework.data.jpa.domain.Specification.where;
 
 import com.cardano.explorer.model.request.TxFilterRequest;
+import com.sotatek.cardano.common.entity.AddressToken;
+import com.sotatek.cardano.common.entity.AddressToken_;
+import com.sotatek.cardano.common.entity.AddressTxBalance;
 import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.Block_;
-import com.sotatek.cardano.common.entity.MaTxOut;
 import com.sotatek.cardano.common.entity.MultiAsset;
+import com.sotatek.cardano.common.entity.MultiAsset_;
 import com.sotatek.cardano.common.entity.Tx;
-import com.sotatek.cardano.common.entity.TxOut;
 import com.sotatek.cardano.common.entity.TxOut_;
 import com.sotatek.cardano.common.entity.Tx_;
 import java.util.Objects;
@@ -42,7 +44,7 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
    * @param blockNo value of blockNo condition
    * @return specification for blockNo equal condition
    */
-  public static Specification<Tx> hasBlockId(Integer blockNo) {
+  public static Specification<Tx> hasBlockId(Long blockNo) {
     return (root, query, criteriaBuilder) -> {
       if (Objects.isNull(blockNo)) {
         return null;
@@ -65,7 +67,7 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
       if (StringUtils.isEmpty(address)) {
         return null;
       }
-      ListJoin<Tx, TxOut> txOutJoin = root.joinList(Tx_.TX_OUT_LIST, JoinType.INNER);
+      ListJoin<Tx, AddressTxBalance> txOutJoin = root.joinList(Tx_.ADDRESS_TX_BALANCES, JoinType.INNER);
       return criteriaBuilder.equal(txOutJoin.get(TxOut_.ADDRESS), address);
     };
   }
@@ -81,10 +83,10 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
       if (StringUtils.isEmpty(tokenId)) {
         return null;
       }
-      ListJoin<Tx, TxOut> txOutJoin = root.joinList(Tx_.TX_OUT_LIST, JoinType.INNER);
-      Join<TxOut, MaTxOut> maTxOutListJoin = txOutJoin.join("maTxOuts");
-      Join<MultiAsset, MaTxOut> assetMaTxOutJoin = maTxOutListJoin.join("ident");
-      return criteriaBuilder.equal(assetMaTxOutJoin.get("fingerprint"), tokenId);
+      query.distinct(true);
+      ListJoin<Tx, AddressToken> tokenListJoin = root.joinList(Tx_.ADDRESS_TOKENS, JoinType.INNER);
+      Join<AddressToken, MultiAsset> addressTokenMultiAssetJoin = tokenListJoin.join(AddressToken_.MULTI_ASSET);
+      return criteriaBuilder.equal(addressTokenMultiAssetJoin.get(MultiAsset_.FINGERPRINT), tokenId);
     };
   }
 }

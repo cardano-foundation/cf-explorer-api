@@ -1,5 +1,6 @@
 package com.cardano.explorer.controller;
 
+import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
@@ -33,7 +34,7 @@ public class AddressController {
   @Operation(summary = "Get a address analytics")
   public List<AddressAnalyticsResponse> getAddressAnalytics(
       @PathVariable @Parameter(description = "Address") String address,
-      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1y,...") String type) {
+      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1y,...") AnalyticType type) {
     return addressService.getAddressAnalytics(address, type);
   }
 }

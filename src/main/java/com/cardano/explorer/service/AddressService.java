@@ -1,5 +1,6 @@
 package com.cardano.explorer.service;
 
+import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import java.util.List;
@@ -19,5 +20,5 @@ public interface AddressService {
    * @param type type of analytics (day, week, month, 3month)
    * @return
    */
-  List<AddressAnalyticsResponse> getAddressAnalytics(String address, String type);
+  List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type);
 }
