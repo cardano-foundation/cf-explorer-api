@@ -31,7 +31,5 @@ public class PoolResponse implements Serializable {
 
   private Double saturation;
 
-  public PoolResponse(Long poolId) {
-    this.poolId = poolId;
-  }
+  private BigDecimal stakeLimit;
 }

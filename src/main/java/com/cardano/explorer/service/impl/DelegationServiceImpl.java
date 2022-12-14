@@ -13,10 +13,12 @@ import com.cardano.explorer.model.response.pool.chart.EpochChartList;
 import com.cardano.explorer.model.response.pool.chart.EpochChartResponse;
 import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import com.cardano.explorer.model.response.pool.projection.BasePoolChartProjection;
+import com.cardano.explorer.model.response.pool.projection.BlockOwnerProjection;
 import com.cardano.explorer.model.response.pool.projection.DelegatorChartProjection;
 import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.TxPoolProjection;
 import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
@@ -43,9 +45,11 @@ import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -89,12 +93,16 @@ public class DelegationServiceImpl implements DelegationService {
   private final PoolOwnerRepository poolOwnerRepository;
 
   private static final Integer ZERO = 0;
+
   private static final Integer DEFAULT_EPOCH_STAKE = 20;
 
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
 
   private static final String PREFIX_POOL_NAME = "{\"name\": \"";
+
+  private static final BigDecimal TOTAL_GLOBAL_ADA = BigDecimal.valueOf(32000000000L);
+
 
   @Override
   public DelegationHeaderResponse getDataForDelegationHeader() {
@@ -115,7 +123,7 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
-    Page<Long> poolIdPage;
+    Page<PoolListProjection> poolIdPage;
     if (Boolean.TRUE.equals(StringUtils.isNotBlank(search))) {
       poolIdPage = Boolean.TRUE.equals(StringUtils.isNumeric(search))
           ? poolHashRepository.findAllByPoolId(Long.valueOf(search), pageable)
@@ -124,21 +132,12 @@ public class DelegationServiceImpl implements DelegationService {
     } else {
       poolIdPage = poolHashRepository.findAllByPoolId(null, pageable);
     }
-    List<PoolResponse> pools = poolIdPage.stream().map(PoolResponse::new)
-        .collect(Collectors.toList());
-    pools.forEach(pool -> {
-      List<BigDecimal> pledges = poolUpdateRepository.findPledgeByPool(pool.getPoolId());
-      if (Objects.nonNull(pledges) && !pledges.isEmpty()) {
-        pool.setPledge(pledges.get(ZERO));
-      }
-      List<String> poolNames = poolOfflineDataRepository.findAllByPool(pool.getPoolId());
-      if (Objects.nonNull(poolNames) && !poolNames.isEmpty()) {
-        pool.setPoolName(getNameValueFromJson(poolNames.get(ZERO)));
-      }
-      pool.setPoolSize(poolHashRepository.getPoolSizeByPoolId(pool.getPoolId()));
-    });
+    response.setData(poolIdPage.stream().map(pool -> PoolResponse.builder().poolId(pool.getPoolId())
+            .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
+            .pledge(pool.getPledge()).feeAmount(pool.getFee())
+            .stakeLimit(getStakeLimit(pool.getParamK())).build())
+        .collect(Collectors.toList()));
     response.setTotalItems(poolIdPage.getTotalElements());
-    response.setData(pools);
     return response;
   }
 
@@ -306,30 +305,58 @@ public class DelegationServiceImpl implements DelegationService {
     return delegatorResponse;
   }
 
-  private String getNameValueFromJson(String json) {
-    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(json))) {
-      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
+  /**
+   * Get name value from json string pools
+   *
+   * @return String
+   */
+  private String getNameValueFromJson(String jsonName) {
+    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(jsonName))) {
+      return null;
     }
-    JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
+    JsonObject jsonObject = new Gson().fromJson(jsonName, JsonObject.class);
     return jsonObject.get("name").getAsString();
   }
 
+  /**
+   * set value for pool registration list
+   * <p>
+   */
   private void setValueForPoolRegistration(List<PoolTxResponse> poolTxRes) {
-    poolTxRes.forEach(poolTx -> {
-      List<TxPoolProjection> trxPools = poolHashRepository.getDataForPoolTx(poolTx.getBlock());
-      if (Objects.nonNull(trxPools) && !trxPools.isEmpty()) {
-        TxPoolProjection trxPool = trxPools.get(ZERO);
-        poolTx.setPledge(trxPool.getPledge());
-        poolTx.setCost(trxPool.getCost());
-        poolTx.setMargin(trxPool.getMargin());
-        List<String> poolNames = poolOfflineDataRepository.findAllByPool(trxPool.getPoolId());
-        if (Objects.nonNull(poolNames) && !poolNames.isEmpty()) {
-          poolTx.setPoolName(getNameValueFromJson(poolNames.get(ZERO)));
-        }
-        Set<Long> poolUpdateIds = trxPools.stream().map(TxPoolProjection::getPoolUpdateId).collect(
-            Collectors.toSet());
-        poolTx.setStakeKey(poolOwnerRepository.getStakeKeyList(poolUpdateIds));
-      }
+    Set<Long> blockIds = poolTxRes.stream().map(PoolTxResponse::getBlock)
+        .collect(Collectors.toSet());
+    List<TxPoolProjection> txPoolProjections = poolHashRepository.getDataForPoolTx(blockIds);
+    List<BlockOwnerProjection> blockOwnerProjections = poolOwnerRepository.getStakeKeyList(
+        blockIds);
+    poolTxRes.forEach(pool -> {
+      txPoolProjections.stream()
+          .filter(txPoolProjection -> txPoolProjection.getBlockId().equals(pool.getBlock()))
+          .forEach(txPoolProjection -> {
+            pool.setPoolName(getNameValueFromJson(txPoolProjection.getPoolName()));
+            pool.setCost(txPoolProjection.getCost());
+            pool.setPledge(txPoolProjection.getPledge());
+            pool.setMargin(txPoolProjection.getMargin());
+          });
+      Set<String> stakeKeys = new HashSet<>();
+      blockOwnerProjections.stream()
+          .filter(blockOwnerProjection -> blockOwnerProjection.getBlockId().equals(pool.getBlock()))
+          .forEach(blockOwnerProjection -> {
+            stakeKeys.add(blockOwnerProjection.getAddress());
+          });
+      pool.setStakeKey(stakeKeys);
     });
+
+  }
+
+  /**
+   * get stake limit with k param
+   *
+   * @return BigDecimal
+   */
+  private BigDecimal getStakeLimit(Integer k) {
+    if (Objects.isNull(k)) {
+      return BigDecimal.ZERO;
+    }
+    return TOTAL_GLOBAL_ADA.divide(BigDecimal.valueOf(k), ZERO, RoundingMode.FLOOR);
   }
 }
