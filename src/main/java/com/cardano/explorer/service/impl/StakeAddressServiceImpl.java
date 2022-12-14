@@ -1,6 +1,5 @@
 package com.cardano.explorer.service.impl;
 
-import com.bloxbean.cardano.client.address.Address;
 import com.cardano.explorer.common.enumeration.StakeAddressStatus;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.model.response.address.DelegationPoolResponse;
@@ -15,7 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sotatek.cardano.common.entity.PoolOfflineData;
 import com.sotatek.cardano.common.entity.StakeAddress;
-import com.sotatek.cardano.ledgersync.util.AddressUtil;
+import com.sotatek.cardano.ledgersync.common.address.ShelleyAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
@@ -37,12 +36,17 @@ public class StakeAddressServiceImpl implements StakeAddressService {
   public StakeAddressResponse getStakeAddress(String address) {
     StakeAddressResponse stakeAddressResponse = new StakeAddressResponse();
     try {
-      Address stake = AddressUtil.baseAddressToStakeAddress(address);
+      ShelleyAddress shelleyAddress = new ShelleyAddress(address);
+      if(!shelleyAddress.containStakeAddress()){
+        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
+      }
+      //TO-DO
+      byte[] addr = shelleyAddress.getStakeReference();
+      ShelleyAddress stake = new ShelleyAddress(addr);
       StakeAddress stakeAddress
           = stakeAddressRepository.findByView(stake.getAddress()).orElseThrow(
           () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
       stakeAddressResponse.setStakeAddress(stake.getAddress());
-      stakeAddressResponse.setStatus(StakeAddressStatus.ACTIVE);
       BigDecimal stakeTotalOutput = txOutRepository.getStakeAddressTotalOutput(stake.getAddress())
           .orElse(BigDecimal.ZERO);
       BigDecimal stakeTotalInput = txOutRepository.getStakeAddressTotalInput(stake.getAddress())
@@ -65,8 +69,10 @@ public class StakeAddressServiceImpl implements StakeAddressService {
             .poolName(jsonObject.get("name").getAsString())
             .tickerName(jsonObject.get("ticker").getAsString())
             .build();
+        stakeAddressResponse.setStatus(StakeAddressStatus.ACTIVE);
         stakeAddressResponse.setPool(poolResponse);
       } else {
+        stakeAddressResponse.setStatus(StakeAddressStatus.INACTIVE);
         stakeAddressResponse.setPool(null);
       }
       return stakeAddressResponse;

@@ -9,7 +9,14 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
 
   Integer countByAddress(String address);
 
-  @Query("SELECT COALESCE(sum(balance), 0) FROM AddressTxBalance WHERE address = :address")
-  BigDecimal getBalanceByAddress(String address);
+  @Query("SELECT MAX(addrTxBalance.balance) "
+      + " FROM AddressTxBalance addrTxBalance"
+      + " WHERE addrTxBalance.address = :address")
+  BigDecimal getMaxBalanceByAddress(String address);
+
+  @Query("SELECT MIN(addrTxBalance.balance) "
+      + " FROM AddressTxBalance addrTxBalance"
+      + " WHERE addrTxBalance.address = :address")
+  BigDecimal getMinBalanceByAddress(String address);
 
 }

@@ -10,9 +10,9 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public enum AnalyticType {
   ONE_DAY("1d"),
-  THREE_DAY("3d"),
   ONE_WEEK("1w"),
-  ONE_MONTH("1m");
+  ONE_MONTH("1m"),
+  THREE_MONTH("3m");
 
   String value;
 }

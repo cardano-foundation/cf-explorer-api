@@ -11,8 +11,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring",imports={HexUtils.class})
 public interface MaTxMintMapper {
 
-  @Mapping(target = "assetName", source = "ident.name")
+  @Mapping(target = "assetName", expression = "java(HexUtils.fromHex(maTxMint.getIdent().getName()))")
   @Mapping(target = "policy.policyId", source = "ident.policy")
+  @Mapping(target = "assetQuantity", source = "quantity")
   @Mapping(target = "assetId", expression = "java(maTxMint.getIdent().getFingerprint())")
   TxMintingResponse fromMaTxMint(MaTxMint maTxMint);
 
