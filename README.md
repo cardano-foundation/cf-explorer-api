@@ -19,7 +19,7 @@
 ### Environment variables
 
 - `SPRING_PROFILES_ACTIVE` : Spring profile (dev, prod, test,local). Default is dev. In your case, you should use local
-- `HOST` : Database host (default is my postgres host: 172.16.1.230)
+- `HOST` : Database host (default is 172.16.1.230). In your case, you should use `db.cardano.sotatek.works`
 - `PORT_DB` : Database port (default is my postgres port: 54321)
 - `USERNAME_DB`: Database username (in your case, do not fill this field because local profile is using a read-only user)
 - `PASSWORD_DB`: Database password (in your case, do not fill this field because local profile is using a read-only user)

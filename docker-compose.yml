@@ -8,8 +8,6 @@ services:
   cardano-explorer-api:
     container_name: cardano-explorer-api
     image: cardano-explorer-api
-    build:
-      context: .
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - HOST=${HOST}
