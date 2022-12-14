@@ -7,6 +7,7 @@ import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.service.AddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +35,21 @@ public class AddressController {
   @Operation(summary = "Get a address analytics")
   public List<AddressAnalyticsResponse> getAddressAnalytics(
       @PathVariable @Parameter(description = "Address") String address,
-      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1y,...") AnalyticType type) {
+      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
     return addressService.getAddressAnalytics(address, type);
+  }
+
+  @GetMapping("/max-balance/{address}")
+  @LogMessage
+  @Operation(summary = "Get the highest balance address")
+  public BigDecimal getAddressMaxBalance(@PathVariable String address) {
+    return addressService.getAddressMaxBalance(address);
+  }
+
+  @GetMapping("/min-balance/{address}")
+  @LogMessage
+  @Operation(summary = "Get the lowest balance address")
+  public BigDecimal getAddressMinBalance(@PathVariable String address) {
+    return addressService.getAddressMinBalance(address);
   }
 }
