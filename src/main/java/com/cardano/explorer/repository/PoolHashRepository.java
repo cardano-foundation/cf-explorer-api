@@ -1,10 +1,12 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
 import com.cardano.explorer.model.response.pool.projection.TxPoolProjection;
 import com.sotatek.cardano.common.entity.PoolHash;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,17 +35,39 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "ORDER BY pu.activeEpochNo DESC")
   List<TxPoolProjection> getDataForPoolTx(@Param("blockId") Long blockId);
 
-  @Query(value = "SELECT ph.id FROM PoolHash ph "
-      + "LEFT JOIN PoolOfflineData po ON po.pool.id = ph.id "
-      + "WHERE (:poolId IS NULL OR ph.id = :poolId) "
-      + "GROUP BY ph.id")
-  Page<Long> findAllByPoolId(@Param("poolId") Long poolId, Pageable pageable);
+  @Query(value =
+      "SELECT pu.fixedCost AS cost, pu.margin AS margin, pu.pledge AS pledge, ph.id AS poolId, po.json AS poolName, bk.id AS blockId FROM Block bk "
+          + "JOIN SlotLeader sl ON sl.id = bk.slotLeader.id "
+          + "JOIN PoolHash ph ON ph.id = sl.poolHash.id "
+          + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
+          + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id "
+          + "WHERE bk.id IN :blockIds "
+          + "AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id) "
+          + "AND (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id = ph.id))")
+  List<TxPoolProjection> getDataForPoolTx(@Param("blockIds") Set<Long> blockIds);
 
-  @Query(value = "SELECT ph.id FROM PoolOfflineData po "
-      + "LEFT JOIN PoolHash ph ON po.pool.id = ph.id "
-      + "WHERE (:poolName IS NULL OR lower(po.json) LIKE :poolName%) "
-      + "GROUP BY ph.id")
-  Page<Long> findAllByPoolName(@Param("poolName") String poolName, Pageable pageable);
+  @Query(value =
+      "SELECT ph.id AS poolId, po.json AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK "
+          + "FROM PoolHash ph "
+          + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id "
+          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
+          + "WHERE (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id = ph.id)) "
+          + "AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
+          + "AND (:poolId IS NULL OR ph.id = :poolId) "
+          + "ORDER BY ph.id ASC")
+  Page<PoolListProjection> findAllByPoolId(@Param("poolId") Long poolId, Pageable pageable);
+
+  @Query(value = "SELECT ph.id AS poolId, po.json AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK "
+      + "FROM PoolOfflineData po "
+      + "JOIN PoolHash ph ON ph.id = po.pool.id "
+      + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+      + "JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
+      + "WHERE (po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id = ph.id)) "
+      + "AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
+      + "AND (:poolName IS NULL OR lower(po.json) LIKE :poolName%) "
+      + "ORDER BY ph.id ASC")
+  Page<PoolListProjection> findAllByPoolName(@Param("poolName") String poolName, Pageable pageable);
 
   @Query(value = "SELECT ph.poolSize FROM PoolHash ph WHERE ph.id = :poolId")
   BigDecimal getPoolSizeByPoolId(@Param("poolId") Long poolId);

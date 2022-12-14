@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 
 public interface TxPoolProjection {
 
+  Long getBlockId();
+
   BigDecimal getPledge();
 
   Double getMargin();
@@ -12,5 +14,5 @@ public interface TxPoolProjection {
 
   Long getPoolId();
 
-  Long getPoolUpdateId();
+  String getPoolName();
 }
