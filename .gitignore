@@ -37,3 +37,11 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### ENV ###
+.env
+
+
+### Maven ###
+.m2/settings.xml
