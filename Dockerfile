@@ -1,9 +1,12 @@
 FROM openjdk:11-jdk-slim AS build
-COPY . /app
 WORKDIR /app
 COPY .m2/settings.xml /root/.m2/settings.xml
-RUN ./mvnw clean package -DskipTests 
-
+COPY pom.xml /app/pom.xml
+COPY mvnw  /app/mvnw
+COPY .mvn /app/.mvn
+RUN ./mvnw verify clean --fail-never
+COPY . /app
+RUN ./mvnw clean package -DskipTests
 
 FROM openjdk:11-jdk-slim AS runtime
 COPY --from=build /app/target/*.jar /app/app.jar
