@@ -19,36 +19,16 @@ pipeline {
 
     stages {
 
-        stage('Copy m2 to repo') {
-            steps {
-                echo 'Copy m2 to repo'
-                sh "cp /root/.m2/settings.xml /var/jenkins_home/workspace/cardano-explorer-api_${env.BRANCH_NAME}/.m2/settings.xml"
-            }
-        }
+        // stage('Copy m2 to repo') {
+        //     steps {
+        //         echo 'Copy m2 to repo'
+        //         sh "cp /root/.m2/settings.xml /var/jenkins_home/workspace/cardano-explorer-api_${env.BRANCH_NAME}/.m2/settings.xml"
+        //     }
+        // }
 
         stage('Build') {
             steps {
                 echo 'Building..'
-                script {
-                    def envFile
-                    if (env.BRANCH_NAME == 'develop') {
-                        envFile = readProperties file: '/tmp/env-dev.properties'
-                    }
-                    if (env.BRANCH_NAME == 'test') {
-                        envFile = readProperties file: '/tmp/env-test.properties'
-                    }
-                    if (env.BRANCH_NAME == 'prod') {
-                        envFile = readProperties file: '/tmp/env-prod.properties'
-                    }
-                    host = envFile.host
-                    portDb = envFile.portDb
-                    usernameDb = envFile.usernameDb
-                    passwordDb = envFile.passwordDb
-                    environment = envFile.environment
-                    hostSonarqube = envFile.hostSonarqube
-                    projectKeyExplorerApi = envFile.projectKeyExplorerApi
-                    loginExplorerApi = envFile.loginExplorerApi
-                }
                 sh "docker build -t cardano-explorer-api ."
                 echo 'Build successfully!!!'
             }
