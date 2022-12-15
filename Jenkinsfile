@@ -18,18 +18,9 @@ pipeline {
     agent any
 
     stages {
-
-        // stage('Copy m2 to repo') {
-        //     steps {
-        //         echo 'Copy m2 to repo'
-        //         sh "cp /root/.m2/settings.xml /var/jenkins_home/workspace/cardano-explorer-api_${env.BRANCH_NAME}/.m2/settings.xml"
-        //     }
-        // }
-
         stage('Build') {
             steps {
-                echo 'Building..'
-                sh "docker build -t cardano-explorer-api ."
+                sh "mvn -B -DskipTests clean package"
                 echo 'Build successfully!!!'
             }
         }

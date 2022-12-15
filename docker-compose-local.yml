@@ -7,6 +7,7 @@ services:
     container_name: cardano-explorer-api
     build:
       context: .
+      dockerfile: Dockerfile.local
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - HOST=${HOST}
