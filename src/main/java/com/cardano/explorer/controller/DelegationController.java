@@ -44,29 +44,30 @@ public class DelegationController {
     return ResponseEntity.ok(delegationService.getDataForPoolTable(pageable, search));
   }
 
-  @GetMapping("/pool-detail-header/{poolId}")
-  public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(@PathVariable Long poolId) {
-    return ResponseEntity.ok(delegationService.getDataForPoolDetail(poolId));
+  @GetMapping("/pool-detail-header/{poolView}")
+  public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(
+      @PathVariable String poolView) {
+    return ResponseEntity.ok(delegationService.getDataForPoolDetail(poolView));
   }
 
   @GetMapping("/pool-detail-analytics")
   public ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(
-      @RequestParam("pool") Long poolId) {
-    return ResponseEntity.ok(delegationService.getAnalyticsForPoolDetail(poolId));
+      @RequestParam("poolView") String poolView) {
+    return ResponseEntity.ok(delegationService.getAnalyticsForPoolDetail(poolView));
   }
 
   @GetMapping("/pool-detail-epochs")
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
-      @RequestParam("pool") Long poolId,
+      @RequestParam("poolView") String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(pageable, poolId));
+    return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(pageable, poolView));
   }
 
   @GetMapping("/pool-detail-delegators")
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
-      @RequestParam("pool") Long poolId,
+      @RequestParam("poolView") String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(pageable, poolId));
+    return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(pageable, poolView));
   }
 
   @GetMapping("/top")

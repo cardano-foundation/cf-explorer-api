@@ -27,5 +27,7 @@ public class PoolDetailDelegatorResponse implements Serializable {
     this.id = poolDetailDelegator.getId();
     this.address = poolDetailDelegator.getAddress();
     this.stakeAddressId = poolDetailDelegator.getStakeAddressId();
+    this.fee = poolDetailDelegator.getFee();
+    this.time = poolDetailDelegator.getTime();
   }
 }

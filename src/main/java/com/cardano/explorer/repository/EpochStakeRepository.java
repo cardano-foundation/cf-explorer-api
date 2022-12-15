@@ -1,10 +1,13 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
+import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
 import com.cardano.explorer.projection.PoolDelegationSizeProjection;
+import com.cardano.explorer.projection.StakeAddressProjection;
 import com.sotatek.cardano.common.entity.EpochStake;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,8 +17,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
 
-  @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.epochNo = :epochNo AND es.pool.id = :poolId")
-  BigDecimal totalStakeByEpochNoAndPool(@Param("epochNo") Integer epochNo,
+  @Query(value = "SELECT es.epochNo AS epochNo, sum(es.amount) AS totalStake FROM EpochStake es "
+      + "WHERE es.epochNo IN :epochNo AND es.pool.id = :poolId "
+      + "GROUP BY es.epochNo")
+  List<EpochStakeProjection> totalStakeByEpochNoAndPool(@Param("epochNo") Set<Integer> epochNo,
       @Param("poolId") Long poolId);
 
   @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.epochNo = :epochNo")
@@ -28,8 +33,11 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
           + "ORDER BY es.epochNo ASC ")
   List<EpochChartProjection> getDataForEpochChart(@Param("poolId") Long poolId);
 
-  @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.addr.id = :stakeAddressId AND es.pool.id = :poolId")
-  BigDecimal totalStakeByAddressAndPool(@Param("stakeAddressId") Long stakeAddressId,
+  @Query(value =
+      "SELECT es.addr.id AS address, sum(es.amount) AS totalStake FROM EpochStake es WHERE es.addr.id IN :stakeAddressIds AND es.pool.id = :poolId "
+          + "GROUP BY es.addr.id")
+  List<StakeAddressProjection> totalStakeByAddressAndPool(
+      @Param("stakeAddressId") Set<Long> stakeAddressIds,
       @Param("poolId") Long poolId);
 
   @Query("SELECT SUM(es.amount) AS poolSize, es.pool.id as poolId "

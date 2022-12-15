@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PoolOfflineDataRepository extends JpaRepository<PoolOfflineData, Long> {
 
-  Optional<PoolOfflineData> findFirstByPool(PoolHash pool);
+  Optional<PoolOfflineData> findFirstByPoolOrderByIdDesc(PoolHash pool);
 
   @EntityGraph(attributePaths = {PoolOfflineData_.POOL})
   @Query("SELECT pool FROM PoolOfflineData pool"
