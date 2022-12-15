@@ -79,24 +79,24 @@ public class AddressServiceImpl implements AddressService {
       case ONE_WEEK:
         var currentWeek = LocalDate.ofInstant(calendar.toInstant(),
             calendar.getTimeZone().toZoneId());
-        for (int i = 0; i < ADDRESS_ANALYTIC_BALANCE_NUMBER; i++) {
+        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
           dates.add(currentWeek.minusWeeks(i));
         }
         break;
       case ONE_MONTH:
         var currentMonth = LocalDate.ofInstant(calendar.toInstant(),
             calendar.getTimeZone().toZoneId());
-        for (int i = 0; i < ADDRESS_ANALYTIC_BALANCE_NUMBER; i++) {
+        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
           dates.add(currentMonth.minusMonths(i));
         }
         break;
       case THREE_MONTH:
-        for (int i = 0; i < ADDRESS_ANALYTIC_BALANCE_NUMBER; i++) {
+        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
           dates.add(currentDate.minusMonths(i * 3L));
         }
         break;
       default:
-        for (int i = 0; i < ADDRESS_ANALYTIC_BALANCE_NUMBER; i++) {
+        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
           dates.add(currentDate.minusDays(i));
         }
     }
@@ -106,10 +106,11 @@ public class AddressServiceImpl implements AddressService {
           var balance = customAddressTxBalanceRepository.getBalanceByAddressAndTime(address,
               Timestamp.valueOf(item.atTime(LocalTime.MAX)));
           if(Objects.isNull(balance)) {
-            return;
+            response.setValue(BigDecimal.ZERO);
+          } else {
+            response.setValue(balance);
           }
           response.setDate(item);
-          response.setValue(balance);
           responses.add(response);
         }
     );

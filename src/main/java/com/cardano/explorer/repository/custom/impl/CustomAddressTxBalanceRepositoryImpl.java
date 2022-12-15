@@ -26,6 +26,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class CustomAddressTxBalanceRepositoryImpl implements CustomAddressTxBalanceRepository {
+
+  static final int LIMIT_BALANCE_ADDRESS = 1;
+
   private final EntityManager entityManager;
 
   public BigDecimal getBalanceByAddressAndTime(String address, Timestamp time) {
@@ -47,7 +50,7 @@ public class CustomAddressTxBalanceRepositoryImpl implements CustomAddressTxBala
     criteriaQuery.select(addressTxBalanceRoot.get(AddressTxBalance_.BALANCE));
     criteriaQuery.orderBy(criteriaBuilder.desc(addressTxBalanceRoot.get(AddressTxBalance_.TX)));
     Query query = entityManager.createQuery(criteriaQuery);
-    query.setMaxResults(1);
+    query.setMaxResults(LIMIT_BALANCE_ADDRESS);
     var results = query.getResultList();
     return results.isEmpty() ? null : (BigDecimal) results.get(0);
   }
