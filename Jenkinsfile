@@ -26,6 +26,26 @@ pipeline {
         }
         stage('Test') {
             steps {
+                script {
+                    def envFile
+                    if (env.BRANCH_NAME == 'develop') {
+                        envFile = readProperties file: '/tmp/env-dev.properties'
+                    }
+                    if (env.BRANCH_NAME == 'test') {
+                        envFile = readProperties file: '/tmp/env-test.properties'
+                    }
+                    if (env.BRANCH_NAME == 'prod') {
+                        envFile = readProperties file: '/tmp/env-prod.properties'
+                    }
+                    host = envFile.host
+                    portDb = envFile.portDb
+                    usernameDb = envFile.usernameDb
+                    passwordDb = envFile.passwordDb
+                    environment = envFile.environment
+                    hostSonarqube = envFile.hostSonarqube
+                    projectKeyExplorerApi = envFile.projectKeyExplorerApi
+                    loginExplorerApi = envFile.loginExplorerApi
+                }
                 echo 'Testing..'
                 sh "mvn test -DHOST=${host} -DPORT_DB=${portDb} -DUSERNAME_DB=${usernameDb} -DPASSWORD_DB=${passwordDb} -DSPRING_PROFILES_ACTIVE=${environment}"
                 echo 'Test successfully!!!'
