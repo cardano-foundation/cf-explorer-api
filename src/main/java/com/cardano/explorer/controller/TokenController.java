@@ -49,7 +49,7 @@ public class TokenController {
 
   @GetMapping("/{tokenId}/top_holders")
   @LogMessage
-  @Operation(summary = "Filter token mint transaction")
+  @Operation(summary = "Filter holders of token")
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(@PathVariable String tokenId,
       @ParameterObject Pageable pageable) {
     return tokenService.getTopHolders(tokenId, pageable);

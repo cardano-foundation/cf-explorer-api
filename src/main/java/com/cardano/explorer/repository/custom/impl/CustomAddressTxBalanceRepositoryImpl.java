@@ -48,6 +48,7 @@ public class CustomAddressTxBalanceRepositoryImpl implements CustomAddressTxBala
     criteriaQuery.orderBy(criteriaBuilder.desc(addressTxBalanceRoot.get(AddressTxBalance_.TX)));
     Query query = entityManager.createQuery(criteriaQuery);
     query.setMaxResults(1);
-    return (BigDecimal) query.getSingleResult();
+    var results = query.getResultList();
+    return results.isEmpty() ? null : (BigDecimal) results.get(0);
   }
 }
