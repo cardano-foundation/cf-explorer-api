@@ -58,10 +58,14 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
    * @return list of pool delegation summary information
    */
   @Query(value =
-      "SELECT ph.id as poolView, pod.json as json, pu.pledge as pledge, pu.fixedCost as fee, ph.poolSize as poolSize "
+      "SELECT ph.id AS poolView, pod.json AS json, pu.pledge AS pledge, pu.fixedCost AS fee,"
+          + " ph.poolSize AS poolSize, ep.optimalPoolCount AS optimalPoolCount, "
+          + "ad.utxo AS utxo "
           + "FROM PoolHash ph "
           + "JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
           + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
+          + "JOIN EpochParam ep ON ep.epochNo = pu.activeEpochNo "
+          + "JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
           + "WHERE pu.activeEpochNo = "
           + "(SELECT MAX(pu.activeEpochNo) FROM pu.activeEpochNo WHERE pu.poolHash.id = ph.id) AND "
           + "pod.id = (SELECT MAX(pod.id) FROM PoolOfflineData pod WHERE pod.pool.id = ph.id) AND "

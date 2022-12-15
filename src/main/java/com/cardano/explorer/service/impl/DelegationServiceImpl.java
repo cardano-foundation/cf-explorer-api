@@ -74,6 +74,7 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class DelegationServiceImpl implements DelegationService {
 
+  private static final int SCALE = 5;
   private final TxInRepository txInRepository;
 
   private final DelegationRepository delegationRepository;
@@ -141,10 +142,11 @@ public class DelegationServiceImpl implements DelegationService {
       poolIdPage = poolHashRepository.findAllByPoolId(null, pageable);
     }
     response.setData(
-        poolIdPage.stream().map(pool -> PoolResponse.builder().poolView(pool.getPoolView())
+        poolIdPage.stream().map(pool -> PoolResponse.builder().poolId(pool.getPoolView())
                 .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
                 .pledge(pool.getPledge()).feeAmount(pool.getFee())
-                .stakeLimit(getStakeLimit(pool.getParamK())).build())
+                .saturation(getSaturation(pool.getPoolSize(),
+                    getStakeLimit(pool.getUtxo(), pool.getParamK())).doubleValue()).build())
             .collect(Collectors.toList()));
     response.setTotalItems(poolIdPage.getTotalElements());
     return response;
@@ -163,13 +165,18 @@ public class DelegationServiceImpl implements DelegationService {
     return pools.stream().map(pool -> {
 
           String poolName = getNameValueFromJson(pool.getJson());
+          Integer parameterK = pool.getOptimalPoolCount();
+          BigDecimal totalAda = pool.getUtxo();
+          BigDecimal stakeLimit = getStakeLimit(totalAda, parameterK);
+          BigDecimal poolSize = pool.getPoolSize();
+          BigDecimal saturation = getSaturation(poolSize, stakeLimit);
 
           return PoolResponse.builder()
-              .poolView(pool.getPoolView())
+              .poolId(pool.getPoolView())
               .poolName(poolName)
               .poolSize(pool.getPoolSize())
               .reward(BigInteger.ZERO.doubleValue())
-              .saturation(BigInteger.ZERO.doubleValue())
+              .saturation(saturation.doubleValue())
               .feeAmount(pool.getFee())
               .feePercent(BigInteger.ZERO.doubleValue())
               .pledge(pool.getPledge())
@@ -391,10 +398,14 @@ public class DelegationServiceImpl implements DelegationService {
    *
    * @return BigDecimal
    */
-  private BigDecimal getStakeLimit(Integer k) {
+  private BigDecimal getStakeLimit(BigDecimal totalAda, Integer k) {
     if (Objects.isNull(k)) {
       return BigDecimal.ZERO;
     }
-    return TOTAL_GLOBAL_ADA.divide(BigDecimal.valueOf(k), ZERO, RoundingMode.FLOOR);
+    return totalAda.divide(new BigDecimal(k), SCALE, RoundingMode.HALF_UP);
+  }
+
+  private static BigDecimal getSaturation(BigDecimal poolSize, BigDecimal stakeLimit) {
+    return poolSize.divide(stakeLimit, SCALE, RoundingMode.HALF_UP);
   }
 }
