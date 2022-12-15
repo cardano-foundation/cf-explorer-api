@@ -8,4 +8,6 @@ public interface PoolDelegationSummaryProjection {
   BigDecimal getPledge();
   BigDecimal getFee();
   BigDecimal getPoolSize();
+  Integer getOptimalPoolCount();
+  BigDecimal getUtxo();
 }

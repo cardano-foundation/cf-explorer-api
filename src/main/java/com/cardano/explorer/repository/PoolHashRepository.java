@@ -38,11 +38,13 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   List<TxPoolProjection> getDataForPoolTx(@Param("blockIds") Set<Long> blockIds);
 
   @Query(value =
-      "SELECT ph.view AS poolView, po.json AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK "
+      "SELECT ph.view AS poolView, po.json AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK"
+          + ", ad.utxo as utxo "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
+          + "JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
           + "WHERE (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id = ph.id)) "
           + "AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
           + "AND (:poolId IS NULL OR ph.id = :poolId) "

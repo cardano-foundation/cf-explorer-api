@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PoolResponse implements Serializable {
 
-  private String poolView;
+  private String poolId;
 
   private String poolName;
 
@@ -31,5 +31,4 @@ public class PoolResponse implements Serializable {
 
   private Double saturation;
 
-  private BigDecimal stakeLimit;
 }

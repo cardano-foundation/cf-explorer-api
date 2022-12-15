@@ -15,4 +15,6 @@ public interface PoolListProjection {
   BigDecimal getPoolSize();
 
   Integer getParamK();
+
+  BigDecimal getUtxo();
 }
