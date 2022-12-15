@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public interface PoolListProjection {
 
-  Long getPoolId();
+  String getPoolView();
 
   String getPoolName();
 

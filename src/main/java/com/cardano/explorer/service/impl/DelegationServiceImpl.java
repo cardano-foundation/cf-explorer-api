@@ -16,12 +16,14 @@ import com.cardano.explorer.model.response.pool.projection.BasePoolChartProjecti
 import com.cardano.explorer.model.response.pool.projection.BlockOwnerProjection;
 import com.cardano.explorer.model.response.pool.projection.DelegatorChartProjection;
 import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
+import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.TxPoolProjection;
 import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
+import com.cardano.explorer.projection.StakeAddressProjection;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
@@ -33,6 +35,7 @@ import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
 import com.cardano.explorer.repository.StakeRegistrationRepository;
+import com.cardano.explorer.repository.TxInRepository;
 import com.cardano.explorer.service.DelegationService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -49,12 +52,14 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -68,6 +73,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Log4j2
 public class DelegationServiceImpl implements DelegationService {
+
+  private final TxInRepository txInRepository;
 
   private final DelegationRepository delegationRepository;
 
@@ -124,6 +131,7 @@ public class DelegationServiceImpl implements DelegationService {
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     Page<PoolListProjection> poolIdPage;
+    //Todo refactor
     if (Boolean.TRUE.equals(StringUtils.isNotBlank(search))) {
       poolIdPage = Boolean.TRUE.equals(StringUtils.isNumeric(search))
           ? poolHashRepository.findAllByPoolId(Long.valueOf(search), pageable)
@@ -132,11 +140,12 @@ public class DelegationServiceImpl implements DelegationService {
     } else {
       poolIdPage = poolHashRepository.findAllByPoolId(null, pageable);
     }
-    response.setData(poolIdPage.stream().map(pool -> PoolResponse.builder().poolId(pool.getPoolId())
-            .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
-            .pledge(pool.getPledge()).feeAmount(pool.getFee())
-            .stakeLimit(getStakeLimit(pool.getParamK())).build())
-        .collect(Collectors.toList()));
+    response.setData(
+        poolIdPage.stream().map(pool -> PoolResponse.builder().poolView(pool.getPoolView())
+                .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
+                .pledge(pool.getPledge()).feeAmount(pool.getFee())
+                .stakeLimit(getStakeLimit(pool.getParamK())).build())
+            .collect(Collectors.toList()));
     response.setTotalItems(poolIdPage.getTotalElements());
     return response;
   }
@@ -156,7 +165,7 @@ public class DelegationServiceImpl implements DelegationService {
           String poolName = getNameValueFromJson(pool.getJson());
 
           return PoolResponse.builder()
-              .poolId(pool.getPoolId())
+              .poolView(pool.getPoolView())
               .poolName(poolName)
               .poolSize(pool.getPoolSize())
               .reward(BigInteger.ZERO.doubleValue())
@@ -172,15 +181,18 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public PoolDetailHeaderResponse getDataForPoolDetail(Long poolId) {
+  public PoolDetailHeaderResponse getDataForPoolDetail(String poolView) {
     PoolDetailHeaderResponse poolDetailResponse = new PoolDetailHeaderResponse();
-    PoolHash poolHash = poolHashRepository.findById(poolId)
+    PoolHash poolHash = poolHashRepository.findByView(poolView)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    Long poolId = poolHash.getId();
     poolDetailResponse.setPoolView(poolHash.getHashRaw());
-    PoolOfflineData poolOff = poolOfflineDataRepository.findFirstByPool(poolHash)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    poolDetailResponse.setPoolName(getNameValueFromJson(poolOff.getJson()));
-    poolDetailResponse.setTickerName(poolOff.getTickerName());
+    Optional<PoolOfflineData> poolOffOpt = poolOfflineDataRepository.findFirstByPoolOrderByIdDesc(
+        poolHash);
+    if (poolOffOpt.isPresent()) {
+      poolDetailResponse.setPoolName(getNameValueFromJson(poolOffOpt.get().getJson()));
+      poolDetailResponse.setTickerName(poolOffOpt.get().getTickerName());
+    }
     poolDetailResponse.setPoolSize(poolHash.getPoolSize());
     Page<Timestamp> createdTime = blockRepository.getTimeCreatedPool(poolId, PageRequest.of(0, 1));
     if (!createdTime.isEmpty()) {
@@ -202,20 +214,41 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
-      Long poolId) {
+      String poolView) {
+    PoolHash poolHash = poolHashRepository.findByView(poolView)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    Long poolId = poolHash.getId();
     BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
     Page<PoolDetailEpochProjection> epochOfPoolPage = poolHashRepository.findEpochByPool(poolId,
         pageable);
     List<PoolDetailEpochResponse> epochOfPools = epochOfPoolPage.stream()
         .map(PoolDetailEpochResponse::new).collect(Collectors.toList());
+    Set<Integer> epochNoInt = epochOfPoolPage.stream().map(PoolDetailEpochProjection::getEpochNo)
+        .collect(
+            Collectors.toSet());
+    Set<Long> epochNoLg = epochNoInt.stream().map(Long::valueOf).collect(Collectors.toSet());
+    List<EpochStakeProjection> epochStakeProjections = epochStakeRepository.totalStakeByEpochNoAndPool(
+        epochNoInt, poolId);
+    Map<Integer, BigDecimal> epochStakeProjectionMap = epochStakeProjections.stream()
+        .collect(Collectors.toMap(EpochStakeProjection::getEpochNo,
+            EpochStakeProjection::getTotalStake));
+    List<EpochStakeProjection> rewardStakeProjections = rewardRepository.totalRewardStakeByEpochNoAndPool(
+        epochNoLg, poolId);
+    Map<Integer, BigDecimal> rewardStakeProjectionMap = rewardStakeProjections.stream()
+        .collect(Collectors.toMap(EpochStakeProjection::getEpochNo,
+            EpochStakeProjection::getTotalStake));
+    List<Epoch> epochs = epochRepository.findFeeByEpochNo(epochNoInt);
+    Map<Integer, BigDecimal> feeMap = epochs.stream()
+        .collect(Collectors.toMap(Epoch::getNo, Epoch::getFees));
     epochOfPools.forEach(epochOfPool -> {
       epochOfPool.setStakeAmount(
-          epochStakeRepository.totalStakeByEpochNoAndPool(epochOfPool.getEpoch(), poolId));
+          epochStakeProjectionMap.get(epochOfPool.getEpoch()));
       epochOfPool.setDelegators(
-          rewardRepository.totalRewardStakeByEpochNoAndPool(Long.valueOf(epochOfPool.getEpoch()),
-              poolId));
-      epochOfPool.setFee(epochRepository.findFeeByEpochNo(epochOfPool.getEpoch()));
+          rewardStakeProjectionMap.get(epochOfPool.getEpoch()));
+      epochOfPool.setFee(feeMap.get(epochOfPool.getEpoch()));
+
     });
+
     epochRes.setData(epochOfPools);
     epochRes.setTotalItems(epochOfPoolPage.getTotalElements());
     return epochRes;
@@ -248,7 +281,10 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(Long poolId) {
+  public PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String poolView) {
+    PoolHash poolHash = poolHashRepository.findByView(poolView)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    Long poolId = poolHash.getId();
     EpochChartResponse epochChart = new EpochChartResponse();
     List<EpochChartProjection> epochDataCharts = epochStakeRepository.getDataForEpochChart(poolId);
     if (!epochDataCharts.isEmpty()) {
@@ -282,23 +318,25 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(
-      Pageable pageable, Long poolId) {
+      Pageable pageable, String poolView) {
+    PoolHash poolHash = poolHashRepository.findByView(poolView)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    Long poolId = poolHash.getId();
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
     Page<PoolDetailDelegatorProjection> delegatorPage = delegationRepository.getAllDelegatorByPool(
         poolId, pageable);
     if (!delegatorPage.isEmpty()) {
       List<PoolDetailDelegatorResponse> delegatorList = delegatorPage.stream()
           .map(PoolDetailDelegatorResponse::new).collect(Collectors.toList());
-      delegatorList.forEach(delegator -> {
-        PoolDetailDelegatorProjection dgTimeAndFee = delegationRepository.getTimeAndFeeByDelegator(
-            delegator.getId());
-        if (Objects.nonNull(dgTimeAndFee)) {
-          delegator.setTime(dgTimeAndFee.getTime());
-          delegator.setFee(dgTimeAndFee.getFee());
-        }
-        delegator.setTotalStake(
-            epochStakeRepository.totalStakeByAddressAndPool(delegator.getStakeAddressId(), poolId));
-      });
+      Set<Long> stakeAddress = delegatorList.stream()
+          .map(PoolDetailDelegatorResponse::getStakeAddressId).collect(
+              Collectors.toSet());
+      List<StakeAddressProjection> stakeAddressProjections = epochStakeRepository.totalStakeByAddressAndPool(
+          stakeAddress, poolId);
+      Map<Long, StakeAddressProjection> stakeAddressProjectionMap = stakeAddressProjections.stream()
+          .collect(Collectors.toMap(StakeAddressProjection::getAddress, Function.identity()));
+      delegatorList.forEach(delegator -> delegator.setTotalStake(
+          stakeAddressProjectionMap.get(delegator.getStakeAddressId()).getTotalStake()));
       delegatorResponse.setTotalItems(delegatorPage.getTotalElements());
       delegatorResponse.setData(delegatorList);
     }
@@ -326,26 +364,26 @@ public class DelegationServiceImpl implements DelegationService {
     Set<Long> blockIds = poolTxRes.stream().map(PoolTxResponse::getBlock)
         .collect(Collectors.toSet());
     List<TxPoolProjection> txPoolProjections = poolHashRepository.getDataForPoolTx(blockIds);
+    Map<Long, TxPoolProjection> txPoolProjectionMap = txPoolProjections.stream()
+        .collect(Collectors.toMap(TxPoolProjection::getBlockId, Function.identity()));
     List<BlockOwnerProjection> blockOwnerProjections = poolOwnerRepository.getStakeKeyList(
         blockIds);
+    Map<Long, List<BlockOwnerProjection>> blockOwnerProjectionMap = blockOwnerProjections.stream()
+        .collect(Collectors.groupingBy(BlockOwnerProjection::getBlockId));
+    Map<Long, Set<String>> stakeKeyStrMap = new HashMap<>();
+    blockOwnerProjectionMap.forEach((k, v) -> stakeKeyStrMap.put(k,
+        v.stream().map(BlockOwnerProjection::getAddress).collect(Collectors.toSet())));
     poolTxRes.forEach(pool -> {
-      txPoolProjections.stream()
-          .filter(txPoolProjection -> txPoolProjection.getBlockId().equals(pool.getBlock()))
-          .forEach(txPoolProjection -> {
-            pool.setPoolName(getNameValueFromJson(txPoolProjection.getPoolName()));
-            pool.setCost(txPoolProjection.getCost());
-            pool.setPledge(txPoolProjection.getPledge());
-            pool.setMargin(txPoolProjection.getMargin());
-          });
-      Set<String> stakeKeys = new HashSet<>();
-      blockOwnerProjections.stream()
-          .filter(blockOwnerProjection -> blockOwnerProjection.getBlockId().equals(pool.getBlock()))
-          .forEach(blockOwnerProjection -> {
-            stakeKeys.add(blockOwnerProjection.getAddress());
-          });
-      pool.setStakeKey(stakeKeys);
+      TxPoolProjection txPool = txPoolProjectionMap.get(pool.getBlock());
+      if (Objects.nonNull(txPool)) {
+        pool.setPoolName(
+            getNameValueFromJson(txPool.getPoolName()));
+        pool.setCost(txPool.getCost());
+        pool.setPledge(txPool.getPledge());
+        pool.setMargin(txPool.getMargin());
+      }
+      pool.setStakeKey(stakeKeyStrMap.get(pool.getBlock()));
     });
-
   }
 
   /**

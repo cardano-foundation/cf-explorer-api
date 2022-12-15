@@ -35,7 +35,7 @@ public interface DelegationService {
    * @param poolId
    * @return PoolDetailHeaderResponse
    */
-  PoolDetailHeaderResponse getDataForPoolDetail(Long poolId);
+  PoolDetailHeaderResponse getDataForPoolDetail(String poolView);
 
   /**
    * Get detail pool epoch list for delegate pools detail
@@ -44,7 +44,7 @@ public interface DelegationService {
    * @return PoolDetailEpochResponse
    */
   BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
-      Long poolId);
+      String poolView);
 
   /**
    * Get pool registration list
@@ -68,7 +68,7 @@ public interface DelegationService {
    * @param poolId
    * @return PoolDetailAnalyticsResponse
    */
-  PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(Long poolId);
+  PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String poolView);
 
   /**
    * Get detail pool delegator list for delegate pools detail
@@ -77,7 +77,7 @@ public interface DelegationService {
    * @return PoolDetailDelegatorsResponse
    */
   BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Pageable pageable,
-      Long poolId);
+      String poolView);
 
   /**
    * Find Top {number} (default 3) Pool Delegation
