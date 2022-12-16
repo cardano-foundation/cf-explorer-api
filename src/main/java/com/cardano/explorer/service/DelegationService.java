@@ -6,7 +6,6 @@ import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailEpochResponse;
 import com.cardano.explorer.model.response.pool.PoolDetailHeaderResponse;
 import com.cardano.explorer.model.response.pool.PoolResponse;
-import com.cardano.explorer.model.response.pool.PoolTxResponse;
 import com.cardano.explorer.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +31,7 @@ public interface DelegationService {
   /**
    * Get detail pool for delegate pools detail
    *
-   * @param poolId
+   * @param poolView
    * @return PoolDetailHeaderResponse
    */
   PoolDetailHeaderResponse getDataForPoolDetail(String poolView);
@@ -40,32 +39,16 @@ public interface DelegationService {
   /**
    * Get detail pool epoch list for delegate pools detail
    *
-   * @param poolId
+   * @param poolView
    * @return PoolDetailEpochResponse
    */
   BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
       String poolView);
 
   /**
-   * Get pool registration list
-   *
-   * @param pageable
-   * @return PoolTxResponse
-   */
-  BaseFilterResponse<PoolTxResponse> getDataForPoolRegistration(Pageable pageable);
-
-  /**
-   * Get pool de registration list
-   *
-   * @param pageable
-   * @return PoolTxResponse
-   */
-  BaseFilterResponse<PoolTxResponse> getDataForPoolDeRegistration(Pageable pageable);
-
-  /**
    * Get detail pool analytics for delegate pools detail
    *
-   * @param poolId
+   * @param poolView
    * @return PoolDetailAnalyticsResponse
    */
   PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String poolView);
@@ -73,7 +56,7 @@ public interface DelegationService {
   /**
    * Get detail pool delegator list for delegate pools detail
    *
-   * @param poolId,pageable
+   * @param poolView,pageable
    * @return PoolDetailDelegatorsResponse
    */
   BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Pageable pageable,

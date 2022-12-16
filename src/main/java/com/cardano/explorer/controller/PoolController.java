@@ -2,7 +2,7 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.PoolTxResponse;
-import com.cardano.explorer.service.DelegationService;
+import com.cardano.explorer.service.PoolRegistrationService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -17,17 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PoolController {
 
-  private final DelegationService delegationService;
+  private final PoolRegistrationService poolRegistrationService;
 
   @GetMapping("/registration")
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(delegationService.getDataForPoolRegistration(pageable));
+    return ResponseEntity.ok(poolRegistrationService.getDataForPoolRegistration(pageable));
   }
 
   @GetMapping("/de-registration")
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(delegationService.getDataForPoolDeRegistration(pageable));
+    return ResponseEntity.ok(poolRegistrationService.getDataForPoolDeRegistration(pageable));
   }
 }
