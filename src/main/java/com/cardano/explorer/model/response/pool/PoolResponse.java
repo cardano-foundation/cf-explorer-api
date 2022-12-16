@@ -1,5 +1,7 @@
 package com.cardano.explorer.model.response.pool;
 
+import com.cardano.explorer.json.serialize.PercentSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
@@ -23,12 +25,14 @@ public class PoolResponse implements Serializable {
 
   private Double reward;
 
+  @JsonSerialize(using = PercentSerializer.class)
   private Double feePercent;
 
   private BigDecimal feeAmount;
 
   private BigDecimal pledge;
 
+  @JsonSerialize(using = PercentSerializer.class)
   private Double saturation;
 
 }
