@@ -39,7 +39,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value =
       "SELECT ph.view AS poolView, po.json AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK"
-          + ", ad.utxo as utxo "
+          + ", ad.utxo AS utxo, pu.margin AS margin "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "

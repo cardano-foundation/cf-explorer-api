@@ -15,7 +15,7 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private String tickerName;
 
-  private String poolView;
+  private String hashView;
 
   private Timestamp createDate;
 
