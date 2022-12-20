@@ -9,6 +9,7 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
+import com.cardano.explorer.model.response.token.TokenMetadataResponse;
 import com.cardano.explorer.model.response.token.TokenMintTxResponse;
 import com.cardano.explorer.model.response.token.TokenResponse;
 import com.cardano.explorer.projection.AddressInputOutputProjection;
@@ -68,8 +69,18 @@ public class TokenServiceImpl implements TokenService {
   public BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable) {
     BaseFilterResponse<TokenFilterResponse> response = new BaseFilterResponse<>();
     Page<MultiAsset> multiAssets = multiAssetRepository.findAll(pageable);
-    List<TokenFilterResponse> tokenFilterResponses = multiAssets.stream().map(
-        tokenMapper::fromMultiAssetToFilterResponse).collect(Collectors.toList());
+    Set<String> subjects = multiAssets.getContent().stream()
+        .map(item -> item.getPolicy() + item.getName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList
+        = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, TokenMetadataResponse> tokenMetadataResponseMap
+        = assetMetadataList.stream().collect(Collectors.toMap(AssetMetadata::getSubject,
+        assetMetadataMapper::fromAssetMetadata));
+    List<TokenFilterResponse> tokenFilterResponses = multiAssets.stream().map( item -> {
+        TokenFilterResponse tokenFilterResponse = tokenMapper.fromMultiAssetToFilterResponse(item);
+        tokenFilterResponse.setMetadata(tokenMetadataResponseMap.get(item.getPolicy() + item.getName()));
+        return tokenFilterResponse;
+    }).collect(Collectors.toList());
     response.setData(tokenFilterResponses);
 
 

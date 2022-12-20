@@ -31,7 +31,7 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token")
   public BaseFilterResponse<TokenFilterResponse> filter(
-      @ParameterObject @SortDefault(sort = {MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY}, direction = Sort.Direction.DESC) Pageable pageable) {
     return tokenService.filterToken(pageable);
   }
 
