@@ -48,4 +48,6 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "WHERE b.time >= :time "
       + "ORDER BY b.time")
   List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
+
+  List<Tx> findByIdInOrderByIdDesc(List<Long> ids);
 }

@@ -14,4 +14,5 @@ public class TokenResponse {
   private Integer txCount;
   private String supply;
   private LocalDateTime createdOn;
+  private TokenMetadataResponse metadata;
 }

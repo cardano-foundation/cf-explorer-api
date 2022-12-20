@@ -30,7 +30,6 @@ import com.cardano.explorer.repository.CollateralTxInRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
-import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.repository.RedeemerRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
@@ -59,6 +58,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -92,8 +92,6 @@ public class TxServiceImpl implements TxService {
   private final DelegationMapper delegationMapper;
   private final MaTxMintRepository maTxMintRepository;
   private final MaTxMintMapper maTxMintMapper;
-
-  private final MultiAssetRepository multiAssetRepository;
 
   private static final int SUMMARY_SIZE = 4;
   private static final long MINUS_DAYS = 15;
@@ -421,12 +419,11 @@ public class TxServiceImpl implements TxService {
       Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputOutputMap) {
     List<TxOutResponse> uTxOs = new ArrayList<>(addressInputOutputMap.keySet());
     for (TxOutResponse uTxO : uTxOs) {
-      List<TxMintingResponse> tokens = addressInputOutputMap.get(uTxO).stream().map(
+      List<TxMintingResponse> tokens = addressInputOutputMap.get(uTxO).stream().
+          filter(token -> Objects.nonNull(token.getAssetId())).map(
           maTxMintMapper::fromAddressInputOutputProjection
       ).collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(tokens)) {
-        uTxO.setTokens(tokens);
-      }
+      uTxO.setTokens(tokens);
     }
     return uTxOs;
   }
@@ -459,6 +456,7 @@ public class TxServiceImpl implements TxService {
             .address(key)
             .value(value)
             .tokens(addressTokenMap.get(key).stream()
+                .filter(token -> Objects.nonNull(token.getAssetId()))
                 .map(maTxMintMapper::fromAddressInputOutputProjection).collect(Collectors.toList()))
             .build())
     );
