@@ -2,11 +2,14 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.model.response.token.TokenMintTxResponse;
 import com.cardano.explorer.model.response.token.TokenResponse;
 import com.cardano.explorer.service.TokenService;
+import com.sotatek.cardano.common.entity.BaseEntity_;
+import com.sotatek.cardano.common.entity.MultiAsset_;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
@@ -28,7 +31,7 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token")
   public BaseFilterResponse<TokenFilterResponse> filter(
-      @ParameterObject @SortDefault(sort = {"supply"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @SortDefault(sort = {MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) {
     return tokenService.filterToken(pageable);
   }
 
@@ -43,15 +46,23 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token mint transaction")
   public BaseFilterResponse<TokenMintTxResponse> getTokenMintTx(@PathVariable String tokenId,
-      @ParameterObject @SortDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @SortDefault(sort = {BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
     return tokenService.getMintTxs(tokenId, pageable);
   }
 
   @GetMapping("/{tokenId}/top_holders")
   @LogMessage
-  @Operation(summary = "Filter holders of token")
+  @Operation(summary = "Filter holders by token")
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(@PathVariable String tokenId,
       @ParameterObject Pageable pageable) {
     return tokenService.getTopHolders(tokenId, pageable);
+  }
+
+  @GetMapping("/{tokenId}/txs")
+  @LogMessage
+  @Operation(summary = "Filter transaction by token")
+  public BaseFilterResponse<TxFilterResponse> getTransactions(@PathVariable String tokenId,
+      @ParameterObject Pageable pageable) {
+    return tokenService.getTxs(tokenId, pageable);
   }
 }

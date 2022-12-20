@@ -12,6 +12,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", imports={HexUtils.class})
 public interface TokenMapper {
   @Mapping(target = "displayName", expression = "java(HexUtils.fromHex(multiAsset.getName()))")
+  @Mapping(target = "createdOn", source = "time")
   TokenFilterResponse fromMultiAssetToFilterResponse(MultiAsset multiAsset);
 
   @Mapping(target = "displayName", expression = "java(HexUtils.fromHex(multiAsset.getName()))")

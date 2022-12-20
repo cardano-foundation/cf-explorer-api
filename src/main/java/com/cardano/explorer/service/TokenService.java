@@ -1,6 +1,7 @@
 package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.model.response.token.TokenMintTxResponse;
@@ -43,4 +44,11 @@ public interface TokenService {
    * @return list addresses hold token in this page
    */
   BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable);
+
+  /** Get transaction by token
+   * @param tokenId fingerprint of token
+   * @param pageable page information
+   * @return list transaction of token in this page
+   */
+  BaseFilterResponse<TxFilterResponse> getTxs(String tokenId, Pageable pageable);
 }

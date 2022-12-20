@@ -47,6 +47,7 @@ spring:
     web:
       pageable:
         default-page-size: 20
+        max-page-size: 50
 
 rsa:
   key:
