@@ -120,7 +120,7 @@ public class DelegationServiceImpl implements DelegationService {
     response.setData(
         poolIdPage.stream().map(pool -> PoolResponse.builder().poolId(pool.getPoolView())
                 .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
-                .pledge(pool.getPledge()).feeAmount(pool.getFee())
+                .pledge(pool.getPledge()).feeAmount(pool.getFee()).feePercent(pool.getMargin())
                 .saturation(getSaturation(pool.getPoolSize(),
                     getStakeLimit(pool.getUtxo(), pool.getParamK())).doubleValue()).build())
             .collect(Collectors.toList()));
@@ -154,7 +154,7 @@ public class DelegationServiceImpl implements DelegationService {
               .reward(BigInteger.ZERO.doubleValue())
               .saturation(saturation.doubleValue())
               .feeAmount(pool.getFee())
-              .feePercent(BigInteger.ZERO.doubleValue())
+              .feePercent(pool.getMargin())
               .pledge(pool.getPledge())
               .build();
         })
@@ -169,7 +169,7 @@ public class DelegationServiceImpl implements DelegationService {
     PoolHash poolHash = poolHashRepository.findByView(poolView)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
-    poolDetailResponse.setPoolView(poolHash.getHashRaw());
+    poolDetailResponse.setHashView(poolHash.getHashRaw());
     Optional<PoolOfflineData> poolOffOpt = poolOfflineDataRepository.findFirstByPoolOrderByIdDesc(
         poolHash);
     if (poolOffOpt.isPresent()) {

@@ -60,7 +60,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   @Query(value =
       "SELECT ph.id AS poolView, pod.json AS json, pu.pledge AS pledge, pu.fixedCost AS fee,"
           + " ph.poolSize AS poolSize, ep.optimalPoolCount AS optimalPoolCount, "
-          + "ad.utxo AS utxo "
+          + "ad.utxo AS utxo, pu.margin AS margin "
           + "FROM PoolHash ph "
           + "JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
           + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "

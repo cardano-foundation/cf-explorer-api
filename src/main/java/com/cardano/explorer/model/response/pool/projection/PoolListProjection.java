@@ -17,4 +17,6 @@ public interface PoolListProjection {
   Integer getParamK();
 
   BigDecimal getUtxo();
+
+  Double getMargin();
 }
