@@ -8,6 +8,9 @@ services:
   cardano-explorer-api:
     container_name: cardano-explorer-api
     image: cardano-explorer-api
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - HOST=${HOST}
