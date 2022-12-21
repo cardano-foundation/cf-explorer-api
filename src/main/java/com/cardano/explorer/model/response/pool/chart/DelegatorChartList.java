@@ -1,11 +1,19 @@
 package com.cardano.explorer.model.response.pool.chart;
 
 import com.cardano.explorer.model.response.pool.projection.DelegatorChartProjection;
+import lombok.Getter;
+import lombok.Setter;
 
-public class DelegatorChartList extends BaseChartList<Long, Long> {
+@Getter
+@Setter
+public class DelegatorChartList {
+
+  private Long epochNo;
+
+  private Long numberDelegator;
 
   public DelegatorChartList(DelegatorChartProjection delegatorChart) {
-    this.setXChart(delegatorChart.getChartKey());
-    this.setYChart(delegatorChart.getChartValue());
+    this.epochNo = delegatorChart.getChartKey();
+    this.numberDelegator = delegatorChart.getChartValue();
   }
 }

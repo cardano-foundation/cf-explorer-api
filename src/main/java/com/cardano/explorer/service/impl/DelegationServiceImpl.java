@@ -1,5 +1,6 @@
 package com.cardano.explorer.service.impl;
 
+import com.cardano.explorer.common.constant.CommonConstant;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.PoolDetailDelegatorResponse;
 import com.cardano.explorer.model.response.pool.DelegationHeaderResponse;
@@ -64,8 +65,6 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class DelegationServiceImpl implements DelegationService {
 
-  private static final int SCALE = 5;
-
   private final DelegationRepository delegationRepository;
 
   private final BlockRepository blockRepository;
@@ -82,12 +81,8 @@ public class DelegationServiceImpl implements DelegationService {
 
   private final RewardRepository rewardRepository;
 
-  private static final Integer ZERO = 0;
-
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
-
-  private static final String PREFIX_POOL_NAME = "{\"name\": \"";
 
 
   @Override
@@ -103,7 +98,8 @@ public class DelegationServiceImpl implements DelegationService {
         Long.valueOf(epochNo));
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
         .liveStake(totalStake).delegators(delegators)
-        .countDownEndTime(countDownTime > ZERO ? countDownTime : ZERO).build();
+        .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
+        .build();
   }
 
   @Override
@@ -113,17 +109,17 @@ public class DelegationServiceImpl implements DelegationService {
     String poolView = null;
     if (Boolean.TRUE.equals(StringUtils.isNotBlank(search))) {
       poolView = search;
-      poolName = PREFIX_POOL_NAME + search;
+      poolName = (CommonConstant.PREFIX_POOL_NAME + search).toLowerCase();
     }
     Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(poolView,
         poolName, pageable);
-    response.setData(
-        poolIdPage.stream().map(pool -> PoolResponse.builder().poolId(pool.getPoolView())
+    response.setData(poolIdPage.stream().map(
+            pool -> PoolResponse.builder().poolId(pool.getPoolView())
                 .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
                 .pledge(pool.getPledge()).feeAmount(pool.getFee()).feePercent(pool.getMargin())
                 .saturation(getSaturation(pool.getPoolSize(),
                     getStakeLimit(pool.getUtxo(), pool.getParamK())).doubleValue()).build())
-            .collect(Collectors.toList()));
+        .collect(Collectors.toList()));
     response.setTotalItems(poolIdPage.getTotalElements());
     return response;
   }
@@ -147,18 +143,11 @@ public class DelegationServiceImpl implements DelegationService {
           BigDecimal poolSize = pool.getPoolSize();
           BigDecimal saturation = getSaturation(poolSize, stakeLimit);
 
-          return PoolResponse.builder()
-              .poolId(pool.getPoolView())
-              .poolName(poolName)
-              .poolSize(pool.getPoolSize())
-              .reward(BigInteger.ZERO.doubleValue())
-              .saturation(saturation.doubleValue())
-              .feeAmount(pool.getFee())
-              .feePercent(pool.getMargin())
-              .pledge(pool.getPledge())
-              .build();
-        })
-        .sorted(((o1, o2) -> o2.getPoolSize().compareTo(o1.getPoolSize())))
+          return PoolResponse.builder().poolId(pool.getPoolView()).poolName(poolName)
+              .poolSize(pool.getPoolSize()).reward(BigInteger.ZERO.doubleValue())
+              .saturation(saturation.doubleValue()).feeAmount(pool.getFee())
+              .feePercent(pool.getMargin()).pledge(pool.getPledge()).build();
+        }).sorted(((o1, o2) -> o2.getPoolSize().compareTo(o1.getPoolSize())))
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
   }
@@ -179,16 +168,16 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setPoolSize(poolHash.getPoolSize());
     Page<Timestamp> createdTime = blockRepository.getTimeCreatedPool(poolId, PageRequest.of(0, 1));
     if (!createdTime.isEmpty()) {
-      poolDetailResponse.setCreateDate(createdTime.toList().get(ZERO));
+      poolDetailResponse.setCreateDate(createdTime.toList().get(CommonConstant.ZERO));
     }
     poolDetailResponse.setRewardAccounts(poolUpdateRepository.findRewardAccountByPool(poolId));
     poolDetailResponse.setOwnerAccounts(poolUpdateRepository.findOwnerAccountByPool(poolId));
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
     List<PoolUpdate> poolUpdates = poolUpdateRepository.findAllByPoolId(poolId);
     if (Objects.nonNull(poolUpdates) && !poolUpdates.isEmpty()) {
-      poolDetailResponse.setCost(poolUpdates.get(ZERO).getFixedCost());
-      poolDetailResponse.setMargin(poolUpdates.get(ZERO).getMargin());
-      poolDetailResponse.setPledge(poolUpdates.get(ZERO).getPledge());
+      poolDetailResponse.setCost(poolUpdates.get(CommonConstant.ZERO).getFixedCost());
+      poolDetailResponse.setMargin(poolUpdates.get(CommonConstant.ZERO).getMargin());
+      poolDetailResponse.setPledge(poolUpdates.get(CommonConstant.ZERO).getPledge());
     }
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
@@ -207,27 +196,22 @@ public class DelegationServiceImpl implements DelegationService {
     List<PoolDetailEpochResponse> epochOfPools = epochOfPoolPage.stream()
         .map(PoolDetailEpochResponse::new).collect(Collectors.toList());
     Set<Integer> epochNoInt = epochOfPoolPage.stream().map(PoolDetailEpochProjection::getEpochNo)
-        .collect(
-            Collectors.toSet());
+        .collect(Collectors.toSet());
     Set<Long> epochNoLg = epochNoInt.stream().map(Long::valueOf).collect(Collectors.toSet());
     List<EpochStakeProjection> epochStakeProjections = epochStakeRepository.totalStakeByEpochNoAndPool(
         epochNoInt, poolId);
-    Map<Integer, BigDecimal> epochStakeProjectionMap = epochStakeProjections.stream()
-        .collect(Collectors.toMap(EpochStakeProjection::getEpochNo,
-            EpochStakeProjection::getTotalStake));
+    Map<Integer, BigDecimal> epochStakeProjectionMap = epochStakeProjections.stream().collect(
+        Collectors.toMap(EpochStakeProjection::getEpochNo, EpochStakeProjection::getTotalStake));
     List<EpochStakeProjection> rewardStakeProjections = rewardRepository.totalRewardStakeByEpochNoAndPool(
         epochNoLg, poolId);
-    Map<Integer, BigDecimal> rewardStakeProjectionMap = rewardStakeProjections.stream()
-        .collect(Collectors.toMap(EpochStakeProjection::getEpochNo,
-            EpochStakeProjection::getTotalStake));
+    Map<Integer, BigDecimal> rewardStakeProjectionMap = rewardStakeProjections.stream().collect(
+        Collectors.toMap(EpochStakeProjection::getEpochNo, EpochStakeProjection::getTotalStake));
     List<Epoch> epochs = epochRepository.findFeeByEpochNo(epochNoInt);
     Map<Integer, BigDecimal> feeMap = epochs.stream()
         .collect(Collectors.toMap(Epoch::getNo, Epoch::getFees));
     epochOfPools.forEach(epochOfPool -> {
-      epochOfPool.setStakeAmount(
-          epochStakeProjectionMap.get(epochOfPool.getEpoch()));
-      epochOfPool.setDelegators(
-          rewardStakeProjectionMap.get(epochOfPool.getEpoch()));
+      epochOfPool.setStakeAmount(epochStakeProjectionMap.get(epochOfPool.getEpoch()));
+      epochOfPool.setDelegators(rewardStakeProjectionMap.get(epochOfPool.getEpoch()));
       epochOfPool.setFee(feeMap.get(epochOfPool.getEpoch()));
 
     });
@@ -286,12 +270,11 @@ public class DelegationServiceImpl implements DelegationService {
       List<PoolDetailDelegatorResponse> delegatorList = delegatorPage.stream()
           .map(PoolDetailDelegatorResponse::new).collect(Collectors.toList());
       Set<Long> stakeAddress = delegatorList.stream()
-          .map(PoolDetailDelegatorResponse::getStakeAddressId).collect(
-              Collectors.toSet());
+          .map(PoolDetailDelegatorResponse::getStakeAddressId).collect(Collectors.toSet());
       List<StakeAddressProjection> stakeAddressProjections = epochStakeRepository.totalStakeByAddressAndPool(
           stakeAddress, poolId);
-      Map<Long, BigDecimal> stakeAddressProjectionMap = stakeAddressProjections.stream()
-          .collect(Collectors.toMap(StakeAddressProjection::getAddress,
+      Map<Long, BigDecimal> stakeAddressProjectionMap = stakeAddressProjections.stream().collect(
+          Collectors.toMap(StakeAddressProjection::getAddress,
               StakeAddressProjection::getTotalStake));
       delegatorList.forEach(delegator -> delegator.setTotalStake(
           stakeAddressProjectionMap.get(delegator.getStakeAddressId())));
@@ -320,13 +303,16 @@ public class DelegationServiceImpl implements DelegationService {
    * @return BigDecimal
    */
   private BigDecimal getStakeLimit(BigDecimal totalAda, Integer k) {
-    if (Objects.isNull(k)) {
+    if (Objects.isNull(k) || Objects.isNull(totalAda)) {
       return BigDecimal.ZERO;
     }
-    return totalAda.divide(new BigDecimal(k), SCALE, RoundingMode.HALF_UP);
+    return totalAda.divide(new BigDecimal(k), CommonConstant.SCALE, RoundingMode.HALF_UP);
   }
 
   private static BigDecimal getSaturation(BigDecimal poolSize, BigDecimal stakeLimit) {
-    return poolSize.divide(stakeLimit, SCALE, RoundingMode.HALF_UP);
+    if (stakeLimit.equals(BigDecimal.ZERO) || Objects.isNull(poolSize)) {
+      return BigDecimal.ZERO;
+    }
+    return poolSize.divide(stakeLimit, CommonConstant.SCALE, RoundingMode.HALF_UP);
   }
 }
