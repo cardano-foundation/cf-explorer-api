@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class DelegationController {
 
   private final DelegationService delegationService;
-  private static final int TOP_DELEGATION_SIZE = 3;
 
   @GetMapping("/header")
   public ResponseEntity<DelegationHeaderResponse> getDataForDelegationHeader() {
