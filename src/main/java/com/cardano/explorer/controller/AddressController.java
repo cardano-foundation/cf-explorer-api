@@ -39,17 +39,10 @@ public class AddressController {
     return addressService.getAddressAnalytics(address, type);
   }
 
-  @GetMapping("/max-balance/{address}")
+  @GetMapping("/min-max-balance/{address}")
   @LogMessage
-  @Operation(summary = "Get the highest balance address")
-  public BigDecimal getAddressMaxBalance(@PathVariable String address) {
-    return addressService.getAddressMaxBalance(address);
-  }
-
-  @GetMapping("/min-balance/{address}")
-  @LogMessage
-  @Operation(summary = "Get the lowest balance address")
-  public BigDecimal getAddressMinBalance(@PathVariable String address) {
-    return addressService.getAddressMinBalance(address);
+  @Operation(summary = "Get the highest and lowest balance address")
+  public List<BigDecimal> getAddressMinMaxBalance(@PathVariable String address) {
+    return addressService.getAddressMinMaxBalance(address);
   }
 }
