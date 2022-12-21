@@ -52,15 +52,6 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " WHERE txIn.txInput = :tx")
   List<AddressInputOutputProjection> getTxAddressInputInfo(Tx tx);
 
-  @Query("SELECT COALESCE(SUM(value), 0) AS value FROM TxOut WHERE address = :address")
-  Optional<BigDecimal> getAddressTotalOutput(String address);
-
-  @Query("SELECT COALESCE(SUM(txOut.value), 0) AS value "
-      + " FROM TxOut txOut "
-      + " INNER JOIN TxIn txIn ON txOut.tx = txIn.txOut AND txIn.txOutIndex = txOut.index "
-      + " WHERE txOut.address = :address")
-  Optional<BigDecimal> getAddressTotalInput(String address);
-
   @Query("SELECT COALESCE(SUM(txOut.value), 0) AS value FROM TxOut txOut"
       + " INNER JOIN StakeAddress sa ON sa.id = txOut.stakeAddress.id"
       + " WHERE sa.view = :stakeAddress")
@@ -71,6 +62,4 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " INNER JOIN StakeAddress sa ON sa.id = txOut.stakeAddress.id"
       + " WHERE sa.view = :stakeAddress")
   Optional<BigDecimal> getStakeAddressTotalInput(String stakeAddress);
-
-  Integer countByAddress(String address);
 }

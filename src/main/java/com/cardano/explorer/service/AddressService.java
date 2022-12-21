@@ -26,18 +26,10 @@ public interface AddressService {
   List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type);
 
   /**
-   * Get the highest balance by address
-   *
-   * @param address wallet address
-   * @return the highest balance
-   */
-  BigDecimal getAddressMaxBalance(String address);
-
-  /**
-   * Get the lowest balance by address
+   * Get the highest and lowest balance by address
    *
    * @param address wallet address
    * @return the lowest balance
    */
-  BigDecimal getAddressMinBalance(String address);
+  List<BigDecimal> getAddressMinMaxBalance(String address);
 }

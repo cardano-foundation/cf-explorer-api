@@ -7,32 +7,32 @@ import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
-import com.cardano.explorer.repository.custom.impl.CustomAddressTxBalanceRepositoryImpl;
 import com.cardano.explorer.service.AddressService;
 import com.sotatek.cardano.ledgersync.common.address.ShelleyAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class AddressServiceImpl implements AddressService {
 
   private final MultiAssetRepository multiAssetRepository;
 
   private final AddressTxBalanceRepository addressTxBalanceRepository;
-  private final CustomAddressTxBalanceRepositoryImpl customAddressTxBalanceRepository;
   private final TokenMapper tokenMapper;
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
 
@@ -57,9 +57,9 @@ public class AddressServiceImpl implements AddressService {
       }
     }
     addressResponse.setAddress(address);
-    var balance = customAddressTxBalanceRepository.getBalanceByAddressAndTime(address,
-        Timestamp.valueOf(LocalDateTime.now()));
-    addressResponse.setBalance(balance);
+    var currentBalance = addressTxBalanceRepository.getBalanceByAddressAndTime(address,
+        Timestamp.valueOf(LocalDate.now().atTime(LocalTime.MAX)));
+    addressResponse.setBalance(currentBalance);
     addressResponse.setTxCount(txCount);
     addressResponse.setTokens(multiAssetRepository.findTokenByAddress(address).stream().map(
         tokenMapper::fromAddressTokenProjection
@@ -103,7 +103,7 @@ public class AddressServiceImpl implements AddressService {
     dates.forEach(
         item -> {
           AddressAnalyticsResponse response = new AddressAnalyticsResponse();
-          var balance = customAddressTxBalanceRepository.getBalanceByAddressAndTime(address,
+          var balance = addressTxBalanceRepository.getBalanceByAddressAndTime(address,
               Timestamp.valueOf(item.atTime(LocalTime.MAX)));
           if(Objects.isNull(balance)) {
             response.setValue(BigDecimal.ZERO);
@@ -118,13 +118,21 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  public BigDecimal getAddressMaxBalance(String address) {
-    return addressTxBalanceRepository.getMaxBalanceByAddress(address);
-  }
-
-
-  @Override
-  public BigDecimal getAddressMinBalance(String address) {
-    return addressTxBalanceRepository.getMinBalanceByAddress(address);
+  public List<BigDecimal> getAddressMinMaxBalance(String address) {
+    List<BigDecimal> balanceList = addressTxBalanceRepository.findAllByAddress(address);
+    BigDecimal maxBalance = balanceList.get(0);
+    BigDecimal minBalance = balanceList.get(0);
+    BigDecimal sumBalance = balanceList.get(0);
+    balanceList.remove(0);
+    for(BigDecimal balance : balanceList) {
+      sumBalance = sumBalance.add(balance);
+      if(sumBalance.compareTo(maxBalance) > 0) {
+        maxBalance = sumBalance;
+      }
+      if(sumBalance.compareTo(minBalance) < 0) {
+        minBalance = sumBalance;
+      }
+    }
+    return Arrays.asList(minBalance, maxBalance);
   }
 }
