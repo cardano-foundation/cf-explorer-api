@@ -268,7 +268,7 @@ public class TxServiceImpl implements TxService {
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
 
-    Epoch epoch = epochRepository.findByNo(txResponse.getTx().getEpochNo()).orElseThrow(
+    Epoch epoch = epochRepository.findFirstByNo(txResponse.getTx().getEpochNo()).orElseThrow(
         () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
     );
     txResponse.getTx().setMaxEpochSlot(epoch.getMaxSlot());
