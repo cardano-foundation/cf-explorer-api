@@ -12,7 +12,7 @@ import org.mapstruct.Mapping;
 public interface MaTxMintMapper {
 
   @Mapping(target = "assetName", expression = "java(HexUtils.fromHex(maTxMint.getIdent().getName()))")
-  @Mapping(target = "policy.policyId", source = "ident.policy")
+  @Mapping(target = "policy", source = "ident.policy")
   @Mapping(target = "assetQuantity", source = "quantity")
   @Mapping(target = "assetId", expression = "java(maTxMint.getIdent().getFingerprint())")
   TxMintingResponse fromMaTxMint(MaTxMint maTxMint);

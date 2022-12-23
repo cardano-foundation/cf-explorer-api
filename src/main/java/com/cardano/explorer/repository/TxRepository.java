@@ -40,13 +40,13 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "LEFT JOIN TxOut inp ON inp.tx.id = txi.txOutputId AND "
       + "inp.index = txi.txOutIndex "
       + "WHERE tx.id IN :txIds "
-      + "ORDER BY b.blockNo DESC, txi.txOutputId DESC")
+      + "ORDER BY b.blockNo DESC, tx.blockIndex DESC")
   List<TxIOProjection> findLatestTxIO(Collection<Long> txIds);
 
   @Query(value = "SELECT b.time as time, b.txCount as transactionNo "
       + "FROM Block b "
       + "WHERE b.time >= :time "
-      + "ORDER BY b.time")
+      + "ORDER BY b.time DESC")
   List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
 
   List<Tx> findByIdInOrderByIdDesc(List<Long> ids);

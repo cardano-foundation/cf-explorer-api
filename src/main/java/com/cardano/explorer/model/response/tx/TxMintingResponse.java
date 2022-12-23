@@ -15,5 +15,5 @@ public class TxMintingResponse {
   private String assetName;
   private BigDecimal assetQuantity;
   private String assetId;
-  private TxPolicyResponse policy;
+  private String policy;
 }
