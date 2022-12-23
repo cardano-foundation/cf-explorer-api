@@ -1,33 +1,52 @@
 package com.cardano.explorer.service.impl;
 
+import com.cardano.explorer.common.enumeration.StakeAddressStatus;
+import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.address.DelegationPoolResponse;
+import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.model.response.stake.TrxBlockEpochStake;
+import com.cardano.explorer.projection.StakeDelegationProjection;
+import com.cardano.explorer.projection.StakeHistoryProjection;
+import com.cardano.explorer.projection.StakeTreasuryProjection;
+import com.cardano.explorer.projection.StakeWithdrawalProjection;
+import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolOfflineDataRepository;
+import com.cardano.explorer.repository.RewardRepository;
+import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
 import com.cardano.explorer.repository.StakeRegistrationRepository;
+import com.cardano.explorer.repository.TreasuryRepository;
+import com.cardano.explorer.repository.TxOutRepository;
+import com.cardano.explorer.repository.WithdrawalRepository;
 import com.cardano.explorer.service.StakeKeyService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sotatek.cardano.common.entity.PoolOfflineData;
+import com.sotatek.cardano.common.entity.StakeAddress;
+import com.sotatek.cardano.ledgersync.common.address.ShelleyAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class StakeKeyServiceImpl implements StakeKeyService {
+
+  private final DelegationRepository delegationRepository;
 
   private final StakeRegistrationRepository stakeRegistrationRepository;
 
@@ -36,6 +55,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final PoolOfflineDataRepository poolOfflineDataRepository;
 
   private final PoolHashRepository poolHashRepository;
+
+  private final TxOutRepository txOutRepository;
+  private final StakeAddressRepository stakeAddressRepository;
+  private final RewardRepository rewardRepository;
+  private final WithdrawalRepository withdrawalRepository;
+  private final TreasuryRepository treasuryRepository;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -73,6 +98,108 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     response.setData(responseList);
     response.setTotalItems(page.getTotalElements());
     response.setTotalPages(page.getTotalPages());
+    response.setCurrentPage(pageable.getPageNumber());
+    return response;
+  }
+
+  @Transactional(readOnly = true)
+  public StakeAddressResponse getStakeByAddress(String address) {
+    try {
+      ShelleyAddress shelleyAddress = new ShelleyAddress(address);
+      if(!shelleyAddress.containStakeAddress()){
+        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
+      }
+      byte[] addr = shelleyAddress.getStakeReference();
+      ShelleyAddress stake = new ShelleyAddress(addr);
+      return getStake(stake.getAddress());
+    } catch (Exception e) {
+      throw new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND);
+    }
+
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public StakeAddressResponse getStake(String stake) {
+    StakeAddressResponse stakeAddressResponse = new StakeAddressResponse();
+    StakeAddress stakeAddress
+        = stakeAddressRepository.findByView(stake).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    stakeAddressResponse.setStakeAddress(stake);
+    BigDecimal stakeTotalOutput = txOutRepository.getStakeAddressTotalOutput(stake)
+        .orElse(BigDecimal.ZERO);
+    BigDecimal stakeTotalInput = txOutRepository.getStakeAddressTotalInput(stake)
+        .orElse(BigDecimal.ZERO);
+    BigDecimal stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
+        stake).orElse(BigDecimal.ZERO);
+    BigDecimal stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
+        stake).orElse(BigDecimal.ZERO);
+    stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
+    stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
+    stakeAddressResponse.setTotalStake(
+        stakeTotalOutput.subtract(stakeTotalInput).add(stakeAvailableReward)
+            .subtract(stakeRewardWithdrawn));
+    PoolOfflineData poolData = poolOfflineDataRepository.findPoolDataByAddress(stakeAddress)
+        .orElse(null);
+    if (poolData != null) {
+      DelegationPoolResponse poolResponse = DelegationPoolResponse.builder()
+          .poolId(poolData.getPool().getView())
+          .poolName(getNameValueFromJson(poolData.getJson()))
+          .tickerName(poolData.getTickerName())
+          .build();
+      stakeAddressResponse.setStatus(StakeAddressStatus.ACTIVE);
+      stakeAddressResponse.setPool(poolResponse);
+    } else {
+      stakeAddressResponse.setStatus(StakeAddressStatus.DEACTIVATED);
+      stakeAddressResponse.setPool(null);
+    }
+    return stakeAddressResponse;
+  }
+
+  @Override
+  public BaseFilterResponse<StakeDelegationProjection> getDelegationHistories(String stakeKey, Pageable pageable) {
+    BaseFilterResponse<StakeDelegationProjection> response = new BaseFilterResponse<>();
+    Page<StakeDelegationProjection> delegations
+        = delegationRepository.findDelegationByAddress(stakeKey, pageable);
+    response.setData(delegations.getContent());
+    response.setTotalPages(delegations.getTotalPages());
+    response.setTotalItems(delegations.getTotalElements());
+    response.setCurrentPage(pageable.getPageNumber());
+    return response;
+  }
+
+  @Override
+  public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey, Pageable pageable) {
+    BaseFilterResponse<StakeHistoryProjection> response = new BaseFilterResponse<>();
+    Page<StakeHistoryProjection> stakeHistories
+        = stakeAddressRepository.getStakeHistory(stakeKey, pageable);
+    response.setData(stakeHistories.getContent());
+    response.setTotalPages(stakeHistories.getTotalPages());
+    response.setTotalItems(stakeHistories.getTotalElements());
+    response.setCurrentPage(pageable.getPageNumber());
+    return response;
+  }
+
+  @Override
+  public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(String stakeKey, Pageable pageable) {
+    BaseFilterResponse<StakeWithdrawalProjection> response = new BaseFilterResponse<>();
+    Page<StakeWithdrawalProjection> withdrawalHistories
+        = withdrawalRepository.getWithdrawalByAddress(stakeKey, pageable);
+    response.setData(withdrawalHistories.getContent());
+    response.setTotalPages(withdrawalHistories.getTotalPages());
+    response.setTotalItems(withdrawalHistories.getTotalElements());
+    response.setCurrentPage(pageable.getPageNumber());
+    return response;
+  }
+
+  @Override
+  public BaseFilterResponse<StakeTreasuryProjection> getInstantaneousRewards(String stakeKey, Pageable pageable) {
+    BaseFilterResponse<StakeTreasuryProjection> response = new BaseFilterResponse<>();
+    Page<StakeTreasuryProjection> instantaneousRewards
+        = treasuryRepository.getTreasuryByAddress(stakeKey, pageable);
+    response.setData(instantaneousRewards.getContent());
+    response.setTotalPages(instantaneousRewards.getTotalPages());
+    response.setTotalItems(instantaneousRewards.getTotalElements());
     response.setCurrentPage(pageable.getPageNumber());
     return response;
   }

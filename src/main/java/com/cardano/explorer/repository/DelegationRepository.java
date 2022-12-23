@@ -3,6 +3,7 @@ package com.cardano.explorer.repository;
 import com.cardano.explorer.model.response.pool.projection.DelegatorChartProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorProjection;
 import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
+import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.sotatek.cardano.common.entity.Delegation;
 import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.Tx;
@@ -72,4 +73,17 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "ph.poolSize IS NOT NULL "
           + "ORDER BY poolSize DESC ")
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(Pageable pageable);
+
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+      + " block.blockNo as blockNo, block.epochNo as epochNo, poolHash.view as poolId,"
+      + " poolOfflineData.json as poolData"
+      + " FROM Delegation delegation"
+      + " INNER JOIN Tx tx ON delegation.tx = tx"
+      + " INNER JOIN Block block ON tx.block = block"
+      + " INNER JOIN StakeAddress stake ON delegation.address = stake"
+      + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
+      + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.pool = poolHash"
+      + " WHERE stake.view = :stakeKey"
+      + " ORDER BY block.time DESC")
+  Page<StakeDelegationProjection> findDelegationByAddress(String stakeKey, Pageable pageable);
 }

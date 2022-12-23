@@ -1,6 +1,5 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.projection.TokenProjection;
 import com.sotatek.cardano.common.entity.MaTxMint;
 import com.sotatek.cardano.common.entity.MaTxMint_;
 import com.sotatek.cardano.common.entity.MultiAsset;
@@ -17,14 +16,6 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
 
   @EntityGraph(attributePaths = {MaTxMint_.IDENT})
   List<MaTxMint> findByTx(Tx tx);
-
-  @Query("SELECT mint.ident.id as ident, min(block.time) as createdOn"
-      + " FROM MaTxMint mint "
-      + " INNER JOIN Tx tx ON tx = mint.tx"
-      + " INNER JOIN Block block ON tx.blockId = block.id"
-      + " WHERE mint.ident IN :multiAssets"
-      + " GROUP BY mint.ident.id")
-  List<TokenProjection> findCreatedOnByIdentIn(List<MultiAsset> multiAssets);
 
   @Query("SELECT min(block.time) as createdOn"
       + " FROM MaTxMint mint "
