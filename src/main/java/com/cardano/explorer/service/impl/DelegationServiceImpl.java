@@ -18,6 +18,7 @@ import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
 import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolDetailUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
 import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
 import com.cardano.explorer.projection.StakeAddressProjection;
@@ -35,7 +36,6 @@ import com.google.gson.JsonObject;
 import com.sotatek.cardano.common.entity.Epoch;
 import com.sotatek.cardano.common.entity.PoolHash;
 import com.sotatek.cardano.common.entity.PoolOfflineData;
-import com.sotatek.cardano.common.entity.PoolUpdate;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
@@ -173,11 +173,16 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setRewardAccounts(poolUpdateRepository.findRewardAccountByPool(poolId));
     poolDetailResponse.setOwnerAccounts(poolUpdateRepository.findOwnerAccountByPool(poolId));
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
-    List<PoolUpdate> poolUpdates = poolUpdateRepository.findAllByPoolId(poolId);
-    if (Objects.nonNull(poolUpdates) && !poolUpdates.isEmpty()) {
-      poolDetailResponse.setCost(poolUpdates.get(CommonConstant.ZERO).getFixedCost());
-      poolDetailResponse.setMargin(poolUpdates.get(CommonConstant.ZERO).getMargin());
-      poolDetailResponse.setPledge(poolUpdates.get(CommonConstant.ZERO).getPledge());
+    PoolDetailUpdateProjection poolUpdates = poolUpdateRepository.findPoolUpdateByPoolId(poolId);
+    if (Objects.nonNull(poolUpdates)) {
+      poolDetailResponse.setCost(poolUpdates.getCost());
+      poolDetailResponse.setMargin(poolUpdates.getMargin());
+      poolDetailResponse.setPledge(poolUpdates.getPledge());
+      poolDetailResponse.setStakeLimit(
+          getStakeLimit(poolUpdates.getUtxo(), poolUpdates.getParamK()));
+      poolDetailResponse.setSaturation(
+          getSaturation(poolHash.getPoolSize(), poolDetailResponse.getStakeLimit()).doubleValue());
+
     }
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
