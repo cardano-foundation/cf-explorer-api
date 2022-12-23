@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,23 +40,9 @@ public class AddressServiceImpl implements AddressService {
   @Override
   @Transactional(readOnly = true)
   public AddressResponse getAddressDetail(String address) {
-    Integer txCount = addressTxBalanceRepository.countByAddress(address);
     AddressResponse addressResponse = new AddressResponse();
-    try {
-      ShelleyAddress shelleyAddress = new ShelleyAddress(address);
-      if(shelleyAddress.containStakeAddress()){
-        //TO-DO: Move to common
-        byte[] addr = shelleyAddress.getStakeReference();
-        ShelleyAddress stakeShelley = new ShelleyAddress(addr);
-        addressResponse.setStakeAddress(stakeShelley.getAddress());
-      } else {
-        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
-      }
-    } catch (Exception e) {
-      if (txCount.equals(0)) {
-        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
-      }
-    }
+    Integer txCount = addressTxBalanceRepository.countByAddress(address);
+    addressResponse.setStakeAddress(getStakeAddress(address, txCount));
     addressResponse.setAddress(address);
     var currentBalance = addressTxBalanceRepository.getBalanceByAddressAndTime(address,
         Timestamp.valueOf(LocalDate.now().atTime(LocalTime.MAX)));
@@ -68,10 +55,34 @@ public class AddressServiceImpl implements AddressService {
 
   }
 
+  private String getStakeAddress(String address, Integer txCount) {
+    String stakeAddress = null;
+    try {
+      ShelleyAddress shelleyAddress = new ShelleyAddress(address);
+      if(shelleyAddress.containStakeAddress()){
+        //TO-DO: Move to common
+        byte[] addr = shelleyAddress.getStakeReference();
+        ShelleyAddress stakeShelley = new ShelleyAddress(addr);
+        stakeAddress = stakeShelley.getAddress();
+      } else {
+        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
+      }
+    } catch (Exception e) {
+      if (txCount.equals(0)) {
+        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
+      }
+    }
+    return stakeAddress;
+  }
+
   @Override
   @Transactional(readOnly = true)
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type) {
     List<AddressAnalyticsResponse> responses = new ArrayList<>();
+    Integer txCount = addressTxBalanceRepository.countByAddress(address);
+    if(StringUtils.isEmpty(getStakeAddress(address, txCount))) {
+      return responses;
+    }
     LocalDate currentDate = LocalDate.now();
     List<LocalDate> dates = new ArrayList<>();
     Calendar calendar = Calendar.getInstance();
@@ -119,6 +130,10 @@ public class AddressServiceImpl implements AddressService {
 
   @Override
   public List<BigDecimal> getAddressMinMaxBalance(String address) {
+    Integer txCount = addressTxBalanceRepository.countByAddress(address);
+    if(StringUtils.isEmpty(getStakeAddress(address, txCount))) {
+      return new ArrayList<>();
+    }
     List<BigDecimal> balanceList = addressTxBalanceRepository.findAllByAddress(address);
     BigDecimal maxBalance = balanceList.get(0);
     BigDecimal minBalance = balanceList.get(0);
