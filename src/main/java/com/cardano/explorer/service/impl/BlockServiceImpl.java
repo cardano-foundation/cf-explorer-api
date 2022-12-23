@@ -44,17 +44,23 @@ public class BlockServiceImpl implements BlockService {
 
   @Override
   @Transactional(readOnly = true)
-  public BlockResponse getBlockDetail(Long no) {
-    Block block = blockRepository.findByBlockNo(no).orElseThrow(
-        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
-    );
-    BlockResponse blockResponse = blockMapper.blockToBlockResponse(block);
-    List<Tx> txList = block.getTxList();
-    blockResponse.setTotalOutput(
-        txList.stream().map(Tx::getOutSum).reduce(BigDecimal.ZERO, BigDecimal::add));
-    blockResponse.setTotalFees(
-        txList.stream().map(Tx::getFee).reduce(BigDecimal.ZERO, BigDecimal::add));
-    return blockResponse;
+  public BlockResponse getBlockDetail(String no) {
+    try {
+      Long blockNo = Long.parseLong(no);
+      Block block = blockRepository.findFirstByBlockNo(blockNo).orElseThrow(
+          () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+      );
+      BlockResponse blockResponse = blockMapper.blockToBlockResponse(block);
+      List<Tx> txList = block.getTxList();
+      blockResponse.setTotalOutput(
+          txList.stream().map(Tx::getOutSum).reduce(BigDecimal.ZERO, BigDecimal::add));
+      blockResponse.setTotalFees(
+          txList.stream().map(Tx::getFee).reduce(BigDecimal.ZERO, BigDecimal::add));
+      return blockResponse;
+    } catch (NumberFormatException e) {
+      throw new BusinessException(BusinessCode.BLOCK_NOT_FOUND);
+    }
+
   }
 
   @Override
