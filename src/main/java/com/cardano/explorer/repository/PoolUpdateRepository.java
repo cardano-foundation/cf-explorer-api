@@ -1,7 +1,7 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.model.response.pool.projection.PoolDetailUpdateProjection;
 import com.sotatek.cardano.common.entity.PoolUpdate;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,9 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
-
-  @Query(value = "SELECT pu.pledge FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId ORDER BY pu.activeEpochNo DESC")
-  List<BigDecimal> findPledgeByPool(@Param("poolId") Long poolId);
 
   @Query(value =
       "SELECT sa.view FROM PoolUpdate pu JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
@@ -25,6 +22,12 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE pu.poolHash.id = :poolId GROUP BY sa.view")
   List<String> findOwnerAccountByPool(@Param("poolId") Long poolId);
 
-  @Query(value = "SELECT pu FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId ORDER BY pu.activeEpochNo DESC")
-  List<PoolUpdate> findAllByPoolId(@Param("poolId") Long poolId);
+  @Query(value =
+      "SELECT pu.pledge AS pledge, pu.margin AS margin, pu.fixedCost AS cost, ep.optimalPoolCount AS paramK, ap.utxo AS utxo "
+          + "FROM PoolUpdate pu "
+          + "JOIN EpochParam ep ON ep.epochNo = pu.activeEpochNo "
+          + "JOIN AdaPots ap ON ap.epochNo = pu.activeEpochNo "
+          + "WHERE pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId) "
+          + "AND pu.poolHash.id = :poolId")
+  PoolDetailUpdateProjection findPoolUpdateByPoolId(@Param("poolId") Long poolId);
 }

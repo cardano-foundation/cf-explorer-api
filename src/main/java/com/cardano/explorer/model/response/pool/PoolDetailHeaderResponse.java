@@ -33,8 +33,6 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Double reward;
 
-  private Double fee;
-
   private Double ros;
 
   private BigDecimal pledge;
