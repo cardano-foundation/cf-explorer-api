@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
-  Optional<Epoch> findByNo(Integer no);
+  Optional<Epoch> findFirstByNo(Integer no);
 
   @Query(value = "SELECT max(no) FROM Epoch")
   Optional<Integer> findCurrentEpochNo();

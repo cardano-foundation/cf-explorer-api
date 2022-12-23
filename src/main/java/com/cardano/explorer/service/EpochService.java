@@ -15,8 +15,7 @@ public interface EpochService {
    * @param no number of epoch
    * @return epoch information detail
    */
-  EpochResponse getEpochDetail(Integer no);
-
+  EpochResponse getEpochDetail(String no);
 
   /**
    * Get current epoch no

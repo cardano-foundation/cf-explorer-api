@@ -19,7 +19,7 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
     JpaSpecificationExecutor<Block> {
 
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
-  Optional<Block> findByBlockNo(Long no);
+  Optional<Block> findFirstByBlockNo(Long no);
 
   Page<Block> findAll(Pageable pageable);
 

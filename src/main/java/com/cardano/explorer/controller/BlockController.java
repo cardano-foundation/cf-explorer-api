@@ -29,7 +29,7 @@ public class BlockController {
   @LogMessage
   @Operation(summary = "Get a block detail by its no")
   public BlockResponse getBlockDetail(
-      @PathVariable @Parameter(description = "Block number") Long no) {
+      @PathVariable @Parameter(description = "Block number") String no) {
     return blockService.getBlockDetail(no);
   }
 

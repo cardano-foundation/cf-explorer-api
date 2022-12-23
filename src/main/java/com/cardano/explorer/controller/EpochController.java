@@ -29,7 +29,7 @@ public class EpochController {
   @LogMessage
   @Operation(summary = "Get a epoch detail by its no")
   public EpochResponse getEpochDetail(@PathVariable
-  @Parameter(description = "Epoch Number") Integer no) {
+  @Parameter(description = "Epoch Number") String no) {
     return epochService.getEpochDetail(no);
   }
 
