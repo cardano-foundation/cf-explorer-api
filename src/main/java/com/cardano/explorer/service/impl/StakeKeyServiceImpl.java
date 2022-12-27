@@ -11,6 +11,7 @@ import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.projection.StakeTreasuryProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
+import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolOfflineDataRepository;
@@ -21,12 +22,13 @@ import com.cardano.explorer.repository.StakeRegistrationRepository;
 import com.cardano.explorer.repository.TreasuryRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.WithdrawalRepository;
+import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.service.StakeKeyService;
+import com.cardano.explorer.util.AddressUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sotatek.cardano.common.entity.PoolOfflineData;
 import com.sotatek.cardano.common.entity.StakeAddress;
-import com.sotatek.cardano.ledgersync.common.address.ShelleyAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
@@ -46,6 +48,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class StakeKeyServiceImpl implements StakeKeyService {
 
+  private final AddressRepository addressRepository;
+
   private final DelegationRepository delegationRepository;
 
   private final StakeRegistrationRepository stakeRegistrationRepository;
@@ -61,6 +65,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final RewardRepository rewardRepository;
   private final WithdrawalRepository withdrawalRepository;
   private final TreasuryRepository treasuryRepository;
+  private final AddressService addressService;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -105,13 +110,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Transactional(readOnly = true)
   public StakeAddressResponse getStakeByAddress(String address) {
     try {
-      ShelleyAddress shelleyAddress = new ShelleyAddress(address);
-      if(!shelleyAddress.containStakeAddress()){
-        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
-      }
-      byte[] addr = shelleyAddress.getStakeReference();
-      ShelleyAddress stake = new ShelleyAddress(addr);
-      return getStake(stake.getAddress());
+      String stakeAddress = AddressUtils.checkStakeAddress(address);
+      return getStake(stakeAddress);
     } catch (Exception e) {
       throw new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND);
     }
@@ -126,9 +126,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         = stakeAddressRepository.findByView(stake).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     stakeAddressResponse.setStakeAddress(stake);
-    BigDecimal stakeTotalOutput = txOutRepository.getStakeAddressTotalOutput(stake)
-        .orElse(BigDecimal.ZERO);
-    BigDecimal stakeTotalInput = txOutRepository.getStakeAddressTotalInput(stake)
+    BigDecimal stakeTotalBalance = addressRepository.getBalanceByStakeAddress(stakeAddress)
         .orElse(BigDecimal.ZERO);
     BigDecimal stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
         stake).orElse(BigDecimal.ZERO);
@@ -136,8 +134,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         stake).orElse(BigDecimal.ZERO);
     stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
     stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
-    stakeAddressResponse.setTotalStake(
-        stakeTotalOutput.subtract(stakeTotalInput).add(stakeAvailableReward)
+    stakeAddressResponse.setTotalStake(stakeTotalBalance.add(stakeAvailableReward)
             .subtract(stakeRewardWithdrawn));
     PoolOfflineData poolData = poolOfflineDataRepository.findPoolDataByAddress(stakeAddress)
         .orElse(null);

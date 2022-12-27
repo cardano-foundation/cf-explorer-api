@@ -1,10 +1,13 @@
 package com.cardano.explorer.service;
 
 import com.cardano.explorer.common.enumeration.AnalyticType;
+import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
+import com.cardano.explorer.model.response.contract.ContractFilterResponse;
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface AddressService {
 
@@ -29,7 +32,15 @@ public interface AddressService {
    * Get the highest and lowest balance by address
    *
    * @param address wallet address
-   * @return the lowest balance
+   * @return the highest and lowest balance
    */
   List<BigDecimal> getAddressMinMaxBalance(String address);
+
+  /**
+   * Get list contract
+   *
+   * @param pageable page information
+   * @return list contract information in this page
+   */
+  BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable);
 }

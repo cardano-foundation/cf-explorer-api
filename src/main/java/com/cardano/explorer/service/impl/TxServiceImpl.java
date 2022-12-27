@@ -25,11 +25,14 @@ import com.cardano.explorer.projection.CollateralInputOutputProjection;
 import com.cardano.explorer.projection.TxContractProjection;
 import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
+import com.cardano.explorer.repository.AddressTokenRepository;
+import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.CollateralTxInRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
+import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.repository.RedeemerRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
@@ -43,6 +46,7 @@ import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.Delegation;
 import com.sotatek.cardano.common.entity.Epoch;
 import com.sotatek.cardano.common.entity.MaTxMint;
+import com.sotatek.cardano.common.entity.MultiAsset;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.Withdrawal;
 import com.sotatek.cardano.common.enumeration.ScriptPurposeType;
@@ -65,6 +69,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -92,6 +97,9 @@ public class TxServiceImpl implements TxService {
   private final DelegationMapper delegationMapper;
   private final MaTxMintRepository maTxMintRepository;
   private final MaTxMintMapper maTxMintMapper;
+  private final AddressTxBalanceRepository addressTxBalanceRepository;
+  private final MultiAssetRepository multiAssetRepository;
+  private final AddressTokenRepository addressTokenRepository;
 
   private static final int SUMMARY_SIZE = 4;
   private static final long MINUS_DAYS = 15;
@@ -192,37 +200,62 @@ public class TxServiceImpl implements TxService {
     } else {
       txPage = txRepository.findAll(pageable);
     }
-    if(!CollectionUtils.isEmpty(txPage.getContent())) {
-      Set<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
-          .collect(Collectors.toSet());
-      var conditions = Specification.where(BlockSpecification.hasIdIn(blockIdList));
-      List<Block> blocks = blockRepository.findAll(conditions);
-      Map<Long, Block> mapBlock = blocks.stream()
-          .collect(Collectors.toMap(Block::getId, Function.identity()));
-      txPage.getContent().forEach(tx -> tx.setBlock(mapBlock.get(tx.getBlockId())));
-
-      List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(
-          txPage.getContent());
-      response.setData(txFilterResponses);
-    } else {
-      response.setData(new ArrayList<>());
-    }
+    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
+    response.setData(txFilterResponses);
     response.setCurrentPage(pageable.getPageNumber());
     response.setTotalPages(txPage.getTotalPages());
     response.setTotalItems(txPage.getTotalElements());
     return response;
   }
 
+  @Override
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address, Pageable pageable) {
+    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
+    Page<Tx> txPage = addressTxBalanceRepository.findAllByAddress(address, pageable);
+
+    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
+    response.setData(txFilterResponses);
+    response.setCurrentPage(pageable.getPageNumber());
+    response.setTotalPages(txPage.getTotalPages());
+    response.setTotalItems(txPage.getTotalElements());
+    return response;
+  }
+
+  @Override
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId, Pageable pageable) {
+    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
+    Optional<MultiAsset> multiAsset = multiAssetRepository.findByFingerprint(tokenId);
+    if(multiAsset.isPresent()) {
+      List<Long> txIds = addressTokenRepository.findTxsById(multiAsset.get(), pageable);
+      List<Tx> txList = txRepository.findByIdInOrderByIdDesc(txIds);
+      Page<Tx> txPage = new PageImpl<>(txList);
+      List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
+      response.setData(txFilterResponses);
+      response.setTotalItems(multiAsset.get().getTxCount());
+      response.setTotalPages((int) Math.ceil((double) multiAsset.get().getTxCount() / pageable.getPageSize()));
+      response.setCurrentPage(pageable.getPageNumber());
+    }
+    return response;
+  }
+
   /**
    * Mapping from tx entity list to tx response dto
    *
-   * @param txList list tx entity
+   * @param txPage list tx in page
    * @return list tx response
    */
-  private List<TxFilterResponse> mapDataFromTxListToResponseList(List<Tx> txList) {
-
+  private List<TxFilterResponse> mapDataFromTxListToResponseList(Page<Tx> txPage) {
+    if(CollectionUtils.isEmpty(txPage.getContent())) {
+      return new ArrayList<>();
+    }
+    Set<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
+        .collect(Collectors.toSet());
+    var conditions = Specification.where(BlockSpecification.hasIdIn(blockIdList));
+    List<Block> blocks = blockRepository.findAll(conditions);
+    Map<Long, Block> blockMap = blocks.stream()
+        .collect(Collectors.toMap(Block::getId, Function.identity()));
     //get addresses input
-    Set<Long> txIdSet = txList.stream().map(Tx::getId).collect(Collectors.toSet());
+    Set<Long> txIdSet = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
     List<AddressInputOutputProjection> txInList = txOutRepository.findAddressInputListByTxId(
         txIdSet);
     Map<Long, List<AddressInputOutputProjection>> addressInMap = txInList.stream()
@@ -235,8 +268,11 @@ public class TxServiceImpl implements TxService {
         .collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
 
     List<TxFilterResponse> txFilterResponses = new ArrayList<>();
-    for (Tx tx : txList) {
+    for (Tx tx : txPage.getContent()) {
       Long txId = tx.getId();
+      if(blockMap.containsKey(tx.getBlockId())) {
+        tx.setBlock(blockMap.get(tx.getBlockId()));
+      }
       TxFilterResponse txResponse = txMapper.txToTxFilterResponse(tx);
       if (addressOutMap.containsKey(txId)) {
         txResponse.setAddressesOutput(

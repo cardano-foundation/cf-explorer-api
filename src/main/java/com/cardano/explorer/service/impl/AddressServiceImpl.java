@@ -1,15 +1,19 @@
 package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.common.enumeration.AnalyticType;
-import com.cardano.explorer.exception.BusinessCode;
+import com.cardano.explorer.mapper.AddressMapper;
 import com.cardano.explorer.mapper.TokenMapper;
+import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
+import com.cardano.explorer.model.response.contract.ContractFilterResponse;
+import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.service.AddressService;
-import com.sotatek.cardano.ledgersync.common.address.ShelleyAddress;
-import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import com.cardano.explorer.service.TxService;
+import com.cardano.explorer.util.AddressUtils;
+import com.sotatek.cardano.common.entity.Address;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -22,7 +26,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,20 +39,20 @@ public class AddressServiceImpl implements AddressService {
   private final MultiAssetRepository multiAssetRepository;
 
   private final AddressTxBalanceRepository addressTxBalanceRepository;
+  private final AddressRepository addressRepository;
+  private final TxService txService;
   private final TokenMapper tokenMapper;
+  private final AddressMapper addressMapper;
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
 
   @Override
   @Transactional(readOnly = true)
   public AddressResponse getAddressDetail(String address) {
-    AddressResponse addressResponse = new AddressResponse();
-    Integer txCount = addressTxBalanceRepository.countByAddress(address);
-    addressResponse.setStakeAddress(getStakeAddress(address, txCount));
-    addressResponse.setAddress(address);
-    var currentBalance = addressTxBalanceRepository.getBalanceByAddressAndTime(address,
-        Timestamp.valueOf(LocalDate.now().atTime(LocalTime.MAX)));
-    addressResponse.setBalance(currentBalance);
-    addressResponse.setTxCount(txCount);
+    Address addr = addressRepository.findFirstByAddress(address).orElse(
+        Address.builder().address(address).txCount(0L).balance(BigDecimal.ZERO).build()
+    );
+    AddressResponse addressResponse = addressMapper.fromAddress(addr);
+    addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
     addressResponse.setTokens(multiAssetRepository.findTokenByAddress(address).stream().map(
         tokenMapper::fromAddressTokenProjection
     ).collect(Collectors.toList()));
@@ -55,32 +60,12 @@ public class AddressServiceImpl implements AddressService {
 
   }
 
-  private String getStakeAddress(String address, Integer txCount) {
-    String stakeAddress = null;
-    try {
-      ShelleyAddress shelleyAddress = new ShelleyAddress(address);
-      if(shelleyAddress.containStakeAddress()){
-        //TO-DO: Move to common
-        byte[] addr = shelleyAddress.getStakeReference();
-        ShelleyAddress stakeShelley = new ShelleyAddress(addr);
-        stakeAddress = stakeShelley.getAddress();
-      } else {
-        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
-      }
-    } catch (Exception e) {
-      if (txCount.equals(0)) {
-        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
-      }
-    }
-    return stakeAddress;
-  }
-
   @Override
   @Transactional(readOnly = true)
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type) {
     List<AddressAnalyticsResponse> responses = new ArrayList<>();
-    Integer txCount = addressTxBalanceRepository.countByAddress(address);
-    if(StringUtils.isEmpty(getStakeAddress(address, txCount))) {
+    Long txCount = addressTxBalanceRepository.countByAddress(address);
+    if(Long.valueOf(0).equals(txCount)) {
       return responses;
     }
     LocalDate currentDate = LocalDate.now();
@@ -130,11 +115,10 @@ public class AddressServiceImpl implements AddressService {
 
   @Override
   public List<BigDecimal> getAddressMinMaxBalance(String address) {
-    Integer txCount = addressTxBalanceRepository.countByAddress(address);
-    if(StringUtils.isEmpty(getStakeAddress(address, txCount))) {
+    List<BigDecimal> balanceList = addressTxBalanceRepository.findAllByAddress(address);
+    if(balanceList.isEmpty()) {
       return new ArrayList<>();
     }
-    List<BigDecimal> balanceList = addressTxBalanceRepository.findAllByAddress(address);
     BigDecimal maxBalance = balanceList.get(0);
     BigDecimal minBalance = balanceList.get(0);
     BigDecimal sumBalance = balanceList.get(0);
@@ -149,5 +133,18 @@ public class AddressServiceImpl implements AddressService {
       }
     }
     return Arrays.asList(minBalance, maxBalance);
+  }
+
+
+  @Override
+  public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
+    BaseFilterResponse<ContractFilterResponse> response = new BaseFilterResponse<>();
+    Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
+    response.setData(contractPage.getContent().stream().map(addressMapper::fromAddressToContractFilter)
+        .collect(Collectors.toList()));
+    response.setCurrentPage(pageable.getPageNumber());
+    response.setTotalPages(contractPage.getTotalPages());
+    response.setTotalItems(contractPage.getTotalElements());
+    return response;
   }
 }
