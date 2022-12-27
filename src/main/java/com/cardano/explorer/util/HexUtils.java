@@ -5,6 +5,10 @@ import org.apache.commons.codec.binary.Hex;
 
 public class HexUtils {
 
+  private HexUtils() {
+    throw new IllegalStateException("Utility class");
+  }
+
   /**
    * Convert from hex to UTF-8
    *

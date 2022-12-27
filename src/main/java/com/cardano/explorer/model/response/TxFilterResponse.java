@@ -12,7 +12,7 @@ import lombok.Setter;
 public class TxFilterResponse implements Serializable {
 
   private String hash;
-  private Integer blockNo;
+  private Long blockNo;
   private Integer epochNo;
   private Integer epochSlotNo;
   private Integer slot;

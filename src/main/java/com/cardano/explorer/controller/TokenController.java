@@ -8,6 +8,7 @@ import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.model.response.token.TokenMintTxResponse;
 import com.cardano.explorer.model.response.token.TokenResponse;
 import com.cardano.explorer.service.TokenService;
+import com.cardano.explorer.service.TxService;
 import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.MultiAsset_;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class TokenController {
   private final TokenService tokenService;
+  private final TxService txService;
 
   @GetMapping
   @LogMessage
@@ -63,6 +65,6 @@ public class TokenController {
   @Operation(summary = "Filter transaction by token")
   public BaseFilterResponse<TxFilterResponse> getTransactions(@PathVariable String tokenId,
       @ParameterObject Pageable pageable) {
-    return tokenService.getTxs(tokenId, pageable);
+    return txService.getTransactionsByToken(tokenId, pageable);
   }
 }

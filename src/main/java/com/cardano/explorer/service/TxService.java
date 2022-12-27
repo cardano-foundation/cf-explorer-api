@@ -35,4 +35,21 @@ public interface TxService {
    */
   TxResponse getTxDetailByHash(String hash);
 
+
+  /**
+   * Get list transaction having address
+   *
+   * @param address wallet address
+   * @param pageable page information
+   * @return  list transaction information in this page
+   */
+  BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address, Pageable pageable);
+
+
+  /** Get transaction by token
+   * @param tokenId fingerprint of token
+   * @param pageable page information
+   * @return list transaction of token in this page
+   */
+  BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId, Pageable pageable);
 }

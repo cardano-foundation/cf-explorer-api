@@ -16,9 +16,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AddressResponse {
   private String address;
-  private Integer txCount;
+  private Long txCount;
   private BigDecimal balance;
   private List<TokenAddressResponse> tokens;
   private String stakeAddress;
-
+  private Boolean isContract;
 }
