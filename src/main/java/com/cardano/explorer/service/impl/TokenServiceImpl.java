@@ -4,21 +4,16 @@ import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.AssetMetadataMapper;
 import com.cardano.explorer.mapper.MaTxMintMapper;
 import com.cardano.explorer.mapper.TokenMapper;
-import com.cardano.explorer.mapper.TxMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.model.response.token.TokenMintTxResponse;
 import com.cardano.explorer.model.response.token.TokenResponse;
 import com.cardano.explorer.projection.AddressTokenProjection;
-import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
-import com.cardano.explorer.repository.TxOutRepository;
-import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.TokenService;
-import com.cardano.explorer.service.TxService;
 import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.MaTxMint;
 import com.sotatek.cardano.common.entity.MultiAsset;
@@ -37,19 +32,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class TokenServiceImpl implements TokenService {
 
-  private final TxRepository txRepository;
-
   private final MultiAssetRepository multiAssetRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
-
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
-  private final AddressTokenRepository addressTokenRepository;
-  private final TxMapper txMapper;
-  private final TxService txService;
-  private final TxOutRepository txOutRepository;
 
 
   @Override

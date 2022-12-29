@@ -1,5 +1,6 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.projection.StakeAddressProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import java.util.Optional;
@@ -19,8 +20,8 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + " FROM TxOut txo"
       + " JOIN Tx tx ON tx.id = txo.tx.id "
       + " JOIN Block b ON b.id = tx.blockId  "
-      + " LEFT JOIN StakeRegistration sr ON  sr.tx.id  =  txo.tx.id "
-      + " LEFT JOIN StakeDeregistration sd ON sd.tx.id  = txo.tx.id"
+      + " LEFT JOIN StakeRegistration sr ON  sr.tx.id  =  txo.tx.id AND sr.addr.id = txo.stakeAddress.id"
+      + " LEFT JOIN StakeDeregistration sd ON sd.tx.id  = txo.tx.id AND sd.addr.id = txo.stakeAddress.id"
       + " WHERE txo.stakeAddress.id = (SELECT sa.id FROM StakeAddress sa WHERE sa.view = :stakeKey) AND"
       + " (sr.id IS NOT NULL OR sd.id IS NOT NULL) AND"
       + " tx.id IS NOT NULL"
@@ -35,5 +36,11 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + " (sr.id IS NOT NULL OR sd.id IS NOT NULL) AND"
       + " tx.id IS NOT NULL")
   Page<StakeHistoryProjection> getStakeHistory(String stakeKey, Pageable pageable);
+
+  @Query("SELECT sa.view as stakeAddress, sa.balance as totalStake"
+      + " FROM StakeAddress sa"
+      + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
+      + " ORDER BY sa.balance DESC")
+  Page<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
 
 }

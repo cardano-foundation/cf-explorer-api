@@ -2,6 +2,7 @@ package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
+import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
@@ -74,4 +75,13 @@ public interface StakeKeyService {
    * @return stake key instantaneous rewards
    */
   BaseFilterResponse<StakeTreasuryProjection> getInstantaneousRewards(String stakeKey, Pageable pageable);
+
+
+  /**
+   * Get top delegators
+   *
+   * @param pageable page information
+   * @return return list active stake address sort by balance
+   */
+  BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable);
 }

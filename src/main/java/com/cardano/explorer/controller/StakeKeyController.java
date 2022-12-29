@@ -3,6 +3,7 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
+import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
@@ -89,6 +90,14 @@ public class StakeKeyController {
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject Pageable pageable) {
     return stakeService.getInstantaneousRewards(stakeKey, pageable);
+  }
+
+  @GetMapping("/top-delegators")
+  @LogMessage
+  @Operation(summary = "Get a address detail")
+  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(
+      @ParameterObject Pageable pageable) {
+    return stakeService.getTopDelegators(pageable);
   }
 
 }

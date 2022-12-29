@@ -5,6 +5,7 @@ import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
+import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.service.TxService;
@@ -35,6 +36,14 @@ public class AddressController {
   public AddressResponse getAddressDetail(
       @PathVariable @Parameter(description = "Address") String address) {
     return addressService.getAddressDetail(address);
+  }
+
+  @GetMapping("/top-addresses")
+  @LogMessage
+  @Operation(summary = "Get a address detail")
+  public BaseFilterResponse<AddressFilterResponse> getTopAddress(
+      @ParameterObject Pageable pageable) {
+    return addressService.getTopAddress(pageable);
   }
 
   @GetMapping("/analytics/{address}/{type}")

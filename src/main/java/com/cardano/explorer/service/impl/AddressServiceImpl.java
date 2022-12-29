@@ -5,13 +5,13 @@ import com.cardano.explorer.mapper.AddressMapper;
 import com.cardano.explorer.mapper.TokenMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
+import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.model.response.contract.ContractFilterResponse;
 import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.service.AddressService;
-import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.util.AddressUtils;
 import com.sotatek.cardano.common.entity.Address;
 import java.math.BigDecimal;
@@ -40,7 +40,6 @@ public class AddressServiceImpl implements AddressService {
 
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final AddressRepository addressRepository;
-  private final TxService txService;
   private final TokenMapper tokenMapper;
   private final AddressMapper addressMapper;
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
@@ -114,6 +113,7 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public List<BigDecimal> getAddressMinMaxBalance(String address) {
     List<BigDecimal> balanceList = addressTxBalanceRepository.findAllByAddress(address);
     if(balanceList.isEmpty()) {
@@ -137,6 +137,7 @@ public class AddressServiceImpl implements AddressService {
 
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
     BaseFilterResponse<ContractFilterResponse> response = new BaseFilterResponse<>();
     Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
@@ -145,6 +146,19 @@ public class AddressServiceImpl implements AddressService {
     response.setCurrentPage(pageable.getPageNumber());
     response.setTotalPages(contractPage.getTotalPages());
     response.setTotalItems(contractPage.getTotalElements());
+    return response;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
+    BaseFilterResponse<AddressFilterResponse> response = new BaseFilterResponse<>();
+    Page<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
+    response.setData(addressPage.getContent().stream().map(addressMapper::fromAddressToFilterResponse)
+        .collect(Collectors.toList()));
+    response.setCurrentPage(pageable.getPageNumber());
+    response.setTotalPages(addressPage.getTotalPages());
+    response.setTotalItems(addressPage.getTotalElements());
     return response;
   }
 }

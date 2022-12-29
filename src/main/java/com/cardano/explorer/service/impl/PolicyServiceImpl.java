@@ -1,13 +1,11 @@
 package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.exception.BusinessCode;
-import com.cardano.explorer.mapper.AssetMetadataMapper;
 import com.cardano.explorer.mapper.TokenMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.token.PolicyResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.projection.AddressTokenProjection;
-import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.repository.ScriptRepository;
 import com.cardano.explorer.service.PolicyService;
@@ -26,8 +24,6 @@ public class PolicyServiceImpl implements PolicyService {
   private final MultiAssetRepository multiAssetRepository;
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
-  private final AssetMetadataRepository assetMetadataRepository;
-  private final AssetMetadataMapper assetMetadataMapper;
 
   @Override
   public PolicyResponse getPolicyDetail(String policyId) {

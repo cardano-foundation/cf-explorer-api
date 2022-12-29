@@ -1,8 +1,6 @@
 package com.cardano.explorer.repository;
 
 import com.sotatek.cardano.common.entity.Address;
-import com.sotatek.cardano.common.entity.StakeAddress;
-import java.math.BigDecimal;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +14,9 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
       + " ORDER BY address.balance DESC")
   Page<Address> findAllByAddressHasScriptIsTrue(Pageable pageable);
 
-  Optional<Address> findFirstByAddress(String address);
+  @Query("SELECT address FROM Address address"
+      + " ORDER BY address.balance DESC")
+  Page<Address> findAllOrderByBalance(Pageable pageable);
 
-  @Query("SELECT sum(addr.balance) "
-      + " FROM Address addr "
-      + " WHERE addr.stakeAddress = :stakeAddress")
-  Optional<BigDecimal> getBalanceByStakeAddress(StakeAddress stakeAddress);
+  Optional<Address> findFirstByAddress(String address);
 }
