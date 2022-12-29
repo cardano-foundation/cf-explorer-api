@@ -2,7 +2,9 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.cardano.explorer.model.response.stake.TrxBlockEpochStake;
+import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.StakeRegistration;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,4 +31,9 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
           + "JOIN Block bk ON bk.id = tx.block.id "
           + "GROUP BY tx.id, tx.hash, bk.time, bk.id, sr.addr.view ")
   Page<TrxBlockEpochStake> getDataForStakeRegistration(Pageable pageable);
+
+  @Query("SELECT max(stakeRegis.tx.id) "
+      + " FROM StakeRegistration stakeRegis"
+      + " WHERE stakeRegis.addr = :stake")
+  Optional<Long> findMaxTxIdByStake(StakeAddress stake);
 }

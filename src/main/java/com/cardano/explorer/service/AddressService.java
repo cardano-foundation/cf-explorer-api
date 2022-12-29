@@ -3,6 +3,7 @@ package com.cardano.explorer.service;
 import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
+import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.model.response.contract.ContractFilterResponse;
 import java.math.BigDecimal;
@@ -43,4 +44,12 @@ public interface AddressService {
    * @return list contract information in this page
    */
   BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable);
+
+  /**
+   * Get top address
+   *
+   * @param pageable page information
+   * @return return list address sort by balance
+   */
+  BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable);
 }

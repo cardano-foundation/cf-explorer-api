@@ -1,5 +1,6 @@
 package com.cardano.explorer.mapper;
 
+import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.model.response.contract.ContractFilterResponse;
 import com.sotatek.cardano.common.entity.Address;
@@ -14,5 +15,7 @@ public interface AddressMapper {
   @Mapping(target = "isContract", source = "addressHasScript")
   @Mapping(target = "stakeAddress", source = "stakeAddress.view")
   AddressResponse fromAddress(Address address);
+
+  AddressFilterResponse fromAddressToFilterResponse(Address address);
 
 }

@@ -6,5 +6,7 @@ public interface StakeAddressProjection {
 
   Long getAddress();
 
+  String getStakeAddress();
+
   BigDecimal getTotalStake();
 }

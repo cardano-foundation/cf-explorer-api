@@ -6,8 +6,11 @@ import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
 import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.sotatek.cardano.common.entity.Delegation;
 import com.sotatek.cardano.common.entity.Delegation_;
+import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -76,7 +79,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, poolHash.view as poolId,"
-      + " poolOfflineData.json as poolData"
+      + " poolOfflineData.json as poolData, poolOfflineData.tickerName as tickerName"
       + " FROM Delegation delegation"
       + " INNER JOIN Tx tx ON delegation.tx = tx"
       + " INNER JOIN Block block ON tx.block = block"
@@ -86,4 +89,28 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.time DESC")
   Page<StakeDelegationProjection> findDelegationByAddress(String stakeKey, Pageable pageable);
+
+  @Query("SELECT poolHash.view as poolId, poolOfflineData.json as poolData,"
+      + " poolOfflineData.tickerName as tickerName"
+      + " FROM Delegation delegation"
+      + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
+      + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.id ="
+      + " (SELECT max(pod.id) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
+      + " WHERE delegation.id = (SELECT max(id) FROM Delegation where address = :address )")
+  Optional<StakeDelegationProjection> findPoolDataByAddress(StakeAddress address);
+
+  @Query("SELECT poolHash.view as poolId, poolOfflineData.json as poolData,"
+      + " poolOfflineData.tickerName as tickerName, stake.view as stakeAddress"
+      + " FROM Delegation delegation"
+      + " INNER JOIN StakeAddress stake ON stake.id = delegation.address.id"
+      + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
+      + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.id ="
+      + " (SELECT max(pod.id) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
+      + " WHERE delegation.id IN "
+      + " (SELECT max(d.id) FROM Delegation d "
+      + " INNER JOIN StakeAddress sa ON d.address = sa"
+      + " WHERE sa.view IN :addresses"
+      + " GROUP BY sa.view )")
+  List<StakeDelegationProjection> findPoolDataByAddressIn(Set<String> addresses);
+
 }
