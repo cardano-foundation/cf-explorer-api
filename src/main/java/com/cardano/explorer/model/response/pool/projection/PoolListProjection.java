@@ -19,4 +19,12 @@ public interface PoolListProjection {
   BigDecimal getUtxo();
 
   Double getMargin();
+
+  BigDecimal getFeePerEpoch();
+
+  Double getInfluence();
+
+  Double getExpansionRate();
+
+  Double getTreasuryRate();
 }
