@@ -47,12 +47,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   Page<PoolDetailDelegatorProjection> getAllDelegatorByPool(@Param("poolId") Long poolId,
       Pageable pageable);
 
-  @Query(value = "SELECT bk.time AS time, tx.fee AS fee FROM Delegation dg "
-      + "JOIN Tx tx ON tx.id = dg.tx.id "
-      + "JOIN Block bk ON bk.id = tx.block.id "
-      + "WHERE dg.id = :delegatorId")
-  PoolDetailDelegatorProjection getTimeAndFeeByDelegator(@Param("delegatorId") Long delegatorId);
-
   @Query("SELECT count(de.id) FROM Delegation de WHERE de.activeEpochNo = :epochNo")
   Integer numberDelegatorsAllPoolByEpochNo(@Param("epochNo") Long epochNo);
 
@@ -64,12 +58,14 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   @Query(value =
       "SELECT ph.id AS poolView, pod.json AS json, pu.pledge AS pledge, pu.fixedCost AS fee,"
           + " ph.poolSize AS poolSize, ep.optimalPoolCount AS optimalPoolCount, "
-          + "ad.utxo AS utxo, pu.margin AS margin "
+          + "ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, "
+          + "ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
           + "FROM PoolHash ph "
           + "JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
           + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
-          + "JOIN EpochParam ep ON ep.epochNo = pu.activeEpochNo "
-          + "JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
+          + "JOIN EpochParam ep ON ep.epochNo = ph.epochNo "
+          + "JOIN AdaPots ad ON ad.epochNo = ph.epochNo "
+          + "JOIN Epoch e ON e.no = ph.epochNo "
           + "WHERE pu.activeEpochNo = "
           + "(SELECT MAX(pu.activeEpochNo) FROM pu.activeEpochNo WHERE pu.poolHash.id = ph.id) AND "
           + "pod.id = (SELECT MAX(pod.id) FROM PoolOfflineData pod WHERE pod.pool.id = ph.id) AND "

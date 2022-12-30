@@ -39,12 +39,13 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value =
       "SELECT ph.view AS poolView, po.json AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK"
-          + ", ad.utxo AS utxo, pu.margin AS margin "
+          + ", ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
-          + "LEFT JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
+          + "LEFT JOIN EpochParam ep ON ph.epochNo = ep.epochNo "
+          + "LEFT JOIN AdaPots ad ON ad.epochNo = ph.epochNo "
+          + "LEFT JOIN Epoch e ON e.no = ph.epochNo "
           + "WHERE (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id = ph.id)) "
           + "AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
           + "AND ((:poolView IS NULL OR ph.view = :poolView) "

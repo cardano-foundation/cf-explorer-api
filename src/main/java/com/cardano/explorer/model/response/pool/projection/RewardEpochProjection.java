@@ -2,13 +2,9 @@ package com.cardano.explorer.model.response.pool.projection;
 
 import java.math.BigDecimal;
 
-public interface PoolDetailUpdateProjection {
+public interface RewardEpochProjection {
 
-  BigDecimal getCost();
-
-  Double getMargin();
-
-  BigDecimal getPledge();
+  Integer getEpochNo();
 
   Integer getParamK();
 

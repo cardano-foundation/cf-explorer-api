@@ -1,5 +1,6 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.model.response.pool.projection.RewardEpochProjection;
 import com.cardano.explorer.projection.EpochSummaryProjection;
 import com.sotatek.cardano.common.entity.Epoch;
 import java.util.List;
@@ -26,4 +27,13 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
   @Query(value = "SELECT ep FROM Epoch ep WHERE ep.no IN :epochNo")
   List<Epoch> findFeeByEpochNo(@Param("epochNo") Set<Integer> epochNo);
+
+  @Query(value =
+      "SELECT e.no AS epochNo, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate, "
+          + "ep.optimalPoolCount AS paramK, ep.influence AS influence, e.fees AS feePerEpoch, ap.utxo AS utxo "
+          + "FROM EpochParam ep "
+          + "JOIN AdaPots ap ON ap.epochNo = ep.epochNo "
+          + "JOIN Epoch e ON e.no = ep.epochNo "
+          + "WHERE e.no IN :epochNo")
+  List<RewardEpochProjection> findParamRewardByEpoch(@Param("epochNo") Set<Integer> epochNo);
 }
