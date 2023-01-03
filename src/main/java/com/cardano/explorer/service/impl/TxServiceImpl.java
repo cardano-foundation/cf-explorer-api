@@ -2,6 +2,7 @@ package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.common.enumeration.TxStatus;
 import com.cardano.explorer.exception.BusinessCode;
+import com.cardano.explorer.mapper.AssetMetadataMapper;
 import com.cardano.explorer.mapper.DelegationMapper;
 import com.cardano.explorer.mapper.MaTxMintMapper;
 import com.cardano.explorer.mapper.TxMapper;
@@ -27,6 +28,7 @@ import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
 import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
+import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.CollateralTxInRepository;
 import com.cardano.explorer.repository.DelegationRepository;
@@ -41,6 +43,7 @@ import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.specification.BlockSpecification;
 import com.cardano.explorer.specification.TxSpecification;
 import com.cardano.explorer.util.TimeUtil;
+import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.Delegation;
@@ -100,7 +103,8 @@ public class TxServiceImpl implements TxService {
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final MultiAssetRepository multiAssetRepository;
   private final AddressTokenRepository addressTokenRepository;
-
+  private final AssetMetadataRepository assetMetadataRepository;
+  private final AssetMetadataMapper assetMetadataMapper;
   private static final int SUMMARY_SIZE = 4;
   private static final long MINUS_DAYS = 15;
 
@@ -329,9 +333,20 @@ public class TxServiceImpl implements TxService {
    */
   private void getMints(Tx tx, TxResponse txResponse) {
     List<MaTxMint> maTxMints = maTxMintRepository.findByTx(tx);
+    Set<String> subjects = maTxMints.stream().map(
+        ma -> ma.getIdent().getPolicy() + ma.getIdent().getName()).collect(Collectors.toSet());
+    var assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    var assetMetadataMap = assetMetadataList.stream().collect(Collectors.toMap(
+        AssetMetadata::getSubject, Function.identity()
+    ));
     if (!CollectionUtils.isEmpty(maTxMints)) {
-      txResponse.setMints(
-          maTxMints.stream().map(maTxMintMapper::fromMaTxMint).collect(Collectors.toList()));
+      txResponse.setMints(maTxMints.stream().map(
+          ma -> {
+            TxMintingResponse txMintingResponse = maTxMintMapper.fromMaTxMint(ma);
+            String subject = ma.getIdent().getPolicy() + ma.getIdent().getName();
+            txMintingResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
+            return txMintingResponse;
+          }).collect(Collectors.toList()));
     }
   }
 

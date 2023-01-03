@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,14 +31,16 @@ public class StakeKeyController {
   private final StakeKeyService stakeService;
 
   @GetMapping("/registration")
+  @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-          @PageableDefault Pageable pageable) {
+          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pageable));
   }
 
   @GetMapping("/de-registration")
+  @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-          @PageableDefault Pageable pageable) {
+          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pageable));
   }
   @GetMapping("/address/{address}")
@@ -94,7 +97,7 @@ public class StakeKeyController {
 
   @GetMapping("/top-delegators")
   @LogMessage
-  @Operation(summary = "Get a address detail")
+  @Operation(summary = "Get top delegators")
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(
       @ParameterObject Pageable pageable) {
     return stakeService.getTopDelegators(pageable);

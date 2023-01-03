@@ -40,7 +40,7 @@ public class AddressController {
 
   @GetMapping("/top-addresses")
   @LogMessage
-  @Operation(summary = "Get a address detail")
+  @Operation(summary = "Get top addresses")
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(
       @ParameterObject Pageable pageable) {
     return addressService.getTopAddress(pageable);

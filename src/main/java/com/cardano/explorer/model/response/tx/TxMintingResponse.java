@@ -1,5 +1,6 @@
 package com.cardano.explorer.model.response.tx;
 
+import com.cardano.explorer.model.response.token.TokenMetadataResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.math.BigDecimal;
@@ -16,4 +17,5 @@ public class TxMintingResponse {
   private BigDecimal assetQuantity;
   private String assetId;
   private String policy;
+  private TokenMetadataResponse metadata;
 }

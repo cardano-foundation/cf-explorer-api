@@ -44,23 +44,41 @@ public class BlockServiceImpl implements BlockService {
 
   @Override
   @Transactional(readOnly = true)
-  public BlockResponse getBlockDetail(String no) {
+  public BlockResponse getBlockDetailByBlockNo(String no) {
     try {
       Long blockNo = Long.parseLong(no);
       Block block = blockRepository.findFirstByBlockNo(blockNo).orElseThrow(
           () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
       );
-      BlockResponse blockResponse = blockMapper.blockToBlockResponse(block);
-      List<Tx> txList = block.getTxList();
-      blockResponse.setTotalOutput(
-          txList.stream().map(Tx::getOutSum).reduce(BigDecimal.ZERO, BigDecimal::add));
-      blockResponse.setTotalFees(
-          txList.stream().map(Tx::getFee).reduce(BigDecimal.ZERO, BigDecimal::add));
-      return blockResponse;
+      return getBlockResponse(block);
     } catch (NumberFormatException e) {
       throw new BusinessException(BusinessCode.BLOCK_NOT_FOUND);
     }
 
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BlockResponse getBlockDetailByHash(String hash) {
+    Block block = blockRepository.findFirstByHash(hash).orElseThrow(
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+    );
+    return getBlockResponse(block);
+  }
+
+  /**
+   * Get block response from entity, calculate totalOutputs and total fees
+   * @param block block entity
+   * @return block response
+   */
+  private BlockResponse getBlockResponse(Block block) {
+    BlockResponse blockResponse = blockMapper.blockToBlockResponse(block);
+    List<Tx> txList = block.getTxList();
+    blockResponse.setTotalOutput(
+        txList.stream().map(Tx::getOutSum).reduce(BigDecimal.ZERO, BigDecimal::add));
+    blockResponse.setTotalFees(
+        txList.stream().map(Tx::getFee).reduce(BigDecimal.ZERO, BigDecimal::add));
+    return blockResponse;
   }
 
   @Override
