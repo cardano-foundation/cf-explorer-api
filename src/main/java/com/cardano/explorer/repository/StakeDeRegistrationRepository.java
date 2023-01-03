@@ -24,12 +24,11 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
 
   @Query(value =
       "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.id AS blockId, bk.epochNo AS epochNo, "
-          +
-          "bk.slotNo as slotNo, sr.addr.view as stakeKey "
+          + "bk.slotNo as slotNo, sr.addr.view as stakeKey "
           + "FROM StakeDeregistration sr "
           + "JOIN Tx tx ON tx.id = sr.tx.id "
-          + "JOIN Block bk ON bk.id = tx.block.id "
-          + "GROUP BY tx.id, tx.hash, bk.time, bk.id, sr.addr.view ")
+          + "JOIN Block bk ON bk.id = tx.block.id ",
+      countQuery = "SELECT count(id) FROM StakeDeregistration")
   Page<TrxBlockEpochStake> getDataForStakeDeRegistration(Pageable pageable);
 
   @Query("SELECT max(stakeDeregis.tx.id) "

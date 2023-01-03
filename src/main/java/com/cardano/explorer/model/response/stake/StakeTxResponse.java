@@ -1,11 +1,9 @@
 package com.cardano.explorer.model.response.stake;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -24,8 +22,6 @@ public class StakeTxResponse implements Serializable {
   private Long slotNo;
 
   private String stakeKey;
-
-  private List<String> poolNames;
 
   public StakeTxResponse(TrxBlockEpochStake trxBlockEpochStake) {
     this.txId = trxBlockEpochStake.getTxId();

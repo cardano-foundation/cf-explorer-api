@@ -27,14 +27,12 @@ import com.cardano.explorer.service.StakeKeyService;
 import com.cardano.explorer.util.AddressUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.sotatek.cardano.common.entity.PoolOfflineData;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -81,23 +79,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     BaseFilterResponse<StakeTxResponse> response = new BaseFilterResponse<>();
     List<StakeTxResponse> responseList = page.stream().map(StakeTxResponse::new)
             .collect(Collectors.toList());
-    List<Long> blockIdList = responseList.stream().map(StakeTxResponse::getBlock).collect(Collectors.toList());
-    List<Long> poolIds = poolHashRepository.getListPoolIdIn(blockIdList);
-    if(!poolIds.isEmpty()){
-      List<PoolOfflineData> listAllPoolOfflineName = poolOfflineDataRepository.findAllByListPool(poolIds);
-      // map with key: pool id, value: list pool offline
-      Map<Long, List<PoolOfflineData>> mapPoolIdPoolName = listAllPoolOfflineName.stream()
-              .collect(Collectors.groupingBy(item -> item.getPool().getId(), Collectors.toList()));
-      for(int i = 0; i < responseList.size(); i++){
-        if(poolIds.size() > i){
-          responseList.get(i).setPoolNames(mapPoolIdPoolName
-                  .get(poolIds.get(i))
-                  .stream()
-                  .map(item -> getNameValueFromJson(item.getJson()))
-                  .collect(Collectors.toList()));
-        }
-      }
-    }
     response.setData(responseList);
     response.setTotalItems(page.getTotalElements());
     response.setTotalPages(page.getTotalPages());

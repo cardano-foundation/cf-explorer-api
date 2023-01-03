@@ -21,6 +21,9 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
   Optional<Block> findFirstByBlockNo(Long no);
 
+  @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
+  Optional<Block> findFirstByHash(String hash);
+
   Page<Block> findAll(Pageable pageable);
 
   Page<Block> findAll(Specification specification, Pageable pageable);
