@@ -18,8 +18,6 @@ public class PoolTxResponse implements Serializable {
 
   private Timestamp txTime;
 
-  private Long block;
-
   private Integer epoch;
 
   private Long slotNo;
@@ -32,14 +30,20 @@ public class PoolTxResponse implements Serializable {
 
   private Double margin;
 
+  private Long poolId;
+
   private Set<String> stakeKey;
 
   public PoolTxResponse(TxBlockEpochProjection trxBlockEpoch) {
     this.txId = trxBlockEpoch.getTxId();
     this.txHash = trxBlockEpoch.getTxHash();
     this.txTime = trxBlockEpoch.getTxTime();
-    this.block = trxBlockEpoch.getBlockId();
     this.epoch = trxBlockEpoch.getEpochNo();
     this.slotNo = trxBlockEpoch.getSlotNo();
+    this.pledge = trxBlockEpoch.getPledge();
+    this.margin = trxBlockEpoch.getMargin();
+    this.cost = trxBlockEpoch.getCost();
+    this.poolName = trxBlockEpoch.getPoolName();
+    this.poolId = trxBlockEpoch.getPoolId();
   }
 }

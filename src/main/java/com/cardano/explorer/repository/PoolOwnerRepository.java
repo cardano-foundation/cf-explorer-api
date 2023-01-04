@@ -1,6 +1,6 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.model.response.pool.projection.BlockOwnerProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolOwnerProjection;
 import com.sotatek.cardano.common.entity.PoolOwner;
 import java.util.List;
 import java.util.Set;
@@ -12,13 +12,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PoolOwnerRepository extends JpaRepository<PoolOwner, Long> {
 
-  @Query(value = "SELECT bk.id AS blockId, sa.view AS address FROM Block bk "
-      + "JOIN SlotLeader sl ON sl.id = bk.slotLeader.id "
-      + "JOIN PoolHash ph ON ph.id = sl.poolHash.id "
-      + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
-      + "JOIN PoolOwner po ON po.poolUpdate = pu.id "
+  @Query(value = "SELECT pu.poolHash.id AS poolId, sa.view AS address "
+      + "FROM PoolUpdate pu "
+      + "JOIN PoolOwner po ON po.poolUpdate.id  = pu.id  "
       + "JOIN StakeAddress sa ON sa.id = po.stakeAddress.id "
-      + "WHERE bk.id IN :blockIds "
-      + "GROUP BY bk.id, sa.view")
-  List<BlockOwnerProjection> getStakeKeyList(@Param("blockIds") Set<Long> blockIds);
+      + "WHERE pu.poolHash.id IN :poolIds")
+  List<PoolOwnerProjection> getStakeKeyList(@Param("poolIds") Set<Long> poolIds);
 }

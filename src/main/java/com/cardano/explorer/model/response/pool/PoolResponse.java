@@ -23,6 +23,7 @@ public class PoolResponse implements Serializable {
 
   private BigDecimal poolSize;
 
+  @JsonSerialize(using = PercentSerializer.class)
   private Double reward;
 
   @JsonSerialize(using = PercentSerializer.class)

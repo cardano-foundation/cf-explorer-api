@@ -1,5 +1,6 @@
 package com.cardano.explorer.model.response.pool.projection;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public interface TxBlockEpochProjection {
@@ -10,9 +11,17 @@ public interface TxBlockEpochProjection {
 
   Timestamp getTxTime();
 
-  Long getBlockId();
-
   Integer getEpochNo();
 
   Long getSlotNo();
+
+  BigDecimal getPledge();
+
+  Double getMargin();
+
+  BigDecimal getCost();
+
+  Long getPoolId();
+
+  String getPoolName();
 }

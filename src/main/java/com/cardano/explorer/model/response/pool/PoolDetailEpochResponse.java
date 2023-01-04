@@ -1,6 +1,8 @@
 package com.cardano.explorer.model.response.pool;
 
+import com.cardano.explorer.json.serialize.PercentSerializer;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.Getter;
@@ -20,6 +22,7 @@ public class PoolDetailEpochResponse implements Serializable {
 
   private BigDecimal fee;
 
+  @JsonSerialize(using = PercentSerializer.class)
   private Double ros;
 
   public PoolDetailEpochResponse(PoolDetailEpochProjection poolEpoch) {
