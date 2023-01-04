@@ -139,26 +139,18 @@ public class AddressServiceImpl implements AddressService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
-    BaseFilterResponse<ContractFilterResponse> response = new BaseFilterResponse<>();
     Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
-    response.setData(contractPage.getContent().stream().map(addressMapper::fromAddressToContractFilter)
-        .collect(Collectors.toList()));
-    response.setCurrentPage(pageable.getPageNumber());
-    response.setTotalPages(contractPage.getTotalPages());
-    response.setTotalItems(contractPage.getTotalElements());
-    return response;
+    Page<ContractFilterResponse> pageResponse
+        = contractPage.map(addressMapper::fromAddressToContractFilter);
+    return new BaseFilterResponse<>(pageResponse);
   }
 
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
-    BaseFilterResponse<AddressFilterResponse> response = new BaseFilterResponse<>();
     Page<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
-    response.setData(addressPage.getContent().stream().map(addressMapper::fromAddressToFilterResponse)
-        .collect(Collectors.toList()));
-    response.setCurrentPage(pageable.getPageNumber());
-    response.setTotalPages(addressPage.getTotalPages());
-    response.setTotalItems(addressPage.getTotalElements());
-    return response;
+    Page<AddressFilterResponse> pageResponse
+        = addressPage.map(addressMapper::fromAddressToFilterResponse);
+    return new BaseFilterResponse<>(pageResponse);
   }
 }

@@ -33,20 +33,20 @@ public class TxController {
   @GetMapping("/list")
   @LogMessage
   @Operation(summary = "Filter transaction")
-  public BaseFilterResponse<TxFilterResponse> filter(
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> filter(
       @Parameter(description = "Condition for filter (Set all properties to null for get all)")
       TxFilterRequest request,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return txService.filterTx(pageable, request);
+    return ResponseEntity.ok(txService.filterTx(pageable, request));
   }
 
   @GetMapping("/{hash}")
   @LogMessage
   @Operation(summary = "Get transaction detail by hash")
-  public TxResponse getTransactionDetail(@PathVariable
+  public ResponseEntity<TxResponse> getTransactionDetail(@PathVariable
   @Parameter(description = "Hash value of transaction") String hash) {
-    return txService.getTxDetailByHash(hash);
+    return ResponseEntity.ok(txService.getTxDetailByHash(hash));
   }
 
   @GetMapping("/current")

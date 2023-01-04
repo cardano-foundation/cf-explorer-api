@@ -15,8 +15,6 @@ import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.projection.StakeTreasuryProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import com.cardano.explorer.repository.DelegationRepository;
-import com.cardano.explorer.repository.PoolHashRepository;
-import com.cardano.explorer.repository.PoolOfflineDataRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
@@ -53,10 +51,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final StakeRegistrationRepository stakeRegistrationRepository;
 
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
-
-  private final PoolOfflineDataRepository poolOfflineDataRepository;
-
-  private final PoolHashRepository poolHashRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RewardRepository rewardRepository;
   private final WithdrawalRepository withdrawalRepository;
@@ -66,24 +60,13 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
     Page<TrxBlockEpochStake> trxBlockEpochStakePage = stakeRegistrationRepository.getDataForStakeRegistration(pageable);
-    return createStakeKeyResponse(trxBlockEpochStakePage, pageable);
+    return new BaseFilterResponse<>(trxBlockEpochStakePage.map(StakeTxResponse::new));
   }
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyDeRegistration(Pageable pageable) {
     Page<TrxBlockEpochStake> trxBlockEpochStakePage = stakeDeRegistrationRepository.getDataForStakeDeRegistration(pageable);
-    return createStakeKeyResponse(trxBlockEpochStakePage, pageable);
-  }
-
-  private BaseFilterResponse<StakeTxResponse> createStakeKeyResponse(Page<TrxBlockEpochStake> page, Pageable pageable){
-    BaseFilterResponse<StakeTxResponse> response = new BaseFilterResponse<>();
-    List<StakeTxResponse> responseList = page.stream().map(StakeTxResponse::new)
-            .collect(Collectors.toList());
-    response.setData(responseList);
-    response.setTotalItems(page.getTotalElements());
-    response.setTotalPages(page.getTotalPages());
-    response.setCurrentPage(pageable.getPageNumber());
-    return response;
+    return new BaseFilterResponse<>(trxBlockEpochStakePage.map(StakeTxResponse::new));
   }
 
   @Override
@@ -141,62 +124,40 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeDelegationProjection> getDelegationHistories(String stakeKey, Pageable pageable) {
-    BaseFilterResponse<StakeDelegationProjection> response = new BaseFilterResponse<>();
     Page<StakeDelegationProjection> delegations
         = delegationRepository.findDelegationByAddress(stakeKey, pageable);
-    response.setData(delegations.getContent());
-    response.setTotalPages(delegations.getTotalPages());
-    response.setTotalItems(delegations.getTotalElements());
-    response.setCurrentPage(pageable.getPageNumber());
-    return response;
+    return new BaseFilterResponse<>(delegations);
   }
 
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey, Pageable pageable) {
-    BaseFilterResponse<StakeHistoryProjection> response = new BaseFilterResponse<>();
     Page<StakeHistoryProjection> stakeHistories
         = stakeAddressRepository.getStakeHistory(stakeKey, pageable);
-    response.setData(stakeHistories.getContent());
-    response.setTotalPages(stakeHistories.getTotalPages());
-    response.setTotalItems(stakeHistories.getTotalElements());
-    response.setCurrentPage(pageable.getPageNumber());
-    return response;
+    return new BaseFilterResponse<>(stakeHistories);
   }
 
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(String stakeKey, Pageable pageable) {
-    BaseFilterResponse<StakeWithdrawalProjection> response = new BaseFilterResponse<>();
     Page<StakeWithdrawalProjection> withdrawalHistories
         = withdrawalRepository.getWithdrawalByAddress(stakeKey, pageable);
-    response.setData(withdrawalHistories.getContent());
-    response.setTotalPages(withdrawalHistories.getTotalPages());
-    response.setTotalItems(withdrawalHistories.getTotalElements());
-    response.setCurrentPage(pageable.getPageNumber());
-    return response;
+    return new BaseFilterResponse<>(withdrawalHistories);
   }
 
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeTreasuryProjection> getInstantaneousRewards(String stakeKey, Pageable pageable) {
-    BaseFilterResponse<StakeTreasuryProjection> response = new BaseFilterResponse<>();
     Page<StakeTreasuryProjection> instantaneousRewards
         = treasuryRepository.getTreasuryByAddress(stakeKey, pageable);
-    response.setData(instantaneousRewards.getContent());
-    response.setTotalPages(instantaneousRewards.getTotalPages());
-    response.setTotalItems(instantaneousRewards.getTotalElements());
-    response.setCurrentPage(pageable.getPageNumber());
-    return response;
+    return new BaseFilterResponse<>(instantaneousRewards);
   }
 
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    BaseFilterResponse<StakeFilterResponse> response = new BaseFilterResponse<>();
     Page<StakeAddressProjection> stakePage
         = stakeAddressRepository.findStakeAddressOrderByBalance(pageable);
-
     List<StakeFilterResponse> content = new ArrayList<>();
     Set<String> stakeAddressList = stakePage.getContent().stream()
         .map(StakeAddressProjection::getStakeAddress).collect(Collectors.toSet());
@@ -210,11 +171,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       stakeResponse.setPoolName(getNameValueFromJson(delegation.getPoolData()));
       content.add(stakeResponse);
     }
-    response.setData(content);
-    response.setTotalPages(stakePage.getTotalPages());
-    response.setTotalItems(stakePage.getTotalElements());
-    response.setCurrentPage(pageable.getPageNumber());
-    return response;
+    return new BaseFilterResponse<>(stakePage, content);
   }
 
   private String getNameValueFromJson(String json) {

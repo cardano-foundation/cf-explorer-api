@@ -17,6 +17,7 @@ import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,39 +33,39 @@ public class TokenController {
   @GetMapping
   @LogMessage
   @Operation(summary = "Filter token")
-  public BaseFilterResponse<TokenFilterResponse> filter(
+  public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
       @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return tokenService.filterToken(pageable);
+    return ResponseEntity.ok(tokenService.filterToken(pageable));
   }
 
   @GetMapping("/{tokenId}")
   @LogMessage
   @Operation(summary = "Detail token")
-  public TokenResponse getTokenDetail(@PathVariable String tokenId) {
-    return tokenService.getTokenDetail(tokenId);
+  public ResponseEntity<TokenResponse> getTokenDetail(@PathVariable String tokenId) {
+    return ResponseEntity.ok(tokenService.getTokenDetail(tokenId));
   }
 
   @GetMapping("/{tokenId}/mints")
   @LogMessage
   @Operation(summary = "Filter token mint transaction")
-  public BaseFilterResponse<TokenMintTxResponse> getTokenMintTx(@PathVariable String tokenId,
+  public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(@PathVariable String tokenId,
       @ParameterObject @SortDefault(sort = {BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return tokenService.getMintTxs(tokenId, pageable);
+    return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pageable));
   }
 
   @GetMapping("/{tokenId}/top_holders")
   @LogMessage
   @Operation(summary = "Filter holders by token")
-  public BaseFilterResponse<TokenAddressResponse> getTopHolders(@PathVariable String tokenId,
-      @ParameterObject Pageable pageable) {
-    return tokenService.getTopHolders(tokenId, pageable);
+  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
+      @PathVariable String tokenId, @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pageable));
   }
 
   @GetMapping("/{tokenId}/txs")
   @LogMessage
   @Operation(summary = "Filter transaction by token")
-  public BaseFilterResponse<TxFilterResponse> getTransactions(@PathVariable String tokenId,
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(@PathVariable String tokenId,
       @ParameterObject Pageable pageable) {
-    return txService.getTransactionsByToken(tokenId, pageable);
+    return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pageable));
   }
 }

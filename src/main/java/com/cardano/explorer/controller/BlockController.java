@@ -13,6 +13,7 @@ import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,29 +29,29 @@ public class BlockController {
   @GetMapping("/{no}")
   @LogMessage
   @Operation(summary = "Get a block detail by its no")
-  public BlockResponse getBlockDetailByBlockNo(
+  public ResponseEntity<BlockResponse> getBlockDetailByBlockNo(
       @PathVariable @Parameter(description = "Block number") String no) {
-    return blockService.getBlockDetailByBlockNo(no);
+    return ResponseEntity.ok(blockService.getBlockDetailByBlockNo(no));
   }
 
   @GetMapping("/hash/{hash}")
   @LogMessage
   @Operation(summary = "Get a block detail by its hash")
-  public BlockResponse getBlockDetailByHash(
+  public ResponseEntity<BlockResponse> getBlockDetailByHash(
       @PathVariable @Parameter(description = "Block hash") String hash) {
-    return blockService.getBlockDetailByHash(hash);
+    return ResponseEntity.ok(blockService.getBlockDetailByHash(hash));
   }
 
   //  @Cacheable(value = "block_list", key = "#pageable.pageNumber+''+#pageable.pageSize+''+#pageable.sort+''+#epochNo")
   @GetMapping("/list")
   @LogMessage
   @Operation(summary = "Filter block")
-  public BaseFilterResponse<BlockFilterResponse> filter(
+  public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> filter(
       @Parameter(description = "Condition for filter (Set all properties to null for get all)")
       BlockFilterRequest request,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return blockService.filterBlock(pageable, request);
+    return ResponseEntity.ok(blockService.filterBlock(pageable, request));
   }
 
 }

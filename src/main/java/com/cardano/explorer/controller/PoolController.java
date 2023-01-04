@@ -1,5 +1,6 @@
 package com.cardano.explorer.controller;
 
+import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.PoolTxResponse;
 import com.cardano.explorer.service.PoolRegistrationService;
@@ -20,14 +21,16 @@ public class PoolController {
   private final PoolRegistrationService poolRegistrationService;
 
   @GetMapping("/registration")
+  @LogMessage
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+      @ParameterObject @PageableDefault() Pageable pageable) {
     return ResponseEntity.ok(poolRegistrationService.getDataForPoolRegistration(pageable));
   }
 
   @GetMapping("/de-registration")
+  @LogMessage
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+      @ParameterObject @PageableDefault() Pageable pageable) {
     return ResponseEntity.ok(poolRegistrationService.getDataForPoolDeRegistration(pageable));
   }
 }
