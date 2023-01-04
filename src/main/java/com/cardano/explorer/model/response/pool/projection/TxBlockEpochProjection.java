@@ -24,4 +24,6 @@ public interface TxBlockEpochProjection {
   Long getPoolId();
 
   String getPoolName();
+
+  Long getBlockId();
 }

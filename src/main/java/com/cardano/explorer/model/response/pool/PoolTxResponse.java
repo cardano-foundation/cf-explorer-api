@@ -20,6 +20,8 @@ public class PoolTxResponse implements Serializable {
 
   private Integer epoch;
 
+  private Long blockId;
+
   private Long slotNo;
 
   private String poolName;
@@ -45,5 +47,6 @@ public class PoolTxResponse implements Serializable {
     this.cost = trxBlockEpoch.getCost();
     this.poolName = trxBlockEpoch.getPoolName();
     this.poolId = trxBlockEpoch.getPoolId();
+    this.blockId = trxBlockEpoch.getBlockId();
   }
 }
