@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,8 +23,8 @@ public class ContractController {
   @GetMapping
   @LogMessage
   @Operation(summary = "Get list contract")
-  public BaseFilterResponse<ContractFilterResponse> filterContract(
+  public ResponseEntity<BaseFilterResponse<ContractFilterResponse>> filterContract(
       @ParameterObject Pageable pageable) {
-    return addressService.getContracts(pageable);
+    return ResponseEntity.ok(addressService.getContracts(pageable));
   }
 }

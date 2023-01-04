@@ -196,33 +196,19 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> filterTx(Pageable pageable, TxFilterRequest request) {
-
-    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
     Page<Tx> txPage;
     if (request != null) {
       txPage = txRepository.findAll(txSpecification.getFilter(request), pageable);
     } else {
       txPage = txRepository.findAll(pageable);
     }
-    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
-    response.setData(txFilterResponses);
-    response.setCurrentPage(pageable.getPageNumber());
-    response.setTotalPages(txPage.getTotalPages());
-    response.setTotalItems(txPage.getTotalElements());
-    return response;
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   @Override
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address, Pageable pageable) {
-    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
     Page<Tx> txPage = addressTxBalanceRepository.findAllByAddress(address, pageable);
-
-    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
-    response.setData(txFilterResponses);
-    response.setCurrentPage(pageable.getPageNumber());
-    response.setTotalPages(txPage.getTotalPages());
-    response.setTotalItems(txPage.getTotalElements());
-    return response;
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   @Override
@@ -232,12 +218,9 @@ public class TxServiceImpl implements TxService {
     if(multiAsset.isPresent()) {
       List<Long> txIds = addressTokenRepository.findTxsById(multiAsset.get(), pageable);
       List<Tx> txList = txRepository.findByIdInOrderByIdDesc(txIds);
-      Page<Tx> txPage = new PageImpl<>(txList);
+      Page<Tx> txPage = new PageImpl<>(txList, pageable, multiAsset.get().getTxCount());
       List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
-      response.setData(txFilterResponses);
-      response.setTotalItems(multiAsset.get().getTxCount());
-      response.setTotalPages((int) Math.ceil((double) multiAsset.get().getTxCount() / pageable.getPageSize()));
-      response.setCurrentPage(pageable.getPageNumber());
+      response = new BaseFilterResponse<>(txPage, txFilterResponses);
     }
     return response;
   }
@@ -308,11 +291,15 @@ public class TxServiceImpl implements TxService {
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
 
-    Epoch epoch = epochRepository.findFirstByNo(txResponse.getTx().getEpochNo()).orElseThrow(
-        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
-    );
-    txResponse.getTx().setMaxEpochSlot(epoch.getMaxSlot());
-    txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
+    if(Objects.nonNull(txResponse.getTx().getEpochNo())) {
+      Epoch epoch = epochRepository.findFirstByNo(txResponse.getTx().getEpochNo()).orElseThrow(
+          () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
+      );
+      txResponse.getTx().setMaxEpochSlot(epoch.getMaxSlot());
+    }
+    if(Objects.nonNull(txResponse.getTx().getBlockNo())) {
+      txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
+    }
     txResponse.getTx().setStatus(TxStatus.SUCCESS);
 
     // get address input output

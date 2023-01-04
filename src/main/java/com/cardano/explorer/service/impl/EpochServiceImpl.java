@@ -13,8 +13,6 @@ import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -69,21 +67,18 @@ public class EpochServiceImpl implements EpochService {
     var rewardTime = LocalDateTime.now(ZoneId.of("UTC")).minusDays(10);
     var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
         () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
-    List<EpochResponse> epochResponses = epochs.stream().
-        map(epoch -> {
-          EpochResponse response = epochMapper.epochToEpochResponse(epoch);
-          if (currentEpoch.equals(response.getNo())) {
-            response.setStatus(EpochStatus.IN_PROGRESS);
-          } else if (rewardTime.isBefore(response.getEndTime())) {
-            response.setStatus(EpochStatus.REWARDING);
-          } else {
-            response.setStatus(EpochStatus.FINISHED);
-          }
-          return response;
-        }).collect(Collectors.toList());
+    Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
+    pageResponse.getContent().forEach(epoch -> {
+      if (currentEpoch.equals(epoch.getNo())) {
+        epoch.setStatus(EpochStatus.IN_PROGRESS);
+      } else if (rewardTime.isBefore(epoch.getEndTime())) {
+        epoch.setStatus(EpochStatus.REWARDING);
+      } else {
+        epoch.setStatus(EpochStatus.FINISHED);
+      }
+    });
 
-    return new BaseFilterResponse<>(epochResponses, epochs.getTotalElements(),
-        epochs.getTotalPages(), pageable.getPageNumber());
+    return new BaseFilterResponse<>(pageResponse);
   }
 
   @Override

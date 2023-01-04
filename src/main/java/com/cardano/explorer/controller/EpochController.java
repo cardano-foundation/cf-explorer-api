@@ -28,18 +28,18 @@ public class EpochController {
   @GetMapping("/{no}")
   @LogMessage
   @Operation(summary = "Get a epoch detail by its no")
-  public EpochResponse getEpochDetail(@PathVariable
+  public ResponseEntity<EpochResponse> getEpochDetail(@PathVariable
   @Parameter(description = "Epoch Number") String no) {
-    return epochService.getEpochDetail(no);
+    return ResponseEntity.ok(epochService.getEpochDetail(no));
   }
 
   @GetMapping("/list")
   @LogMessage
   @Operation(summary = "Get all epoch")
-  public BaseFilterResponse<EpochResponse> filter(
+  public ResponseEntity<BaseFilterResponse<EpochResponse>> filter(
       @ParameterObject @PageableDefault(sort = {"id"},
           direction = Sort.Direction.DESC) Pageable pageable) {
-    return epochService.filterEpoch(pageable);
+    return ResponseEntity.ok(epochService.filterEpoch(pageable));
   }
   @GetMapping("/current")
   @LogMessage

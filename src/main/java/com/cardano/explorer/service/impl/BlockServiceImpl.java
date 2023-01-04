@@ -91,9 +91,7 @@ public class BlockServiceImpl implements BlockService {
     } else {
       page = blockRepository.findAll(pageable);
     }
-    var response = mapperBlockToBlockFilterResponse(page);
-    response.setCurrentPage(pageable.getPageNumber());
-    return response;
+    return mapperBlockToBlockFilterResponse(page);
   }
 
   /**
@@ -104,10 +102,8 @@ public class BlockServiceImpl implements BlockService {
    */
   private BaseFilterResponse<BlockFilterResponse> mapperBlockToBlockFilterResponse(
       Page<Block> blocks) {
-    BaseFilterResponse<BlockFilterResponse> response = new BaseFilterResponse<>();
-
     //get slot leader for block
-    List<SlotLeader> slotLeaders = slotLeaderRepository.findByIdIn(blocks.toList().stream().map(
+    List<SlotLeader> slotLeaders = slotLeaderRepository.findByIdIn(blocks.getContent().stream().map(
         Block::getSlotLeaderId).collect(Collectors.toList()));
     Map<Long, SlotLeader> slotLeaderMap = slotLeaders.stream().collect(Collectors.toMap(
         BaseEntity::getId, Function.identity()
@@ -127,6 +123,7 @@ public class BlockServiceImpl implements BlockService {
     ));
 
     List<BlockFilterResponse> blockFilterResponseList = new ArrayList<>();
+
     for (Block block : blocks) {
       block.setSlotLeader(slotLeaderMap.get(block.getSlotLeaderId()));
       BlockFilterResponse blockResponse = blockMapper.blockToBlockFilterResponse(block);
@@ -136,9 +133,6 @@ public class BlockServiceImpl implements BlockService {
       blockResponse.setTotalFees(Objects.requireNonNullElse(totalFees, BigDecimal.ZERO));
       blockFilterResponseList.add(blockResponse);
     }
-    response.setData(blockFilterResponseList);
-    response.setTotalItems(blocks.getTotalElements());
-    response.setTotalPages(blocks.getTotalPages());
-    return response;
+    return new BaseFilterResponse<>(blocks, blockFilterResponseList);
   }
 }

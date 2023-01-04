@@ -46,35 +46,35 @@ public class StakeKeyController {
   @GetMapping("/address/{address}")
   @LogMessage
   @Operation(summary = "Get a stake detail by stake key")
-  public StakeAddressResponse getStakeDetailByAddress(
+  public ResponseEntity<StakeAddressResponse> getStakeDetailByAddress(
       @PathVariable @Parameter(description = "Address") String address) {
-    return stakeService.getStakeByAddress(address);
+    return ResponseEntity.ok(stakeService.getStakeByAddress(address));
   }
 
   @GetMapping("/{stakeKey}")
   @LogMessage
   @Operation(summary = "Get a stake detail by stake key")
-  public StakeAddressResponse getStakeDetail(
+  public ResponseEntity<StakeAddressResponse> getStakeDetail(
       @PathVariable @Parameter(description = "Stake key") String stakeKey) {
-    return stakeService.getStake(stakeKey);
+    return ResponseEntity.ok(stakeService.getStake(stakeKey));
   }
 
   @GetMapping("/{stakeKey}/delegation-history")
   @LogMessage
   @Operation(summary = "Get delegation history of stake key")
-  public BaseFilterResponse<StakeDelegationProjection> getDelegationHistories(
+  public ResponseEntity<BaseFilterResponse<StakeDelegationProjection>> getDelegationHistories(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject Pageable pageable) {
-    return stakeService.getDelegationHistories(stakeKey, pageable);
+    return ResponseEntity.ok(stakeService.getDelegationHistories(stakeKey, pageable));
   }
 
   @GetMapping("/{stakeKey}/stake-history")
   @LogMessage
   @Operation(summary = "Get stake history of stake key")
-  public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(
+  public ResponseEntity<BaseFilterResponse<StakeHistoryProjection>> getStakeHistories(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject Pageable pageable) {
-    return stakeService.getStakeHistories(stakeKey, pageable);
+    return ResponseEntity.ok(stakeService.getStakeHistories(stakeKey, pageable));
   }
 
   @GetMapping("/{stakeKey}/withdrawal-history")

@@ -16,6 +16,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   @EntityGraph(attributePaths = {MultiAsset_.METADATA})
   Page<MultiAsset> findAll(Pageable pageable);
 
+  @EntityGraph(attributePaths = {MultiAsset_.METADATA})
   Optional<MultiAsset> findByFingerprint(String fingerprint);
 
   @Query("SELECT token.address AS address,"
