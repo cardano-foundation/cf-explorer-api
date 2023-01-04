@@ -1,8 +1,8 @@
 package com.cardano.explorer.model.response.pool.projection;
 
-public interface BlockOwnerProjection {
+public interface PoolOwnerProjection {
 
-  Long getBlockId();
+  Long getPoolId();
 
   String getAddress();
 }

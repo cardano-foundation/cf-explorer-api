@@ -1,5 +1,7 @@
 package com.cardano.explorer.model.response.pool;
 
+import com.cardano.explorer.json.serialize.PercentSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -29,16 +31,20 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Integer delegators;
 
+  @JsonSerialize(using = PercentSerializer.class)
   private Double saturation;
 
+  @JsonSerialize(using = PercentSerializer.class)
   private Double reward;
 
+  @JsonSerialize(using = PercentSerializer.class)
   private Double ros;
 
   private BigDecimal pledge;
 
   private BigDecimal cost;
 
+  @JsonSerialize(using = PercentSerializer.class)
   private Double margin;
 
   private Integer epochBlock;

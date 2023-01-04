@@ -2,11 +2,9 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
-import com.cardano.explorer.model.response.pool.projection.TxPoolProjection;
 import com.sotatek.cardano.common.entity.PoolHash;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,17 +23,6 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "GROUP BY bk.epochNo "
           + "ORDER BY bk.epochNo ASC")
   Page<PoolDetailEpochProjection> findEpochByPool(@Param("poolId") Long poolId, Pageable pageable);
-
-  @Query(value =
-      "SELECT pu.fixedCost AS cost, pu.margin AS margin, pu.pledge AS pledge, ph.id AS poolId, po.json AS poolName, bk.id AS blockId FROM Block bk "
-          + "JOIN SlotLeader sl ON sl.id = bk.slotLeader.id "
-          + "JOIN PoolHash ph ON ph.id = sl.poolHash.id "
-          + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
-          + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id "
-          + "WHERE bk.id IN :blockIds "
-          + "AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id) "
-          + "AND (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id = ph.id))")
-  List<TxPoolProjection> getDataForPoolTx(@Param("blockIds") Set<Long> blockIds);
 
   @Query(value =
       "SELECT ph.view AS poolView, po.json AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK"
