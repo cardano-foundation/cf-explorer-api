@@ -116,24 +116,19 @@ public class DelegationServiceImpl implements DelegationService {
     }
     Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(poolView,
         poolName, pageable);
-    response.setData(poolIdPage.stream().map(
-            pool -> {
-              BigDecimal poolReward = getPoolReward(pool.getUtxo(), pool.getExpansionRate(),
-                  pool.getFeePerEpoch(), pool.getTreasuryRate());
-              BigDecimal poolRewardInEpoch = getPoolRewardInEpoch(pool.getParamK(),
-                  pool.getPledge(), pool.getUtxo(), pool.getInfluence(),
-                  pool.getPoolSize(),
-                  poolReward);
-              Double annualizedPoolReward = getAnnualizedPoolReward(poolRewardInEpoch,
-                  pool.getPoolSize());
-              return PoolResponse.builder().poolId(pool.getPoolView())
-                  .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
-                  .pledge(pool.getPledge()).feeAmount(pool.getFee()).feePercent(pool.getMargin())
-                  .saturation(getSaturation(pool.getPoolSize(),
-                      getStakeLimit(pool.getUtxo(), pool.getParamK())).doubleValue())
-                  .reward(annualizedPoolReward).build();
-            })
-        .collect(Collectors.toList()));
+    response.setData(poolIdPage.stream().map(pool -> {
+      BigDecimal poolReward = getPoolReward(pool.getUtxo(), pool.getExpansionRate(),
+          pool.getFeePerEpoch(), pool.getTreasuryRate());
+      BigDecimal poolRewardInEpoch = getPoolRewardInEpoch(pool.getParamK(), pool.getPledge(),
+          pool.getUtxo(), pool.getInfluence(), pool.getPoolSize(), poolReward);
+      Double annualizedPoolReward = getAnnualizedPoolReward(poolRewardInEpoch, pool.getPoolSize());
+      return PoolResponse.builder().poolId(pool.getPoolView())
+          .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
+          .pledge(pool.getPledge()).feeAmount(pool.getFee()).feePercent(pool.getMargin())
+          .saturation(getSaturation(pool.getPoolSize(),
+              getStakeLimit(pool.getUtxo(), pool.getParamK())).doubleValue())
+          .reward(annualizedPoolReward).build();
+    }).collect(Collectors.toList()));
     response.setTotalItems(poolIdPage.getTotalElements());
     return response;
   }
@@ -159,11 +154,8 @@ public class DelegationServiceImpl implements DelegationService {
           BigDecimal poolReward = getPoolReward(pool.getUtxo(), pool.getExpansionRate(),
               pool.getFeePerEpoch(), pool.getTreasuryRate());
           BigDecimal poolRewardInEpoch = getPoolRewardInEpoch(pool.getOptimalPoolCount(),
-              pool.getPledge(), pool.getUtxo(), pool.getInfluence(),
-              pool.getPoolSize(),
-              poolReward);
-          Double annualizedPoolReward = getAnnualizedPoolReward(poolRewardInEpoch,
-              pool.getPoolSize());
+              pool.getPledge(), pool.getUtxo(), pool.getInfluence(), pool.getPoolSize(), poolReward);
+          Double annualizedPoolReward = getAnnualizedPoolReward(poolRewardInEpoch, pool.getPoolSize());
           return PoolResponse.builder().poolId(pool.getPoolView()).poolName(poolName)
               .poolSize(pool.getPoolSize()).reward(BigInteger.ZERO.doubleValue())
               .saturation(saturation.doubleValue()).feeAmount(pool.getFee())
@@ -209,8 +201,7 @@ public class DelegationServiceImpl implements DelegationService {
           poolUpdates.getFeePerEpoch(), poolUpdates.getTreasuryRate());
       BigDecimal poolRewardInEpoch = getPoolRewardInEpoch(poolUpdates.getParamK(),
           poolUpdates.getPledge(), poolUpdates.getUtxo(), poolUpdates.getInfluence(),
-          poolHash.getPoolSize(),
-          poolReward);
+          poolHash.getPoolSize(), poolReward);
       Double annualizedPoolReward = getAnnualizedPoolReward(poolRewardInEpoch,
           poolHash.getPoolSize());
       poolDetailResponse.setReward(annualizedPoolReward);
@@ -247,8 +238,7 @@ public class DelegationServiceImpl implements DelegationService {
     List<RewardEpochProjection> rewardEpochProjections = epochRepository.findParamRewardByEpoch(
         epochNoInt);
     Map<Integer, RewardEpochProjection> rewardEpochProjectionMap = rewardEpochProjections.stream()
-        .collect(
-            Collectors.toMap(RewardEpochProjection::getEpochNo, Function.identity()));
+        .collect(Collectors.toMap(RewardEpochProjection::getEpochNo, Function.identity()));
     epochOfPools.forEach(epochOfPool -> {
       epochOfPool.setStakeAmount(epochStakeProjectionMap.get(epochOfPool.getEpoch()));
       epochOfPool.setDelegators(rewardStakeProjectionMap.get(epochOfPool.getEpoch()));
@@ -256,13 +246,11 @@ public class DelegationServiceImpl implements DelegationService {
           epochOfPool.getEpoch());
       if (Objects.nonNull(rewardEpochProjection) && Objects.nonNull(poolUpdate)) {
         BigDecimal poolReward = getPoolReward(rewardEpochProjection.getUtxo(),
-            rewardEpochProjection.getExpansionRate(),
-            rewardEpochProjection.getFeePerEpoch(), rewardEpochProjection.getTreasuryRate());
+            rewardEpochProjection.getExpansionRate(), rewardEpochProjection.getFeePerEpoch(),
+            rewardEpochProjection.getTreasuryRate());
         BigDecimal poolRewardInEpoch = getPoolRewardInEpoch(rewardEpochProjection.getParamK(),
             poolUpdate.getPledge(), rewardEpochProjection.getUtxo(),
-            rewardEpochProjection.getInfluence(),
-            poolHash.getPoolSize(),
-            poolReward);
+            rewardEpochProjection.getInfluence(), poolHash.getPoolSize(), poolReward);
         Double annualizedPoolReward = getAnnualizedPoolReward(poolRewardInEpoch,
             poolHash.getPoolSize());
         epochOfPool.setRos(getPoolRos(annualizedPoolReward, poolUpdate.getMargin()));
@@ -377,6 +365,10 @@ public class DelegationServiceImpl implements DelegationService {
    */
   private BigDecimal getPoolReward(BigDecimal currentAda, Double expansionRate,
       BigDecimal feePerEpoch, Double treasuryRate) {
+    if (Objects.isNull(currentAda) || Objects.isNull(expansionRate) || Objects.isNull(feePerEpoch)
+        || Objects.isNull(treasuryRate)) {
+      return BigDecimal.ZERO;
+    }
     BigDecimal grossReward = CommonConstant.TOTAL_ADA.subtract(currentAda)
         .multiply(BigDecimal.valueOf(expansionRate)).add(feePerEpoch);
     return grossReward.subtract(grossReward.multiply(BigDecimal.valueOf(treasuryRate)));
@@ -389,13 +381,14 @@ public class DelegationServiceImpl implements DelegationService {
    */
   private BigDecimal getPoolRewardInEpoch(Integer k, BigDecimal pledge, BigDecimal currentAda,
       Double a0, BigDecimal poolSize, BigDecimal poolReward) {
-    if (Objects.isNull(k) || Objects.isNull(currentAda) || Objects.isNull(a0)) {
+    if (Objects.isNull(k) || Objects.isNull(currentAda) || Objects.isNull(a0) || Objects.isNull(
+        pledge) || Objects.isNull(poolSize)) {
       return BigDecimal.ZERO;
     }
     BigDecimal z0 = BigDecimal.ONE.divide(BigDecimal.valueOf(k), CommonConstant.SCALE,
         RoundingMode.HALF_DOWN);
-    BigDecimal s = pledge.divide(currentAda, CommonConstant.SCALE, RoundingMode.HALF_DOWN);
-    BigDecimal sigma = poolSize.divide(currentAda, CommonConstant.SCALE, RoundingMode.HALF_DOWN);
+    BigDecimal s = pledge.divide(currentAda, CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
+    BigDecimal sigma = poolSize.divide(currentAda, CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
     BigDecimal sCapped = z0.min(s);
     BigDecimal sigmaCapped = z0.min(sigma);
     return poolReward.divide(BigDecimal.ONE.add(BigDecimal.valueOf(a0)), CommonConstant.SCALE,
@@ -412,7 +405,8 @@ public class DelegationServiceImpl implements DelegationService {
    * @return Double
    */
   private Double getAnnualizedPoolReward(BigDecimal poolRewardInEpoch, BigDecimal poolSize) {
-    if (Objects.isNull(poolSize) || poolSize.equals(BigDecimal.ZERO)) {
+    if (Objects.isNull(poolSize) || poolSize.equals(BigDecimal.ZERO)
+        || poolRewardInEpoch.compareTo(BigDecimal.ZERO) < 0) {
       return CommonConstant.ZERO.doubleValue();
     }
     return poolRewardInEpoch.multiply(CommonConstant.EPOCH_IN_YEARS)
@@ -425,6 +419,9 @@ public class DelegationServiceImpl implements DelegationService {
    * @return Double
    */
   private Double getPoolRos(Double reward, Double margin) {
+    if (Objects.isNull(margin)) {
+      return CommonConstant.ZERO.doubleValue();
+    }
     return BigDecimal.valueOf(reward)
         .subtract(BigDecimal.valueOf(reward).multiply(BigDecimal.valueOf(margin))).doubleValue();
   }
