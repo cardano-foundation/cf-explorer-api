@@ -9,6 +9,8 @@ public class CommonConstant {
 
   public static final int SCALE = 5;
 
+  public static final int SCALE_10 = 10;
+
   public static final String PREFIX_POOL_NAME = "{\"name\": \"";
 
   public static final Integer ZERO = 0;
