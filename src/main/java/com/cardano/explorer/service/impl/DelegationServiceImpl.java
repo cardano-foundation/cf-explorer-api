@@ -36,7 +36,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sotatek.cardano.common.entity.Epoch;
 import com.sotatek.cardano.common.entity.PoolHash;
-import com.sotatek.cardano.common.entity.PoolOfflineData;
 import com.sotatek.cardano.common.entity.PoolUpdate;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
@@ -55,6 +54,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -168,18 +168,13 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public PoolDetailHeaderResponse getDataForPoolDetail(String poolView) {
-    PoolDetailHeaderResponse poolDetailResponse = new PoolDetailHeaderResponse();
-    PoolHash poolHash = poolHashRepository.findByView(poolView)
+    PoolDetailUpdateProjection poolDetailProjection = poolHashRepository.getDataForPoolDetail(
+        poolView);
+    Long poolId = poolDetailProjection.getPoolId();
+    PoolDetailHeaderResponse poolDetailResponse = Stream.of(poolDetailProjection)
+        .map(PoolDetailHeaderResponse::new).findFirst()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    Long poolId = poolHash.getId();
-    poolDetailResponse.setHashView(poolHash.getHashRaw());
-    Optional<PoolOfflineData> poolOffOpt = poolOfflineDataRepository.findFirstByPoolOrderByIdDesc(
-        poolHash);
-    if (poolOffOpt.isPresent()) {
-      poolDetailResponse.setPoolName(getNameValueFromJson(poolOffOpt.get().getJson()));
-      poolDetailResponse.setTickerName(poolOffOpt.get().getTickerName());
-    }
-    poolDetailResponse.setPoolSize(poolHash.getPoolSize());
+    poolDetailResponse.setPoolName(getNameValueFromJson(poolDetailResponse.getPoolName()));
     Page<Timestamp> createdTime = blockRepository.getTimeCreatedPool(poolId, PageRequest.of(0, 1));
     if (!createdTime.isEmpty()) {
       poolDetailResponse.setCreateDate(createdTime.toList().get(CommonConstant.ZERO));
@@ -188,25 +183,22 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setOwnerAccounts(poolUpdateRepository.findOwnerAccountByPool(poolId));
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
     poolDetailResponse.setReward(CommonConstant.ZERO.doubleValue());
-    PoolDetailUpdateProjection poolUpdates = poolUpdateRepository.findPoolUpdateByPoolId(poolId);
-    if (Objects.nonNull(poolUpdates)) {
-      poolDetailResponse.setCost(poolUpdates.getCost());
-      poolDetailResponse.setMargin(poolUpdates.getMargin());
-      poolDetailResponse.setPledge(poolUpdates.getPledge());
-      poolDetailResponse.setStakeLimit(
-          getStakeLimit(poolUpdates.getUtxo(), poolUpdates.getParamK()));
-      poolDetailResponse.setSaturation(
-          getSaturation(poolHash.getPoolSize(), poolDetailResponse.getStakeLimit()).doubleValue());
-      BigDecimal poolReward = getPoolReward(poolUpdates.getUtxo(), poolUpdates.getExpansionRate(),
-          poolUpdates.getFeePerEpoch(), poolUpdates.getTreasuryRate());
-      BigDecimal poolRewardInEpoch = getPoolRewardInEpoch(poolUpdates.getParamK(),
-          poolUpdates.getPledge(), poolUpdates.getUtxo(), poolUpdates.getInfluence(),
-          poolHash.getPoolSize(), poolReward);
-      Double annualizedPoolReward = getAnnualizedPoolReward(poolRewardInEpoch,
-          poolHash.getPoolSize());
-      poolDetailResponse.setReward(annualizedPoolReward);
-      poolDetailResponse.setRos(getPoolRos(annualizedPoolReward, poolUpdates.getMargin()));
-    }
+    poolDetailResponse.setStakeLimit(
+        getStakeLimit(poolDetailProjection.getUtxo(), poolDetailProjection.getParamK()));
+    poolDetailResponse.setSaturation(
+        getSaturation(poolDetailProjection.getPoolSize(),
+            poolDetailResponse.getStakeLimit()).doubleValue());
+    BigDecimal poolReward = getPoolReward(poolDetailProjection.getUtxo(),
+        poolDetailProjection.getExpansionRate(),
+        poolDetailProjection.getFeePerEpoch(), poolDetailProjection.getTreasuryRate());
+    BigDecimal poolRewardInEpoch = getPoolRewardInEpoch(poolDetailProjection.getParamK(),
+        poolDetailProjection.getPledge(), poolDetailProjection.getUtxo(),
+        poolDetailProjection.getInfluence(),
+        poolDetailProjection.getPoolSize(), poolReward);
+    Double annualizedPoolReward = getAnnualizedPoolReward(poolRewardInEpoch,
+        poolDetailProjection.getPoolSize());
+    poolDetailResponse.setReward(annualizedPoolReward);
+    poolDetailResponse.setRos(getPoolRos(annualizedPoolReward, poolDetailProjection.getMargin()));
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
     return poolDetailResponse;

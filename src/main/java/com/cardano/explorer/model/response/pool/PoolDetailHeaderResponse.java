@@ -1,6 +1,7 @@
 package com.cardano.explorer.model.response.pool;
 
 import com.cardano.explorer.json.serialize.PercentSerializer;
+import com.cardano.explorer.model.response.pool.projection.PoolDetailUpdateProjection;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -50,4 +51,14 @@ public class PoolDetailHeaderResponse implements Serializable {
   private Integer epochBlock;
 
   private Integer lifetimeBlock;
+
+  public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
+    this.poolName = poolDetail.getPoolName();
+    this.tickerName = poolDetail.getTickerName();
+    this.poolSize = poolDetail.getPoolSize();
+    this.hashView = poolDetail.getHashRaw();
+    this.pledge = poolDetail.getPledge();
+    this.cost = poolDetail.getCost();
+    this.margin = poolDetail.getMargin();
+  }
 }

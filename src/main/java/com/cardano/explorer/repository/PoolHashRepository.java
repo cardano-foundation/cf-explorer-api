@@ -1,6 +1,7 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolDetailUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
 import com.sotatek.cardano.common.entity.PoolHash;
 import java.util.List;
@@ -49,4 +50,16 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   List<Long> getListPoolIdIn(@Param("blockIds") List<Long> blockIds);
 
   Optional<PoolHash> findByView(String view);
+
+  @Query(value =
+      "SELECT ph.id AS poolId, ph.hashRaw AS hashRaw, ph.poolSize AS poolSize, po.json AS poolName, po.tickerName AS tickerName, pu.pledge AS pledge, pu.margin AS margin, "
+          + "pu.fixedCost AS cost, ep.optimalPoolCount AS paramK, ap.utxo AS utxo, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
+          + "FROM PoolHash ph "
+          + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id  = ph.id)) "
+          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id  = ph.id) "
+          + "LEFT JOIN EpochParam ep ON ph.epochNo = ep.epochNo "
+          + "LEFT JOIN AdaPots ap ON ph.epochNo = ap.epochNo "
+          + "LEFT JOIN Epoch e ON ph.epochNo = e.no "
+          + "WHERE ph.view = :poolView ")
+  PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolView") String poolView);
 }
