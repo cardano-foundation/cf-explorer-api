@@ -4,6 +4,16 @@ import java.math.BigDecimal;
 
 public interface PoolDetailUpdateProjection {
 
+  Long getPoolId();
+
+  String getHashRaw();
+
+  BigDecimal getPoolSize();
+
+  String getPoolName();
+
+  String getTickerName();
+
   BigDecimal getCost();
 
   Double getMargin();
