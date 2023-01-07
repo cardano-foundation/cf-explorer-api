@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
 
   @Query(value =
-      "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.id AS blockId, bk.epochNo AS epochNo, bk.epochSlotNo AS slotNo, "
+      "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.blockNo AS blockNo, bk.epochNo AS epochNo, bk.epochSlotNo AS slotNo, "
           + "pu.pledge AS pledge, pu.margin AS margin, pu.fixedCost AS cost, pu.poolHash.id AS poolId, po.json AS poolName "
           + "FROM PoolRetire pr "
           + "JOIN Tx tx ON tx.id = pr.announcedTx.id "

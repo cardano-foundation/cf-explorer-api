@@ -16,6 +16,7 @@ public interface PoolOwnerRepository extends JpaRepository<PoolOwner, Long> {
       + "FROM PoolUpdate pu "
       + "JOIN PoolOwner po ON po.poolUpdate.id  = pu.id  "
       + "JOIN StakeAddress sa ON sa.id = po.stakeAddress.id "
-      + "WHERE pu.poolHash.id IN :poolIds")
+      + "WHERE pu.poolHash.id IN :poolIds "
+      + "GROUP BY pu.poolHash.id, sa.view ")
   List<PoolOwnerProjection> getStakeKeyList(@Param("poolIds") Set<Long> poolIds);
 }
