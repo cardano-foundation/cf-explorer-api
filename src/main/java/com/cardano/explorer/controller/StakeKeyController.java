@@ -2,6 +2,7 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
@@ -101,6 +102,15 @@ public class StakeKeyController {
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(
       @ParameterObject Pageable pageable) {
     return stakeService.getTopDelegators(pageable);
+  }
+
+  @GetMapping("/{stakeKey}/list-address")
+  @LogMessage
+  @Operation(summary = "Get all address of stake")
+  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
+      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(stakeService.getAddresses(stakeKey,pageable));
   }
 
 }

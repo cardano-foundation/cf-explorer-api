@@ -19,4 +19,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   Page<Address> findAllOrderByBalance(Pageable pageable);
 
   Optional<Address> findFirstByAddress(String address);
+
+  @Query("SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress")
+  Page<Address> findByStakeAddress(String stakeAddress, Pageable pageable);
 }
