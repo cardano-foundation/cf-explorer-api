@@ -2,8 +2,10 @@ package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.common.enumeration.StakeAddressStatus;
 import com.cardano.explorer.exception.BusinessCode;
+import com.cardano.explorer.mapper.AddressMapper;
 import com.cardano.explorer.mapper.StakeAddressMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.DelegationPoolResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
@@ -14,6 +16,7 @@ import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.projection.StakeTreasuryProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
+import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
@@ -25,6 +28,7 @@ import com.cardano.explorer.service.StakeKeyService;
 import com.cardano.explorer.util.AddressUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
@@ -46,6 +50,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class StakeKeyServiceImpl implements StakeKeyService {
 
+  private final AddressRepository addressRepository;
+
   private final DelegationRepository delegationRepository;
 
   private final StakeRegistrationRepository stakeRegistrationRepository;
@@ -56,6 +62,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final WithdrawalRepository withdrawalRepository;
   private final TreasuryRepository treasuryRepository;
   private final StakeAddressMapper stakeAddressMapper;
+  private final AddressMapper addressMapper;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -172,6 +179,13 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       content.add(stakeResponse);
     }
     return new BaseFilterResponse<>(stakePage, content);
+  }
+
+  @Override
+  public BaseFilterResponse<AddressFilterResponse> getAddresses(String stakeKey,
+      Pageable pageable) {
+    Page<Address> addresses = addressRepository.findByStakeAddress(stakeKey, pageable);
+    return new BaseFilterResponse<>(addresses.map(addressMapper::fromAddressToFilterResponse));
   }
 
   private String getNameValueFromJson(String json) {

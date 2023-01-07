@@ -1,6 +1,7 @@
 package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
@@ -84,4 +85,11 @@ public interface StakeKeyService {
    * @return return list active stake address sort by balance
    */
   BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable);
+
+  /**
+   * Get all address of stake key
+   * @param stakeKey stake address
+   * @return list address of stake address in this page
+   */
+  BaseFilterResponse<AddressFilterResponse> getAddresses(String stakeKey, Pageable pageable);
 }
