@@ -9,9 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
 
-  @Query("SELECT re.scriptHash AS scriptHash, tout.address AS address, re.purpose as purpose"
+  @Query("SELECT re.scriptHash AS scriptHash, txOut.address AS address, re.purpose as purpose"
       + " FROM Redeemer re"
-      + " INNER JOIN TxOut tout ON re.tx = tout.tx AND re.index = tout.index "
-      + " WHERE re.tx = :tx")
+      + " INNER JOIN Tx tx ON re.tx = tx"
+      + " LEFT JOIN TxIn txIn ON txIn.redeemer = re"
+      + " LEFT JOIN TxOut txOut ON txIn.txOut = txOut.tx AND txIn.txOutIndex = txOut.index "
+      + " WHERE tx = :tx")
   List<TxContractProjection> findContractByTx(Tx tx);
 }
