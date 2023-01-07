@@ -29,7 +29,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   PoolUpdate findLastEpochByPool(@Param("poolId") Long poolId);
 
   @Query(value =
-      "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.id AS blockId, bk.epochNo AS epochNo, bk.epochSlotNo AS slotNo, "
+      "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.blockNo AS blockNo, bk.epochNo AS epochNo, bk.epochSlotNo AS slotNo, "
           + "pu.pledge AS pledge, pu.margin AS margin, pu.fixedCost AS cost, pu.poolHash.id AS poolId, po.json AS poolName "
           + "FROM PoolUpdate pu  "
           + "JOIN Tx tx ON tx.id = pu.registeredTx.id "

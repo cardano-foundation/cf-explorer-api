@@ -47,6 +47,6 @@ public class PoolTxResponse implements Serializable {
     this.cost = trxBlockEpoch.getCost();
     this.poolName = trxBlockEpoch.getPoolName();
     this.poolId = trxBlockEpoch.getPoolId();
-    this.block = trxBlockEpoch.getBlockId();
+    this.block = trxBlockEpoch.getBlockNo();
   }
 }
