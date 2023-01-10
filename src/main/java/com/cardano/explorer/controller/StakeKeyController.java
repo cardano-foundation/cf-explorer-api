@@ -2,6 +2,7 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.StakeAnalyticResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
@@ -111,6 +112,13 @@ public class StakeKeyController {
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getAddresses(stakeKey,pageable));
+  }
+
+  @GetMapping("/analytics")
+  @LogMessage
+  @Operation(summary = "Get active stake, live stake and total stake")
+  public ResponseEntity<StakeAnalyticResponse> getStakeAnalytics() {
+    return ResponseEntity.ok(stakeService.getStakeAnalytics());
   }
 
 }
