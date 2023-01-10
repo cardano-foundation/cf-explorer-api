@@ -5,6 +5,7 @@ import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.AddressMapper;
 import com.cardano.explorer.mapper.StakeAddressMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.StakeAnalyticResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.DelegationPoolResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
@@ -18,6 +19,8 @@ import com.cardano.explorer.projection.StakeTreasuryProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.DelegationRepository;
+import com.cardano.explorer.repository.EpochRepository;
+import com.cardano.explorer.repository.EpochStakeRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
@@ -63,6 +66,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final TreasuryRepository treasuryRepository;
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
+  private final EpochRepository epochRepository;
+  private final EpochStakeRepository epochStakeRepository;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -186,6 +191,19 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       Pageable pageable) {
     Page<Address> addresses = addressRepository.findByStakeAddress(stakeKey, pageable);
     return new BaseFilterResponse<>(addresses.map(addressMapper::fromAddressToFilterResponse));
+  }
+
+  @Override
+  public StakeAnalyticResponse getStakeAnalytics() {
+    StakeAnalyticResponse response = new StakeAnalyticResponse();
+    Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
+    response.setLiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch));
+    if(1 > currentEpoch) {
+      response.setActiveStake(BigDecimal.ZERO);
+    } else {
+      response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1));
+    }
+    return response;
   }
 
   private String getNameValueFromJson(String json) {
