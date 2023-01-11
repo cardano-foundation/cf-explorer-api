@@ -32,7 +32,8 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
    */
   @Override
   public Specification<Tx> getFilter(TxFilterRequest request) {
-    return (root, query, cb) -> where(hasBlockId(request.getBlockNo())
+    return (root, query, cb) -> where(hasBlockNo(request.getBlockNo())
+        .and(hasBlockHash(request.getBlockHash()))
         .and(hasAddress(request.getAddress()))
         .and(hasToken(request.getTokenId())))
         .toPredicate(root, query, cb);
@@ -44,7 +45,7 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
    * @param blockNo value of blockNo condition
    * @return specification for blockNo equal condition
    */
-  public static Specification<Tx> hasBlockId(Long blockNo) {
+  public static Specification<Tx> hasBlockNo(Long blockNo) {
     return (root, query, criteriaBuilder) -> {
       if (Objects.isNull(blockNo)) {
         return null;
@@ -53,6 +54,24 @@ public final class TxSpecification extends BaseSpecification<Tx, TxFilterRequest
       Join<Tx, Block> txBlockJoin = root.join(Tx_.BLOCK, JoinType.LEFT);
 
       return criteriaBuilder.equal(txBlockJoin.get(Block_.BLOCK_NO), blockNo);
+    };
+  }
+
+  /**
+   * Create specification with blockNo condition
+   *
+   * @param blockHash value of blockNo condition
+   * @return specification for blockNo equal condition
+   */
+  public static Specification<Tx> hasBlockHash(String blockHash) {
+    return (root, query, criteriaBuilder) -> {
+      if (StringUtils.isEmpty(blockHash)) {
+        return null;
+      }
+
+      Join<Tx, Block> txBlockJoin = root.join(Tx_.BLOCK, JoinType.LEFT);
+
+      return criteriaBuilder.equal(txBlockJoin.get(Block_.HASH), blockHash);
     };
   }
 
