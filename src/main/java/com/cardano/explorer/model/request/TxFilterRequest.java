@@ -9,6 +9,7 @@ import lombok.Setter;
 public class TxFilterRequest {
 
   private Long blockNo;
+  private String blockHash;
   private String address;
   private String tokenId;
   @JsonIgnore

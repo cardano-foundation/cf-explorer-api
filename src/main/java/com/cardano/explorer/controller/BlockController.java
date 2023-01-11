@@ -28,8 +28,8 @@ public class BlockController {
 
   @GetMapping("/{blockId}")
   @LogMessage
-  @Operation(summary = "Get a block detail by its no")
-  public ResponseEntity<BlockResponse> getBlockDetailByBlockNo(
+  @Operation(summary = "Get a block detail")
+  public ResponseEntity<BlockResponse> getBlockDetailByBlockId(
       @PathVariable @Parameter(description = "Block number or block hash") String blockId) {
     return ResponseEntity.ok(blockService.getBlockDetailByBlockId(blockId));
   }
