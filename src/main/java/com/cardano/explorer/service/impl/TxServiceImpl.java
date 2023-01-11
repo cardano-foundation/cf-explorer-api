@@ -299,6 +299,8 @@ public class TxServiceImpl implements TxService {
     }
     if(Objects.nonNull(txResponse.getTx().getBlockNo())) {
       txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
+    } else {
+      txResponse.getTx().setConfirmation(currentBlockNo);
     }
     txResponse.getTx().setStatus(TxStatus.SUCCESS);
 

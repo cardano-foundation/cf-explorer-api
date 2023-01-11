@@ -11,18 +11,10 @@ public interface BlockService {
   /**
    * Get information detail by block no
    *
-   * @param no block no
+   * @param blockId block no or block hash
    * @return block information detail
    */
-  BlockResponse getBlockDetailByBlockNo(String no);
-
-  /**
-   * Get information detail by block hash
-   *
-   * @param hash block hash
-   * @return block information detail
-   */
-  BlockResponse getBlockDetailByHash(String hash);
+  BlockResponse getBlockDetailByBlockId(String blockId);
 
   /**
    * Get list block with paging

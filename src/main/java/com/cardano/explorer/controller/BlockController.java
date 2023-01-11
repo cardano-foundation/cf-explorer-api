@@ -26,20 +26,12 @@ public class BlockController {
 
   private final BlockService blockService;
 
-  @GetMapping("/{no}")
+  @GetMapping("/{blockId}")
   @LogMessage
   @Operation(summary = "Get a block detail by its no")
   public ResponseEntity<BlockResponse> getBlockDetailByBlockNo(
-      @PathVariable @Parameter(description = "Block number") String no) {
-    return ResponseEntity.ok(blockService.getBlockDetailByBlockNo(no));
-  }
-
-  @GetMapping("/hash/{hash}")
-  @LogMessage
-  @Operation(summary = "Get a block detail by its hash")
-  public ResponseEntity<BlockResponse> getBlockDetailByHash(
-      @PathVariable @Parameter(description = "Block hash") String hash) {
-    return ResponseEntity.ok(blockService.getBlockDetailByHash(hash));
+      @PathVariable @Parameter(description = "Block number or block hash") String blockId) {
+    return ResponseEntity.ok(blockService.getBlockDetailByBlockId(blockId));
   }
 
   //  @Cacheable(value = "block_list", key = "#pageable.pageNumber+''+#pageable.pageSize+''+#pageable.sort+''+#epochNo")

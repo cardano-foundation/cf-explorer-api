@@ -44,28 +44,21 @@ public class BlockServiceImpl implements BlockService {
 
   @Override
   @Transactional(readOnly = true)
-  public BlockResponse getBlockDetailByBlockNo(String no) {
+  public BlockResponse getBlockDetailByBlockId(String blockId) {
     try {
-      Long blockNo = Long.parseLong(no);
+      Long blockNo = Long.parseLong(blockId);
       Block block = blockRepository.findFirstByBlockNo(blockNo).orElseThrow(
           () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
       );
       return getBlockResponse(block);
     } catch (NumberFormatException e) {
-      throw new BusinessException(BusinessCode.BLOCK_NOT_FOUND);
+      Block block = blockRepository.findFirstByHash(blockId).orElseThrow(
+          () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+      );
+      return getBlockResponse(block);
     }
 
   }
-
-  @Override
-  @Transactional(readOnly = true)
-  public BlockResponse getBlockDetailByHash(String hash) {
-    Block block = blockRepository.findFirstByHash(hash).orElseThrow(
-        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
-    );
-    return getBlockResponse(block);
-  }
-
   /**
    * Get block response from entity, calculate totalOutputs and total fees
    * @param block block entity
