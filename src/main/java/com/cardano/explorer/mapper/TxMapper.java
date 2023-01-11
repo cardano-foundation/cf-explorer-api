@@ -15,12 +15,14 @@ public interface TxMapper {
   @Mapping(target = "epochSlotNo", source = "block.epochSlotNo")
   @Mapping(target = "slot", source = "block.slotNo")
   @Mapping(target = "blockNo", source = "block.blockNo")
+  @Mapping(target = "blockHash", source = "block.hash")
   @Mapping(target = "time", source = "block.time")
   @Mapping(target = "totalOutput", source = "outSum")
   TxFilterResponse txToTxFilterResponse(Tx tx);
 
   @Mapping(target = "tx.hash", source = "hash")
   @Mapping(target = "tx.blockNo", source = "block.blockNo")
+  @Mapping(target = "tx.blockHash", source = "block.hash")
   @Mapping(target = "tx.epochSlot", source = "block.epochSlotNo")
   @Mapping(target = "tx.epochNo", source = "block.epochNo")
   @Mapping(target = "tx.time", source = "block.time")

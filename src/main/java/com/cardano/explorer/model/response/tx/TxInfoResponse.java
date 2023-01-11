@@ -19,6 +19,7 @@ public class TxInfoResponse {
   private String hash;
   private LocalDateTime time;
   private Integer blockNo;
+  private String blockHash;
   private Integer epochSlot;
   private Integer maxEpochSlot;
   private Integer epochNo;

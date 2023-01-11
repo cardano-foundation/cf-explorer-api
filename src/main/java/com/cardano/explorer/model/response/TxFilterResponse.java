@@ -13,6 +13,7 @@ public class TxFilterResponse implements Serializable {
 
   private String hash;
   private Long blockNo;
+  private String blockHash;
   private Integer epochNo;
   private Integer epochSlotNo;
   private Integer slot;
