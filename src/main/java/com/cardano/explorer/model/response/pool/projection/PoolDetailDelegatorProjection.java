@@ -14,4 +14,6 @@ public interface PoolDetailDelegatorProjection {
   Timestamp getTime();
 
   BigDecimal getFee();
+
+  String getView();
 }
