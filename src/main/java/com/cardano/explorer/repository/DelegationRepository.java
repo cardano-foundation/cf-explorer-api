@@ -36,7 +36,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   List<DelegatorChartProjection> getDataForDelegatorChart(@Param("poolId") Long poolId);
 
   @Query(value =
-      "SELECT dg.id AS id, sa.hashRaw AS address, sa.id AS stakeAddressId, bk.time AS time, tx.fee AS fee "
+      "SELECT dg.id AS id, sa.hashRaw AS address, sa.id AS stakeAddressId, bk.time AS time, tx.fee AS fee, sa.view AS view "
           + "FROM PoolHash ph "
           + "JOIN Delegation dg ON dg.poolHash.id = ph.id "
           + "LEFT JOIN StakeAddress sa ON sa.id = dg.address.id "
