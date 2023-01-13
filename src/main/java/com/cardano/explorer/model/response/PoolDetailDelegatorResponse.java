@@ -23,11 +23,14 @@ public class PoolDetailDelegatorResponse implements Serializable {
 
   private BigDecimal fee;
 
+  private String view;
+
   public PoolDetailDelegatorResponse(PoolDetailDelegatorProjection poolDetailDelegator) {
     this.id = poolDetailDelegator.getId();
     this.address = poolDetailDelegator.getAddress();
     this.stakeAddressId = poolDetailDelegator.getStakeAddressId();
     this.fee = poolDetailDelegator.getFee();
     this.time = poolDetailDelegator.getTime();
+    this.view = poolDetailDelegator.getView();
   }
 }

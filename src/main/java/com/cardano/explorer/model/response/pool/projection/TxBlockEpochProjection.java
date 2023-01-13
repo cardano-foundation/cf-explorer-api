@@ -26,4 +26,6 @@ public interface TxBlockEpochProjection {
   String getPoolName();
 
   Long getBlockNo();
+
+  String getPoolView();
 }

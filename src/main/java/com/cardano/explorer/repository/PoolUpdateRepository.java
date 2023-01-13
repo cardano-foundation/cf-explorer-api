@@ -30,8 +30,9 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
   @Query(value =
       "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.blockNo AS blockNo, bk.epochNo AS epochNo, bk.epochSlotNo AS slotNo, "
-          + "pu.pledge AS pledge, pu.margin AS margin, pu.fixedCost AS cost, pu.poolHash.id AS poolId, po.json AS poolName "
+          + "pu.pledge AS pledge, pu.margin AS margin, pu.fixedCost AS cost, pu.poolHash.id AS poolId, po.json AS poolName, ph.view AS poolView "
           + "FROM PoolUpdate pu  "
+          + "JOIN PoolHash ph ON pu.poolHash.id = ph.id "
           + "JOIN Tx tx ON tx.id = pu.registeredTx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
           + "LEFT JOIN PoolOfflineData po on pu.poolHash.id = po.pool.id AND (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id  = pu.poolHash.id)) "

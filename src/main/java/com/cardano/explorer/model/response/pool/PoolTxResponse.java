@@ -34,6 +34,8 @@ public class PoolTxResponse implements Serializable {
 
   private Long poolId;
 
+  private String poolView;
+
   private Set<String> stakeKey;
 
   public PoolTxResponse(TxBlockEpochProjection trxBlockEpoch) {
@@ -48,5 +50,6 @@ public class PoolTxResponse implements Serializable {
     this.poolName = trxBlockEpoch.getPoolName();
     this.poolId = trxBlockEpoch.getPoolId();
     this.block = trxBlockEpoch.getBlockNo();
+    this.poolView = trxBlockEpoch.getPoolView();
   }
 }
