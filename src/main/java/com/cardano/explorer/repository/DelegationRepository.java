@@ -59,7 +59,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       "SELECT ph.view AS poolView, pod.json AS json, pu.pledge AS pledge, pu.fixedCost AS fee,"
           + " ph.poolSize AS poolSize, ep.optimalPoolCount AS optimalPoolCount, "
           + "ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, "
-          + "ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
+          + "ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate, e.blkCount AS blkCount, ep.maxBlockSize AS MaxBlockSize "
           + "FROM PoolHash ph "
           + "JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
           + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
