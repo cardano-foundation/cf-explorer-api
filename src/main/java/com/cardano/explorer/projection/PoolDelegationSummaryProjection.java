@@ -27,4 +27,8 @@ public interface PoolDelegationSummaryProjection {
   Double getExpansionRate();
 
   Double getTreasuryRate();
+
+  Integer getBlkCount();
+
+  Integer getMaxBlockSize();
 }
