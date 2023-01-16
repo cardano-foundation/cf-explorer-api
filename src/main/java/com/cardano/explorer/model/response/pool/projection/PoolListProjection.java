@@ -27,4 +27,8 @@ public interface PoolListProjection {
   Double getExpansionRate();
 
   Double getTreasuryRate();
+
+  Integer getBlkCount();
+
+  Integer getMaxBlockSize();
 }
