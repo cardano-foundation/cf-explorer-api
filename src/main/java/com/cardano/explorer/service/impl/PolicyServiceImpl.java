@@ -4,6 +4,7 @@ import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.TokenMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.token.PolicyResponse;
+import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.projection.AddressTokenProjection;
 import com.cardano.explorer.repository.MultiAssetRepository;
@@ -44,8 +45,9 @@ public class PolicyServiceImpl implements PolicyService {
   }
 
   @Override
-  public BaseFilterResponse<AddressTokenProjection> getHolders(String policyId, Pageable pageable) {
-    Page<AddressTokenProjection> multiAssetPage = multiAssetRepository.findAddressTokenByPolicy(policyId, pageable);
-    return new BaseFilterResponse<>(multiAssetPage);
+  public BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable) {
+    Page<AddressTokenProjection> multiAssetPage
+        = multiAssetRepository.findAddressTokenByPolicy(policyId, pageable);
+    return new BaseFilterResponse<>(multiAssetPage.map(tokenMapper::fromAddressTokenProjection));
   }
 }

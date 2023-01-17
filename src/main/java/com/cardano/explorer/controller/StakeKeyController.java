@@ -35,14 +35,16 @@ public class StakeKeyController {
   @GetMapping("/registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC)
+          @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pageable));
   }
 
   @GetMapping("/de-registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC)
+          @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pageable));
   }
   @GetMapping("/address/{address}")
@@ -69,7 +71,6 @@ public class StakeKeyController {
       @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDelegationHistories(stakeKey, pageable));
   }
-
   @GetMapping("/{stakeKey}/stake-history")
   @LogMessage
   @Operation(summary = "Get stake history of stake key")
@@ -81,7 +82,7 @@ public class StakeKeyController {
 
   @GetMapping("/{stakeKey}/withdrawal-history")
   @LogMessage
-  @Operation(summary = "Get stake history of stake key")
+  @Operation(summary = "Get withdrawal transaction of stake key")
   public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject Pageable pageable) {
@@ -90,7 +91,7 @@ public class StakeKeyController {
 
   @GetMapping("/{stakeKey}/instantaneous-rewards")
   @LogMessage
-  @Operation(summary = "Get stake history of stake key")
+  @Operation(summary = "Get reward transaction of stake key")
   public BaseFilterResponse<StakeTreasuryProjection> getInstantaneousRewards(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject Pageable pageable) {

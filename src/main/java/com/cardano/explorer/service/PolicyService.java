@@ -2,8 +2,8 @@ package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.token.PolicyResponse;
+import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
-import com.cardano.explorer.projection.AddressTokenProjection;
 import org.springframework.data.domain.Pageable;
 
 public interface PolicyService {
@@ -33,5 +33,5 @@ public interface PolicyService {
    * @param pageable page info
    * @return list holders in this page
    */
-  BaseFilterResponse<AddressTokenProjection> getHolders(String policyId, Pageable pageable);
+  BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable);
 }
