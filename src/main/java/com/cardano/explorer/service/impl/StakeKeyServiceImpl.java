@@ -101,7 +101,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         = stakeAddressRepository.findByView(stake).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     stakeAddressResponse.setStakeAddress(stake);
-    BigDecimal stakeTotalBalance = stakeAddress.getBalance();
+    BigDecimal stakeTotalBalance
+        = addressRepository.findTotalBalanceByStakeAddress(stakeAddress).orElse(BigDecimal.ZERO);
     BigDecimal stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
         stake).orElse(BigDecimal.ZERO);
     BigDecimal stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(

@@ -37,10 +37,15 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + " tx.id IS NOT NULL")
   Page<StakeHistoryProjection> getStakeHistory(String stakeKey, Pageable pageable);
 
-  @Query("SELECT sa.view as stakeAddress, sa.balance as totalStake"
+  @Query(value = "SELECT sa.view as stakeAddress, sum(addr.balance) as totalStake"
       + " FROM StakeAddress sa"
+      + " LEFT JOIN Address addr ON addr.stakeAddress = sa"
       + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
-      + " ORDER BY sa.balance DESC")
+      + " GROUP BY sa.id"
+      + " HAVING sum(addr.balance) IS NOT NULL"
+      + " ORDER BY totalStake DESC",
+      countQuery = "SELECT count(sa) FROM StakeAddress sa "
+      + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)")
   Page<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
 
 }

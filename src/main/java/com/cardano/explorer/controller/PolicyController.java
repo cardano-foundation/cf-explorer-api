@@ -3,8 +3,8 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.token.PolicyResponse;
+import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
-import com.cardano.explorer.projection.AddressTokenProjection;
 import com.cardano.explorer.service.PolicyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -44,7 +44,7 @@ public class PolicyController {
   @GetMapping("/{policyId}/holders")
   @LogMessage
   @Operation(summary = "Get holders by policy")
-  public ResponseEntity<BaseFilterResponse<AddressTokenProjection>> getHolders(
+  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
       @PathVariable @Parameter(description = "Policy hash") String policyId,
       @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(policyService.getHolders(policyId, pageable));
