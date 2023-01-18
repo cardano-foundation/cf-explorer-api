@@ -1,6 +1,6 @@
 package com.cardano.explorer.util;
 
-import com.bloxbean.cardano.client.address.AddressType;
+import com.bloxbean.cardano.client.address.util.AddressUtil;
 import com.cardano.explorer.exception.BusinessCode;
 import com.sotatek.cardano.ledgersync.common.address.ShelleyAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
@@ -19,9 +19,7 @@ public class AddressUtils {
   public static String checkStakeAddress(String address) {
     String stakeAddress = null;
     try {
-      com.bloxbean.cardano.client.address.Address addressCheck
-          = new com.bloxbean.cardano.client.address.Address(address);
-      if(addressCheck.getAddressType() != AddressType.Byron) {
+      if(address.startsWith("addr")) {
         ShelleyAddress shelleyAddress = new ShelleyAddress(address);
         if (shelleyAddress.containStakeAddress()) {
           //TO-DO: Move to common
@@ -29,6 +27,8 @@ public class AddressUtils {
           ShelleyAddress stakeShelley = new ShelleyAddress(addr);
           stakeAddress = stakeShelley.getAddress();
         }
+      } else if(!AddressUtil.isValidAddress(address)) {
+        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
       }
     } catch (Exception e) {
       throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
