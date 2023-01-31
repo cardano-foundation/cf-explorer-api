@@ -198,11 +198,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public StakeAnalyticResponse getStakeAnalytics() {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
-    response.setLiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch));
+    response.setLiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch).orElse(BigDecimal.ZERO));
     if(1 > currentEpoch) {
       response.setActiveStake(BigDecimal.ZERO);
     } else {
-      response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1));
+      response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1).orElse(BigDecimal.ZERO));
     }
     return response;
   }
