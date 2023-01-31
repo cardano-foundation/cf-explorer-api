@@ -17,6 +17,8 @@ services:
       - PORT_DB=${PORT_DB}
       - USERNAME_DB=${USERNAME_DB}
       - PASSWORD_DB=${PASSWORD_DB}
+      - SCHEMA=${SCHEMA}
+      - DB=${DB}
     ports:
       - "8033:8080"
       - "18033:8080"
