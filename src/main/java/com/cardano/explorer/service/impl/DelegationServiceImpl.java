@@ -94,7 +94,7 @@ public class DelegationServiceImpl implements DelegationService {
     Timestamp endTime = epoch.getEndTime();
     long countDownTime = endTime.getTime() - Timestamp.from(Instant.now()).getTime();
     Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo);
-    BigDecimal totalStake = epochStakeRepository.totalStakeAllPoolByEpochNo(epochNo);
+    BigDecimal totalStake = epochStakeRepository.totalStakeAllPoolByEpochNo(epochNo).orElse(BigDecimal.ZERO);
     Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
         Long.valueOf(epochNo));
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)

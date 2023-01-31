@@ -7,6 +7,7 @@ import com.cardano.explorer.projection.StakeAddressProjection;
 import com.sotatek.cardano.common.entity.EpochStake;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,7 +25,7 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
       @Param("poolId") Long poolId);
 
   @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.epochNo = :epochNo")
-  BigDecimal totalStakeAllPoolByEpochNo(@Param("epochNo") Integer epochNo);
+  Optional<BigDecimal> totalStakeAllPoolByEpochNo(@Param("epochNo") Integer epochNo);
 
   @Query(value =
       "SELECT es.epochNo AS chartKey, sum(es.amount) AS chartValue FROM EpochStake es "
