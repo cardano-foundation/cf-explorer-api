@@ -23,6 +23,8 @@
 - `PORT_DB` : Database port (default is my postgres port: 54321)
 - `USERNAME_DB`: Database username (in your case, do not fill this field because local profile is using a read-only user)
 - `PASSWORD_DB`: Database password (in your case, do not fill this field because local profile is using a read-only user)
+- `SCHEMA`: Schema of database
+- `DB`: Database name
  
 
 
