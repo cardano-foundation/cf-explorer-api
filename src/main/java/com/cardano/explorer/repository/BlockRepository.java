@@ -3,6 +3,7 @@ package com.cardano.explorer.repository;
 import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.Block_;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +40,7 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
       + "JOIN Block bk ON bk.slotLeader.id = sl.id "
       + "WHERE ph.id = :poolId "
       + "ORDER BY bk.time ASC")
-  Page<Timestamp> getTimeCreatedPool(@Param("poolId") Long poolId, Pageable pageable);
+  List<Timestamp> getTimeCreatedPool(@Param("poolId") Long poolId);
 
   @Query(value = "SELECT count(bk.id) FROM PoolHash ph "
       + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
