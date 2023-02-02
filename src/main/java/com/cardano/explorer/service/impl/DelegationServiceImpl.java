@@ -94,7 +94,8 @@ public class DelegationServiceImpl implements DelegationService {
     Timestamp endTime = epoch.getEndTime();
     long countDownTime = endTime.getTime() - Timestamp.from(Instant.now()).getTime();
     Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo);
-    BigDecimal totalStake = epochStakeRepository.totalStakeAllPoolByEpochNo(epochNo).orElse(BigDecimal.ZERO);
+    BigDecimal totalStake = epochStakeRepository.totalStakeAllPoolByEpochNo(epochNo)
+        .orElse(BigDecimal.ZERO);
     Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
         Long.valueOf(epochNo));
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
@@ -379,7 +380,8 @@ public class DelegationServiceImpl implements DelegationService {
    *
    * @return BigDecimal
    */
-  private BigDecimal getGrossReward(Integer k, BigDecimal currentAda, BigDecimal totalADAInCirculation,
+  private BigDecimal getGrossReward(Integer k, BigDecimal currentAda,
+      BigDecimal totalADAInCirculation,
       Double a0, BigDecimal poolSize, BigDecimal r) {
     if (r.equals(BigDecimal.ZERO) || Objects.isNull(k) || Objects.isNull(
         a0) || Objects.isNull(poolSize) || poolSize.equals(BigDecimal.ZERO)) {
@@ -389,7 +391,8 @@ public class DelegationServiceImpl implements DelegationService {
         RoundingMode.HALF_DOWN);
     BigDecimal poolSaturation = totalADAInCirculation.divide(BigDecimal.valueOf(k),
         CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal s = (poolSize.min(poolSaturation)).divide(totalADAInCirculation, CommonConstant.SCALE_10,
+    BigDecimal s = (poolSize.min(poolSaturation)).divide(totalADAInCirculation,
+        CommonConstant.SCALE_10,
         RoundingMode.HALF_DOWN);
     BigDecimal sigma = poolSize.divide(currentAda, CommonConstant.SCALE_10,
         RoundingMode.HALF_DOWN);
@@ -430,7 +433,7 @@ public class DelegationServiceImpl implements DelegationService {
    */
   private Double getReward(BigDecimal poolSize, BigDecimal pledge, Integer k, BigDecimal currentAda,
       Double expansionRate, BigDecimal netReward) {
-    if (netReward.equals(BigDecimal.ZERO)) {
+    if (netReward.equals(BigDecimal.ZERO) || poolSize.compareTo(pledge) <= 0) {
       return BigDecimal.ZERO.doubleValue();
     }
     BigDecimal ada = poolSize.subtract(pledge);
@@ -454,7 +457,8 @@ public class DelegationServiceImpl implements DelegationService {
         param.getExpansionRate());
     BigDecimal r = getParamR(param.getCurrentAda(), param.getExpansionRate(),
         param.getFeePerEpoch(), param.getTreasuryRate());
-    BigDecimal grossReward = getGrossReward(param.getK(), param.getCurrentAda(), totalADAInCirculation,
+    BigDecimal grossReward = getGrossReward(param.getK(), param.getCurrentAda(),
+        totalADAInCirculation,
         param.getA0(), param.getPoolSize(), r);
     BigDecimal netReward = getNetReward(grossReward, param.getBlkCount(), param.getMaxBlockSize(),
         param.getMargin(), param.getFixedFee());
