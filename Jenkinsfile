@@ -65,21 +65,19 @@ pipeline {
             steps {
                 echo 'Deploying....'
                 script {
-                    if (env.BRANCH_NAME == 'develop') {
-                        envFileDeploy = '/tmp/env-dev.env'
-                        composeFile = 'docker-compose.yml'
-                        
-                    }
-                    if (env.BRANCH_NAME == 'test') {
-                        envFileDeploy = '/tmp/env-test.env'
-                        composeFile = 'docker-compose-test.yml'
-                    }
-                    if (env.BRANCH_NAME == 'prod') {
-                        envFileDeploy = '/tmp/env-prod.env'
-                        composeFile = 'docker-compose.yml'
-                    }
+                    def envMainnet = "/tmp/explorer-api-mainnet.env"
+                    def envTestnet = "/tmp/explorer-api-testnet.env"
+                    def envPreprod = "/tmp/explorer-api-preprod.env"
+                    def envPreview = "/tmp/explorer-api-preview.env"
+
+                    sh "docker-compose --env-file ${envMainnet}  -p mainnet up -d --build"
+                    sh "docker-compose --env-file ${envTestnet}  -p testnet up -d --build"
+                    sh "docker-compose --env-file ${envPreprod}  -p preprod up -d --build"
+                    sh "docker-compose --env-file ${envPreview}  -p preview up -d --build"
                 }
-                sh "docker-compose --env-file ${envFileDeploy} -f ${composeFile} up -d --build"
+ 
+              
+
                 sh "docker images -f 'dangling=true' -q --no-trunc | xargs --no-run-if-empty docker rmi"
                 echo 'Deployment Done!!!'
             }
