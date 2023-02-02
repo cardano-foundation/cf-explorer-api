@@ -18,6 +18,4 @@ public class CommonConstant {
   public static final BigDecimal TOTAL_ADA = new BigDecimal(45000000000000000L);
 
   public static final BigDecimal EPOCH_IN_YEARS = new BigDecimal(73);
-
-  public static final BigDecimal DAY_IN_EPOCH = new BigDecimal(5);
 }
