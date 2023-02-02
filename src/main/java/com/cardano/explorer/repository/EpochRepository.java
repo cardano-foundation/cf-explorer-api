@@ -30,7 +30,7 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
   @Query(value =
       "SELECT e.no AS epochNo, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate, e.blkCount AS blkCount, "
-          + "ep.optimalPoolCount AS paramK, ep.influence AS influence, e.fees AS feePerEpoch, ap.utxo AS utxo, ep.maxBlockSize AS MaxBlockSize "
+          + "ep.optimalPoolCount AS paramK, ep.influence AS influence, e.fees AS feePerEpoch, ap.utxo AS utxo, ep.maxBlockSize AS maxBlockSize "
           + "FROM EpochParam ep "
           + "JOIN AdaPots ap ON ap.epochNo = ep.epochNo "
           + "JOIN Epoch e ON e.no = ep.epochNo "
