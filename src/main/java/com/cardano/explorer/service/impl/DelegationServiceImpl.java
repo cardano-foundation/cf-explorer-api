@@ -45,6 +45,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -115,13 +116,23 @@ public class DelegationServiceImpl implements DelegationService {
     }
     Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(poolView,
         poolName, pageable);
-    response.setData(poolIdPage.stream().map(
-        pool -> PoolResponse.builder().poolId(pool.getPoolView())
-            .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
-            .pledge(pool.getPledge()).feeAmount(pool.getFee()).feePercent(pool.getMargin())
-            .saturation(getSaturation(pool.getPoolSize(),
-                getStakeLimit(pool.getUtxo(), pool.getParamK())).doubleValue())
-            .reward(getReward(new RewardParam(pool))).build()).collect(Collectors.toList()));
+    List<PoolResponse> poolList = new ArrayList<>();
+    List<String> poolViews = new ArrayList<>();
+    poolIdPage.stream().forEach(pool -> {
+      poolList.add(PoolResponse.builder().poolId(pool.getPoolView())
+          .poolName(getNameValueFromJson(pool.getPoolName())).poolSize(pool.getPoolSize())
+          .pledge(pool.getPledge()).feeAmount(pool.getFee()).feePercent(pool.getMargin())
+          .saturation(getSaturation(pool.getPoolSize(),
+              getStakeLimit(pool.getUtxo(), pool.getParamK())).doubleValue())
+          .build());
+      poolViews.add(pool.getPoolView());
+    });
+    List<PoolListProjection> dataRewards = poolHashRepository.findDataCalculateReward(poolViews);
+    Map<String, PoolListProjection> dataRewardsMap = dataRewards.stream()
+        .collect(Collectors.toMap(PoolListProjection::getPoolView, Function.identity()));
+    poolList.forEach(
+        pool -> pool.setReward(getReward(new RewardParam(dataRewardsMap.get(pool.getPoolId())))));
+    response.setData(poolList);
     response.setTotalItems(poolIdPage.getTotalElements());
     return response;
   }
@@ -135,7 +146,12 @@ public class DelegationServiceImpl implements DelegationService {
 
     List<PoolDelegationSummaryProjection> pools = delegationRepository.findDelegationPoolsSummary(
         pageable);
-
+    List<String> poolViews = pools.stream().map(PoolDelegationSummaryProjection::getPoolView)
+        .collect(
+            Collectors.toList());
+    List<PoolListProjection> dataRewards = poolHashRepository.findDataCalculateReward(poolViews);
+    Map<String, PoolListProjection> dataRewardsMap = dataRewards.stream()
+        .collect(Collectors.toMap(PoolListProjection::getPoolView, Function.identity()));
     return pools.stream().map(pool -> {
 
           String poolName = getNameValueFromJson(pool.getJson());
@@ -148,10 +164,9 @@ public class DelegationServiceImpl implements DelegationService {
               .poolSize(pool.getPoolSize()).reward(BigInteger.ZERO.doubleValue())
               .saturation(saturation.doubleValue()).feeAmount(pool.getFee())
               .feePercent(pool.getMargin()).pledge(pool.getPledge())
-              .reward(getReward(new RewardParam(pool))).build();
+              .reward(getReward(new RewardParam(dataRewardsMap.get(pool.getPoolView())))).build();
         }).sorted(((o1, o2) -> o2.getPoolSize().compareTo(o1.getPoolSize())))
         .collect(Collectors.toCollection(LinkedHashSet::new));
-
   }
 
   @Override
@@ -175,7 +190,8 @@ public class DelegationServiceImpl implements DelegationService {
         getStakeLimit(poolDetailProjection.getUtxo(), poolDetailProjection.getParamK()));
     poolDetailResponse.setSaturation(getSaturation(poolDetailProjection.getPoolSize(),
         poolDetailResponse.getStakeLimit()).doubleValue());
-    Double reward = getReward(new RewardParam(poolDetailProjection));
+    PoolListProjection poolListProjection = poolHashRepository.findDataCalculateReward(poolView);
+    Double reward = getReward(new RewardParam(poolListProjection));
     poolDetailResponse.setReward(reward);
     poolDetailResponse.setRos(getPoolRos(reward, poolDetailProjection.getMargin()));
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));

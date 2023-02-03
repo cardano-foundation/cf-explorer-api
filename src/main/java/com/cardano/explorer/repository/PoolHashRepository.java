@@ -62,4 +62,28 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "LEFT JOIN Epoch e ON ph.epochNo = e.no "
           + "WHERE ph.view = :poolView ")
   PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolView") String poolView);
+
+  @Query(value =
+      "SELECT ph.view AS poolView, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
+          + ", ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
+          + "FROM PoolHash ph "
+          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
+          + "LEFT JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
+          + "LEFT JOIN Epoch e ON e.no = pu.activeEpochNo "
+          + "WHERE (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
+          + "AND (ph.view IN :poolViews) ")
+  List<PoolListProjection> findDataCalculateReward(@Param("poolViews") List<String> poolViews);
+
+  @Query(value =
+      "SELECT ph.view AS poolView, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
+          + ", ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
+          + "FROM PoolHash ph "
+          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
+          + "LEFT JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
+          + "LEFT JOIN Epoch e ON e.no = pu.activeEpochNo "
+          + "WHERE (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
+          + "AND (ph.view = :poolView) ")
+  PoolListProjection findDataCalculateReward(@Param("poolView") String poolView);
 }
