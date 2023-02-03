@@ -1,9 +1,7 @@
 package com.cardano.explorer.model.request.pool;
 
-import com.cardano.explorer.model.response.pool.projection.PoolDetailUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
 import com.cardano.explorer.model.response.pool.projection.RewardEpochProjection;
-import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
 import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,36 +47,6 @@ public class RewardParam {
     this.maxBlockSize = param.getMaxBlockSize();
     this.margin = param.getMargin();
     this.fixedFee = param.getFee();
-  }
-
-  public RewardParam(PoolDelegationSummaryProjection param) {
-    this.currentAda = param.getUtxo();
-    this.expansionRate = param.getExpansionRate();
-    this.feePerEpoch = param.getFeePerEpoch();
-    this.treasuryRate = param.getTreasuryRate();
-    this.k = param.getOptimalPoolCount();
-    this.pledge = param.getPledge();
-    this.a0 = param.getInfluence();
-    this.poolSize = param.getPoolSize();
-    this.blkCount = param.getBlkCount();
-    this.maxBlockSize = param.getMaxBlockSize();
-    this.margin = param.getMargin();
-    this.fixedFee = param.getFee();
-  }
-
-  public RewardParam(PoolDetailUpdateProjection param) {
-    this.currentAda = param.getUtxo();
-    this.expansionRate = param.getExpansionRate();
-    this.feePerEpoch = param.getFeePerEpoch();
-    this.treasuryRate = param.getTreasuryRate();
-    this.k = param.getParamK();
-    this.pledge = param.getPledge();
-    this.a0 = param.getInfluence();
-    this.poolSize = param.getPoolSize();
-    this.blkCount = param.getBlkCount();
-    this.maxBlockSize = param.getMaxBlockSize();
-    this.margin = param.getMargin();
-    this.fixedFee = param.getCost();
   }
 
   public RewardParam(RewardEpochProjection param) {
