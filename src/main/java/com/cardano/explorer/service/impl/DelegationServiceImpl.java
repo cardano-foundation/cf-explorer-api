@@ -178,10 +178,7 @@ public class DelegationServiceImpl implements DelegationService {
         .map(PoolDetailHeaderResponse::new).findFirst()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     poolDetailResponse.setPoolName(getNameValueFromJson(poolDetailResponse.getPoolName()));
-    List<Timestamp> createdTime = blockRepository.getTimeCreatedPool(poolId);
-    if (!createdTime.isEmpty()) {
-      poolDetailResponse.setCreateDate(createdTime.get(CommonConstant.ZERO));
-    }
+    poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
     poolDetailResponse.setRewardAccounts(poolUpdateRepository.findRewardAccountByPool(poolId));
     poolDetailResponse.setOwnerAccounts(poolUpdateRepository.findOwnerAccountByPool(poolId));
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
