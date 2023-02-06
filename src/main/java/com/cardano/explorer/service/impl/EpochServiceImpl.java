@@ -36,16 +36,7 @@ public class EpochServiceImpl implements EpochService {
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
       );
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
-      var rewardTime = LocalDateTime.now().minusDays(10);
-      var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
-          () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
-      if (currentEpoch.equals(response.getNo())) {
-        response.setStatus(EpochStatus.IN_PROGRESS);
-      } else if (rewardTime.isBefore(response.getEndTime())) {
-        response.setStatus(EpochStatus.REWARDING);
-      } else {
-        response.setStatus(EpochStatus.FINISHED);
-      }
+      checkEpochStatus(response);
       return response;
     } catch (NumberFormatException e) {
       throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
@@ -64,21 +55,36 @@ public class EpochServiceImpl implements EpochService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<EpochResponse> filterEpoch(Pageable pageable) {
     Page<Epoch> epochs = epochRepository.findAll(pageable);
-    var rewardTime = LocalDateTime.now(ZoneId.of("UTC")).minusDays(10);
+    Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
+    pageResponse.getContent().forEach(this::checkEpochStatus);
+    return new BaseFilterResponse<>(pageResponse);
+  }
+
+  /**
+   * Get epoch status from start time and end time
+   *
+   * <p>Start time < now < end time : in progress</p>
+   * <p>End time > now - 10 day and not in progress: rewarding</p>
+   * <p>Others: finished</p>
+   *
+   * @param epoch epoch response
+   */
+  private void checkEpochStatus(EpochResponse epoch) {
+    var rewardTime = LocalDateTime.now().minusDays(10);
     var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
         () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
-    Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
-    pageResponse.getContent().forEach(epoch -> {
-      if (currentEpoch.equals(epoch.getNo())) {
-        epoch.setStatus(EpochStatus.IN_PROGRESS);
-      } else if (rewardTime.isBefore(epoch.getEndTime())) {
-        epoch.setStatus(EpochStatus.REWARDING);
-      } else {
-        epoch.setStatus(EpochStatus.FINISHED);
-      }
-    });
-
-    return new BaseFilterResponse<>(pageResponse);
+    if (epoch.getStartTime().plusDays(5).isAfter(LocalDateTime.now(ZoneId.of("UTC")))
+     && epoch.getStartTime().isBefore(LocalDateTime.now(ZoneId.of("UTC")))) {
+      epoch.setStatus(EpochStatus.IN_PROGRESS);
+      epoch.setEndTime(epoch.getStartTime().plusDays(5));
+    } else if (rewardTime.isBefore(epoch.getEndTime())) {
+      epoch.setStatus(EpochStatus.REWARDING);
+    } else {
+      epoch.setStatus(EpochStatus.FINISHED);
+    }
+    if(!EpochStatus.IN_PROGRESS.equals(epoch.getStatus()) && currentEpoch.equals(epoch.getNo())) {
+      epoch.setStatus(EpochStatus.SYNCING);
+    }
   }
 
   @Override
