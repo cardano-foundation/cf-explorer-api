@@ -21,6 +21,8 @@ public class StakeTxResponse implements Serializable {
 
   private Long slotNo;
 
+  private Long epochSlotNo;
+
   private String stakeKey;
 
   public StakeTxResponse(TrxBlockEpochStake trxBlockEpochStake) {
@@ -30,6 +32,7 @@ public class StakeTxResponse implements Serializable {
     this.block = trxBlockEpochStake.getBlockId();
     this.epoch = trxBlockEpochStake.getEpochNo();
     this.slotNo = trxBlockEpochStake.getSlotNo();
+    this.epochSlotNo = trxBlockEpochStake.getEpochSlotNo();
     this.stakeKey = trxBlockEpochStake.getStakeKey();
   }
 

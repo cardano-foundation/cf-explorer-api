@@ -16,6 +16,8 @@ public interface TrxBlockEpochStake {
 
   Long getSlotNo();
 
+  Long getEpochSlotNo();
+
   String getStakeKey();
 
 }

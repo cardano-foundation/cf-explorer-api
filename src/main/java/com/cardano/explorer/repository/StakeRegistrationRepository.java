@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
 public interface StakeRegistrationRepository extends JpaRepository<StakeRegistration, Long> {
 
   @Query(value =
-      "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.id AS blockId, bk.epochNo AS epochNo, "
-          + "bk.slotNo as slotNo, sr.addr.view as stakeKey "
+      "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.blockNo AS blockId, bk.epochNo AS epochNo, "
+          + "bk.slotNo as slotNo, bk.epochSlotNo as epochSlotNo, sr.addr.view as stakeKey "
           + "FROM StakeRegistration sr "
           + "JOIN Tx tx ON tx.id = sr.tx.id "
           + "JOIN Block bk ON bk.id = tx.block.id ",
