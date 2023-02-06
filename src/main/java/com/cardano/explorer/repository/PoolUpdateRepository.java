@@ -2,6 +2,7 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.PoolUpdate;
+import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,4 +39,11 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "LEFT JOIN PoolOfflineData po on pu.poolHash.id = po.pool.id AND (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id  = pu.poolHash.id)) "
           + "ORDER BY bk.time DESC")
   Page<TxBlockEpochProjection> getDataForPoolRegistration(Pageable pageable);
+
+  @Query(value = "SELECT bk.time FROM PoolUpdate pu "
+      + "JOIN Tx t ON pu.registeredTx.id = t.id "
+      + "JOIN Block bk ON t.block.id = bk.id "
+      + "WHERE pu.activeEpochNo = (SELECT min(pu.activeEpochNo) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId) "
+      + "AND pu.poolHash.id = :poolId ")
+  Timestamp getCreatedTimeOfPool(@Param("poolId") Long poolId);
 }
