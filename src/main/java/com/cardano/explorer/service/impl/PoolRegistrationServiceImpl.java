@@ -10,7 +10,6 @@ import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.service.PoolRegistrationService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,10 +84,12 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
    * @return String
    */
   private String getNameValueFromJson(String jsonName) {
-    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(jsonName))) {
-      return null;
+    try {
+      JsonObject jsonObject = new Gson().fromJson(jsonName, JsonObject.class);
+      return jsonObject.get("name").getAsString();
+    } catch (Exception ex) {
+      log.error("Error: when convert json string to json object");
     }
-    JsonObject jsonObject = new Gson().fromJson(jsonName, JsonObject.class);
-    return jsonObject.get("name").getAsString();
+    return null;
   }
 }
