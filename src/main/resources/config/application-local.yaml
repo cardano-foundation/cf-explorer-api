@@ -52,8 +52,8 @@ spring:
 
 redis:
   databaseIndex: 0
-  master: ${REDIS_MASTER:mymaster}
-  password: ${REDIS_PASS:redis_sentinel_pass}
+  master: ${REDIS_MASTER_NAME:mymaster}
+  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
   testOnBorrow: false
   maxTotal: 10
   maxIdle: 5
