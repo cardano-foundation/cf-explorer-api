@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -42,19 +42,17 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 @Slf4j
 @Configuration
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @EnableCaching
+@RequiredArgsConstructor
 public class RedisConfiguration extends CachingConfigurerSupport {
 
   /**
    * Redis properties config
    */
-  RedisProperties redisProperties;
+  private final RedisProperties redisProperties;
 
-  @Autowired
-  RedisConfiguration(RedisProperties redisProperties) {
-    this.redisProperties = redisProperties;
-  }
+  @Value("${application.api.coin.gecko.market.interval-time}")
+  private int apiMarketIntervalTime;
 
 
   @Bean
@@ -211,9 +209,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
   @Bean (name="cacheManager")
   public RedisCacheManager cacheManager(@Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
     RedisCacheConfiguration coinPriceConf = RedisCacheConfiguration.defaultCacheConfig()
-        .entryTtl(Duration.ofSeconds(10));
+        .entryTtl(Duration.ofSeconds(apiMarketIntervalTime));
     Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-    cacheConfigurations.put("coin-price", coinPriceConf);
+    cacheConfigurations.put("market", coinPriceConf);
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(connectionFactory)
         .withInitialCacheConfigurations(cacheConfigurations).build();
   }

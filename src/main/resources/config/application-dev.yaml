@@ -64,5 +64,6 @@ redis:
       port: 26379
 
 application:
-  api.coin.gecko.simple.price:
-    base-url: https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=usd
+  api.coin.gecko.market:
+    interval-time: 12
+    base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
