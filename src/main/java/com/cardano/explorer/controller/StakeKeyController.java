@@ -17,8 +17,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +33,6 @@ public class StakeKeyController {
   @GetMapping("/registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC)
           @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pageable));
   }
@@ -43,7 +40,6 @@ public class StakeKeyController {
   @GetMapping("/de-registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC)
           @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pageable));
   }

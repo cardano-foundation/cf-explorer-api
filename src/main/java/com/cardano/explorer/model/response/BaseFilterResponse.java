@@ -1,5 +1,6 @@
 package com.cardano.explorer.model.response;
 
+import java.io.Serializable;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import org.springframework.data.domain.Page;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BaseFilterResponse<T> {
+public class BaseFilterResponse<T> implements Serializable {
 
   private List<T> data;
   private long totalItems;

@@ -37,7 +37,7 @@ public class TxController {
       @Parameter(description = "Condition for filter (Set all properties to null for get all)")
       TxFilterRequest request,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(txService.filterTx(pageable, request));
   }
 
@@ -52,7 +52,7 @@ public class TxController {
   @GetMapping("/current")
   @LogMessage
   @Operation(summary = "Get current transactions")
-  public ResponseEntity<List<TxSummary>> findCurrentEpoch(){
+  public ResponseEntity<List<TxSummary>> findCurrentTransaction(){
     return ResponseEntity.ok(txService.findLatestTxSummary());
   }
 

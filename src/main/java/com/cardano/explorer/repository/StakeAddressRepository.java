@@ -25,7 +25,7 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + " WHERE txo.stakeAddress.id = (SELECT sa.id FROM StakeAddress sa WHERE sa.view = :stakeKey) AND"
       + " (sr.id IS NOT NULL OR sd.id IS NOT NULL) AND"
       + " tx.id IS NOT NULL"
-      + " ORDER BY b.time DESC",
+      + " ORDER BY b.blockNo DESC, tx.blockIndex DESC",
       countQuery = "SELECT COUNT(DISTINCT tx.id)"
       + " FROM TxOut txo"
       + " JOIN Tx tx ON tx.id = txo.tx.id "
