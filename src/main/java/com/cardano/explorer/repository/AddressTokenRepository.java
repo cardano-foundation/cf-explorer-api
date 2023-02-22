@@ -12,7 +12,7 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
   @Query(value = "SELECT DISTINCT addrToken.tx.id "
       + " FROM AddressToken addrToken "
       + " WHERE addrToken.multiAsset = :multiAsset "
-      + " ORDER BY addrToken.tx.blockId DESC, addrToken.tx.blockIndex DESC")
+      + " ORDER BY addrToken.tx.id DESC")
   List<Long> findTxsByMultiAsset(MultiAsset multiAsset, Pageable pageable);
 
 }

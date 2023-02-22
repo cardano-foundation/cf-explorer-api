@@ -10,7 +10,9 @@ import com.cardano.explorer.model.response.dashboard.TxSummary;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +40,7 @@ public class TxController {
       TxFilterRequest request,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(txService.filterTx(pageable, request));
+    return ResponseEntity.ok(txService.filterTx(request, pageable));
   }
 
   @GetMapping("/{hash}")

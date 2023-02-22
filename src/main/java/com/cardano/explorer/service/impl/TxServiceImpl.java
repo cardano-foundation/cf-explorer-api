@@ -195,7 +195,7 @@ public class TxServiceImpl implements TxService {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TxFilterResponse> filterTx(Pageable pageable, TxFilterRequest request) {
+  public BaseFilterResponse<TxFilterResponse> filterTx(TxFilterRequest request, Pageable pageable) {
     Page<Tx> txPage;
     if (request != null) {
       txPage = txRepository.findAll(txSpecification.getFilter(request), pageable);
@@ -204,6 +204,7 @@ public class TxServiceImpl implements TxService {
     }
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
+
 
   @Override
   @Transactional(readOnly = true)

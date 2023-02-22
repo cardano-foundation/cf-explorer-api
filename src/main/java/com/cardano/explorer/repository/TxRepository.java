@@ -19,6 +19,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationExecutor<Tx> {
 
+  @Query(value = "SELECT tx FROM Tx tx", countQuery = "SELECT sum(b.txCount) FROM Block b")
+  Page<Tx> findAll(Pageable pageable);
+
   List<Tx> findByBlockIn(List<Block> blocks);
 
   @EntityGraph(attributePaths = {Tx_.BLOCK})
