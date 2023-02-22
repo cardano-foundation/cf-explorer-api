@@ -36,14 +36,16 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   List<DelegatorChartProjection> getDataForDelegatorChart(@Param("poolId") Long poolId);
 
   @Query(value =
-      "SELECT dg.id AS id, sa.hashRaw AS address, sa.id AS stakeAddressId, bk.time AS time, tx.fee AS fee, sa.view AS view "
+      "SELECT sa.id AS stakeAddressId, sa.view AS view , bk.time AS time, tx.fee AS fee "
           + "FROM PoolHash ph "
           + "JOIN Delegation dg ON dg.poolHash.id = ph.id "
-          + "LEFT JOIN StakeAddress sa ON sa.id = dg.address.id "
-          + "JOIN Tx tx ON tx.id = dg.tx.id "
+          + "JOIN StakeAddress sa ON sa.id = dg.address.id "
+          + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr.id) FROM StakeRegistration sr WHERE sa.id = sr.addr.id) "
+          + "JOIN Tx tx ON tx.id = sr.tx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
           + "WHERE ph.id = :poolId "
-          + "ORDER BY dg.id ASC")
+          + "GROUP BY sa.id, sa.view, bk.time, tx.fee "
+          + "ORDER BY bk.time DESC")
   Page<PoolDetailDelegatorProjection> getAllDelegatorByPool(@Param("poolId") Long poolId,
       Pageable pageable);
 
