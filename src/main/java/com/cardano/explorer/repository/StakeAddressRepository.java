@@ -16,7 +16,7 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   @Query(value = "SELECT DISTINCT tx.hash as txHash, b.time as time,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
-      + " (CASE WHEN sr.id IS NULL THEN 'De Registered' ELSE 'Registered' END) AS action"
+      + " (CASE WHEN sr.id IS NULL THEN 'De Registered' ELSE 'Registered' END) AS action, tx.blockIndex"
       + " FROM TxOut txo"
       + " JOIN Tx tx ON tx.id = txo.tx.id "
       + " JOIN Block b ON b.id = tx.blockId  "
