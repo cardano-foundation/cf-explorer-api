@@ -1,8 +1,10 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.stake.TrxBlockEpochStake;
+import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.StakeDeregistration;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,4 +29,15 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
       + " FROM StakeDeregistration stakeDeregis"
       + " WHERE stakeDeregis.addr = :stake")
   Optional<Long> findMaxTxIdByStake(StakeAddress stake);
+
+
+  @Query(value = "SELECT DISTINCT tx.hash as txHash, b.time as time,"
+      + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
+      + " 'De Registered' AS action, tx.blockIndex as blockIndex"
+      + " FROM StakeDeregistration sd"
+      + " JOIN Tx tx ON tx.id = sd.tx.id"
+      + " JOIN Block b ON b.id = tx.blockId"
+      + " WHERE sd.addr.id = (SELECT sa.id FROM StakeAddress sa WHERE sa.view = :stakeKey)"
+      + " ORDER BY b.blockNo DESC, tx.blockIndex DESC")
+  List<StakeHistoryProjection> getStakeDeRegistrationsByAddress(String stakeKey);
 }

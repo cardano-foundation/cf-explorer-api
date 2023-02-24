@@ -83,7 +83,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " INNER JOIN Block block ON tx.block = block"
       + " INNER JOIN StakeAddress stake ON delegation.address = stake"
       + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
-      + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.pool = poolHash"
+      + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.id ="
+      + " (SELECT max(pod.id) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
   Page<StakeDelegationProjection> findDelegationByAddress(String stakeKey, Pageable pageable);
