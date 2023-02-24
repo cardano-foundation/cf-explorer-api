@@ -20,7 +20,7 @@ public class MarketDataController {
   @GetMapping
   @LogMessage
   @Operation(summary = "Get ada cardano price, market cap, volume, and market related data")
-  public ResponseEntity<?> getMarketData(@RequestParam("currency") String currency) {
+  public ResponseEntity<Object> getMarketData(@RequestParam("currency") String currency) {
     return ResponseEntity.ok(marketDataService.getMarketData(currency));
   }
 }
