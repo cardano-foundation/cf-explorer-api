@@ -27,7 +27,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + "   ORDER BY txIn.id ASC")
   List<AddressInputOutputProjection> findAddressInputListByTxId(Collection<Long> txIds);
 
-  @Query("SELECT txOut.address AS address, COALESCE(stake.view, txOut.address) AS stakeAddress,"
+  @Query("SELECT txOut.address AS address, txOut.index as index, COALESCE(stake.view, txOut.address) AS stakeAddress,"
       + "   txOut.value AS value, maTxOut.quantity as assetQuantity,"
       + "   asset.name as assetName, asset.fingerprint as assetId"
       + " FROM TxOut txOut "
@@ -38,7 +38,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
   List<AddressInputOutputProjection> getTxAddressOutputInfo(Tx tx);
 
 
-  @Query("SELECT txOut.address AS address, txIn.txOut.hash AS txHash,"
+  @Query("SELECT txOut.address AS address, txOut.index as index, txIn.txOut.hash AS txHash,"
       + "   COALESCE(stake.view,txOut.address) AS stakeAddress,"
       + "   txOut.value AS value, maTxOut.quantity as assetQuantity,"
       + "   asset.name as assetName, asset.fingerprint as assetId"
