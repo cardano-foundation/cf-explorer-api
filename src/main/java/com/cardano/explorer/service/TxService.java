@@ -1,6 +1,5 @@
 package com.cardano.explorer.service;
 
-import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxResponse;
@@ -22,10 +21,9 @@ public interface TxService {
    * Get list transaction with paging
    *
    * @param pageable page information
-   * @param request  request condition
    * @return list transaction information in this page
    */
-  BaseFilterResponse<TxFilterResponse> filterTx(TxFilterRequest request, Pageable pageable);
+  BaseFilterResponse<TxFilterResponse> getAll(Pageable pageable);
 
   /**
    * Get transaction information detail by hash
@@ -35,6 +33,14 @@ public interface TxService {
    */
   TxResponse getTxDetailByHash(String hash);
 
+  /**
+   * Get list transaction by blockId with paging
+   *
+   * @param blockId block no or block hash
+   * @param pageable page information
+   * @return list transaction information of this block in this page
+   */
+  BaseFilterResponse<TxFilterResponse> getTransactionsByBlock(String blockId, Pageable pageable);
 
   /**
    * Get list transaction having address
