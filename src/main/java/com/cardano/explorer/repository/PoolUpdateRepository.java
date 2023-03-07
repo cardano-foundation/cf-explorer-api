@@ -15,14 +15,19 @@ import org.springframework.stereotype.Repository;
 public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
   @Query(value =
-      "SELECT sa.view FROM PoolUpdate pu JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-          + "WHERE pu.poolHash.id = :poolId GROUP BY sa.view")
+      "SELECT sa.view FROM PoolHash ph "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.activeEpochNo = (SELECT max(pu.activeEpochNo) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
+          + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+          + "WHERE ph.id = :poolId "
+          + "GROUP BY sa.view")
   List<String> findRewardAccountByPool(@Param("poolId") Long poolId);
 
   @Query(value =
-      "SELECT sa.view FROM PoolOwner po JOIN PoolUpdate pu ON po.poolUpdate.id = pu.id "
+      "SELECT sa.view FROM PoolHash ph "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.activeEpochNo = (SELECT max(pu.activeEpochNo) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
+          + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
           + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
-          + "WHERE pu.poolHash.id = :poolId GROUP BY sa.view")
+          + "WHERE ph.id  = :poolId ")
   List<String> findOwnerAccountByPool(@Param("poolId") Long poolId);
 
   @Query(value = "SELECT pu FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId "
