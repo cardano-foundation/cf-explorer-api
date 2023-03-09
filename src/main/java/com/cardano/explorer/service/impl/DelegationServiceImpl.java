@@ -46,6 +46,7 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -180,7 +181,9 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setPoolName(getNameValueFromJson(poolDetailResponse.getPoolName()));
     poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
     poolDetailResponse.setRewardAccounts(poolUpdateRepository.findRewardAccountByPool(poolId));
-    poolDetailResponse.setOwnerAccounts(poolUpdateRepository.findOwnerAccountByPool(poolId));
+    List<String> ownerAddress = poolUpdateRepository.findOwnerAccountByPool(poolId);
+    Collections.sort(ownerAddress);
+    poolDetailResponse.setOwnerAccounts(ownerAddress);
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
     poolDetailResponse.setReward(CommonConstant.ZERO.doubleValue());
     poolDetailResponse.setStakeLimit(

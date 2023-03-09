@@ -4,7 +4,7 @@ import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjectio
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Set;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,7 +36,7 @@ public class PoolTxResponse implements Serializable {
 
   private String poolView;
 
-  private Set<String> stakeKey;
+  private List<String> stakeKey;
 
   public PoolTxResponse(TxBlockEpochProjection trxBlockEpoch) {
     this.txId = trxBlockEpoch.getTxId();
