@@ -183,22 +183,24 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    Page<StakeAddressProjection> stakePage
+    List<StakeAddressProjection> stakeList
         = stakeAddressRepository.findStakeAddressOrderByBalance(pageable);
     List<StakeFilterResponse> content = new ArrayList<>();
-    Set<String> stakeAddressList = stakePage.getContent().stream()
+    Set<String> stakeAddressList = stakeList.stream()
         .map(StakeAddressProjection::getStakeAddress).collect(Collectors.toSet());
     var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
     var poolDataMap = poolData.stream().collect(Collectors.toMap(
         StakeDelegationProjection::getStakeAddress, Function.identity()));
-    for(var stake : stakePage) {
+    for(var stake : stakeList) {
       StakeDelegationProjection delegation =  poolDataMap.get(stake.getStakeAddress());
       StakeFilterResponse stakeResponse
           = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
       stakeResponse.setPoolName(getNameValueFromJson(delegation.getPoolData()));
       content.add(stakeResponse);
     }
-    return new BaseFilterResponse<>(stakePage, content);
+    Page<StakeFilterResponse> pageResponse
+        = new PageImpl<>(content, pageable, pageable.getPageSize());
+    return new BaseFilterResponse<>(pageResponse);
   }
 
   @Override

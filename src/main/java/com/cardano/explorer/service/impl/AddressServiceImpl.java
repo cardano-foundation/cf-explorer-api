@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -164,18 +165,22 @@ public class AddressServiceImpl implements AddressService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
-    Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
+    List<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
+    List<ContractFilterResponse> responses = contractPage.stream()
+        .map(addressMapper::fromAddressToContractFilter).collect(Collectors.toList());
     Page<ContractFilterResponse> pageResponse
-        = contractPage.map(addressMapper::fromAddressToContractFilter);
+        = new PageImpl<>(responses, pageable, pageable.getPageSize());
     return new BaseFilterResponse<>(pageResponse);
   }
 
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
-    Page<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
+    List<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
+    List<AddressFilterResponse> responses = addressPage.stream()
+        .map(addressMapper::fromAddressToFilterResponse).collect(Collectors.toList());
     Page<AddressFilterResponse> pageResponse
-        = addressPage.map(addressMapper::fromAddressToFilterResponse);
+        = new PageImpl<>(responses, pageable, pageable.getPageSize());
     return new BaseFilterResponse<>(pageResponse);
   }
 }
