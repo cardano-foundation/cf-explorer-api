@@ -1,5 +1,6 @@
 package com.cardano.explorer.util;
 
+import com.sotatek.cardano.ledgersync.util.StringUtil;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.binary.Hex;
 
@@ -18,9 +19,12 @@ public class HexUtils {
   public static String fromHex(String hexString) {
     try {
       byte[] bytes = Hex.decodeHex(hexString.toCharArray());
-      return new String(bytes, StandardCharsets.UTF_8);
+      if(StringUtil.isUtf8(bytes)){
+        return new String(bytes, StandardCharsets.UTF_8);
+      }
+      return null;
     } catch (Exception ex) {
-      return hexString;
+      return null;
     }
   }
 }
