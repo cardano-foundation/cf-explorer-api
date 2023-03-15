@@ -15,37 +15,41 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   Optional<MultiAsset> findByFingerprint(String fingerprint);
 
-  @Query("SELECT token.address AS address,"
+  @Query("SELECT addr.address AS address,"
       + " sum(COALESCE(token.balance, 0)) AS quantity"
       + " FROM AddressToken token"
+      + " INNER JOIN Address addr ON token.address = addr"
       + " WHERE token.multiAsset.fingerprint = :fingerprint "
-      + " GROUP BY token.address"
+      + " GROUP BY addr.address"
       + " HAVING sum(token.balance) > 0"
       + " ORDER BY sum(token.balance) DESC")
   Page<AddressTokenProjection> findAddressByToken(String fingerprint, Pageable pageable);
 
-  @Query("SELECT token.multiAsset.fingerprint AS fingerprint,"
-      + " token.multiAsset.name AS tokenName,"
-      + " sum(COALESCE(token.balance, 0)) AS quantity"
-      + " FROM AddressToken token"
-      + " WHERE token.address = :address "
-      + " GROUP BY token.multiAsset.fingerprint, token.multiAsset.name"
-      + " HAVING sum(token.balance) > 0"
-      + " ORDER BY sum(token.balance) DESC")
+  @Query("SELECT multiAsset.fingerprint AS fingerprint,"
+      + " multiAsset.name AS tokenName,"
+      + " sum(COALESCE(addressToken.balance, 0)) AS quantity"
+      + " FROM AddressToken addressToken"
+      + " INNER JOIN MultiAsset multiAsset ON addressToken.multiAsset = multiAsset"
+      + " INNER JOIN Address addr ON addressToken.address = addr"
+      + " WHERE addr.address = :address "
+      + " GROUP BY multiAsset.fingerprint, multiAsset.name"
+      + " HAVING sum(addressToken.balance) > 0"
+      + " ORDER BY sum(addressToken.balance) DESC")
   List<AddressTokenProjection> findTokenByAddress(String address);
 
   Integer countByPolicy(String policy);
 
   Page<MultiAsset> findAllByPolicy(String policy, Pageable pageable);
 
-  @Query("SELECT token.address AS address,"
+  @Query("SELECT addr.address AS address,"
       + " multiAsset.fingerprint AS fingerprint,"
       + " multiAsset.name AS tokenName,"
       + " sum(COALESCE(token.balance, 0)) AS quantity"
       + " FROM AddressToken token"
       + " INNER JOIN MultiAsset multiAsset ON token.multiAsset = multiAsset"
+      + " INNER JOIN Address addr ON token.address = addr"
       + " WHERE multiAsset.policy = :policy "
-      + " GROUP BY token.address, multiAsset.fingerprint, multiAsset.name"
+      + " GROUP BY addr.address, multiAsset.fingerprint, multiAsset.name"
       + " HAVING sum(token.balance) > 0"
       + " ORDER BY sum(token.balance) DESC")
   Page<AddressTokenProjection> findAddressTokenByPolicy(String policy, Pageable pageable);
