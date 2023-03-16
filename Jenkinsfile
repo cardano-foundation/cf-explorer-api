@@ -8,7 +8,10 @@ def composeFile
 def hostSonarqube
 def projectKeyExplorerApi
 def loginExplorerApi
-
+def redisSentinelPass
+def redisMasterName
+def redisSentinelHost
+def db
 def COLOR_MAP = [
     'SUCCESS': 'good',
     'FAILURE': 'danger',
@@ -41,13 +44,17 @@ pipeline {
                     portDb = envFile.portDb
                     usernameDb = envFile.usernameDb
                     passwordDb = envFile.passwordDb
+                    db = envFile.db
                     environment = envFile.environment
                     hostSonarqube = envFile.hostSonarqube
                     projectKeyExplorerApi = envFile.projectKeyExplorerApi
                     loginExplorerApi = envFile.loginExplorerApi
+                    redisSentinelPass = envFile.redisSentinelPass
+                    redisMasterName = envFile.redisMasterName
+                    redisSentinelHost = envFile.redisSentinelHost
                 }
                 echo 'Testing..'
-                sh "mvn test -DHOST=${host} -DPORT_DB=${portDb} -DUSERNAME_DB=${usernameDb} -DPASSWORD_DB=${passwordDb} -DSPRING_PROFILES_ACTIVE=${environment}"
+                sh "mvn test -DHOST=${host} -DPORT_DB=${portDb} -DUSERNAME_DB=${usernameDb} -DPASSWORD_DB=${passwordDb} -DSPRING_PROFILES_ACTIVE=${environment} -DREDIS_SENTINEL_PASS=${redisSentinelPass} -DREDIS_MASTER_NAME=${redisMasterName} -DREDIS_SENTINEL_HOST=${redisSentinelHost} -DDB=${db}"
                 echo 'Test successfully!!!'
             }
         }
