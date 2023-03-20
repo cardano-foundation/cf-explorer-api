@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/pool")
+@RequestMapping("/api/v1/pools")
 @RequiredArgsConstructor
 public class PoolController {
 

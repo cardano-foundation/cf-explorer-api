@@ -1,11 +1,12 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
-import com.cardano.explorer.model.request.BlockFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.BlockFilterResponse;
 import com.cardano.explorer.model.response.BlockResponse;
+import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.service.BlockService;
+import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +21,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/block")
+@RequestMapping("/api/v1/blocks")
 @RequiredArgsConstructor
 public class BlockController {
 
   private final BlockService blockService;
+  private final TxService txService;
 
   @GetMapping("/{blockId}")
   @LogMessage
@@ -34,16 +36,23 @@ public class BlockController {
     return ResponseEntity.ok(blockService.getBlockDetailByBlockId(blockId));
   }
 
-  //  @Cacheable(value = "block_list", key = "#pageable.pageNumber+''+#pageable.pageSize+''+#pageable.sort+''+#epochNo")
-  @GetMapping("/list")
+  @GetMapping
   @LogMessage
-  @Operation(summary = "Filter block")
-  public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> filter(
-      @Parameter(description = "Condition for filter (Set all properties to null for get all)")
-      BlockFilterRequest request,
+  @Operation(summary = "Get all block")
+  public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getAll(
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(blockService.filterBlock(pageable, request));
+    return ResponseEntity.ok(blockService.filterBlock(pageable));
+  }
+
+  @GetMapping("/{blockId}/txs")
+  @LogMessage
+  @Operation(summary = "Get tx list of block")
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactionsByBlock(
+      @PathVariable @Parameter(description = "Block number or block hash") String blockId,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(txService.getTransactionsByBlock(blockId, pageable));
   }
 
 }

@@ -2,10 +2,11 @@ package com.cardano.explorer.repository;
 
 import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.Block_;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -16,16 +17,20 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BlockRepository extends JpaRepository<Block, Long>,
     JpaSpecificationExecutor<Block> {
-
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
   Optional<Block> findFirstByBlockNo(Long no);
 
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
   Optional<Block> findFirstByHash(String hash);
 
-  Page<Block> findAll(Pageable pageable);
+  @Query(value = "SELECT b FROM Block b WHERE b.epochNo IS NOT NULL",
+      countQuery = "SELECT sum (e.blkCount) FROM Epoch e")
+  Page<Block> findAllBlock(Pageable pageable);
 
-  Page<Block> findAll(Specification specification, Pageable pageable);
+  List<Block> findAllByIdIn(Collection<Long> ids);
+
+  @Query(value = "SELECT b FROM Block b WHERE b.epochNo = :epochNo")
+  Page<Block> findBlockByEpochNo(Integer epochNo, Pageable pageable);
 
   @Query(value = "SELECT max(blockNo) FROM Block")
   Optional<Integer> findCurrentBlock();

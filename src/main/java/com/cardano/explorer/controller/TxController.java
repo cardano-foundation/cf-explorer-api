@@ -1,7 +1,6 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
-import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxResponse;
@@ -10,9 +9,7 @@ import com.cardano.explorer.model.response.dashboard.TxSummary;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -25,22 +22,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/tx")
+@RequestMapping("/api/v1/txs")
 @RequiredArgsConstructor
 public class TxController {
 
   private final TxService txService;
 
-  //  @Cacheable(value = "tx_page", key = "#pageable.pageNumber+''+#pageable.pageSize+''+#pageable.sort")
-  @GetMapping("/list")
+  @GetMapping
   @LogMessage
   @Operation(summary = "Filter transaction")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> filter(
-      @Parameter(description = "Condition for filter (Set all properties to null for get all)")
-      TxFilterRequest request,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(txService.filterTx(request, pageable));
+    return ResponseEntity.ok(txService.getAll(pageable));
   }
 
   @GetMapping("/{hash}")
