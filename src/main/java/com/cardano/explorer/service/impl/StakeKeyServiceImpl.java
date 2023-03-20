@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -144,10 +145,23 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey, Pageable pageable) {
-    Page<StakeHistoryProjection> stakeHistories
-        = stakeAddressRepository.getStakeHistory(stakeKey, pageable);
-    return new BaseFilterResponse<>(stakeHistories);
+  public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey,
+      Pageable pageable) {
+    List<StakeHistoryProjection> stakeHistoryList =
+        stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeKey);
+    stakeHistoryList.addAll(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeKey));
+    stakeHistoryList.sort((o1, o2) -> {
+      if (o1.getBlockNo().equals(o2.getBlockNo())) {
+        return o2.getBlockIndex() - o1.getBlockIndex();
+      } else {
+        return o2.getEpochNo() - o1.getEpochNo();
+      }
+    });
+    final int start = (int) pageable.getOffset();
+    final int end = Math.min((start + pageable.getPageSize()), stakeHistoryList.size());
+    Page<StakeHistoryProjection> page = new PageImpl<>(stakeHistoryList.subList(start, end),
+        pageable, stakeHistoryList.size());
+    return new BaseFilterResponse<>(page);
   }
 
   @Override
