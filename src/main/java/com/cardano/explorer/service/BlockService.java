@@ -1,6 +1,5 @@
 package com.cardano.explorer.service;
 
-import com.cardano.explorer.model.request.BlockFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.BlockFilterResponse;
 import com.cardano.explorer.model.response.BlockResponse;
@@ -20,9 +19,16 @@ public interface BlockService {
    * Get list block with paging
    *
    * @param pageable page information
-   * @param request request condition
    * @return list block information in this page
    */
-  BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable,
-      BlockFilterRequest request);
+  BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable);
+
+  /**
+   * Get list block by epoch with paging
+   *
+   * @param no epoch number
+   * @param pageable page information
+   * @return list block of this epoch
+   */
+  BaseFilterResponse<BlockFilterResponse> getBlockByEpoch(String no, Pageable pageable);
 }

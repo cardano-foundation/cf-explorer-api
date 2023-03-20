@@ -18,19 +18,12 @@ public interface EpochService {
   EpochResponse getEpochDetail(String no);
 
   /**
-   * Get current epoch no
-   *
-   * @return current epoch no
-   */
-  Integer getCurrentEpoch();
-
-  /**
    * Get epoch list with paging
    *
    * @param pageable Page information
    * @return Epoch List in this page
    */
-  BaseFilterResponse<EpochResponse> filterEpoch(Pageable pageable);
+  BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable);
 
   @Transactional(readOnly = true)
   EpochSummary getCurrentEpochSummary();
