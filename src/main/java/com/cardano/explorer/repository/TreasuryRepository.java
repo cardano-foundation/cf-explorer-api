@@ -16,6 +16,6 @@ public interface TreasuryRepository extends JpaRepository<Treasury, Long> {
       + " INNER JOIN Block block ON tx.block = block"
       + " INNER JOIN StakeAddress stake ON treasury.addr = stake"
       + " WHERE stake.view = :stakeKey"
-      + " ORDER BY block.time DESC")
+      + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
   Page<StakeTreasuryProjection> getTreasuryByAddress(String stakeKey, Pageable pageable);
 }
