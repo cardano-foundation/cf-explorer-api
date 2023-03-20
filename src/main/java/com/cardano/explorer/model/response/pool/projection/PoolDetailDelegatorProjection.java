@@ -5,10 +5,6 @@ import java.sql.Timestamp;
 
 public interface PoolDetailDelegatorProjection {
 
-  Long getId();
-
-  String getAddress();
-
   Long getStakeAddressId();
 
   Timestamp getTime();
