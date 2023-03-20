@@ -1,6 +1,8 @@
 package com.cardano.explorer.service.impl;
 
+import com.cardano.explorer.common.constant.CommonConstant;
 import com.cardano.explorer.common.enumeration.AnalyticType;
+import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.AddressMapper;
 import com.cardano.explorer.mapper.TokenMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
@@ -14,6 +16,7 @@ import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.util.AddressUtils;
 import com.sotatek.cardano.common.entity.Address;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -26,6 +29,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,12 +48,19 @@ public class AddressServiceImpl implements AddressService {
   private final AddressMapper addressMapper;
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
 
+  @Value("${application.network}")
+  private String network;
+
+
   @Override
   @Transactional(readOnly = true)
   public AddressResponse getAddressDetail(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElse(
         Address.builder().address(address).txCount(0L).balance(BigDecimal.ZERO).build()
     );
+    if(!checkNetworkAddress(address)) {
+      throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
+    }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
     addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
     addressResponse.setTokens(multiAssetRepository.findTokenByAddress(address).stream().map(
@@ -57,6 +68,20 @@ public class AddressServiceImpl implements AddressService {
     ).collect(Collectors.toList()));
     return addressResponse;
 
+  }
+
+  /**
+   * Check address is valid in this network
+   *
+   * @param address address view value
+   * @return true if valid and false if not
+   */
+  private boolean checkNetworkAddress(String address) {
+    if (network.equals(CommonConstant.MAINNET_NETWORK)) {
+      return !address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX);
+    } else {
+      return address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX);
+    }
   }
 
   @Override
