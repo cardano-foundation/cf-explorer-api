@@ -9,6 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AssetMetadataRepository extends JpaRepository<AssetMetadata, Long> {
 
   Optional<AssetMetadata> findFirstBySubject(String subject);
-
   List<AssetMetadata> findBySubjectIn(Set<String> subjects);
 }

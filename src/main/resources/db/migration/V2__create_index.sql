@@ -78,9 +78,9 @@ CREATE INDEX IF NOT EXISTS idx_pool_relay_update_id ON pool_relay USING btree (u
 CREATE INDEX IF NOT EXISTS idx_address_stake_address_id ON address USING btree (stake_address_id);
 CREATE INDEX IF NOT EXISTS idx_address_address ON address USING hash (address);
 CREATE INDEX IF NOT EXISTS idx_address_tx_balance_time ON address_tx_balance USING btree ("time");
-CREATE INDEX IF NOT EXISTS idx_address_tx_balance_tx_id ON dev.address_tx_balance USING btree (tx_id);
+CREATE INDEX IF NOT EXISTS idx_address_tx_balance_tx_id ON address_tx_balance USING btree (tx_id);
 CREATE INDEX IF NOT EXISTS idx_address_tx_balance_address ON address_tx_balance USING hash (address);
 CREATE INDEX IF NOT EXISTS idx_address_token_address ON address_token USING hash (address);
-CREATE INDEX IF NOT EXISTS idx_address_token_tx_id ON dev.address_token USING btree (tx_id);
-CREATE INDEX IF NOT EXISTS idx_address_token_ident ON dev.address_token USING btree (ident)
+CREATE INDEX IF NOT EXISTS idx_address_token_tx_id ON address_token USING btree (tx_id);
+CREATE INDEX IF NOT EXISTS idx_address_token_ident ON address_token USING btree (ident)
 

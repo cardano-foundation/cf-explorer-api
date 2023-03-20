@@ -10,7 +10,9 @@ import com.cardano.explorer.model.response.dashboard.TxSummary;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -37,8 +39,8 @@ public class TxController {
       @Parameter(description = "Condition for filter (Set all properties to null for get all)")
       TxFilterRequest request,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(txService.filterTx(pageable, request));
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(txService.filterTx(request, pageable));
   }
 
   @GetMapping("/{hash}")
@@ -52,7 +54,7 @@ public class TxController {
   @GetMapping("/current")
   @LogMessage
   @Operation(summary = "Get current transactions")
-  public ResponseEntity<List<TxSummary>> findCurrentEpoch(){
+  public ResponseEntity<List<TxSummary>> findCurrentTransaction(){
     return ResponseEntity.ok(txService.findLatestTxSummary());
   }
 
