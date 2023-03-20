@@ -1,10 +1,10 @@
 package com.cardano.explorer.projection;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface AddressTokenProjection {
 
-  BigDecimal getQuantity();
+  BigInteger getQuantity();
   String getFingerprint();
   String getTokenName();
   String getAddress();

@@ -1,6 +1,6 @@
 package com.cardano.explorer.projection;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface StakeAddressProjection {
 
@@ -8,5 +8,5 @@ public interface StakeAddressProjection {
 
   String getStakeAddress();
 
-  BigDecimal getTotalStake();
+  BigInteger getTotalStake();
 }

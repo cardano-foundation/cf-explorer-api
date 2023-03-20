@@ -51,7 +51,6 @@ import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.Withdrawal;
 import com.sotatek.cardano.common.enumeration.ScriptPurposeType;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -496,8 +495,8 @@ public class TxServiceImpl implements TxService {
         ));
     var addressValueMap = addressMap.keySet().stream().collect(Collectors.groupingBy(
         TxOutResponse::getAddress,
-        Collectors.reducing(BigDecimal.ZERO, TxOutResponse::getValue,
-            BigDecimal::add)
+        Collectors.reducing(BigInteger.ZERO, TxOutResponse::getValue,
+            BigInteger::add)
     ));
     List<TxOutResponse> stakeAddressTxInputList = new ArrayList<>();
     addressValueMap.forEach(

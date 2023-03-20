@@ -1,6 +1,6 @@
 package com.cardano.explorer.model.response.address;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,5 +15,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AddressAnalyticsResponse {
   private LocalDate date;
-  private BigDecimal value;
+  private BigInteger value;
 }

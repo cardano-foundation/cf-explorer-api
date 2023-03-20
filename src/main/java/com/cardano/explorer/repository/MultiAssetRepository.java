@@ -26,13 +26,13 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   Page<AddressTokenProjection> findAddressByToken(String fingerprint, Pageable pageable);
 
   @Query("SELECT multiAsset.fingerprint AS fingerprint,"
-      + " multiAsset.name AS tokenName,"
+      + " multiAsset.name AS tokenName, multiAsset.policy AS policy,"
       + " sum(COALESCE(addressToken.balance, 0)) AS quantity"
       + " FROM AddressToken addressToken"
       + " INNER JOIN MultiAsset multiAsset ON addressToken.multiAsset = multiAsset"
       + " INNER JOIN Address addr ON addressToken.address = addr"
       + " WHERE addr.address = :address "
-      + " GROUP BY multiAsset.fingerprint, multiAsset.name"
+      + " GROUP BY multiAsset.fingerprint, multiAsset.name, multiAsset.policy"
       + " HAVING sum(addressToken.balance) > 0"
       + " ORDER BY sum(addressToken.balance) DESC")
   List<AddressTokenProjection> findTokenByAddress(String address);

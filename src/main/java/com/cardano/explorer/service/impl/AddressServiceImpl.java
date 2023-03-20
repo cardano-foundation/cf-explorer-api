@@ -4,20 +4,24 @@ import com.cardano.explorer.common.constant.CommonConstant;
 import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.AddressMapper;
+import com.cardano.explorer.mapper.AssetMetadataMapper;
 import com.cardano.explorer.mapper.TokenMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.model.response.contract.ContractFilterResponse;
+import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
+import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.util.AddressUtils;
 import com.sotatek.cardano.common.entity.Address;
+import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,7 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -57,7 +64,7 @@ public class AddressServiceImpl implements AddressService {
   @Transactional(readOnly = true)
   public AddressResponse getAddressDetail(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElse(
-        Address.builder().address(address).txCount(0L).balance(BigDecimal.ZERO).build()
+        Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
     );
     if(!checkNetworkAddress(address)) {
       throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
@@ -127,7 +134,7 @@ public class AddressServiceImpl implements AddressService {
           var balance = addressTxBalanceRepository.getBalanceByAddressAndTime(address,
               Timestamp.valueOf(item.atTime(LocalTime.MAX)));
           if(Objects.isNull(balance)) {
-            response.setValue(BigDecimal.ZERO);
+            response.setValue(BigInteger.ZERO);
           } else {
             response.setValue(balance);
           }
@@ -140,16 +147,16 @@ public class AddressServiceImpl implements AddressService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<BigDecimal> getAddressMinMaxBalance(String address) {
-    List<BigDecimal> balanceList = addressTxBalanceRepository.findAllByAddress(address);
+  public List<BigInteger> getAddressMinMaxBalance(String address) {
+    List<BigInteger> balanceList = addressTxBalanceRepository.findAllByAddress(address);
     if(balanceList.isEmpty()) {
       return new ArrayList<>();
     }
-    BigDecimal maxBalance = balanceList.get(0);
-    BigDecimal minBalance = balanceList.get(0);
-    BigDecimal sumBalance = balanceList.get(0);
+    BigInteger maxBalance = balanceList.get(0);
+    BigInteger minBalance = balanceList.get(0);
+    BigInteger sumBalance = balanceList.get(0);
     balanceList.remove(0);
-    for(BigDecimal balance : balanceList) {
+    for(BigInteger balance : balanceList) {
       sumBalance = sumBalance.add(balance);
       if(sumBalance.compareTo(maxBalance) > 0) {
         maxBalance = sumBalance;

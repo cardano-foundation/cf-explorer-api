@@ -2,7 +2,7 @@ package com.cardano.explorer.model.response.pool;
 
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import lombok.Getter;
@@ -26,9 +26,9 @@ public class PoolTxResponse implements Serializable {
 
   private String poolName;
 
-  private BigDecimal pledge;
+  private BigInteger pledge;
 
-  private BigDecimal cost;
+  private BigInteger cost;
 
   private Double margin;
 
