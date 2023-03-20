@@ -2,21 +2,17 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.projection.AddressTokenProjection;
 import com.sotatek.cardano.common.entity.MultiAsset;
-import com.sotatek.cardano.common.entity.MultiAsset_;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
-  @EntityGraph(attributePaths = {MultiAsset_.METADATA})
   Page<MultiAsset> findAll(Pageable pageable);
 
-  @EntityGraph(attributePaths = {MultiAsset_.METADATA})
   Optional<MultiAsset> findByFingerprint(String fingerprint);
 
   @Query("SELECT token.address AS address,"
@@ -40,7 +36,6 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   Integer countByPolicy(String policy);
 
-  @EntityGraph(attributePaths = {MultiAsset_.METADATA})
   Page<MultiAsset> findAllByPolicy(String policy, Pageable pageable);
 
   @Query("SELECT token.address AS address,"

@@ -20,13 +20,13 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
 
   @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
       + " WHERE addrTxBalance.address = :address"
-      + " ORDER BY addrTxBalance.tx.id ASC")
+      + " ORDER BY addrTxBalance.tx.blockId ASC, addrTxBalance.tx.blockIndex ASC")
   List<BigDecimal> findAllByAddress(String address);
 
   @Query(value = "SELECT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.address = :address"
-      + " ORDER BY tx.id DESC",
+      + " ORDER BY tx.blockId DESC, tx.blockIndex DESC",
       countQuery = "SELECT count(addrTxBalance) "
       + " FROM AddressTxBalance addrTxBalance"
       + " WHERE addrTxBalance.address = :address")

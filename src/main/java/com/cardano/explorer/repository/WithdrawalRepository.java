@@ -29,6 +29,6 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " INNER JOIN Block block ON tx.block = block"
       + " INNER JOIN StakeAddress stake ON withdrawal.addr = stake"
       + " WHERE stake.view = :stakeKey"
-      + " ORDER BY block.time DESC")
+      + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
   Page<StakeWithdrawalProjection> getWithdrawalByAddress(String stakeKey, Pageable pageable);
 }

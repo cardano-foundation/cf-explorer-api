@@ -216,8 +216,8 @@ public class TxServiceImpl implements TxService {
     BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
     Optional<MultiAsset> multiAsset = multiAssetRepository.findByFingerprint(tokenId);
     if(multiAsset.isPresent()) {
-      List<Long> txIds = addressTokenRepository.findTxsById(multiAsset.get(), pageable);
-      List<Tx> txList = txRepository.findByIdInOrderByIdDesc(txIds);
+      List<Long> txIds = addressTokenRepository.findTxsByMultiAsset(multiAsset.get(), pageable);
+      List<Tx> txList = txRepository.findByIdIn(txIds);
       Page<Tx> txPage = new PageImpl<>(txList, pageable, multiAsset.get().getTxCount());
       List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
       response = new BaseFilterResponse<>(txPage, txFilterResponses);
