@@ -52,8 +52,10 @@ public class AddressServiceImpl implements AddressService {
 
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final AddressRepository addressRepository;
+  private final AssetMetadataRepository assetMetadataRepository;
   private final TokenMapper tokenMapper;
   private final AddressMapper addressMapper;
+  private final AssetMetadataMapper assetMetadataMapper;
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
 
   @Value("${application.network}")
@@ -71,9 +73,20 @@ public class AddressServiceImpl implements AddressService {
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
     addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
-    addressResponse.setTokens(multiAssetRepository.findTokenByAddress(address).stream().map(
-        tokenMapper::fromAddressTokenProjection
-    ).collect(Collectors.toList()));
+    List<TokenAddressResponse> tokenListResponse = multiAssetRepository.findTokenByAddress(address)
+        .stream().map(tokenMapper::fromAddressTokenProjection).collect(Collectors.toList());
+    Set<String> subjects = tokenListResponse.stream().map(
+        ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
+        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+    tokenListResponse.forEach(token -> {
+      AssetMetadata assetMetadata = assetMetadataMap.get(token.getPolicy() + token.getName());
+      if (Objects.nonNull(assetMetadata)) {
+        token.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
+      }
+    });
+    addressResponse.setTokens(tokenListResponse);
     return addressResponse;
 
   }
