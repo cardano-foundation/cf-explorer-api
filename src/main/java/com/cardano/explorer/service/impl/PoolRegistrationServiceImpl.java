@@ -10,7 +10,6 @@ import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.service.PoolRegistrationService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
