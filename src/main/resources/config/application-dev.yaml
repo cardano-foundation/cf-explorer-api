@@ -48,3 +48,23 @@ spring:
       pageable:
         default-page-size: 20
         max-page-size: 50
+
+redis:
+  databaseIndex: 0
+  master: ${REDIS_MASTER_NAME:mymaster}
+  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
+  testOnBorrow: false
+  maxTotal: 10
+  maxIdle: 5
+  minIdle: 3
+  testOnReturn: false
+  testWhileIdle: false
+  sentinels:
+    - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
+      port: 26379
+
+application:
+  network: ${SCHEMA:mainnet}
+  api.coin.gecko.market:
+    interval-time: 15
+    base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
