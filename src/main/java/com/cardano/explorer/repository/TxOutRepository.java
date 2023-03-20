@@ -3,10 +3,8 @@ package com.cardano.explorer.repository;
 import com.cardano.explorer.projection.AddressInputOutputProjection;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.TxOut;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -51,15 +49,4 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
       + " WHERE txIn.txInput = :tx")
   List<AddressInputOutputProjection> getTxAddressInputInfo(Tx tx);
-
-  @Query("SELECT COALESCE(SUM(txOut.value), 0) AS value FROM TxOut txOut"
-      + " INNER JOIN StakeAddress sa ON sa.id = txOut.stakeAddress.id"
-      + " WHERE sa.view = :stakeAddress")
-  Optional<BigDecimal> getStakeAddressTotalOutput(String stakeAddress);
-  @Query("SELECT COALESCE(SUM(txOut.value), 0) AS value "
-      + " FROM TxOut txOut "
-      + " INNER JOIN TxIn txIn ON txOut.tx = txIn.txOut AND txIn.txOutIndex = txOut.index "
-      + " INNER JOIN StakeAddress sa ON sa.id = txOut.stakeAddress.id"
-      + " WHERE sa.view = :stakeAddress")
-  Optional<BigDecimal> getStakeAddressTotalInput(String stakeAddress);
 }

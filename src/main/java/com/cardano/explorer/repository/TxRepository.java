@@ -19,6 +19,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationExecutor<Tx> {
 
+  @Query(value = "SELECT tx FROM Tx tx", countQuery = "SELECT sum(b.txCount) FROM Block b")
+  Page<Tx> findAll(Pageable pageable);
+
   List<Tx> findByBlockIn(List<Block> blocks);
 
   @EntityGraph(attributePaths = {Tx_.BLOCK})
@@ -49,5 +52,6 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "ORDER BY b.time DESC")
   List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
 
-  List<Tx> findByIdInOrderByIdDesc(List<Long> ids);
+  @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
+  List<Tx> findByIdIn(List<Long> ids);
 }

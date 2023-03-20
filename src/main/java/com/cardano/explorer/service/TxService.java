@@ -25,7 +25,7 @@ public interface TxService {
    * @param request  request condition
    * @return list transaction information in this page
    */
-  BaseFilterResponse<TxFilterResponse> filterTx(Pageable pageable, TxFilterRequest request);
+  BaseFilterResponse<TxFilterResponse> filterTx(TxFilterRequest request, Pageable pageable);
 
   /**
    * Get transaction information detail by hash

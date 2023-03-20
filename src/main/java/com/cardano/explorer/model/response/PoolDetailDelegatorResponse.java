@@ -11,10 +11,6 @@ import lombok.Setter;
 @Setter
 public class PoolDetailDelegatorResponse implements Serializable {
 
-  private Long id;
-
-  private String address;
-
   private Long stakeAddressId;
 
   private BigDecimal totalStake;
@@ -26,8 +22,6 @@ public class PoolDetailDelegatorResponse implements Serializable {
   private String view;
 
   public PoolDetailDelegatorResponse(PoolDetailDelegatorProjection poolDetailDelegator) {
-    this.id = poolDetailDelegator.getId();
-    this.address = poolDetailDelegator.getAddress();
     this.stakeAddressId = poolDetailDelegator.getStakeAddressId();
     this.fee = poolDetailDelegator.getFee();
     this.time = poolDetailDelegator.getTime();

@@ -2,14 +2,12 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
 import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
-import com.cardano.explorer.projection.PoolDelegationSizeProjection;
 import com.cardano.explorer.projection.StakeAddressProjection;
 import com.sotatek.cardano.common.entity.EpochStake;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,10 +38,4 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
   List<StakeAddressProjection> totalStakeByAddressAndPool(
       @Param("stakeAddressIds") Set<Long> stakeAddressIds,
       @Param("poolId") Long poolId);
-
-  @Query("SELECT SUM(es.amount) AS poolSize, es.pool.id as poolId "
-      + "FROM EpochStake es "
-      + "GROUP BY es.pool.id "
-      + "ORDER BY poolSize DESC ")
-  List<PoolDelegationSizeProjection> findPoolsDelegationSize(Pageable pageable);
 }
