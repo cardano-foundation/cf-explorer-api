@@ -18,6 +18,10 @@ services:
       - PASSWORD_DB=${PASSWORD_DB}
       - SCHEMA=${SCHEMA}
       - DB=${DB}
+
+      - REDIS_MASTER_NAME=${REDIS_MASTER_NAME}
+      - REDIS_SENTINEL_PASS=${REDIS_SENTINEL_PASS}
+      - REDIS_SENTINEL_HOST=${REDIS_SENTINEL_HOST}
     ports:
       - ${PORT}:8080
     healthcheck:
