@@ -205,6 +205,7 @@ public class TxServiceImpl implements TxService {
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
+
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address, Pageable pageable) {
@@ -462,8 +463,8 @@ public class TxServiceImpl implements TxService {
     for (TxOutResponse uTxO : uTxOs) {
       List<TxMintingResponse> tokens = addressInputOutputMap.get(uTxO).stream().
           filter(token -> Objects.nonNull(token.getAssetId())).map(
-          maTxMintMapper::fromAddressInputOutputProjection
-      ).collect(Collectors.toList());
+              maTxMintMapper::fromAddressInputOutputProjection
+          ).collect(Collectors.toList());
       uTxO.setTokens(tokens);
     }
     return uTxOs;
