@@ -20,6 +20,7 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class TxOutResponse {
   private String address;
+  private String index;
   private String txHash;
   private BigDecimal value;
   private List<TxMintingResponse> tokens;
