@@ -1,0 +1,22 @@
+version: '3.9'
+networks:
+  default:
+    name: infrastructure-net
+    external: true
+
+services:
+  cardano-explorer-api-test:
+    container_name: cardano-explorer-api-test
+    image: cardano-explorer-api-test
+    build:
+      context: .
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - HOST=${HOST}
+      - PORT_DB=${PORT_DB}
+      - USERNAME_DB=${USERNAME_DB}
+      - PASSWORD_DB=${PASSWORD_DB}
+    ports:
+      - "7033:8080"
+    volumes:
+      - $PWD/cardano/volumes/logs/cardano-explorer-api-test:/cardano-explorer-api-test/logs/

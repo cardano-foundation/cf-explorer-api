@@ -1,0 +1,35 @@
+version: '3.9'
+networks:
+  default:
+    name: infrastructure-net
+    external: true
+
+services:
+  cardano-explorer-api:
+    image: cardano-explorer-api-${SCHEMA}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - HOST=${HOST}
+      - PORT_DB=${PORT_DB}
+      - USERNAME_DB=${USERNAME_DB}
+      - PASSWORD_DB=${PASSWORD_DB}
+      - SCHEMA=${SCHEMA}
+      - DB=${DB}
+
+      - REDIS_MASTER_NAME=${REDIS_MASTER_NAME}
+      - REDIS_SENTINEL_PASS=${REDIS_SENTINEL_PASS}
+      - REDIS_SENTINEL_HOST=${REDIS_SENTINEL_HOST}
+    ports:
+      - ${PORT}:8080
+    healthcheck:
+      test: "curl --fail --silent 172.16.1.230:${PORT}/actuator/health | grep UP || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    volumes:
+      - $PWD/cardano/volumes/logs/cardano-explorer-api:/cardano-explorer-api/logs/
+  
