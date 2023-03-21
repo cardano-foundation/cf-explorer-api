@@ -7,6 +7,7 @@ public interface StakeHistoryProjection {
   String getTxHash();
   Timestamp getTime();
   Long getBlockNo();
+  Integer getBlockIndex();
   Integer getEpochNo();
   Integer getEpochSlotNo();
   String getAction();

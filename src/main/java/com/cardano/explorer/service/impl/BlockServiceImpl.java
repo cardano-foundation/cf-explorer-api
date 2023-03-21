@@ -2,7 +2,6 @@ package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.BlockMapper;
-import com.cardano.explorer.model.request.BlockFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.BlockFilterResponse;
 import com.cardano.explorer.model.response.BlockResponse;
@@ -10,7 +9,6 @@ import com.cardano.explorer.repository.BlockRepository;
 import com.cardano.explorer.repository.SlotLeaderRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.BlockService;
-import com.cardano.explorer.specification.BlockSpecification;
 import com.sotatek.cardano.common.entity.BaseEntity;
 import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.SlotLeader;
@@ -39,8 +37,6 @@ public class BlockServiceImpl implements BlockService {
   private final TxRepository txRepository;
   private final SlotLeaderRepository slotLeaderRepository;
   private final BlockMapper blockMapper;
-
-  private final BlockSpecification blockSpecification;
 
   @Override
   @Transactional(readOnly = true)
@@ -76,15 +72,21 @@ public class BlockServiceImpl implements BlockService {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable,
-      BlockFilterRequest request) {
-    Page<Block> page;
-    if (request != null) {
-      page = blockRepository.findAll(blockSpecification.getFilter(request), pageable);
-    } else {
-      page = blockRepository.findAll(pageable);
+  public BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable) {
+    Page<Block> blockPage = blockRepository.findAllBlock(pageable);
+    return mapperBlockToBlockFilterResponse(blockPage);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BaseFilterResponse<BlockFilterResponse> getBlockByEpoch(String no, Pageable pageable) {
+    try {
+      Integer epochNo = Integer.parseInt(no);
+      Page<Block> blocks = blockRepository.findBlockByEpochNo(epochNo, pageable);
+      return mapperBlockToBlockFilterResponse(blocks);
+    } catch (NumberFormatException e) {
+      throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
     }
-    return mapperBlockToBlockFilterResponse(page);
   }
 
   /**

@@ -10,6 +10,8 @@ public interface AddressInputOutputProjection {
 
   String getAddress();
 
+  Integer getIndex();
+
   String getStakeAddress();
 
   BigDecimal getValue();

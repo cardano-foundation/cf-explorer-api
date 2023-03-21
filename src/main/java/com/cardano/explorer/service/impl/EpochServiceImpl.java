@@ -45,15 +45,7 @@ public class EpochServiceImpl implements EpochService {
 
   @Override
   @Transactional(readOnly = true)
-  public Integer getCurrentEpoch() {
-    return epochRepository.findCurrentEpochNo().orElseThrow(
-        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
-    );
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public BaseFilterResponse<EpochResponse> filterEpoch(Pageable pageable) {
+  public BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable) {
     Page<Epoch> epochs = epochRepository.findAll(pageable);
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
     pageResponse.getContent().forEach(this::checkEpochStatus);
@@ -105,4 +97,5 @@ public class EpochServiceImpl implements EpochService {
         })
         .orElse(EpochSummary.builder().slot(0).no(0).totalSlot(0).build());
   }
+
 }

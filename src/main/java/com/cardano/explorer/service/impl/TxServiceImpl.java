@@ -8,7 +8,6 @@ import com.cardano.explorer.mapper.MaTxMintMapper;
 import com.cardano.explorer.mapper.TxMapper;
 import com.cardano.explorer.mapper.TxOutMapper;
 import com.cardano.explorer.mapper.WithdrawalMapper;
-import com.cardano.explorer.model.request.TxFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.TxResponse;
@@ -40,8 +39,6 @@ import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.repository.WithdrawalRepository;
 import com.cardano.explorer.service.TxService;
-import com.cardano.explorer.specification.BlockSpecification;
-import com.cardano.explorer.specification.TxSpecification;
 import com.cardano.explorer.util.TimeUtil;
 import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.BaseEntity_;
@@ -76,7 +73,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -90,7 +86,6 @@ public class TxServiceImpl implements TxService {
   private final BlockRepository blockRepository;
   private final TxMapper txMapper;
   private final TxOutMapper txOutMapper;
-  private final TxSpecification txSpecification;
   private final RedeemerRepository redeemerRepository;
   private final EpochRepository epochRepository;
   private final CollateralTxInRepository collateralTxInRepository;
@@ -195,25 +190,38 @@ public class TxServiceImpl implements TxService {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TxFilterResponse> filterTx(TxFilterRequest request, Pageable pageable) {
+  public BaseFilterResponse<TxFilterResponse> getAll(Pageable pageable) {
+    Page<Tx> txPage = txRepository.findAllTx(pageable);
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
+  }
+
+
+  @Override
+  @Transactional(readOnly = true)
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByBlock(String blockId,
+      Pageable pageable) {
     Page<Tx> txPage;
-    if (request != null) {
-      txPage = txRepository.findAll(txSpecification.getFilter(request), pageable);
-    } else {
-      txPage = txRepository.findAll(pageable);
+    try {
+      Long blockNo = Long.parseLong(blockId);
+      txPage = txRepository.findByBlockNo(blockNo, pageable);
+    } catch (NumberFormatException e) {
+      txPage = txRepository.findByBlockHash(blockId, pageable);
     }
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address, Pageable pageable) {
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
+      Pageable pageable) {
     Page<Tx> txPage = addressTxBalanceRepository.findAllByAddress(address, pageable);
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   @Override
-  public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId, Pageable pageable) {
+  @Transactional(readOnly = true)
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId,
+      Pageable pageable) {
     BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
     Optional<MultiAsset> multiAsset = multiAssetRepository.findByFingerprint(tokenId);
     if(multiAsset.isPresent()) {
@@ -238,8 +246,7 @@ public class TxServiceImpl implements TxService {
     }
     Set<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
         .collect(Collectors.toSet());
-    var conditions = Specification.where(BlockSpecification.hasIdIn(blockIdList));
-    List<Block> blocks = blockRepository.findAll(conditions);
+    List<Block> blocks = blockRepository.findAllByIdIn(blockIdList);
     Map<Long, Block> blockMap = blocks.stream()
         .collect(Collectors.toMap(Block::getId, Function.identity()));
     //get addresses input
@@ -334,7 +341,8 @@ public class TxServiceImpl implements TxService {
           ma -> {
             TxMintingResponse txMintingResponse = maTxMintMapper.fromMaTxMint(ma);
             String subject = ma.getIdent().getPolicy() + ma.getIdent().getName();
-            txMintingResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
+            txMintingResponse.setMetadata(
+                assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
             return txMintingResponse;
           }).collect(Collectors.toList()));
     }
@@ -462,8 +470,8 @@ public class TxServiceImpl implements TxService {
     for (TxOutResponse uTxO : uTxOs) {
       List<TxMintingResponse> tokens = addressInputOutputMap.get(uTxO).stream().
           filter(token -> Objects.nonNull(token.getAssetId())).map(
-          maTxMintMapper::fromAddressInputOutputProjection
-      ).collect(Collectors.toList());
+              maTxMintMapper::fromAddressInputOutputProjection
+          ).collect(Collectors.toList());
       uTxO.setTokens(tokens);
     }
     return uTxOs;

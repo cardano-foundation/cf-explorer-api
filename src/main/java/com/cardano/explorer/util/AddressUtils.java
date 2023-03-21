@@ -1,6 +1,7 @@
 package com.cardano.explorer.util;
 
 import com.bloxbean.cardano.client.address.util.AddressUtil;
+import com.cardano.explorer.common.constant.CommonConstant;
 import com.cardano.explorer.exception.BusinessCode;
 import com.sotatek.cardano.ledgersync.common.address.ShelleyAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
@@ -19,7 +20,7 @@ public class AddressUtils {
   public static String checkStakeAddress(String address) {
     String stakeAddress = null;
     try {
-      if(address.startsWith("addr")) {
+      if(address.startsWith(CommonConstant.MAINNET_ADDRESS_PREFIX)) {
         ShelleyAddress shelleyAddress = new ShelleyAddress(address);
         if (shelleyAddress.containStakeAddress()) {
           //TO-DO: Move to common

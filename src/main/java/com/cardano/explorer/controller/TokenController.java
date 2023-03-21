@@ -34,7 +34,8 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
-      @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY, MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY,
+          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(tokenService.filterToken(pageable));
   }
 
@@ -48,8 +49,9 @@ public class TokenController {
   @GetMapping("/{tokenId}/mints")
   @LogMessage
   @Operation(summary = "Filter token mint transaction")
-  public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(@PathVariable String tokenId,
-      @ParameterObject @SortDefault(sort = {BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
+  public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(
+      @PathVariable String tokenId, @ParameterObject @SortDefault(sort = {
+      BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pageable));
   }
 
@@ -64,8 +66,8 @@ public class TokenController {
   @GetMapping("/{tokenId}/txs")
   @LogMessage
   @Operation(summary = "Filter transaction by token")
-  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(@PathVariable String tokenId,
-      @ParameterObject Pageable pageable) {
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
+      @PathVariable String tokenId, @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pageable));
   }
 }
