@@ -1,8 +1,8 @@
 package com.cardano.explorer.projection;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface PoolDelegationSizeProjection {
-  BigDecimal getPoolSize();
+  BigInteger getPoolSize();
   Long getPoolId();
 }

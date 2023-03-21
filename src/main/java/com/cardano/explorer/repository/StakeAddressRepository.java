@@ -3,6 +3,7 @@ package com.cardano.explorer.repository;
 import com.cardano.explorer.projection.StakeAddressProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.sotatek.cardano.common.entity.StakeAddress;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,9 +44,7 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
       + " GROUP BY sa.id"
       + " HAVING sum(addr.balance) IS NOT NULL"
-      + " ORDER BY totalStake DESC",
-      countQuery = "SELECT count(sa) FROM StakeAddress sa "
-      + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)")
-  Page<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
+      + " ORDER BY totalStake DESC")
+  List<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
 
 }

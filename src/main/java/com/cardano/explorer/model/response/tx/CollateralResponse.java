@@ -1,6 +1,6 @@
 package com.cardano.explorer.model.response.tx;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,5 +11,5 @@ import lombok.Setter;
 public class CollateralResponse {
   private String address;
   private String txHash;
-  private BigDecimal amount;
+  private BigInteger amount;
 }

@@ -1,7 +1,7 @@
 package com.cardano.explorer.model.response.pool.chart;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
-public class EpochChartResponse extends BasePoolChart<EpochChartList, BigDecimal> {
+public class EpochChartResponse extends BasePoolChart<EpochChartList, BigInteger> {
 
 }

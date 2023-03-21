@@ -1,6 +1,6 @@
 package com.cardano.explorer.projection;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface AddressInputOutputProjection {
 
@@ -14,9 +14,9 @@ public interface AddressInputOutputProjection {
 
   String getStakeAddress();
 
-  BigDecimal getValue();
+  BigInteger getValue();
 
-  BigDecimal getAssetQuantity();
+  BigInteger getAssetQuantity();
 
   String getAssetName();
 

@@ -1,7 +1,7 @@
 package com.cardano.explorer.model.response.pool;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,7 @@ public class DelegationHeaderResponse implements Serializable {
 
   private Integer epochSlotNo;
 
-  private BigDecimal liveStake;
+  private BigInteger liveStake;
 
   private Integer delegators;
 }

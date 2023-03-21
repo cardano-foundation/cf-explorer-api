@@ -1,7 +1,7 @@
 package com.cardano.explorer.model.response.contract;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,5 +10,5 @@ import lombok.Setter;
 public class ContractFilterResponse implements Serializable {
   private String address;
   private Long txCount;
-  private BigDecimal balance;
+  private BigInteger balance;
 }
