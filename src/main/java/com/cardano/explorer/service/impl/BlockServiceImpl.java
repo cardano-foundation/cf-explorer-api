@@ -14,7 +14,7 @@ import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.SlotLeader;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +64,9 @@ public class BlockServiceImpl implements BlockService {
     BlockResponse blockResponse = blockMapper.blockToBlockResponse(block);
     List<Tx> txList = block.getTxList();
     blockResponse.setTotalOutput(
-        txList.stream().map(Tx::getOutSum).reduce(BigDecimal.ZERO, BigDecimal::add));
+        txList.stream().map(Tx::getOutSum).reduce(BigInteger.ZERO, BigInteger::add));
     blockResponse.setTotalFees(
-        txList.stream().map(Tx::getFee).reduce(BigDecimal.ZERO, BigDecimal::add));
+        txList.stream().map(Tx::getFee).reduce(BigInteger.ZERO, BigInteger::add));
     return blockResponse;
   }
 
@@ -107,14 +107,14 @@ public class BlockServiceImpl implements BlockService {
     List<Tx> txList = txRepository.findByBlockIn(blocks.toList());
 
     // create map with key: block_id, value : total output of block
-    Map<Long, BigDecimal> blockTotalOutputMap = txList.stream().collect(Collectors.groupingBy(
+    Map<Long, BigInteger> blockTotalOutputMap = txList.stream().collect(Collectors.groupingBy(
         tx -> tx.getBlock().getId(),
-        Collectors.reducing(BigDecimal.ZERO, Tx::getOutSum, BigDecimal::add)
+        Collectors.reducing(BigInteger.ZERO, Tx::getOutSum, BigInteger::add)
     ));
     // create map with key: block_id, value : total fee of block
-    Map<Long, BigDecimal> blockTotalFeeMap = txList.stream().collect(Collectors.groupingBy(
+    Map<Long, BigInteger> blockTotalFeeMap = txList.stream().collect(Collectors.groupingBy(
         tx -> tx.getBlock().getId(),
-        Collectors.reducing(BigDecimal.ZERO, Tx::getFee, BigDecimal::add)
+        Collectors.reducing(BigInteger.ZERO, Tx::getFee, BigInteger::add)
     ));
 
     List<BlockFilterResponse> blockFilterResponseList = new ArrayList<>();
@@ -124,8 +124,8 @@ public class BlockServiceImpl implements BlockService {
       BlockFilterResponse blockResponse = blockMapper.blockToBlockFilterResponse(block);
       var totalOutput = blockTotalOutputMap.get(block.getId());
       var totalFees = blockTotalFeeMap.get(block.getId());
-      blockResponse.setTotalOutput(Objects.requireNonNullElse(totalOutput, BigDecimal.ZERO));
-      blockResponse.setTotalFees(Objects.requireNonNullElse(totalFees, BigDecimal.ZERO));
+      blockResponse.setTotalOutput(Objects.requireNonNullElse(totalOutput, BigInteger.ZERO));
+      blockResponse.setTotalFees(Objects.requireNonNullElse(totalFees, BigInteger.ZERO));
       blockFilterResponseList.add(blockResponse);
     }
     return new BaseFilterResponse<>(blocks, blockFilterResponseList);

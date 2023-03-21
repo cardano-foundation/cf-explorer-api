@@ -1,7 +1,7 @@
 package com.cardano.explorer.model.response.pool.chart;
 
 import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +12,7 @@ public class EpochChartList {
 
   private Integer epochNo;
 
-  private BigDecimal totalStake;
+  private BigInteger totalStake;
 
   public EpochChartList(EpochChartProjection epochChart) {
     this.epochNo = epochChart.getChartKey();

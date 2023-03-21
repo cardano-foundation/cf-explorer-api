@@ -17,7 +17,7 @@ import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.util.AddressUtils;
 import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +57,7 @@ public class AddressServiceImpl implements AddressService {
   @Transactional(readOnly = true)
   public AddressResponse getAddressDetail(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElse(
-        Address.builder().address(address).txCount(0L).balance(BigDecimal.ZERO).build()
+        Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
     );
     if(!checkNetworkAddress(address)) {
       throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
@@ -126,7 +127,7 @@ public class AddressServiceImpl implements AddressService {
           var balance = addressTxBalanceRepository.getBalanceByAddressAndTime(address,
               Timestamp.valueOf(item.atTime(LocalTime.MAX)));
           if(Objects.isNull(balance)) {
-            response.setValue(BigDecimal.ZERO);
+            response.setValue(BigInteger.ZERO);
           } else {
             response.setValue(balance);
           }
@@ -139,16 +140,16 @@ public class AddressServiceImpl implements AddressService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<BigDecimal> getAddressMinMaxBalance(String address) {
-    List<BigDecimal> balanceList = addressTxBalanceRepository.findAllByAddress(address);
+  public List<BigInteger> getAddressMinMaxBalance(String address) {
+    List<BigInteger> balanceList = addressTxBalanceRepository.findAllByAddress(address);
     if(balanceList.isEmpty()) {
       return new ArrayList<>();
     }
-    BigDecimal maxBalance = balanceList.get(0);
-    BigDecimal minBalance = balanceList.get(0);
-    BigDecimal sumBalance = balanceList.get(0);
+    BigInteger maxBalance = balanceList.get(0);
+    BigInteger minBalance = balanceList.get(0);
+    BigInteger sumBalance = balanceList.get(0);
     balanceList.remove(0);
-    for(BigDecimal balance : balanceList) {
+    for(BigInteger balance : balanceList) {
       sumBalance = sumBalance.add(balance);
       if(sumBalance.compareTo(maxBalance) > 0) {
         maxBalance = sumBalance;
@@ -164,18 +165,22 @@ public class AddressServiceImpl implements AddressService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
-    Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
+    List<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
+    List<ContractFilterResponse> responses = contractPage.stream()
+        .map(addressMapper::fromAddressToContractFilter).collect(Collectors.toList());
     Page<ContractFilterResponse> pageResponse
-        = contractPage.map(addressMapper::fromAddressToContractFilter);
+        = new PageImpl<>(responses, pageable, pageable.getPageSize());
     return new BaseFilterResponse<>(pageResponse);
   }
 
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
-    Page<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
+    List<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
+    List<AddressFilterResponse> responses = addressPage.stream()
+        .map(addressMapper::fromAddressToFilterResponse).collect(Collectors.toList());
     Page<AddressFilterResponse> pageResponse
-        = addressPage.map(addressMapper::fromAddressToFilterResponse);
+        = new PageImpl<>(responses, pageable, pageable.getPageSize());
     return new BaseFilterResponse<>(pageResponse);
   }
 }

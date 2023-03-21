@@ -14,7 +14,7 @@ public class HexUtils {
    * Convert from hex to UTF-8
    *
    * @param hexString string hex
-   * @return string UTF-8 or null if not UTF-8
+   * @return string UTF-8
    */
   public static String fromHex(String hexString) {
     try {

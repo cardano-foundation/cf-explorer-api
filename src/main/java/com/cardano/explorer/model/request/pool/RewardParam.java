@@ -2,7 +2,7 @@ package com.cardano.explorer.model.request.pool;
 
 import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
 import com.cardano.explorer.model.response.pool.projection.RewardEpochProjection;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,21 +10,20 @@ import lombok.Setter;
 @Setter
 public class RewardParam {
 
-  private BigDecimal currentAda;
-
+  private BigInteger currentAda;
   private Double expansionRate;
 
-  private BigDecimal feePerEpoch;
+  private BigInteger feePerEpoch;
 
   private Double treasuryRate;
 
   private Integer k;
 
-  private BigDecimal pledge;
+  private BigInteger pledge;
 
   private Double a0;
 
-  private BigDecimal poolSize;
+  private BigInteger poolSize;
 
   private Integer blkCount;
 
@@ -32,7 +31,7 @@ public class RewardParam {
 
   private Double margin;
 
-  private BigDecimal fixedFee;
+  private BigInteger fixedFee;
 
   public RewardParam(PoolListProjection param) {
     this.currentAda = param.getUtxo();

@@ -1,7 +1,7 @@
 package com.cardano.explorer.model.response.tx;
 
 import com.cardano.explorer.common.enumeration.TxStatus;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +25,7 @@ public class TxInfoResponse {
   private Integer epochNo;
   private TxStatus status;
   private Integer confirmation;
-  private BigDecimal fee;
-  private BigDecimal totalOutput;
+  private BigInteger fee;
+  private BigInteger totalOutput;
 
 }

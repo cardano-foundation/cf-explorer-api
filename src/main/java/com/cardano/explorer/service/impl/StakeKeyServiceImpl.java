@@ -35,7 +35,7 @@ import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -102,12 +102,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         = stakeAddressRepository.findByView(stake).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     stakeAddressResponse.setStakeAddress(stake);
-    BigDecimal stakeTotalBalance
-        = addressRepository.findTotalBalanceByStakeAddress(stakeAddress).orElse(BigDecimal.ZERO);
-    BigDecimal stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
-        stake).orElse(BigDecimal.ZERO);
-    BigDecimal stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
-        stake).orElse(BigDecimal.ZERO);
+    BigInteger stakeTotalBalance
+        = addressRepository.findTotalBalanceByStakeAddress(stakeAddress).orElse(BigInteger.ZERO);
+    BigInteger stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
+        stake).orElse(BigInteger.ZERO);
+    BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
+        stake).orElse(BigInteger.ZERO);
     stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
     stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
     stakeAddressResponse.setTotalStake(stakeTotalBalance.add(stakeAvailableReward)
@@ -183,22 +183,24 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    Page<StakeAddressProjection> stakePage
+    List<StakeAddressProjection> stakeList
         = stakeAddressRepository.findStakeAddressOrderByBalance(pageable);
     List<StakeFilterResponse> content = new ArrayList<>();
-    Set<String> stakeAddressList = stakePage.getContent().stream()
+    Set<String> stakeAddressList = stakeList.stream()
         .map(StakeAddressProjection::getStakeAddress).collect(Collectors.toSet());
     var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
     var poolDataMap = poolData.stream().collect(Collectors.toMap(
         StakeDelegationProjection::getStakeAddress, Function.identity()));
-    for(var stake : stakePage) {
+    for(var stake : stakeList) {
       StakeDelegationProjection delegation =  poolDataMap.get(stake.getStakeAddress());
       StakeFilterResponse stakeResponse
           = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
       stakeResponse.setPoolName(getNameValueFromJson(delegation.getPoolData()));
       content.add(stakeResponse);
     }
-    return new BaseFilterResponse<>(stakePage, content);
+    Page<StakeFilterResponse> pageResponse
+        = new PageImpl<>(content, pageable, pageable.getPageSize());
+    return new BaseFilterResponse<>(pageResponse);
   }
 
   @Override
@@ -212,11 +214,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public StakeAnalyticResponse getStakeAnalytics() {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
-    response.setLiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch).orElse(BigDecimal.ZERO));
+    response.setLiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch).orElse(BigInteger.ZERO));
     if(1 > currentEpoch) {
-      response.setActiveStake(BigDecimal.ZERO);
+      response.setActiveStake(BigInteger.ZERO);
     } else {
-      response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1).orElse(BigDecimal.ZERO));
+      response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1).orElse(BigInteger.ZERO));
     }
     return response;
   }

@@ -4,7 +4,7 @@ import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.Withdrawal;
 import com.sotatek.cardano.common.entity.Withdrawal_;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -20,7 +20,7 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   @Query("SELECT SUM(w.amount) FROM Withdrawal w "
       + " INNER JOIN StakeAddress stakeAddress ON w.addr.id = stakeAddress.id"
       + " WHERE stakeAddress.view = :stakeAddress")
-  Optional<BigDecimal> getRewardWithdrawnByStakeAddress(String stakeAddress);
+  Optional<BigInteger> getRewardWithdrawnByStakeAddress(String stakeAddress);
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"

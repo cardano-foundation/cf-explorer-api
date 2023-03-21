@@ -1,6 +1,6 @@
 package com.cardano.explorer.model.response.pool.projection;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface RewardEpochProjection {
 
@@ -8,9 +8,9 @@ public interface RewardEpochProjection {
 
   Integer getParamK();
 
-  BigDecimal getUtxo();
+  BigInteger getUtxo();
 
-  BigDecimal getFeePerEpoch();
+  BigInteger getFeePerEpoch();
 
   Double getInfluence();
 
