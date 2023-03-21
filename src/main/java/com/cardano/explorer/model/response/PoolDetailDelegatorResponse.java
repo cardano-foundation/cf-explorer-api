@@ -2,7 +2,7 @@ package com.cardano.explorer.model.response;
 
 import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorProjection;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,11 +13,11 @@ public class PoolDetailDelegatorResponse implements Serializable {
 
   private Long stakeAddressId;
 
-  private BigDecimal totalStake;
+  private BigInteger totalStake;
 
   private Timestamp time;
 
-  private BigDecimal fee;
+  private BigInteger fee;
 
   private String view;
 

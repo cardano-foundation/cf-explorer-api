@@ -10,6 +10,7 @@ import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.service.PoolRegistrationService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,12 +69,14 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
     List<PoolOwnerProjection> blockOwnerProjections = poolOwnerRepository.getStakeKeyList(poolIds);
     Map<Long, List<PoolOwnerProjection>> poolOwnerProjectionMap = blockOwnerProjections.stream()
         .collect(Collectors.groupingBy(PoolOwnerProjection::getPoolId));
-    Map<Long, Set<String>> stakeKeyStrMap = new HashMap<>();
+    Map<Long, List<String>> stakeKeyStrMap = new HashMap<>();
     poolOwnerProjectionMap.forEach((k, v) -> stakeKeyStrMap.put(k,
-        v.stream().map(PoolOwnerProjection::getAddress).collect(Collectors.toSet())));
+        v.stream().map(PoolOwnerProjection::getAddress).collect(Collectors.toList())));
     poolTxRes.forEach(pool -> {
       pool.setPoolName(getNameValueFromJson(pool.getPoolName()));
-      pool.setStakeKey(stakeKeyStrMap.get(pool.getPoolId()));
+      List<String> stakeKeys = stakeKeyStrMap.get(pool.getPoolId());
+      Collections.sort(stakeKeys);
+      pool.setStakeKey(stakeKeys);
     });
   }
 

@@ -1,6 +1,6 @@
 package com.cardano.explorer.model.response;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class StakeAnalyticResponse {
 
-  BigDecimal activeStake;
-  BigDecimal liveStake;
+  BigInteger activeStake;
+  BigInteger liveStake;
 }
