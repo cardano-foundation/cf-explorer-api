@@ -1,0 +1,34 @@
+package com.cardano.explorer.model.response.pool.projection;
+
+import java.math.BigDecimal;
+
+public interface PoolListProjection {
+
+  String getPoolView();
+
+  String getPoolName();
+
+  BigDecimal getPledge();
+
+  BigDecimal getFee();
+
+  BigDecimal getPoolSize();
+
+  Integer getParamK();
+
+  BigDecimal getUtxo();
+
+  Double getMargin();
+
+  BigDecimal getFeePerEpoch();
+
+  Double getInfluence();
+
+  Double getExpansionRate();
+
+  Double getTreasuryRate();
+
+  Integer getBlkCount();
+
+  Integer getMaxBlockSize();
+}

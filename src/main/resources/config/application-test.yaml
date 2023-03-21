@@ -1,0 +1,56 @@
+# Infrastructure domain
+spring:
+  # Datasource specific configs
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://${HOST}:${PORT_DB}/explorer_api?currentSchema=${SPRING_PROFILES_ACTIVE}
+    username: ${USERNAME_DB}
+    password: ${PASSWORD_DB}
+    driver-class-name: org.postgresql.Driver
+    # Hikari specific configs
+    hikari:
+      pool-name: explorer-api-pool
+      minimum-idle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximum-pool-size: 10 #maximum pool size
+      idle-timeout: 300000 #maximum idle time for connection
+      max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      auto-commit: false #default auto-commit behavior.
+      connection-init-sql: SELECT 1
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+  # JPA specific configs
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: ${SPRING_PROFILES_ACTIVE}
+        show_sql: false
+        format_sql: true
+  flyway:
+    enabled: false
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+
+rsa:
+  key:
+    public-key-file: /key/public_key
+
+authentication:
+  ignore-check: true #ignore authentication check
