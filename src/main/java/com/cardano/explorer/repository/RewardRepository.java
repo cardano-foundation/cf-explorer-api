@@ -2,7 +2,7 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
 import com.sotatek.cardano.common.entity.Reward;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,7 +18,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " INNER JOIN StakeAddress stakeAddress ON r.addr.id = stakeAddress.id"
       + " WHERE r.spendableEpoch <= (SELECT max(no) FROM Epoch)"
       + " AND stakeAddress.view = :stakeAddress")
-  Optional<BigDecimal> getAvailableRewardByStakeAddress(String stakeAddress);
+  Optional<BigInteger> getAvailableRewardByStakeAddress(String stakeAddress);
 
   @Query(value = "SELECT rw.earnedEpoch AS epochNo, sum(rw.amount) AS totalStake FROM Reward rw "
       + "WHERE rw.pool.id = :poolId AND rw.earnedEpoch IN :epochNo "
