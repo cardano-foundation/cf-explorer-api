@@ -2,7 +2,7 @@ package com.cardano.explorer.model.response.token;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,5 +14,5 @@ public class TokenAddressResponse {
   private String name;
   private String displayName;
   private String fingerprint;
-  private BigDecimal quantity;
+  private BigInteger quantity;
 }

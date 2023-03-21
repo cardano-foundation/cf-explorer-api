@@ -1,7 +1,7 @@
 package com.cardano.explorer.model.response.stake;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +13,7 @@ public class StakeFilterResponse implements Serializable {
 
   private String stakeKey;
 
-  private BigDecimal balance;
+  private BigInteger balance;
 
   private String poolId;
 

@@ -12,11 +12,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PoolOwnerRepository extends JpaRepository<PoolOwner, Long> {
 
-  @Query(value = "SELECT pu.poolHash.id AS poolId, sa.view AS address "
-      + "FROM PoolUpdate pu "
+  @Query(value = "SELECT ph.id AS poolId, sa.view AS address "
+      + "FROM PoolHash ph "
+      + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.activeEpochNo = (SELECT max(pu.activeEpochNo) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
       + "JOIN PoolOwner po ON po.poolUpdate.id  = pu.id  "
       + "JOIN StakeAddress sa ON sa.id = po.stakeAddress.id "
-      + "WHERE pu.poolHash.id IN :poolIds "
-      + "GROUP BY pu.poolHash.id, sa.view ")
+      + "WHERE ph.id IN :poolIds "
+      + "GROUP BY ph.id, sa.view ")
   List<PoolOwnerProjection> getStakeKeyList(@Param("poolIds") Set<Long> poolIds);
 }
