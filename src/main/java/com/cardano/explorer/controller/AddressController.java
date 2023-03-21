@@ -11,7 +11,7 @@ import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
@@ -59,7 +59,7 @@ public class AddressController {
   @GetMapping("/min-max-balance/{address}")
   @LogMessage
   @Operation(summary = "Get the highest and lowest balance address")
-  public ResponseEntity<List<BigDecimal>> getAddressMinMaxBalance(@PathVariable String address) {
+  public ResponseEntity<List<BigInteger>> getAddressMinMaxBalance(@PathVariable String address) {
     return ResponseEntity.ok(addressService.getAddressMinMaxBalance(address));
   }
 

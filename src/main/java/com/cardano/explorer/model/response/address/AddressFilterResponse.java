@@ -1,6 +1,6 @@
 package com.cardano.explorer.model.response.address;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,5 +14,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AddressFilterResponse {
   private String address;
-  private BigDecimal balance;
+  private BigInteger balance;
 }

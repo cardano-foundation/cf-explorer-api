@@ -2,7 +2,7 @@ package com.cardano.explorer.model.response.tx;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +22,6 @@ public class TxOutResponse {
   private String address;
   private String index;
   private String txHash;
-  private BigDecimal value;
+  private BigInteger value;
   private List<TxMintingResponse> tokens;
 }

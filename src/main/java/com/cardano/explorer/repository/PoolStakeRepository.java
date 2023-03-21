@@ -1,7 +1,7 @@
 package com.cardano.explorer.repository;
 
 import com.sotatek.cardano.common.entity.PoolStake;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface PoolStakeRepository extends JpaRepository<PoolStake, Long> {
 
   @Query(value = "SELECT ps.amount FROM PoolStake ps WHERE ps.pool.id = :poolId")
-  Optional<BigDecimal> findTotalStakeByPoolId(@Param("poolId") Long poolId);
+  Optional<BigInteger> findTotalStakeByPoolId(@Param("poolId") Long poolId);
 }

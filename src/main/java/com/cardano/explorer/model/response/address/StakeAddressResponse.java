@@ -1,7 +1,7 @@
 package com.cardano.explorer.model.response.address;
 
 import com.cardano.explorer.common.enumeration.StakeAddressStatus;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,8 +16,8 @@ import lombok.Setter;
 public class StakeAddressResponse {
   private StakeAddressStatus status;
   private String stakeAddress;
-  private BigDecimal totalStake;
-  private BigDecimal rewardAvailable;
-  private BigDecimal rewardWithdrawn;
+  private BigInteger totalStake;
+  private BigInteger rewardAvailable;
+  private BigInteger rewardWithdrawn;
   private DelegationPoolResponse pool;
 }
