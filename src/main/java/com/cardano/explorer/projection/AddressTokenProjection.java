@@ -8,5 +8,6 @@ public interface AddressTokenProjection {
   String getFingerprint();
   String getTokenName();
   String getAddress();
+  Long getAddressId();
   String getPolicy();
 }

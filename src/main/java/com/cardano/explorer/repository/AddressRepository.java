@@ -3,6 +3,7 @@ package com.cardano.explorer.repository;
 import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -28,4 +29,6 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 
   @Query("SELECT sum(addr.balance) FROM Address addr WHERE addr.stakeAddress = :stake")
   Optional<BigInteger> findTotalBalanceByStakeAddress(StakeAddress stake);
+
+  List<Address> findAddressByIdIn(Collection<Long> idList);
 }

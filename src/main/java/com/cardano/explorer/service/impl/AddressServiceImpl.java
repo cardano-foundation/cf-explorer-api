@@ -73,7 +73,7 @@ public class AddressServiceImpl implements AddressService {
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
     addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
-    List<TokenAddressResponse> tokenListResponse = multiAssetRepository.findTokenByAddress(address)
+    List<TokenAddressResponse> tokenListResponse = multiAssetRepository.findTokenByAddress(addr)
         .stream().map(tokenMapper::fromAddressTokenProjection).collect(Collectors.toList());
     Set<String> subjects = tokenListResponse.stream().map(
         ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
@@ -108,8 +108,10 @@ public class AddressServiceImpl implements AddressService {
   @Override
   @Transactional(readOnly = true)
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type) {
+    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
     List<AddressAnalyticsResponse> responses = new ArrayList<>();
-    Long txCount = addressTxBalanceRepository.countByAddress(address);
+    Long txCount = addressTxBalanceRepository.countByAddress(addr);
     if(Long.valueOf(0).equals(txCount)) {
       return responses;
     }
@@ -144,7 +146,7 @@ public class AddressServiceImpl implements AddressService {
     dates.forEach(
         item -> {
           AddressAnalyticsResponse response = new AddressAnalyticsResponse();
-          var balance = addressTxBalanceRepository.getBalanceByAddressAndTime(address,
+          var balance = addressTxBalanceRepository.getBalanceByAddressAndTime(addr,
               Timestamp.valueOf(item.atTime(LocalTime.MAX)));
           if(Objects.isNull(balance)) {
             response.setValue(BigInteger.ZERO);
@@ -161,7 +163,9 @@ public class AddressServiceImpl implements AddressService {
   @Override
   @Transactional(readOnly = true)
   public List<BigInteger> getAddressMinMaxBalance(String address) {
-    List<BigInteger> balanceList = addressTxBalanceRepository.findAllByAddress(address);
+    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+    List<BigInteger> balanceList = addressTxBalanceRepository.findAllByAddress(addr);
     if(balanceList.isEmpty()) {
       return new ArrayList<>();
     }
