@@ -9,7 +9,7 @@ import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
-import com.cardano.explorer.projection.StakeTreasuryProjection;
+import com.cardano.explorer.projection.StakeInstantaneousRewardsProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import com.cardano.explorer.service.StakeKeyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -88,7 +88,7 @@ public class StakeKeyController {
   @GetMapping("/{stakeKey}/instantaneous-rewards")
   @LogMessage
   @Operation(summary = "Get reward transaction of stake key")
-  public BaseFilterResponse<StakeTreasuryProjection> getInstantaneousRewards(
+  public BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject Pageable pageable) {
     return stakeService.getInstantaneousRewards(stakeKey, pageable);

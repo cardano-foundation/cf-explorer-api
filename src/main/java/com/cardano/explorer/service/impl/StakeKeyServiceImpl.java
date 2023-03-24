@@ -15,12 +15,13 @@ import com.cardano.explorer.model.response.stake.TrxBlockEpochStake;
 import com.cardano.explorer.projection.StakeAddressProjection;
 import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
-import com.cardano.explorer.projection.StakeTreasuryProjection;
+import com.cardano.explorer.projection.StakeInstantaneousRewardsProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.EpochStakeRepository;
+import com.cardano.explorer.repository.ReserveRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
@@ -65,6 +66,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final RewardRepository rewardRepository;
   private final WithdrawalRepository withdrawalRepository;
   private final TreasuryRepository treasuryRepository;
+  private final ReserveRepository reserveRepository;
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
@@ -154,7 +156,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       if (o1.getBlockNo().equals(o2.getBlockNo())) {
         return o2.getBlockIndex() - o1.getBlockIndex();
       } else {
-        return o2.getEpochNo() - o1.getEpochNo();
+        return o2.getBlockNo().compareTo(o1.getBlockNo());
       }
     });
     final int start = (int) pageable.getOffset();
@@ -174,10 +176,23 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<StakeTreasuryProjection> getInstantaneousRewards(String stakeKey, Pageable pageable) {
-    Page<StakeTreasuryProjection> instantaneousRewards
-        = treasuryRepository.getTreasuryByAddress(stakeKey, pageable);
-    return new BaseFilterResponse<>(instantaneousRewards);
+  public BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
+      String stakeKey, Pageable pageable) {
+    List<StakeInstantaneousRewardsProjection> instantaneousRewards
+        = treasuryRepository.getTreasuryByAddress(stakeKey);
+    instantaneousRewards.addAll(reserveRepository.getReserveByAddress(stakeKey));
+    instantaneousRewards.sort((o1, o2) -> {
+      if (o1.getBlockNo().equals(o2.getBlockNo())) {
+        return o2.getBlockIndex() - o1.getBlockIndex();
+      } else {
+        return o2.getBlockNo().compareTo(o1.getBlockNo());
+      }
+    });
+    final int start = (int) pageable.getOffset();
+    final int end = Math.min((start + pageable.getPageSize()), instantaneousRewards.size());
+    Page<StakeInstantaneousRewardsProjection> page = new PageImpl<>(
+        instantaneousRewards.subList(start, end), pageable, instantaneousRewards.size());
+    return new BaseFilterResponse<>(page);
   }
 
   @Override
