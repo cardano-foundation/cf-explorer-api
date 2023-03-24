@@ -156,7 +156,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       if (o1.getBlockNo().equals(o2.getBlockNo())) {
         return o2.getBlockIndex() - o1.getBlockIndex();
       } else {
-        return o2.getEpochNo() - o1.getEpochNo();
+        return o2.getBlockNo().compareTo(o1.getBlockNo());
       }
     });
     final int start = (int) pageable.getOffset();
@@ -185,7 +185,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       if (o1.getBlockNo().equals(o2.getBlockNo())) {
         return o2.getBlockIndex() - o1.getBlockIndex();
       } else {
-        return o2.getEpochNo() - o1.getEpochNo();
+        return o2.getBlockNo().compareTo(o1.getBlockNo());
       }
     });
     final int start = (int) pageable.getOffset();
