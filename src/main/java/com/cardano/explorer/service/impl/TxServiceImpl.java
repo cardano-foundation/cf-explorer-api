@@ -25,6 +25,7 @@ import com.cardano.explorer.projection.CollateralInputOutputProjection;
 import com.cardano.explorer.projection.TxContractProjection;
 import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
+import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
@@ -40,6 +41,7 @@ import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.repository.WithdrawalRepository;
 import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.util.TimeUtil;
+import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.Block;
@@ -89,6 +91,7 @@ public class TxServiceImpl implements TxService {
   private final EpochRepository epochRepository;
   private final CollateralTxInRepository collateralTxInRepository;
   private final WithdrawalRepository withdrawalRepository;
+  private final AddressRepository addressRepository;
   private final WithdrawalMapper withdrawalMapper;
   private final DelegationRepository delegationRepository;
   private final DelegationMapper delegationMapper;
@@ -213,7 +216,11 @@ public class TxServiceImpl implements TxService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
       Pageable pageable) {
-    Page<Tx> txPage = addressTxBalanceRepository.findAllByAddress(address, pageable);
+    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+    );
+    List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
+    Page<Tx> txPage = new PageImpl<>(txList, pageable, addr.getTxCount());
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
