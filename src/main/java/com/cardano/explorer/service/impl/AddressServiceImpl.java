@@ -12,14 +12,17 @@ import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.model.response.contract.ContractFilterResponse;
 import com.cardano.explorer.model.response.token.TokenAddressResponse;
+import com.cardano.explorer.projection.AddressTokenProjection;
 import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.util.AddressUtils;
+import com.cardano.explorer.util.HexUtils;
 import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AssetMetadata;
+import com.sotatek.cardano.common.entity.MultiAsset;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -28,6 +31,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +40,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -73,22 +78,7 @@ public class AddressServiceImpl implements AddressService {
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
     addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
-    List<TokenAddressResponse> tokenListResponse = multiAssetRepository.findTokenByAddress(addr)
-        .stream().map(tokenMapper::fromAddressTokenProjection).collect(Collectors.toList());
-    Set<String> subjects = tokenListResponse.stream().map(
-        ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-    tokenListResponse.forEach(token -> {
-      AssetMetadata assetMetadata = assetMetadataMap.get(token.getPolicy() + token.getName());
-      if (Objects.nonNull(assetMetadata)) {
-        token.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
-      }
-    });
-    addressResponse.setTokens(tokenListResponse);
     return addressResponse;
-
   }
 
   /**
@@ -205,6 +195,105 @@ public class AddressServiceImpl implements AddressService {
         .map(addressMapper::fromAddressToFilterResponse).collect(Collectors.toList());
     Page<AddressFilterResponse> pageResponse
         = new PageImpl<>(responses, pageable, pageable.getPageSize());
+    return new BaseFilterResponse<>(pageResponse);
+  }
+
+  /**
+   * Get list token by address
+   *
+   * @param pageable page information
+   * @param address  wallet address
+   * @return list token by address
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public BaseFilterResponse<TokenAddressResponse> getTokenByAddress(Pageable pageable,
+      String address) {
+
+    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+    );
+
+    List<AddressTokenProjection> addressTokenProjectionList = multiAssetRepository.getIdentListByAddress(
+        addr, pageable).stream().collect(Collectors.toList());
+    List<Long> multiAssetIdList = addressTokenProjectionList.stream()
+        .map(AddressTokenProjection::getMultiAssetId).collect(Collectors.toList());
+    List<MultiAsset> multiAssetList = multiAssetRepository.findAllById(multiAssetIdList);
+
+    Map<Long, AddressTokenProjection> addressTokenProjectionMap = addressTokenProjectionList.stream()
+        .collect(Collectors.toMap(AddressTokenProjection::getMultiAssetId, Function.identity()));
+
+    List<TokenAddressResponse> tokenListResponse = multiAssetList.stream()
+        .map(multiAsset -> {
+          AddressTokenProjection addressTokenProjection = addressTokenProjectionMap.get(
+              multiAsset.getId());
+          return tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressTokenProjection);
+        }).collect(Collectors.toList());
+
+    Set<String> subjects = tokenListResponse.stream()
+        .map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
+        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+    for (int i = 0; i < tokenListResponse.size(); i++) {
+      TokenAddressResponse token = tokenListResponse.get(i);
+      AssetMetadata assetMetadata = assetMetadataMap.get(token.getPolicy() + token.getName());
+      if (Objects.nonNull(assetMetadata)) {
+        token.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
+      }
+    }
+
+    Page<TokenAddressResponse> pageResponse = new PageImpl<>(tokenListResponse, pageable,
+        pageable.getPageSize());
+    return new BaseFilterResponse<>(pageResponse);
+  }
+
+  /**
+   * Get list token by display name
+   *
+   * @param pageable    page information
+   * @param address     wallet address
+   * @param displayName display name of token
+   * @return list token by display name
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable,
+      String address, String displayName) {
+    if (StringUtils.isEmpty(displayName)) {
+      return getTokenByAddress(pageable, address);
+    }
+
+    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+    );
+
+    List<AddressTokenProjection> addressTokenProjectionList = multiAssetRepository.getIdentListByAddress(
+        addr);
+    List<Long> multiAssetIdList = addressTokenProjectionList.stream()
+        .map(AddressTokenProjection::getMultiAssetId).collect(Collectors.toList());
+
+    List<MultiAsset> multiAssetList = multiAssetRepository.findAllById(multiAssetIdList).stream()
+        .filter(multiAsset -> HexUtils.fromHex(multiAsset.getName().toLowerCase(),
+            multiAsset.getFingerprint()).contains(displayName.toLowerCase()))
+        .collect(Collectors.toList());
+
+    Map<Long, AddressTokenProjection> addressTokenProjectionMap = addressTokenProjectionList.stream()
+        .collect(Collectors.toMap(AddressTokenProjection::getMultiAssetId, Function.identity()));
+
+    List<TokenAddressResponse> tokenListResponse = multiAssetList.stream()
+        .map(multiAsset -> {
+          AddressTokenProjection addressTokenProjection = addressTokenProjectionMap.get(
+              multiAsset.getId());
+          return tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressTokenProjection);
+        })
+        .sorted(Comparator.comparing(TokenAddressResponse::getAddress))
+        .collect(Collectors.toList());
+
+    final int start = (int) pageable.getOffset();
+    final int end = Math.min((start + pageable.getPageSize()), tokenListResponse.size());
+    Page<TokenAddressResponse> pageResponse = new PageImpl<>(tokenListResponse.subList(start, end),
+        pageable, tokenListResponse.size());
     return new BaseFilterResponse<>(pageResponse);
   }
 }

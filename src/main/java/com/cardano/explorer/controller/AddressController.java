@@ -7,6 +7,7 @@ import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
+import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,6 +70,24 @@ public class AddressController {
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(@PathVariable String address,
       @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(txService.getTransactionsByAddress(address, pageable));
+  }
+
+  @GetMapping("/{address}/tokens")
+  @LogMessage
+  @Operation(summary = "Get list token by address")
+  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTokenByAddress(
+      @PathVariable String address,
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(addressService.getTokenByAddress(pageable, address));
+  }
+
+  @GetMapping("/{address}/tokens/{displayName}")
+  @LogMessage
+  @Operation(summary = "Get list token by address and display name")
+  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTokenByDisplayName(
+      @PathVariable String address, @PathVariable String displayName,
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(addressService.getTokenByDisplayName(pageable, address, displayName));
   }
 
 }
