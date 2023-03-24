@@ -8,7 +8,7 @@ import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
-import com.cardano.explorer.projection.StakeTreasuryProjection;
+import com.cardano.explorer.projection.StakeInstantaneousRewardsProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import org.springframework.data.domain.Pageable;
 
@@ -76,7 +76,7 @@ public interface StakeKeyService {
    * @param stakeKey stake address
    * @return stake key instantaneous rewards
    */
-  BaseFilterResponse<StakeTreasuryProjection> getInstantaneousRewards(String stakeKey, Pageable pageable);
+  BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(String stakeKey, Pageable pageable);
 
 
   /**
