@@ -11,6 +11,7 @@ import lombok.Setter;
 public class RewardParam {
 
   private BigInteger currentAda;
+
   private Double expansionRate;
 
   private BigInteger feePerEpoch;

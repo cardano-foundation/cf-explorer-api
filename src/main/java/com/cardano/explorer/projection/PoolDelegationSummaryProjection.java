@@ -1,6 +1,7 @@
 package com.cardano.explorer.projection;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface PoolDelegationSummaryProjection {
 
@@ -8,19 +9,19 @@ public interface PoolDelegationSummaryProjection {
 
   String getJson();
 
-  BigDecimal getPledge();
+  BigInteger getPledge();
 
-  BigDecimal getFee();
+  BigInteger getFee();
 
-  BigDecimal getPoolSize();
+  BigInteger getPoolSize();
 
   Integer getOptimalPoolCount();
 
-  BigDecimal getUtxo();
+  BigInteger getUtxo();
 
   Double getMargin();
 
-  BigDecimal getFeePerEpoch();
+  BigInteger getFeePerEpoch();
 
   Double getInfluence();
 
@@ -31,4 +32,6 @@ public interface PoolDelegationSummaryProjection {
   Integer getBlkCount();
 
   Integer getMaxBlockSize();
+
+  BigInteger getReserves();
 }

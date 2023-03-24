@@ -5,6 +5,7 @@ import com.cardano.explorer.model.response.pool.projection.PoolDetailUpdateProje
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private List<String> ownerAccounts;
 
-  private BigDecimal poolSize;
+  private BigInteger poolSize;
 
   private BigDecimal stakeLimit;
 
@@ -41,9 +42,9 @@ public class PoolDetailHeaderResponse implements Serializable {
   @JsonSerialize(using = PercentSerializer.class)
   private Double ros;
 
-  private BigDecimal pledge;
+  private BigInteger pledge;
 
-  private BigDecimal cost;
+  private BigInteger cost;
 
   @JsonSerialize(using = PercentSerializer.class)
   private Double margin;

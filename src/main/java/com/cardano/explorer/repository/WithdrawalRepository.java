@@ -12,8 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
+
   @EntityGraph(attributePaths = {Withdrawal_.ADDR})
   List<Withdrawal> findByTx(Tx tx);
 
@@ -31,4 +33,25 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
   Page<StakeWithdrawalProjection> getWithdrawalByAddress(String stakeKey, Pageable pageable);
+
+  @Query("SELECT sum(wd.amount) "
+      + "FROM Withdrawal wd "
+      + "WHERE wd.addr.id IN ( "
+      + "SELECT DISTINCT d.address.id "
+      + "FROM Delegation d "
+      + "JOIN PoolHash ph ON ph.id = d.poolHash.id "
+      + "JOIN StakeAddress sa ON sa.id = d.address.id "
+      + "WHERE d.address.id  NOT IN ( "
+      + "SELECT d1.address.id "
+      + "FROM Delegation d1 "
+      + "JOIN PoolHash ph ON ph.id = d1.poolHash.id "
+      + "JOIN StakeAddress sa ON sa.id = d1.address.id "
+      + "WHERE d1.address.id  = d.address.id "
+      + "AND d1.id > d.id) "
+      + "AND d.address.id IN ( "
+      + "SELECT d.address.id "
+      + "FROM Delegation d "
+      + "JOIN PoolHash ph ON ph.id = d.poolHash.id "
+      + "WHERE ph.view = :poolView) AND ph.view  = :poolView)")
+  BigInteger findWithdrawalStakeByPool(@Param("poolView") String poolView);
 }

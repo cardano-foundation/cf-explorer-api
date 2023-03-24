@@ -1,6 +1,7 @@
 package com.cardano.explorer.model.response.pool.projection;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface PoolDetailUpdateProjection {
 
@@ -8,23 +9,23 @@ public interface PoolDetailUpdateProjection {
 
   String getHashRaw();
 
-  BigDecimal getPoolSize();
+  BigInteger getPoolSize();
 
   String getPoolName();
 
   String getTickerName();
 
-  BigDecimal getCost();
+  BigInteger getCost();
 
   Double getMargin();
 
-  BigDecimal getPledge();
+  BigInteger getPledge();
 
   Integer getParamK();
 
-  BigDecimal getUtxo();
+  BigInteger getUtxo();
 
-  BigDecimal getFeePerEpoch();
+  BigInteger getFeePerEpoch();
 
   Double getInfluence();
 
@@ -35,4 +36,6 @@ public interface PoolDetailUpdateProjection {
   Integer getBlkCount();
 
   Integer getMaxBlockSize();
+
+  BigInteger getReserves();
 }

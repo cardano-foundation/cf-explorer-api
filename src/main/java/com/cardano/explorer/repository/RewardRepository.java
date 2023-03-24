@@ -25,4 +25,26 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "GROUP BY rw.earnedEpoch")
   List<EpochStakeProjection> totalRewardStakeByEpochNoAndPool(@Param("epochNo") Set<Long> epochNo,
       @Param("poolId") Long poolId);
+
+  @Query("SELECT sum(rw.amount) "
+      + "FROM Reward rw "
+      + "WHERE rw.spendableEpoch <= (SELECT max(epochNo) FROM Block) "
+      + "AND rw.addr.id IN ( "
+      + "SELECT DISTINCT d.address.id "
+      + "FROM Delegation d "
+      + "JOIN PoolHash ph ON ph.id = d.poolHash.id "
+      + "JOIN StakeAddress sa ON sa.id = d.address.id "
+      + "WHERE d.address.id  NOT IN ( "
+      + "SELECT d1.address.id "
+      + "FROM Delegation d1 "
+      + "JOIN PoolHash ph ON ph.id = d1.poolHash.id "
+      + "JOIN StakeAddress sa ON sa.id = d1.address.id "
+      + "WHERE d1.address.id  = d.address.id "
+      + "AND d1.id > d.id) "
+      + "AND d.address.id IN ( "
+      + "SELECT d.address.id "
+      + "FROM Delegation d "
+      + "JOIN PoolHash ph ON ph.id = d.poolHash.id "
+      + "WHERE ph.view = :poolView) AND ph.view  = :poolView)")
+  BigInteger findRewardStakeByPool(@Param("poolView") String poolView);
 }

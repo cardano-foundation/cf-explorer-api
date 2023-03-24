@@ -8,6 +8,7 @@ import com.sotatek.cardano.common.entity.Delegation;
 import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -61,7 +62,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       "SELECT ph.view AS poolView, pod.json AS json, pu.pledge AS pledge, pu.fixedCost AS fee,"
           + " ph.poolSize AS poolSize, ep.optimalPoolCount AS optimalPoolCount, "
           + "ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, "
-          + "ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
+          + "ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize, ad.reserves AS reserves "
           + "FROM PoolHash ph "
           + "JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
           + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
@@ -112,4 +113,28 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " GROUP BY sa.view )")
   List<StakeDelegationProjection> findPoolDataByAddressIn(Set<String> addresses);
 
+  @Query("SELECT sum(txo.value) "
+      + "FROM TxOut txo "
+      + "LEFT JOIN TxIn txi ON txo.tx.id = txi.txOut.id AND txo.index = txi.txOutIndex "
+      + "LEFT JOIN Tx tx ON tx.id = txo.tx.id "
+      + "LEFT JOIN Block block ON tx.block.id = block.id "
+      + "WHERE (txi.txInput.id IS NULL) AND (block.epochNo IS NOT NULL) "
+      + "AND txo.stakeAddress.id IN ( "
+      + "SELECT DISTINCT d.address.id "
+      + "FROM Delegation d "
+      + "JOIN PoolHash ph ON ph.id = d.poolHash.id "
+      + "JOIN StakeAddress sa ON sa.id = d.address.id "
+      + "WHERE d.address.id  NOT IN ( "
+      + "SELECT d1.address.id "
+      + "FROM Delegation d1 "
+      + "JOIN PoolHash ph ON ph.id = d1.poolHash.id "
+      + "JOIN StakeAddress sa ON sa.id = d1.address.id "
+      + "WHERE d1.address.id  = d.address.id "
+      + "AND d1.id > d.id) "
+      + "AND d.address.id IN ( "
+      + "SELECT d.address.id "
+      + "FROM Delegation d "
+      + "JOIN PoolHash ph ON ph.id = d.poolHash.id "
+      + "WHERE ph.view = :poolView) AND ph.view  = :poolView)")
+  BigInteger findDelegateStakeByPool(@Param("poolView") String poolView);
 }

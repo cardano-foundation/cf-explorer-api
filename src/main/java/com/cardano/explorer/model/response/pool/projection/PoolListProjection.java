@@ -32,4 +32,6 @@ public interface PoolListProjection {
   Integer getBlkCount();
 
   Integer getMaxBlockSize();
+
+  BigInteger getReserves();
 }

@@ -3,7 +3,7 @@ package com.cardano.explorer.model.response.pool;
 import com.cardano.explorer.json.serialize.PercentSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +21,7 @@ public class PoolResponse implements Serializable {
 
   private String poolName;
 
-  private BigDecimal poolSize;
+  private BigInteger poolSize;
 
   @JsonSerialize(using = PercentSerializer.class)
   private Double reward;
@@ -29,9 +29,9 @@ public class PoolResponse implements Serializable {
   @JsonSerialize(using = PercentSerializer.class)
   private Double feePercent;
 
-  private BigDecimal feeAmount;
+  private BigInteger feeAmount;
 
-  private BigDecimal pledge;
+  private BigInteger pledge;
 
   @JsonSerialize(using = PercentSerializer.class)
   private Double saturation;

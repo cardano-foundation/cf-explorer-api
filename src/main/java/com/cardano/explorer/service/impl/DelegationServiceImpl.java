@@ -63,6 +63,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -83,6 +84,8 @@ public class DelegationServiceImpl implements DelegationService {
   private final PoolUpdateRepository poolUpdateRepository;
 
   private final RewardRepository rewardRepository;
+
+  private final RedisTemplate<String, Object> redisTemplate;
 
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
@@ -122,12 +125,12 @@ public class DelegationServiceImpl implements DelegationService {
     poolIdPage.stream().forEach(pool -> {
       poolList.add(PoolResponse.builder().poolId(pool.getPoolView())
           .poolName(getNameValueFromJson(pool.getPoolName()))
-          .poolSize(Objects.isNull(pool.getPoolSize()) ? null : new BigDecimal(pool.getPoolSize()))
-          .pledge(Objects.isNull(pool.getPledge()) ? null : new BigDecimal(pool.getPledge()))
-          .feeAmount(Objects.isNull(pool.getFee()) ? null : new BigDecimal(pool.getFee()))
+          .poolSize(pool.getPoolSize())
+          .pledge(pool.getPledge())
+          .feeAmount(pool.getFee())
           .feePercent(pool.getMargin())
-          .saturation(getSaturation(Objects.isNull(pool.getPoolSize()) ? null : new BigDecimal(pool.getPoolSize()),
-              getStakeLimit(Objects.isNull(pool.getUtxo()) ? null : new BigDecimal(pool.getUtxo()), pool.getParamK())).doubleValue())
+          .saturation(getSaturation(pool.getPoolView(),
+              getPoolSaturation(pool.getReserves(), pool.getParamK())).doubleValue())
           .build());
       poolViews.add(pool.getPoolView());
     });
@@ -160,10 +163,8 @@ public class DelegationServiceImpl implements DelegationService {
 
           String poolName = getNameValueFromJson(pool.getJson());
           Integer parameterK = pool.getOptimalPoolCount();
-          BigDecimal totalAda = pool.getUtxo();
-          BigDecimal stakeLimit = getStakeLimit(totalAda, parameterK);
-          BigDecimal poolSize = pool.getPoolSize();
-          BigDecimal saturation = getSaturation(poolSize, stakeLimit);
+          BigDecimal saturation = getSaturation(pool.getPoolView(),
+              getPoolSaturation(pool.getReserves(), parameterK));
           return PoolResponse.builder().poolId(pool.getPoolView()).poolName(poolName)
               .poolSize(pool.getPoolSize()).reward(BigInteger.ZERO.doubleValue())
               .saturation(saturation.doubleValue()).feeAmount(pool.getFee())
@@ -189,11 +190,12 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setOwnerAccounts(ownerAddress);
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
     poolDetailResponse.setReward(CommonConstant.ZERO.doubleValue());
-    poolDetailResponse.setStakeLimit(
-        getStakeLimit(poolDetailProjection.getUtxo(), poolDetailProjection.getParamK()));
-    poolDetailResponse.setSaturation(getSaturation(poolDetailProjection.getPoolSize(),
-        poolDetailResponse.getStakeLimit()).doubleValue());
+    poolDetailResponse.setSaturation(getSaturation(poolView,
+        getPoolSaturation(poolDetailProjection.getReserves(),
+            poolDetailProjection.getParamK())).doubleValue());
     PoolListProjection poolListProjection = poolHashRepository.findDataCalculateReward(poolView);
+    poolDetailResponse.setStakeLimit(
+        getStakeLimit(poolListProjection.getUtxo(), poolDetailProjection.getParamK()));
     Double reward = getReward(new RewardParam(poolListProjection));
     poolDetailResponse.setReward(reward);
     poolDetailResponse.setRos(getPoolRos(reward, poolDetailProjection.getMargin()));
@@ -334,18 +336,33 @@ public class DelegationServiceImpl implements DelegationService {
    *
    * @return BigDecimal
    */
-  private BigDecimal getStakeLimit(BigDecimal totalAda, Integer k) {
+  private BigDecimal getStakeLimit(BigInteger totalAda, Integer k) {
     if (Objects.isNull(k) || Objects.isNull(totalAda)) {
       return BigDecimal.ZERO;
     }
-    return totalAda.divide(new BigDecimal(k), CommonConstant.SCALE, RoundingMode.HALF_UP);
+    return new BigDecimal(totalAda).divide(new BigDecimal(k), CommonConstant.SCALE,
+        RoundingMode.HALF_UP);
   }
 
-  private static BigDecimal getSaturation(BigDecimal poolSize, BigDecimal stakeLimit) {
-    if (stakeLimit.equals(BigDecimal.ZERO) || Objects.isNull(poolSize)) {
+  private BigDecimal getPoolSaturation(BigInteger reserves, Integer k) {
+    if (Objects.isNull(k) || Objects.isNull(reserves)) {
       return BigDecimal.ZERO;
     }
-    return poolSize.divide(stakeLimit, CommonConstant.SCALE, RoundingMode.HALF_UP);
+    return (CommonConstant.TOTAL_ADA.subtract(new BigDecimal(reserves))).divide(new BigDecimal(k),
+        CommonConstant.SCALE, RoundingMode.HALF_UP);
+  }
+
+  private BigDecimal getSaturation(String poolView, BigDecimal poolSaturation) {
+    if (poolSaturation.equals(BigDecimal.ZERO) || Objects.isNull(poolView)) {
+      return BigDecimal.ZERO;
+    }
+    Object liveStakeObject = redisTemplate.opsForValue()
+        .get(CommonConstant.REDIS_POOL_PREFIX + poolView);
+    if (Objects.isNull(liveStakeObject)) {
+      return BigDecimal.ZERO;
+    }
+    return new BigDecimal(String.valueOf(liveStakeObject)).divide(poolSaturation,
+        CommonConstant.SCALE, RoundingMode.HALF_UP);
   }
 
   /**
@@ -404,18 +421,19 @@ public class DelegationServiceImpl implements DelegationService {
    */
   private BigDecimal getGrossReward(Integer k, BigInteger currentAda,
       BigDecimal totalADAInCirculation,
-      Double a0, BigDecimal poolSize, BigDecimal r) {
+      Double a0, BigInteger poolSize, BigDecimal r) {
     if (r.equals(BigDecimal.ZERO) || Objects.isNull(k) || Objects.isNull(
         a0) || Objects.isNull(poolSize) || poolSize.equals(BigDecimal.ZERO)) {
       return BigDecimal.ZERO;
     }
-    BigDecimal z0 = BigDecimal.ONE.divide(BigDecimal.valueOf(k), CommonConstant.SCALE_10,
+    BigDecimal z0 = BigDecimal.ONE.divide(BigDecimal.valueOf(k), CommonConstant.SCALE,
         RoundingMode.HALF_DOWN);
     BigDecimal poolSaturation = totalADAInCirculation.divide(BigDecimal.valueOf(k),
-        CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal s = (poolSize.min(poolSaturation)).divide(totalADAInCirculation,
-        CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal sigma = poolSize.divide(new BigDecimal(currentAda), CommonConstant.SCALE_10,
+        CommonConstant.SCALE, RoundingMode.HALF_DOWN);
+    BigDecimal s = (new BigDecimal(poolSize).min(poolSaturation)).divide(totalADAInCirculation,
+        CommonConstant.SCALE, RoundingMode.HALF_DOWN);
+    BigDecimal sigma = new BigDecimal(poolSize).divide(new BigDecimal(currentAda),
+        CommonConstant.SCALE,
         RoundingMode.HALF_DOWN);
     BigDecimal sCapped = z0.min(s);
     BigDecimal sigmaCapped = z0.min(sigma);
@@ -433,16 +451,16 @@ public class DelegationServiceImpl implements DelegationService {
    * @return BigDecimal
    */
   private BigDecimal getNetReward(BigDecimal grossReward, Integer blkCount, Integer maxBlockSize,
-      Double margin, BigDecimal fixedFee) {
+      Double margin, BigInteger fixedFee) {
     if (grossReward.equals(BigDecimal.ZERO) || Objects.isNull(blkCount) || Objects.isNull(
         maxBlockSize) || Objects.isNull(margin) || Objects.isNull(fixedFee)) {
       return BigDecimal.ZERO;
     }
     BigDecimal stakePoolPerformance = BigDecimal.valueOf(blkCount)
-        .divide(BigDecimal.valueOf(maxBlockSize), CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
+        .divide(BigDecimal.valueOf(maxBlockSize), CommonConstant.SCALE, RoundingMode.HALF_DOWN);
     BigDecimal penalty = BigDecimal.ONE.subtract(stakePoolPerformance).multiply(grossReward);
     grossReward = BigDecimal.ZERO.max(grossReward.subtract(penalty));
-    grossReward = BigDecimal.ZERO.max(grossReward.subtract(fixedFee));
+    grossReward = BigDecimal.ZERO.max(grossReward.subtract(new BigDecimal(fixedFee)));
     BigDecimal marginAda = grossReward.multiply(BigDecimal.valueOf(margin));
     return grossReward.subtract(marginAda);
   }
@@ -452,25 +470,26 @@ public class DelegationServiceImpl implements DelegationService {
    *
    * @return BigDecimal
    */
-  private Double getReward(BigDecimal poolSize, BigDecimal pledge, Integer k, BigDecimal currentAda,
+  private Double getReward(BigInteger poolSize, BigInteger pledge, Integer k, BigInteger currentAda,
       Double expansionRate, BigDecimal netReward) {
     if (netReward.equals(BigDecimal.ZERO) || poolSize.compareTo(pledge) <= 0) {
       return BigDecimal.ZERO.doubleValue();
     }
-    BigDecimal ada = poolSize.subtract(pledge);
-    BigDecimal reserveOne = CommonConstant.TOTAL_ADA.subtract(currentAda);
-    BigDecimal totalADAInCirculation = currentAda.add(
+    BigDecimal ada = new BigDecimal(poolSize).subtract(new BigDecimal(pledge));
+    BigDecimal reserveOne = CommonConstant.TOTAL_ADA.subtract(new BigDecimal(currentAda));
+    BigDecimal totalADAInCirculation = new BigDecimal(currentAda).add(
         (reserveOne.multiply(BigDecimal.valueOf(expansionRate))));
     BigDecimal poolSaturation = totalADAInCirculation.divide(BigDecimal.valueOf(k),
-        CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal sigma = poolSize.divide(currentAda, CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
+        CommonConstant.SCALE, RoundingMode.HALF_DOWN);
+    BigDecimal sigma = new BigDecimal(poolSize).divide(new BigDecimal(currentAda),
+        CommonConstant.SCALE, RoundingMode.HALF_DOWN);
     BigDecimal control = sigma.multiply(totalADAInCirculation);
     BigDecimal cappedAda = ada.min(
-        BigDecimal.ZERO.max(poolSaturation.min(control).subtract(poolSize)));
+        BigDecimal.ZERO.max(poolSaturation.min(control).subtract(new BigDecimal(poolSize))));
     BigDecimal stakePoolControlADA = sigma.multiply(totalADAInCirculation);
     BigDecimal rewardAda = ((netReward.multiply(cappedAda)).divide(stakePoolControlADA,
-        CommonConstant.SCALE_10, RoundingMode.HALF_DOWN)).multiply(CommonConstant.EPOCH_IN_YEARS);
-    return rewardAda.divide(ada, CommonConstant.SCALE_10, RoundingMode.HALF_DOWN).doubleValue();
+        CommonConstant.SCALE, RoundingMode.HALF_DOWN)).multiply(CommonConstant.EPOCH_IN_YEARS);
+    return rewardAda.divide(ada, CommonConstant.SCALE, RoundingMode.HALF_DOWN).doubleValue();
   }
 
   private Double getReward(RewardParam param) {
@@ -480,11 +499,15 @@ public class DelegationServiceImpl implements DelegationService {
         param.getFeePerEpoch(), param.getTreasuryRate());
     BigDecimal grossReward = getGrossReward(param.getK(), param.getCurrentAda(),
         totalADAInCirculation, param.getA0(),
-        Objects.isNull(param.getPoolSize()) ? null : new BigDecimal(param.getPoolSize()), r);
+        param.getPoolSize(), r);
     BigDecimal netReward = getNetReward(grossReward, param.getBlkCount(), param.getMaxBlockSize(),
-        param.getMargin(), Objects.isNull(param.getFixedFee()) ? null : new BigDecimal(param.getFixedFee()));
-    return getReward(Objects.isNull(param.getPoolSize()) ? null : new BigDecimal(param.getPoolSize()),
-        Objects.isNull(param.getPledge()) ? null : new BigDecimal(param.getPledge()),
-        param.getK(), Objects.isNull(param.getCurrentAda()) ? null : new BigDecimal(param.getCurrentAda()), param.getExpansionRate(), netReward);
+        param.getMargin(),
+        param.getFixedFee());
+    return getReward(
+        param.getPoolSize(),
+        param.getPledge(),
+        param.getK(),
+        param.getCurrentAda(),
+        param.getExpansionRate(), netReward);
   }
 }
