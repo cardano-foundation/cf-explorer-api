@@ -2,6 +2,7 @@ package com.cardano.explorer.projection;
 
 import java.math.BigInteger;
 
+
 public interface AddressInputOutputProjection {
 
   Long getTxId();
@@ -21,4 +22,6 @@ public interface AddressInputOutputProjection {
   String getAssetName();
 
   String getAssetId();
+
+  String getAssetsJson();
 }

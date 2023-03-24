@@ -25,4 +25,6 @@ public class CommonConstant {
 
   public static final String REDIS_POOL_PREFIX = "LIVE_STAKE_POOL_";
 
+  public static final String LOVELACE = "LOVELACE";
+
 }
