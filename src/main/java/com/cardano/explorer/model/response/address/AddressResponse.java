@@ -18,7 +18,6 @@ public class AddressResponse {
   private String address;
   private Long txCount;
   private BigInteger balance;
-  private List<TokenAddressResponse> tokens;
   private String stakeAddress;
   private Boolean isContract;
 }

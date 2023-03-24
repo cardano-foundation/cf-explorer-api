@@ -11,14 +11,15 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring",imports={HexUtils.class})
 public interface MaTxMintMapper {
 
-  @Mapping(target = "assetName", expression = "java(HexUtils.fromHex(maTxMint.getIdent().getName()))")
+  @Mapping(target = "assetName",
+      expression = "java(HexUtils.fromHex(maTxMint.getIdent().getName(), maTxMint.getIdent().getFingerprint()))")
   @Mapping(target = "policy", source = "ident.policy")
   @Mapping(target = "assetQuantity", source = "quantity")
   @Mapping(target = "assetId", expression = "java(maTxMint.getIdent().getFingerprint())")
   TxMintingResponse fromMaTxMint(MaTxMint maTxMint);
 
   @Mapping(target = "assetName",
-      expression = "java(HexUtils.fromHex(input.getAssetName()))")
+      expression = "java(HexUtils.fromHex(input.getAssetName(), input.getAssetId()))")
   @Mapping(target = "assetId", expression = "java(input.getAssetId())")
   TxMintingResponse fromAddressInputOutputProjection(
       AddressInputOutputProjection input);
