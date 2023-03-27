@@ -277,8 +277,8 @@ public class AddressServiceImpl implements AddressService {
         .map(AddressTokenProjection::getMultiAssetId).collect(Collectors.toList());
 
     List<MultiAsset> multiAssetList = multiAssetRepository.findAllById(multiAssetIdList).stream()
-        .filter(multiAsset -> HexUtils.fromHex(multiAsset.getName().toLowerCase(),
-            multiAsset.getFingerprint()).contains(displayName.toLowerCase()))
+        .filter(multiAsset -> HexUtils.fromHex(multiAsset.getName(),
+            multiAsset.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
         .collect(Collectors.toList());
 
     Map<Long, AddressTokenProjection> addressTokenProjectionMap = addressTokenProjectionList.stream()
