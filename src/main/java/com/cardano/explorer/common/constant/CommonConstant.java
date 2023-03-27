@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonConstant {
 
-  public static final int SCALE = 9;
+  public static final int SCALE = 6;
 
   public static final String PREFIX_POOL_NAME = "{\"name\": \"";
 

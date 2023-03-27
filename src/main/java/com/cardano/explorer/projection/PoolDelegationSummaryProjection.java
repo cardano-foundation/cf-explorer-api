@@ -17,21 +17,7 @@ public interface PoolDelegationSummaryProjection {
 
   Integer getOptimalPoolCount();
 
-  BigInteger getUtxo();
-
   Double getMargin();
-
-  BigInteger getFeePerEpoch();
-
-  Double getInfluence();
-
-  Double getExpansionRate();
-
-  Double getTreasuryRate();
-
-  Integer getBlkCount();
-
-  Integer getMaxBlockSize();
 
   BigInteger getReserves();
 }
