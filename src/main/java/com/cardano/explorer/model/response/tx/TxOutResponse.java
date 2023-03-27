@@ -23,5 +23,6 @@ public class TxOutResponse {
   private String index;
   private String txHash;
   private BigInteger value;
+  private String assetId;
   private List<TxMintingResponse> tokens;
 }
