@@ -54,14 +54,6 @@ public interface AddressService {
    */
   BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable);
 
-  /**
-   * Get list token by address
-   *
-   * @param pageable page information
-   * @param address wallet address
-   * @return list token by address
-   */
-  BaseFilterResponse<TokenAddressResponse> getTokenByAddress(Pageable pageable, String address);
 
   /**
    * Get list token by display name

@@ -205,7 +205,6 @@ public class AddressServiceImpl implements AddressService {
    * @param address  wallet address
    * @return list token by address
    */
-  @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TokenAddressResponse> getTokenByAddress(Pageable pageable,
       String address) {
@@ -214,8 +213,12 @@ public class AddressServiceImpl implements AddressService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    List<AddressTokenProjection> addressTokenProjectionList = multiAssetRepository.getIdentListByAddress(
-        addr, pageable).stream().collect(Collectors.toList());
+    Page<AddressTokenProjection> addressTokenProjectionPage = multiAssetRepository.getIdentListByAddress(
+        addr, pageable);
+
+    List<AddressTokenProjection> addressTokenProjectionList = addressTokenProjectionPage.getContent();
+    long totalElements = addressTokenProjectionPage.getTotalElements();
+
     List<Long> multiAssetIdList = addressTokenProjectionList.stream()
         .map(AddressTokenProjection::getMultiAssetId).collect(Collectors.toList());
     List<MultiAsset> multiAssetList = multiAssetRepository.findAllById(multiAssetIdList);
@@ -235,16 +238,16 @@ public class AddressServiceImpl implements AddressService {
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
     Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
         Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-    for (int i = 0; i < tokenListResponse.size(); i++) {
-      TokenAddressResponse token = tokenListResponse.get(i);
+
+    tokenListResponse.forEach(token -> {
       AssetMetadata assetMetadata = assetMetadataMap.get(token.getPolicy() + token.getName());
       if (Objects.nonNull(assetMetadata)) {
         token.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
       }
-    }
+    });
 
     Page<TokenAddressResponse> pageResponse = new PageImpl<>(tokenListResponse, pageable,
-        pageable.getPageSize());
+        totalElements);
     return new BaseFilterResponse<>(pageResponse);
   }
 
@@ -287,13 +290,13 @@ public class AddressServiceImpl implements AddressService {
               multiAsset.getId());
           return tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressTokenProjection);
         })
-        .sorted(Comparator.comparing(TokenAddressResponse::getAddress))
+        .sorted(Comparator.comparing(TokenAddressResponse::getDisplayName))
         .collect(Collectors.toList());
 
     final int start = (int) pageable.getOffset();
-    final int end = Math.min((start + pageable.getPageSize()), tokenListResponse.size());
+    final int end = Math.min((start + pageable.getPageSize()), multiAssetList.size());
     Page<TokenAddressResponse> pageResponse = new PageImpl<>(tokenListResponse.subList(start, end),
-        pageable, tokenListResponse.size());
+        pageable, multiAssetList.size());
     return new BaseFilterResponse<>(pageResponse);
   }
 }
