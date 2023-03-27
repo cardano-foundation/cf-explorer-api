@@ -44,7 +44,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,7 +62,7 @@ public class AddressServiceImpl implements AddressService {
   private final AssetMetadataMapper assetMetadataMapper;
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
 
- static final Integer DEFAULT_PAGESIZE = 5000;
+ static final Integer DEFAULT_PAGE_SIZE = 40000;
 
 
   @Value("${application.network}")
@@ -235,18 +234,7 @@ public class AddressServiceImpl implements AddressService {
           return tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressTokenProjection);
         }).collect(Collectors.toList());
 
-    Set<String> subjects = tokenListResponse.stream()
-        .map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-
-    tokenListResponse.forEach(token -> {
-      AssetMetadata assetMetadata = assetMetadataMap.get(token.getPolicy() + token.getName());
-      if (Objects.nonNull(assetMetadata)) {
-        token.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
-      }
-    });
+    setMetadata(tokenListResponse);
 
     Page<TokenAddressResponse> pageResponse = new PageImpl<>(tokenListResponse, pageable,
         totalElements);
@@ -273,34 +261,40 @@ public class AddressServiceImpl implements AddressService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    List<AddressTokenProjection> addressTokenProjectionList = multiAssetRepository.getIdentListByAddress(
-        addr, PageRequest.of(BigInteger.ZERO.intValue(), DEFAULT_PAGESIZE)).getContent();
-
-    List<Long> multiAssetIdList = addressTokenProjectionList.stream()
-        .map(AddressTokenProjection::getMultiAssetId).collect(Collectors.toList());
-
-    List<MultiAsset> multiAssetList = multiAssetRepository.findAllById(multiAssetIdList).stream()
-        .filter(multiAsset -> HexUtils.fromHex(multiAsset.getName(),
-            multiAsset.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
+    List<AddressTokenProjection> addressTokenProjectionList = multiAssetRepository.getAddressTokenByAddress(
+        addr)
+        .stream()
+        .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
+            addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
         .collect(Collectors.toList());
-
-    Map<Long, AddressTokenProjection> addressTokenProjectionMap = addressTokenProjectionList.stream()
-        .collect(Collectors.toMap(AddressTokenProjection::getMultiAssetId, Function.identity()));
-
-    List<TokenAddressResponse> tokenListResponse = multiAssetList.stream()
-        .map(multiAsset -> {
-          AddressTokenProjection addressTokenProjection = addressTokenProjectionMap.get(
-              multiAsset.getId());
-          return tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressTokenProjection);
-        })
+    
+    List<TokenAddressResponse> tokenListResponse = addressTokenProjectionList.stream()
+        .map(tokenMapper::fromAddressTokenProjection)
         .sorted(Comparator.comparing(TokenAddressResponse::getQuantity).reversed()
-                          .thenComparing(TokenAddressResponse::getDisplayName))
+            .thenComparing(TokenAddressResponse::getDisplayName))
         .collect(Collectors.toList());
+
+    setMetadata(tokenListResponse);
 
     final int start = (int) pageable.getOffset();
-    final int end = Math.min((start + pageable.getPageSize()), multiAssetList.size());
+    final int end = Math.min((start + pageable.getPageSize()), addressTokenProjectionList.size());
     Page<TokenAddressResponse> pageResponse = new PageImpl<>(tokenListResponse.subList(start, end),
-        pageable, multiAssetList.size());
+        pageable, addressTokenProjectionList.size());
     return new BaseFilterResponse<>(pageResponse);
+  }
+
+  private void setMetadata(List<TokenAddressResponse> tokenListResponse) {
+    Set<String> subjects = tokenListResponse.stream()
+        .map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
+        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+
+    tokenListResponse.forEach(token -> {
+      AssetMetadata assetMetadata = assetMetadataMap.get(token.getPolicy() + token.getName());
+      if (Objects.nonNull(assetMetadata)) {
+        token.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
+      }
+    });
   }
 }

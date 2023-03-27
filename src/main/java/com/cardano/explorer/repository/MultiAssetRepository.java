@@ -32,6 +32,18 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       + " ORDER BY sum(at.balance) DESC")
   Page<AddressTokenProjection> getIdentListByAddress(Address address, Pageable pageable);
 
+  @Query("SELECT sum(at.balance) as quantity, "
+      + " multiAsset.fingerprint as fingerprint, "
+      + " multiAsset.policy as policy, "
+      + " multiAsset.name as tokenName "
+      + " FROM AddressToken at "
+      + " LEFT JOIN MultiAsset multiAsset ON at.multiAsset.id = multiAsset.id"
+      + " WHERE at.address = :address"
+      + " GROUP BY multiAsset.fingerprint, multiAsset.name, multiAsset.policy"
+      + " HAVING sum(at.balance) > 0")
+  List<AddressTokenProjection> getAddressTokenByAddress(Address address);
+
+
   Integer countByPolicy(String policy);
 
   Page<MultiAsset> findAllByPolicy(String policy, Pageable pageable);
