@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +55,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AddressServiceImpl implements AddressService {
 
   private final MultiAssetRepository multiAssetRepository;
-
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final AddressRepository addressRepository;
   private final AssetMetadataRepository assetMetadataRepository;
@@ -62,6 +62,9 @@ public class AddressServiceImpl implements AddressService {
   private final AddressMapper addressMapper;
   private final AssetMetadataMapper assetMetadataMapper;
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
+
+ static final Integer DEFAULT_PAGESIZE = 5000;
+
 
   @Value("${application.network}")
   private String network;
@@ -223,13 +226,12 @@ public class AddressServiceImpl implements AddressService {
         .map(AddressTokenProjection::getMultiAssetId).collect(Collectors.toList());
     List<MultiAsset> multiAssetList = multiAssetRepository.findAllById(multiAssetIdList);
 
-    Map<Long, AddressTokenProjection> addressTokenProjectionMap = addressTokenProjectionList.stream()
-        .collect(Collectors.toMap(AddressTokenProjection::getMultiAssetId, Function.identity()));
+    Map<Long, MultiAsset> multiAssetMap = multiAssetList.stream()
+        .collect(Collectors.toMap(MultiAsset::getId, Function.identity()));
 
-    List<TokenAddressResponse> tokenListResponse = multiAssetList.stream()
-        .map(multiAsset -> {
-          AddressTokenProjection addressTokenProjection = addressTokenProjectionMap.get(
-              multiAsset.getId());
+    List<TokenAddressResponse> tokenListResponse = addressTokenProjectionList.stream()
+        .map(addressTokenProjection -> {
+            MultiAsset multiAsset = multiAssetMap.get(addressTokenProjection.getMultiAssetId());
           return tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressTokenProjection);
         }).collect(Collectors.toList());
 
@@ -272,7 +274,8 @@ public class AddressServiceImpl implements AddressService {
     );
 
     List<AddressTokenProjection> addressTokenProjectionList = multiAssetRepository.getIdentListByAddress(
-        addr);
+        addr, PageRequest.of(BigInteger.ZERO.intValue(), DEFAULT_PAGESIZE)).getContent();
+
     List<Long> multiAssetIdList = addressTokenProjectionList.stream()
         .map(AddressTokenProjection::getMultiAssetId).collect(Collectors.toList());
 
@@ -290,7 +293,8 @@ public class AddressServiceImpl implements AddressService {
               multiAsset.getId());
           return tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressTokenProjection);
         })
-        .sorted(Comparator.comparing(TokenAddressResponse::getDisplayName))
+        .sorted(Comparator.comparing(TokenAddressResponse::getQuantity).reversed()
+                          .thenComparing(TokenAddressResponse::getDisplayName))
         .collect(Collectors.toList());
 
     final int start = (int) pageable.getOffset();
