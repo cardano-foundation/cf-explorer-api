@@ -447,7 +447,11 @@ public class TxServiceImpl implements TxService {
       List<TxOutResponse> collateralOutputResponses = mappingProjectionToAddress(addressOutputMap);
       collateralResponse.setCollateralOutputResponses(collateralOutputResponses);
     }
-    txResponse.setCollaterals(collateralResponse);
+    if (CollectionUtils.isEmpty(collateralInputs) && CollectionUtils.isEmpty(collateralOutputs)) {
+      txResponse.setCollaterals(null);
+    } else {
+      txResponse.setCollaterals(collateralResponse);
+    }
   }
 
   /**

@@ -62,9 +62,6 @@ public class AddressServiceImpl implements AddressService {
   private final AssetMetadataMapper assetMetadataMapper;
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
 
- static final Integer DEFAULT_PAGE_SIZE = 40000;
-
-
   @Value("${application.network}")
   private String network;
 

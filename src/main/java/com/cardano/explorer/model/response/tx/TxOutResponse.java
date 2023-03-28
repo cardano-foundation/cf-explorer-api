@@ -23,6 +23,7 @@ public class TxOutResponse {
   private String index;
   private String txHash;
   private BigInteger value;
+  @EqualsAndHashCode.Exclude
   private String assetId;
   private List<TxMintingResponse> tokens;
 }
