@@ -218,22 +218,19 @@ public class DelegationServiceImpl implements DelegationService {
         .map(PoolDetailEpochResponse::new).collect(Collectors.toList());
     Set<Integer> epochNoInt = epochOfPoolPage.stream().map(PoolDetailEpochProjection::getEpochNo)
         .collect(Collectors.toSet());
-    Set<Long> epochNoLg = epochNoInt.stream().map(Long::valueOf).collect(Collectors.toSet());
     List<EpochStakeProjection> epochStakeProjections = epochStakeRepository.totalStakeByEpochNoAndPool(
         epochNoInt, poolId);
     Map<Integer, BigInteger> epochStakeProjectionMap = epochStakeProjections.stream().collect(
         Collectors.toMap(EpochStakeProjection::getEpochNo, EpochStakeProjection::getTotalStake));
-    List<EpochStakeProjection> rewardStakeProjections = rewardRepository.totalRewardStakeByEpochNoAndPool(
-        epochNoLg, poolId);
-    Map<Integer, BigInteger> rewardStakeProjectionMap = rewardStakeProjections.stream().collect(
-        Collectors.toMap(EpochStakeProjection::getEpochNo, EpochStakeProjection::getTotalStake));
+    List<Epoch> epochList = epochRepository.findFeeByEpochNo(epochNoInt);
+    Map<Integer, BigInteger> feesMap = epochList.stream().collect(Collectors.toMap(Epoch::getNo, Epoch::getFees));
     List<RewardEpochProjection> rewardEpochProjections = epochRepository.findParamRewardByEpoch(
         epochNoInt);
     Map<Integer, RewardEpochProjection> rewardEpochProjectionMap = rewardEpochProjections.stream()
         .collect(Collectors.toMap(RewardEpochProjection::getEpochNo, Function.identity()));
     epochOfPools.forEach(epochOfPool -> {
+      epochOfPool.setFee(feesMap.get(epochOfPool.getEpoch()));
       epochOfPool.setStakeAmount(epochStakeProjectionMap.get(epochOfPool.getEpoch()));
-      epochOfPool.setDelegators(rewardStakeProjectionMap.get(epochOfPool.getEpoch()));
       RewardEpochProjection rewardEpochProjection = rewardEpochProjectionMap.get(
           epochOfPool.getEpoch());
       if (Objects.nonNull(rewardEpochProjection) && Objects.nonNull(poolUpdate)) {
@@ -243,8 +240,8 @@ public class DelegationServiceImpl implements DelegationService {
         param.setFixedFee(poolUpdate.getFixedCost());
         param.setPoolSize(poolHash.getPoolSize());
         Double reward = getReward(param);
+        //Todo add delegators reward
         epochOfPool.setRos(getPoolRos(reward, poolUpdate.getMargin()));
-        epochOfPool.setFee(rewardEpochProjection.getFeePerEpoch());
       }
     });
 
