@@ -25,4 +25,5 @@ public class CommonConstant {
 
   public static final String MAINNET_ADDRESS_PREFIX = "addr";
 
+  public static final String LOVELACE = "LOVELACE";
 }
