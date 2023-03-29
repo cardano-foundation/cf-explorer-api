@@ -26,6 +26,7 @@ import com.cardano.explorer.projection.AddressInputOutputProjection;
 import com.cardano.explorer.projection.TxContractProjection;
 import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
+import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
@@ -100,6 +101,7 @@ public class TxServiceImpl implements TxService {
   private final UnconsumeTxInRepository unconsumeTxInRepository;
   private final FailedTxOutRepository failedTxOutRepository;
   private final WithdrawalRepository withdrawalRepository;
+  private final AddressRepository addressRepository;
   private final WithdrawalMapper withdrawalMapper;
   private final DelegationRepository delegationRepository;
   private final DelegationMapper delegationMapper;
@@ -224,7 +226,11 @@ public class TxServiceImpl implements TxService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
       Pageable pageable) {
-    Page<Tx> txPage = addressTxBalanceRepository.findAllByAddress(address, pageable);
+    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+    );
+    List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
+    Page<Tx> txPage = new PageImpl<>(txList, pageable, addr.getTxCount());
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
