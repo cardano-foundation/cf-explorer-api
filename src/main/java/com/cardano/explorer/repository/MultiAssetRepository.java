@@ -1,6 +1,7 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.projection.AddressTokenProjection;
+import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.MultiAsset;
 import java.util.List;
 import java.util.Optional;
@@ -15,42 +16,49 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   Optional<MultiAsset> findByFingerprint(String fingerprint);
 
-  @Query("SELECT addr.address AS address,"
+  @Query("SELECT token.address.id AS addressId,"
       + " sum(COALESCE(token.balance, 0)) AS quantity"
       + " FROM AddressToken token"
-      + " INNER JOIN Address addr ON token.address = addr"
-      + " WHERE token.multiAsset.fingerprint = :fingerprint "
-      + " GROUP BY addr.address"
+      + " WHERE token.multiAsset = :multiAsset "
+      + " GROUP BY token.address.id"
       + " HAVING sum(token.balance) > 0"
       + " ORDER BY sum(token.balance) DESC")
-  Page<AddressTokenProjection> findAddressByToken(String fingerprint, Pageable pageable);
+  Page<AddressTokenProjection> findAddressByToken(MultiAsset multiAsset, Pageable pageable);
 
-  @Query("SELECT multiAsset.fingerprint AS fingerprint,"
-      + " multiAsset.name AS tokenName, multiAsset.policy AS policy,"
-      + " sum(COALESCE(addressToken.balance, 0)) AS quantity"
-      + " FROM AddressToken addressToken"
-      + " INNER JOIN MultiAsset multiAsset ON addressToken.multiAsset = multiAsset"
-      + " INNER JOIN Address addr ON addressToken.address = addr"
-      + " WHERE addr.address = :address "
+  @Query("SELECT at.multiAsset.id as multiAssetId, sum(at.balance) as quantity from AddressToken at"
+      + " WHERE at.address = :address"
+      + " GROUP BY at.multiAsset.id"
+      + " HAVING sum(at.balance) > 0"
+      + " ORDER BY sum(at.balance) DESC")
+  Page<AddressTokenProjection> getIdentListByAddress(Address address, Pageable pageable);
+
+  @Query("SELECT sum(at.balance) as quantity, "
+      + " multiAsset.fingerprint as fingerprint, "
+      + " multiAsset.policy as policy, "
+      + " multiAsset.name as tokenName "
+      + " FROM AddressToken at "
+      + " LEFT JOIN MultiAsset multiAsset ON at.multiAsset.id = multiAsset.id"
+      + " WHERE at.address = :address"
       + " GROUP BY multiAsset.fingerprint, multiAsset.name, multiAsset.policy"
-      + " HAVING sum(addressToken.balance) > 0"
-      + " ORDER BY sum(addressToken.balance) DESC")
-  List<AddressTokenProjection> findTokenByAddress(String address);
+      + " HAVING sum(at.balance) > 0")
+  List<AddressTokenProjection> getAddressTokenByAddress(Address address);
+
 
   Integer countByPolicy(String policy);
 
   Page<MultiAsset> findAllByPolicy(String policy, Pageable pageable);
 
-  @Query("SELECT addr.address AS address,"
+  List<MultiAsset> findAllByPolicy(String policy);
+
+  @Query("SELECT token.address.id AS addressId,"
       + " multiAsset.fingerprint AS fingerprint,"
       + " multiAsset.name AS tokenName,"
       + " sum(COALESCE(token.balance, 0)) AS quantity"
       + " FROM AddressToken token"
       + " INNER JOIN MultiAsset multiAsset ON token.multiAsset = multiAsset"
-      + " INNER JOIN Address addr ON token.address = addr"
-      + " WHERE multiAsset.policy = :policy "
-      + " GROUP BY addr.address, multiAsset.fingerprint, multiAsset.name"
+      + " WHERE token.multiAsset IN :multiAssets "
+      + " GROUP BY token.address.id, multiAsset.fingerprint, multiAsset.name"
       + " HAVING sum(token.balance) > 0"
       + " ORDER BY sum(token.balance) DESC")
-  Page<AddressTokenProjection> findAddressTokenByPolicy(String policy, Pageable pageable);
+  Page<AddressTokenProjection> findAddressTokenByMultiAssetIn(List<MultiAsset> multiAssets, Pageable pageable);
 }

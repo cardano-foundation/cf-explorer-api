@@ -14,5 +14,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AddressFilterResponse {
   private String address;
+  private Long txCount;
   private BigInteger balance;
 }

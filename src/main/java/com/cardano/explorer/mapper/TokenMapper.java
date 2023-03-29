@@ -11,19 +11,30 @@ import java.time.LocalDateTime;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", imports={HexUtils.class}, uses = {AssetMetadataMapper.class})
+@Mapper(componentModel = "spring", imports = {HexUtils.class}, uses = {AssetMetadataMapper.class})
 public interface TokenMapper {
-  @Mapping(target = "displayName", expression = "java(HexUtils.fromHex(multiAsset.getName()))")
+
+  @Mapping(target = "displayName",
+      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
   @Mapping(target = "createdOn", source = "time")
   TokenFilterResponse fromMultiAssetToFilterResponse(MultiAsset multiAsset);
 
-  @Mapping(target = "displayName", expression = "java(HexUtils.fromHex(multiAsset.getName()))")
+  @Mapping(target = "displayName",
+      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
   @Mapping(target = "createdOn", source = "time")
   TokenResponse fromMultiAssetToResponse(MultiAsset multiAsset);
 
-  @Mapping(target = "displayName", expression = "java(HexUtils.fromHex(projection.getTokenName()))")
+  @Mapping(target = "displayName",
+      expression = "java(HexUtils.fromHex(projection.getTokenName(), projection.getFingerprint()))")
   @Mapping(target = "name", source = "tokenName")
   TokenAddressResponse fromAddressTokenProjection(AddressTokenProjection projection);
+
+
+  @Mapping(target = "displayName",
+      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
+  @Mapping(target = "policy", source = "multiAsset.policy")
+  @Mapping(target = "fingerprint", source = "multiAsset.fingerprint")
+  TokenAddressResponse fromMultiAssetAndAddressToken(MultiAsset multiAsset, AddressTokenProjection projection);
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
     return timestamp == null ? null : timestamp.toLocalDateTime();
