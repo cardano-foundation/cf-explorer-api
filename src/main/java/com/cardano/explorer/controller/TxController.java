@@ -3,7 +3,7 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
-import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.tx.TxResponse;
 import com.cardano.explorer.model.response.dashboard.TxGraph;
 import com.cardano.explorer.model.response.dashboard.TxSummary;
 import com.cardano.explorer.service.TxService;
