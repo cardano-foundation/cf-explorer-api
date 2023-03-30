@@ -10,12 +10,14 @@ import com.cardano.explorer.model.response.token.PolicyScriptResponse;
 import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.projection.AddressTokenProjection;
+import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.repository.ScriptRepository;
 import com.cardano.explorer.service.PolicyService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.MultiAsset;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
@@ -36,6 +38,7 @@ public class PolicyServiceImpl implements PolicyService {
 
   private final MultiAssetRepository multiAssetRepository;
   private final AssetMetadataRepository assetMetadataRepository;
+  private final AddressRepository addressRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
@@ -88,8 +91,21 @@ public class PolicyServiceImpl implements PolicyService {
 
   @Override
   public BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable) {
+    List<MultiAsset> multiAssets = multiAssetRepository.findAllByPolicy(policyId);
     Page<AddressTokenProjection> multiAssetPage
-        = multiAssetRepository.findAddressTokenByPolicy(policyId, pageable);
-    return new BaseFilterResponse<>(multiAssetPage.map(tokenMapper::fromAddressTokenProjection));
+        = multiAssetRepository.findAddressTokenByMultiAssetIn(multiAssets, pageable);
+    Set<Long> addressIds = multiAssetPage.stream().map(AddressTokenProjection::getAddressId)
+        .collect(Collectors.toSet());
+    List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
+    Map<Long, Address> addressMap = addressList.stream().collect(
+        Collectors.toMap(Address::getId, Function.identity()));
+    Page<TokenAddressResponse> tokenAddressResponses = multiAssetPage.map(
+        tokenMapper::fromAddressTokenProjection);
+    tokenAddressResponses.forEach(tokenAddress -> {
+      tokenAddress.setAddress(
+          addressMap.get(tokenAddress.getAddressId()).getAddress());
+      tokenAddress.setAddressId(null);
+    });
+    return new BaseFilterResponse<>(tokenAddressResponses);
   }
 }

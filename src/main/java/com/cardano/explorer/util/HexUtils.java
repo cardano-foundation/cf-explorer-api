@@ -14,8 +14,7 @@ public class HexUtils {
    * Convert from hex to UTF-8
    *
    * @param hexString string hex
-   * @param fingerprint fingerprint of asset token
-   * @return string UTF-8 if token name is UT8, otherwise return fingerprint
+   * @return string UTF-8
    */
   public static String fromHex(String hexString, String fingerprint) {
     try {
@@ -26,24 +25,6 @@ public class HexUtils {
       return fingerprint;
     } catch (Exception ex) {
       return fingerprint;
-    }
-  }
-
-  /**
-   * Convert from hex to UTF-8
-   *
-   * @param hexString string hex
-   * @return string UTF-8
-   */
-  public static String fromHex(String hexString) {
-    try {
-      byte[] bytes = Hex.decodeHex(hexString.toCharArray());
-      if(StringUtil.isUtf8(bytes)){
-        return new String(bytes, StandardCharsets.UTF_8);
-      }
-      return null;
-    } catch (Exception ex) {
-      return null;
     }
   }
 }
