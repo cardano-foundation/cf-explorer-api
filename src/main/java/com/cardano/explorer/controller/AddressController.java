@@ -7,6 +7,7 @@ import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
+import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.service.AddressService;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -71,4 +73,13 @@ public class AddressController {
     return ResponseEntity.ok(txService.getTransactionsByAddress(address, pageable));
   }
 
+  @GetMapping("/{address}/tokens")
+  @LogMessage
+  @Operation(summary = "Get list token by address")
+  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTokenByAddress(
+      @PathVariable String address,
+      @RequestParam(required = false) String displayName,
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(addressService.getTokenByDisplayName(pageable, address, displayName));
+  }
 }

@@ -1,8 +1,6 @@
 package com.cardano.explorer.model.response.address;
 
-import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import java.math.BigInteger;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +16,6 @@ public class AddressResponse {
   private String address;
   private Long txCount;
   private BigInteger balance;
-  private List<TokenAddressResponse> tokens;
   private String stakeAddress;
   private Boolean isContract;
 }
