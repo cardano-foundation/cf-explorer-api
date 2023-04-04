@@ -6,6 +6,7 @@ import com.cardano.explorer.model.response.address.AddressAnalyticsResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.AddressResponse;
 import com.cardano.explorer.model.response.contract.ContractFilterResponse;
+import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import java.math.BigInteger;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -52,4 +53,15 @@ public interface AddressService {
    * @return return list address sort by balance
    */
   BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable);
+
+
+  /**
+   * Get list token by display name
+   *
+   * @param pageable page information
+   * @param address wallet address
+   * @param displayName display name of token
+   * @return list token by display name
+   */
+  BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable, String address, String displayName);
 }

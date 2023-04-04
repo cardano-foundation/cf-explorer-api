@@ -16,15 +16,15 @@ public class HexUtils {
    * @param hexString string hex
    * @return string UTF-8
    */
-  public static String fromHex(String hexString) {
+  public static String fromHex(String hexString, String fingerprint) {
     try {
       byte[] bytes = Hex.decodeHex(hexString.toCharArray());
       if(StringUtil.isUtf8(bytes)){
         return new String(bytes, StandardCharsets.UTF_8);
       }
-      return null;
+      return fingerprint;
     } catch (Exception ex) {
-      return null;
+      return fingerprint;
     }
   }
 }

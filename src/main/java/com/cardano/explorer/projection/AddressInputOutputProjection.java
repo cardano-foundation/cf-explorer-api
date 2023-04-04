@@ -21,4 +21,6 @@ public interface AddressInputOutputProjection {
   String getAssetName();
 
   String getAssetId();
+
+  String getAssetsJson();
 }
