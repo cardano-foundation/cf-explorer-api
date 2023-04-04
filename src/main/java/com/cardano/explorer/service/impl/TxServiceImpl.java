@@ -1,5 +1,7 @@
 package com.cardano.explorer.service.impl;
 
+import com.bloxbean.cardano.client.util.AssetUtil;
+import com.cardano.explorer.common.constant.CommonConstant;
 import com.cardano.explorer.common.enumeration.TxStatus;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.AssetMetadataMapper;
@@ -10,10 +12,10 @@ import com.cardano.explorer.mapper.TxOutMapper;
 import com.cardano.explorer.mapper.WithdrawalMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
-import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.tx.CollateralResponse;
+import com.cardano.explorer.model.response.tx.TxResponse;
 import com.cardano.explorer.model.response.dashboard.TxGraph;
 import com.cardano.explorer.model.response.dashboard.TxSummary;
-import com.cardano.explorer.model.response.tx.CollateralResponse;
 import com.cardano.explorer.model.response.tx.ContractResponse;
 import com.cardano.explorer.model.response.tx.SummaryResponse;
 import com.cardano.explorer.model.response.tx.TxMintingResponse;
@@ -21,17 +23,18 @@ import com.cardano.explorer.model.response.tx.TxOutResponse;
 import com.cardano.explorer.model.response.tx.UTxOResponse;
 import com.cardano.explorer.model.response.tx.WithdrawalResponse;
 import com.cardano.explorer.projection.AddressInputOutputProjection;
-import com.cardano.explorer.projection.CollateralInputOutputProjection;
 import com.cardano.explorer.projection.TxContractProjection;
 import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
+import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.BlockRepository;
-import com.cardano.explorer.repository.CollateralTxInRepository;
+import com.cardano.explorer.repository.UnconsumeTxInRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
+import com.cardano.explorer.repository.FailedTxOutRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.repository.RedeemerRepository;
@@ -39,7 +42,12 @@ import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.repository.WithdrawalRepository;
 import com.cardano.explorer.service.TxService;
+import com.cardano.explorer.util.HexUtils;
 import com.cardano.explorer.util.TimeUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.Block;
@@ -67,6 +75,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -78,6 +88,7 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class TxServiceImpl implements TxService {
 
   private final TxRepository txRepository;
@@ -87,8 +98,10 @@ public class TxServiceImpl implements TxService {
   private final TxOutMapper txOutMapper;
   private final RedeemerRepository redeemerRepository;
   private final EpochRepository epochRepository;
-  private final CollateralTxInRepository collateralTxInRepository;
+  private final UnconsumeTxInRepository unconsumeTxInRepository;
+  private final FailedTxOutRepository failedTxOutRepository;
   private final WithdrawalRepository withdrawalRepository;
+  private final AddressRepository addressRepository;
   private final WithdrawalMapper withdrawalMapper;
   private final DelegationRepository delegationRepository;
   private final DelegationMapper delegationMapper;
@@ -213,7 +226,11 @@ public class TxServiceImpl implements TxService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
       Pageable pageable) {
-    Page<Tx> txPage = addressTxBalanceRepository.findAllByAddress(address, pageable);
+    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+    );
+    List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
+    Page<Tx> txPage = new PageImpl<>(txList, pageable, addr.getTxCount());
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
@@ -309,7 +326,6 @@ public class TxServiceImpl implements TxService {
     } else {
       txResponse.getTx().setConfirmation(currentBlockNo);
     }
-    txResponse.getTx().setStatus(TxStatus.SUCCESS);
 
     // get address input output
     getSummaryAndUTxOs(tx, txResponse);
@@ -318,6 +334,27 @@ public class TxServiceImpl implements TxService {
     getWithdrawals(tx, txResponse);
     getDelegations(tx, txResponse);
     getMints(tx, txResponse);
+
+    /*
+      * If the transaction is invalid, the collateral is the input and the output of the transaction.
+      * Otherwise, the collateral is the input and the output of the collateral.
+     */
+    if(Boolean.TRUE.equals(tx.getValidContract())) {
+      txResponse.getTx().setStatus(TxStatus.SUCCESS);
+    } else {
+      txResponse.getTx().setStatus(TxStatus.FAIL);
+      CollateralResponse collateralResponse = txResponse.getCollaterals();
+      List<TxOutResponse> collateralInputs = collateralResponse.getCollateralInputResponses();
+      List<TxOutResponse> collateralOutputs = collateralResponse.getCollateralOutputResponses();
+      collateralResponse.setCollateralInputResponses(txResponse.getUTxOs().getInputs());
+      collateralResponse.setCollateralOutputResponses(txResponse.getUTxOs().getOutputs());
+      txResponse.setCollaterals(collateralResponse);
+      UTxOResponse uTxOResponse = new UTxOResponse();
+      uTxOResponse.setInputs(collateralInputs);
+      uTxOResponse.setOutputs(collateralOutputs);
+      txResponse.setUTxOs(uTxOResponse);
+    }
+
     return txResponse;
   }
 
@@ -389,17 +426,31 @@ public class TxServiceImpl implements TxService {
    * @param txResponse response data of transaction
    */
   private void getCollaterals(Tx tx, TxResponse txResponse) {
-    List<CollateralInputOutputProjection> collateralInputs = collateralTxInRepository
+    CollateralResponse collateralResponse = new CollateralResponse();
+    List<AddressInputOutputProjection> collateralInputs = unconsumeTxInRepository
         .findTxCollateralInput(tx);
+    List<AddressInputOutputProjection> collateralOutputs = failedTxOutRepository
+        .findFailedTxOutByTx(tx);
     if (!CollectionUtils.isEmpty(collateralInputs)) {
-      List<CollateralResponse> collateralInputResponses = collateralInputs.stream().map(
-          collateralInputOutputProjection -> CollateralResponse.builder()
-              .txHash(collateralInputOutputProjection.getTxHash())
-              .amount(collateralInputOutputProjection.getValue())
-              .address(collateralInputOutputProjection.getAddress())
-              .build()
-      ).collect(Collectors.toList());
-      txResponse.setCollaterals(collateralInputResponses);
+      Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputMap = collateralInputs
+          .stream().collect(Collectors.groupingBy(
+              txOutMapper::fromAddressInputOutput
+          ));
+      List<TxOutResponse> collateralInputResponse = mappingProjectionToAddress(addressInputMap);
+      collateralResponse.setCollateralInputResponses(collateralInputResponse);
+    }
+    if (!CollectionUtils.isEmpty(collateralOutputs)) {
+      Map<TxOutResponse, List<AddressInputOutputProjection>> addressOutputMap = collateralOutputs
+          .stream().collect(Collectors.groupingBy(
+              txOutMapper::fromAddressInputOutput
+          ));
+      List<TxOutResponse> collateralOutputResponses = mappingProjectionToAddress(addressOutputMap);
+      collateralResponse.setCollateralOutputResponses(collateralOutputResponses);
+    }
+    if (CollectionUtils.isEmpty(collateralInputs) && CollectionUtils.isEmpty(collateralOutputs)) {
+      txResponse.setCollaterals(null);
+    } else {
+      txResponse.setCollaterals(collateralResponse);
     }
   }
 
@@ -471,9 +522,55 @@ public class TxServiceImpl implements TxService {
           filter(token -> Objects.nonNull(token.getAssetId())).map(
               maTxMintMapper::fromAddressInputOutputProjection
           ).collect(Collectors.toList());
+      tokens.addAll(getTokenInFailedTxOut(addressInputOutputMap, uTxO));
       uTxO.setTokens(tokens);
     }
     return uTxOs;
+  }
+
+  /**
+   * If data from  collateral output, handle token in json string data
+   * Otherwise, not exist json string data
+   * Example of json string data:
+   * [{"unit":"LOVELACE","policyId":"","assetName":"TE9WRUxBQ0U=","quantity":2726335}]
+   * @param addressInputOutputMap address projection map
+   * @param txOut list collateral output
+   */
+  private List<TxMintingResponse> getTokenInFailedTxOut(
+      Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputOutputMap,
+      TxOutResponse txOut) {
+    List<TxMintingResponse> tokens = new ArrayList<>();
+    List<String> tokenStringList = addressInputOutputMap.get(txOut).stream().map(
+        AddressInputOutputProjection::getAssetsJson).filter(
+        StringUtils::isNotEmpty
+    ).collect(Collectors.toList());
+    ObjectMapper objectMapper = new ObjectMapper();
+    tokenStringList.forEach(tokenString -> {
+          if (StringUtils.isNotEmpty(tokenString)) {
+            try {
+              JsonNode tokenFailedTxOut = objectMapper.readValue(tokenString, JsonNode.class);
+              for (JsonNode token : tokenFailedTxOut) {
+                if (CommonConstant.LOVELACE.equals(token.get("unit").asText())) {
+                  continue;
+                }
+                String assetName = token.get("unit").asText().split("\\.")[1];
+                String assetDisplayName = HexUtils.fromHex(assetName,
+                    AssetUtil.calculateFingerPrint(token.get("policyId").asText(), assetName));
+                TxMintingResponse txMintingResponse = TxMintingResponse.builder()
+                    .assetId(token.get("unit").asText())
+                    .assetName(assetDisplayName)
+                    .policy(token.get("policyId").asText())
+                    .assetQuantity(new BigInteger(token.get("quantity").asText()))
+                    .build();
+                tokens.add(txMintingResponse);
+              }
+            } catch (JsonProcessingException e) {
+              log.error("Failed to parse token json string: {}", tokenString);
+            }
+          }
+        }
+    );
+    return tokens;
   }
 
   /**

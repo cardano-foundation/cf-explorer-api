@@ -1,7 +1,7 @@
 package com.cardano.explorer.mapper;
 
 import com.cardano.explorer.model.response.TxFilterResponse;
-import com.cardano.explorer.model.response.TxResponse;
+import com.cardano.explorer.model.response.tx.TxResponse;
 import com.sotatek.cardano.common.entity.Tx;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;

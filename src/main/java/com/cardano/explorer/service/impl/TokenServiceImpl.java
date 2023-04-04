@@ -10,10 +10,12 @@ import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.model.response.token.TokenMintTxResponse;
 import com.cardano.explorer.model.response.token.TokenResponse;
 import com.cardano.explorer.projection.AddressTokenProjection;
+import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.service.TokenService;
+import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.MaTxMint;
 import com.sotatek.cardano.common.entity.MultiAsset;
@@ -38,6 +40,7 @@ public class TokenServiceImpl implements TokenService {
   private final MultiAssetRepository multiAssetRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final AssetMetadataRepository assetMetadataRepository;
+  private final AddressRepository addressRepository;
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
@@ -85,8 +88,23 @@ public class TokenServiceImpl implements TokenService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
-    Page<AddressTokenProjection> tokenAddresses = multiAssetRepository.findAddressByToken(tokenId,
-        pageable);
-    return new BaseFilterResponse<>(tokenAddresses.map(tokenMapper::fromAddressTokenProjection));
+    MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
+        () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
+    );
+    Page<AddressTokenProjection> tokenAddresses = multiAssetRepository.findAddressByToken(
+        multiAsset, pageable);
+    Set<Long> addressIds = tokenAddresses.stream().map(AddressTokenProjection::getAddressId)
+        .collect(Collectors.toSet());
+    List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
+    Map<Long, Address> addressMap = addressList.stream().collect(
+        Collectors.toMap(Address::getId, Function.identity()));
+    Page<TokenAddressResponse> tokenAddressResponses = tokenAddresses.map(
+        tokenMapper::fromAddressTokenProjection);
+    tokenAddressResponses.forEach(tokenAddress -> {
+      tokenAddress.setAddress(
+              addressMap.get(tokenAddress.getAddressId()).getAddress());
+      tokenAddress.setAddressId(null);
+    });
+    return new BaseFilterResponse<>(tokenAddressResponses);
   }
 }

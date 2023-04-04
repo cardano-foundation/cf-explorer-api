@@ -16,7 +16,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
   @Query(value =
       "SELECT sa.view FROM PoolHash ph "
-          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.activeEpochNo = (SELECT max(pu.activeEpochNo) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
           + "WHERE ph.id = :poolId "
           + "GROUP BY sa.view")
@@ -24,7 +24,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
   @Query(value =
       "SELECT sa.view FROM PoolHash ph "
-          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.activeEpochNo = (SELECT max(pu.activeEpochNo) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
           + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
           + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
           + "WHERE ph.id  = :poolId ")
