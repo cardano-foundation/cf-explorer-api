@@ -1,0 +1,4000 @@
+{
+	"info": {
+		"_postman_id": "39f2651c-cfe0-473a-a54a-fef8022e5150",
+		"name": "Cardano Explorer API",
+		"description": "Cardano Explorer API OpenAPI 3.0\n\nContact Support:\n Name: Cardano\n Email: info@cardano.com",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14658212"
+	},
+	"item": [
+		{
+			"name": "api",
+			"item": [
+				{
+					"name": "v1",
+					"item": [
+						{
+							"name": "txs",
+							"item": [
+								{
+									"name": "Filter transaction",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/txs?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"txs"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/txs?page=0&size=20&sort=blockIndex,DESC",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"txs"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "blockIndex,DESC",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    },\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get transaction detail by hash",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/txs/cdfcba04cecfbcb270d74732330edfe44993ed75f467db198c1e262d1ed0246f",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"txs",
+												"cdfcba04cecfbcb270d74732330edfe44993ed75f467db198c1e262d1ed0246f"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/txs/:hash",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"txs",
+														":hash"
+													],
+													"variable": [
+														{
+															"key": "hash"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"tx\": {\n    \"hash\": \"<string>\",\n    \"time\": \"<dateTime>\",\n    \"blockNo\": \"<integer>\",\n    \"blockHash\": \"<string>\",\n    \"epochSlot\": \"<integer>\",\n    \"maxEpochSlot\": \"<integer>\",\n    \"epochNo\": \"<integer>\",\n    \"status\": \"FAIL\",\n    \"confirmation\": \"<integer>\",\n    \"fee\": \"<integer>\",\n    \"totalOutput\": \"<integer>\"\n  },\n  \"summary\": {\n    \"stakeAddressTxInputs\": [\n      {\n        \"address\": \"<string>\",\n        \"index\": \"<string>\",\n        \"txHash\": \"<string>\",\n        \"value\": \"<integer>\",\n        \"tokens\": [\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          },\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          }\n        ]\n      },\n      {\n        \"address\": \"<string>\",\n        \"index\": \"<string>\",\n        \"txHash\": \"<string>\",\n        \"value\": \"<integer>\",\n        \"tokens\": [\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          },\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          }\n        ]\n      }\n    ],\n    \"stakeAddressTxOutputs\": [\n      {\n        \"address\": \"<string>\",\n        \"index\": \"<string>\",\n        \"txHash\": \"<string>\",\n        \"value\": \"<integer>\",\n        \"tokens\": [\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          },\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          }\n        ]\n      },\n      {\n        \"address\": \"<string>\",\n        \"index\": \"<string>\",\n        \"txHash\": \"<string>\",\n        \"value\": \"<integer>\",\n        \"tokens\": [\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          },\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          }\n        ]\n      }\n    ]\n  },\n  \"contracts\": [\n    {\n      \"contract\": \"<string>\"\n    },\n    {\n      \"contract\": \"<string>\"\n    }\n  ],\n  \"collaterals\": [\n    {\n      \"address\": \"<string>\",\n      \"txHash\": \"<string>\",\n      \"amount\": \"<integer>\"\n    },\n    {\n      \"address\": \"<string>\",\n      \"txHash\": \"<string>\",\n      \"amount\": \"<integer>\"\n    }\n  ],\n  \"notes\": [\n    {\n      \"note\": \"<string>\"\n    },\n    {\n      \"note\": \"<string>\"\n    }\n  ],\n  \"withdrawals\": [\n    {\n      \"stakeAddressFrom\": \"<string>\",\n      \"addressTo\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"amount\": \"<integer>\"\n    },\n    {\n      \"stakeAddressFrom\": \"<string>\",\n      \"addressTo\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"amount\": \"<integer>\"\n    }\n  ],\n  \"delegations\": [\n    {\n      \"address\": \"<string>\",\n      \"poolId\": \"<string>\"\n    },\n    {\n      \"address\": \"<string>\",\n      \"poolId\": \"<string>\"\n    }\n  ],\n  \"mints\": [\n    {\n      \"assetName\": \"<string>\",\n      \"assetQuantity\": \"<integer>\",\n      \"assetId\": \"<string>\",\n      \"policy\": \"<string>\",\n      \"metadata\": {\n        \"url\": \"<string>\",\n        \"ticker\": \"<string>\",\n        \"decimals\": \"<integer>\",\n        \"logo\": \"<string>\",\n        \"description\": \"<string>\"\n      }\n    },\n    {\n      \"assetName\": \"<string>\",\n      \"assetQuantity\": \"<integer>\",\n      \"assetId\": \"<string>\",\n      \"policy\": \"<string>\",\n      \"metadata\": {\n        \"url\": \"<string>\",\n        \"ticker\": \"<string>\",\n        \"decimals\": \"<integer>\",\n        \"logo\": \"<string>\",\n        \"description\": \"<string>\"\n      }\n    }\n  ],\n  \"utxOs\": {\n    \"inputs\": [\n      {\n        \"address\": \"<string>\",\n        \"index\": \"<string>\",\n        \"txHash\": \"<string>\",\n        \"value\": \"<integer>\",\n        \"tokens\": [\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          },\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          }\n        ]\n      },\n      {\n        \"address\": \"<string>\",\n        \"index\": \"<string>\",\n        \"txHash\": \"<string>\",\n        \"value\": \"<integer>\",\n        \"tokens\": [\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          },\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          }\n        ]\n      }\n    ],\n    \"outputs\": [\n      {\n        \"address\": \"<string>\",\n        \"index\": \"<string>\",\n        \"txHash\": \"<string>\",\n        \"value\": \"<integer>\",\n        \"tokens\": [\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          },\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          }\n        ]\n      },\n      {\n        \"address\": \"<string>\",\n        \"index\": \"<string>\",\n        \"txHash\": \"<string>\",\n        \"value\": \"<integer>\",\n        \"tokens\": [\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          },\n          {\n            \"assetName\": \"<string>\",\n            \"assetQuantity\": \"<integer>\",\n            \"assetId\": \"<string>\",\n            \"policy\": \"<string>\",\n            \"metadata\": {\n              \"url\": \"<string>\",\n              \"ticker\": \"<string>\",\n              \"decimals\": \"<integer>\",\n              \"logo\": \"<string>\",\n              \"description\": \"<string>\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}"
+										}
+									]
+								},
+								{
+									"name": "Get Number Transaction On Last 15 Days",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/txs/graph",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"txs",
+												"graph"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/txs/graph",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"txs",
+														"graph"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"date\": \"<dateTime>\",\n    \"txs\": \"<integer>\"\n  },\n  {\n    \"date\": \"<dateTime>\",\n    \"txs\": \"<integer>\"\n  }\n]"
+										}
+									]
+								},
+								{
+									"name": "Get current transactions",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/txs/current",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"txs",
+												"current"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/txs/current",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"txs",
+														"current"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"blockNo\": \"<long>\",\n    \"fromAddress\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"toAddress\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"amount\": \"<double>\",\n    \"hash\": \"<string>\"\n  },\n  {\n    \"blockNo\": \"<long>\",\n    \"fromAddress\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"toAddress\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"amount\": \"<double>\",\n    \"hash\": \"<string>\"\n  }\n]"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "tokens",
+							"item": [
+								{
+									"name": "Filter token",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/tokens?page=0&size=20&sort=supply,DESC&sort=txCount,DESC",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"tokens"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "supply,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+												},
+												{
+													"key": "sort",
+													"value": "txCount,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/tokens?page=0&size=20&sort=txCount,DESC",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"tokens"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "txCount,DESC",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"policy\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"txCount\": \"<integer>\",\n      \"supply\": \"<string>\",\n      \"createdOn\": \"<dateTime>\",\n      \"metadata\": {\n        \"url\": \"<string>\",\n        \"ticker\": \"<string>\",\n        \"decimals\": \"<integer>\",\n        \"logo\": \"<string>\",\n        \"description\": \"<string>\"\n      }\n    },\n    {\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"policy\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"txCount\": \"<integer>\",\n      \"supply\": \"<string>\",\n      \"createdOn\": \"<dateTime>\",\n      \"metadata\": {\n        \"url\": \"<string>\",\n        \"ticker\": \"<string>\",\n        \"decimals\": \"<integer>\",\n        \"logo\": \"<string>\",\n        \"description\": \"<string>\"\n      }\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Filter transaction by token",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/txs?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"tokens",
+												":tokenId",
+												"txs"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "tokenId",
+													"value": "asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du",
+													"type": "string",
+													"description": "fingerprint"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/txs?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"tokens",
+														":tokenId",
+														"txs"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "tokenId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    },\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Filter holders by token",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/top_holders?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"tokens",
+												":tokenId",
+												"top_holders"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "tokenId",
+													"value": "asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du",
+													"type": "string",
+													"description": "fingerprint"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/top_holders?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"tokens",
+														":tokenId",
+														"top_holders"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "tokenId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"address\": \"<string>\",\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"quantity\": \"<integer>\"\n    },\n    {\n      \"address\": \"<string>\",\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"quantity\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Filter token mint transaction",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/mints?page=0&size=20&sort=id,DESC",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"tokens",
+												":tokenId",
+												"mints"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "id,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+												}
+											],
+											"variable": [
+												{
+													"key": "tokenId",
+													"value": "asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du",
+													"description": "fingerprint"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/mints?page=0&size=20&sort=id,DESC",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"tokens",
+														":tokenId",
+														"mints"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "id,DESC",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "tokenId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"txHash\": \"<string>\",\n      \"amount\": \"<string>\",\n      \"time\": \"<dateTime>\"\n    },\n    {\n      \"txHash\": \"<string>\",\n      \"amount\": \"<string>\",\n      \"time\": \"<dateTime>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Detail token",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/tokens/:tokenId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"tokens",
+												":tokenId"
+											],
+											"variable": [
+												{
+													"key": "tokenId",
+													"value": "asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du",
+													"description": "fingerprint"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/tokens/:tokenId",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"tokens",
+														":tokenId"
+													],
+													"variable": [
+														{
+															"key": "tokenId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"name\": \"<string>\",\n  \"displayName\": \"<string>\",\n  \"policy\": \"<string>\",\n  \"fingerprint\": \"<string>\",\n  \"txCount\": \"<integer>\",\n  \"supply\": \"<string>\",\n  \"createdOn\": \"<dateTime>\",\n  \"metadata\": {\n    \"url\": \"<string>\",\n    \"ticker\": \"<string>\",\n    \"decimals\": \"<integer>\",\n    \"logo\": \"<string>\",\n    \"description\": \"<string>\"\n  }\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "stakes",
+							"item": [
+								{
+									"name": "Get withdrawal transaction of stake key",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/withdrawal-history?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												":stakeKey",
+												"withdrawal-history"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "stakeKey",
+													"value": "stake_test17p05drwxcurskuvge62nu7n8knlx8p6vyetqn9km6fef87qlada7n",
+													"description": "view of stake key"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/withdrawal-history?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														":stakeKey",
+														"withdrawal-history"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "stakeKey"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"time\": \"<dateTime>\",\n      \"epochNo\": \"<integer>\",\n      \"blockNo\": \"<long>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"amount\": \"<string>\",\n      \"txHash\": \"<string>\"\n    },\n    {\n      \"time\": \"<dateTime>\",\n      \"epochNo\": \"<integer>\",\n      \"blockNo\": \"<long>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"amount\": \"<string>\",\n      \"txHash\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get stake history of stake key",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/stake-history?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												":stakeKey",
+												"stake-history"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "stakeKey",
+													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
+													"description": "view of stake key"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/stake-history?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														":stakeKey",
+														"stake-history"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "stakeKey"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"time\": \"<dateTime>\",\n      \"epochNo\": \"<integer>\",\n      \"blockNo\": \"<long>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"txHash\": \"<string>\",\n      \"blockIndex\": \"<integer>\",\n      \"action\": \"<string>\"\n    },\n    {\n      \"time\": \"<dateTime>\",\n      \"epochNo\": \"<integer>\",\n      \"blockNo\": \"<long>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"txHash\": \"<string>\",\n      \"blockIndex\": \"<integer>\",\n      \"action\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get all address of stake",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/list-address?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												":stakeKey",
+												"list-address"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "stakeKey",
+													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
+													"description": "view of stake key"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/list-address?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														":stakeKey",
+														"list-address"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "stakeKey"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"address\": \"<string>\",\n      \"balance\": \"<integer>\"\n    },\n    {\n      \"address\": \"<string>\",\n      \"balance\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get reward transaction of stake key",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/instantaneous-rewards?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												":stakeKey",
+												"instantaneous-rewards"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "stakeKey",
+													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
+													"description": "view of stake key"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/instantaneous-rewards?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														":stakeKey",
+														"instantaneous-rewards"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "stakeKey"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"time\": \"<dateTime>\",\n      \"epochNo\": \"<integer>\",\n      \"blockNo\": \"<long>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"amount\": \"<string>\",\n      \"txHash\": \"<string>\"\n    },\n    {\n      \"time\": \"<dateTime>\",\n      \"epochNo\": \"<integer>\",\n      \"blockNo\": \"<long>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"amount\": \"<string>\",\n      \"txHash\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get delegation history of stake key",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/delegation-history?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												":stakeKey",
+												"delegation-history"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "stakeKey",
+													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
+													"description": "view of stake key"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/delegation-history?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														":stakeKey",
+														"delegation-history"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "stakeKey"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"time\": \"<dateTime>\",\n      \"epochNo\": \"<integer>\",\n      \"blockNo\": \"<long>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"stakeAddress\": \"<string>\",\n      \"poolId\": \"<string>\",\n      \"tickerName\": \"<string>\",\n      \"txHash\": \"<string>\",\n      \"poolData\": \"<string>\"\n    },\n    {\n      \"time\": \"<dateTime>\",\n      \"epochNo\": \"<integer>\",\n      \"blockNo\": \"<long>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"stakeAddress\": \"<string>\",\n      \"poolId\": \"<string>\",\n      \"tickerName\": \"<string>\",\n      \"txHash\": \"<string>\",\n      \"poolData\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get a stake detail by stake key",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												":stakeKey"
+											],
+											"variable": [
+												{
+													"key": "stakeKey",
+													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
+													"description": "view of stake key"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														":stakeKey"
+													],
+													"variable": [
+														{
+															"key": "stakeKey"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"status\": \"DEACTIVATED\",\n  \"stakeAddress\": \"<string>\",\n  \"totalStake\": \"<integer>\",\n  \"rewardAvailable\": \"<integer>\",\n  \"rewardWithdrawn\": \"<integer>\",\n  \"pool\": {\n    \"tickerName\": \"<string>\",\n    \"poolName\": \"<string>\",\n    \"poolId\": \"<string>\"\n  }\n}"
+										}
+									]
+								},
+								{
+									"name": "Get top delegators",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/top-delegators?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												"top-delegators"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/top-delegators?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														"top-delegators"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"stakeKey\": \"<string>\",\n      \"balance\": \"<integer>\",\n      \"poolId\": \"<string>\",\n      \"tickerName\": \"<string>\",\n      \"poolName\": \"<string>\"\n    },\n    {\n      \"stakeKey\": \"<string>\",\n      \"balance\": \"<integer>\",\n      \"poolId\": \"<string>\",\n      \"tickerName\": \"<string>\",\n      \"poolName\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "get Data For Stake Registration",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/registration?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												"registration"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/registration?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														"registration"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"txId\": \"<long>\",\n      \"txHash\": \"<string>\",\n      \"txTime\": \"<dateTime>\",\n      \"block\": \"<long>\",\n      \"epoch\": \"<integer>\",\n      \"slotNo\": \"<long>\",\n      \"epochSlotNo\": \"<long>\",\n      \"stakeKey\": \"<string>\"\n    },\n    {\n      \"txId\": \"<long>\",\n      \"txHash\": \"<string>\",\n      \"txTime\": \"<dateTime>\",\n      \"block\": \"<long>\",\n      \"epoch\": \"<integer>\",\n      \"slotNo\": \"<long>\",\n      \"epochSlotNo\": \"<long>\",\n      \"stakeKey\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "get Data For Stake De Registration",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/de-registration?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												"de-registration"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/de-registration?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														"de-registration"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"txId\": \"<long>\",\n      \"txHash\": \"<string>\",\n      \"txTime\": \"<dateTime>\",\n      \"block\": \"<long>\",\n      \"epoch\": \"<integer>\",\n      \"slotNo\": \"<long>\",\n      \"epochSlotNo\": \"<long>\",\n      \"stakeKey\": \"<string>\"\n    },\n    {\n      \"txId\": \"<long>\",\n      \"txHash\": \"<string>\",\n      \"txTime\": \"<dateTime>\",\n      \"block\": \"<long>\",\n      \"epoch\": \"<integer>\",\n      \"slotNo\": \"<long>\",\n      \"epochSlotNo\": \"<long>\",\n      \"stakeKey\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get active stake, live stake and total stake",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/analytics",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												"analytics"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/analytics",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														"analytics"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"activeStake\": \"<integer>\",\n  \"liveStake\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get a stake detail by stake key",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/stakes/address/:address",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"stakes",
+												"address",
+												":address"
+											],
+											"variable": [
+												{
+													"key": "address",
+													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6r44kgagw49zsln23lqjmtglv5n4tfjdlvnatvmk5whfrrqwxllu7",
+													"description": "address view"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/stakes/address/:address",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"stakes",
+														"address",
+														":address"
+													],
+													"variable": [
+														{
+															"key": "address"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"status\": \"DEACTIVATED\",\n  \"stakeAddress\": \"<string>\",\n  \"totalStake\": \"<integer>\",\n  \"rewardAvailable\": \"<integer>\",\n  \"rewardWithdrawn\": \"<integer>\",\n  \"pool\": {\n    \"tickerName\": \"<string>\",\n    \"poolName\": \"<string>\",\n    \"poolId\": \"<string>\"\n  }\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "pools",
+							"item": [
+								{
+									"name": "get Data For Pool Registration",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/pools/registration?page=0&size=10",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"pools",
+												"registration"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "10",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/pools/registration?page=0&size=10&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"pools",
+														"registration"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "10",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"txId\": \"<long>\",\n      \"txHash\": \"<string>\",\n      \"txTime\": \"<dateTime>\",\n      \"epoch\": \"<integer>\",\n      \"block\": \"<long>\",\n      \"slotNo\": \"<long>\",\n      \"poolName\": \"<string>\",\n      \"pledge\": \"<integer>\",\n      \"cost\": \"<integer>\",\n      \"margin\": \"<double>\",\n      \"poolId\": \"<long>\",\n      \"poolView\": \"<string>\",\n      \"stakeKey\": [\n        \"<string>\",\n        \"<string>\"\n      ]\n    },\n    {\n      \"txId\": \"<long>\",\n      \"txHash\": \"<string>\",\n      \"txTime\": \"<dateTime>\",\n      \"epoch\": \"<integer>\",\n      \"block\": \"<long>\",\n      \"slotNo\": \"<long>\",\n      \"poolName\": \"<string>\",\n      \"pledge\": \"<integer>\",\n      \"cost\": \"<integer>\",\n      \"margin\": \"<double>\",\n      \"poolId\": \"<long>\",\n      \"poolView\": \"<string>\",\n      \"stakeKey\": [\n        \"<string>\",\n        \"<string>\"\n      ]\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "get Data For Pool De Registration",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/pools/de-registration?page=0&size=10",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"pools",
+												"de-registration"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "10",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/pools/de-registration?page=0&size=10&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"pools",
+														"de-registration"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "10",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"txId\": \"<long>\",\n      \"txHash\": \"<string>\",\n      \"txTime\": \"<dateTime>\",\n      \"epoch\": \"<integer>\",\n      \"block\": \"<long>\",\n      \"slotNo\": \"<long>\",\n      \"poolName\": \"<string>\",\n      \"pledge\": \"<integer>\",\n      \"cost\": \"<integer>\",\n      \"margin\": \"<double>\",\n      \"poolId\": \"<long>\",\n      \"poolView\": \"<string>\",\n      \"stakeKey\": [\n        \"<string>\",\n        \"<string>\"\n      ]\n    },\n    {\n      \"txId\": \"<long>\",\n      \"txHash\": \"<string>\",\n      \"txTime\": \"<dateTime>\",\n      \"epoch\": \"<integer>\",\n      \"block\": \"<long>\",\n      \"slotNo\": \"<long>\",\n      \"poolName\": \"<string>\",\n      \"pledge\": \"<integer>\",\n      \"cost\": \"<integer>\",\n      \"margin\": \"<double>\",\n      \"poolId\": \"<long>\",\n      \"poolView\": \"<string>\",\n      \"stakeKey\": [\n        \"<string>\",\n        \"<string>\"\n      ]\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "policies",
+							"item": [
+								{
+									"name": "Get tokens by policy",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/policies/:policyId/tokens?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"policies",
+												":policyId",
+												"tokens"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "policyId",
+													"value": "e68f1cea19752d1292b4be71b7f5d2b3219a15859c028f7454f66cdf",
+													"description": "policy hash value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/policies/:policyId/tokens?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"policies",
+														":policyId",
+														"tokens"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "policyId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"policy\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"txCount\": \"<integer>\",\n      \"supply\": \"<string>\",\n      \"createdOn\": \"<dateTime>\",\n      \"metadata\": {\n        \"url\": \"<string>\",\n        \"ticker\": \"<string>\",\n        \"decimals\": \"<integer>\",\n        \"logo\": \"<string>\",\n        \"description\": \"<string>\"\n      }\n    },\n    {\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"policy\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"txCount\": \"<integer>\",\n      \"supply\": \"<string>\",\n      \"createdOn\": \"<dateTime>\",\n      \"metadata\": {\n        \"url\": \"<string>\",\n        \"ticker\": \"<string>\",\n        \"decimals\": \"<integer>\",\n        \"logo\": \"<string>\",\n        \"description\": \"<string>\"\n      }\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get holders by policy",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/policies/:policyId/holders?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"policies",
+												":policyId",
+												"holders"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "policyId",
+													"value": "e68f1cea19752d1292b4be71b7f5d2b3219a15859c028f7454f66cdf",
+													"description": "policy hash value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/policies/:policyId/holders?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"policies",
+														":policyId",
+														"holders"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "policyId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"address\": \"<string>\",\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"quantity\": \"<integer>\"\n    },\n    {\n      \"address\": \"<string>\",\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"quantity\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get a policy detail",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/policies/:policyId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"policies",
+												":policyId"
+											],
+											"variable": [
+												{
+													"key": "policyId",
+													"value": "e68f1cea19752d1292b4be71b7f5d2b3219a15859c028f7454f66cdf",
+													"description": "policy hash value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/policies/:policyId",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"policies",
+														":policyId"
+													],
+													"variable": [
+														{
+															"key": "policyId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"policyId\": \"<string>\",\n  \"totalToken\": \"<integer>\",\n  \"policyScript\": \"<string>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "markets",
+							"item": [
+								{
+									"name": "Get ada cardano price, market cap, volume, and market related data",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/markets?currency=usd",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"markets"
+											],
+											"query": [
+												{
+													"key": "currency",
+													"value": "usd",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/markets?currency=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"markets"
+													],
+													"query": [
+														{
+															"key": "currency",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "epochs",
+							"item": [
+								{
+									"name": "Get a epoch detail by its no",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/epochs/:no",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"epochs",
+												":no"
+											],
+											"variable": [
+												{
+													"key": "no",
+													"value": "50",
+													"description": "epoch number"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/epochs/:no",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"epochs",
+														":no"
+													],
+													"variable": [
+														{
+															"key": "no"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"no\": \"<integer>\",\n  \"status\": \"FINISHED\",\n  \"blkCount\": \"<integer>\",\n  \"outSum\": \"<integer>\",\n  \"txCount\": \"<integer>\",\n  \"startTime\": \"<dateTime>\",\n  \"endTime\": \"<dateTime>\",\n  \"maxSlot\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get current epoch",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/epochs/current",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"epochs",
+												"current"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/epochs/current",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"epochs",
+														"current"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"no\": \"<integer>\",\n  \"slot\": \"<integer>\",\n  \"totalSlot\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get all epoch",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/epochs?page=0&size=10&sort=id,DESC",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"epochs"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "10",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "id,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/epochs?page=0&size=10&sort=id,DESC",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"epochs"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "10",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "id,DESC",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"no\": \"<integer>\",\n      \"status\": \"REWARDING\",\n      \"blkCount\": \"<integer>\",\n      \"outSum\": \"<integer>\",\n      \"txCount\": \"<integer>\",\n      \"startTime\": \"<dateTime>\",\n      \"endTime\": \"<dateTime>\",\n      \"maxSlot\": \"<integer>\"\n    },\n    {\n      \"no\": \"<integer>\",\n      \"status\": \"FINISHED\",\n      \"blkCount\": \"<integer>\",\n      \"outSum\": \"<integer>\",\n      \"txCount\": \"<integer>\",\n      \"startTime\": \"<dateTime>\",\n      \"endTime\": \"<dateTime>\",\n      \"maxSlot\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get block list of epoch by its no",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/epochs/:no/blocks?page=0&size=10&sort=id,DESC",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"epochs",
+												":no",
+												"blocks"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "10",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "id,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+												}
+											],
+											"variable": [
+												{
+													"key": "no",
+													"value": "57",
+													"description": "epoch number"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/epochs/:no/blocks?page=0&size=10&sort=id,DESC",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"epochs",
+														":no",
+														"blocks"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "10",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "id,DESC",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "no"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"blockNo\": \"<integer>\",\n      \"slotNo\": \"<long>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"hash\": \"<string>\",\n      \"time\": \"<dateTime>\",\n      \"txCount\": \"<long>\",\n      \"totalFees\": \"<integer>\",\n      \"totalOutput\": \"<integer>\",\n      \"slotLeader\": \"<string>\"\n    },\n    {\n      \"blockNo\": \"<integer>\",\n      \"slotNo\": \"<long>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"hash\": \"<string>\",\n      \"time\": \"<dateTime>\",\n      \"txCount\": \"<long>\",\n      \"totalFees\": \"<integer>\",\n      \"totalOutput\": \"<integer>\",\n      \"slotLeader\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "delegations",
+							"item": [
+								{
+									"name": "Find Top(default is 3) Delegation Pool order by pool size",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/delegations/top?page=0&size=10",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"delegations",
+												"top"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "(Required) "
+												},
+												{
+													"key": "size",
+													"value": "10",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/delegations/top?page=<integer>&size=<integer>&sort=<string>,<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"delegations",
+														"top"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "<integer>",
+															"description": "(Required) "
+														},
+														{
+															"key": "size",
+															"value": "<integer>",
+															"description": "(Required) "
+														},
+														{
+															"key": "sort",
+															"value": "<string>,<string>",
+															"description": "(Required) "
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"poolId\": \"<string>\",\n    \"poolName\": \"<string>\",\n    \"poolSize\": \"<integer>\",\n    \"reward\": \"<double>\",\n    \"feePercent\": \"<double>\",\n    \"feeAmount\": \"<integer>\",\n    \"pledge\": \"<integer>\",\n    \"saturation\": \"<double>\"\n  }\n]"
+										}
+									]
+								},
+								{
+									"name": "get Data For Pool Table",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/delegations/pool-list?page=0&size=10&search=",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"delegations",
+												"pool-list"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "10"
+												},
+												{
+													"key": "search",
+													"value": ""
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/delegations/pool-list?page=0&size=10&sort=<string>&search=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"delegations",
+														"pool-list"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "10",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														},
+														{
+															"key": "search",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"poolId\": \"<string>\",\n      \"poolName\": \"<string>\",\n      \"poolSize\": \"<integer>\",\n      \"reward\": \"<double>\",\n      \"feePercent\": \"<double>\",\n      \"feeAmount\": \"<integer>\",\n      \"pledge\": \"<integer>\",\n      \"saturation\": \"<double>\"\n    },\n    {\n      \"poolId\": \"<string>\",\n      \"poolName\": \"<string>\",\n      \"poolSize\": \"<integer>\",\n      \"reward\": \"<double>\",\n      \"feePercent\": \"<double>\",\n      \"feeAmount\": \"<integer>\",\n      \"pledge\": \"<integer>\",\n      \"saturation\": \"<double>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "get Data For Pool Detail",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/delegations/pool-detail-header/:poolView",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"delegations",
+												"pool-detail-header",
+												":poolView"
+											],
+											"variable": [
+												{
+													"key": "poolView",
+													"value": "pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx",
+													"description": "pool view value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/delegations/pool-detail-header/:poolView",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"delegations",
+														"pool-detail-header",
+														":poolView"
+													],
+													"variable": [
+														{
+															"key": "poolView"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"poolName\": \"<string>\",\n  \"tickerName\": \"<string>\",\n  \"hashView\": \"<string>\",\n  \"createDate\": \"<dateTime>\",\n  \"rewardAccounts\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"ownerAccounts\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"poolSize\": \"<number>\",\n  \"stakeLimit\": \"<number>\",\n  \"delegators\": \"<integer>\",\n  \"saturation\": \"<double>\",\n  \"reward\": \"<double>\",\n  \"ros\": \"<double>\",\n  \"pledge\": \"<number>\",\n  \"cost\": \"<number>\",\n  \"margin\": \"<double>\",\n  \"epochBlock\": \"<integer>\",\n  \"lifetimeBlock\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "get Epoch List For Pool Detail",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/delegations/pool-detail-epochs?poolView=pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx&page=0&size=10",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"delegations",
+												"pool-detail-epochs"
+											],
+											"query": [
+												{
+													"key": "poolView",
+													"value": "pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx",
+													"description": "(Required) "
+												},
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "10",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/delegations/pool-detail-epochs?poolView=<string>&page=0&size=10&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"delegations",
+														"pool-detail-epochs"
+													],
+													"query": [
+														{
+															"key": "poolView",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "10",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"epoch\": \"<integer>\",\n      \"block\": \"<long>\",\n      \"stakeAmount\": \"<integer>\",\n      \"delegators\": \"<integer>\",\n      \"fee\": \"<integer>\",\n      \"ros\": \"<double>\"\n    },\n    {\n      \"epoch\": \"<integer>\",\n      \"block\": \"<long>\",\n      \"stakeAmount\": \"<integer>\",\n      \"delegators\": \"<integer>\",\n      \"fee\": \"<integer>\",\n      \"ros\": \"<double>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "get Delegator For Pool Detail",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/delegations/pool-detail-delegators?poolView=pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx&page=0&size=10",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"delegations",
+												"pool-detail-delegators"
+											],
+											"query": [
+												{
+													"key": "poolView",
+													"value": "pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx",
+													"description": "(Required) "
+												},
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "10",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/delegations/pool-detail-delegators?poolView=<string>&page=0&size=10&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"delegations",
+														"pool-detail-delegators"
+													],
+													"query": [
+														{
+															"key": "poolView",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "10",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"stakeAddressId\": \"<long>\",\n      \"totalStake\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"fee\": \"<integer>\",\n      \"view\": \"<string>\"\n    },\n    {\n      \"stakeAddressId\": \"<long>\",\n      \"totalStake\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"fee\": \"<integer>\",\n      \"view\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "get Analytics For Pool Detail",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/delegations/pool-detail-analytics?poolView=pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"delegations",
+												"pool-detail-analytics"
+											],
+											"query": [
+												{
+													"key": "poolView",
+													"value": "pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/delegations/pool-detail-analytics?poolView=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"delegations",
+														"pool-detail-analytics"
+													],
+													"query": [
+														{
+															"key": "poolView",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"epochChart\": {\n    \"highest\": \"<integer>\",\n    \"lowest\": \"<integer>\",\n    \"dataByDays\": [\n      {\n        \"epochNo\": \"<integer>\",\n        \"totalStake\": \"<integer>\"\n      },\n      {\n        \"epochNo\": \"<integer>\",\n        \"totalStake\": \"<integer>\"\n      }\n    ]\n  },\n  \"delegatorChart\": {\n    \"highest\": \"<long>\",\n    \"lowest\": \"<long>\",\n    \"dataByDays\": [\n      {\n        \"epochNo\": \"<long>\",\n        \"numberDelegator\": \"<long>\"\n      },\n      {\n        \"epochNo\": \"<long>\",\n        \"numberDelegator\": \"<long>\"\n      }\n    ]\n  }\n}"
+										}
+									]
+								},
+								{
+									"name": "get Data For Delegation Header",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/delegations/header",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"delegations",
+												"header"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/delegations/header",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"delegations",
+														"header"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"epochNo\": \"<integer>\",\n  \"countDownEndTime\": \"<long>\",\n  \"epochSlotNo\": \"<integer>\",\n  \"liveStake\": \"<integer>\",\n  \"delegators\": \"<integer>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "contracts",
+							"item": [
+								{
+									"name": "Get list contract",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/contracts?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"contracts"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/contracts?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"contracts"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"address\": \"<string>\",\n      \"txCount\": \"<long>\",\n      \"balance\": \"<integer>\"\n    },\n    {\n      \"address\": \"<string>\",\n      \"txCount\": \"<long>\",\n      \"balance\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "blocks",
+							"item": [
+								{
+									"name": "Get tx list of block",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blocks/:blockId/txs?page=0&size=20&sort=blockId,DESC&sort=blockIndex,DESC",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blocks",
+												":blockId",
+												"txs"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "blockId,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+												},
+												{
+													"key": "sort",
+													"value": "blockIndex,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+												}
+											],
+											"variable": [
+												{
+													"key": "blockId",
+													"value": "e3b5cc8c5358fdc3a10cd01802423da3c9d95172aa68745cefb5913e0aae644a",
+													"description": "block hash value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/blocks/:blockId/txs?page=0&size=20&sort=blockIndex,DESC",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"blocks",
+														":blockId",
+														"txs"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "blockIndex,DESC",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "blockId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    },\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get a block detail",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blocks/:blockId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blocks",
+												":blockId"
+											],
+											"variable": [
+												{
+													"key": "blockId",
+													"value": "e3b5cc8c5358fdc3a10cd01802423da3c9d95172aa68745cefb5913e0aae644a",
+													"description": "block hash value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/blocks/:blockId",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"blocks",
+														":blockId"
+													],
+													"variable": [
+														{
+															"key": "blockId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"hash\": \"<string>\",\n  \"time\": \"<dateTime>\",\n  \"txCount\": \"<long>\",\n  \"epochNo\": \"<integer>\",\n  \"blockNo\": \"<integer>\",\n  \"slotNo\": \"<long>\",\n  \"epochSlotNo\": \"<integer>\",\n  \"totalFees\": \"<integer>\",\n  \"totalOutput\": \"<integer>\",\n  \"slotLeader\": \"<string>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get all block",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blocks?page=0&size=20&sort=id,DESC",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blocks"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "id,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/blocks?page=0&size=20&sort=id,DESC",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"blocks"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "id,DESC",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"blockNo\": \"<integer>\",\n      \"slotNo\": \"<long>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"hash\": \"<string>\",\n      \"time\": \"<dateTime>\",\n      \"txCount\": \"<long>\",\n      \"totalFees\": \"<integer>\",\n      \"totalOutput\": \"<integer>\",\n      \"slotLeader\": \"<string>\"\n    },\n    {\n      \"blockNo\": \"<integer>\",\n      \"slotNo\": \"<long>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"hash\": \"<string>\",\n      \"time\": \"<dateTime>\",\n      \"txCount\": \"<long>\",\n      \"totalFees\": \"<integer>\",\n      \"totalOutput\": \"<integer>\",\n      \"slotLeader\": \"<string>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "addresses",
+							"item": [
+								{
+									"name": "Get list transaction of address",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/addresses/:address/txs?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"addresses",
+												":address",
+												"txs"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "address",
+													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6qtz2su6pacwwz6ktmr9q0ajyv6xucs0lddet0skdjp652s606tf3",
+													"description": "address view value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/addresses/:address/txs?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"addresses",
+														":address",
+														"txs"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "address"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    },\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get a address detail",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/addresses/:address",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"addresses",
+												":address"
+											],
+											"variable": [
+												{
+													"key": "address",
+													"value": "Ae2tdPwUPEYwFx4dmJheyNPPYXtvHbJLeCaA96o6Y2iiUL18cAt7AizN2zG",
+													"description": "address view value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/addresses/:address",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"addresses",
+														":address"
+													],
+													"variable": [
+														{
+															"key": "address"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"address\": \"<string>\",\n  \"txCount\": \"<long>\",\n  \"balance\": \"<integer>\",\n  \"tokens\": [\n    {\n      \"address\": \"<string>\",\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"quantity\": \"<integer>\"\n    },\n    {\n      \"address\": \"<string>\",\n      \"name\": \"<string>\",\n      \"displayName\": \"<string>\",\n      \"fingerprint\": \"<string>\",\n      \"quantity\": \"<integer>\"\n    }\n  ],\n  \"stakeAddress\": \"<string>\",\n  \"isContract\": \"<boolean>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get top addresses",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/addresses/top-addresses?page=0&size=50",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"addresses",
+												"top-addresses"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "50",
+													"description": "The size of the page to be returned"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/addresses/top-addresses?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"addresses",
+														"top-addresses"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"address\": \"<string>\",\n      \"balance\": \"<integer>\"\n    },\n    {\n      \"address\": \"<string>\",\n      \"balance\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Get the highest and lowest balance address",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/addresses/min-max-balance/:address",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"addresses",
+												"min-max-balance",
+												":address"
+											],
+											"variable": [
+												{
+													"key": "address",
+													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6qtz2su6pacwwz6ktmr9q0ajyv6xucs0lddet0skdjp652s606tf3",
+													"description": "address view value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/addresses/min-max-balance/:address",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"addresses",
+														"min-max-balance",
+														":address"
+													],
+													"variable": [
+														{
+															"key": "address"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  \"<integer>\",\n  \"<integer>\"\n]"
+										}
+									]
+								},
+								{
+									"name": "Get a address analytics",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/addresses/analytics/:address/:type",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"addresses",
+												"analytics",
+												":address",
+												":type"
+											],
+											"variable": [
+												{
+													"key": "address",
+													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6qtz2su6pacwwz6ktmr9q0ajyv6xucs0lddet0skdjp652s606tf3",
+													"description": "address view value"
+												},
+												{
+													"key": "type",
+													"value": "THREE_MONTH",
+													"description": "ONE_DAY, ONE_WEEK, ONE_MONTH, THREE_MONTH"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/addresses/analytics/:address/:type",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"addresses",
+														"analytics",
+														":address",
+														":type"
+													],
+													"variable": [
+														{
+															"key": "address"
+														},
+														{
+															"key": "type"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"date\": \"<date>\",\n    \"value\": \"<integer>\"\n  },\n  {\n    \"date\": \"<date>\",\n    \"value\": \"<integer>\"\n  }\n]"
+										}
+									]
+								},
+								{
+									"name": "Get list token of address",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/addresses/:address/tokens?page=0&size=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"addresses",
+												":address",
+												"tokens"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)"
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned"
+												}
+											],
+											"variable": [
+												{
+													"key": "address",
+													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6qtz2su6pacwwz6ktmr9q0ajyv6xucs0lddet0skdjp652s606tf3",
+													"description": "address view value"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/addresses/:address/txs?page=0&size=20&sort=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"addresses",
+														":address",
+														"txs"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0",
+															"description": "Zero-based page index (0..N)"
+														},
+														{
+															"key": "size",
+															"value": "20",
+															"description": "The size of the page to be returned"
+														},
+														{
+															"key": "sort",
+															"value": "<string>",
+															"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+														}
+													],
+													"variable": [
+														{
+															"key": "address"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    },\n    {\n      \"hash\": \"<string>\",\n      \"blockNo\": \"<long>\",\n      \"blockHash\": \"<string>\",\n      \"epochNo\": \"<integer>\",\n      \"epochSlotNo\": \"<integer>\",\n      \"slot\": \"<integer>\",\n      \"time\": \"<dateTime>\",\n      \"addressesInput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"addressesOutput\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"fee\": \"<integer>\",\n      \"totalOutput\": \"<integer>\"\n    }\n  ],\n  \"totalItems\": \"<long>\",\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://172.16.1.230:803"
+		}
+	]
+}
