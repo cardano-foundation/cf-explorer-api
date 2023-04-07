@@ -6,6 +6,7 @@ import com.sotatek.cardano.common.entity.Tx;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,5 +32,12 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " WHERE addrTxBalance.address = :address"
       + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   List<Tx> findAllByAddress(Address address, Pageable pageable);
+
+  @Query(value = "SELECT DISTINCT tx FROM AddressTxBalance addrTxBalance"
+      + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
+      + " WHERE addrTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress)"
+      + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
+  Page<Tx> findAllByStake(String stakeAddress, Pageable pageable);
 
 }
