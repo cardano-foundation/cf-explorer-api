@@ -46,6 +46,7 @@ public class BlockServiceImpl implements BlockService {
       Block block = blockRepository.findFirstByBlockNo(blockNo).orElseThrow(
           () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
       );
+
       return getBlockResponse(block);
     } catch (NumberFormatException e) {
       Block block = blockRepository.findFirstByHash(blockId).orElseThrow(
@@ -67,6 +68,12 @@ public class BlockServiceImpl implements BlockService {
         txList.stream().map(Tx::getOutSum).reduce(BigInteger.ZERO, BigInteger::add));
     blockResponse.setTotalFees(
         txList.stream().map(Tx::getFee).reduce(BigInteger.ZERO, BigInteger::add));
+    Integer currentBlockNo = blockRepository.findCurrentBlock().orElseThrow(
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+    );
+    if(Objects.nonNull(block.getBlockNo())) {
+      blockResponse.setConfirmation(currentBlockNo - block.getBlockNo().intValue());
+    }
     return blockResponse;
   }
 
