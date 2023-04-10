@@ -1,5 +1,6 @@
 package com.cardano.explorer.service.impl;
 
+import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.common.enumeration.StakeAddressStatus;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.AddressMapper;
@@ -9,6 +10,7 @@ import com.cardano.explorer.model.response.StakeAnalyticResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.DelegationPoolResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
+import com.cardano.explorer.model.response.stake.StakeAnalyticBalanceResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.model.response.stake.TrxBlockEpochStake;
@@ -18,6 +20,7 @@ import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.projection.StakeInstantaneousRewardsProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import com.cardano.explorer.repository.AddressRepository;
+import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.EpochStakeRepository;
@@ -37,8 +40,14 @@ import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -71,6 +80,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
   private final EpochStakeRepository epochStakeRepository;
+  private final AddressTxBalanceRepository addressTxBalanceRepository;
+
+  private static final int STAKE_ANALYTIC_NUMBER = 5;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -236,6 +248,54 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1).orElse(BigInteger.ZERO));
     }
     return response;
+  }
+
+  @Override
+  public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey,
+      AnalyticType type) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
+    LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+    List<LocalDate> dates = new ArrayList<>();
+    switch (type) {
+      case ONE_WEEK:
+        var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
+          dates.add(currentWeek.minusWeeks(i));
+        }
+        break;
+      case ONE_MONTH:
+        var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
+          dates.add(currentMonth.minusMonths(i));
+        }
+        break;
+      case THREE_MONTH:
+        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
+          dates.add(currentDate.minusMonths(i * 3L));
+        }
+        break;
+      default:
+        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
+          dates.add(currentDate.minusDays(i));
+        }
+    }
+    dates.forEach(
+        item -> {
+          StakeAnalyticBalanceResponse response = new StakeAnalyticBalanceResponse();
+          var balance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(stakeAddress,
+              Timestamp.valueOf(item.atTime(LocalTime.MAX)));
+          if(Objects.isNull(balance)) {
+            response.setValue(BigInteger.ZERO);
+          } else {
+            response.setValue(balance);
+          }
+          response.setDate(item);
+          responses.add(response);
+        }
+    );
+    return responses;
   }
 
   private String getNameValueFromJson(String json) {

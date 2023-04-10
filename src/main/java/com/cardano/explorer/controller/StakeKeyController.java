@@ -1,11 +1,13 @@
 package com.cardano.explorer.controller;
 
+import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.StakeAnalyticResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
+import com.cardano.explorer.model.response.stake.StakeAnalyticBalanceResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
@@ -16,6 +18,7 @@ import com.cardano.explorer.service.StakeKeyService;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -129,6 +132,15 @@ public class StakeKeyController {
   @Operation(summary = "Get active stake, live stake and total stake")
   public ResponseEntity<StakeAnalyticResponse> getStakeAnalytics() {
     return ResponseEntity.ok(stakeService.getStakeAnalytics());
+  }
+
+  @GetMapping("/analytics/{stakeKey}/{type}")
+  @LogMessage
+  @Operation(summary = "Get stake balance analytics")
+  public ResponseEntity<List<StakeAnalyticBalanceResponse>> getStakeBalanceAnalytics(
+      @PathVariable String stakeKey, @PathVariable
+  @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+    return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
   }
 
 }

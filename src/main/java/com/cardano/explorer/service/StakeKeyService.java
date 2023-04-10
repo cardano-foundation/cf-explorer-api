@@ -1,15 +1,18 @@
 package com.cardano.explorer.service;
 
+import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.StakeAnalyticResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
+import com.cardano.explorer.model.response.stake.StakeAnalyticBalanceResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.projection.StakeInstantaneousRewardsProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 public interface StakeKeyService {
@@ -100,4 +103,12 @@ public interface StakeKeyService {
    * @return live stake, active stake and total stake
    */
   StakeAnalyticResponse getStakeAnalytics();
+
+  /**
+   * Get stake balance analytics
+   * @param stakeKey stake address
+   * @param type type of analytics (day, week, month, 3month)
+   * @return list transaction analytics
+   */
+  List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type);
 }
