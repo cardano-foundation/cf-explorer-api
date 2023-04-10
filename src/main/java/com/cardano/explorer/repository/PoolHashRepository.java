@@ -37,8 +37,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "WHERE (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id = ph.id)) "
           + "AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
           + "AND ((:poolView IS NULL OR ph.view = :poolView) "
-          + "OR (:poolName IS NULL OR po.json LIKE :poolName%)) "
-          + "ORDER BY ph.id ASC")
+          + "OR (:poolName IS NULL OR po.json LIKE :poolName%)) ")
   Page<PoolListProjection> findAllByPoolViewAndPoolName(@Param("poolView") String poolView,
       @Param("poolName") String poolName, Pageable pageable);
 

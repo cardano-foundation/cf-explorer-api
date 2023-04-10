@@ -19,8 +19,7 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
           + "JOIN Tx tx ON tx.id = pr.announcedTx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
           + "LEFT JOIN PoolOfflineData po ON pr.poolHash.id  = po.pool.id AND  (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id  = pr.poolHash.id)) "
-          + "LEFT JOIN PoolUpdate pu ON pr.poolHash.id = pu.poolHash.id AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pr.poolHash.id  = pu.poolHash.id)) "
-          + "ORDER BY bk.time DESC")
+          + "LEFT JOIN PoolUpdate pu ON pr.poolHash.id = pu.poolHash.id AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pr.poolHash.id  = pu.poolHash.id)) ")
   Page<TxBlockEpochProjection> getDataForPoolDeRegistration(Pageable pageable);
 
 }
