@@ -8,4 +8,5 @@ public interface TxIOProjection {
   String getToAddress();
   String getHash();
   BigInteger getAmount();
+  Boolean getValidContract();
 }
