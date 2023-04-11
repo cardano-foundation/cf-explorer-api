@@ -3,6 +3,7 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.StakeAnalyticResponse;
+import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
@@ -12,6 +13,7 @@ import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.projection.StakeInstantaneousRewardsProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import com.cardano.explorer.service.StakeKeyService;
+import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class StakeKeyController {
 
   private final StakeKeyService stakeService;
+
+  private final TxService txService;
 
   @GetMapping("/registration")
   @LogMessage
@@ -57,6 +61,15 @@ public class StakeKeyController {
   public ResponseEntity<StakeAddressResponse> getStakeDetail(
       @PathVariable @Parameter(description = "Stake key") String stakeKey) {
     return ResponseEntity.ok(stakeService.getStake(stakeKey));
+  }
+
+  @GetMapping("/{stakeKey}/txs")
+  @LogMessage
+  @Operation(summary = "Get transactions of stake key")
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
+      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pageable));
   }
 
   @GetMapping("/{stakeKey}/delegation-history")
