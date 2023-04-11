@@ -18,6 +18,7 @@ import com.cardano.explorer.service.StakeKeyService;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.math.BigInteger;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
@@ -141,6 +142,13 @@ public class StakeKeyController {
       @PathVariable String stakeKey, @PathVariable
   @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
     return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
+  }
+
+  @GetMapping("/min-max-balance/{stakeKey}")
+  @LogMessage
+  @Operation(summary = "Get the highest and lowest balance address")
+  public ResponseEntity<List<BigInteger>> getAddressMinMaxBalance(@PathVariable String stakeKey) {
+    return ResponseEntity.ok(stakeService.getAddressMinMaxBalance(stakeKey));
   }
 
 }

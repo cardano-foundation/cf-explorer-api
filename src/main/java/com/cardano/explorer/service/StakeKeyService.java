@@ -12,6 +12,7 @@ import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.projection.StakeInstantaneousRewardsProjection;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
+import java.math.BigInteger;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 
@@ -111,4 +112,11 @@ public interface StakeKeyService {
    * @return list transaction analytics
    */
   List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type);
+
+  /**
+   *
+   * @param stakeKey stake address
+   * @return min and max balance of stake address
+   */
+  List<BigInteger> getAddressMinMaxBalance(String stakeKey);
 }

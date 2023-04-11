@@ -46,6 +46,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -296,6 +297,30 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         }
     );
     return responses;
+  }
+
+  @Override
+  public List<BigInteger> getAddressMinMaxBalance(String stakeKey) {
+    StakeAddress stake = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    List<BigInteger> balanceList = addressTxBalanceRepository.findAllByStakeAddress(stake);
+    if(balanceList.isEmpty()) {
+      return new ArrayList<>();
+    }
+    BigInteger maxBalance = balanceList.get(0);
+    BigInteger minBalance = balanceList.get(0);
+    BigInteger sumBalance = balanceList.get(0);
+    balanceList.remove(0);
+    for(BigInteger balance : balanceList) {
+      sumBalance = sumBalance.add(balance);
+      if(sumBalance.compareTo(maxBalance) > 0) {
+        maxBalance = sumBalance;
+      }
+      if(sumBalance.compareTo(minBalance) < 0) {
+        minBalance = sumBalance;
+      }
+    }
+    return Arrays.asList(minBalance, maxBalance);
   }
 
   private String getNameValueFromJson(String json) {
