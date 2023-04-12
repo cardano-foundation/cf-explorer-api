@@ -250,6 +250,12 @@ public class TxServiceImpl implements TxService {
     return response;
   }
 
+  @Override
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable pageable) {
+    Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeKey, pageable);
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
+  }
+
   /**
    * Mapping from tx entity list to tx response dto
    *

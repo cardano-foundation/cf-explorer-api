@@ -58,4 +58,12 @@ public interface TxService {
    * @return list transaction of token in this page
    */
   BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId, Pageable pageable);
+
+  /**
+   *
+   * @param stakeKey stake key view value
+   * @param pageable page information
+   * @return list transaction of stake in this page
+   */
+  BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable pageable);
 }
