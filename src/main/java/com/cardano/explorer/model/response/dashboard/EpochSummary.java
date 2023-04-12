@@ -9,4 +9,5 @@ public class EpochSummary {
   protected Integer no;
   private Integer slot;
   private Integer totalSlot;
+  private Integer account;
 }

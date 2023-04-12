@@ -36,4 +36,13 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
           + "JOIN Epoch e ON e.no = ep.epochNo "
           + "WHERE e.no IN :epochNo")
   List<RewardEpochProjection> findParamRewardByEpoch(@Param("epochNo") Set<Integer> epochNo);
+
+  @Query(value = "SELECT COUNT(addr.id) "
+      + "FROM Block b "
+      + "JOIN Tx tx ON tx.blockId = b.id "
+      + "JOIN AddressTxBalance atb ON atb.tx.id = tx.id "
+      + "JOIN Address addr ON addr.id = atb.address.id "
+      + "WHERE b.epochNo = :epochNo")
+  Integer getTotalAccountsAtEpoch(Integer epochNo);
+
 }

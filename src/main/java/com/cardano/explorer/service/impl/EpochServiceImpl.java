@@ -89,10 +89,12 @@ public class EpochServiceImpl implements EpochService {
           var slot =
               (Instant.now().toEpochMilli() - epochSummaryProjection.getStartTime().getTime())
                   / MILLI;
+
           return EpochSummary.builder()
               .no(epochSummaryProjection.getNo())
               .slot((int) slot)
               .totalSlot(epochSummaryProjection.getMaxSlot())
+              .account(epochRepository.getTotalAccountsAtEpoch(epochSummaryProjection.getNo()))
               .build();
         })
         .orElse(EpochSummary.builder().slot(0).no(0).totalSlot(0).build());
