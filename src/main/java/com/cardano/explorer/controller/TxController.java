@@ -1,14 +1,18 @@
 package com.cardano.explorer.controller;
 
+import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
-import com.cardano.explorer.model.response.tx.TxResponse;
 import com.cardano.explorer.model.response.dashboard.TxGraph;
 import com.cardano.explorer.model.response.dashboard.TxSummary;
+import com.cardano.explorer.model.response.tx.TxResponse;
 import com.cardano.explorer.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TxController {
 
   private final TxService txService;
+  private static final long DEFALUT_DAYS = 7;
 
   @GetMapping
   @LogMessage
@@ -48,14 +53,31 @@ public class TxController {
   @GetMapping("/current")
   @LogMessage
   @Operation(summary = "Get current transactions")
-  public ResponseEntity<List<TxSummary>> findCurrentTransaction(){
+  public ResponseEntity<List<TxSummary>> findCurrentTransaction() {
     return ResponseEntity.ok(txService.findLatestTxSummary());
   }
 
-  @GetMapping("/graph")
+  @GetMapping("/graph/{type}")
   @LogMessage
-  @Operation(summary = "Get Number Transaction On Last 15 Days")
-  public ResponseEntity<List<TxGraph>> getNumberTransactionOnLast15Days() {
-    return ResponseEntity.ok(txService.getTxsAfterTime());
+  @Operation(summary = "Get Number Transaction On Fixable Days Max 1 month")
+  public ResponseEntity<List<TxGraph>> getNumberTransactionOnLastDays(@PathVariable
+  @Parameter(description = "Type analytics: 1d, 1w, 2w, 1m") AnalyticType type) {
+    long days = DEFALUT_DAYS;
+    switch (type) {
+      case ONE_DAY:
+        days = BigInteger.ONE.longValue();
+        break;
+      case ONE_WEEK:
+        days = DEFALUT_DAYS;
+        break;
+      case TWO_WEEK:
+        days = 14L;
+        break;
+      case ONE_MONTH:
+        days = Math.abs(ChronoUnit.DAYS.between(LocalDateTime.now(), LocalDateTime.now().minusMonths(1L)));
+        break;
+    }
+    return ResponseEntity.ok(txService.getTxsAfterTime(days));
   }
+
 }

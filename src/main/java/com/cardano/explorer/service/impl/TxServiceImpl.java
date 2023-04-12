@@ -12,6 +12,7 @@ import com.cardano.explorer.mapper.TxOutMapper;
 import com.cardano.explorer.mapper.WithdrawalMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
+import com.cardano.explorer.model.response.dashboard.Widget;
 import com.cardano.explorer.model.response.tx.CollateralResponse;
 import com.cardano.explorer.model.response.tx.TxResponse;
 import com.cardano.explorer.model.response.dashboard.TxGraph;
@@ -47,6 +48,7 @@ import com.cardano.explorer.util.TimeUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.BaseEntity_;
@@ -63,25 +65,33 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -112,8 +122,16 @@ public class TxServiceImpl implements TxService {
   private final AddressTokenRepository addressTokenRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
+
+  private final RedisTemplate<String, TxGraph> redisTemplate;
+  @Value("${application.network}")
+  private String network;
   private static final int SUMMARY_SIZE = 4;
-  private static final long MINUS_DAYS = 15;
+  private static final long MONTH = 31;
+
+  public static final int BATCH_SIZE = 1000;
+  private static final String TRANSACTION_GRAPH_KEY = "TRANSACTION_GRAPH";
+
 
   @Override
   @Transactional(readOnly = true)
@@ -150,7 +168,7 @@ public class TxServiceImpl implements TxService {
             .amount(tx.getAmount().doubleValue())
             .fromAddress(from)
             .toAddress(to)
-            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS: TxStatus.FAIL)
+            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAIL)
             .build();
 
         summaries.add(summary);
@@ -170,35 +188,10 @@ public class TxServiceImpl implements TxService {
     return summaries;
   }
 
-
   @Override
   @Transactional(readOnly = true)
-  public List<TxGraph> getTxsAfterTime() {
-    LocalDate localDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(MINUS_DAYS);
-
-    List<TxGraphProjection> txs = txRepository.getTransactionsAfterTime(
-        Timestamp.valueOf(localDate.atStartOfDay()));
-
-    if (CollectionUtils.isEmpty(txs)) {
-      return Collections.emptyList();
-    }
-
-    return txs.stream()
-        .collect(
-            Collectors.groupingByConcurrent(
-                tx ->
-                    TimeUtil.formatDate(tx.getTime()),
-                Collectors.summingInt(TxGraphProjection::getTransactionNo)
-            ))
-        .entrySet()
-        .stream()
-        .map(entry -> TxGraph.builder()
-            .date(entry.getKey())
-            .txs(entry.getValue())
-            .build())
-        .sorted(Comparator.comparing(TxGraph::getDate))
-        .collect(Collectors.toList());
-
+  public List<TxGraph> getTxsAfterTime(long minusDays) {
+    return getTxGraphsInTime(minusDays);
   }
 
   @Override
@@ -241,7 +234,7 @@ public class TxServiceImpl implements TxService {
       Pageable pageable) {
     BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
     Optional<MultiAsset> multiAsset = multiAssetRepository.findByFingerprint(tokenId);
-    if(multiAsset.isPresent()) {
+    if (multiAsset.isPresent()) {
       List<Long> txIds = addressTokenRepository.findTxsByMultiAsset(multiAsset.get(), pageable);
       List<Tx> txList = txRepository.findByIdIn(txIds);
       Page<Tx> txPage = new PageImpl<>(txList, pageable, multiAsset.get().getTxCount());
@@ -252,7 +245,8 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
-  public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable pageable) {
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
+      Pageable pageable) {
     Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeKey, pageable);
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
@@ -264,7 +258,7 @@ public class TxServiceImpl implements TxService {
    * @return list tx response
    */
   private List<TxFilterResponse> mapDataFromTxListToResponseList(Page<Tx> txPage) {
-    if(CollectionUtils.isEmpty(txPage.getContent())) {
+    if (CollectionUtils.isEmpty(txPage.getContent())) {
       return new ArrayList<>();
     }
     Set<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
@@ -288,7 +282,7 @@ public class TxServiceImpl implements TxService {
     List<TxFilterResponse> txFilterResponses = new ArrayList<>();
     for (Tx tx : txPage.getContent()) {
       Long txId = tx.getId();
-      if(blockMap.containsKey(tx.getBlockId())) {
+      if (blockMap.containsKey(tx.getBlockId())) {
         tx.setBlock(blockMap.get(tx.getBlockId()));
       }
       TxFilterResponse txResponse = txMapper.txToTxFilterResponse(tx);
@@ -322,13 +316,13 @@ public class TxServiceImpl implements TxService {
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
 
-    if(Objects.nonNull(txResponse.getTx().getEpochNo())) {
+    if (Objects.nonNull(txResponse.getTx().getEpochNo())) {
       Epoch epoch = epochRepository.findFirstByNo(txResponse.getTx().getEpochNo()).orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
       );
       txResponse.getTx().setMaxEpochSlot(epoch.getMaxSlot());
     }
-    if(Objects.nonNull(txResponse.getTx().getBlockNo())) {
+    if (Objects.nonNull(txResponse.getTx().getBlockNo())) {
       txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
     } else {
       txResponse.getTx().setConfirmation(currentBlockNo);
@@ -343,10 +337,10 @@ public class TxServiceImpl implements TxService {
     getMints(tx, txResponse);
 
     /*
-      * If the transaction is invalid, the collateral is the input and the output of the transaction.
-      * Otherwise, the collateral is the input and the output of the collateral.
+     * If the transaction is invalid, the collateral is the input and the output of the transaction.
+     * Otherwise, the collateral is the input and the output of the collateral.
      */
-    if(Boolean.TRUE.equals(tx.getValidContract())) {
+    if (Boolean.TRUE.equals(tx.getValidContract())) {
       txResponse.getTx().setStatus(TxStatus.SUCCESS);
     } else {
       txResponse.getTx().setStatus(TxStatus.FAIL);
@@ -537,12 +531,12 @@ public class TxServiceImpl implements TxService {
   }
 
   /**
-   * If data from  collateral output, handle token in json string data
-   * Otherwise, not exist json string data
-   * Example of json string data:
+   * If data from  collateral output, handle token in json string data Otherwise, not exist json
+   * string data Example of json string data:
    * [{"unit":"LOVELACE","policyId":"","assetName":"TE9WRUxBQ0U=","quantity":2726335}]
+   *
    * @param addressInputOutputMap address projection map
-   * @param txOut list collateral output
+   * @param txOut                 list collateral output
    */
   private List<TxMintingResponse> getTokenInFailedTxOut(
       Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputOutputMap,
@@ -615,4 +609,105 @@ public class TxServiceImpl implements TxService {
     );
     return stakeAddressTxInputList;
   }
+
+  private String getRedisKey(String rawKey) {
+    return String.join("_", this.network, rawKey);
+  }
+
+  private List<TxGraph> getTxGraphsInTime(long minusDays) {
+
+    LocalDate markTime = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(minusDays - 1);
+
+    List<TxGraphProjection> txs =
+        txRepository.getTransactionsAfterTime(Timestamp.valueOf(markTime.atStartOfDay()));
+
+    List<Long> blockIdsHaveTransaction =
+        txs.stream()
+            .map(TxGraphProjection::getBlockId)
+            .distinct()
+            .collect(Collectors.toList());
+    // Get all transaction linked with block ids
+    List<Tx> transactions = Collections.synchronizedList(new ArrayList<>());
+    Lists.partition(blockIdsHaveTransaction, BATCH_SIZE)
+        .parallelStream()
+        .forEach(batch -> transactions.addAll(txRepository.findTxIdsByBlockIds(batch)));
+
+    List<Long> transactionIds = transactions.stream().map(Tx::getId).collect(Collectors.toList());
+    // calculate transaction Ids Have Token
+    Set<Long> transactionIdsHaveToken = Collections.synchronizedSet(new HashSet<>());
+    Lists.partition(transactionIds, BATCH_SIZE)
+        .parallelStream()
+        .forEach(batch ->
+            transactionIdsHaveToken.addAll(addressTokenRepository.findTransactionHaveToken(batch)));
+
+    // calculate remain transactionIds have smart contract
+    Set<Long> transactionIdHaveSmartContract = Collections.synchronizedSet(new HashSet<>());
+    List<Long> transactionRemain = transactionIds.stream()
+        .filter(id -> !transactionIdsHaveToken.contains(id))
+        .collect(Collectors.toList());
+    Lists.partition(transactionRemain, BATCH_SIZE)
+        .parallelStream()
+        .forEach(batch ->
+            transactionIdHaveSmartContract.addAll(
+                addressTxBalanceRepository.findTransactionIdsHaveSmartContract(batch,
+                    Boolean.TRUE)));
+
+    Map<Date, TxGraph> txGraphs = new ConcurrentHashMap<>();
+
+    if(minusDays != BigInteger.ONE.longValue()) {
+      Lists.partition(txs, BATCH_SIZE)
+          .parallelStream()
+          .forEach(batch -> batch.parallelStream().forEach(tx -> {
+            var key = TimeUtil.formatDate(tx.getTime());
+            TxGraph txGraph;
+            if (txGraphs.containsKey(key)) {
+              txGraph = txGraphs.get(key);
+              txGraph.setTxs(txGraph.getTxs() + tx.getTransactionNo());
+            } else {
+              log.debug("for date {}", key);
+              txGraph = TxGraph.builder()
+                  .txs(tx.getTransactionNo())
+                  .date(key)
+                  .build();
+              txGraphs.put(key, txGraph);
+            }
+
+            var complexTransaction = transactions.stream()
+                .filter(transaction -> tx.getBlockId().equals(transaction.getBlockId()))
+                .filter(transaction -> transactionIdsHaveToken.contains(transaction.getId()) ||
+                    transactionIdHaveSmartContract.contains(transaction.getId())).count();
+
+            txGraph.setComplexTxs((int) complexTransaction);
+            txGraph.setSimpleTxs(txGraph.getTxs() - txGraph.getComplexTxs());
+          }));
+    } else{
+      txs.parallelStream()
+          .forEach(tx -> {
+            var currentDateTime =  tx.getTime().toLocalDateTime();
+            var key = Timestamp.valueOf(LocalDateTime.of(LocalDate.ofYearDay(currentDateTime.getYear(),
+                currentDateTime.getDayOfYear()), LocalTime.of(currentDateTime.getHour(), 0)));
+
+            TxGraph txGraph = TxGraph.builder()
+                .txs(tx.getTransactionNo())
+                .date(key)
+                .build();
+
+            var complexTransaction = transactions.stream()
+                .filter(transaction -> tx.getBlockId().equals(transaction.getBlockId()))
+                .filter(transaction -> transactionIdsHaveToken.contains(transaction.getId()) ||
+                    transactionIdHaveSmartContract.contains(transaction.getId())).count();
+
+            txGraph.setComplexTxs((int) complexTransaction);
+            txGraph.setSimpleTxs(txGraph.getTxs() - txGraph.getComplexTxs());
+
+            txGraphs.put(key, txGraph);
+          });
+    }
+
+    return txGraphs.values()
+        .stream()
+        .sorted(Comparator.comparing(TxGraph::getDate))
+        .collect(Collectors.toList());
+  }
+
 }

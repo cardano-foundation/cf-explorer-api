@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalance, Long> {
 
@@ -53,4 +54,10 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
       + " AND addressTxBalance.time <= :time")
   BigInteger getBalanceByStakeAddressAndTime(StakeAddress stakeAddress, Timestamp time);
+
+  @Query("SELECT atb.tx.id "
+      + "FROM AddressTxBalance atb "
+      + "INNER JOIN Address addr ON addr.id = atb.address.id "
+      + "WHERE atb.tx.id IN :txIds AND addr.addressHasScript = :isSmartContract")
+  List<Long> findTransactionIdsHaveSmartContract(@Param("txIds") List<Long> txIds, @Param("isSmartContract") Boolean isSmartContract);
 }

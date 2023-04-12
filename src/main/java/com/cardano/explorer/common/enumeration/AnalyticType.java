@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 public enum AnalyticType {
   ONE_DAY("1d"),
   ONE_WEEK("1w"),
+  TWO_WEEK("2w"),
   ONE_MONTH("1m"),
   THREE_MONTH("3m");
 

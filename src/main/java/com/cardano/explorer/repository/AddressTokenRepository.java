@@ -10,6 +10,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AddressTokenRepository extends JpaRepository<AddressToken, Long> {
 
@@ -51,4 +52,10 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " WHERE b.time >= :time)"
       + " GROUP BY addrToken.multiAsset")
   List<TokenVolumeProjection> sumBalanceAfterTx(Collection<MultiAsset> multiAsset, Timestamp time);
+
+  @Query("SELECT at.tx.id "
+      + "FROM AddressToken at "
+      + "INNER JOIN Address addr ON addr.id = at.address.id "
+      + "WHERE at.tx.id IN :txIds")
+  List<Long> findTransactionHaveToken(@Param("txIds") List<Long> txIds);
 }

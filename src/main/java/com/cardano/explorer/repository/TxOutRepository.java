@@ -49,4 +49,10 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
       + " WHERE txIn.txInput = :tx")
   List<AddressInputOutputProjection> getTxAddressInputInfo(Tx tx);
+
+
+  @Query("SELECT sAddr.id "
+      + "FROM StakeAddress sAddr "
+      + "JOIN TxOut txo ON txo.stakeAddress.id = sAddr.id ")
+  List<Long> getUniqueAcountByTxId();
 }

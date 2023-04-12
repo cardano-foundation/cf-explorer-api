@@ -2,6 +2,7 @@ package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
+import com.cardano.explorer.model.response.dashboard.Widget;
 import com.cardano.explorer.model.response.tx.TxResponse;
 import com.cardano.explorer.model.response.dashboard.TxGraph;
 import com.cardano.explorer.model.response.dashboard.TxSummary;
@@ -15,7 +16,7 @@ public interface TxService {
   List<TxSummary> findLatestTxSummary();
 
   @Transactional(readOnly = true)
-  List<TxGraph> getTxsAfterTime();
+  List<TxGraph> getTxsAfterTime(long minusDays);
 
   /**
    * Get list transaction with paging

@@ -33,6 +33,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -124,7 +125,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
       final LettuceConnectionFactory lettuceConnectionFactory) {
     var redisTemplate = new RedisTemplate<String, Object>();
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
-    redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+    redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
     return redisTemplate;
   }
 
