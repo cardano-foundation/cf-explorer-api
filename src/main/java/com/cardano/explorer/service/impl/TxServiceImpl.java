@@ -118,7 +118,7 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public List<TxSummary> findLatestTxSummary() {
-    Page<Long> txIds = txRepository.findLatestTxId(
+    List<Long> txIds = txRepository.findLatestTxId(
         PageRequest.of(BigInteger.ZERO.intValue(),
             SUMMARY_SIZE,
             Sort.by(BaseEntity_.ID).descending()));
@@ -128,7 +128,7 @@ public class TxServiceImpl implements TxService {
     }
 
     List<TxSummary> summaries = new ArrayList<>();
-    List<TxIOProjection> txs = txRepository.findLatestTxIO(txIds.toList());
+    List<TxIOProjection> txs = txRepository.findLatestTxIO(txIds);
 
     txs.forEach(tx -> {
 
@@ -150,6 +150,7 @@ public class TxServiceImpl implements TxService {
             .amount(tx.getAmount().doubleValue())
             .fromAddress(from)
             .toAddress(to)
+            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS: TxStatus.FAIL)
             .build();
 
         summaries.add(summary);
@@ -248,6 +249,12 @@ public class TxServiceImpl implements TxService {
       response = new BaseFilterResponse<>(txPage, txFilterResponses);
     }
     return response;
+  }
+
+  @Override
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable pageable) {
+    Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeKey, pageable);
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   /**
