@@ -37,14 +37,15 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   Optional<Tx> findByHash(String hash);
 
   @Query(value = "SELECT tx.id FROM Tx tx ")
-  Page<Long> findLatestTxId(Pageable pageable);
+  List<Long> findLatestTxId(Pageable pageable);
 
 
   @Query(value = "SELECT tx.hash as hash, "
       + "b.blockNo as blockNo, "
       + "outp.address as toAddress, "
       + "inp.address as fromAddress, "
-      + "outp.value as amount "
+      + "outp.value as amount,"
+      + "tx.validContract as validContract "
       + "FROM Tx tx "
       + "JOIN Block b ON b.id = tx.blockId "
       + "JOIN TxIn txi ON txi.txInputId = tx.id "
