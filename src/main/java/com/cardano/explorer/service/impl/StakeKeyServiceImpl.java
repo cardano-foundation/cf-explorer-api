@@ -11,6 +11,7 @@ import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.DelegationPoolResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeAnalyticBalanceResponse;
+import com.cardano.explorer.model.response.stake.StakeAnalyticRewardResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.model.response.stake.TrxBlockEpochStake;
@@ -296,6 +297,22 @@ public class StakeKeyServiceImpl implements StakeKeyService {
           responses.add(response);
         }
     );
+    return responses;
+  }
+
+  @Override
+  public List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey) {
+    int epochNo = stakeAddressRepository.findRegisterEpoch(stakeKey).orElse(0);
+    int currentEpoch = epochRepository.findCurrentEpochNo().orElse(2) - 2;
+    List<StakeAnalyticRewardResponse> responses = rewardRepository.findRewardByStake(stakeKey);
+    List<Long> epochList = responses.stream().map(StakeAnalyticRewardResponse::getEpoch).collect(Collectors.toList());
+    for (int epoch = epochNo; epoch <= currentEpoch; epoch++) {
+      if(epochList.contains((long) epoch)) {
+        continue;
+      }
+      StakeAnalyticRewardResponse response = new StakeAnalyticRewardResponse((long)epoch, BigInteger.ZERO);
+      responses.add(response);
+    }
     return responses;
   }
 

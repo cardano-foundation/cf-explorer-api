@@ -6,6 +6,7 @@ import com.cardano.explorer.model.response.StakeAnalyticResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeAnalyticBalanceResponse;
+import com.cardano.explorer.model.response.stake.StakeAnalyticRewardResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
@@ -109,9 +110,16 @@ public interface StakeKeyService {
    * Get stake balance analytics
    * @param stakeKey stake address
    * @param type type of analytics (day, week, month, 3month)
-   * @return list transaction analytics
+   * @return list balance value by stake
    */
   List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type);
+
+  /**
+   * Get stake reward analytics
+   * @param stakeKey stake address
+   * @return list reward value by stake
+   */
+  List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey);
 
   /**
    *

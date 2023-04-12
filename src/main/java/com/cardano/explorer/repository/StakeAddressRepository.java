@@ -14,6 +14,13 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   Optional<StakeAddress> findByView(String aLong);
 
+  @Query(value = "SELECT b.epochNo"
+      + " FROM StakeAddress sa "
+      + " INNER JOIN Tx tx ON sa.tx = tx"
+      + " INNER JOIN Block b ON tx.block = b"
+      + " WHERE sa.view = :stakeAddress")
+  Optional<Integer> findRegisterEpoch(String stakeAddress);
+
 
   @Query(value = "SELECT DISTINCT tx.hash as txHash, b.time as time,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"

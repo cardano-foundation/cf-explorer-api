@@ -8,6 +8,7 @@ import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeAnalyticBalanceResponse;
+import com.cardano.explorer.model.response.stake.StakeAnalyticRewardResponse;
 import com.cardano.explorer.model.response.stake.StakeFilterResponse;
 import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
@@ -135,13 +136,21 @@ public class StakeKeyController {
     return ResponseEntity.ok(stakeService.getStakeAnalytics());
   }
 
-  @GetMapping("/analytics/{stakeKey}/{type}")
+  @GetMapping("/analytics-balance/{stakeKey}/{type}")
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
   public ResponseEntity<List<StakeAnalyticBalanceResponse>> getStakeBalanceAnalytics(
       @PathVariable String stakeKey, @PathVariable
   @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
     return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
+  }
+
+  @GetMapping("/analytics-reward/{stakeKey}")
+  @LogMessage
+  @Operation(summary = "Get stake balance analytics")
+  public ResponseEntity<List<StakeAnalyticRewardResponse>> getStakeRewardAnalytics(
+      @PathVariable String stakeKey) {
+    return ResponseEntity.ok(stakeService.getStakeRewardAnalytics(stakeKey));
   }
 
   @GetMapping("/min-max-balance/{stakeKey}")
