@@ -12,15 +12,14 @@ import com.cardano.explorer.mapper.TxOutMapper;
 import com.cardano.explorer.mapper.WithdrawalMapper;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
-import com.cardano.explorer.model.response.dashboard.Widget;
-import com.cardano.explorer.model.response.tx.CollateralResponse;
-import com.cardano.explorer.model.response.tx.TxResponse;
 import com.cardano.explorer.model.response.dashboard.TxGraph;
 import com.cardano.explorer.model.response.dashboard.TxSummary;
+import com.cardano.explorer.model.response.tx.CollateralResponse;
 import com.cardano.explorer.model.response.tx.ContractResponse;
 import com.cardano.explorer.model.response.tx.SummaryResponse;
 import com.cardano.explorer.model.response.tx.TxMintingResponse;
 import com.cardano.explorer.model.response.tx.TxOutResponse;
+import com.cardano.explorer.model.response.tx.TxResponse;
 import com.cardano.explorer.model.response.tx.UTxOResponse;
 import com.cardano.explorer.model.response.tx.WithdrawalResponse;
 import com.cardano.explorer.projection.AddressInputOutputProjection;
@@ -32,7 +31,6 @@ import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.BlockRepository;
-import com.cardano.explorer.repository.UnconsumeTxInRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.FailedTxOutRepository;
@@ -41,10 +39,10 @@ import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.repository.RedeemerRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
+import com.cardano.explorer.repository.UnconsumeTxInRepository;
 import com.cardano.explorer.repository.WithdrawalRepository;
 import com.cardano.explorer.service.TxService;
 import com.cardano.explorer.util.HexUtils;
-import com.cardano.explorer.util.TimeUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,27 +61,22 @@ import com.sotatek.cardano.common.enumeration.ScriptPurposeType;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -172,9 +165,12 @@ public class TxServiceImpl implements TxService {
             .amount(tx.getAmount().doubleValue())
             .fromAddress(from)
             .toAddress(to)
+            .epochNo(tx.getEpochNo())
+            .epochSlotNo(tx.getEpochSlotNo())
+            .slot(tx.getSlot())
+            .time(tx.getTime())
             .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAIL)
             .build();
-
         summaries.add(summary);
         return;
       }
