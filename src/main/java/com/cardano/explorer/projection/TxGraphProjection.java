@@ -6,5 +6,6 @@ public interface TxGraphProjection {
   Timestamp getTime();
   Integer getTransactionNo();
 
-  Long getBlockId();
+  Long getMaxBlockId();
+  Long getMinBlockId();
 }
