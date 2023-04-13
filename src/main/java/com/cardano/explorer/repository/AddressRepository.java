@@ -15,7 +15,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 
   @Query("SELECT address FROM Address address"
       + " WHERE address.addressHasScript = true")
-  List<Address> findAllByAddressHasScriptIsTrue(Pageable pageable);
+  Page<Address> findAllByAddressHasScriptIsTrue(Pageable pageable);
 
   @Query("SELECT address FROM Address address"
       + " ORDER BY address.balance DESC")

@@ -13,8 +13,8 @@ spring:
     # Hikari specific configs
     hikari:
       pool-name: explorer-api-pool
-      minimum-idle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: 1 #maximum pool size
+      minimum-idle: 10 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximum-pool-size: 20 #maximum pool size
       idle-timeout: 300000 #maximum idle time for connection
       max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
       connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
@@ -48,7 +48,7 @@ spring:
     web:
       pageable:
         default-page-size: 20
-        max-page-size: 50
+        max-page-size: 100
 
 redis:
   databaseIndex: 0
