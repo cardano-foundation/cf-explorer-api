@@ -616,7 +616,8 @@ public class TxServiceImpl implements TxService {
 
   private List<TxGraph> getTxGraphsInTime(long minusDays) {
 
-    LocalDate markTime = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(minusDays - 1);
+    LocalDate markTime = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .minusDays(minusDays - 1);
 
     List<TxGraphProjection> txs =
         txRepository.getTransactionsAfterTime(Timestamp.valueOf(markTime.atStartOfDay()));
@@ -652,9 +653,9 @@ public class TxServiceImpl implements TxService {
                 addressTxBalanceRepository.findTransactionIdsHaveSmartContract(batch,
                     Boolean.TRUE)));
 
-    Map<Date, TxGraph> txGraphs = new ConcurrentHashMap<>();
+    ConcurrentHashMap<Date, TxGraph> txGraphs = new ConcurrentHashMap<>();
 
-    if(minusDays != BigInteger.ONE.longValue()) {
+    if (minusDays != BigInteger.ONE.longValue()) {
       Lists.partition(txs, BATCH_SIZE)
           .parallelStream()
           .forEach(batch -> batch.parallelStream().forEach(tx -> {
@@ -672,30 +673,34 @@ public class TxServiceImpl implements TxService {
               txGraphs.put(key, txGraph);
             }
 
-            var complexTransaction = transactions.stream()
-                .filter(transaction -> tx.getBlockId().equals(transaction.getBlockId()))
-                .filter(transaction -> transactionIdsHaveToken.contains(transaction.getId()) ||
-                    transactionIdHaveSmartContract.contains(transaction.getId())).count();
+            var complexTransaction = getCountComplexTransactions(transactions, transactionIdsHaveToken,
+                transactionIdHaveSmartContract, tx);
 
             txGraph.setComplexTxs((int) complexTransaction);
             txGraph.setSimpleTxs(txGraph.getTxs() - txGraph.getComplexTxs());
           }));
-    } else{
+    } else {
       txs.parallelStream()
           .forEach(tx -> {
-            var currentDateTime =  tx.getTime().toLocalDateTime();
-            var key = Timestamp.valueOf(LocalDateTime.of(LocalDate.ofYearDay(currentDateTime.getYear(),
-                currentDateTime.getDayOfYear()), LocalTime.of(currentDateTime.getHour(), 0)));
+            var currentDateTime = tx.getTime().toLocalDateTime();
+            var key = Timestamp.valueOf(
+                LocalDateTime.of(LocalDate.ofYearDay(currentDateTime.getYear(),
+                    currentDateTime.getDayOfYear()), LocalTime.of(currentDateTime.getHour(), 0)));
 
-            TxGraph txGraph = TxGraph.builder()
-                .txs(tx.getTransactionNo())
-                .date(key)
-                .build();
+            TxGraph txGraph;
+            if (txGraphs.containsKey(key)) {
+              txGraph = txGraphs.get(key);
+              txGraph.setTxs(txGraph.getTxs() + tx.getTransactionNo());
+            } else {
+              txGraph = TxGraph.builder()
+                  .txs(tx.getTransactionNo())
+                  .date(key)
+                  .build();
+            }
 
-            var complexTransaction = transactions.stream()
-                .filter(transaction -> tx.getBlockId().equals(transaction.getBlockId()))
-                .filter(transaction -> transactionIdsHaveToken.contains(transaction.getId()) ||
-                    transactionIdHaveSmartContract.contains(transaction.getId())).count();
+            var complexTransaction = getCountComplexTransactions(transactions,
+                transactionIdsHaveToken, transactionIdHaveSmartContract,
+                tx);
 
             txGraph.setComplexTxs((int) complexTransaction);
             txGraph.setSimpleTxs(txGraph.getTxs() - txGraph.getComplexTxs());
@@ -708,6 +713,14 @@ public class TxServiceImpl implements TxService {
         .stream()
         .sorted(Comparator.comparing(TxGraph::getDate))
         .collect(Collectors.toList());
+  }
+
+  private static long getCountComplexTransactions(List<Tx> transactions, Set<Long> transactionIdsHaveToken,
+      Set<Long> transactionIdHaveSmartContract, TxGraphProjection tx) {
+    return transactions.stream()
+        .filter(transaction -> tx.getBlockId().equals(transaction.getBlockId()))
+        .filter(transaction -> transactionIdsHaveToken.contains(transaction.getId()) ||
+            transactionIdHaveSmartContract.contains(transaction.getId())).count();
   }
 
 }
