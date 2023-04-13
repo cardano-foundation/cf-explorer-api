@@ -18,6 +18,7 @@ import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
+import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.TokenService;
 import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AssetMetadata;
@@ -55,6 +56,7 @@ public class TokenServiceImpl implements TokenService {
   private final AssetMetadataRepository assetMetadataRepository;
   private final AddressTokenRepository addressTokenRepository;
   private final AddressRepository addressRepository;
+  private final TxRepository txRepository;
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
@@ -74,8 +76,9 @@ public class TokenServiceImpl implements TokenService {
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
     Timestamp yesterday = Timestamp.valueOf(
         LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
+    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(0L);
     List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(
-        multiAssets.getContent(), yesterday);
+        multiAssets.getContent(), txId);
     Map<Long, BigInteger> tokenVolumeMap = volumes.stream().collect(
         Collectors.toMap(TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume));
     multiAssetResponsesList.forEach(

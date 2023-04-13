@@ -64,6 +64,11 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "ORDER BY b.time DESC")
   List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
 
+  @Query("SELECT min(tx.id) FROM Tx tx "
+      + " INNER JOIN Block b ON b.id = tx.blockId"
+      + " WHERE b.time >= :time AND b.txCount > 0")
+  Optional<Long> findMinTxByAfterTime(@Param("time") Timestamp time);
+
   @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   List<Tx> findByIdIn(List<Long> ids);
 

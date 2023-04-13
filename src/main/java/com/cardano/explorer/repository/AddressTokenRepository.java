@@ -47,12 +47,9 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " COALESCE(SUM(addrToken.balance), 0) AS volume"
       + " FROM AddressToken addrToken"
       + " WHERE addrToken.multiAsset IN :multiAsset "
-      + " AND addrToken.balance > 0 AND addrToken.tx.id >="
-      + " (SELECT min(tx.id) FROM Tx tx "
-      + " INNER JOIN Block b ON b.id = tx.blockId"
-      + " WHERE b.time >= :time)"
+      + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId"
       + " GROUP BY addrToken.multiAsset")
-  List<TokenVolumeProjection> sumBalanceAfterTx(Collection<MultiAsset> multiAsset, Timestamp time);
+  List<TokenVolumeProjection> sumBalanceAfterTx(Collection<MultiAsset> multiAsset, Long txId);
 
   @Query("SELECT at.tx.id "
       + "FROM AddressToken at "
