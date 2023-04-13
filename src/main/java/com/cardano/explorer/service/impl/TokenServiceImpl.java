@@ -104,8 +104,12 @@ public class TokenServiceImpl implements TokenService {
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
     Timestamp yesterday = Timestamp.valueOf(
         LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    tokenResponse.setVolumeIn24h(
-        addressTokenRepository.sumBalanceAfterTx(multiAsset, yesterday).toString());
+    var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, yesterday);
+    if(Objects.isNull(volume)) {
+      tokenResponse.setVolumeIn24h(String.valueOf(0));
+    } else {
+      tokenResponse.setVolumeIn24h(volume.toString());
+    }
     AssetMetadata assetMetadata = assetMetadataRepository.findFirstBySubject(
         multiAsset.getPolicy() + multiAsset.getName()).orElse(null);
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));

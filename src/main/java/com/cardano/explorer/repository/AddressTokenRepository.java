@@ -20,7 +20,7 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " ORDER BY addrToken.tx.id DESC")
   List<Long> findTxsByMultiAsset(MultiAsset multiAsset, Pageable pageable);
 
-  @Query(value = "SELECT sum(addrToken.balance)"
+  @Query(value = "SELECT COALESCE(sum(addrToken.balance), 0)"
       + " FROM AddressToken addrToken"
       + " WHERE addrToken.multiAsset = :multiAsset "
       + " AND addrToken.balance > 0 AND addrToken.tx.id >= "
@@ -29,21 +29,22 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " WHERE b.time >= :time)")
   BigInteger sumBalanceAfterTx(MultiAsset multiAsset, Timestamp time);
 
-  @Query(value = "SELECT sum(addrToken.balance)"
+  @Query(value = "SELECT COALESCE(SUM(addrToken.balance), 0)"
       + " FROM AddressToken addrToken"
       + " WHERE addrToken.multiAsset = :multiAsset"
       + " AND addrToken.tx.id >"
-      + "   (SELECT max(tx.id) FROM Tx tx WHERE tx.blockId = "
-      + "     (SELECT max(block.id) FROM Block block WHERE block.time < :from AND block.txCount > 0)"
+      + "   (SELECT MAX(tx.id) FROM Tx tx WHERE tx.blockId = "
+      + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :from AND block.txCount > 0)"
       + "   )"
       + " AND addrToken.tx.id <="
-      + "   (SELECT max(tx.id) FROM Tx tx WHERE tx.blockId = "
-      + "     (SELECT max(block.id) FROM Block block WHERE block.time < :to AND block.txCount > 0)"
+      + "   (SELECT MAX(tx.id) FROM Tx tx WHERE tx.blockId = "
+      + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :to AND block.txCount > 0)"
       + "   )"
       + " AND addrToken.balance > 0")
   BigInteger sumBalanceBetweenTx(MultiAsset multiAsset, Timestamp from, Timestamp to);
 
-  @Query(value = "SELECT addrToken.multiAsset.id as ident, sum(addrToken.balance) as volume"
+  @Query(value = "SELECT addrToken.multiAsset.id AS ident, "
+      + " COALESCE(SUM(addrToken.balance), 0) AS volume"
       + " FROM AddressToken addrToken"
       + " WHERE addrToken.multiAsset IN :multiAsset "
       + " AND addrToken.balance > 0 AND addrToken.tx.id >="
