@@ -624,12 +624,12 @@ public class TxServiceImpl implements TxService {
     List<TxGraphProjection> txs;
     if (minusDays != BigInteger.ONE.longValue()) {
       markTime = LocalDateTime.now().minusDays(minusDays);
-      txs = txRepository.getTransactionsAfterTime(Timestamp.valueOf(markTime.toLocalDate().atStartOfDay()));
-    }else{
+      txs = txRepository.getTransactionsAfterTime(
+          Timestamp.valueOf(markTime.toLocalDate().atStartOfDay()));
+    } else {
       markTime = LocalDateTime.now().minus(ONE_DAY_HOURS, ChronoUnit.HOURS);
       txs = txRepository.getTransactionsAfterTime(Timestamp.valueOf(markTime));
     }
-
 
     List<Long> blockIdsHaveTransaction =
         txs.stream()
@@ -694,13 +694,15 @@ public class TxServiceImpl implements TxService {
             txGraphs.put(key, txGraph);
           }
 
-          var complexTransaction = transactions.stream()
+          var complexTransaction = (int) transactions.stream()
               .filter(transaction -> tx.getBlockId().equals(transaction.getBlockId()))
               .filter(transaction -> transactionIdsHaveToken.contains(transaction.getId()) ||
                   transactionIdHaveSmartContract.contains(transaction.getId())).count();
 
-          txGraph.setComplexTxs((int) complexTransaction);
-          txGraph.setSimpleTxs(txGraph.getTxs() - txGraph.getComplexTxs());
+          var transactionNatives = tx.getTransactionNo()  - complexTransaction;
+
+          txGraph.setComplexTxs(txGraph.getComplexTxs() + complexTransaction);
+          txGraph.setSimpleTxs( txGraph.getSimpleTxs() + transactionNatives);
         }));
 
     return txGraphs.values()
