@@ -26,6 +26,7 @@ import com.cardano.explorer.projection.AddressInputOutputProjection;
 import com.cardano.explorer.projection.TxContractProjection;
 import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
+import com.cardano.explorer.projection.TxLimit;
 import com.cardano.explorer.repository.AddressRepository;
 import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
@@ -46,7 +47,6 @@ import com.cardano.explorer.util.HexUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AssetMetadata;
 import com.sotatek.cardano.common.entity.BaseEntity_;
@@ -61,23 +61,25 @@ import com.sotatek.cardano.common.enumeration.ScriptPurposeType;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -88,6 +90,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -97,7 +100,7 @@ import org.springframework.util.CollectionUtils;
 @Log4j2
 public class TxServiceImpl implements TxService {
 
-  public static final int ONE_DAY_HOURS = 24;
+  public static final int ONE_DAY_HOURS = 25;
   private final TxRepository txRepository;
   private final TxOutRepository txOutRepository;
   private final BlockRepository blockRepository;
@@ -124,11 +127,9 @@ public class TxServiceImpl implements TxService {
   @Value("${application.network}")
   private String network;
   private static final int SUMMARY_SIZE = 4;
-  private static final long MONTH = 31;
-
-  public static final int BATCH_SIZE = 1000;
-  private static final String TRANSACTION_GRAPH_KEY = "TRANSACTION_GRAPH";
-
+  private static final long MONTH = 32;
+  private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
+  private static final String TRANSACTION_GRAPH_DAY_KEY = "TRANSACTION_GRAPH_DAY_KEY";
 
   @Override
   @Transactional(readOnly = true)
@@ -191,7 +192,10 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public List<TxGraph> getTxsAfterTime(long minusDays) {
-    return getTxGraphsInTime(minusDays);
+    if (minusDays != BigInteger.ONE.longValue()) {
+      return getTxGraphsInDays(minusDays);
+    }
+    return getTxGraphsToday();
   }
 
   @Override
@@ -614,97 +618,120 @@ public class TxServiceImpl implements TxService {
     return String.join("_", this.network, rawKey);
   }
 
-  private List<TxGraph> getTxGraphsInTime(long minusDays) {
-
-    LocalDateTime markTime;
-    List<TxGraphProjection> txs;
-    if (minusDays != BigInteger.ONE.longValue()) {
-      markTime = LocalDateTime.now().minusDays(minusDays);
-      txs = txRepository.getTransactionsAfterTime(
-          Timestamp.valueOf(markTime.toLocalDate().atStartOfDay()));
-    } else {
-      markTime = LocalDateTime.now().minus(ONE_DAY_HOURS, ChronoUnit.HOURS);
-      txs = txRepository.getTransactionsAfterTime(Timestamp.valueOf(markTime));
-    }
-
-    List<Long> blockIdsHaveTransaction =
-        txs.stream()
-            .map(TxGraphProjection::getBlockId)
-            .distinct()
-            .collect(Collectors.toList());
-    // Get all transaction linked with block ids
-    List<Tx> transactions = Collections.synchronizedList(new ArrayList<>());
-    Lists.partition(blockIdsHaveTransaction, BATCH_SIZE)
-        .parallelStream()
-        .forEach(batch -> transactions.addAll(txRepository.findTxIdsByBlockIds(batch)));
-
-    List<Long> transactionIds = transactions.stream().map(Tx::getId).collect(Collectors.toList());
-    // calculate transaction Ids Have Token
-    Set<Long> transactionIdsHaveToken = Collections.synchronizedSet(new HashSet<>());
-    Lists.partition(transactionIds, BATCH_SIZE)
-        .parallelStream()
-        .forEach(batch ->
-            transactionIdsHaveToken.addAll(addressTokenRepository.findTransactionHaveToken(batch)));
-
-    // calculate remain transactionIds have smart contract
-    Set<Long> transactionIdHaveSmartContract = Collections.synchronizedSet(new HashSet<>());
-    List<Long> transactionRemain = transactionIds.stream()
-        .filter(id -> !transactionIdsHaveToken.contains(id))
-        .collect(Collectors.toList());
-    Lists.partition(transactionRemain, BATCH_SIZE)
-        .parallelStream()
-        .forEach(batch ->
-            transactionIdHaveSmartContract.addAll(
-                addressTxBalanceRepository.findTransactionIdsHaveSmartContract(batch,
-                    Boolean.TRUE)));
-
-    Map<Date, TxGraph> txGraphs = new ConcurrentHashMap<>();
-    Function<LocalDateTime, Date> dateSupplier;
-
-    if (minusDays != BigInteger.ONE.longValue()) {
-      dateSupplier = localDateTime ->
-          Timestamp.valueOf(LocalDateTime.of(LocalDate.ofYearDay(localDateTime.getYear(),
-              localDateTime.getDayOfYear()), LocalTime.of(0, 0)));
-
-    } else {
-      dateSupplier = (localDateTime) ->
-          Timestamp.valueOf(LocalDateTime.of(LocalDate.ofYearDay(localDateTime.getYear(),
-              localDateTime.getDayOfYear()), LocalTime.of(localDateTime.getHour(), 0)));
-
-    }
-
-    Lists.partition(txs, BATCH_SIZE)
-        .parallelStream()
-        .forEach(batch -> batch.parallelStream().forEach(tx -> {
-          var key = dateSupplier.apply(tx.getTime().toLocalDateTime());
-          TxGraph txGraph;
-          if (txGraphs.containsKey(key)) {
-            txGraph = txGraphs.get(key);
-            txGraph.setTxs(txGraph.getTxs() + tx.getTransactionNo());
-          } else {
-            log.debug("for date {}", key);
-            txGraph = TxGraph.builder()
-                .txs(tx.getTransactionNo())
-                .date(key)
-                .build();
-            txGraphs.put(key, txGraph);
+  private List<TxGraph> getTxGraphsToday() {
+    List<TxGraph> txGraphs = new ArrayList<>();
+    IntStream.range(BigInteger.ZERO.intValue(), ONE_DAY_HOURS - 1)
+        .parallel()
+        .forEach(hour -> {
+          LocalDateTime markTime = LocalDateTime.now().minus(hour, ChronoUnit.HOURS);
+          LocalDateTime endTime = LocalDateTime.now().minus(hour + 1, ChronoUnit.HOURS);
+          if (hour != BigInteger.ZERO.intValue()) {
+            markTime = LocalDateTime.of(markTime.toLocalDate(),
+                LocalTime.of(markTime.getHour(), 0));
           }
 
-          var complexTransaction = (int) transactions.stream()
-              .filter(transaction -> tx.getBlockId().equals(transaction.getBlockId()))
-              .filter(transaction -> transactionIdsHaveToken.contains(transaction.getId()) ||
-                  transactionIdHaveSmartContract.contains(transaction.getId())).count();
-
-          var transactionNatives = tx.getTransactionNo()  - complexTransaction;
-
-          txGraph.setComplexTxs(txGraph.getComplexTxs() + complexTransaction);
-          txGraph.setSimpleTxs( txGraph.getSimpleTxs() + transactionNatives);
-        }));
-
-    return txGraphs.values()
-        .stream()
+          endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0));
+          txGraphs.add(getTxGraph(Pair.of(markTime, endTime), Boolean.TRUE));
+        });
+    return txGraphs.stream()
         .sorted(Comparator.comparing(TxGraph::getDate))
         .collect(Collectors.toList());
   }
 
+  private List<TxGraph> getTxGraphsInDays(long minusDays) {
+    List<TxGraph> txGraphs = new ArrayList<>();
+
+    LongStream.range(BigInteger.ONE.longValue(), minusDays).parallel().forEach(day -> {
+      LocalDateTime markTime = LocalDateTime.now().minusDays(day - BigInteger.ONE.longValue())
+          .toLocalDate().atStartOfDay();
+      LocalDateTime endTime = LocalDateTime.now().minusDays(day - BigInteger.ONE.longValue())
+          .toLocalDate().atStartOfDay();
+      var keyMonth = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
+      var index = endTime.getDayOfMonth() % MONTH;
+      var redisGraph = redisTemplate.opsForList().index(keyMonth, index);
+
+      if (Objects.nonNull(redisGraph)) {
+        var distance = Math.abs(
+            ChronoUnit.DAYS.between(
+                LocalDateTime.ofInstant(redisGraph.getDate().toInstant(), ZoneId.systemDefault()),
+                endTime));
+        if (distance == BigInteger.ZERO.longValue()) {
+          txGraphs.add(redisGraph);
+          return;
+        }
+      }
+
+      TxGraph txGraph = getTxGraph(Pair.of(markTime, endTime), Boolean.FALSE);
+      redisTemplate.opsForList().set(keyMonth, index - 1, txGraph);
+      txGraphs.add(txGraph);
+    });
+
+    txGraphs.add(getTxGraph(
+        Pair.of(LocalDateTime.now(), LocalDateTime.now().toLocalDate().atStartOfDay()),
+        Boolean.FALSE));
+
+    return txGraphs.stream()
+        .sorted(Comparator.comparing(TxGraph::getDate))
+        .collect(Collectors.toList());
+  }
+
+  private TxGraph getTxGraph(Pair<LocalDateTime, LocalDateTime> markAndEnd, boolean isOneDay) {
+    var markTime = markAndEnd.getFirst();
+    var endTime = markAndEnd.getSecond();
+
+    Supplier<TxGraphProjection> supplier;
+    if (isOneDay) {
+      supplier = () -> txRepository.getTransactionsAfterDateTime(Timestamp.valueOf(markTime),
+          Timestamp.valueOf(endTime));
+    } else {
+      supplier = () -> txRepository.getTransactionsAfterDate(
+          Timestamp.valueOf(markTime),
+          Timestamp.valueOf(endTime));
+    }
+
+    TxGraphProjection txGraphProjection = supplier.get();
+
+    if (Objects.isNull(txGraphProjection)) {
+      return TxGraph.builder()
+          .date(Timestamp.valueOf(endTime))
+          .txs(BigInteger.ZERO.intValue())
+          .complexTxs(BigInteger.ZERO.intValue())
+          .simpleTxs(BigInteger.ZERO.intValue())
+          .build();
+    }
+
+    TxLimit txLimit = txRepository.findRangeTxIdsByBlockIds(
+        List.of(txGraphProjection.getMinBlockId(),
+            txGraphProjection.getMaxBlockId()));
+
+    var totalComplexTx = txOutRepository.getTotalTokenAndSmartContract(
+        txLimit.getMinId(),
+        txLimit.getMaxId());
+
+    return TxGraph.builder()
+        .date(Timestamp.valueOf(endTime))
+        .txs(txGraphProjection.getTransactionNo())
+        .complexTxs(totalComplexTx)
+        .simpleTxs(txGraphProjection.getTransactionNo() - totalComplexTx)
+        .build();
+  }
+
+
+  @PostConstruct
+  public void setup() {
+    var keyMonth = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
+    var size = redisTemplate.opsForList().size(keyMonth);
+    if (Objects.isNull(size)) {
+      size = 0L;
+    }
+    if (size < MONTH - 1) {
+      LongStream.range(0, MONTH - 1 - size).forEach(time ->
+          redisTemplate.opsForList().leftPush(keyMonth, TxGraph.builder()
+              .date(new Date())
+              .txs(BigInteger.ZERO.intValue())
+              .complexTxs(BigInteger.ZERO.intValue())
+              .simpleTxs(BigInteger.ZERO.intValue())
+              .build()));
+    }
+  }
 }

@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface TxOutRepository extends JpaRepository<TxOut, Long> {
 
@@ -51,8 +52,13 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
   List<AddressInputOutputProjection> getTxAddressInputInfo(Tx tx);
 
 
-  @Query("SELECT sAddr.id "
-      + "FROM StakeAddress sAddr "
-      + "JOIN TxOut txo ON txo.stakeAddress.id = sAddr.id ")
-  List<Long> getUniqueAcountByTxId();
+  @Query("SELECT COUNT( DISTINCT(txo.tx.id)) "
+      + "FROM TxOut txo "
+      + "WHERE txo.tx.id >= :minTx AND "
+      + "txo.tx.id <= :maxTx AND "
+      + "(txo.addressHasScript = TRUE OR "
+      + "txo.tokenType != com.sotatek.cardano.common.enumeration.TokenType.NATIVE_TOKEN )")
+  Integer getTotalTokenAndSmartContract(
+      @Param("minTx") Long minTx,
+      @Param("maxTx") Long maxTx);
 }

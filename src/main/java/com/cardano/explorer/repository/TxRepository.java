@@ -2,6 +2,7 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.projection.TxGraphProjection;
 import com.cardano.explorer.projection.TxIOProjection;
+import com.cardano.explorer.projection.TxLimit;
 import com.sotatek.cardano.common.entity.Block;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.Tx_;
@@ -60,13 +61,27 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "ORDER BY b.blockNo DESC, tx.blockIndex DESC")
   List<TxIOProjection> findLatestTxIO(Collection<Long> txIds);
 
-  @Query(value = "SELECT b.id AS blockId, b.time as time, b.txCount as transactionNo "
-      + "FROM Block b "
-      + "WHERE b.time >= :time AND "
-      + "b.txCount IS NOT NULL AND "
-      + "b.txCount > 0 "
-      + "ORDER BY b.time DESC")
-  List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
+  @Query(value =
+      "SELECT MAX(b.id) AS maxBlockId, MIN(b.id) AS minBlockId, SUM(b.txCount) as transactionNo "
+          + "FROM Block b "
+          + "WHERE b.time >= :endTime AND "
+          + "b.time < :startTime AND "
+          + "b.txCount IS NOT NULL AND "
+          + "b.txCount > 0 "
+          + "GROUP BY CAST(b.time AS date )")
+  TxGraphProjection getTransactionsAfterDate(@Param("startTime") Timestamp startTime,
+      @Param("endTime") Timestamp endTime);
+
+  @Query(value =
+      "SELECT MAX(b.id) AS maxBlockId, MIN(b.id) AS minBlockId, CAST(b.time AS LocalTime ) as time, SUM(b.txCount) as transactionNo "
+          + "FROM Block b "
+          + "WHERE b.time >= :endTime AND "
+          + "b.time < :startTime AND "
+          + "b.txCount IS NOT NULL AND "
+          + "b.txCount > 0 "
+          + "GROUP BY time")
+  TxGraphProjection getTransactionsAfterDateTime(@Param("startTime") Timestamp startTime,
+      @Param("endTime") Timestamp endTime);
 
   @Query("SELECT min(tx.id) FROM Tx tx "
       + " INNER JOIN Block b ON b.id = tx.blockId"
@@ -76,6 +91,6 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   List<Tx> findByIdIn(List<Long> ids);
 
-  @Query("SELECT tx FROM Tx tx WHERE tx.blockId IN :blockIds")
-  List<Tx> findTxIdsByBlockIds(@Param("blockIds") List<Long> blockIds);
+  @Query("SELECT MAX(tx.id) AS maxId, MIN(tx.id) AS minId FROM Tx tx WHERE tx.blockId IN :blockIds")
+  TxLimit findRangeTxIdsByBlockIds(@Param("blockIds") List<Long> blockIds);
 }
