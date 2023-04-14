@@ -79,6 +79,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -619,10 +620,10 @@ public class TxServiceImpl implements TxService {
   }
 
   private List<TxGraph> getTxGraphsToday() {
-    List<TxGraph> txGraphs = new ArrayList<>();
-    IntStream.range(BigInteger.ZERO.intValue(), ONE_DAY_HOURS - 1)
+    return IntStream.range(BigInteger.ZERO.intValue(), ONE_DAY_HOURS - 1)
+        .boxed()
         .parallel()
-        .forEach(hour -> {
+        .map(hour -> {
           LocalDateTime markTime = LocalDateTime.now().minus(hour, ChronoUnit.HOURS);
           LocalDateTime endTime = LocalDateTime.now().minus(hour + 1, ChronoUnit.HOURS);
           if (hour != BigInteger.ZERO.intValue()) {
@@ -631,46 +632,45 @@ public class TxServiceImpl implements TxService {
           }
 
           endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0));
-          txGraphs.add(getTxGraph(Pair.of(markTime, endTime), Boolean.TRUE));
-        });
-    return txGraphs.stream()
+          return getTxGraph(Pair.of(markTime, endTime), Boolean.TRUE);
+        })
         .sorted(Comparator.comparing(TxGraph::getDate))
         .collect(Collectors.toList());
   }
 
   private List<TxGraph> getTxGraphsInDays(long minusDays) {
-    List<TxGraph> txGraphs = new ArrayList<>();
 
-    LongStream.range(BigInteger.ONE.longValue(), minusDays).forEach(day -> {
-      LocalDateTime markTime = LocalDateTime.now().minusDays(day)
-          .toLocalDate().atStartOfDay();
-      LocalDateTime endTime = LocalDateTime.now().minusDays(day + BigInteger.ONE.longValue())
-          .toLocalDate().atStartOfDay();
-      var keyMonth = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
-      var index = endTime.getDayOfMonth() % MONTH;
-      var redisGraph = redisTemplate.opsForList().index(keyMonth, index);
+    var txGraphs = LongStream.range(BigInteger.ZERO.longValue(), minusDays)
+        .boxed()
+        .parallel()
+        .map(day -> {
+          LocalDateTime markTime = LocalDateTime.now().minusDays(day)
+              .toLocalDate().atStartOfDay();
+          LocalDateTime endTime = LocalDateTime.now().minusDays(day + BigInteger.ONE.longValue())
+              .toLocalDate().atStartOfDay();
+          var keyMonth = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
+          var index = endTime.getDayOfMonth() % MONTH;
+          var redisGraph = redisTemplate.opsForList().index(keyMonth, index);
 
-      if (Objects.nonNull(redisGraph)) {
-        var distance = Math.abs(
-            ChronoUnit.DAYS.between(
-                LocalDateTime.ofInstant(redisGraph.getDate().toInstant(), ZoneId.systemDefault()),
-                endTime));
-        if (distance == BigInteger.ZERO.longValue()) {
-          txGraphs.add(redisGraph);
-          return;
-        }
-      }
+          if (Objects.nonNull(redisGraph)) {
+            var distance = Math.abs(
+                ChronoUnit.DAYS.between(
+                    LocalDateTime.ofInstant(redisGraph.getDate().toInstant(),
+                        ZoneId.systemDefault()),
+                    endTime));
+            if (distance == BigInteger.ZERO.longValue()) {
+              return redisGraph;
+            }
+          }
 
-      TxGraph txGraph = getTxGraph(Pair.of(markTime, endTime), Boolean.FALSE);
-      redisTemplate.opsForList().set(keyMonth, index - 1, txGraph);
-      txGraphs.add(txGraph);
-    });
+          TxGraph txGraph = getTxGraph(Pair.of(markTime, endTime), Boolean.FALSE);
+          redisTemplate.opsForList().set(keyMonth, index - 1, txGraph);
+          return txGraph;
+        });
 
-    txGraphs.add(getTxGraph(
-        Pair.of(LocalDateTime.now(), LocalDateTime.now().toLocalDate().atStartOfDay()),
-        Boolean.FALSE));
-
-    return txGraphs.stream()
+    return Stream.concat(txGraphs, Stream.of(getTxGraph(
+            Pair.of(LocalDateTime.now(), LocalDateTime.now().toLocalDate().atStartOfDay()),
+            Boolean.FALSE)))
         .sorted(Comparator.comparing(TxGraph::getDate))
         .collect(Collectors.toList());
   }
