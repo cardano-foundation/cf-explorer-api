@@ -64,6 +64,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -624,8 +625,8 @@ public class TxServiceImpl implements TxService {
     var streamTxGraph = IntStream.range(BigInteger.ONE.intValue(), ONE_DAY_HOURS - 1)
         .boxed()
         .map(hour -> {
-          LocalDateTime markTime = LocalDateTime.now().minus(hour, ChronoUnit.HOURS);
-          LocalDateTime endTime = LocalDateTime.now().minus(hour + 1, ChronoUnit.HOURS);
+          LocalDateTime markTime = LocalDateTime.now(ZoneOffset.UTC).minus(hour, ChronoUnit.HOURS);
+          LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC).minus(hour + 1L, ChronoUnit.HOURS);
 
           markTime = LocalDateTime.of(markTime.toLocalDate(), LocalTime.of(markTime.getHour(), 0, 0));
           endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0, 0));
@@ -633,12 +634,10 @@ public class TxServiceImpl implements TxService {
           return getTxGraph(Pair.of(markTime, endTime), Boolean.TRUE);
         });
 
-    LocalDateTime currentHour = LocalDateTime.now();
+    LocalDateTime currentHour = LocalDateTime.now(ZoneOffset.UTC);
 
-    LocalDateTime endTime = LocalDateTime.now();
+    LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC);
     endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0, 0));
-
-
 
     return Stream.concat(Stream.of(getTxGraph(Pair.of(currentHour, endTime), Boolean.TRUE)), streamTxGraph)
         .sorted(Comparator.comparing(TxGraph::getDate))
@@ -651,9 +650,9 @@ public class TxServiceImpl implements TxService {
         .boxed()
         .parallel()
         .map(day -> {
-          LocalDateTime markTime = LocalDateTime.now().minusDays(day)
+          LocalDateTime markTime = LocalDateTime.now(ZoneOffset.UTC).minusDays(day)
               .toLocalDate().atStartOfDay();
-          LocalDateTime endTime = LocalDateTime.now().minusDays(day + BigInteger.ONE.longValue())
+          LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC).minusDays(day + BigInteger.ONE.longValue())
               .toLocalDate().atStartOfDay();
           var keyMonth = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
           var index = endTime.getDayOfMonth() % MONTH;
@@ -676,7 +675,7 @@ public class TxServiceImpl implements TxService {
         });
 
     return Stream.concat(txGraphs, Stream.of(getTxGraph(
-            Pair.of(LocalDateTime.now(), LocalDateTime.now().toLocalDate().atStartOfDay()),
+            Pair.of(LocalDateTime.now(ZoneOffset.UTC), LocalDateTime.now(ZoneOffset.UTC).toLocalDate().atStartOfDay()),
             Boolean.FALSE)))
         .sorted(Comparator.comparing(TxGraph::getDate))
         .collect(Collectors.toList());
