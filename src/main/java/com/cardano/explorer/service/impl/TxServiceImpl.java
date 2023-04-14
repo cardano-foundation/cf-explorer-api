@@ -642,7 +642,7 @@ public class TxServiceImpl implements TxService {
     List<TxGraph> txGraphs = new ArrayList<>();
 
     LongStream.range(BigInteger.ONE.longValue(), minusDays).parallel().forEach(day -> {
-      LocalDateTime markTime = LocalDateTime.now().minusDays(day - BigInteger.ONE.longValue())
+      LocalDateTime markTime = LocalDateTime.now().minusDays(day)
           .toLocalDate().atStartOfDay();
       LocalDateTime endTime = LocalDateTime.now().minusDays(day - BigInteger.ONE.longValue())
           .toLocalDate().atStartOfDay();
