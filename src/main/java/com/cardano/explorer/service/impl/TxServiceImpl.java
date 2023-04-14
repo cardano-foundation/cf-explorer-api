@@ -620,24 +620,27 @@ public class TxServiceImpl implements TxService {
   }
 
   private List<TxGraph> getTxGraphsToday() {
-    log.info("check deploy");
-    return IntStream.range(BigInteger.ZERO.intValue(), ONE_DAY_HOURS - 1)
+
+    var streamTxGraph = IntStream.range(BigInteger.ONE.intValue(), ONE_DAY_HOURS - 1)
         .boxed()
-        .parallel()
         .map(hour -> {
           LocalDateTime markTime = LocalDateTime.now().minus(hour, ChronoUnit.HOURS);
           LocalDateTime endTime = LocalDateTime.now().minus(hour + 1, ChronoUnit.HOURS);
-          if (hour != BigInteger.ZERO.intValue()) {
-            markTime = LocalDateTime.of(markTime.toLocalDate(),
-                LocalTime.of(markTime.getHour(), 0));
-          }else{
-            markTime = LocalDateTime.of(markTime.toLocalDate(),
-                LocalTime.of(markTime.getHour(), 59));
-          }
-          endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0));
+
+          markTime = LocalDateTime.of(markTime.toLocalDate(), LocalTime.of(markTime.getHour(), 0, 0));
+          endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0, 0));
 
           return getTxGraph(Pair.of(markTime, endTime), Boolean.TRUE);
-        })
+        });
+
+    LocalDateTime currentHour = LocalDateTime.now();
+
+    LocalDateTime endTime = LocalDateTime.now();
+    endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0, 0));
+
+
+
+    return Stream.concat(Stream.of(getTxGraph(Pair.of(currentHour, endTime), Boolean.TRUE)), streamTxGraph)
         .sorted(Comparator.comparing(TxGraph::getDate))
         .collect(Collectors.toList());
   }
