@@ -73,13 +73,13 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       @Param("endTime") Timestamp endTime);
 
   @Query(value =
-      "SELECT MAX(b.id) AS maxBlockId, MIN(b.id) AS minBlockId, CAST(b.time AS LocalTime ) as time, SUM(b.txCount) as transactionNo "
+      "SELECT MAX(b.id) AS maxBlockId, MIN(b.id) AS minBlockId, SUM(b.txCount) as transactionNo "
           + "FROM Block b "
           + "WHERE b.time >= :endTime AND "
           + "b.time < :startTime AND "
           + "b.txCount IS NOT NULL AND "
           + "b.txCount > 0 "
-          + "GROUP BY time")
+          + "GROUP BY  hour(b.time)  ")
   TxGraphProjection getTransactionsAfterDateTime(@Param("startTime") Timestamp startTime,
       @Param("endTime") Timestamp endTime);
 
