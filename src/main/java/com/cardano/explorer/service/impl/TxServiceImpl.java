@@ -620,6 +620,7 @@ public class TxServiceImpl implements TxService {
   }
 
   private List<TxGraph> getTxGraphsToday() {
+    log.info("check deploy");
     return IntStream.range(BigInteger.ZERO.intValue(), ONE_DAY_HOURS - 1)
         .boxed()
         .parallel()
@@ -629,9 +630,12 @@ public class TxServiceImpl implements TxService {
           if (hour != BigInteger.ZERO.intValue()) {
             markTime = LocalDateTime.of(markTime.toLocalDate(),
                 LocalTime.of(markTime.getHour(), 0));
+          }else{
+            markTime = LocalDateTime.of(markTime.toLocalDate(),
+                LocalTime.of(markTime.getHour(), 59));
           }
-
           endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0));
+
           return getTxGraph(Pair.of(markTime, endTime), Boolean.TRUE);
         })
         .sorted(Comparator.comparing(TxGraph::getDate))
