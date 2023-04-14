@@ -68,7 +68,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
           + "b.time < :startTime AND "
           + "b.txCount IS NOT NULL AND "
           + "b.txCount > 0 "
-          + "GROUP BY CAST(b.time AS date )")
+          + "GROUP BY date(b.time) ")
   TxGraphProjection getTransactionsAfterDate(@Param("startTime") Timestamp startTime,
       @Param("endTime") Timestamp endTime);
 
