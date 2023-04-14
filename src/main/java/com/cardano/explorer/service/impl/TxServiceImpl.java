@@ -641,10 +641,10 @@ public class TxServiceImpl implements TxService {
   private List<TxGraph> getTxGraphsInDays(long minusDays) {
     List<TxGraph> txGraphs = new ArrayList<>();
 
-    LongStream.range(BigInteger.ONE.longValue(), minusDays).parallel().forEach(day -> {
+    LongStream.range(BigInteger.ONE.longValue(), minusDays).forEach(day -> {
       LocalDateTime markTime = LocalDateTime.now().minusDays(day)
           .toLocalDate().atStartOfDay();
-      LocalDateTime endTime = LocalDateTime.now().minusDays(day - BigInteger.ONE.longValue())
+      LocalDateTime endTime = LocalDateTime.now().minusDays(day + BigInteger.ONE.longValue())
           .toLocalDate().atStartOfDay();
       var keyMonth = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
       var index = endTime.getDayOfMonth() % MONTH;
