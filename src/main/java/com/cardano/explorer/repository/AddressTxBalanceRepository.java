@@ -6,6 +6,7 @@ import com.sotatek.cardano.common.entity.Tx;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
