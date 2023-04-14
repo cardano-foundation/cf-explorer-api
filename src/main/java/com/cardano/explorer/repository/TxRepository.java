@@ -45,7 +45,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "b.blockNo as blockNo, "
       + "outp.address as toAddress, "
       + "inp.address as fromAddress, "
-      + "outp.value as amount,"
+      + "tx.outSum as amount,"
       + "tx.validContract as validContract, "
       + "b.time as time, "
       + "b.epochNo as epochNo, "
