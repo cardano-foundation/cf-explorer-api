@@ -1,6 +1,7 @@
 package com.cardano.explorer.model.response.dashboard;
 
 import com.cardano.explorer.common.enumeration.TxStatus;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,5 +19,9 @@ public class TxSummary {
   private List<String> toAddress;
   private Double amount;
   private String hash;
+  private Integer epochNo;
+  private Integer epochSlotNo;
+  private Integer slot;
+  private LocalDateTime time;
   private TxStatus status;
 }
