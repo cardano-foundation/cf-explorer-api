@@ -14,9 +14,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
   @Query("SELECT address FROM Address address"
-      + " WHERE address.addressHasScript = true"
-      + " ORDER BY address.balance DESC")
-  List<Address> findAllByAddressHasScriptIsTrue(Pageable pageable);
+      + " WHERE address.addressHasScript = true")
+  Page<Address> findAllByAddressHasScriptIsTrue(Pageable pageable);
 
   @Query("SELECT address FROM Address address"
       + " ORDER BY address.balance DESC")
