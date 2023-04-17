@@ -1,6 +1,7 @@
 package com.cardano.explorer.projection;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 public interface TxIOProjection {
   Long getBlockNo();
@@ -9,4 +10,8 @@ public interface TxIOProjection {
   String getHash();
   BigInteger getAmount();
   Boolean getValidContract();
+  Integer getEpochNo();
+  Integer getEpochSlotNo();
+  Integer getSlot();
+  LocalDateTime getTime();
 }

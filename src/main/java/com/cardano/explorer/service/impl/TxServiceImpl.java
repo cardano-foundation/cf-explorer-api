@@ -150,7 +150,11 @@ public class TxServiceImpl implements TxService {
             .amount(tx.getAmount().doubleValue())
             .fromAddress(from)
             .toAddress(to)
-            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS: TxStatus.FAIL)
+            .epochNo(tx.getEpochNo())
+            .epochSlotNo(tx.getEpochSlotNo())
+            .slot(tx.getSlot())
+            .time(tx.getTime())
+            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAIL)
             .build();
 
         summaries.add(summary);
