@@ -178,11 +178,8 @@ public class AddressServiceImpl implements AddressService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
-    List<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
-    List<ContractFilterResponse> responses = contractPage.stream()
-        .map(addressMapper::fromAddressToContractFilter).collect(Collectors.toList());
-    Page<ContractFilterResponse> pageResponse
-        = new PageImpl<>(responses, pageable, pageable.getPageSize());
+    Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
+    Page<ContractFilterResponse> pageResponse = contractPage.map(addressMapper::fromAddressToContractFilter);
     return new BaseFilterResponse<>(pageResponse);
   }
 
