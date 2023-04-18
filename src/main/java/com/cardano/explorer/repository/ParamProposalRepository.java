@@ -280,5 +280,5 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
   )
   List<ParamHistory> getHistoryCostModel(@Param("txIds") List<Long> txIds);
 
-
+  List<ParamProposal> getParamProposalByRegisteredTxId(Long id);
 }
