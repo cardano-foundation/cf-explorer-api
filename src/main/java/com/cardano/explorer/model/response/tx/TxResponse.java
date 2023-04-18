@@ -17,4 +17,5 @@ public class TxResponse {
   private List<WithdrawalResponse> withdrawals;
   private List<TxDelegationResponse> delegations;
   private List<TxMintingResponse> mints;
+  private ProtocolParamResponse protocols;
 }
