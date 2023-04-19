@@ -76,7 +76,7 @@ public class TokenServiceImpl implements TokenService {
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
     Timestamp yesterday = Timestamp.valueOf(
         LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(0L);
+    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
     List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(
         multiAssets.getContent(), txId);
     Map<Long, BigInteger> tokenVolumeMap = volumes.stream().collect(
