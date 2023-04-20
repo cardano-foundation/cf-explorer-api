@@ -1,10 +1,12 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
+import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardAllResponse;
+import com.cardano.explorer.service.PoolLifecycleService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/pool-lifecycle")
 @RequiredArgsConstructor
 public class PoolLifecycleController {
+
+  private final PoolLifecycleService poolLifecycleService;
 
 
   @GetMapping(value = "/registration")
@@ -47,5 +51,12 @@ public class PoolLifecycleController {
   public ResponseEntity<DeRegistrationResponse> deRegistration(
       @RequestParam("poolView") String poolView) {
     return null;
+  }
+
+  @GetMapping(value = "/owner")
+  public ResponseEntity<BaseFilterResponse<String>> poolOwner(
+      @RequestParam("stakeKey") String stakeKey,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolLifecycleService.getPoolViewByStakeKey(stakeKey, pageable));
   }
 }
