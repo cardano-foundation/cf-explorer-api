@@ -1,6 +1,7 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
+import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.Withdrawal;
 import com.sotatek.cardano.common.entity.Withdrawal_;
@@ -24,6 +25,14 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " WHERE stakeAddress.view = :stakeAddress")
   Optional<BigInteger> getRewardWithdrawnByStakeAddress(String stakeAddress);
 
+  @Query("SELECT tx.hash as txHash,withdrawal.amount as amount, block.time as time, tx.fee as fee,"
+      + " block.epochNo as epochNo"
+      + " FROM Withdrawal withdrawal"
+      + " INNER JOIN Tx tx ON withdrawal.tx = tx"
+      + " INNER JOIN Block block ON tx.block = block"
+      + " WHERE withdrawal.addr = :stakeKey AND tx.hash = :hash")
+  Optional<StakeWithdrawalProjection> getWithdrawalByAddressAndTx(StakeAddress stakeKey, String hash);
+
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"
       + " FROM Withdrawal withdrawal"
@@ -33,6 +42,15 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
   Page<StakeWithdrawalProjection> getWithdrawalByAddress(String stakeKey, Pageable pageable);
+
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+      + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"
+      + " FROM Withdrawal withdrawal"
+      + " INNER JOIN Tx tx ON withdrawal.tx = tx"
+      + " INNER JOIN Block block ON tx.block = block"
+      + " WHERE withdrawal.addr = :stakeKey")
+  Page<StakeWithdrawalProjection> getWithdrawalByAddress(StakeAddress stakeKey,
+      Pageable pageable);
 
   @Query("SELECT sum(wd.amount) "
       + "FROM Withdrawal wd "

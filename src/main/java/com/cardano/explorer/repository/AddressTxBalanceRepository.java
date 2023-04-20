@@ -7,11 +7,11 @@ import com.sotatek.cardano.common.entity.Tx;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalance, Long> {
 
@@ -53,11 +53,5 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " WHERE addressTxBalance.address IN "
       + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
       + " AND addressTxBalance.time <= :time")
-  BigInteger getBalanceByStakeAddressAndTime(StakeAddress stakeAddress, Timestamp time);
-
-  @Query("SELECT atb.tx.id "
-      + "FROM AddressTxBalance atb "
-      + "INNER JOIN Address addr ON addr.id = atb.address.id "
-      + "WHERE atb.tx.id IN :txIds AND addr.addressHasScript = :isSmartContract")
-  List<Long> findTransactionIdsHaveSmartContract(@Param("txIds") List<Long> txIds, @Param("isSmartContract") Boolean isSmartContract);
+  Optional<BigInteger> getBalanceByStakeAddressAndTime(StakeAddress stakeAddress, Timestamp time);
 }
