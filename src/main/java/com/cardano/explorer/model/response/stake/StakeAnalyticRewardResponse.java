@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class StakeAnalyticRewardResponse {
-  private Long epoch;
+  private Integer epoch;
   private BigInteger value;
 }

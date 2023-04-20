@@ -17,11 +17,11 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   @Query(value = "SELECT b.epochNo"
       + " FROM StakeAddress sa "
-      + " INNER JOIN Tx tx ON sa.tx = tx"
+      + " INNER JOIN StakeRegistration sr ON sa.id = sr.addr.id"
+      + " INNER JOIN Tx tx ON sr.tx.id = tx.id"
       + " INNER JOIN Block b ON tx.block = b"
       + " WHERE sa.view = :stakeAddress")
   Optional<Integer> findRegisterEpoch(String stakeAddress);
-
 
   @Query(value = "SELECT DISTINCT tx.hash as txHash, b.time as time,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
