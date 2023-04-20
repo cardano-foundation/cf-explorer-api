@@ -49,6 +49,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -302,15 +303,16 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey) {
-    int epochNo = stakeAddressRepository.findRegisterEpoch(stakeKey).orElse(0);
+    int startEpoch = stakeAddressRepository.findRegisterEpoch(stakeKey).orElse(0);
     int currentEpoch = epochRepository.findCurrentEpochNo().orElse(2) - 2;
     List<StakeAnalyticRewardResponse> responses = rewardRepository.findRewardByStake(stakeKey);
-    List<Long> epochList = responses.stream().map(StakeAnalyticRewardResponse::getEpoch).collect(Collectors.toList());
-    for (int epoch = epochNo; epoch <= currentEpoch; epoch++) {
-      if(epochList.contains((long) epoch)) {
-        continue;
-      }
-      StakeAnalyticRewardResponse response = new StakeAnalyticRewardResponse((long)epoch, BigInteger.ZERO);
+    Map<Integer, BigInteger> rewardMap = responses.stream().collect(Collectors.toMap(
+        StakeAnalyticRewardResponse::getEpoch, StakeAnalyticRewardResponse::getValue));
+    responses = new ArrayList<>();
+    for (int epoch = startEpoch ; epoch <= currentEpoch; epoch++) {
+      StakeAnalyticRewardResponse response;
+      response = new StakeAnalyticRewardResponse(epoch,
+          rewardMap.getOrDefault(epoch, BigInteger.ZERO));
       responses.add(response);
     }
     return responses;
