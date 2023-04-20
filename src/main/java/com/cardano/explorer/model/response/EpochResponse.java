@@ -25,4 +25,6 @@ public class EpochResponse {
   private LocalDateTime endTime;
 
   private Integer maxSlot;
+
+  private BigInteger rewardsDistributed;
 }
