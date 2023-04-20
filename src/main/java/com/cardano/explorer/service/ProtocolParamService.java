@@ -2,9 +2,11 @@ package com.cardano.explorer.service;
 
 import com.cardano.explorer.common.enumeration.ProtocolType;
 import com.cardano.explorer.model.response.protocol.ProtocolHistory;
-import java.util.List;
+import java.util.Set;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ProtocolParamService {
 
-  List<ProtocolHistory> getProtocolHistory(ProtocolType protocolType);
+  @Transactional(readOnly = true)
+  Set<ProtocolHistory> getProtocolHistory(ProtocolType protocolType);
 }

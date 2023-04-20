@@ -5,7 +5,7 @@ import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.protocol.ProtocolHistory;
 import com.cardano.explorer.service.ProtocolParamService;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.List;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,7 +25,7 @@ public class ProtocolParamController {
   @GetMapping("/{type}/history")
   @LogMessage
   @Operation(summary = "Get protocol history change")
-  public List<ProtocolHistory> getProtocolHistory(@PathVariable ProtocolType type) {
+  public Set<ProtocolHistory> getProtocolHistory(@PathVariable ProtocolType type) {
     return protocolParamService.getProtocolHistory(type);
   }
 }
