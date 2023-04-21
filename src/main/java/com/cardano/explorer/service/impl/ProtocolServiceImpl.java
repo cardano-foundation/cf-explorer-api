@@ -14,15 +14,18 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 @Service
+@Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class ProtocolServiceImpl implements ProtocolParamService {
@@ -49,36 +52,31 @@ public class ProtocolServiceImpl implements ProtocolParamService {
     }
 
     Stream<ProtocolHistory> historyStream;
-    historyStream = getHistoryStream(historiesChange,
-        paramProtocolMethod.get(protocolType.getFieldName()));
-    return historyStream
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    historyStream = getHistoryStream(historiesChange, paramProposal -> {
+      try {
+        return paramProtocolMethod.get(protocolType.getFieldName()).invoke(paramProposal);
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        log.error(e.getMessage());
+        return null;
+      }
+    });
+
+    return historyStream.collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private Stream<ProtocolHistory> getHistoryStream(Stream<ParamProposal> historiesChange,
-      Method method) {
+      Function<ParamProposal, ?> function) {
 
     return historiesChange
-        .filter(paramProposal -> {
-              try {
-                return Objects.nonNull(method.invoke(paramProposal));
-              } catch (IllegalAccessException | InvocationTargetException e) {
-                return false;
-              }
-            }
-        )
-        .map(paramProposal -> {
-          try {
-            return ProtocolHistory
+        .filter(paramProposal -> Objects.nonNull(function.apply(paramProposal)))
+        .map(paramProposal ->
+            ProtocolHistory
                 .builder()
-                .value(method.invoke(paramProposal))
+                .value(function.apply(paramProposal))
                 .transactionHash(paramProposal.getRegisteredTx().getHash())
                 .time(paramProposal.getRegisteredTx().getBlock().getTime())
-                .build();
-          } catch (IllegalAccessException | InvocationTargetException e) {
-            return new ProtocolHistory();
-          }
-        });
+                .build()
+        );
   }
 
   @PostConstruct
