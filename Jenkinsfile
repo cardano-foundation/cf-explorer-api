@@ -35,7 +35,7 @@ pipeline {
 
                 }
  
-                sh "docker images -f 'dangling=true' -q --no-trunc | xargs --no-run-if-empty docker rmi"
+                sh "docker images -f 'dangling=true' -q --no-trunc | xargs --no-run-if-empty docker rmi &>/dev/null"
                 echo 'Deployment Done!!!'
             }
         }
