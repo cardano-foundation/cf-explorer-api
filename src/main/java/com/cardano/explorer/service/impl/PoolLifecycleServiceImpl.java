@@ -1,10 +1,13 @@
 package com.cardano.explorer.service.impl;
 
+import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.projection.PoolInfoProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
@@ -76,6 +79,25 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       regisRes.setStakeKeys(stakeKeyStrMap.get(regisRes.getPoolUpdateId()));
     });
     res.setRegistrations(regisList);
+    return res;
+  }
+
+  @Override
+  public BaseFilterResponse<PoolUpdateResponse> poolUpdate(PoolUpdateRequest poolUpdateRequest,
+      Pageable pageable) {
+    BaseFilterResponse<PoolUpdateResponse> res = new BaseFilterResponse<>();
+    Page<PoolUpdateProjection> poolUpdates = poolUpdateRepository.findPoolUpdateByPool(
+        poolUpdateRequest.getPoolView(), poolUpdateRequest.getTxHash(),
+        poolUpdateRequest.getFromDate(), poolUpdateRequest.getToDate(), pageable);
+    List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();
+    if (Objects.nonNull(poolUpdates)) {
+      poolUpdates.stream().forEach(poolUpdate -> {
+        PoolUpdateResponse poolUpdateRes =  new PoolUpdateResponse(poolUpdate);
+        poolUpdateResList.add(poolUpdateRes);
+      });
+    }
+    res.setData(poolUpdateResList);
+    res.setTotalItems(poolUpdates.getTotalElements());
     return res;
   }
 }
