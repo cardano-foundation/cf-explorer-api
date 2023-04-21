@@ -29,7 +29,7 @@ public class PoolLifecycleController {
   @GetMapping(value = "/registration")
   public ResponseEntity<RegistrationAllResponse> registration(
       @RequestParam("poolView") String poolView) {
-    return null;
+    return ResponseEntity.ok(poolLifecycleService.registration(poolView));
   }
 
   @GetMapping(value = "/pool-update")

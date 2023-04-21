@@ -1,29 +1,30 @@
 package com.cardano.explorer.model.response.pool.lifecycle;
 
+import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 public class RegistrationResponse implements Serializable {
+
+  private Long poolUpdateId;
 
   private String txHash;
 
-  private BigInteger totalFees;
+  private BigInteger totalFee;
 
   private Timestamp time;
 
+  private BigInteger fee;
+
+  private String rewardAccount;
+
   private List<String> stakeKeys;
-
-  private BigInteger fees;
-
-  private List<String> rewardAccounts;
 
   private String vrfKey;
 
@@ -32,4 +33,20 @@ public class RegistrationResponse implements Serializable {
   private Double margin;
 
   private BigInteger cost;
+
+  private BigInteger deposit;
+
+  public RegistrationResponse(PoolRegistrationProjection projection) {
+    this.poolUpdateId = projection.getPoolUpdateId();
+    this.txHash = projection.getTxHash();
+    this.totalFee = projection.getDeposit().add(projection.getFee());
+    this.time = projection.getTime();
+    this.fee = projection.getFee();
+    this.vrfKey = projection.getVrfKey();
+    this.pledge = projection.getPledge();
+    this.margin = projection.getMargin();
+    this.cost = projection.getCost();
+    this.deposit = projection.getDeposit();
+    this.rewardAccount = projection.getRewardAccount();
+  }
 }

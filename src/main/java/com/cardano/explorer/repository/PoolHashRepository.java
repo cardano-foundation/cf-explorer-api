@@ -2,7 +2,9 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailUpdateProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolInfoProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolListProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import com.sotatek.cardano.common.entity.PoolHash;
 import java.util.List;
 import java.util.Optional;
@@ -88,4 +90,22 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value = "SELECT ph.view FROM PoolHash ph")
   List<String> findAllView();
+
+  @Query(value =
+      "SELECT pu.id AS poolUpdateId, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, ep.poolDeposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
+          + "FROM PoolHash ph "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
+          + "JOIN Block bk ON tx.block.id  = bk.id "
+          + "JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
+          + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+          + "WHERE ph.view = :poolView "
+          + "ORDER BY pu.id DESC")
+  List<PoolRegistrationProjection> getPoolRegistration(@Param("poolView") String poolView);
+
+  @Query(value = "SELECT pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView "
+      + "FROM PoolHash ph "
+      + "LEFT JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id ) "
+      + "WHERE ph.view = :poolView")
+  PoolInfoProjection getPoolInfo(@Param("poolView") String poolView);
 }
