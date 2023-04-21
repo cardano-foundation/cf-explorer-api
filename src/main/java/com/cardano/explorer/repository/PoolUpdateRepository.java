@@ -1,5 +1,6 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.PoolUpdate;
@@ -59,4 +60,17 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
           + "WHERE pu.id IN :poolUpdateIds ")
   List<StakeKeyProjection> findOwnerAccountByPoolUpdate(@Param("poolUpdateIds") Set<Long> poolUpdateIds);
+
+  @Query(value = "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time "
+      + "FROM PoolHash ph "
+      + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+      + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
+      + "JOIN Block bk ON tx.blockId = bk.id "
+      + "where ph.view = :poolView "
+      + "AND (:txHash IS NULL OR tx.hash = :txHash) "
+      + "AND (:fromDate IS NULL OR bk.time >= :fromDate) "
+      + "AND (:toDate IS NULL OR bk.time <= :toDate)")
+  Page<PoolUpdateProjection> findPoolUpdateByPool(@Param("poolView") String poolView,
+      @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
+      @Param("toDate") Timestamp toDate, Pageable pageable);
 }

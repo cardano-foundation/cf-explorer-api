@@ -1,39 +1,28 @@
 package com.cardano.explorer.model.response.pool.lifecycle;
 
+import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.util.List;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 public class PoolUpdateResponse implements Serializable {
 
-  private BigInteger previousPledge;
-
-  private Double previousMargin;
+  private Long poolUpdateId;
 
   private String txHash;
 
-  private BigInteger totalFees;
+  private BigInteger fee;
 
   private Timestamp time;
 
-  private List<String> stakeKeys;
-
-  private BigInteger fees;
-
-  private List<String> rewardAccounts;
-
-  private String vrfKey;
-
-  private BigInteger pledge;
-
-  private Double margin;
-
-  private BigInteger cost;
+  public PoolUpdateResponse(PoolUpdateProjection projection) {
+    this.poolUpdateId = projection.getPoolUpdateId();
+    this.txHash = projection.getTxHash();
+    this.fee = projection.getFee();
+    this.time = projection.getTime();
+  }
 }

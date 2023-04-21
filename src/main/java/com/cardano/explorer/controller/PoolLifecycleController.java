@@ -3,7 +3,7 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateAllResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardAllResponse;
 import com.cardano.explorer.service.PoolLifecycleService;
@@ -33,11 +33,11 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/pool-update")
-  public ResponseEntity<PoolUpdateAllResponse> poolUpdate(
+  public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> poolUpdate(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
       @RequestBody
       PoolUpdateRequest poolUpdateRequest) {
-    return null;
+    return ResponseEntity.ok(poolLifecycleService.poolUpdate(poolUpdateRequest, pageable));
   }
 
   @GetMapping(value = "/reward")
