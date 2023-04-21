@@ -1,9 +1,11 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.PoolUpdate;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,4 +52,11 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "WHERE pu.activeEpochNo = (SELECT min(pu.activeEpochNo) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId) "
       + "AND pu.poolHash.id = :poolId ")
   Timestamp getCreatedTimeOfPool(@Param("poolId") Long poolId);
+
+  @Query(value =
+      "SELECT pu.id AS poolUpdateId, sa.view AS view FROM PoolUpdate pu "
+          + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
+          + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
+          + "WHERE pu.id IN :poolUpdateIds ")
+  List<StakeKeyProjection> findOwnerAccountByPoolUpdate(@Param("poolUpdateIds") Set<Long> poolUpdateIds);
 }
