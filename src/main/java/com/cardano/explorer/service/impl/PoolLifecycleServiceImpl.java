@@ -75,9 +75,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     Map<Long, List<String>> stakeKeyStrMap = new HashMap<>();
     stakeKeyProjectionMap.forEach((k, v) -> stakeKeyStrMap.put(k,
         v.stream().map(StakeKeyProjection::getView).collect(Collectors.toList())));
-    regisList.forEach(regisRes -> {
-      regisRes.setStakeKeys(stakeKeyStrMap.get(regisRes.getPoolUpdateId()));
-    });
+    regisList.forEach(regisRes -> regisRes.setStakeKeys(stakeKeyStrMap.get(regisRes.getPoolUpdateId())));
     res.setRegistrations(regisList);
     return res;
   }
@@ -92,12 +90,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();
     if (Objects.nonNull(poolUpdates)) {
       poolUpdates.stream().forEach(poolUpdate -> {
-        PoolUpdateResponse poolUpdateRes =  new PoolUpdateResponse(poolUpdate);
+        PoolUpdateResponse poolUpdateRes = new PoolUpdateResponse(poolUpdate);
         poolUpdateResList.add(poolUpdateRes);
       });
+      res.setTotalItems(poolUpdates.getTotalElements());
     }
     res.setData(poolUpdateResList);
-    res.setTotalItems(poolUpdates.getTotalElements());
     return res;
   }
 }

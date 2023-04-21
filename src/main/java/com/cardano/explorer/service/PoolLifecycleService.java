@@ -4,7 +4,6 @@ import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
-import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 public interface PoolLifecycleService {
@@ -31,5 +30,6 @@ public interface PoolLifecycleService {
    * @param
    * @return BaseFilterResponse<PoolUpdateResponse>
    */
-  BaseFilterResponse<PoolUpdateResponse> poolUpdate(PoolUpdateRequest poolUpdateRequest, Pageable pageable);
+  BaseFilterResponse<PoolUpdateResponse> poolUpdate(PoolUpdateRequest poolUpdateRequest,
+      Pageable pageable);
 }
