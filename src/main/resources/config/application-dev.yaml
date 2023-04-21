@@ -3,15 +3,15 @@ spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${HOST}:${PORT_DB}/${DB}?currentSchema=${SCHEMA}
-    username: ${USERNAME_DB}
-    password: ${PASSWORD_DB}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?currentSchema=${DB_SCHEMA}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
       pool-name: explorer-api-pool
       minimum-idle: 10 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: 20 #maximum pool size
+      maximum-pool-size: ${DB_MAXIUM_POOL_SIZE:10} #maximum pool size
       idle-timeout: 300000 #maximum idle time for connection
       max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
       connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
@@ -38,7 +38,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: ${SCHEMA:dev}
+        default_schema: ${DB_SCHEMA:dev}
         show_sql: false
         format_sql: true
   flyway:
@@ -51,8 +51,8 @@ spring:
 
 redis:
   databaseIndex: 0
-  master: ${REDIS_MASTER_NAME:mymaster}
-  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
+  master: ${REDIS_SENTINEL_MASTER_NAME:mymaster}
+  password: ${REDIS_SENTINEL_PASSWORD:redis_sentinel_pass}
   testOnBorrow: false
   maxTotal: 10
   maxIdle: 5
@@ -61,10 +61,10 @@ redis:
   testWhileIdle: false
   sentinels:
     - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
-      port: 26379
+      port: ${REDIS_SENTINEL_PORT:26379}
 
 application:
-  network: ${SCHEMA:mainnet}
+  network: ${DB_SCHEMA:mainnet}
   api.coin.gecko.market:
     interval-time: 60
     base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s

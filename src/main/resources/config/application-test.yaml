@@ -3,7 +3,7 @@ spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${HOST}:${PORT_DB}/explorer_api?currentSchema=${SPRING_PROFILES_ACTIVE}
+    url: jdbc:postgresql://${HOST_DB}:${PORT_DB}/explorer_api?currentSchema=${SPRING_PROFILES_ACTIVE}
     username: ${USERNAME_DB}
     password: ${PASSWORD_DB}
     driver-class-name: org.postgresql.Driver
@@ -11,7 +11,7 @@ spring:
     hikari:
       pool-name: explorer-api-pool
       minimum-idle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: 10 #maximum pool size
+      maximum-pool-size: ${MAX_POOL_SIZE:10} #maximum pool size
       idle-timeout: 300000 #maximum idle time for connection
       max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
       connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection

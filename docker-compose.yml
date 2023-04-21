@@ -6,22 +6,27 @@ networks:
 
 services:
   cardano-explorer-api:
-    image: cardano-explorer-api-${SCHEMA}
+    image: cardano-explorer-api
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - HOST=${HOST}
-      - PORT_DB=${PORT_DB}
-      - USERNAME_DB=${USERNAME_DB}
-      - PASSWORD_DB=${PASSWORD_DB}
-      - SCHEMA=${SCHEMA}
-      - DB=${DB}
 
-      - REDIS_MASTER_NAME=${REDIS_MASTER_NAME}
-      - REDIS_SENTINEL_PASS=${REDIS_SENTINEL_PASS}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_SCHEMA=${DB_SCHEMA}
+      - DB_MAXIUM_POOL_SIZE=${DB_MAXIUM_POOL_SIZE}
+
+      - REDIS_SENTINEL_MASTER_NAME=${REDIS_SENTINEL_MASTER_NAME}
+      - REDIS_SENTINEL_PASSWORD=${REDIS_SENTINEL_PASSWORD}
       - REDIS_SENTINEL_HOST=${REDIS_SENTINEL_HOST}
+      - REDIS_SENTINEL_PORT=${REDIS_SENTINEL_PORT}
+      - PORT=${PORT}
+
     ports:
       - ${PORT}:8080
     healthcheck:
