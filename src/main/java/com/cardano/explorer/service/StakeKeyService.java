@@ -8,13 +8,12 @@ import com.cardano.explorer.model.response.address.AddressFilterResponse;
 import com.cardano.explorer.model.response.address.StakeAddressResponse;
 import com.cardano.explorer.model.response.stake.StakeAnalyticBalanceResponse;
 import com.cardano.explorer.model.response.stake.StakeAnalyticRewardResponse;
+import com.cardano.explorer.model.response.stake.StakeFilterResponse;
+import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import com.cardano.explorer.model.response.stake.StakeFilterResponse;
-import com.cardano.explorer.model.response.stake.lifecycle.StakeLifeCycleResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
-import com.cardano.explorer.model.response.stake.StakeTxResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import com.cardano.explorer.projection.StakeDelegationProjection;
@@ -136,22 +135,21 @@ public interface StakeKeyService {
    */
   List<BigInteger> getAddressMinMaxBalance(String stakeKey);
 
-  List<StakeLifeCycleResponse> getStakeLifeCycleList(String stakeKey);
-
-  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey, Pageable pageable);
+  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey,
+      Pageable pageable);
 
   BaseFilterResponse<StakeDelegationFilterResponse> getStakeDelegations(String stakeKey,
     StakeLifeCycleFilterRequest condition, Pageable pageable);
 
   StakeDelegationDetailResponse getStakeDelegationDetail(String stakeKey, String hash);
 
-  BaseFilterResponse<StakeRewardResponse> getStakeReward(String stakeKey,
-      StakeLifeCycleFilterRequest condition, Pageable pageable);
+  BaseFilterResponse<StakeRewardResponse> getStakeReward(String stakeKey, Pageable pageable);
 
   BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawals(String stakeKey,
       StakeLifeCycleFilterRequest condition, Pageable pageable);
 
   StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash);
 
-  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrations(String stakeKey, Pageable pageable);
+  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrations(String stakeKey,
+      Pageable pageable);
 }
