@@ -1,6 +1,7 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
+import com.cardano.explorer.model.response.pool.projection.LifeCycleRewardProjection;
 import com.cardano.explorer.model.response.stake.StakeAnalyticRewardResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.sotatek.cardano.common.entity.Reward;
@@ -73,4 +74,13 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " AND r.addr = :stakeAddress")
   Optional<BigInteger> getAvailableRewardByStakeAddressAndEpoch(StakeAddress stakeAddress, Integer epoch);
 
+
+  @Query(value = "SELECT rw.earnedEpoch AS epochNo, e.startTime AS time, rw.amount AS amount, sa.view AS address "
+      + "FROM Reward rw "
+      + "JOIN PoolHash ph ON rw.pool.id  = ph.id "
+      + "JOIN StakeAddress sa ON rw.addr.id  = sa.id "
+      + "JOIN Epoch e ON rw.spendableEpoch  = e.no "
+      + "WHERE ph.view  = :poolView AND rw.type = 'leader' "
+      + "ORDER BY rw.earnedEpoch DESC")
+  Page<LifeCycleRewardProjection> getRewardInfoByPool(@Param("poolView") String poolView, Pageable pageable);
 }

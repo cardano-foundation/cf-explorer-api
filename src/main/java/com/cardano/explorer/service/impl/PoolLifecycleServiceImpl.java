@@ -2,10 +2,13 @@ package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
+import com.cardano.explorer.model.response.pool.projection.LifeCycleRewardProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolInfoProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
@@ -13,6 +16,7 @@ import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
+import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.service.PoolLifecycleService;
 import java.util.ArrayList;
@@ -39,6 +43,8 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   private final PoolHashRepository poolHashRepository;
 
   private final PoolUpdateRepository poolUpdateRepository;
+
+  private final RewardRepository rewardRepository;
 
   @Override
   public BaseFilterResponse<String> getPoolViewByStakeKey(String stakeKey, Pageable pageable) {
@@ -111,6 +117,35 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res = new PoolUpdateDetailResponse(projection);
       res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolUpdate(id));
     }
+    return res;
+  }
+
+  @Override
+  public BaseFilterResponse<RewardResponse> listReward(String poolView, Pageable pageable) {
+    BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
+    List<RewardResponse> rewardRes = new ArrayList<>();
+    Page<LifeCycleRewardProjection> projections = rewardRepository.getRewardInfoByPool(poolView, pageable);
+    if (Objects.nonNull(projections)) {
+      projections.stream().forEach(projection -> {
+        RewardResponse reward = new RewardResponse(projection);
+        rewardRes.add(reward);
+      });
+      res.setTotalItems(projections.getTotalElements());
+    }
+    res.setData(rewardRes);
+    return res;
+  }
+
+  @Override
+  public PoolInfoResponse poolInfo(String poolView) {
+    PoolInfoResponse res = new PoolInfoResponse();
+    PoolInfoProjection poolInfo = poolHashRepository.getPoolInfo(poolView);
+    if (Objects.nonNull(poolInfo)) {
+      res.setPoolId(poolInfo.getPoolId());
+      res.setPoolName(poolInfo.getPoolName());
+      res.setPoolView(poolInfo.getPoolView());
+    }
+    res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
     return res;
   }
 }
