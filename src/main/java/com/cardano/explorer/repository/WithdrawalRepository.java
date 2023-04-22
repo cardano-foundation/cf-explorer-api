@@ -6,6 +6,7 @@ import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.Withdrawal;
 import com.sotatek.cardano.common.entity.Withdrawal_;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -48,9 +49,12 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " FROM Withdrawal withdrawal"
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"
       + " INNER JOIN Block block ON tx.block = block"
-      + " WHERE withdrawal.addr = :stakeKey")
-  Page<StakeWithdrawalProjection> getWithdrawalByAddress(StakeAddress stakeKey,
-      Pageable pageable);
+      + " WHERE withdrawal.addr = :stakeKey"
+      + " AND (block.time >= :fromTime )"
+      + " AND (block.time <= :toTime)"
+      + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
+  Page<StakeWithdrawalProjection> getWithdrawalByAddress(StakeAddress stakeKey, String txHash,
+      Timestamp fromTime, Timestamp toTime, Pageable pageable);
 
   @Query("SELECT sum(wd.amount) "
       + "FROM Withdrawal wd "

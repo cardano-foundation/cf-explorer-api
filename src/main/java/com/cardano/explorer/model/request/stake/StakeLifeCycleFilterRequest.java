@@ -1,6 +1,6 @@
 package com.cardano.explorer.model.request.stake;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +9,7 @@ import lombok.Setter;
 public class StakeLifeCycleFilterRequest {
 
   private String txHash;
-  private LocalDateTime fromDate;
-  private LocalDateTime toDate;
+  private Date fromDate;
+  private Date toDate;
 
 }
