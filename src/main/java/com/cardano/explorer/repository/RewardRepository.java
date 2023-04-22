@@ -2,11 +2,15 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
 import com.cardano.explorer.model.response.stake.StakeAnalyticRewardResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.sotatek.cardano.common.entity.Reward;
+import com.sotatek.cardano.common.entity.StakeAddress;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -56,4 +60,17 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " AND rw.addr = (SELECT sa FROM StakeAddress sa WHERE sa.view = :stakeAddress)"
       + " GROUP BY rw.earnedEpoch")
   List<StakeAnalyticRewardResponse> findRewardByStake(String stakeAddress);
+
+  @Query("SELECT new com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse"
+      + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
+      + " FROM Reward rw"
+      + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
+      + " WHERE rw.addr = :stakeAddress")
+  Page<StakeRewardResponse> findRewardByStake(StakeAddress stakeAddress, Pageable pageable);
+
+  @Query("SELECT SUM(r.amount) FROM Reward r "
+      + " WHERE r.spendableEpoch <= :epoch"
+      + " AND r.addr = :stakeAddress")
+  Optional<BigInteger> getAvailableRewardByStakeAddressAndEpoch(StakeAddress stakeAddress, Integer epoch);
+
 }
