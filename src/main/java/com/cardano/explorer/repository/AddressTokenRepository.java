@@ -10,7 +10,6 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface AddressTokenRepository extends JpaRepository<AddressToken, Long> {
 
@@ -23,11 +22,8 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
   @Query(value = "SELECT COALESCE(sum(addrToken.balance), 0)"
       + " FROM AddressToken addrToken"
       + " WHERE addrToken.multiAsset = :multiAsset "
-      + " AND addrToken.balance > 0 AND addrToken.tx.id >= "
-      + " (SELECT min(tx.id) FROM Tx tx "
-      + " INNER JOIN Block b ON b.id = tx.blockId"
-      + " WHERE b.time >= :time)")
-  BigInteger sumBalanceAfterTx(MultiAsset multiAsset, Timestamp time);
+      + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId")
+  BigInteger sumBalanceAfterTx(MultiAsset multiAsset, Long txId);
 
   @Query(value = "SELECT COALESCE(SUM(addrToken.balance), 0)"
       + " FROM AddressToken addrToken"
@@ -50,10 +46,4 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId"
       + " GROUP BY addrToken.multiAsset")
   List<TokenVolumeProjection> sumBalanceAfterTx(Collection<MultiAsset> multiAsset, Long txId);
-
-  @Query("SELECT at.tx.id "
-      + "FROM AddressToken at "
-      + "INNER JOIN Address addr ON addr.id = at.address.id "
-      + "WHERE at.tx.id IN :txIds")
-  List<Long> findTransactionHaveToken(@Param("txIds") List<Long> txIds);
 }
