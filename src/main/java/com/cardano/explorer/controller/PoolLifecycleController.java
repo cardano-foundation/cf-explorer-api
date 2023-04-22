@@ -3,10 +3,11 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.RewardAllResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
 import com.cardano.explorer.service.PoolLifecycleService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
@@ -49,10 +50,10 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/reward")
-  public ResponseEntity<RewardAllResponse> reward(
+  public ResponseEntity<BaseFilterResponse<RewardResponse>> reward(
       @RequestParam("poolView") String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return null;
+    return ResponseEntity.ok(poolLifecycleService.listReward(poolView, pageable));
   }
 
   @GetMapping(value = "/de-registration")
@@ -66,5 +67,10 @@ public class PoolLifecycleController {
       @RequestParam("stakeKey") String stakeKey,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(poolLifecycleService.getPoolViewByStakeKey(stakeKey, pageable));
+  }
+
+  @GetMapping(value = "/pool-info")
+  public ResponseEntity<PoolInfoResponse> poolInfo(@RequestParam("poolView") String poolView) {
+    return ResponseEntity.ok(poolLifecycleService.poolInfo(poolView));
   }
 }

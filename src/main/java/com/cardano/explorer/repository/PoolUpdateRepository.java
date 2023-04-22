@@ -34,6 +34,15 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE ph.id  = :poolId ")
   List<String> findOwnerAccountByPool(@Param("poolId") Long poolId);
 
+  @Query(value =
+      "SELECT sa.view FROM PoolHash ph "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
+          + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
+          + "WHERE ph.view  = :poolView "
+          + "GROUP BY sa.view")
+  List<String> findOwnerAccountByPoolView(@Param("poolView") String poolView);
+
   @Query(value = "SELECT pu FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId "
       + "AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId)")
   PoolUpdate findLastEpochByPool(@Param("poolId") Long poolId);

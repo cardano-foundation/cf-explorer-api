@@ -1,14 +1,13 @@
 package com.cardano.explorer.model.response.pool.lifecycle;
 
+import com.cardano.explorer.model.response.pool.projection.LifeCycleRewardProjection;
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 public class RewardResponse {
 
   private Integer epochNo;
@@ -18,4 +17,11 @@ public class RewardResponse {
   private BigInteger amount;
 
   private String rewardAccount;
+
+  public RewardResponse(LifeCycleRewardProjection projection) {
+    this.epochNo = projection.getEpochNo();
+    this.time = projection.getTime();
+    this.amount = projection.getAmount();
+    this.rewardAccount = projection.getAddress();
+  }
 }
