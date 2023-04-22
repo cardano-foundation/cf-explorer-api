@@ -3,6 +3,7 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardAllResponse;
@@ -10,6 +11,7 @@ import com.cardano.explorer.service.PoolLifecycleService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +40,12 @@ public class PoolLifecycleController {
       @RequestBody
       PoolUpdateRequest poolUpdateRequest) {
     return ResponseEntity.ok(poolLifecycleService.poolUpdate(poolUpdateRequest, pageable));
+  }
+
+  @GetMapping(value = "/pool-update-detail")
+  public ResponseEntity<PoolUpdateDetailResponse> poolUpdate(@RequestParam("id") Long id,
+      @Param("previousId") Long previousId) {
+    return ResponseEntity.ok(poolLifecycleService.poolUpdateDetail(id, previousId));
   }
 
   @GetMapping(value = "/reward")
