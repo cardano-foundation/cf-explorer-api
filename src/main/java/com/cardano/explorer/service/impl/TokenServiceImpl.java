@@ -117,7 +117,8 @@ public class TokenServiceImpl implements TokenService {
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
     Timestamp yesterday = Timestamp.valueOf(
         LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, yesterday);
+    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
+    var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, txId);
     var numberOfHolders = addressTokenBalanceRepository.countByMultiAsset(multiAsset).orElse(0L);
     tokenResponse.setNumberOfHolders(numberOfHolders);
     if(Objects.isNull(volume)) {
