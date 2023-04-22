@@ -10,6 +10,7 @@ import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import com.cardano.explorer.service.StakeKeyService;
+import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.StakeRegistration_;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -71,7 +72,8 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRewardResponse>> getRewards(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @ParameterObject Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(stakeService.getStakeReward(stakeKey, pageable));
   }
 
@@ -81,7 +83,8 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
       @ParameterObject @Parameter(description = "filter condition")
       StakeLifeCycleFilterRequest condition,
-      @ParameterObject Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(stakeService.getStakeWithdrawals(stakeKey, condition, pageable));
   }
 
