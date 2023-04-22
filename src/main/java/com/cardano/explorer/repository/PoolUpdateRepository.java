@@ -1,5 +1,6 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
@@ -69,8 +70,30 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "WHERE ph.view = :poolView "
       + "AND (:txHash IS NULL OR tx.hash = :txHash) "
       + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
-      + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate)")
+      + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) "
+      + "ORDER BY pu.id DESC")
   Page<PoolUpdateProjection> findPoolUpdateByPool(@Param("poolView") String poolView,
       @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate, Pageable pageable);
+
+
+  @Query(value = "SELECT ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount, "
+      + "(SELECT pu.pledge FROM PoolUpdate pu WHERE pu.id = :previousId) AS previousPledge, "
+      + "(SELECT pu.margin FROM PoolUpdate pu WHERE pu.id = :previousId) AS previousMargin "
+      + "FROM PoolHash ph "
+      + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
+      + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+      + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
+      + "JOIN Block bk ON tx.block.id  = bk.id "
+      + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
+      + "WHERE pu.id = :id ")
+  PoolUpdateDetailProjection findPoolUpdateDetailById(@Param("id") Long id, @Param("previousId") Long previousId);
+
+
+  @Query(value =
+      "SELECT sa.view FROM PoolUpdate pu "
+          + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
+          + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
+          + "WHERE pu.id  = :id ")
+  List<String> findOwnerAccountByPoolUpdate(@Param("id") Long id);
 }
