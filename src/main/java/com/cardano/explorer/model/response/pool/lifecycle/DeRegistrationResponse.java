@@ -1,35 +1,32 @@
 package com.cardano.explorer.model.response.pool.lifecycle;
 
+import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.util.List;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 public class DeRegistrationResponse implements Serializable {
-
-  private String poolId;
-
-  private String poolName;
-
-  private String poolView;
-
-  private BigInteger poolHold;
 
   private String txHash;
 
-  private BigInteger totalFees;
+  private BigInteger totalFee;
+
+  private BigInteger poolHold;
 
   private Timestamp time;
 
-  private BigInteger fees;
-
-  private List<String> stakeKeys;
+  private BigInteger fee;
 
   private Integer retiringEpoch;
+
+  public DeRegistrationResponse(PoolDeRegistrationProjection projection) {
+    this.txHash = projection.getTxHash();
+    this.time = projection.getTime();
+    this.fee = projection.getFee();
+    this.retiringEpoch = projection.getRetiringEpoch();
+  }
 }

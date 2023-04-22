@@ -2,6 +2,7 @@ package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
@@ -59,4 +60,12 @@ public interface PoolLifecycleService {
    * @return PoolInfoResponse
    */
   PoolInfoResponse poolInfo(String poolView);
+
+  /**
+   * Get pool lifecycle registration
+   *
+   * @param
+   * @return RegistrationAllResponse
+   */
+  DeRegistrationAllResponse deRegistration(String poolView);
 }

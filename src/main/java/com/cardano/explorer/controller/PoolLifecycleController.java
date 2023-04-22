@@ -2,7 +2,7 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
@@ -57,9 +57,9 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/de-registration")
-  public ResponseEntity<DeRegistrationResponse> deRegistration(
+  public ResponseEntity<DeRegistrationAllResponse> deRegistration(
       @RequestParam("poolView") String poolView) {
-    return null;
+    return ResponseEntity.ok(poolLifecycleService.deRegistration(poolView));
   }
 
   @GetMapping(value = "/owner")
