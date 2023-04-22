@@ -2,6 +2,8 @@ package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationAllResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
@@ -9,16 +11,20 @@ import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllRespons
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
 import com.cardano.explorer.model.response.pool.projection.LifeCycleRewardProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolInfoProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
+import com.cardano.explorer.model.response.pool.projection.RewardRefundProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.repository.PoolHashRepository;
+import com.cardano.explorer.repository.PoolRetireRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.service.PoolLifecycleService;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +51,8 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   private final PoolUpdateRepository poolUpdateRepository;
 
   private final RewardRepository rewardRepository;
+
+  private final PoolRetireRepository poolRetireRepository;
 
   @Override
   public BaseFilterResponse<String> getPoolViewByStakeKey(String stakeKey, Pageable pageable) {
@@ -124,7 +132,8 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   public BaseFilterResponse<RewardResponse> listReward(String poolView, Pageable pageable) {
     BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
     List<RewardResponse> rewardRes = new ArrayList<>();
-    Page<LifeCycleRewardProjection> projections = rewardRepository.getRewardInfoByPool(poolView, pageable);
+    Page<LifeCycleRewardProjection> projections = rewardRepository.getRewardInfoByPool(poolView,
+        pageable);
     if (Objects.nonNull(projections)) {
       projections.stream().forEach(projection -> {
         RewardResponse reward = new RewardResponse(projection);
@@ -146,6 +155,40 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setPoolView(poolInfo.getPoolView());
     }
     res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
+    return res;
+  }
+
+  @Override
+  public DeRegistrationAllResponse deRegistration(String poolView) {
+    DeRegistrationAllResponse res = new DeRegistrationAllResponse();
+    PoolInfoProjection poolInfo = poolHashRepository.getPoolInfo(poolView);
+    if (Objects.nonNull(poolInfo)) {
+      res.setPoolId(poolInfo.getPoolId());
+      res.setPoolName(poolInfo.getPoolName());
+      res.setPoolView(poolInfo.getPoolView());
+    }
+    res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
+    List<PoolDeRegistrationProjection> projections = poolRetireRepository.getPoolDeRegistration(
+        poolView);
+    if (Objects.nonNull(projections)) {
+      List<DeRegistrationResponse> deRegistrations = new ArrayList<>();
+      Set<Integer> epochNos = new HashSet<>();
+      projections.forEach(projection -> {
+        DeRegistrationResponse deRegistrationRes = new DeRegistrationResponse(projection);
+        deRegistrations.add(deRegistrationRes);
+        epochNos.add(projection.getRetiringEpoch());
+      });
+      List<RewardRefundProjection> rewardRefundProjections = rewardRepository.getRewardRefundByEpoch(
+          poolView, epochNos);
+      Map<Integer, BigInteger> refundAmountMap = new HashMap<>();
+      rewardRefundProjections.forEach(
+          refund -> refundAmountMap.put(refund.getEpochNo(), refund.getAmount()));
+      deRegistrations.forEach(deRegistration -> {
+        deRegistration.setPoolHold(refundAmountMap.get(deRegistration.getRetiringEpoch()));
+        deRegistration.setTotalFee(deRegistration.getFee().add(deRegistration.getPoolHold()));
+      });
+      res.setDeRegistrations(deRegistrations);
+    }
     return res;
   }
 }

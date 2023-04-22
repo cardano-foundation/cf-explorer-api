@@ -1,11 +1,14 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.PoolRetire;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -22,4 +25,12 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
           + "LEFT JOIN PoolUpdate pu ON pr.poolHash.id = pu.poolHash.id AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pr.poolHash.id  = pu.poolHash.id)) ")
   Page<TxBlockEpochProjection> getDataForPoolDeRegistration(Pageable pageable);
 
+  @Query(value =
+  "SELECT tx.fee AS fee, pr.retiringEpoch AS retiringEpoch, tx.hash AS txHash, bk.time AS time "
+      + "FROM PoolRetire pr "
+      + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
+      + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
+      + "JOIN Block bk ON tx.block.id = bk.id "
+      + "WHERE ph.view = :poolView ")
+  List<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("poolView") String poolView);
 }
