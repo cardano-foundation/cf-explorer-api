@@ -3,11 +3,13 @@ package com.cardano.explorer.model.response;
 import com.cardano.explorer.common.enumeration.EpochStatus;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class EpochResponse {
 
   private Integer no;

@@ -1,4 +1,4 @@
-package com.cardano.explorer.protocol;
+package com.cardano.explorer.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
