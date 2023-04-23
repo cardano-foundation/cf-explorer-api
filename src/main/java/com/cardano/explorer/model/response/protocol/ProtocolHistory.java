@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProtocolHistory {
+
   Date time;
   String transactionHash;
   Object value;

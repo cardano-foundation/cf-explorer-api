@@ -8,6 +8,7 @@ import com.cardano.explorer.repository.EpochParamRepository;
 import com.cardano.explorer.repository.ParamProposalRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.service.ProtocolParamService;
+import com.sotatek.cardano.common.entity.CostModel;
 import com.sotatek.cardano.common.entity.EpochParam;
 import com.sotatek.cardano.common.entity.ParamProposal;
 import com.sotatek.cardano.common.entity.Tx;
@@ -84,7 +85,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     List<ParamHistory> previousProtocolsChange = paramProposalRepository
         .findProtocolsChange(currentProtocols.getEpochNo())
         .stream()
-        .sorted(Comparator.comparing(ParamHistory::getId))
+        .sorted(Comparator.comparing(ParamHistory::getId).reversed())
         .collect(Collectors.toList());
 
     Map<Long, Tx> txs = txRepository.findByIdIn(
@@ -93,7 +94,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .stream()
         .collect(Collectors.toMap(Tx::getId, Function.identity()));
 
-    return Protocols.builder()
+    var protocols = Protocols.builder()
         .minFeeA(getChangeProtocol(previousProtocolsChange.stream(),
             ParamHistory::getMinFeeA,
             currentProtocols.getMinFeeA(), txs))
@@ -179,6 +180,12 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             ParamHistory::getCoinsPerUtxoSize,
             currentProtocols.getCoinsPerUtxoSize(), txs))
         .build();
+
+    protocols.setCostModel(getChangeCostModelProtocol(previousProtocolsChange.stream(),
+        currentProtocols.getCostModel().getCosts(),
+        txs));
+
+    return protocols;
   }
 
   private Stream<ProtocolHistory> getHistoryStream(Stream<ParamProposal> historiesChange,
@@ -200,17 +207,14 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       Function<ParamHistory, ?> function,
       Object currentProtocol,
       Map<Long, Tx> txs) {
+
     var history = proposalChange
         .filter(paramProposal -> Objects.nonNull(function.apply(paramProposal)))
         .findFirst()
         .orElse(null);
 
     if (Objects.isNull(history)) {
-      return ProtocolHistory.builder()
-          .value(currentProtocol)
-          .time(null)
-          .transactionHash(null)
-          .build();
+      return getDefaultProtocol(currentProtocol);
     }
 
     Tx tx = txs.get(history.getTx());
@@ -222,6 +226,27 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .build();
   }
 
+  private ProtocolHistory getChangeCostModelProtocol(Stream<ParamHistory> proposalChange,
+      String currentProtocol,
+      Map<Long, Tx> txs) {
+
+    var history = proposalChange
+        .filter(paramProposal -> Objects.nonNull(paramProposal.getCostModel()))
+        .findFirst()
+        .orElse(null);
+
+    if (Objects.isNull(history)) {
+      return getDefaultProtocol(currentProtocol);
+    }
+
+    Tx tx = txs.get(history.getTx());
+
+    return ProtocolHistory.builder()
+        .value(currentProtocol)
+        .time(tx.getBlock().getTime())
+        .transactionHash(tx.getHash())
+        .build();
+  }
 
   public
   @PostConstruct
@@ -243,5 +268,13 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         paramProtocolMethod.put(field.getName(), methodUsed);
       }
     }
+  }
+
+  private  ProtocolHistory getDefaultProtocol(Object currentProtocol) {
+    return ProtocolHistory.builder()
+        .value(currentProtocol)
+        .time(null)
+        .transactionHash(null)
+        .build();
   }
 }
