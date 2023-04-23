@@ -1,11 +1,10 @@
 package com.cardano.explorer.projection;
 
-import com.bloxbean.cardano.client.transaction.spec.CostMdls;
 import java.math.BigInteger;
 import java.util.Date;
 
-public interface ParamHistory {
-
+public interface ParamHistory   {
+  Long getId();
   BigInteger getMinFeeA();
 
   BigInteger getMinFeeB();
@@ -62,7 +61,8 @@ public interface ParamHistory {
 
   String getEntropy();
 
-  CostMdls getCostModel();
+  Long getCostModel();
+  Long getTx();
 
   Date getTime();
 

@@ -2,6 +2,7 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.common.enumeration.ProtocolType;
 import com.cardano.explorer.config.LogMessage;
+import com.cardano.explorer.model.response.protocol.Protocols;
 import com.cardano.explorer.model.response.protocol.ProtocolHistory;
 import com.cardano.explorer.service.ProtocolParamService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,5 +28,12 @@ public class ProtocolParamController {
   @Operation(summary = "Get protocol history change")
   public Set<ProtocolHistory> getProtocolHistory(@PathVariable ProtocolType type) {
     return protocolParamService.getProtocolHistory(type);
+  }
+
+  @GetMapping("/current")
+  @LogMessage
+  @Operation(summary = "Get current protocol history change")
+  public Protocols getCurrentProtocol (){
+    return protocolParamService.getProtocolCurrentHistory();
   }
 }
