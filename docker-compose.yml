@@ -7,6 +7,7 @@ networks:
 services:
   cardano-explorer-api:
     image: cardano-explorer-api
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile

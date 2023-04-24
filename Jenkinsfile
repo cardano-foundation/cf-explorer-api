@@ -27,13 +27,13 @@ pipeline {
 
             steps {
                 echo 'Deploying....'
-                script {
+                script 
                     def envMainnet = secretFolder + "/mainnet.env"
                     def envPreprod = secretFolder + "/preprod.env"
-                    sh "docker compose --env-file ${envMainnet}  -p mainnet up -d --build"
-                    sh "docker compose --env-file ${envPreprod}  -p preprod up -d --build"
-
                 }
+
+                sh "docker compose --env-file ${envMainnet}  -p mainnet up -d"
+                sh "docker compose --env-file ${envPreprod}  -p preprod up -d"
  
                 sh "docker images -f 'dangling=true' -q --no-trunc | xargs --no-run-if-empty docker rmi &>/dev/null"
                 echo 'Deployment Done!!!'
