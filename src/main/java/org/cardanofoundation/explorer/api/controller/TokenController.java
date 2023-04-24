@@ -1,0 +1,73 @@
+package org.cardanofoundation.explorer.api.controller;
+
+import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
+import org.cardanofoundation.explorer.api.service.TokenService;
+import org.cardanofoundation.explorer.api.service.TxService;
+import com.sotatek.cardano.common.entity.BaseEntity_;
+import com.sotatek.cardano.common.entity.MultiAsset_;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/tokens")
+@RequiredArgsConstructor
+public class TokenController {
+  private final TokenService tokenService;
+  private final TxService txService;
+
+  @GetMapping
+  @LogMessage
+  @Operation(summary = "Filter token")
+  public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
+      @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY,
+          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(tokenService.filterToken(pageable));
+  }
+
+  @GetMapping("/{tokenId}")
+  @LogMessage
+  @Operation(summary = "Detail token")
+  public ResponseEntity<TokenResponse> getTokenDetail(@PathVariable String tokenId) {
+    return ResponseEntity.ok(tokenService.getTokenDetail(tokenId));
+  }
+
+  @GetMapping("/{tokenId}/mints")
+  @LogMessage
+  @Operation(summary = "Filter token mint transaction")
+  public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(
+      @PathVariable String tokenId, @ParameterObject @SortDefault(sort = {
+      BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pageable));
+  }
+
+  @GetMapping("/{tokenId}/top_holders")
+  @LogMessage
+  @Operation(summary = "Filter holders by token")
+  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
+      @PathVariable String tokenId, @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pageable));
+  }
+
+  @GetMapping("/{tokenId}/txs")
+  @LogMessage
+  @Operation(summary = "Filter transaction by token")
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
+      @PathVariable String tokenId, @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pageable));
+  }
+}
