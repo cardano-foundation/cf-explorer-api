@@ -47,6 +47,8 @@ spring:
     web:
       pageable:
         default-page-size: 20
+  jackson:
+    default-property-inclusion: NON_NULL
 
 rsa:
   key:
@@ -54,3 +56,19 @@ rsa:
 
 authentication:
   ignore-check: true #ignore authentication check
+
+springdoc:
+  api-docs.path: /apidocs
+  show-actuator: true
+
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json
+    min-response-size: 1024
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
