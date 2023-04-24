@@ -2,7 +2,8 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
 import com.cardano.explorer.model.response.pool.projection.LifeCycleRewardProjection;
-import com.cardano.explorer.model.response.pool.projection.RewardRefundProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolAmountProjection;
+import com.cardano.explorer.model.response.pool.projection.EpochRewardProjection;
 import com.cardano.explorer.model.response.stake.StakeAnalyticRewardResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.sotatek.cardano.common.entity.Reward;
@@ -78,9 +79,9 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
 
   @Query(value = "SELECT rw.earnedEpoch AS epochNo, e.startTime AS time, rw.amount AS amount, sa.view AS address "
       + "FROM Reward rw "
-      + "JOIN PoolHash ph ON rw.pool.id  = ph.id "
-      + "JOIN StakeAddress sa ON rw.addr.id  = sa.id "
-      + "JOIN Epoch e ON rw.spendableEpoch  = e.no "
+      + "JOIN PoolHash ph ON rw.pool.id = ph.id "
+      + "JOIN StakeAddress sa ON rw.addr.id = sa.id "
+      + "JOIN Epoch e ON rw.spendableEpoch = e.no "
       + "WHERE ph.view  = :poolView AND rw.type = 'leader' "
       + "ORDER BY rw.earnedEpoch DESC")
   Page<LifeCycleRewardProjection> getRewardInfoByPool(@Param("poolView") String poolView, Pageable pageable);
@@ -89,5 +90,21 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "FROM Reward rw "
       + "JOIN PoolHash ph ON rw.pool.id = ph.id "
       + "WHERE ph.view = :poolView AND rw.type = 'refund' AND rw.earnedEpoch IN :epochNos")
-  List<RewardRefundProjection> getRewardRefundByEpoch(@Param("poolView") String poolView, @Param("epochNos") Set<Integer> epochNos);
+  List<EpochRewardProjection> getRewardRefundByEpoch(@Param("poolView") String poolView, @Param("epochNos") Set<Integer> epochNos);
+
+  @Query(value = "SELECT sum(rw.amount) FROM Reward rw "
+      + "WHERE rw.pool.id = :poolId AND (rw.type = 'leader' or rw.type = 'member') AND rw.spendableEpoch = (SELECT max(e.no) FROM Epoch e)")
+  BigInteger getPoolRewardByPool(@Param("poolId") Long poolId);
+
+  @Query(value = "SELECT rw.pool.id AS poolId, sum(rw.amount) AS amount "
+      + "FROM Reward rw "
+      + "WHERE rw.pool.id IN :poolIds AND (rw.type = 'leader' OR rw.type = 'member') AND rw.spendableEpoch = (SELECT max(e.no) FROM Epoch e) "
+      + "GROUP BY rw.pool.id")
+  List<PoolAmountProjection> getPoolRewardByPoolList(@Param("poolIds") Set<Long> poolIds);
+
+  @Query(value = "SELECT rw.spendableEpoch AS epochNo, sum(rw.amount) AS amount FROM Reward rw "
+      + "WHERE rw.pool.id = :poolId AND rw.type = 'member' "
+      + "AND rw.spendableEpoch IN :epochNos "
+      + "GROUP BY rw.spendableEpoch")
+  List<EpochRewardProjection> getDelegatorRewardByPool(@Param("poolId") Long poolId, @Param("epochNos") Set<Integer> epochNos);
 }

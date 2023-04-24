@@ -1,7 +1,7 @@
 package com.cardano.explorer.model.response.pool;
 
 import com.cardano.explorer.json.serialize.PercentSerializer;
-import com.cardano.explorer.model.response.pool.projection.PoolDetailEpochProjection;
+import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -25,8 +25,8 @@ public class PoolDetailEpochResponse implements Serializable {
   @JsonSerialize(using = PercentSerializer.class)
   private Double ros;
 
-  public PoolDetailEpochResponse(PoolDetailEpochProjection poolEpoch) {
-    this.epoch = poolEpoch.getEpochNo();
-    this.block = poolEpoch.getCountBlock();
+  public PoolDetailEpochResponse(EpochStakeProjection projection) {
+    this.epoch = projection.getEpochNo();
+    this.stakeAmount = projection.getTotalStake();
   }
 }

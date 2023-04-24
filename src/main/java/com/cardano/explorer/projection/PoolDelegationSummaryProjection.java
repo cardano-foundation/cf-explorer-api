@@ -5,15 +5,15 @@ import java.math.BigInteger;
 
 public interface PoolDelegationSummaryProjection {
 
+  Long getPoolId();
+
   String getPoolView();
 
-  String getJson();
+  String getPoolName();
 
   BigInteger getPledge();
 
   BigInteger getFee();
-
-  BigInteger getPoolSize();
 
   Integer getOptimalPoolCount();
 
