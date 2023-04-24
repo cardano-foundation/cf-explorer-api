@@ -9,7 +9,7 @@ import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLife
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
-import com.cardano.explorer.service.StakeKeyService;
+import com.cardano.explorer.service.StakeKeyLifeCycleService;
 import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.StakeRegistration_;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class StakeKeyLifeCycleController {
 
-  private final StakeKeyService stakeService;
+  private final StakeKeyLifeCycleService stakeKeyLifeCycleService;
 
   @GetMapping("/{stakeKey}/registrations")
   @LogMessage
@@ -38,7 +38,7 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getStakeRegistrations(stakeKey, pageable));
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, pageable));
   }
 
   @GetMapping("/{stakeKey}/de-registrations")
@@ -47,7 +47,7 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getStakeDeRegistrations(stakeKey, pageable));
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, pageable));
   }
 
   @GetMapping("/{stakeKey}/delegations")
@@ -57,7 +57,8 @@ public class StakeKeyLifeCycleController {
       @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           Delegation_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getStakeDelegations(stakeKey, condition, pageable));
+    return ResponseEntity.ok(
+        stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pageable));
   }
 
   @GetMapping("/{stakeKey}/delegations/{hash}")
@@ -65,7 +66,7 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<StakeDelegationDetailResponse> getDelegationDetail(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
       @PathVariable @Parameter(description = "tx hash") String hash) {
-    return ResponseEntity.ok(stakeService.getStakeDelegationDetail(stakeKey, hash));
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDelegationDetail(stakeKey, hash));
   }
 
   @GetMapping("/{stakeKey}/rewards")
@@ -74,7 +75,7 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getStakeReward(stakeKey, pageable));
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, pageable));
   }
 
   @GetMapping("/{stakeKey}/withdrawals")
@@ -85,7 +86,8 @@ public class StakeKeyLifeCycleController {
       StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getStakeWithdrawals(stakeKey, condition, pageable));
+    return ResponseEntity.ok(
+        stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pageable));
   }
 
   @GetMapping("/{stakeKey}/withdrawals/{hash}")
@@ -93,7 +95,7 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<StakeWithdrawalDetailResponse> getDetailWithdrawal(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
       @PathVariable @Parameter(description = "tx hash") String hash) {
-    return ResponseEntity.ok(stakeService.getStakeWithdrawalDetail(stakeKey, hash));
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWithdrawalDetail(stakeKey, hash));
   }
 
 }
