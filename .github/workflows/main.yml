@@ -37,6 +37,6 @@ jobs:
 
       - name: Puring unsed Images
         shell: bash
-      - run:  'echo "Puring unsed Images"'
-      - run: 'docker images -f 'dangling=true' -q --no-trunc | xargs --no-run-if-empty docker rmi &>/dev/null'
+      - run:  'echo "Puring unsed Images" '
+      - run: 'docker images -f "dangling=true" -q --no-trunc | xargs --no-run-if-empty docker rmi &>/dev/null'
       - run: 'echo "Done"'
