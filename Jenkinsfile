@@ -27,7 +27,7 @@ pipeline {
 
             steps {
                 echo 'Deploying....'
-                script 
+                script  {
                     def envMainnet = secretFolder + "/mainnet.env"
                     def envPreprod = secretFolder + "/preprod.env"
                 }
