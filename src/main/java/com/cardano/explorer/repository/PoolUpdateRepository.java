@@ -60,7 +60,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   @Query(value = "SELECT bk.time FROM PoolUpdate pu "
       + "JOIN Tx t ON pu.registeredTx.id = t.id "
       + "JOIN Block bk ON t.block.id = bk.id "
-      + "WHERE pu.activeEpochNo = (SELECT min(pu.activeEpochNo) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId) "
+      + "WHERE pu.id = (SELECT min(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId) "
       + "AND pu.poolHash.id = :poolId ")
   Timestamp getCreatedTimeOfPool(@Param("poolId") Long poolId);
 

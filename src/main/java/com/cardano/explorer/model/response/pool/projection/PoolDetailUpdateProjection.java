@@ -9,8 +9,6 @@ public interface PoolDetailUpdateProjection {
 
   String getHashRaw();
 
-  BigInteger getPoolSize();
-
   String getPoolName();
 
   String getTickerName();
@@ -23,19 +21,7 @@ public interface PoolDetailUpdateProjection {
 
   Integer getParamK();
 
-  BigInteger getUtxo();
-
-  BigInteger getFeePerEpoch();
-
-  Double getInfluence();
-
-  Double getExpansionRate();
-
-  Double getTreasuryRate();
-
-  Integer getBlkCount();
-
-  Integer getMaxBlockSize();
-
   BigInteger getReserves();
+
+  String getRewardAddress();
 }

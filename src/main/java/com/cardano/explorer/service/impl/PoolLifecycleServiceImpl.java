@@ -16,7 +16,7 @@ import com.cardano.explorer.model.response.pool.projection.PoolInfoProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
-import com.cardano.explorer.model.response.pool.projection.RewardRefundProjection;
+import com.cardano.explorer.model.response.pool.projection.EpochRewardProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolRetireRepository;
@@ -178,10 +178,10 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
         deRegistrations.add(deRegistrationRes);
         epochNos.add(projection.getRetiringEpoch());
       });
-      List<RewardRefundProjection> rewardRefundProjections = rewardRepository.getRewardRefundByEpoch(
+      List<EpochRewardProjection> epochRewardProjections = rewardRepository.getRewardRefundByEpoch(
           poolView, epochNos);
       Map<Integer, BigInteger> refundAmountMap = new HashMap<>();
-      rewardRefundProjections.forEach(
+      epochRewardProjections.forEach(
           refund -> refundAmountMap.put(refund.getEpochNo(), refund.getAmount()));
       deRegistrations.forEach(deRegistration -> {
         deRegistration.setPoolHold(refundAmountMap.get(deRegistration.getRetiringEpoch()));

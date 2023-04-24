@@ -31,6 +31,7 @@ public class LiveStakeProvider {
   public void calculateLiveStake() {
     log.info("start calculate live stake for pool...");
     List<String> poolViews = poolHashRepository.findAllView();
+    BigInteger totalLiveStake = BigInteger.ZERO;
     poolViews.forEach(view -> {
       BigInteger delegateStake = delegationRepository.findDelegateStakeByPool(view);
       BigInteger rewardStake = rewardRepository.findRewardStakeByPool(view);
@@ -45,8 +46,10 @@ public class LiveStakeProvider {
         withdrawalStake = BigInteger.ZERO;
       }
       BigInteger liveStake = delegateStake.add(rewardStake).subtract(withdrawalStake);
+      totalLiveStake.add(liveStake);
       redisTemplate.opsForValue().set(CommonConstant.REDIS_POOL_PREFIX + view, liveStake);
     });
+    redisTemplate.opsForValue().set(CommonConstant.REDIS_TOTAL_LIVE_STAKE, totalLiveStake);
     log.info("...end...");
   }
 }

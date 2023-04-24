@@ -8,6 +8,7 @@ import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProje
 import com.sotatek.cardano.common.entity.PoolHash;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,24 +23,22 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       "SELECT bk.epochNo AS epochNo, count(bk.id) AS countBlock FROM PoolHash ph "
           + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
           + "JOIN Block bk ON bk.slotLeader.id = sl.id "
-          + "WHERE ph.id = :poolId "
-          + "GROUP BY bk.epochNo "
-          + "ORDER BY bk.epochNo ASC")
-  Page<PoolDetailEpochProjection> findEpochByPool(@Param("poolId") Long poolId, Pageable pageable);
+          + "WHERE ph.id = :poolId AND bk.epochNo IN :epochNo "
+          + "GROUP BY bk.epochNo")
+  List<PoolDetailEpochProjection> findEpochByPool(@Param("poolId") Long poolId, @Param("epochNo") Set<Integer> epochNo);
 
   @Query(value =
-      "SELECT ph.view AS poolView, po.json AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
-          + ", ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate, ad.reserves AS reserves "
+      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ep.optimalPoolCount AS paramK, "
+          + "pu.margin AS margin, ad.reserves AS reserves "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "LEFT JOIN EpochParam ep ON ph.epochNo = ep.epochNo "
-          + "LEFT JOIN AdaPots ad ON ad.epochNo = ph.epochNo "
-          + "LEFT JOIN Epoch e ON e.no = ph.epochNo "
+          + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
+          + "LEFT JOIN AdaPots ad ON ad.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "WHERE (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id = ph.id)) "
           + "AND (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
           + "AND ((:poolView IS NULL OR ph.view = :poolView) "
-          + "OR (:poolName IS NULL OR po.json LIKE :poolName%)) ")
+          + "OR (:poolName IS NULL OR po.poolName LIKE %:poolName%)) ")
   Page<PoolListProjection> findAllByPoolViewAndPoolName(@Param("poolView") String poolView,
       @Param("poolName") String poolName, Pageable pageable);
 
@@ -53,40 +52,16 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   Optional<PoolHash> findByView(String view);
 
   @Query(value =
-      "SELECT ph.id AS poolId, ph.hashRaw AS hashRaw, ph.poolSize AS poolSize, po.json AS poolName, po.tickerName AS tickerName, pu.pledge AS pledge, pu.margin AS margin, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize, "
-          + "pu.fixedCost AS cost, ep.optimalPoolCount AS paramK, ap.utxo AS utxo, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate, ap.reserves AS reserves "
+      "SELECT ph.id AS poolId, ph.hashRaw AS hashRaw, po.poolName AS poolName, po.tickerName AS tickerName, pu.pledge AS pledge, pu.margin AS margin, "
+          + "pu.fixedCost AS cost, ep.optimalPoolCount AS paramK, ap.reserves AS reserves, sa.view AS rewardAddress "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id is NULL OR po.id = (SELECT max(po.id) FROM PoolOfflineData po WHERE po.pool.id  = ph.id)) "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id  = ph.id) "
-          + "LEFT JOIN EpochParam ep ON ph.epochNo = ep.epochNo "
-          + "LEFT JOIN AdaPots ap ON ph.epochNo = ap.epochNo "
-          + "LEFT JOIN Epoch e ON ph.epochNo = e.no "
+          + "LEFT JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+          + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
+          + "LEFT JOIN AdaPots ap ON ap.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "WHERE ph.view = :poolView ")
   PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolView") String poolView);
-
-  @Query(value =
-      "SELECT ph.view AS poolView, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
-          + ", ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
-          + "FROM PoolHash ph "
-          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
-          + "LEFT JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
-          + "LEFT JOIN Epoch e ON e.no = pu.activeEpochNo "
-          + "WHERE (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
-          + "AND (ph.view IN :poolViews) ")
-  List<PoolListProjection> findDataCalculateReward(@Param("poolViews") List<String> poolViews);
-
-  @Query(value =
-      "SELECT ph.view AS poolView, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
-          + ", ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
-          + "FROM PoolHash ph "
-          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
-          + "LEFT JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
-          + "LEFT JOIN Epoch e ON e.no = pu.activeEpochNo "
-          + "WHERE (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
-          + "AND (ph.view = :poolView) ")
-  PoolListProjection findDataCalculateReward(@Param("poolView") String poolView);
 
   @Query(value = "SELECT ph.view FROM PoolHash ph")
   List<String> findAllView();
