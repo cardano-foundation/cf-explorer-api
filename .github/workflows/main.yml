@@ -33,6 +33,7 @@ jobs:
 
     steps:
       - name: Deploy Mainnet
+      - uses: actions/checkout@v3
         shell: bash
       - run: "docker-compose --env-file /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/mainnet.env -p mainnet up -d"
 
