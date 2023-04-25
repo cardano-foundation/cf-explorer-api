@@ -71,6 +71,13 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " WHERE rw.addr = :stakeAddress")
   Page<StakeRewardResponse> findRewardByStake(StakeAddress stakeAddress, Pageable pageable);
 
+  @Query("SELECT new com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse"
+      + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
+      + " FROM Reward rw"
+      + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
+      + " WHERE rw.addr = :stakeAddress")
+  List<StakeRewardResponse> findRewardByStake(StakeAddress stakeAddress);
+
   @Query("SELECT SUM(r.amount) FROM Reward r "
       + " WHERE r.spendableEpoch <= :epoch"
       + " AND r.addr = :stakeAddress")
