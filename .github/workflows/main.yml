@@ -16,7 +16,7 @@
           run: |
             pwd
             ls -lrat
-            chown -R sotatek:sotatek cardano
+            sudo chown -R sotatek:sotatek cardano
    
         - uses: actions/checkout@v3
           name: Checkout code
