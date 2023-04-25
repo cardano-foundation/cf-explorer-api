@@ -85,9 +85,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       @Param("toDate") Timestamp toDate, Pageable pageable);
 
 
-  @Query(value = "SELECT ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount, "
-      + "(SELECT pu.pledge FROM PoolUpdate pu WHERE pu.id = :previousId) AS previousPledge, "
-      + "(SELECT pu.margin FROM PoolUpdate pu WHERE pu.id = :previousId) AS previousMargin "
+  @Query(value = "SELECT ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
       + "FROM PoolHash ph "
       + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
       + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
@@ -95,7 +93,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "JOIN Block bk ON tx.block.id  = bk.id "
       + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
       + "WHERE pu.id = :id ")
-  PoolUpdateDetailProjection findPoolUpdateDetailById(@Param("id") Long id, @Param("previousId") Long previousId);
+  PoolUpdateDetailProjection findPoolUpdateDetailById(@Param("id") Long id);
 
 
   @Query(value =
@@ -104,4 +102,6 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
           + "WHERE pu.id  = :id ")
   List<String> findOwnerAccountByPoolUpdate(@Param("id") Long id);
+
+  PoolUpdate findTopByIdLessThanOrderByIdDesc(@Param("id") Long id);
 }

@@ -55,9 +55,8 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/pool-update-detail")
-  public ResponseEntity<PoolUpdateDetailResponse> poolUpdate(@RequestParam("id") Long id,
-      @Param("previousId") Long previousId) {
-    return ResponseEntity.ok(poolLifecycleService.poolUpdateDetail(id, previousId));
+  public ResponseEntity<PoolUpdateDetailResponse> poolUpdate(@RequestParam("id") Long id) {
+    return ResponseEntity.ok(poolLifecycleService.poolUpdateDetail(id));
   }
 
   @GetMapping(value = "/reward")
