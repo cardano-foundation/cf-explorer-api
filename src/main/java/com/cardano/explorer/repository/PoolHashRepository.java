@@ -67,16 +67,14 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   List<String> findAllView();
 
   @Query(value =
-      "SELECT pu.id AS poolUpdateId, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, ep.poolDeposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
-          + "FROM PoolHash ph "
-          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+      "SELECT pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, ep.poolDeposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
+          + "FROM PoolUpdate pu "
           + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
           + "JOIN Block bk ON tx.block.id  = bk.id "
           + "JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-          + "WHERE ph.view = :poolView "
-          + "ORDER BY pu.id DESC")
-  List<PoolRegistrationProjection> getPoolRegistration(@Param("poolView") String poolView);
+          + "WHERE pu.id = :id")
+  PoolRegistrationProjection getPoolRegistration(@Param("id") Long id);
 
   @Query(value = "SELECT pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView "
       + "FROM PoolHash ph "

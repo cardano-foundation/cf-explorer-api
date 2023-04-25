@@ -4,12 +4,21 @@ import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationPro
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class DeRegistrationResponse implements Serializable {
+
+  private String poolId;
+
+  private String poolName;
+
+  private String poolView;
+
+  private List<String> stakeKeys;
 
   private String txHash;
 
