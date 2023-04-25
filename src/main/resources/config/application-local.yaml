@@ -1,14 +1,16 @@
 # Infrastructure domain
 infrastructure:
-  host: 10.4.10.231
-
+#  host: 10.4.10.112
+  host: localhost
 spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:54321/explorer?currentSchema=preprod
-    username: read
-    password: 1
+    url: jdbc:postgresql://${infrastructure.host}:54321/explorer?currentSchema=mainnet
+#    username: cardano_read
+#    password: 1
+    username: cardano-master
+    password: Y2FyZGFuby1kYXRhYmFzZS1tYXN0ZXI=
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
@@ -39,11 +41,19 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: preprod
+        default_schema: mainnet
         show_sql: true
         format_sql: true
   flyway:
-    enabled: false
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    group: true
+    sql-migration-prefix: B
+    sql-migration-separator: __
+    sql-migration-suffixes: .sql
+
   data:
     web:
       pageable:
@@ -70,3 +80,5 @@ application:
   api.coin.gecko.market:
     interval-time: 60
     base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
+
+  time-zone: ${TIME_ZONE:GMT+1}
