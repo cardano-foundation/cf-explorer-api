@@ -36,18 +36,22 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeRegistrations(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, pageable));
+    return ResponseEntity.ok(
+        stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, condition, pageable));
   }
 
   @GetMapping("/{stakeKey}/de-registrations")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeDeRegistrations(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, pageable));
+    return ResponseEntity.ok(
+        stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, condition, pageable));
   }
 
   @GetMapping("/{stakeKey}/delegations")

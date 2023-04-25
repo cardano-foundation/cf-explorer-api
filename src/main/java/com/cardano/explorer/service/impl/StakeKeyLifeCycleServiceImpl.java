@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
 
+  public static final String MIN_TIME = "1970-01-01 00:00:00";
   private final DelegationRepository delegationRepository;
   private final StakeRegistrationRepository stakeRegistrationRepository;
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
@@ -50,11 +51,21 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
 
   @Override
   public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey,
-      Pageable pageable) {
+      StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .toInstant(ZoneOffset.UTC));
+    if (Objects.nonNull(condition.getFromDate())) {
+      fromDate = Timestamp.from(condition.getFromDate().toInstant());
+    }
+    if (Objects.nonNull(condition.getToDate())) {
+      toDate = Timestamp.from(condition.getToDate().toInstant());
+    }
     Page<StakeHistoryProjection> stakeHistoryList =
-        stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress, pageable);
+        stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress,
+            condition.getTxHash(), fromDate, toDate, pageable);
     var response = stakeHistoryList.map(item -> StakeRegistrationLifeCycle.builder()
         .txHash(item.getTxHash())
         .fee(item.getFee())
@@ -70,7 +81,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
       StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
         .toInstant(ZoneOffset.UTC));
     if (Objects.nonNull(condition.getFromDate())) {
@@ -128,7 +139,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
       StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
         .toInstant(ZoneOffset.UTC));
     if (Objects.nonNull(condition.getFromDate())) {
@@ -172,11 +183,21 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
 
   @Override
   public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrations(String stakeKey,
-      Pageable pageable) {
+      StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .toInstant(ZoneOffset.UTC));
+    if (Objects.nonNull(condition.getFromDate())) {
+      fromDate = Timestamp.from(condition.getFromDate().toInstant());
+    }
+    if (Objects.nonNull(condition.getToDate())) {
+      toDate = Timestamp.from(condition.getToDate().toInstant());
+    }
     Page<StakeHistoryProjection> stakeHistoryList =
-        stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress, pageable);
+        stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress,
+            condition.getTxHash(), fromDate, toDate, pageable);
     var response = stakeHistoryList.map(item -> StakeRegistrationLifeCycle.builder()
         .txHash(item.getTxHash())
         .fee(item.getFee())

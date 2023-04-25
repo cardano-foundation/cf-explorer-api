@@ -70,12 +70,15 @@ class StakeKeyLifeCycleServiceTest {
   @Test
   void whenStakeKeyNotFound_shouldThrowException() {
     StakeLifeCycleFilterRequest request = new StakeLifeCycleFilterRequest();
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
     Pageable pageable = PageRequest.of(0, 1);
     when(stakeAddressRepository.findByView("stake1notfound")).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
-        () -> stakeKeyLifeCycleService.getStakeRegistrations("stake1notfound", pageable));
+        () -> stakeKeyLifeCycleService.getStakeRegistrations("stake1notfound", condition,
+            pageable));
     Assertions.assertThrows(BusinessException.class,
-        () -> stakeKeyLifeCycleService.getStakeDeRegistrations("stake1notfound", pageable));
+        () -> stakeKeyLifeCycleService.getStakeDeRegistrations("stake1notfound", condition,
+            pageable));
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegationDetail("stake1notfound",
             "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2"));
@@ -91,7 +94,40 @@ class StakeKeyLifeCycleServiceTest {
   }
 
   @Test
-  void whenStakeAddressHaveRegistration_showReturnRegistrations() {
+  void whenStakeAddressHaveRegistrationWithCondition_showReturnRegistrations() {
+    Pageable pageable = PageRequest.of(0, 1);
+    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .toInstant(ZoneOffset.UTC));
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
+    condition.setTxHash("bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488");
+    condition.setFromDate(fromDate);
+    condition.setToDate(toDate);
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    when(projection.getTxHash()).thenReturn(
+        "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getDeposit()).thenReturn(2000000L);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress,
+        condition.getTxHash(),
+        fromDate, toDate, pageable)).thenReturn(page);
+    var response = stakeKeyLifeCycleService.getStakeRegistrations(
+        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2",
+        response.getData().get(0).getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getData().get(0).getFee());
+    Assertions.assertEquals(2000000L, response.getData().get(0).getDeposit());
+  }
+
+  @Test
+  void whenStakeAddressHaveRegistrationWithoutCondition_showReturnRegistrations() {
     Pageable pageable = PageRequest.of(0, 1);
     StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
     when(projection.getTxHash()).thenReturn(
@@ -101,10 +137,11 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
-    when(stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress, pageable))
-        .thenReturn(page);
+    when(stakeRegistrationRepository.getStakeRegistrationsByAddress(any(), any(),
+        any(), any(), any())).thenReturn(page);
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
     var response = stakeKeyLifeCycleService.getStakeRegistrations(
-        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", pageable);
+        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
     Assertions.assertEquals(1, response.getTotalPages());
     Assertions.assertEquals(1, response.getTotalItems());
     Assertions.assertEquals(0, response.getCurrentPage());
@@ -319,8 +356,15 @@ class StakeKeyLifeCycleServiceTest {
   }
 
   @Test
-  void whenStakeAddressHaveDeRegistration_showReturnDeRegistrations() {
+  void whenStakeAddressHaveDeRegistrationWithCondition_showReturnDeRegistrations() {
     Pageable pageable = PageRequest.of(0, 1);
+    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .toInstant(ZoneOffset.UTC));
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
+    condition.setTxHash("bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488");
+    condition.setFromDate(fromDate);
+    condition.setToDate(toDate);
     StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
     when(projection.getTxHash()).thenReturn(
         "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
@@ -329,10 +373,38 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
-    when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress, pageable))
-        .thenReturn(page);
+    when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress,
+        condition.getTxHash(), fromDate, toDate, pageable)).thenReturn(page);
     var response = stakeKeyLifeCycleService.getStakeDeRegistrations(
-        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", pageable);
+        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2",
+        response.getData().get(0).getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getData().get(0).getFee());
+    Assertions.assertEquals(2000000L, response.getData().get(0).getDeposit());
+  }
+
+  @Test
+  void whenStakeAddressHaveDeRegistrationWithoutCondition_showReturnDeRegistrations() {
+    Pageable pageable = PageRequest.of(0, 1);
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
+    condition.setTxHash("bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488");
+
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    when(projection.getTxHash()).thenReturn(
+        "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getDeposit()).thenReturn(2000000L);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(any(), any(), any(), any(),
+        any())).thenReturn(page);
+    var response = stakeKeyLifeCycleService.getStakeDeRegistrations(
+        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
     Assertions.assertEquals(1, response.getTotalPages());
     Assertions.assertEquals(1, response.getTotalItems());
     Assertions.assertEquals(0, response.getCurrentPage());
