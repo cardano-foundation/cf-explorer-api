@@ -16,7 +16,7 @@
           run: |
             pwd
             ls -lrat
-            sudo chown -R sotatek:sotatek /home/sotatek/github-runner/runner-cardano-explorer-api/_work/cardano-explorer-api/cardano-explorer-api/cardano
+            chown -R sotatek:sotatek cardano
    
         - uses: actions/checkout@v3
           name: Checkout code
