@@ -11,16 +11,11 @@
   jobs:
     build:
       runs-on: self-hosted
-      steps:
-        - name: Grant Permission
-          run: |
-            who i am
-            pwd
-            ls -lrat
-            # sudo chown -R sotatek:sotatek cardano
-   
+      steps: 
         - uses: actions/checkout@v3
           name: Checkout code
+          with:
+            clean: false
 
         - name: Entering to Github Runner
           run: echo "Entering to Github Runner"
