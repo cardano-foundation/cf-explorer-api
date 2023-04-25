@@ -44,6 +44,7 @@ class StakeKeyLifeCycleControllerTest {
   @Test
   void shouldGetRegistrations() throws Exception {
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
     List<StakeRegistrationLifeCycle> list = new ArrayList<>();
     list.add(StakeRegistrationLifeCycle.builder()
         .txHash("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")
@@ -51,7 +52,7 @@ class StakeKeyLifeCycleControllerTest {
         .fee(BigInteger.valueOf(173333))
         .time(LocalDateTime.now())
         .build());
-    given(stakeKeyLifeCycleService.getStakeRegistrations(stakeKey,
+    given(stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, filter,
         PageRequest.of(0, 1, Sort.by("tx").descending())))
         .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));
     mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}/registrations", stakeKey)
@@ -68,13 +69,14 @@ class StakeKeyLifeCycleControllerTest {
   void shouldGetDeRegistrations() throws Exception {
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
     List<StakeRegistrationLifeCycle> list = new ArrayList<>();
+    StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
     list.add(StakeRegistrationLifeCycle.builder()
         .txHash("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")
         .deposit(-2000000L)
         .fee(BigInteger.valueOf(173333))
         .time(LocalDateTime.now())
         .build());
-    given(stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey,
+    given(stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, filter,
         PageRequest.of(0, 1, Sort.by("tx").descending())))
         .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));
     mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}/de-registrations", stakeKey)

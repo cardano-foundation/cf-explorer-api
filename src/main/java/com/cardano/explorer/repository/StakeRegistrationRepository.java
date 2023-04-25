@@ -4,6 +4,7 @@ import com.cardano.explorer.model.response.stake.TrxBlockEpochStake;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.StakeRegistration;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,10 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
       + " FROM StakeRegistration sr"
       + " JOIN Tx tx ON tx.id = sr.tx.id"
       + " JOIN Block b ON b.id = tx.blockId"
-      + " WHERE sr.addr = :stakeKey")
-  Page<StakeHistoryProjection> getStakeRegistrationsByAddress(StakeAddress stakeKey, Pageable pageable);
+      + " WHERE sr.addr = :stakeKey"
+      + " AND (b.time >= :fromTime ) "
+      + " AND (b.time <= :toTime)"
+      + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
+  Page<StakeHistoryProjection> getStakeRegistrationsByAddress(StakeAddress stakeKey, String txHash,
+      Timestamp fromTime, Timestamp toTime, Pageable pageable);
 }

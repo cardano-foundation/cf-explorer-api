@@ -4,6 +4,7 @@ import com.cardano.explorer.model.response.stake.TrxBlockEpochStake;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.StakeDeregistration;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -44,10 +45,13 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
   @Query(value = "SELECT tx.hash as txHash, b.time as time,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
       + " 'De Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
-      + " FROM StakeDeregistration sd"
-      + " JOIN Tx tx ON tx.id = sd.tx.id"
+      + " FROM StakeDeregistration dr"
+      + " JOIN Tx tx ON tx.id = dr.tx.id"
       + " JOIN Block b ON b.id = tx.blockId"
-      + " WHERE sd.addr = :stakeKey"
-      + " ORDER BY b.blockNo DESC, tx.blockIndex DESC")
-  Page<StakeHistoryProjection> getStakeDeRegistrationsByAddress(StakeAddress stakeKey, Pageable pageable);
+      + " WHERE dr.addr = :stakeKey"
+      + " AND (b.time >= :fromTime ) "
+      + " AND (b.time <= :toTime)"
+      + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
+  Page<StakeHistoryProjection> getStakeDeRegistrationsByAddress(StakeAddress stakeKey, String txHash,
+      Timestamp fromTime, Timestamp toTime, Pageable pageable);
 }
