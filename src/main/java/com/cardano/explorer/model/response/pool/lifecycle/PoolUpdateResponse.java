@@ -19,10 +19,13 @@ public class PoolUpdateResponse implements Serializable {
 
   private Timestamp time;
 
+  private Double margin;
+
   public PoolUpdateResponse(PoolUpdateProjection projection) {
     this.poolUpdateId = projection.getPoolUpdateId();
     this.txHash = projection.getTxHash();
     this.fee = projection.getFee();
     this.time = projection.getTime();
+    this.margin = projection.getMargin();
   }
 }

@@ -1,6 +1,5 @@
 package com.cardano.explorer.service.impl;
 
-import com.cardano.explorer.model.request.pool.lifecycle.PoolUpdateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
@@ -10,13 +9,13 @@ import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
+import com.cardano.explorer.model.response.pool.projection.EpochRewardProjection;
 import com.cardano.explorer.model.response.pool.projection.LifeCycleRewardProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolInfoProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
-import com.cardano.explorer.model.response.pool.projection.RewardRefundProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolRetireRepository;
@@ -25,6 +24,7 @@ import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.service.PoolLifecycleService;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,12 +98,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public BaseFilterResponse<PoolUpdateResponse> poolUpdate(PoolUpdateRequest poolUpdateRequest,
+  public BaseFilterResponse<PoolUpdateResponse> poolUpdate(String poolView, String txHash,
+      Timestamp fromDate, Timestamp toDate,
       Pageable pageable) {
     BaseFilterResponse<PoolUpdateResponse> res = new BaseFilterResponse<>();
-    Page<PoolUpdateProjection> projection = poolUpdateRepository.findPoolUpdateByPool(
-        poolUpdateRequest.getPoolView(), poolUpdateRequest.getTxHash(),
-        poolUpdateRequest.getFromDate(), poolUpdateRequest.getToDate(), pageable);
+    Page<PoolUpdateProjection> projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
+        txHash, fromDate, toDate, pageable);
     List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();
     if (Objects.nonNull(projection)) {
       projection.stream().forEach(poolUpdate -> {
@@ -178,10 +178,10 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
         deRegistrations.add(deRegistrationRes);
         epochNos.add(projection.getRetiringEpoch());
       });
-      List<RewardRefundProjection> rewardRefundProjections = rewardRepository.getRewardRefundByEpoch(
+      List<EpochRewardProjection> epochRewardProjections = rewardRepository.getRewardRefundByEpoch(
           poolView, epochNos);
       Map<Integer, BigInteger> refundAmountMap = new HashMap<>();
-      rewardRefundProjections.forEach(
+      epochRewardProjections.forEach(
           refund -> refundAmountMap.put(refund.getEpochNo(), refund.getAmount()));
       deRegistrations.forEach(deRegistration -> {
         deRegistration.setPoolHold(refundAmountMap.get(deRegistration.getRetiringEpoch()));

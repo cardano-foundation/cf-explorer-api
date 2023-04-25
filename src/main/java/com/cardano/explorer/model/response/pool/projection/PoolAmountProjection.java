@@ -2,9 +2,9 @@ package com.cardano.explorer.model.response.pool.projection;
 
 import java.math.BigInteger;
 
-public interface RewardRefundProjection {
+public interface PoolAmountProjection {
 
-  Integer getEpochNo();
+  Long getPoolId();
 
   BigInteger getAmount();
 }

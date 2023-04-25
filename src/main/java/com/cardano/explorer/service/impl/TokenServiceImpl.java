@@ -145,8 +145,8 @@ public class TokenServiceImpl implements TokenService {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
         () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
     );
-    Page<AddressTokenProjection> tokenAddresses = multiAssetRepository.findAddressByToken(
-        multiAsset, pageable);
+    Page<AddressTokenProjection> tokenAddresses
+        = addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
     Set<Long> addressIds = tokenAddresses.stream().map(AddressTokenProjection::getAddressId)
         .collect(Collectors.toSet());
     List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);

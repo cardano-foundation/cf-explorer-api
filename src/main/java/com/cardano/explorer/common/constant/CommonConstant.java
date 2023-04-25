@@ -9,8 +9,6 @@ public class CommonConstant {
 
   public static final int SCALE = 6;
 
-  public static final String PREFIX_POOL_NAME = "{\"name\": \"";
-
   public static final Integer ZERO = 0;
 
   public static final BigDecimal TOTAL_ADA = new BigDecimal(45000000000000000L);
@@ -27,4 +25,7 @@ public class CommonConstant {
 
   public static final String LOVELACE = "LOVELACE";
 
+  public static final BigDecimal PERCENT = new BigDecimal(100);
+
+  public static final String REDIS_TOTAL_LIVE_STAKE = "TOTAL_LIVE_STAKE";
 }

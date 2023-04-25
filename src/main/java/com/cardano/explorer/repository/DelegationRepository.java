@@ -2,6 +2,7 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.DelegatorChartProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDetailDelegatorProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolAmountProjection;
 import com.cardano.explorer.projection.PoolDelegationSummaryProjection;
 import com.cardano.explorer.projection.StakeDelegationProjection;
 import com.sotatek.cardano.common.entity.Delegation;
@@ -43,6 +44,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "JOIN Delegation dg ON dg.poolHash.id = ph.id "
           + "JOIN StakeAddress sa ON sa.id = dg.address.id "
           + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr.id) FROM StakeRegistration sr WHERE sa.id = sr.addr.id) "
+          + "LEFT JOIN StakeDeregistration sd ON sa.id = sd.addr.id AND sd.id IS NULL "
           + "JOIN Tx tx ON tx.id = sr.tx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
           + "WHERE ph.id = :poolId "
@@ -60,7 +62,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
    * @return list of pool delegation summary information
    */
   @Query(value =
-      "SELECT ph.view AS poolView, pod.json AS json, pu.pledge AS pledge, pu.fixedCost AS fee,"
+      "SELECT ph.id AS poolId, ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee,"
           + "ph.poolSize AS poolSize, ep.optimalPoolCount AS optimalPoolCount, "
           + "pu.margin AS margin, ad.reserves AS reserves "
           + "FROM PoolHash ph "
@@ -160,4 +162,19 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + "JOIN PoolHash ph ON ph.id = d.poolHash.id "
       + "WHERE ph.view = :poolView) AND ph.view  = :poolView)")
   BigInteger findDelegateStakeByPool(@Param("poolView") String poolView);
+
+  @Query(value =
+      "SELECT ph.id AS poolId, ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee,"
+          + "ep.optimalPoolCount AS optimalPoolCount, "
+          + "pu.margin AS margin, ad.reserves AS reserves "
+          + "FROM PoolHash ph "
+          + "LEFT JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
+          + "LEFT JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
+          + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
+          + "LEFT JOIN AdaPots ad ON ad.epochNo = (SELECT max(e.no) FROM Epoch e) "
+          + "WHERE pu.id = "
+          + "(SELECT MAX(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id) AND "
+          + "pod.id = (SELECT MAX(pod.id) FROM PoolOfflineData pod WHERE pod.pool.id = ph.id) AND "
+          + "ph.id IN :poolIds")
+  List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(@Param("poolIds") Set<Long> poolIds);
 }

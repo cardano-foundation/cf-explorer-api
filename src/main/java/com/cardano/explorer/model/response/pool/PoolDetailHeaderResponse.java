@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -56,10 +57,10 @@ public class PoolDetailHeaderResponse implements Serializable {
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
-    this.poolSize = poolDetail.getPoolSize();
     this.hashView = poolDetail.getHashRaw();
     this.pledge = poolDetail.getPledge();
     this.cost = poolDetail.getCost();
     this.margin = poolDetail.getMargin();
+    this.rewardAccounts = Collections.singletonList(poolDetail.getRewardAddress());
   }
 }

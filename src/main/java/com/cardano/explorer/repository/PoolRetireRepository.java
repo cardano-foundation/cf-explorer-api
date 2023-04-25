@@ -31,6 +31,7 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
       + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
       + "JOIN Block bk ON tx.block.id = bk.id "
-      + "WHERE ph.view = :poolView ")
+      + "WHERE ph.view = :poolView "
+      + "ORDER BY pr.id DESC")
   List<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("poolView") String poolView);
 }
