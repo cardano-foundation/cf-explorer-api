@@ -1,3 +1,4 @@
+# Build Image
 FROM openjdk:11-jdk-slim AS build
 ENV TZ=Asia/Ho_Chi_Minh
 WORKDIR /app
