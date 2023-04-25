@@ -4,6 +4,7 @@ import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProje
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
+import com.sotatek.cardano.common.entity.PoolHash;
 import com.sotatek.cardano.common.entity.PoolUpdate;
 import java.sql.Timestamp;
 import java.util.List;
@@ -69,30 +70,33 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
           + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
           + "WHERE pu.id IN :poolUpdateIds ")
-  List<StakeKeyProjection> findOwnerAccountByPoolUpdate(@Param("poolUpdateIds") Set<Long> poolUpdateIds);
+  List<StakeKeyProjection> findOwnerAccountByPoolUpdate(
+      @Param("poolUpdateIds") Set<Long> poolUpdateIds);
 
-  @Query(value = "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin "
-      + "FROM PoolHash ph "
-      + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-      + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
-      + "JOIN Block bk ON tx.blockId = bk.id "
-      + "WHERE ph.view = :poolView "
-      + "AND (:txHash IS NULL OR tx.hash = :txHash) "
-      + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
-      + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
+  @Query(value =
+      "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin "
+          + "FROM PoolHash ph "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
+          + "JOIN Block bk ON tx.blockId = bk.id "
+          + "WHERE ph.view = :poolView "
+          + "AND (:txHash IS NULL OR tx.hash = :txHash) "
+          + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
+          + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
   Page<PoolUpdateProjection> findPoolUpdateByPool(@Param("poolView") String poolView,
       @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate, Pageable pageable);
 
 
-  @Query(value = "SELECT ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
-      + "FROM PoolHash ph "
-      + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
-      + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-      + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
-      + "JOIN Block bk ON tx.block.id  = bk.id "
-      + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
-      + "WHERE pu.id = :id ")
+  @Query(value =
+      "SELECT ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
+          + "FROM PoolHash ph "
+          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
+          + "JOIN Block bk ON tx.block.id  = bk.id "
+          + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
+          + "WHERE pu.id = :id ")
   PoolUpdateDetailProjection findPoolUpdateDetailById(@Param("id") Long id);
 
 
@@ -103,5 +107,6 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE pu.id  = :id ")
   List<String> findOwnerAccountByPoolUpdate(@Param("id") Long id);
 
-  PoolUpdate findTopByIdLessThanOrderByIdDesc(@Param("id") Long id);
+  PoolUpdate findTopByIdAndPoolHashLessThanOrderByIdDesc(@Param("id") Long id,
+      @Param("poolHash") PoolHash poolHash);
 }
