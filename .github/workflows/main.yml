@@ -30,6 +30,9 @@
       steps:
         - name: Checkout code
           uses: actions/checkout@v3
+          with:
+            clean: false
+            
         - name: Deploy Mainnet
           run: docker-compose --env-file /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/mainnet.env -p mainnet up -d
         - name: Deploy Preprod
