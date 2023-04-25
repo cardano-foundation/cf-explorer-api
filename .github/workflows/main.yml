@@ -1,36 +1,43 @@
-name: CI/CD for cardano-explorer-api
+  name: CI/CD for cardano-explorer-api
 
-on:
-  push:
-    branches:
-      - "develop"
-  pull_request:
-    branches:
-      - "develop"
+  on:
+    push:
+      branches:
+        - "develop"
+    pull_request:
+      branches:
+        - "develop"
 
-jobs:
-  build:
-    runs-on: self-hosted
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Entering to Github Runner
-        run: echo "Entering to Github Runner"
-      - name: Copy configuration file
-        run: cp -rp /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/settings.xml ./.m2/settings.xml
-      - name: Building
-        run: docker build -t cardano-explorer-api .
+  jobs:
+    build:
+      runs-on: self-hosted
+      steps:
+        - name: Grant Permission
+          run: |
+            pwd
+            ls -lrat
+            sudo chown -R sotatek:sotatek /home/sotatek/github-runner/runner-cardano-explorer-api/_work/cardano-explorer-api/cardano-explorer-api/cardano
+   
+        - uses: actions/checkout@v3
+          name: Checkout code
 
-  deploy:
-    runs-on: self-hosted
-    needs: [build]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Deploy Mainnet
-        run: docker-compose --env-file /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/mainnet.env -p mainnet up -d
-      - name: Deploy Preprod
-        run: docker-compose --env-file /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/preprod.env -p preprod up -d
-      - name: Purging unused Images
-#        run: docker images -f "dangling=true" -q --no-trunc | xargs --no-run-if-empty docker rmi &>/dev/null
-        run: docker image prune -a -f
+        - name: Entering to Github Runner
+          run: echo "Entering to Github Runner"
+        - name: Copy configuration file
+          run: cp -rp /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/settings.xml ./.m2/settings.xml
+        - name: Building
+          run: docker build -t cardano-explorer-api .
+
+    deploy:
+      runs-on: self-hosted
+      needs: [build]
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+        - name: Deploy Mainnet
+          run: docker-compose --env-file /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/mainnet.env -p mainnet up -d
+        - name: Deploy Preprod
+          run: docker-compose --env-file /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/preprod.env -p preprod up -d
+        - name: Purging unused Images
+  #        run: docker images -f "dangling=true" -q --no-trunc | xargs --no-run-if-empty docker rmi &>/dev/null
+          run: docker image prune -a -f
