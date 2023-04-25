@@ -4,6 +4,7 @@ import com.cardano.explorer.common.enumeration.ProtocolType;
 import com.cardano.explorer.model.response.protocol.ProtocolHistory;
 import com.cardano.explorer.model.response.protocol.Protocols;
 import com.cardano.explorer.projection.ParamHistory;
+import com.cardano.explorer.repository.CostModelRepository;
 import com.cardano.explorer.repository.EpochParamRepository;
 import com.cardano.explorer.repository.ParamProposalRepository;
 import com.cardano.explorer.repository.TxRepository;
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 @Service
 @Log4j2
@@ -41,9 +43,11 @@ import org.springframework.stereotype.Service;
 public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   public static final String GET = "get";
+  public static final int TWO = 2;
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
   final TxRepository txRepository;
+  final CostModelRepository costModelRepository;
 
   Map<String, Method> paramProtocolMethod;
 
@@ -208,21 +212,34 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       Object currentProtocol,
       Map<Long, Tx> txs) {
 
-    var history = proposalChange
+    var histories = proposalChange
         .filter(paramProposal -> Objects.nonNull(function.apply(paramProposal)))
-        .findFirst()
-        .orElse(null);
+        .collect(Collectors.toList());
 
-    if (Objects.isNull(history)) {
+
+    if (ObjectUtils.isEmpty(histories)) {
       return getDefaultProtocol(currentProtocol);
     }
 
-    Tx tx = txs.get(history.getTx());
+
+    ProtocolHistory past = new ProtocolHistory();
+
+    if (histories.size() >= TWO) {
+      ParamHistory pastParamHistory =  histories.get(1);
+      Tx pastTX = txs.get(pastParamHistory.getTx());
+      past.setValue(function.apply(pastParamHistory));
+      past.setTime(pastTX.getBlock().getTime());
+      past.setTransactionHash(pastTX.getHash());
+    }
+
+    var current = histories.get(0);
+    Tx tx = txs.get(current.getTx());
 
     return ProtocolHistory.builder()
         .value(currentProtocol)
         .time(tx.getBlock().getTime())
         .transactionHash(tx.getHash())
+        .oldValue(past)
         .build();
   }
 
@@ -230,21 +247,34 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       String currentProtocol,
       Map<Long, Tx> txs) {
 
-    var history = proposalChange
+    var histories = proposalChange
         .filter(paramProposal -> Objects.nonNull(paramProposal.getCostModel()))
-        .findFirst()
-        .orElse(null);
+        .collect(Collectors.toList());
 
-    if (Objects.isNull(history)) {
+    if (ObjectUtils.isEmpty(histories)) {
       return getDefaultProtocol(currentProtocol);
     }
 
-    Tx tx = txs.get(history.getTx());
+    var current = histories.get(0);
+    Tx tx = txs.get(current.getTx());
+
+    ProtocolHistory past = ProtocolHistory.builder()
+        .build();
+
+    if (histories.size() >= TWO) {
+      ParamHistory pastParamHistory =  histories.get(1);
+      past.setValue(
+          costModelRepository
+              .getReferenceById(pastParamHistory.getCostModel()).getCosts());
+      past.setTime(pastParamHistory.getTime());
+      past.setTransactionHash(pastParamHistory.getHash());
+    }
 
     return ProtocolHistory.builder()
         .value(currentProtocol)
         .time(tx.getBlock().getTime())
         .transactionHash(tx.getHash())
+        .oldValue(past)
         .build();
   }
 
@@ -270,11 +300,12 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     }
   }
 
-  private  ProtocolHistory getDefaultProtocol(Object currentProtocol) {
+  private ProtocolHistory getDefaultProtocol(Object currentProtocol) {
     return ProtocolHistory.builder()
         .value(currentProtocol)
         .time(null)
         .transactionHash(null)
+        .oldValue(null)
         .build();
   }
 }

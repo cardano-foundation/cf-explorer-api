@@ -15,6 +15,7 @@ public class ProtocolHistory {
   Date time;
   String transactionHash;
   Object value;
+  ProtocolHistory oldValue;
 }
 
 
