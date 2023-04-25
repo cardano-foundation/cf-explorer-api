@@ -1,4 +1,4 @@
-  name: CI/CD for cardano-explorer-api
+ name: CI/CD for cardano-explorer-api
 
   on:
     push:
@@ -12,7 +12,7 @@
     build:
       runs-on: self-hosted
       steps: 
-        - uses: actions/checkout@main
+        - uses: actions/checkout@v2
           name: Checkout code
           with:
             ref: ${{ github.event.pull_request.head.sha }}
@@ -29,7 +29,7 @@
       runs-on: self-hosted
       needs: [build]
       steps:
-        - uses: actions/checkout@main
+        - uses: actions/checkout@v2
           name: Checkout code
           with:
             ref: ${{ github.event.pull_request.head.sha }}
@@ -42,3 +42,13 @@
         - name: Purging unused Images
   #        run: docker images -f "dangling=true" -q --no-trunc | xargs --no-run-if-empty docker rmi &>/dev/null
           run: docker image prune -a -f
+    
+    post-deploy:
+      run-on: self-hosted
+      needs: [build, deploy]
+      steps:
+        - uses: actions/checkout@v2
+          name: Checkout code
+        
+        - name: Remove unsed
+          run: sudo rm -rf /home/sotatek/github-runner/runner-cardano-explorer-api/_work/cardano-explorer-api/cardano-explorer-api/cardano
