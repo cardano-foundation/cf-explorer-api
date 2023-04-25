@@ -16,6 +16,7 @@
           name: Checkout code
           with:
             ref: ${{ github.event.pull_request.head.sha }}
+            clean: false
 
         - name: Entering to Github Runner
           run: echo "Entering to Github Runner"
@@ -32,6 +33,7 @@
           name: Checkout code
           with:
             ref: ${{ github.event.pull_request.head.sha }}
+            clean: false
             
         - name: Deploy Mainnet
           run: docker-compose --env-file /home/sotatek/jenkins-cardano/configs/cardano-explorer-api/mainnet.env -p mainnet up -d
