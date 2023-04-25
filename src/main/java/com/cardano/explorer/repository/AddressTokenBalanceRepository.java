@@ -19,7 +19,7 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
 
   @Query("SELECT COUNT(atb) as numberOfHolders, atb.multiAsset.id as ident"
       + " FROM AddressTokenBalance atb "
-      + " WHERE atb.multiAsset IN :multiAssets"
+      + " WHERE atb.multiAsset IN :multiAssets AND atb.balance > 0"
       + " GROUP BY atb.multiAsset.id")
   List<TokenNumberHoldersProjection> countByMultiAssetIn(List<MultiAsset> multiAssets);
 
