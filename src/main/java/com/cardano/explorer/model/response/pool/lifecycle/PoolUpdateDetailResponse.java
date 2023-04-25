@@ -46,8 +46,6 @@ public class PoolUpdateDetailResponse implements Serializable {
     this.poolId = projection.getPoolId();
     this.poolName = projection.getPoolName();
     this.poolView = projection.getPoolView();
-    this.previousPledge = projection.getPreviousPledge();
-    this.previousMargin = projection.getPreviousMargin();
     this.txHash = projection.getTxHash();
     this.time = projection.getTime();
     this.fee = projection.getFee();

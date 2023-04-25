@@ -1,15 +1,12 @@
 package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
-import java.sql.Timestamp;
 import java.util.Date;
 import org.springframework.data.domain.Pageable;
 
@@ -57,7 +54,7 @@ public interface PoolLifecycleService {
    * @param
    * @return PoolUpdateDetailResponse
    */
-  PoolUpdateDetailResponse poolUpdateDetail(Long id, Long previousId);
+  PoolUpdateDetailResponse poolUpdateDetail(Long id);
 
   /**
    * Get pool lifecycle pool reward

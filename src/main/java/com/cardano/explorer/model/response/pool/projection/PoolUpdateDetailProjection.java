@@ -11,10 +11,6 @@ public interface PoolUpdateDetailProjection {
 
   String getPoolView();
 
-  BigInteger getPreviousPledge();
-
-  Double getPreviousMargin();
-
   String getTxHash();
 
   Timestamp getTime();
