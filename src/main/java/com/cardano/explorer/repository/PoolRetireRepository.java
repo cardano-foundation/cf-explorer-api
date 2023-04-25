@@ -3,6 +3,7 @@ package com.cardano.explorer.repository;
 import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.PoolRetire;
+import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,10 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
       + "JOIN Block bk ON tx.block.id = bk.id "
       + "WHERE ph.view = :poolView "
-      + "ORDER BY pr.id DESC")
-  List<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("poolView") String poolView);
+      + "AND (:txHash IS NULL OR tx.hash = :txHash) "
+      + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
+      + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
+  Page<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("poolView") String poolView,
+      @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
+      @Param("toDate") Timestamp toDate, Pageable pageable);
 }

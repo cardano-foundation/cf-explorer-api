@@ -6,13 +6,19 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class RegistrationResponse implements Serializable {
 
-  private Long poolUpdateId;
+  private String poolId;
+
+  private String poolName;
+
+  private String poolView;
 
   private String txHash;
 
@@ -37,7 +43,6 @@ public class RegistrationResponse implements Serializable {
   private BigInteger deposit;
 
   public RegistrationResponse(PoolRegistrationProjection projection) {
-    this.poolUpdateId = projection.getPoolUpdateId();
     this.txHash = projection.getTxHash();
     this.totalFee = projection.getDeposit().add(projection.getFee());
     this.time = projection.getTime();

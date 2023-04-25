@@ -1,14 +1,14 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationAllResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
 import com.cardano.explorer.service.PoolLifecycleService;
-import java.sql.Timestamp;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -29,17 +29,27 @@ public class PoolLifecycleController {
 
 
   @GetMapping(value = "/registration")
-  public ResponseEntity<RegistrationAllResponse> registration(
-      @RequestParam("poolView") String poolView) {
-    return ResponseEntity.ok(poolLifecycleService.registration(poolView));
+  public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> registration(
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @Param("poolView") String poolView, @Param("txHash") String txHash,
+      @Param("fromDate") Date fromDate,
+      @Param("toDate") Date toDate) {
+    return ResponseEntity.ok(
+        poolLifecycleService.registration(poolView, txHash, fromDate, toDate, pageable));
+  }
+
+  @GetMapping(value = "/registration-detail")
+  public ResponseEntity<RegistrationResponse> registrationDetail(@Param("poolView") String poolView,
+      @RequestParam("id") Long id) {
+    return ResponseEntity.ok(poolLifecycleService.registrationDetail(poolView, id));
   }
 
   @GetMapping(value = "/pool-update")
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> poolUpdate(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
       @Param("poolView") String poolView, @Param("txHash") String txHash,
-      @Param("fromDate") Timestamp fromDate,
-      @Param("toDate") Timestamp toDate) {
+      @Param("fromDate") Date fromDate,
+      @Param("toDate") Date toDate) {
     return ResponseEntity.ok(
         poolLifecycleService.poolUpdate(poolView, txHash, fromDate, toDate, pageable));
   }
@@ -58,9 +68,13 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/de-registration")
-  public ResponseEntity<DeRegistrationAllResponse> deRegistration(
-      @RequestParam("poolView") String poolView) {
-    return ResponseEntity.ok(poolLifecycleService.deRegistration(poolView));
+  public ResponseEntity<BaseFilterResponse<DeRegistrationResponse>> deRegistration(
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @Param("poolView") String poolView, @Param("txHash") String txHash,
+      @Param("fromDate") Date fromDate,
+      @Param("toDate") Date toDate) {
+    return ResponseEntity.ok(
+        poolLifecycleService.deRegistration(poolView, txHash, fromDate, toDate, pageable));
   }
 
   @GetMapping(value = "/owner")

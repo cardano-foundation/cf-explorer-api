@@ -79,8 +79,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "WHERE ph.view = :poolView "
       + "AND (:txHash IS NULL OR tx.hash = :txHash) "
       + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
-      + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) "
-      + "ORDER BY pu.id DESC")
+      + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
   Page<PoolUpdateProjection> findPoolUpdateByPool(@Param("poolView") String poolView,
       @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate, Pageable pageable);

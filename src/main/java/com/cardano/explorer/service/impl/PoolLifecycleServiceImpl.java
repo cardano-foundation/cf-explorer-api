@@ -1,12 +1,10 @@
 package com.cardano.explorer.service.impl;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
-import com.cardano.explorer.model.response.pool.lifecycle.RegistrationAllResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
 import com.cardano.explorer.model.response.pool.projection.EpochRewardProjection;
@@ -16,7 +14,6 @@ import com.cardano.explorer.model.response.pool.projection.PoolInfoProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
-import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolRetireRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
@@ -26,13 +23,13 @@ import com.cardano.explorer.service.PoolLifecycleService;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -65,55 +62,34 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public RegistrationAllResponse registration(String poolView) {
-    RegistrationAllResponse res = new RegistrationAllResponse();
+  public BaseFilterResponse<PoolUpdateResponse> registration(String poolView, String txHash,
+      Date fromDate, Date toDate,
+      Pageable pageable) {
+    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable);
+  }
+
+  @Override
+  public RegistrationResponse registrationDetail(String poolView, Long id) {
+    RegistrationResponse res = new RegistrationResponse();
     PoolInfoProjection poolInfo = poolHashRepository.getPoolInfo(poolView);
+    PoolRegistrationProjection projection = poolHashRepository.getPoolRegistration(id);
+    if (Objects.nonNull(projection)) {
+      res = new RegistrationResponse(projection);
+    }
     if (Objects.nonNull(poolInfo)) {
       res.setPoolId(poolInfo.getPoolId());
       res.setPoolName(poolInfo.getPoolName());
       res.setPoolView(poolInfo.getPoolView());
     }
-    List<PoolRegistrationProjection> poolRegistrations = poolHashRepository.getPoolRegistration(
-        poolView);
-    List<RegistrationResponse> regisList = new ArrayList<>();
-    Set<Long> poolUpdateIds = new HashSet<>();
-    if (Objects.nonNull(poolRegistrations)) {
-      poolRegistrations.forEach(poolRegis -> {
-        poolUpdateIds.add(poolRegis.getPoolUpdateId());
-        RegistrationResponse regis = new RegistrationResponse(poolRegis);
-        regisList.add(regis);
-      });
-    }
-    List<StakeKeyProjection> stakeKeyProjections = poolUpdateRepository.findOwnerAccountByPoolUpdate(
-        poolUpdateIds);
-    Map<Long, List<StakeKeyProjection>> stakeKeyProjectionMap = stakeKeyProjections.stream()
-        .collect(Collectors.groupingBy(StakeKeyProjection::getPoolUpdateId));
-    Map<Long, List<String>> stakeKeyStrMap = new HashMap<>();
-    stakeKeyProjectionMap.forEach((k, v) -> stakeKeyStrMap.put(k,
-        v.stream().map(StakeKeyProjection::getView).collect(Collectors.toList())));
-    regisList.forEach(
-        regisRes -> regisRes.setStakeKeys(stakeKeyStrMap.get(regisRes.getPoolUpdateId())));
-    res.setRegistrations(regisList);
+    res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolUpdate(id));
     return res;
   }
 
   @Override
   public BaseFilterResponse<PoolUpdateResponse> poolUpdate(String poolView, String txHash,
-      Timestamp fromDate, Timestamp toDate,
+      Date fromDate, Date toDate,
       Pageable pageable) {
-    BaseFilterResponse<PoolUpdateResponse> res = new BaseFilterResponse<>();
-    Page<PoolUpdateProjection> projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
-        txHash, fromDate, toDate, pageable);
-    List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();
-    if (Objects.nonNull(projection)) {
-      projection.stream().forEach(poolUpdate -> {
-        PoolUpdateResponse poolUpdateRes = new PoolUpdateResponse(poolUpdate);
-        poolUpdateResList.add(poolUpdateRes);
-      });
-      res.setTotalItems(projection.getTotalElements());
-    }
-    res.setData(poolUpdateResList);
-    return res;
+    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable);
   }
 
   @Override
@@ -159,21 +135,26 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public DeRegistrationAllResponse deRegistration(String poolView) {
-    DeRegistrationAllResponse res = new DeRegistrationAllResponse();
+  public BaseFilterResponse<DeRegistrationResponse> deRegistration(String poolView, String txHash,
+      Date fromDate, Date toDate,
+      Pageable pageable) {
+    BaseFilterResponse<DeRegistrationResponse> res = new BaseFilterResponse<>();
     PoolInfoProjection poolInfo = poolHashRepository.getPoolInfo(poolView);
-    if (Objects.nonNull(poolInfo)) {
-      res.setPoolId(poolInfo.getPoolId());
-      res.setPoolName(poolInfo.getPoolName());
-      res.setPoolView(poolInfo.getPoolView());
+    Timestamp fromTimestamp = null;
+    Timestamp toTimestamp = null;
+    if (Objects.nonNull(fromDate)) {
+      fromTimestamp = new Timestamp(fromDate.getTime());
     }
-    res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
-    List<PoolDeRegistrationProjection> projections = poolRetireRepository.getPoolDeRegistration(
-        poolView);
+    if (Objects.nonNull(toDate)) {
+      toTimestamp = new Timestamp(toDate.getTime());
+    }
+    Page<PoolDeRegistrationProjection> projections = poolRetireRepository.getPoolDeRegistration(
+        poolView,
+        txHash, fromTimestamp, toTimestamp, pageable);
+    List<DeRegistrationResponse> deRegistrations = new ArrayList<>();
     if (Objects.nonNull(projections)) {
-      List<DeRegistrationResponse> deRegistrations = new ArrayList<>();
       Set<Integer> epochNos = new HashSet<>();
-      projections.forEach(projection -> {
+      projections.stream().forEach(projection -> {
         DeRegistrationResponse deRegistrationRes = new DeRegistrationResponse(projection);
         deRegistrations.add(deRegistrationRes);
         epochNos.add(projection.getRetiringEpoch());
@@ -186,9 +167,41 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       deRegistrations.forEach(deRegistration -> {
         deRegistration.setPoolHold(refundAmountMap.get(deRegistration.getRetiringEpoch()));
         deRegistration.setTotalFee(deRegistration.getFee().add(deRegistration.getPoolHold()));
+        deRegistration.setPoolId(poolInfo.getPoolId());
+        deRegistration.setPoolName(poolInfo.getPoolName());
+        deRegistration.setPoolView(poolInfo.getPoolView());
+        deRegistration.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
       });
-      res.setDeRegistrations(deRegistrations);
+      res.setTotalItems(projections.getTotalElements());
     }
+    res.setData(deRegistrations);
+    return res;
+  }
+
+  private BaseFilterResponse<PoolUpdateResponse> getDataForPoolUpdate(String poolView,
+      String txHash,
+      Date fromDate, Date toDate,
+      Pageable pageable) {
+    BaseFilterResponse<PoolUpdateResponse> res = new BaseFilterResponse<>();
+    Timestamp fromTimestamp = null;
+    Timestamp toTimestamp = null;
+    if (Objects.nonNull(fromDate)) {
+      fromTimestamp = new Timestamp(fromDate.getTime());
+    }
+    if (Objects.nonNull(toDate)) {
+      toTimestamp = new Timestamp(toDate.getTime());
+    }
+    Page<PoolUpdateProjection> projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
+        txHash, fromTimestamp, toTimestamp, pageable);
+    List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();
+    if (Objects.nonNull(projection)) {
+      projection.stream().forEach(poolUpdate -> {
+        PoolUpdateResponse poolUpdateRes = new PoolUpdateResponse(poolUpdate);
+        poolUpdateResList.add(poolUpdateRes);
+      });
+      res.setTotalItems(projection.getTotalElements());
+    }
+    res.setData(poolUpdateResList);
     return res;
   }
 }
