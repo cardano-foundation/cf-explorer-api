@@ -71,7 +71,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE pu.id IN :poolUpdateIds ")
   List<StakeKeyProjection> findOwnerAccountByPoolUpdate(@Param("poolUpdateIds") Set<Long> poolUpdateIds);
 
-  @Query(value = "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time "
+  @Query(value = "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin "
       + "FROM PoolHash ph "
       + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
       + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
