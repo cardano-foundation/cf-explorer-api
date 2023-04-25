@@ -12,4 +12,6 @@ public interface PoolUpdateProjection {
    BigInteger getFee();
 
    Timestamp getTime();
+
+   Double getMargin();
 }
