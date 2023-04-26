@@ -119,7 +119,7 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeRewardActivityResponse>> getRewardActivities(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          AddressTxBalance_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
+          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pageable));
   }
 
