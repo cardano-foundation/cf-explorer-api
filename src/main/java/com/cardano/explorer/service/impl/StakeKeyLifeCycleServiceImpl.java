@@ -7,6 +7,7 @@ import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLife
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
@@ -185,6 +186,26 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
                 .build()
         )
     );
+  }
+
+  @Override
+  public StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    var withdrawal = withdrawalRepository.getWithdrawalByAddressAndTx(stakeAddress, hash)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
+    var totalBalance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(stakeAddress,
+        withdrawal.getTime()).orElse(BigInteger.ZERO);
+    var rewardAvailable = rewardRepository.getAvailableRewardByStakeAddressAndEpoch(stakeAddress,
+        withdrawal.getEpochNo()).orElse(BigInteger.ZERO);
+    return StakeWithdrawalDetailResponse.builder()
+        .fee(withdrawal.getFee())
+        .amount(withdrawal.getAmount())
+        .time(withdrawal.getTime().toLocalDateTime())
+        .txHash(withdrawal.getTxHash())
+        .stakeTotalAmount(totalBalance)
+        .stakeRewardAvailable(rewardAvailable)
+        .build();
   }
 
   private String getNameValueFromJson(String json) {

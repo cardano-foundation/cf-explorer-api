@@ -6,6 +6,7 @@ import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLife
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import org.springframework.data.domain.Pageable;
 
@@ -66,4 +67,12 @@ public interface StakeKeyLifeCycleService {
    */
   BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawals(String stakeKey,
       StakeLifeCycleFilterRequest condition, Pageable pageable);
+
+  /**
+   * Get detail withdrawal in stake key life cycle
+   * @param stakeKey stake address view
+   * @param hash hash of transaction
+   * @return withdrawal detail
+   */
+  StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash);
 }
