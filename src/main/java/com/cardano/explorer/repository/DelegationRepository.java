@@ -89,6 +89,18 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
   Page<StakeDelegationProjection> findDelegationByAddress(String stakeKey, Pageable pageable);
 
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+      + " block.blockNo as blockNo, block.epochNo as epochNo, tx.fee as fee, tx.outSum as outSum"
+      + " FROM Delegation delegation"
+      + " INNER JOIN Tx tx ON delegation.tx = tx"
+      + " INNER JOIN Block block ON tx.block = block"
+      + " WHERE delegation.address = :stakeKey"
+      + " AND (block.time >= :fromTime ) "
+      + " AND (block.time <= :toTime)"
+      + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
+  Page<StakeDelegationProjection> findDelegationByAddress(StakeAddress stakeKey,
+      String txHash, Timestamp fromTime, Timestamp toTime, Pageable pageable);
+
   @Query("SELECT poolHash.view as poolId, poolOfflineData.json as poolData,"
       + " poolOfflineData.tickerName as tickerName"
       + " FROM Delegation delegation"

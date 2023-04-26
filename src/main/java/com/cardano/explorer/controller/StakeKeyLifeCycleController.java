@@ -4,7 +4,9 @@ import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationFilterResponse;
 import com.cardano.explorer.service.StakeKeyLifeCycleService;
+import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.StakeRegistration_;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,18 @@ public class StakeKeyLifeCycleController {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(
         stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, condition, pageable));
+  }
+
+
+  @GetMapping("/{stakeKey}/delegations")
+  @LogMessage
+  public ResponseEntity<BaseFilterResponse<StakeDelegationFilterResponse>> getDelegations(
+      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @ParameterObject StakeLifeCycleFilterRequest condition,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          Delegation_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(
+        stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pageable));
   }
 
 }
