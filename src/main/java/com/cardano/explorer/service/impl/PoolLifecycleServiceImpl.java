@@ -1,5 +1,6 @@
 package com.cardano.explorer.service.impl;
 
+import com.cardano.explorer.common.constant.CommonConstant;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.PoolInfoResponse;
@@ -16,12 +17,15 @@ import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProje
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
+import com.cardano.explorer.repository.EpochRepository;
+import com.cardano.explorer.repository.EpochStakeRepository;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolRetireRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.service.PoolLifecycleService;
+import com.sotatek.cardano.common.entity.PoolRetire;
 import com.sotatek.cardano.common.entity.PoolUpdate;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -54,6 +58,10 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   private final RewardRepository rewardRepository;
 
   private final PoolRetireRepository poolRetireRepository;
+
+  private final EpochStakeRepository epochStakeRepository;
+
+  private final EpochRepository epochRepository;
 
   @Override
   public BaseFilterResponse<String> getPoolViewByStakeKey(String stakeKey, Pageable pageable) {
@@ -133,13 +141,23 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   @Override
   public PoolInfoResponse poolInfo(String poolView) {
     PoolInfoResponse res = new PoolInfoResponse();
-    PoolInfoProjection poolInfo = poolHashRepository.getPoolInfo(poolView);
-    if (Objects.nonNull(poolInfo)) {
-      res.setPoolId(poolInfo.getPoolId());
-      res.setPoolName(poolInfo.getPoolName());
-      res.setPoolView(poolInfo.getPoolView());
+    PoolInfoProjection projection = poolHashRepository.getPoolInfo(poolView);
+    if (Objects.nonNull(projection)) {
+      res.setPoolId(projection.getPoolId());
+      res.setPoolName(projection.getPoolName());
+      res.setPoolView(projection.getPoolView());
+      res.setPoolSize(epochStakeRepository.activeStakeByPool(projection.getId()));
+      res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
+      res.setRewardAvailable(rewardRepository.getTotalRewardByPool(poolView));
     }
-    res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
+    PoolRetire poolRetire = poolRetireRepository.findByPoolView(poolView);
+    if (Objects.isNull(poolRetire)) {
+      res.setStatus(CommonConstant.POOL_STATUS_ACTIVE);
+      res.setEpochNo(epochRepository.findCurrentEpochNo().orElse(0));
+    } else {
+      res.setStatus(CommonConstant.POOL_STATUS_RETIRING);
+      res.setEpochNo(poolRetire.getRetiringEpoch());
+    }
     return res;
   }
 

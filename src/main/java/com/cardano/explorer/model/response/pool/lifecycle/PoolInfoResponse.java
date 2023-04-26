@@ -1,6 +1,7 @@
 package com.cardano.explorer.model.response.pool.lifecycle;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,11 +10,19 @@ import lombok.Setter;
 @Setter
 public class PoolInfoResponse implements Serializable {
 
-  String poolId;
+  private String poolId;
 
-  String poolName;
+  private String poolName;
 
-  String poolView;
+  private String poolView;
+
+  private BigInteger poolSize;
+
+  private BigInteger rewardAvailable;
+
+  private String status;
+
+  private Integer epochNo;
 
   List<String> stakeKeys;
 }
