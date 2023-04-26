@@ -45,15 +45,15 @@ public class PoolReportController {
         // Temp
         BaseFilterResponse<PoolReportListResponse> res = new BaseFilterResponse<>();
         List<PoolReportListResponse> poolReportListResponses = List.of(
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build()
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build()
         );
         res.setData(poolReportListResponses);
         res.setTotalItems(poolReportListResponses.size());
@@ -65,9 +65,16 @@ public class PoolReportController {
     public ResponseEntity<PoolReportDetailResponse> detailPoolReport(@PathVariable String reportId) {
         //TODO Implement service processing
         // Temp
-        PoolReportDetailResponse res = PoolReportDetailResponse.builder().poolRegistrations(temp1()).poolUpdates(temp2()).rewardDistributions(temp3()).deregistrations(temp4()).build();
+        PoolReportDetailResponse res = PoolReportDetailResponse.builder().poolRegistrations(temp1()).poolUpdates(temp2()).rewardDistributions(temp3()).deregistrations(temp4()).epochSizes(temp5()).build();
 
         return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("detail/{reportId}/epoch-size")
+    public ResponseEntity<BaseFilterResponse<PoolReportDetailResponse.EpochSize>> detailEpochSizePoolReport(@PathVariable String reportId, @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        //TODO Implement service processing
+        // Temp
+        return ResponseEntity.ok(temp5());
     }
 
     private BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> temp1() {
@@ -108,6 +115,19 @@ public class PoolReportController {
         List<PoolReportDetailResponse.Deregistration> poolReportDetailResponses = List.of(
                 PoolReportDetailResponse.Deregistration.builder().txnHash("2ca384e18e4eab235194666e66e4c195a155bb2fe7b23d254f08f6a887ed28ab").date(new Date()).adaValueHold(BigDecimal.valueOf(1.2)).adaValueFees(BigDecimal.valueOf(0.3)).owner("stake1u95vd8c9gwhp4f6xzhj7nnkqz94tdcypkvpset52kua7s9s8fvh5d").build(),
                 PoolReportDetailResponse.Deregistration.builder().txnHash("2ca384e18e4eab235194666e66e4c195a155bb2fe7b23d254f08f6a887ed28ab").date(new Date()).adaValueHold(BigDecimal.valueOf(1.2)).adaValueFees(BigDecimal.valueOf(0.3)).owner("stake1u95vd8c9gwhp4f6xzhj7nnkqz94tdcypkvpset52kua7s9s8fvh5d").build()
+        );
+        res.setData(poolReportDetailResponses);
+        res.setTotalItems(poolReportDetailResponses.size());
+        return res;
+    }
+
+    private BaseFilterResponse<PoolReportDetailResponse.EpochSize> temp5() {
+        BaseFilterResponse<PoolReportDetailResponse.EpochSize> res = new BaseFilterResponse<>();
+        List<PoolReportDetailResponse.EpochSize> poolReportDetailResponses = List.of(
+                PoolReportDetailResponse.EpochSize.builder().epoch("401").size(BigDecimal.valueOf(123456721.21)).build(),
+                PoolReportDetailResponse.EpochSize.builder().epoch("402").size(BigDecimal.valueOf(123456721.21)).build(),
+                PoolReportDetailResponse.EpochSize.builder().epoch("403").size(BigDecimal.valueOf(123456721.21)).build(),
+                PoolReportDetailResponse.EpochSize.builder().epoch("404").size(BigDecimal.valueOf(123456721.21)).build()
         );
         res.setData(poolReportDetailResponses);
         res.setTotalItems(poolReportDetailResponses.size());

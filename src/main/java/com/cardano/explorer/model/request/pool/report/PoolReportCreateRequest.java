@@ -11,6 +11,10 @@ public class PoolReportCreateRequest {
 
     private String poolId;
 
+    private Boolean isPoolSize;
+
+    private Boolean isFeesPaid;
+
     private Integer[] epochRanges;
 
     private PoolReportEvent[] event;

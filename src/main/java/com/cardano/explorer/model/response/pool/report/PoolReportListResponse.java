@@ -15,5 +15,9 @@ public class PoolReportListResponse {
 
     private Integer[] epochRanges;
 
+    private Boolean isPoolSize;
+
+    private Boolean isFreePaid;
+
     private String event;
 }
