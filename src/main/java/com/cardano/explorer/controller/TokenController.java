@@ -1,5 +1,6 @@
 package com.cardano.explorer.controller;
 
+import com.cardano.explorer.common.enumeration.AnalyticType;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
@@ -7,11 +8,14 @@ import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.model.response.token.TokenFilterResponse;
 import com.cardano.explorer.model.response.token.TokenMintTxResponse;
 import com.cardano.explorer.model.response.token.TokenResponse;
+import com.cardano.explorer.model.response.token.TokenVolumeAnalyticsResponse;
 import com.cardano.explorer.service.TokenService;
 import com.cardano.explorer.service.TxService;
 import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.MultiAsset_;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -69,5 +73,14 @@ public class TokenController {
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
       @PathVariable String tokenId, @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pageable));
+  }
+
+  @GetMapping("/analytics/{tokenId}/{type}")
+  @LogMessage
+  @Operation(summary = "Filter transaction by token")
+  public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
+      @PathVariable String tokenId, @PathVariable
+  @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+    return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
   }
 }
