@@ -4,6 +4,7 @@ import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationFilterResponse;
 import com.cardano.explorer.service.StakeKeyLifeCycleService;
 import com.sotatek.cardano.common.entity.Delegation_;
@@ -60,5 +61,14 @@ public class StakeKeyLifeCycleController {
     return ResponseEntity.ok(
         stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pageable));
   }
+
+  @GetMapping("/{stakeKey}/delegations/{hash}")
+  @LogMessage
+  public ResponseEntity<StakeDelegationDetailResponse> getDelegationDetail(
+      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @PathVariable @Parameter(description = "tx hash") String hash) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDelegationDetail(stakeKey, hash));
+  }
+
 
 }
