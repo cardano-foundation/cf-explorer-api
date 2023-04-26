@@ -290,7 +290,10 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     } else {
       response.sort(Comparator.comparing(StakeRewardActivityResponse::getEpochNo).reversed());
     }
-    Page<StakeRewardActivityResponse> page = new PageImpl<>(response, pageable, response.size());
+    final int start = (int) pageable.getOffset();
+    final int end = Math.min((start + pageable.getPageSize()), response.size());
+    Page<StakeRewardActivityResponse> page = new PageImpl<>(response.subList(start, end),
+        pageable, response.size());
     return new BaseFilterResponse<>(page);
   }
 
