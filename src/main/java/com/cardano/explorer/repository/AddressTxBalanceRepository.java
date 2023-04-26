@@ -1,5 +1,6 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.projection.StakeTxProjection;
 import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AddressTxBalance;
 import com.sotatek.cardano.common.entity.StakeAddress;
@@ -41,6 +42,14 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " (SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress)"
       + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   Page<Tx> findAllByStake(String stakeAddress, Pageable pageable);
+
+  @Query(value = "SELECT addrTxBalance.tx.id as txId, sum(addrTxBalance.balance) as amount,"
+      + " addrTxBalance.time as time"
+      + " FROM AddressTxBalance addrTxBalance"
+      + " WHERE addrTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress)"
+      + " GROUP BY addrTxBalance.tx.id, addrTxBalance.time")
+  Page<StakeTxProjection> findTxAndAmountByStake(String stakeAddress, Pageable pageable);
 
   @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.address IN "
