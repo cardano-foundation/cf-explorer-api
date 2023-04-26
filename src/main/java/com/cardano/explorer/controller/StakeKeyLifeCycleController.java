@@ -3,13 +3,16 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
-import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardActivityResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import com.cardano.explorer.service.StakeKeyLifeCycleService;
+import com.sotatek.cardano.common.entity.AddressTxBalance_;
 import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.StakeRegistration_;
@@ -53,7 +56,6 @@ public class StakeKeyLifeCycleController {
     return ResponseEntity.ok(
         stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, condition, pageable));
   }
-
 
   @GetMapping("/{stakeKey}/delegations")
   @LogMessage
@@ -102,4 +104,23 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "tx hash") String hash) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWithdrawalDetail(stakeKey, hash));
   }
+
+  @GetMapping("/{stakeKey}/wallet-activity")
+  @LogMessage
+  public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>> getWalletActivities(
+      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          AddressTxBalance_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pageable));
+  }
+
+  @GetMapping("/{stakeKey}/reward-activity")
+  @LogMessage
+  public ResponseEntity<BaseFilterResponse<StakeRewardActivityResponse>> getRewardActivities(
+      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pageable));
+  }
+
 }
