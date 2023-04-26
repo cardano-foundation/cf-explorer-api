@@ -1,5 +1,6 @@
 package com.cardano.explorer.repository;
 
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
@@ -53,5 +54,15 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
   Page<StakeWithdrawalProjection> getWithdrawalByAddress(StakeAddress stakeKey, String txHash,
       Timestamp fromTime, Timestamp toTime, Pageable pageable);
+
+  @Query("SELECT new com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse("
+      + "block.epochNo, epoch.endTime, sum(withdrawal.amount))"
+      + " FROM Withdrawal withdrawal"
+      + " INNER JOIN Tx tx ON withdrawal.tx = tx"
+      + " INNER JOIN Block block ON tx.block = block"
+      + " INNER JOIN Epoch epoch ON block.epochNo = epoch.no"
+      + " WHERE withdrawal.addr = :stakeAddress"
+      + " GROUP BY block.epochNo, epoch.endTime")
+  List<StakeRewardResponse> findEpochWithdrawalByStake(StakeAddress stakeAddress);
 
 }

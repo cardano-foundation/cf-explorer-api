@@ -9,6 +9,7 @@ import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -75,6 +76,11 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "ph.poolSize IS NOT NULL "
           + "ORDER BY poolSize DESC ")
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(Pageable pageable);
+
+  @Query("SELECT delegation.tx.id"
+      + " FROM Delegation delegation"
+      + " WHERE delegation.address = :stakeKey AND delegation.tx.id IN :txIds")
+  List<Long> findDelegationByAddressAndTxIn(StakeAddress stakeKey, Collection<Long> txIds);
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, poolHash.view as poolId,"

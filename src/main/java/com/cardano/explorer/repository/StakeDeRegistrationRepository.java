@@ -5,6 +5,7 @@ import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.StakeDeregistration;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,10 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
       + " ORDER BY b.blockNo DESC, tx.blockIndex DESC")
   List<StakeHistoryProjection> getStakeDeRegistrationsByAddress(String stakeKey);
 
+  @Query(value = "SELECT sd.tx.id"
+      + " FROM StakeDeregistration sd"
+      + " WHERE sd.addr = :stakeKey AND sd.tx.id IN :txIds")
+  List<Long> getStakeDeRegistrationsByAddressAndTxIn(StakeAddress stakeKey, Collection<Long> txIds);
 
   @Query(value = "SELECT tx.hash as txHash, b.time as time,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
