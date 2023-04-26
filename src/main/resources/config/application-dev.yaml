@@ -69,16 +69,18 @@ application:
     interval-time: 60
     base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
 
+  time-zone: ${TIME_ZONE:GMT+1}
+
 cloud:
   aws:
     credentials:
-      access-key: minioadmin
-      secret-key: minioadmin
+      access-key: ${MINIO_ACCESS_KEY:miniominio}
+      secret-key: ${MINIO_SECRET_KEY:sekritsekrit}
     region:
       static: null
     s3:
       bucket:
-        name: storage
+        name: ${BUCKET_NAME:cardano-explorer-api-storage}
       path-style:
         enabled: true
-      endpoint: http://localhost:9100
+      endpoint: ${STORAGE_ENDPOINT:http://172.16.1.230:9000}
