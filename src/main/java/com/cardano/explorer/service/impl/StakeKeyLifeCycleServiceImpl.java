@@ -7,6 +7,7 @@ import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLife
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationDetailResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.DelegationRepository;
@@ -14,6 +15,7 @@ import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
 import com.cardano.explorer.repository.StakeRegistrationRepository;
+import com.cardano.explorer.repository.WithdrawalRepository;
 import com.cardano.explorer.service.StakeKeyLifeCycleService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -43,6 +45,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RewardRepository rewardRepository;
+  private final WithdrawalRepository withdrawalRepository;
   private final AddressTxBalanceRepository addressTxBalanceRepository;
 
   @Override
@@ -157,6 +160,32 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     return new BaseFilterResponse<>(response);
   }
 
+  @Override
+  public BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawals(String stakeKey,
+      StakeLifeCycleFilterRequest condition, Pageable pageable) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .toInstant(ZoneOffset.UTC));
+    if (Objects.nonNull(condition.getFromDate())) {
+      fromDate = Timestamp.from(condition.getFromDate().toInstant());
+    }
+    if (Objects.nonNull(condition.getToDate())) {
+      toDate = Timestamp.from(condition.getToDate().toInstant());
+    }
+    var response = withdrawalRepository.getWithdrawalByAddress(stakeAddress, condition.getTxHash(),
+        fromDate, toDate, pageable);
+    return new BaseFilterResponse<>(
+        response.map(
+            item -> StakeWithdrawalFilterResponse.builder()
+                .txHash(item.getTxHash())
+                .time(item.getTime().toLocalDateTime())
+                .value(item.getAmount())
+                .build()
+        )
+    );
+  }
 
   private String getNameValueFromJson(String json) {
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(json))) {

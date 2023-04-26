@@ -1,10 +1,12 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.projection.StakeWithdrawalProjection;
+import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
 import com.sotatek.cardano.common.entity.Withdrawal;
 import com.sotatek.cardano.common.entity.Withdrawal_;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -31,4 +33,17 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
   Page<StakeWithdrawalProjection> getWithdrawalByAddress(String stakeKey, Pageable pageable);
+
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+      + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"
+      + " FROM Withdrawal withdrawal"
+      + " INNER JOIN Tx tx ON withdrawal.tx = tx"
+      + " INNER JOIN Block block ON tx.block = block"
+      + " WHERE withdrawal.addr = :stakeKey"
+      + " AND (block.time >= :fromTime )"
+      + " AND (block.time <= :toTime)"
+      + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
+  Page<StakeWithdrawalProjection> getWithdrawalByAddress(StakeAddress stakeKey, String txHash,
+      Timestamp fromTime, Timestamp toTime, Pageable pageable);
+
 }
