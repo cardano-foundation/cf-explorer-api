@@ -48,6 +48,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -284,7 +285,11 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
             .type(StakeRewardType.REWARD_WITHDRAWN)
             .build()
     ).collect(Collectors.toList()));
-    response.sort(Comparator.comparing(StakeRewardActivityResponse::getEpochNo).reversed());
+    if(pageable.getSort().equals(Sort.by(Sort.Direction.ASC, "time"))) {
+      response.sort(Comparator.comparing(StakeRewardActivityResponse::getEpochNo));
+    } else {
+      response.sort(Comparator.comparing(StakeRewardActivityResponse::getEpochNo).reversed());
+    }
     Page<StakeRewardActivityResponse> page = new PageImpl<>(response, pageable, response.size());
     return new BaseFilterResponse<>(page);
   }
