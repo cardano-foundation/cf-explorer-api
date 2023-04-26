@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 
 public interface PoolUpdateDetailProjection {
 
+  Long getHashId();
+
   String getPoolId();
 
   String getPoolName();

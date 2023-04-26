@@ -89,7 +89,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
 
   @Query(value =
-      "SELECT ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
+      "SELECT ph.id AS hashId, ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
@@ -107,6 +107,6 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE pu.id  = :id ")
   List<String> findOwnerAccountByPoolUpdate(@Param("id") Long id);
 
-  PoolUpdate findTopByIdAndPoolHashLessThanOrderByIdDesc(@Param("id") Long id,
-      @Param("poolHash") PoolHash poolHash);
+  PoolUpdate findTopByIdLessThanAndPoolHashIdOrderByIdDesc(@Param("id") Long id,
+      @Param("poolHashId") Long poolHashId);
 }

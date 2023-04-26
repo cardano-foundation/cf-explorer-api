@@ -20,7 +20,6 @@ import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.service.PoolLifecycleService;
-import com.sotatek.cardano.common.entity.PoolHash;
 import com.sotatek.cardano.common.entity.PoolUpdate;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -101,9 +100,8 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     if (Objects.nonNull(projection)) {
       res = new PoolUpdateDetailResponse(projection);
       res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolUpdate(id));
-      PoolHash poolHash = poolHashRepository.findByView(projection.getPoolView()).orElse(null);
-      PoolUpdate poolUpdatePrevious = poolUpdateRepository.findTopByIdAndPoolHashLessThanOrderByIdDesc(
-          id, poolHash);
+      PoolUpdate poolUpdatePrevious = poolUpdateRepository.findTopByIdLessThanAndPoolHashIdOrderByIdDesc(
+          id, projection.getHashId());
       if (Objects.nonNull(poolUpdatePrevious)) {
         res.setPreviousPledge(poolUpdatePrevious.getPledge());
         res.setPreviousMargin(poolUpdatePrevious.getMargin());
