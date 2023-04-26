@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 
 public interface PoolRegistrationProjection {
 
+  Long getPoolUpdateId();
+
   BigInteger getPledge();
 
   Double getMargin();

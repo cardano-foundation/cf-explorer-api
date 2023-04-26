@@ -7,6 +7,7 @@ import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailRespon
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.TabularRegisResponse;
 import com.cardano.explorer.model.response.pool.projection.EpochRewardProjection;
 import com.cardano.explorer.model.response.pool.projection.LifeCycleRewardProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
@@ -14,6 +15,7 @@ import com.cardano.explorer.model.response.pool.projection.PoolInfoProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
+import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.repository.PoolHashRepository;
 import com.cardano.explorer.repository.PoolRetireRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -181,6 +184,60 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setTotalItems(projections.getTotalElements());
     }
     res.setData(deRegistrations);
+    return res;
+  }
+
+  @Override
+  public BaseFilterResponse<TabularRegisResponse> registrationList(String poolView,
+      Pageable pageable) {
+    BaseFilterResponse<TabularRegisResponse> res = new BaseFilterResponse<>();
+    List<TabularRegisResponse> tabularRegisList = new ArrayList<>();
+    Page<PoolRegistrationProjection> projection = poolHashRepository.getPoolRegistrationByPool(
+        poolView, pageable);
+    if (Objects.nonNull(projection)) {
+      Set<Long> poolUpdateIds = new HashSet<>();
+      projection.stream().forEach(tabularRegis -> {
+        tabularRegisList.add(new TabularRegisResponse(tabularRegis));
+        poolUpdateIds.add(tabularRegis.getPoolUpdateId());
+      });
+      List<StakeKeyProjection> stakeKeyProjections = poolUpdateRepository.findOwnerAccountByPoolUpdate(
+          poolUpdateIds);
+      Map<Long, List<StakeKeyProjection>> stakeKeyProjectionMap = stakeKeyProjections.stream()
+          .collect(Collectors.groupingBy(StakeKeyProjection::getPoolUpdateId));
+      Map<Long, List<String>> stakeKeyStrMap = new HashMap<>();
+      stakeKeyProjectionMap.forEach((k, v) -> stakeKeyStrMap.put(k,
+          v.stream().map(StakeKeyProjection::getView).collect(Collectors.toList())));
+      res.setTotalItems(projection.getTotalElements());
+      tabularRegisList.forEach(tabularRegis -> tabularRegis.setStakeKeys(
+          stakeKeyStrMap.get(tabularRegis.getPoolUpdateId())));
+    }
+    res.setData(tabularRegisList);
+    return res;
+  }
+
+  @Override
+  public BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(String poolView,
+      Pageable pageable) {
+    BaseFilterResponse<PoolUpdateDetailResponse> res = new BaseFilterResponse<>();
+    List<PoolUpdateDetailResponse> poolUpdateList = new ArrayList<>();
+    Page<PoolUpdateDetailProjection> projection = poolUpdateRepository.findPoolUpdateByPool(
+        poolView, pageable);
+    if (Objects.nonNull(projection)) {
+      projection.stream().forEach(poolUpdate -> {
+        PoolUpdateDetailResponse poolUpdateRes = new PoolUpdateDetailResponse(poolUpdate);
+        poolUpdateRes.setStakeKeys(
+            poolUpdateRepository.findOwnerAccountByPoolUpdate(poolUpdate.getPoolUpdateId()));
+        PoolUpdate poolUpdatePrevious = poolUpdateRepository.findTopByIdLessThanAndPoolHashIdOrderByIdDesc(
+            poolUpdate.getPoolUpdateId(), poolUpdate.getHashId());
+        if (Objects.nonNull(poolUpdatePrevious)) {
+          poolUpdateRes.setPreviousPledge(poolUpdatePrevious.getPledge());
+          poolUpdateRes.setPreviousMargin(poolUpdatePrevious.getMargin());
+        }
+        poolUpdateList.add(poolUpdateRes);
+        res.setTotalItems(projection.getTotalElements());
+      });
+    }
+    res.setData(poolUpdateList);
     return res;
   }
 

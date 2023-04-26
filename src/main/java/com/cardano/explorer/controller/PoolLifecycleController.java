@@ -7,6 +7,7 @@ import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailRespon
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.TabularRegisResponse;
 import com.cardano.explorer.service.PoolLifecycleService;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -86,5 +87,19 @@ public class PoolLifecycleController {
   @GetMapping(value = "/pool-info")
   public ResponseEntity<PoolInfoResponse> poolInfo(@RequestParam("poolView") String poolView) {
     return ResponseEntity.ok(poolLifecycleService.poolInfo(poolView));
+  }
+
+  @GetMapping(value = "/registration-list")
+  public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> registrationList(@RequestParam("poolView") String poolView,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(
+        poolLifecycleService.registrationList(poolView, pageable));
+  }
+
+  @GetMapping(value = "/pool-update-list")
+  public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> poolUpdate(@RequestParam("poolView") String poolView,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(
+        poolLifecycleService.poolUpdateList(poolView, pageable));
   }
 }

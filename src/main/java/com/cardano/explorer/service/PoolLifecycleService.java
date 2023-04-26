@@ -7,6 +7,7 @@ import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailRespon
 import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RegistrationResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.TabularRegisResponse;
 import java.util.Date;
 import org.springframework.data.domain.Pageable;
 
@@ -81,4 +82,22 @@ public interface PoolLifecycleService {
   BaseFilterResponse<DeRegistrationResponse> deRegistration(String poolView, String txHash,
       Date fromDate, Date toDate,
       Pageable pageable);
+
+  /**
+   * Get pool lifecycle registration list
+   *
+   * @param
+   * @return BaseFilterResponse<TabularRegisResponse>
+   */
+  BaseFilterResponse<TabularRegisResponse> registrationList(String poolView, Pageable pageable);
+
+
+  /**
+   * Get pool lifecycle pool update list
+   *
+   * @param
+   * @return BaseFilterResponse<PoolUpdateDetailResponse>
+   */
+  BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(String poolView, Pageable pageable);
+
 }
