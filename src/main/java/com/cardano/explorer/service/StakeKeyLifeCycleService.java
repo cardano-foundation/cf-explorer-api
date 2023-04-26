@@ -3,8 +3,9 @@ package com.cardano.explorer.service;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationDetailResponse;
-import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationDetailResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface StakeKeyLifeCycleService {
@@ -46,4 +47,12 @@ public interface StakeKeyLifeCycleService {
    * @return detail delegation
    */
   StakeDelegationDetailResponse getStakeDelegationDetail(String stakeKey, String hash);
+
+  /**
+   * Get list reward in stake key life cycle
+   * @param stakeKey stake address view
+   * @param pageable page information
+   * @return list stake key reward
+   */
+  BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey, Pageable pageable);
 }

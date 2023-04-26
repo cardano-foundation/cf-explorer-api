@@ -1,4 +1,4 @@
-package com.cardano.explorer.model.response.stake.lifecycle.lifecycle;
+package com.cardano.explorer.model.response.stake.lifecycle;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
