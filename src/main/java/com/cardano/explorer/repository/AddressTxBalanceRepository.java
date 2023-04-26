@@ -2,10 +2,12 @@ package com.cardano.explorer.repository;
 
 import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AddressTxBalance;
+import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,7 +20,7 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   Long countByAddress(Address address);
   @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.address = :address"
-      + " AND addressTxBalance.time < :time")
+      + " AND addressTxBalance.time <= :time")
   BigInteger getBalanceByAddressAndTime(Address address, Timestamp time);
 
   @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
@@ -40,4 +42,9 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   Page<Tx> findAllByStake(String stakeAddress, Pageable pageable);
 
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
+      + " AND addressTxBalance.time <= :time")
+  Optional<BigInteger> getBalanceByStakeAddressAndTime(StakeAddress stakeAddress, Timestamp time);
 }
