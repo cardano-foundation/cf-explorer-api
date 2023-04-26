@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataUtil {
 
-  private static String TIME_ZONE;
+  public static String TIME_ZONE;
 
   public static boolean isNullOrEmpty(CharSequence cs) {
     int strLen;
