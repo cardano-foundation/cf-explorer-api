@@ -4,9 +4,11 @@ import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationDetailResponse;
-import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationDetailResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.cardano.explorer.service.StakeKeyLifeCycleService;
+import com.sotatek.cardano.common.entity.BaseEntity_;
 import com.sotatek.cardano.common.entity.Delegation_;
 import com.sotatek.cardano.common.entity.StakeRegistration_;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -70,5 +72,12 @@ public class StakeKeyLifeCycleController {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDelegationDetail(stakeKey, hash));
   }
 
-
+  @GetMapping("/{stakeKey}/rewards")
+  @LogMessage
+  public ResponseEntity<BaseFilterResponse<StakeRewardResponse>> getRewards(
+      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, pageable));
+  }
 }
