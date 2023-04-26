@@ -109,4 +109,15 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
   PoolUpdate findTopByIdLessThanAndPoolHashIdOrderByIdDesc(@Param("id") Long id,
       @Param("poolHashId") Long poolHashId);
+
+  @Query(value =
+      "SELECT pu.id AS poolUpdateId, ph.id AS hashId, ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
+          + "FROM PoolHash ph "
+          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
+          + "JOIN Block bk ON tx.block.id  = bk.id "
+          + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
+          + "WHERE ph.view = :poolView ")
+  Page<PoolUpdateDetailProjection> findPoolUpdateByPool(@Param("poolView") String poolView, Pageable pageable);
 }

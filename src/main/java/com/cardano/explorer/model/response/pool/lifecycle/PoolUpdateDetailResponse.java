@@ -14,6 +14,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PoolUpdateDetailResponse implements Serializable {
 
+  private Long poolUpdateId;
+
   private String poolId;
 
   private String poolName;
@@ -43,6 +45,7 @@ public class PoolUpdateDetailResponse implements Serializable {
   private BigInteger cost;
 
   public PoolUpdateDetailResponse(PoolUpdateDetailProjection projection) {
+    this.poolUpdateId = projection.getPoolUpdateId();
     this.poolId = projection.getPoolId();
     this.poolName = projection.getPoolName();
     this.poolView = projection.getPoolView();

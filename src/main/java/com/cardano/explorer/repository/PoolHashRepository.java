@@ -81,4 +81,15 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       + "LEFT JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id ) "
       + "WHERE ph.view = :poolView")
   PoolInfoProjection getPoolInfo(@Param("poolView") String poolView);
+
+  @Query(value =
+      "SELECT pu.id AS poolUpdateId, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, ep.poolDeposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
+          + "FROM PoolHash ph "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
+          + "JOIN Block bk ON tx.block.id  = bk.id "
+          + "JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
+          + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+          + "WHERE ph.view = :poolView")
+  Page<PoolRegistrationProjection> getPoolRegistrationByPool(@Param("poolView") String poolView, Pageable pageable);
 }
