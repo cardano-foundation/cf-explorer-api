@@ -5,6 +5,7 @@ import com.cardano.explorer.model.response.pool.PoolTxResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
 import com.cardano.explorer.model.response.pool.projection.PoolRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -16,6 +17,8 @@ import java.util.Date;
 @Builder
 public class PoolReportDetailResponse {
 
+    private BaseFilterResponse<EpochSize>  epochSizes;
+
     private BaseFilterResponse<PoolRegistration> poolRegistrations;
 
     private BaseFilterResponse<PoolUpdate> poolUpdates;
@@ -23,6 +26,16 @@ public class PoolReportDetailResponse {
     private BaseFilterResponse<RewardDistribution> rewardDistributions;
 
     private BaseFilterResponse<Deregistration> deregistrations;
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class EpochSize {
+        private String epoch;
+
+        private BigDecimal size;
+    }
 
     @Data
     @AllArgsConstructor
