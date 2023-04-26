@@ -4,7 +4,10 @@ import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationFilterResponse;
 import com.cardano.explorer.projection.StakeHistoryProjection;
+import com.cardano.explorer.repository.AddressTxBalanceRepository;
+import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
 import com.cardano.explorer.repository.StakeRegistrationRepository;
@@ -28,9 +31,11 @@ import org.springframework.stereotype.Service;
 public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
 
   public static final String MIN_TIME = "1970-01-01 00:00:00";
+  private final DelegationRepository delegationRepository;
   private final StakeRegistrationRepository stakeRegistrationRepository;
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final AddressTxBalanceRepository addressTxBalanceRepository;
 
   @Override
   public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey,
@@ -84,5 +89,32 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         .build()
     );
     return new BaseFilterResponse<>(response);
+  }
+
+  @Override
+  public BaseFilterResponse<StakeDelegationFilterResponse> getStakeDelegations(String stakeKey,
+      StakeLifeCycleFilterRequest condition, Pageable pageable) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .toInstant(ZoneOffset.UTC));
+    if (Objects.nonNull(condition.getFromDate())) {
+      fromDate = Timestamp.from(condition.getFromDate().toInstant());
+    }
+    if (Objects.nonNull(condition.getToDate())) {
+      toDate = Timestamp.from(condition.getToDate().toInstant());
+    }
+    var response = delegationRepository.findDelegationByAddress(stakeAddress, condition.getTxHash(),
+        fromDate, toDate, pageable);
+    return new BaseFilterResponse<>(
+        response.map(
+            item -> StakeDelegationFilterResponse.builder()
+                .txHash(item.getTxHash())
+                .time(item.getTime().toLocalDateTime())
+                .outSum(item.getOutSum())
+                .build()
+        )
+    );
   }
 }
