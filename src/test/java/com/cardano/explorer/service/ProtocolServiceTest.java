@@ -59,7 +59,7 @@ class ProtocolServiceTest {
   }
 
   @Test
-  void testCurrentProtocol() {
+  void testCurrentProtocolDontHaveOldValue() {
     List<ParamProposal> paramProposals = new ArrayList<>();
 
     EpochParam epochParam = EpochParam.builder()
@@ -324,48 +324,49 @@ class ProtocolServiceTest {
     var collateralPercent = paramHistories.get(28);
 
     Protocols expectProtocols = Protocols.builder()
-        .minFeeA(getBuildHistory(minFeeA, minFeeA.getMinFeeA()))
-        .minFeeB(getBuildHistory(minFeeB, minFeeB.getMinFeeB()))
-        .maxBlockSize(getBuildHistory(maxBlockSize, maxBlockSize.getMaxBlockSize()))
-        .maxTxSize(getBuildHistory(maxTxSize, maxTxSize.getMaxTxSize()))
-        .maxBhSize(getBuildHistory(maxBhSize, maxBhSize.getMaxBhSize()))
-        .keyDeposit(getBuildHistory(keyDeposit, keyDeposit.getKeyDeposit()))
-        .poolDeposit(getBuildHistory(poolDeposit, poolDeposit.getPoolDeposit()))
-        .maxEpoch(getBuildHistory(maxEpoch, maxEpoch.getMaxEpoch()))
-        .optimalPoolCount(getBuildHistory(optimalPoolCount, optimalPoolCount.getOptimalPoolCount()))
-        .influence(getBuildHistory(influence, influence.getInfluence()))
+        .minFeeA(getBuildHistory(minFeeA, minFeeA.getMinFeeA(),new ProtocolHistory()))
+        .minFeeB(getBuildHistory(minFeeB, minFeeB.getMinFeeB(),new ProtocolHistory()))
+        .maxBlockSize(getBuildHistory(maxBlockSize, maxBlockSize.getMaxBlockSize(),new ProtocolHistory()))
+        .maxTxSize(getBuildHistory(maxTxSize, maxTxSize.getMaxTxSize(),new ProtocolHistory()))
+        .maxBhSize(getBuildHistory(maxBhSize, maxBhSize.getMaxBhSize(),new ProtocolHistory()))
+        .keyDeposit(getBuildHistory(keyDeposit, keyDeposit.getKeyDeposit(),new ProtocolHistory()))
+        .poolDeposit(getBuildHistory(poolDeposit, poolDeposit.getPoolDeposit(),new ProtocolHistory()))
+        .maxEpoch(getBuildHistory(maxEpoch, maxEpoch.getMaxEpoch(),new ProtocolHistory()))
+        .optimalPoolCount(getBuildHistory(optimalPoolCount, optimalPoolCount.getOptimalPoolCount(),new ProtocolHistory()))
+        .influence(getBuildHistory(influence, influence.getInfluence(),new ProtocolHistory()))
         .monetaryExpandRate(
-            getBuildHistory(monetaryExpandRate, monetaryExpandRate.getMonetaryExpandRate()))
+            getBuildHistory(monetaryExpandRate, monetaryExpandRate.getMonetaryExpandRate(),new ProtocolHistory()))
         .treasuryGrowthRate(
-            getBuildHistory(treasuryGrowthRate, treasuryGrowthRate.getTreasuryGrowthRate()))
-        .decentralisation(getBuildHistory(decentralisation, decentralisation.getDecentralisation()))
-        .entropy(getBuildHistory(extraEntropy, extraEntropy.getEntropy()))
-        .protocolMajor(getBuildHistory(protocolMajor, protocolMajor.getProtocolMajor()))
-        .protocolMinor(getBuildHistory(protocolMinor, protocolMinor.getProtocolMinor()))
-        .minUtxoValue(getBuildHistory(minUtxoValue, minUtxoValue.getMinUtxoValue()))
-        .minPoolCost(getBuildHistory(minPoolCost, minPoolCost.getMinPoolCost()))
-        .coinsPerUtxoSize(getBuildHistory(coinsPerUtxoSize, coinsPerUtxoSize.getCoinsPerUtxoSize()))
-        .priceMem(getBuildHistory(priceMem, priceMem.getPriceMem()))
-        .priceStep(getBuildHistory(priceStep, priceStep.getPriceStep()))
-        .maxTxExMem(getBuildHistory(maxTxExMem, maxTxExMem.getMaxTxExMem()))
-        .maxTxExSteps(getBuildHistory(maxTxExSteps, maxTxExSteps.getMaxTxExSteps()))
-        .maxBlockExMem(getBuildHistory(maxBlockExMem, maxBlockExMem.getMaxBlockExMem()))
-        .maxBlockExSteps(getBuildHistory(maxBlockExSteps, maxBlockExSteps.getMaxBlockExSteps()))
-        .maxValSize(getBuildHistory(maxValSize, maxValSize.getMaxValSize()))
+            getBuildHistory(treasuryGrowthRate, treasuryGrowthRate.getTreasuryGrowthRate(),new ProtocolHistory()))
+        .decentralisation(getBuildHistory(decentralisation, decentralisation.getDecentralisation(),new ProtocolHistory()))
+        .entropy(getBuildHistory(extraEntropy, extraEntropy.getEntropy(),new ProtocolHistory()))
+        .protocolMajor(getBuildHistory(protocolMajor, protocolMajor.getProtocolMajor(),new ProtocolHistory()))
+        .protocolMinor(getBuildHistory(protocolMinor, protocolMinor.getProtocolMinor(),new ProtocolHistory()))
+        .minUtxoValue(getBuildHistory(minUtxoValue, minUtxoValue.getMinUtxoValue(),new ProtocolHistory()))
+        .minPoolCost(getBuildHistory(minPoolCost, minPoolCost.getMinPoolCost(),new ProtocolHistory()))
+        .coinsPerUtxoSize(getBuildHistory(coinsPerUtxoSize, coinsPerUtxoSize.getCoinsPerUtxoSize(),new ProtocolHistory()))
+        .priceMem(getBuildHistory(priceMem, priceMem.getPriceMem(),new ProtocolHistory()))
+        .priceStep(getBuildHistory(priceStep, priceStep.getPriceStep(),new ProtocolHistory()))
+        .maxTxExMem(getBuildHistory(maxTxExMem, maxTxExMem.getMaxTxExMem(),new ProtocolHistory()))
+        .maxTxExSteps(getBuildHistory(maxTxExSteps, maxTxExSteps.getMaxTxExSteps(),new ProtocolHistory()))
+        .maxBlockExMem(getBuildHistory(maxBlockExMem, maxBlockExMem.getMaxBlockExMem(),new ProtocolHistory()))
+        .maxBlockExSteps(getBuildHistory(maxBlockExSteps, maxBlockExSteps.getMaxBlockExSteps(),new ProtocolHistory()))
+        .maxValSize(getBuildHistory(maxValSize, maxValSize.getMaxValSize(),new ProtocolHistory()))
         .collateralPercent(
-            getBuildHistory(collateralPercent, collateralPercent.getCollateralPercent()))
+            getBuildHistory(collateralPercent, collateralPercent.getCollateralPercent(),new ProtocolHistory()))
         .build();
     expectProtocols.setMaxCollateralInputs(
-        getBuildHistory(collateralPercent, collateralPercent.getMaxCollateralInputs()));
-    expectProtocols.setCostModel(getBuildHistory(costModel, epochParam.getCostModel().getCosts()));
+        getBuildHistory(collateralPercent, collateralPercent.getMaxCollateralInputs(),new ProtocolHistory()));
+    expectProtocols.setCostModel(getBuildHistory(costModel, epochParam.getCostModel().getCosts(),new ProtocolHistory()));
 
     Protocols actualProtocols = protocolParamService.getProtocolCurrentHistory();
     Assertions.assertEquals(expectProtocols.toString(), actualProtocols.toString());
   }
 
-  private static ProtocolHistory getBuildHistory(ParamHistory minFeeA, Object value) {
+  private static ProtocolHistory getBuildHistory(ParamHistory minFeeA, Object value, ProtocolHistory oldValue) {
     return ProtocolHistory.builder().value(value).transactionHash(minFeeA.getHash())
-        .time(minFeeA.getTime()).build();
+        .time(minFeeA.getTime())
+        .oldValue(oldValue).build();
   }
 
   @Test
