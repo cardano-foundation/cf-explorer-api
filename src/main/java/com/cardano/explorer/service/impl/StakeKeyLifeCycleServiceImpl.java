@@ -4,11 +4,13 @@ import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationDetailResponse;
-import com.cardano.explorer.model.response.stake.lifecycle.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationDetailResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.cardano.explorer.projection.StakeHistoryProjection;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.DelegationRepository;
+import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.repository.StakeDeRegistrationRepository;
 import com.cardano.explorer.repository.StakeRegistrationRepository;
@@ -40,6 +42,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final StakeRegistrationRepository stakeRegistrationRepository;
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final RewardRepository rewardRepository;
   private final AddressTxBalanceRepository addressTxBalanceRepository;
 
   @Override
@@ -143,6 +146,17 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         .stakeTotalAmount(totalBalance)
         .build();
   }
+
+  @Override
+  public BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey,
+      Pageable pageable) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    var response
+        = rewardRepository.findRewardByStake(stakeAddress, pageable);
+    return new BaseFilterResponse<>(response);
+  }
+
 
   private String getNameValueFromJson(String json) {
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(json))) {
