@@ -30,6 +30,11 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   List<EpochStakeProjection> totalRewardStakeByEpochNoAndPool(@Param("epochNo") Set<Long> epochNo,
       @Param("poolId") Long poolId);
 
+  @Query("SELECT SUM(r.amount) FROM Reward r "
+      + " WHERE r.spendableEpoch <= :epoch"
+      + " AND r.addr = :stakeAddress")
+  Optional<BigInteger> getAvailableRewardByStakeAddressAndEpoch(StakeAddress stakeAddress, Integer epoch);
+
   @Query("SELECT new com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
       + " FROM Reward rw"
