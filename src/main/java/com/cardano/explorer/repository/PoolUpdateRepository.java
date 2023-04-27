@@ -4,8 +4,8 @@ import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProje
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
-import com.sotatek.cardano.common.entity.PoolHash;
 import com.sotatek.cardano.common.entity.PoolUpdate;
+import com.sotatek.cardano.common.entity.Tx;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
@@ -98,6 +98,16 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
           + "WHERE pu.id = :id ")
   PoolUpdateDetailProjection findPoolUpdateDetailById(@Param("id") Long id);
+
+  @Query("SELECT ph.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
+      + "pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, sa.view AS rewardAccount, "
+      + "pmr.url AS metadataUrl, pmr.hash as metadataHash "
+      + "FROM PoolUpdate pu "
+      + "INNER JOIN PoolHash ph ON pu.poolHash.id = ph.id "
+      + "INNER JOIN PoolMetadataRef pmr ON pu.meta = pmr "
+      + "INNER JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+      + "WHERE pu.registeredTx = :tx")
+  List<PoolUpdateDetailProjection> findByTx(Tx tx);
 
 
   @Query(value =
