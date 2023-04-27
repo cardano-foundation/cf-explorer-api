@@ -163,6 +163,9 @@ public interface ProtocolMapper {
         protocolParam.setCostModel(costModel);
       }
     });
+    if (protocolParam.hashCode() == new ProtocolParamResponse().hashCode()) {
+      return null;
+    }
     return protocolParam;
   }
 
