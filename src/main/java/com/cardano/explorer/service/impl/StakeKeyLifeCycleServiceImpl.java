@@ -198,7 +198,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         .amount(withdrawal.getAmount())
         .time(withdrawal.getTime().toLocalDateTime())
         .txHash(withdrawal.getTxHash())
-        .stakeTotalAmount(totalBalance.subtract(rewardAvailable))
+        .stakeTotalAmount(totalBalance)
         .stakeRewardAvailable(rewardAvailable)
         .build();
   }
