@@ -28,4 +28,8 @@ public class CommonConstant {
   public static final BigDecimal PERCENT = new BigDecimal(100);
 
   public static final String REDIS_TOTAL_LIVE_STAKE = "TOTAL_LIVE_STAKE";
+
+  public static final String POOL_STATUS_ACTIVE = "ACTIVE";
+
+  public static final String POOL_STATUS_RETIRING = "RETIRING";
 }

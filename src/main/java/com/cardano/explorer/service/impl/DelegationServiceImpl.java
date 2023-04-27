@@ -188,7 +188,7 @@ public class DelegationServiceImpl implements DelegationService {
     PoolDetailHeaderResponse poolDetailResponse = Stream.of(projection)
         .map(PoolDetailHeaderResponse::new).findFirst()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    BigInteger activeStake = epochStakeRepository.activeStakeByPoolAndEpochNo(poolId);
+    BigInteger activeStake = epochStakeRepository.activeStakeByPool(poolId);
     poolDetailResponse.setPoolSize(activeStake);
     poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
     List<String> ownerAddress = poolUpdateRepository.findOwnerAccountByPool(poolId);
