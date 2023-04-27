@@ -2,6 +2,7 @@ package com.cardano.explorer.service.impl;
 
 import com.bloxbean.cardano.client.util.AssetUtil;
 import com.cardano.explorer.common.constant.CommonConstant;
+import com.cardano.explorer.common.enumeration.CertificateType;
 import com.cardano.explorer.common.enumeration.TxStatus;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.AssetMetadataMapper;
@@ -15,12 +16,19 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.TxFilterResponse;
 import com.cardano.explorer.model.response.dashboard.TxGraph;
 import com.cardano.explorer.model.response.dashboard.TxSummary;
+import com.cardano.explorer.model.response.pool.PoolRelayResponse;
+import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolRelayProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
+import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.model.response.tx.CollateralResponse;
 import com.cardano.explorer.model.response.tx.ContractResponse;
 import com.cardano.explorer.model.response.tx.SummaryResponse;
 import com.cardano.explorer.model.response.tx.TxMintingResponse;
 import com.cardano.explorer.model.response.tx.TxOutResponse;
+import com.cardano.explorer.model.response.tx.TxPoolCertificate;
 import com.cardano.explorer.model.response.tx.TxResponse;
+import com.cardano.explorer.model.response.tx.TxStakeCertificate;
 import com.cardano.explorer.model.response.tx.UTxOResponse;
 import com.cardano.explorer.model.response.tx.WithdrawalResponse;
 import com.cardano.explorer.projection.AddressInputOutputProjection;
@@ -39,7 +47,12 @@ import com.cardano.explorer.repository.FailedTxOutRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
 import com.cardano.explorer.repository.ParamProposalRepository;
+import com.cardano.explorer.repository.PoolRelayRepository;
+import com.cardano.explorer.repository.PoolRetireRepository;
+import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.RedeemerRepository;
+import com.cardano.explorer.repository.StakeDeRegistrationRepository;
+import com.cardano.explorer.repository.StakeRegistrationRepository;
 import com.cardano.explorer.repository.TxOutRepository;
 import com.cardano.explorer.repository.TxRepository;
 import com.cardano.explorer.repository.UnconsumeTxInRepository;
@@ -129,6 +142,11 @@ public class TxServiceImpl implements TxService {
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final ParamProposalRepository paramProposalRepository;
+  private final StakeRegistrationRepository stakeRegistrationRepository;
+  private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
+  private final PoolUpdateRepository poolUpdateRepository;
+  private final PoolRelayRepository poolRelayRepository;
+  private final PoolRetireRepository poolRetireRepository;
   private final ProtocolMapper protocolMapper;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
@@ -348,7 +366,9 @@ public class TxServiceImpl implements TxService {
     getWithdrawals(tx, txResponse);
     getDelegations(tx, txResponse);
     getMints(tx, txResponse);
-
+    getProtocols(tx, txResponse);
+    getStakeCertificates(tx, txResponse);
+    getPoolCertificates(tx, txResponse);
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -369,23 +389,6 @@ public class TxServiceImpl implements TxService {
       txResponse.setUTxOs(uTxOResponse);
     }
 
-    List<ParamProposal> paramProposals = paramProposalRepository
-        .getParamProposalByRegisteredTxId(tx.getId());
-
-    if (!ObjectUtils.isEmpty(paramProposals)) {
-      List<ParamProposal> currentProtocol = paramProposals.stream()
-          .filter(paramProposal -> paramProposal.getRegisteredTx().getId().equals(tx.getId()))
-          .collect(Collectors.toList());
-
-      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(currentProtocol));
-
-      //get previous value
-      paramProposals.removeAll(currentProtocol);
-
-      txResponse.setPreviousProtocols(
-          protocolMapper.mapPreviousProtocolParamResponse(paramProposals
-              , txResponse.getProtocols()));
-    }
     return txResponse;
   }
 
@@ -541,6 +544,122 @@ public class TxServiceImpl implements TxService {
   }
 
   /**
+   * Get protocol params update in transaction
+   *
+   * @param tx         transaction
+   * @param txResponse response data of transaction
+   */
+  private void getProtocols(Tx tx, TxResponse txResponse) {
+    List<ParamProposal> paramProposals = paramProposalRepository
+        .getParamProposalByRegisteredTxId(tx.getId());
+
+    if (!ObjectUtils.isEmpty(paramProposals)) {
+      List<ParamProposal> currentProtocol = paramProposals.stream()
+          .filter(paramProposal -> paramProposal.getRegisteredTx().getId().equals(tx.getId()))
+          .collect(Collectors.toList());
+
+      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(currentProtocol));
+
+      //get previous value
+      paramProposals.removeAll(currentProtocol);
+
+      txResponse.setPreviousProtocols(
+          protocolMapper.mapPreviousProtocolParamResponse(paramProposals
+              , txResponse.getProtocols()));
+    }
+  }
+
+  /**
+   * Get transaction stake certificates info
+   *
+   * @param tx         transaction
+   * @param txResponse response data of stake certificates
+   */
+  private void getStakeCertificates(Tx tx, TxResponse txResponse) {
+    List<TxStakeCertificate> stakeCertificates = stakeRegistrationRepository
+        .findByTx(tx).stream().map(
+            item -> new TxStakeCertificate(item.getAddr().getView(),
+                CertificateType.STAKE_REGISTRATION)
+        ).collect(Collectors.toList());
+    stakeCertificates.addAll(stakeDeRegistrationRepository.findByTx(tx).stream()
+        .map(
+            item -> new TxStakeCertificate(item.getAddr().getView(),
+                CertificateType.STAKE_DEREGISTRATION)
+        ).collect(Collectors.toList()));
+    txResponse.setStakeCertificates(stakeCertificates);
+  }
+
+  /**
+   * Get transaction pool certificates info
+   * @param tx transaction
+   * @param txResponse response data of pool certificates
+   */
+  private void getPoolCertificates(Tx tx, TxResponse txResponse) {
+
+    // get pool registration
+    List<PoolUpdateDetailProjection> poolUpdateDetailProjections = poolUpdateRepository
+        .findByTx(tx);
+    Set<Long> poolUpdateIdSet = poolUpdateDetailProjections.stream().map(
+        PoolUpdateDetailProjection::getPoolUpdateId).collect(Collectors.toSet());
+    List<StakeKeyProjection> poolOwners = poolUpdateRepository.findOwnerAccountByPoolUpdate(
+        poolUpdateIdSet);
+    Map<Long, List<String>> poolOwnerMap = poolOwners.stream().collect(Collectors.groupingBy(
+        StakeKeyProjection::getPoolUpdateId,
+        Collectors.mapping(StakeKeyProjection::getView, Collectors.toList())
+    ));
+    List<PoolRelayProjection> poolRelays = poolRelayRepository.findByPoolHashIdIn(poolUpdateIdSet);
+    Map<Long, List<PoolRelayProjection>> poolRelayMap =
+        poolRelays.stream().collect(Collectors.groupingBy(PoolRelayProjection::getPoolUpdateId));
+    List<TxPoolCertificate> poolCertificates = poolUpdateDetailProjections.stream()
+        .map(
+            item -> {
+              List<PoolRelayResponse> relays = null;
+              if(poolRelayMap.containsKey(item.getPoolUpdateId())) {
+                relays = poolRelayMap.get(item.getPoolUpdateId())
+                    .stream().map(relay ->
+                        PoolRelayResponse.builder()
+                            .dnsName(relay.getDnsName())
+                            .dnsSrvName(relay.getDnsSrvName())
+                            .ipv4(relay.getIpv4())
+                            .ipv6(relay.getIpv6())
+                            .port(relay.getPort())
+                            .build()).collect(Collectors.toList());
+              }
+              List<String> poolOwnersList = new ArrayList<>();
+              if(poolOwnerMap.containsKey(item.getPoolUpdateId())) {
+                poolOwnersList = poolOwnerMap.get(item.getPoolUpdateId());
+              }
+              return TxPoolCertificate.builder()
+                  .poolId(item.getPoolView())
+                  .margin(item.getMargin())
+                  .rewardAccount(item.getRewardAccount())
+                  .pledge(item.getPledge())
+                  .vrfKey(item.getVrfKey())
+                  .cost(item.getCost())
+                  .metadataHash(item.getMetadataHash())
+                  .metadataUrl(item.getMetadataUrl())
+                  .poolOwners(poolOwnersList)
+                  .relays(relays)
+                  .type(CertificateType.POOL_REGISTRATION)
+                  .build();
+            }
+        ).collect(Collectors.toList());
+
+    //get pool de registration
+    List<PoolDeRegistrationProjection> poolRetireDetailProjections
+        = poolRetireRepository.findByAnnouncedTx(tx);
+    poolCertificates.addAll(poolRetireDetailProjections.stream().map(
+        item -> TxPoolCertificate.builder()
+            .poolId(item.getPoolId())
+            .epoch(item.getRetiringEpoch())
+            .type(CertificateType.POOL_DEREGISTRATION)
+            .build()
+    ).collect(Collectors.toList()));
+
+    txResponse.setPoolCertificates(poolCertificates);
+  }
+
+  /**
    * Map data from AddressInputOutputProjection to TxOutResponse
    *
    * @param addressInputOutputMap address projection map
@@ -582,10 +701,12 @@ public class TxServiceImpl implements TxService {
             try {
               JsonNode tokenFailedTxOut = objectMapper.readValue(tokenString, JsonNode.class);
               for (JsonNode token : tokenFailedTxOut) {
-                if (CommonConstant.LOVELACE.equals(token.get("unit").asText())) {
+                String[] policyAndName = token.get("unit").asText().split("\\.");
+                if (CommonConstant.LOVELACE.equals(token.get("unit").asText())
+                    || policyAndName.length < 2) {
                   continue;
                 }
-                String assetName = token.get("unit").asText().split("\\.")[1];
+                String assetName = policyAndName[1];
                 String assetDisplayName = HexUtils.fromHex(assetName,
                     AssetUtil.calculateFingerPrint(token.get("policyId").asText(), assetName));
                 TxMintingResponse txMintingResponse = TxMintingResponse.builder()

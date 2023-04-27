@@ -9,6 +9,10 @@ public interface PoolDeRegistrationProjection {
 
   String getTxHash();
 
+  Long getTxId();
+
+  String getPoolId();
+
   Integer getRetiringEpoch();
 
   Timestamp getTime();

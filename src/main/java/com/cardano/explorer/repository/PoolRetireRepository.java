@@ -3,7 +3,9 @@ package com.cardano.explorer.repository;
 import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.PoolRetire;
+import com.sotatek.cardano.common.entity.Tx;
 import java.sql.Timestamp;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,8 +41,16 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate, Pageable pageable);
 
-  @Query(value = "SELECT pr FROM PoolRetire pr "
+  @Query(value = "SELECT pr.retiringEpoch FROM PoolRetire pr "
       + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
-      + "WHERE ph.view = :poolView ")
-  PoolRetire findByPoolView(@Param("poolView") String poolView);
+      + "WHERE ph.view = :poolView "
+      + "ORDER BY pr.id DESC")
+  List<Integer> findByPoolView(@Param("poolView") String poolView);
+
+  @Query(value = "SELECT pr.announcedTx.id as txId, pr.retiringEpoch as retiringEpoch, "
+      + "ph.view as poolId "
+      + "FROM PoolRetire pr "
+      + "INNER JOIN PoolHash ph ON pr.poolHash.id = ph.id "
+      + "WHERE pr.announcedTx = :tx")
+  List<PoolDeRegistrationProjection> findByAnnouncedTx(Tx tx);
 }

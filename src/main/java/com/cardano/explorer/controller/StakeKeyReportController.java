@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/staking-lifecycle/report")
 @RequiredArgsConstructor
-public class StakingLifecycleReportController {
+public class StakeKeyReportController {
 
   private final StakeKeyReportService stakeKeyReportService;
 
@@ -35,7 +35,7 @@ public class StakingLifecycleReportController {
   @GetMapping(value = "/stake-key/{reportId}/export")
   @LogMessage
   @Operation(summary = "Export stake key report by id")
-  public ResponseEntity<?> exportStakeKeyReportByStorageKey(@PathVariable Long reportId) {
+  public ResponseEntity<Resource> exportStakeKeyReportByStorageKey(@PathVariable Long reportId) {
     StakeKeyReportResponse response = stakeKeyReportService.exportStakeKeyReport(reportId);
     return ResponseEntity.ok()
         .contentLength(response.getByteArrayInputStream().available())

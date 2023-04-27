@@ -25,7 +25,6 @@ import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
 import com.cardano.explorer.service.PoolLifecycleService;
-import com.sotatek.cardano.common.entity.PoolRetire;
 import com.sotatek.cardano.common.entity.PoolUpdate;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -150,13 +149,13 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
       res.setRewardAvailable(rewardRepository.getTotalRewardByPool(poolView));
     }
-    PoolRetire poolRetire = poolRetireRepository.findByPoolView(poolView);
-    if (Objects.isNull(poolRetire)) {
+    List<Integer> retireEpochs = poolRetireRepository.findByPoolView(poolView);
+    if (Objects.isNull(retireEpochs) && !retireEpochs.isEmpty()) {
       res.setStatus(CommonConstant.POOL_STATUS_ACTIVE);
       res.setEpochNo(epochRepository.findCurrentEpochNo().orElse(0));
     } else {
       res.setStatus(CommonConstant.POOL_STATUS_RETIRING);
-      res.setEpochNo(poolRetire.getRetiringEpoch());
+      res.setEpochNo(retireEpochs.get(0));
     }
     return res;
   }
