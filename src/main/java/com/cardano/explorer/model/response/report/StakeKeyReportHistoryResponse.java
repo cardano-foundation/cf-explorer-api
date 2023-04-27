@@ -1,7 +1,8 @@
 package com.cardano.explorer.model.response.report;
 
 import com.sotatek.cardano.common.entity.StakingLifeCycleEvent;
-import com.sotatek.cardano.common.enumeration.StakeKeyReportStatus;
+import com.sotatek.cardano.common.enumeration.ReportStatus;
+import com.sotatek.cardano.common.enumeration.ReportType;
 import java.sql.Timestamp;
 import java.util.Set;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class StakeKeyReportHistoryResponse {
   private Timestamp toDate;
   private Boolean isADATransfer;
   private Boolean isFeesPaid;
-  private StakeKeyReportStatus status;
+  private ReportStatus status;
+  private ReportType type;
   private Set<StakingLifeCycleEvent> stakingLifeCycleEvents;
 }
