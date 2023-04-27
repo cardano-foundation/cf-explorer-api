@@ -113,6 +113,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         response.map(
             item -> StakeDelegationFilterResponse.builder()
                 .txHash(item.getTxHash())
+                .fee(item.getFee())
                 .time(item.getTime().toLocalDateTime())
                 .outSum(item.getOutSum())
                 .build()
@@ -171,6 +172,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         response.map(
             item -> StakeWithdrawalFilterResponse.builder()
                 .txHash(item.getTxHash())
+                .fee(item.getFee())
                 .time(item.getTime().toLocalDateTime())
                 .value(item.getAmount())
                 .build()
@@ -186,14 +188,17 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
     var totalBalance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(stakeAddress,
         withdrawal.getTime()).orElse(BigInteger.ZERO);
-    var rewardAvailable = rewardRepository.getAvailableRewardByStakeAddressAndEpoch(stakeAddress,
+    var totalReward = rewardRepository.getAvailableRewardByStakeAddressAndEpoch(stakeAddress,
         withdrawal.getEpochNo()).orElse(BigInteger.ZERO);
+    var totalWithdrawal = withdrawalRepository.sumByAddrAndTx(stakeAddress, withdrawal.getTxId())
+        .orElse(BigInteger.ZERO);
+    var rewardAvailable = totalReward.subtract(totalWithdrawal);
     return StakeWithdrawalDetailResponse.builder()
         .fee(withdrawal.getFee())
         .amount(withdrawal.getAmount())
         .time(withdrawal.getTime().toLocalDateTime())
         .txHash(withdrawal.getTxHash())
-        .stakeTotalAmount(totalBalance)
+        .stakeTotalAmount(totalBalance.subtract(rewardAvailable))
         .stakeRewardAvailable(rewardAvailable)
         .build();
   }
@@ -273,7 +278,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
             .epochNo(item.getEpoch())
             .amount(item.getAmount())
             .time(item.getTime())
-            .type(StakeRewardType.REWARD_RECEIVED)
+            .type(StakeRewardType.REWARD_WITHDRAWN)
             .build()
     ).collect(Collectors.toList());
     var rewardList = rewardRepository.findRewardByStake(stakeAddress);
@@ -282,7 +287,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
             .epochNo(item.getEpoch())
             .amount(item.getAmount())
             .time(item.getTime())
-            .type(StakeRewardType.REWARD_WITHDRAWN)
+            .type(StakeRewardType.REWARD_RECEIVED)
             .build()
     ).collect(Collectors.toList()));
     if(pageable.getSort().equals(Sort.by(Sort.Direction.ASC, "time"))) {
