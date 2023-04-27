@@ -150,7 +150,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setRewardAvailable(rewardRepository.getTotalRewardByPool(poolView));
     }
     List<Integer> retireEpochs = poolRetireRepository.findByPoolView(poolView);
-    if (Objects.isNull(retireEpochs) && !retireEpochs.isEmpty()) {
+    if (Objects.isNull(retireEpochs) || retireEpochs.isEmpty()) {
       res.setStatus(CommonConstant.POOL_STATUS_ACTIVE);
       res.setEpochNo(epochRepository.findCurrentEpochNo().orElse(0));
     } else {
