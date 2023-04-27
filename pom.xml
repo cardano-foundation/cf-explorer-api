@@ -44,6 +44,7 @@
 
     <properties>
         <revision>1.0.0-SNAPSHOT</revision>
+        <start-class>org.cardanofoundation.explorer.api.ExplorerApiApplication</start-class>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.java>11</version.java>
         <version.maven-compiler-plugin>3.10.0</version.maven-compiler-plugin>
