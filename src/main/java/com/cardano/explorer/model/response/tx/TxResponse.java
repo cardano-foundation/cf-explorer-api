@@ -18,5 +18,7 @@ public class TxResponse {
   private List<TxDelegationResponse> delegations;
   private List<TxMintingResponse> mints;
   private ProtocolParamResponse protocols;
+  private List<TxStakeCertificate> stakeCertificates;
+  private List<TxPoolCertificate> poolCertificates;
   private ProtocolParamResponse previousProtocols;
 }
