@@ -369,14 +369,22 @@ public class TxServiceImpl implements TxService {
       txResponse.setUTxOs(uTxOResponse);
     }
 
-    List<ParamProposal> paramProposals = paramProposalRepository.getParamProposalByRegisteredTxId(
-        tx.getId());
-    if (!ObjectUtils.isEmpty(paramProposals)) {
-      List<ParamProposal> previousProposals = paramProposalRepository.getParamProposalByEpochNo(
-          tx.getBlock().getEpochNo());
+    List<ParamProposal> paramProposals = paramProposalRepository
+        .getParamProposalByRegisteredTxId(tx.getId());
 
-      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
-      txResponse.setPreviousProtocols(protocolMapper.mapProtocolParamResponse(previousProposals));
+    if (!ObjectUtils.isEmpty(paramProposals)) {
+      List<ParamProposal> currentProtocol = paramProposals.stream()
+          .filter(paramProposal -> paramProposal.getRegisteredTx().getId().equals(tx.getId()))
+          .collect(Collectors.toList());
+
+      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(currentProtocol));
+
+      //get previous value
+      paramProposals.removeAll(currentProtocol);
+
+      txResponse.setPreviousProtocols(
+          protocolMapper.mapPreviousProtocolParamResponse(paramProposals
+              , txResponse.getProtocols()));
     }
     return txResponse;
   }
