@@ -27,10 +27,17 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
 
   @Query("SELECT pp "
       + "FROM ParamProposal  pp "
-      + "WHERE pp.registeredTx.id <= :id "
+      + "WHERE pp.registeredTx.id = :id "
       + "ORDER BY pp.id DESC"
   )
   List<ParamProposal> getParamProposalByRegisteredTxId(@Param("id") Long id);
+
+  @Query("SELECT pp "
+      + "FROM ParamProposal  pp "
+      + "WHERE pp.registeredTx.id = :id "
+      + "ORDER BY pp.id DESC"
+  )
+  List<ParamProposal> getParamProposalBySmallerThanRegisteredTxId(@Param("id") Long id);
 
   @Query("SELECT pp.minFeeA AS minFeeA , pp.minFeeB AS minFeeB, pp.maxBlockSize AS maxBlockSize ,"
       + "pp.maxTxSize AS maxTxSize,pp.maxBhSize AS maxBhSize,pp.keyDeposit AS keyDeposit, "
