@@ -51,4 +51,6 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
   List<ParamHistory> findProtocolsChange(@Param("epochNo") Integer epochNo);
 
 
+  @Query("SELECT pp FROM ParamProposal pp WHERE pp.epochNo < :epochNo")
+  List<ParamProposal> getParamProposalByEpochNo(@Param("epochNo") Integer epochNo);
 }

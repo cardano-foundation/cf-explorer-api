@@ -370,7 +370,11 @@ public class TxServiceImpl implements TxService {
 
     List<ParamProposal> paramProposals = paramProposalRepository.getParamProposalByRegisteredTxId(
         tx.getId());
+
+    List<ParamProposal> previousProposals = paramProposalRepository.getParamProposalByEpochNo(tx.getBlock().getEpochNo());
+
     txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
+    txResponse.setPreviousProtocols(protocolMapper.mapProtocolParamResponse(previousProposals));
     return txResponse;
   }
 
