@@ -3,6 +3,7 @@ package com.cardano.explorer.controller;
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.request.report.StakeKeyReport;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.report.ReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportResponse;
 import com.cardano.explorer.service.StakeKeyReportService;
@@ -48,10 +49,27 @@ public class StakeKeyReportController {
   @GetMapping(value = "/stake-key/{stakeKey}/history")
   @LogMessage
   @Operation(summary = "Get stake key report history by stake key")
-  public ResponseEntity<BaseFilterResponse<StakeKeyReportHistoryResponse>> getReportHistoryByStakeKey(
-      @RequestParam String stakeKey,
+  public ResponseEntity<BaseFilterResponse<StakeKeyReportHistoryResponse>> getStakeReportHistoryByStakeKey(
+      @PathVariable String stakeKey,
       @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(stakeKey, pageable));
+    return ResponseEntity.ok(
+        stakeKeyReportService.getStakeKeyReportHistoryByStakeKey(stakeKey, pageable));
+  }
+
+  @GetMapping(value = "/stake-key/history")
+  @LogMessage
+  @Operation(summary = "Get all stake key report history")
+  public ResponseEntity<BaseFilterResponse<StakeKeyReportHistoryResponse>> getStakeReportHistory(
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(pageable));
+  }
+
+  @GetMapping(value = "/dashboard")
+  @LogMessage
+  @Operation(summary = "Get report history of stake key and pool id")
+  public ResponseEntity<BaseFilterResponse<ReportHistoryResponse>> getReportHistory(
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(stakeKeyReportService.getReportHistory(pageable));
   }
 
 }

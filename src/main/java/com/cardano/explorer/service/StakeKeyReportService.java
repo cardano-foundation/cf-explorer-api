@@ -2,6 +2,7 @@ package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.request.report.StakeKeyReport;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.report.ReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportResponse;
 import org.springframework.data.domain.Pageable;
@@ -25,8 +26,23 @@ public interface StakeKeyReportService extends StorageService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeKeyReportHistoryResponse>
    */
-  BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(String stakeKey,
+  BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistoryByStakeKey(String stakeKey,
       Pageable pageable);
+
+
+  /**
+   * Get all stake key report history
+   * @param pageable pageable
+   * @return BaseFilterResponse<StakeKeyReportHistoryResponse>
+   */
+  BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(Pageable pageable);
+
+  /**
+   * Get report history
+   * @param pageable pageable
+   * @return BaseFilterResponse<StakeKeyReportHistoryResponse>
+   */
+  BaseFilterResponse<ReportHistoryResponse> getReportHistory(Pageable pageable);
 
   /**
    * Export stake key report by report id
