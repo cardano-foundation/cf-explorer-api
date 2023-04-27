@@ -99,6 +99,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -370,11 +371,13 @@ public class TxServiceImpl implements TxService {
 
     List<ParamProposal> paramProposals = paramProposalRepository.getParamProposalByRegisteredTxId(
         tx.getId());
+    if (!ObjectUtils.isEmpty(paramProposals)) {
+      List<ParamProposal> previousProposals = paramProposalRepository.getParamProposalByEpochNo(
+          tx.getBlock().getEpochNo());
 
-    List<ParamProposal> previousProposals = paramProposalRepository.getParamProposalByEpochNo(tx.getBlock().getEpochNo());
-
-    txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
-    txResponse.setPreviousProtocols(protocolMapper.mapProtocolParamResponse(previousProposals));
+      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
+      txResponse.setPreviousProtocols(protocolMapper.mapProtocolParamResponse(previousProposals));
+    }
     return txResponse;
   }
 
