@@ -1,9 +1,15 @@
-package com.cardano.explorer.util;
+package com.cardano.explorer.util.csv;
 
+import com.cardano.explorer.exception.BusinessCode;
+import com.cardano.explorer.util.DataUtil;
+import com.cardano.explorer.util.ReflectorUtil;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -22,24 +28,55 @@ public class CSVHelper {
 
   public static final String DATE_TIME_PATTERN = "yyyy/MM/dd HH:mm:ss";
 
+  /**
+   * Write the data to CSV file
+   *
+   * @param prefixBytes the prefix bytes to be written to the output stream
+   * @param title       the first line data to be written to the output stream
+   * @return the output stream with the prefix bytes and the title
+   */
   public static ByteArrayInputStream writeContent(byte[] prefixBytes, String title) {
     return writeContent(Collections.emptyList(), Collections.emptyList(), prefixBytes, title);
   }
 
+  /**
+   * Write the data to CSV file
+   *
+   * @param title the first line data to be written to the output stream
+   * @return the output stream with the title
+   */
   public static ByteArrayInputStream writeContent(String title) {
     return writeContent(Collections.emptyList(), Collections.emptyList(), null, title);
   }
 
+  /**
+   * Write the data to CSV file
+   *
+   * @param data          the data to be written to the output stream
+   * @param csvColumnList the column list to be written to the output stream
+   * @param title         the first line data to be written to the output stream
+   * @return the output stream with the data and the title
+   */
   public static <T> ByteArrayInputStream writeContent(List<T> data, List<CSVColumn> csvColumnList,
       String title) {
     return writeContent(data, csvColumnList, null, title);
   }
 
+  /**
+   * Write the data to CSV file
+   *
+   * @param data          the data to be written to the output stream
+   * @param csvColumnList the column list to be written to the output stream
+   * @param prefixBytes   the prefix bytes to be written to the output stream
+   * @param title         the first line data to be written to the output stream
+   * @return the output stream with the data, the prefix bytes and the title
+   */
   public static <T> ByteArrayInputStream writeContent(List<T> data, List<CSVColumn> csvColumnList,
       byte[] prefixBytes, String title) {
     try {
-      List<String> columnHeaders = csvColumnList.stream().map(CSVColumn::getTitle).collect(
-          Collectors.toList());
+      List<String> columnHeaders = csvColumnList.stream()
+          .map(csvColumn -> csvColumn.getColumnTitle().getValue())
+          .collect(Collectors.toList());
       CSVFormat csvFormat = CSVFormat.DEFAULT;
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -59,9 +96,11 @@ public class CSVHelper {
         List<String> record = new ArrayList<>();
         for (CSVColumn csvColumn : csvColumnList) {
           try {
-            Field field = ReflectorUtil.getFieldByName(item.getClass(), csvColumn.getColumn());
+            Field field = ReflectorUtil.getFieldByName(item.getClass(),
+                csvColumn.getColumnFiled().getValue());
             if (field == null) {
-              throw new RuntimeException("Field not found: " + csvColumn.getColumn());
+              log.error("Field not found: " + csvColumn.getColumnFiled().getValue());
+              throw new BusinessException(BusinessCode.INTERNAL_ERROR);
             }
             field.setAccessible(true);
             Object value = field.get(item);
@@ -77,13 +116,14 @@ public class CSVHelper {
             } else if (value instanceof LocalDateTime) {
               text = DataUtil.instantToString(((LocalDateTime) value).atZone(
                   ZoneId.of(DataUtil.TIME_ZONE)).toInstant(), DATE_TIME_PATTERN);
-            } else {
+            }
+            else {
               text = DataUtil.objectToString(value);
             }
             record.add(text);
           } catch (IllegalAccessException ex) {
-            throw new RuntimeException(
-                "Can't parse field: " + csvColumn.getColumn() + " " + ex.getMessage());
+            log.error("Can't parse field: " + csvColumn.getColumnFiled().getValue(), ex);
+            throw new BusinessException(BusinessCode.INTERNAL_ERROR);
           }
         }
         printer.printRecord(record);
@@ -91,8 +131,9 @@ public class CSVHelper {
       printer.printRecord();
       printer.flush();
       return new ByteArrayInputStream(outputStream.toByteArray());
-    } catch (final Exception e) {
-      throw new RuntimeException("Csv writing error: " + e.getMessage());
+    } catch (final IOException e) {
+      log.error("Csv writing error: ", e);
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
     }
   }
 
