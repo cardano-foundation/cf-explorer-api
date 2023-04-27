@@ -41,10 +41,11 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate, Pageable pageable);
 
-  @Query(value = "SELECT pr FROM PoolRetire pr "
+  @Query(value = "SELECT pr.retiringEpoch FROM PoolRetire pr "
       + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
-      + "WHERE ph.view = :poolView ")
-  PoolRetire findByPoolView(@Param("poolView") String poolView);
+      + "WHERE ph.view = :poolView "
+      + "ORDER BY pr.id DESC")
+  List<Integer> findByPoolView(@Param("poolView") String poolView);
 
   @Query(value = "SELECT pr.announcedTx.id as txId, pr.retiringEpoch as retiringEpoch, "
       + "ph.view as poolId "
