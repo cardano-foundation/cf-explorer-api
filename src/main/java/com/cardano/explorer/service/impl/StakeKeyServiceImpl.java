@@ -25,6 +25,7 @@ import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.DelegationRepository;
 import com.cardano.explorer.repository.EpochRepository;
 import com.cardano.explorer.repository.EpochStakeRepository;
+import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.ReserveRepository;
 import com.cardano.explorer.repository.RewardRepository;
 import com.cardano.explorer.repository.StakeAddressRepository;
@@ -75,6 +76,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final WithdrawalRepository withdrawalRepository;
   private final TreasuryRepository treasuryRepository;
   private final ReserveRepository reserveRepository;
+  private final PoolUpdateRepository poolUpdateRepository;
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
@@ -145,6 +147,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     else {
       stakeAddressResponse.setStatus(StakeAddressStatus.DEACTIVATED);
     }
+    stakeAddressResponse.setRewardPools(poolUpdateRepository.findPoolByRewardAccount(stakeAddress));
     return stakeAddressResponse;
   }
 

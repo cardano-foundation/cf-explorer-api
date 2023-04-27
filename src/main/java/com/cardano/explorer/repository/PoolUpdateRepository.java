@@ -5,6 +5,7 @@ import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.PoolUpdate;
+import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
 import java.sql.Timestamp;
 import java.util.List;
@@ -130,4 +131,15 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
           + "WHERE ph.view = :poolView ")
   Page<PoolUpdateDetailProjection> findPoolUpdateByPool(@Param("poolView") String poolView, Pageable pageable);
+
+  @Query("SELECT poolHash.view FROM PoolUpdate poolUpdate "
+      + "INNER JOIN PoolHash poolHash ON poolUpdate.poolHash = poolHash "
+      + "WHERE poolUpdate.rewardAddr = :stakeAddress "
+      + "AND poolUpdate.registeredTx.id = "
+      + "(SELECT max(poolUpdate.registeredTx.id) "
+      + "FROM PoolUpdate poolUpdate "
+      + "WHERE poolUpdate.poolHash = poolHash) "
+      + "AND (SELECT COALESCE(max(poolRetire.retiringEpoch), 0) + 2 "
+      + "FROM PoolRetire poolRetire WHERE poolRetire.poolHash = poolHash) < poolUpdate.activeEpochNo")
+  List<String> findPoolByRewardAccount(StakeAddress stakeAddress);
 }
