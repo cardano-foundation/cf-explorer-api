@@ -1,4 +1,4 @@
-package com.cardano.explorer.util;
+package com.cardano.explorer.util.csv;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class CSVColumn {
-  private String column;
-  private String title;
+  private ColumFieldEnum columnFiled;
+  private ColumnTitleEnum columnTitle;
 }
