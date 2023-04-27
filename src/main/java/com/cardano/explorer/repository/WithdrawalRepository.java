@@ -28,7 +28,7 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   Optional<BigInteger> getRewardWithdrawnByStakeAddress(String stakeAddress);
 
   @Query("SELECT tx.hash as txHash,withdrawal.amount as amount, block.time as time, tx.fee as fee,"
-      + " block.epochNo as epochNo"
+      + " block.epochNo as epochNo, tx.id as txId"
       + " FROM Withdrawal withdrawal"
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"
       + " INNER JOIN Block block ON tx.block = block"
@@ -46,7 +46,8 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   Page<StakeWithdrawalProjection> getWithdrawalByAddress(String stakeKey, Pageable pageable);
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
-      + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"
+      + " tx.fee as fee, block.blockNo as blockNo, block.epochNo as epochNo,"
+      + " withdrawal.amount as amount"
       + " FROM Withdrawal withdrawal"
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"
       + " INNER JOIN Block block ON tx.block = block"
@@ -87,4 +88,8 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " WHERE withdrawal.addr = :stakeAddress"
       + " GROUP BY block.epochNo, epoch.endTime")
   List<StakeRewardResponse> findEpochWithdrawalByStake(StakeAddress stakeAddress);
+
+  @Query("SELECT sum(w.amount) FROM Withdrawal w"
+      + " WHERE w.addr = :stakeAddress AND w.tx.id < :txId")
+  Optional<BigInteger> sumByAddrAndTx(StakeAddress stakeAddress, Long txId);
 }
