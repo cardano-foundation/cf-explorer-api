@@ -34,7 +34,7 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
 
   @Query("SELECT pp "
       + "FROM ParamProposal  pp "
-      + "WHERE pp.registeredTx.id = :id "
+      + "WHERE pp.registeredTx.id < :id "
       + "ORDER BY pp.id DESC"
   )
   List<ParamProposal> getParamProposalBySmallerThanRegisteredTxId(@Param("id") Long id);

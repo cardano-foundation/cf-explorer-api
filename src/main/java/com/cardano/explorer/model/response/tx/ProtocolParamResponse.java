@@ -1,6 +1,5 @@
 package com.cardano.explorer.model.response.tx;
 
-import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,18 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProtocolParamResponse {
-  BigInteger minFeeA;
-
-
-  @Override
-  public int hashCode() {
-    return hashCode(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
-        poolDeposit,
-        maxEpoch, optimalPoolCount, minUtxoValue, minPoolCost, maxTxExMem, maxTxExSteps,
-        maxBlockExMem, maxBlockExSteps, maxValSize, coinsPerUtxoSize, influence, monetaryExpandRate,
-        treasuryGrowthRate, decentralisation, priceMem, priceStep, protocolMajor, protocolMinor,
-        collateralPercent, maxCollateralInputs, entropy, costModel);
-  }
+  Object minFeeA;
 
   public static int hashCode(Object... a) {
     if (a == null) {
@@ -38,59 +26,69 @@ public class ProtocolParamResponse {
     return result;
   }
 
-  BigInteger minFeeB;
+  Object minFeeB;
 
-  BigInteger maxBlockSize;
+  Object maxBlockSize;
 
-  BigInteger maxTxSize;
+  Object maxTxSize;
 
-  BigInteger maxBhSize;
+  Object maxBhSize;
 
-  BigInteger keyDeposit;
+  Object keyDeposit;
 
-  BigInteger poolDeposit;
+  Object poolDeposit;
 
-  BigInteger maxEpoch;
+  Object maxEpoch;
 
-  BigInteger optimalPoolCount;
+  Object optimalPoolCount;
 
-  BigInteger minUtxoValue;
+  Object minUtxoValue;
 
-  BigInteger minPoolCost;
+  Object minPoolCost;
 
-  BigInteger maxTxExMem;
+  Object maxTxExMem;
 
-  BigInteger maxTxExSteps;
+  Object maxTxExSteps;
 
-  BigInteger maxBlockExMem;
+  Object maxBlockExMem;
 
-  BigInteger maxBlockExSteps;
+  Object maxBlockExSteps;
 
-  BigInteger maxValSize;
+  Object maxValSize;
 
-  BigInteger coinsPerUtxoSize;
+  Object coinsPerUtxoSize;
 
-  Double influence;
+  Object influence;
 
-  Double monetaryExpandRate;
+  Object monetaryExpandRate;
 
-  Double treasuryGrowthRate;
+  Object treasuryGrowthRate;
 
-  Double decentralisation;
+  Object decentralisation;
 
-  Double priceMem;
+  Object priceMem;
 
-  Double priceStep;
+  Object priceStep;
 
-  Integer protocolMajor;
+  Object protocolMajor;
 
-  Integer protocolMinor;
+  Object protocolMinor;
 
-  Integer collateralPercent;
+  Object collateralPercent;
 
-  Integer maxCollateralInputs;
+  Object maxCollateralInputs;
 
-  String entropy;
+  Object entropy;
 
-  String costModel;
+  Object costModel;
+
+  @Override
+  public int hashCode() {
+    return hashCode(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
+        poolDeposit,
+        maxEpoch, optimalPoolCount, minUtxoValue, minPoolCost, maxTxExMem, maxTxExSteps,
+        maxBlockExMem, maxBlockExSteps, maxValSize, coinsPerUtxoSize, influence, monetaryExpandRate,
+        treasuryGrowthRate, decentralisation, priceMem, priceStep, protocolMajor, protocolMinor,
+        collateralPercent, maxCollateralInputs, entropy, costModel);
+  }
 }
