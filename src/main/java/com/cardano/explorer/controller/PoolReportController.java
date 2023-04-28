@@ -7,7 +7,10 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
 import com.cardano.explorer.model.response.pool.report.PoolReportDetailResponse;
 import com.cardano.explorer.model.response.pool.report.PoolReportListResponse;
+import com.cardano.explorer.repository.PoolReportRepository;
+import com.cardano.explorer.service.PoolReportService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("api/v1/pool-report")
 @RequiredArgsConstructor
+@Slf4j
 public class PoolReportController {
 
     @PostMapping("create")
@@ -45,15 +49,15 @@ public class PoolReportController {
         // Temp
         BaseFilterResponse<PoolReportListResponse> res = new BaseFilterResponse<>();
         List<PoolReportListResponse> poolReportListResponses = List.of(
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
-                PoolReportListResponse.builder().reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build()
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build(),
+                PoolReportListResponse.builder().reportId(1L).reportName("Report Name").epochRanges(new Integer[]{300, 304}).isPoolSize(true).isFreePaid(true).event(transformEvent(List.of(PoolReportEvent.REWARD, PoolReportEvent.POOL_UPDATE))).build()
         );
         res.setData(poolReportListResponses);
         res.setTotalItems(poolReportListResponses.size());
