@@ -1,6 +1,7 @@
 package com.cardano.explorer.repository;
 
 import com.cardano.explorer.model.response.pool.projection.PoolDeRegistrationProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolReportProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.sotatek.cardano.common.entity.PoolRetire;
 import com.sotatek.cardano.common.entity.Tx;
@@ -41,6 +42,7 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate, Pageable pageable);
 
+
   @Query(value = "SELECT pr.retiringEpoch FROM PoolRetire pr "
       + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
       + "WHERE ph.view = :poolView "
@@ -53,4 +55,15 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       + "INNER JOIN PoolHash ph ON pr.poolHash.id = ph.id "
       + "WHERE pr.announcedTx = :tx")
   List<PoolDeRegistrationProjection> findByAnnouncedTx(Tx tx);
+
+  @Query(value =
+          "select t.hash as txnHash, b.time as timestamp, t.outSum as adaValueHold, t.fee as adaValueFees, pu.rewardAddr.view as owner "
+        + "from PoolRetire pr "
+        + "join Tx t on pr.announcedTxId = t.id "
+        + "join Block b on t.blockId = b.id "
+        + "join PoolUpdate pu on pr.poolHashId = pu.poolHash.id "
+        + "where pu.poolHash.view = :poolView and b.epochNo between :epochBegin and :epochEnd"
+  )
+  List<PoolReportProjection> getDeregistrationByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd);
+
 }
