@@ -6,6 +6,7 @@ import com.cardano.explorer.model.request.pool.report.PoolReportCreateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.report.PoolReportDetailResponse;
 import com.cardano.explorer.model.response.pool.report.PoolReportListResponse;
+import com.cardano.explorer.service.PoolReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.api.annotations.ParameterObject;
