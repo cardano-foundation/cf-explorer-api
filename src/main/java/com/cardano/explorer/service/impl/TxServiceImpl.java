@@ -563,7 +563,7 @@ public class TxServiceImpl implements TxService {
         paramProposals.removeAll(previousParam);
 
         txResponse.setPreviousProtocols(
-            protocolMapper.mapPreviousProtocolParamResponse(paramProposals
+            protocolMapper.mapPreviousProtocolParamResponse(previousParam
                 , txResponse.getProtocols()));
       }
     }
