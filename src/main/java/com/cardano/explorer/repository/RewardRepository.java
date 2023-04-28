@@ -132,7 +132,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
           + "join Reward r on pu.activeEpochNo = r.earnedEpoch "
           + "join Epoch e on pu.activeEpochNo = e.no "
           + "where pu.poolHash.view = :poolView and pu.activeEpochNo between :epochBegin and :epochEnd "
-          + "group by r.earnedEpoch, e.no, e.startTime, pu.rewardAddrId"
+          + "group by r.earnedEpoch, e.no, e.startTime, pu.rewardAddr.view"
   )
   List<PoolReportProjection> getRewardDistributionByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd);
 
