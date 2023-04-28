@@ -5,11 +5,13 @@ import com.sotatek.cardano.common.enumeration.ReportStatus;
 import com.sotatek.cardano.common.enumeration.ReportType;
 import java.sql.Timestamp;
 import java.util.Set;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class StakeKeyReportHistoryResponse {
   private Long id;
   private String stakeKey;
