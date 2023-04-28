@@ -79,6 +79,14 @@ public class DataUtil {
     return result;
   }
 
+  public static String makeLikeQuery(String s) {
+    if (DataUtil.isNullOrEmpty(s)) {
+      return null;
+    }
+    return "%" + s + "%";
+  }
+
+
   @Value("${application.time-zone}")
   public void setTimeZone(String timeZone) {
     DataUtil.TIME_ZONE = timeZone;
