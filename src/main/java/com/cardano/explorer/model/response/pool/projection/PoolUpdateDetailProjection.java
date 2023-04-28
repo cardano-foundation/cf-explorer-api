@@ -30,4 +30,7 @@ public interface PoolUpdateDetailProjection {
   Double getMargin();
 
   BigInteger getCost();
+
+  String getMetadataUrl();
+  String getMetadataHash();
 }

@@ -45,7 +45,7 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
 
   @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.pool.id = :poolId "
       + "AND es.epochNo = (SELECT max(e.no) FROM Epoch e)")
-  BigInteger activeStakeByPoolAndEpochNo(@Param("poolId") Long poolId);
+  BigInteger activeStakeByPool(@Param("poolId") Long poolId);
 
   @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.pool.id = :poolId AND es.epochNo = :epochNo")
   BigInteger getPoolSizeByPoolAndEpochNo(@Param("poolId") Long poolId, @Param("epochNo") Integer epochNo);

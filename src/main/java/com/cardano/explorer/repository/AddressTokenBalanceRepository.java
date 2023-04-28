@@ -14,13 +14,33 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface AddressTokenBalanceRepository extends JpaRepository<AddressTokenBalance, Long> {
 
-  Optional<Long> countByMultiAsset(MultiAsset multiAsset);
+  @Query("SELECT COUNT(atb.addressId) FROM AddressTokenBalance atb "
+      + "INNER JOIN Address addr ON addr.id = atb.addressId "
+      + "WHERE atb.multiAsset = :multiAsset "
+      + "AND addr.stakeAddressId IS NULL AND atb.balance > 0 ")
+  Optional<Long> countAddressNotHaveStakeByMultiAsset(MultiAsset multiAsset);
+
+  @Query("SELECT COUNT(DISTINCT addr.stakeAddressId) FROM AddressTokenBalance atb "
+      + "INNER JOIN Address addr ON addr.id = atb.addressId "
+      + "WHERE atb.multiAsset = :multiAsset "
+      + "AND atb.balance > 0 ")
+  Optional<Long> countStakeByMultiAsset(MultiAsset multiAsset);
 
 
-  @Query("SELECT COUNT(atb) as numberOfHolders, atb.multiAsset.id as ident"
-      + " FROM AddressTokenBalance atb "
-      + " WHERE atb.multiAsset IN :multiAssets AND atb.balance > 0"
-      + " GROUP BY atb.multiAsset.id")
+  @Query("SELECT COUNT(atb.addressId) as numberOfHolders, atb.multiAsset.id as ident "
+      + "FROM AddressTokenBalance atb "
+      + "INNER JOIN Address addr ON addr.id = atb.addressId "
+      + "WHERE atb.multiAsset IN :multiAssets "
+      + "AND addr.stakeAddressId IS NULL AND atb.balance > 0 "
+      + "GROUP BY atb.multiAsset.id")
+  List<TokenNumberHoldersProjection> countAddressNotHaveStakeByMultiAssetIn(List<MultiAsset> multiAssets);
+
+  @Query("SELECT COUNT(DISTINCT addr.stakeAddressId) as numberOfHolders, atb.multiAsset.id as ident "
+      + "FROM AddressTokenBalance atb "
+      + "INNER JOIN Address addr ON addr.id = atb.addressId "
+      + "WHERE atb.multiAsset IN :multiAssets "
+      + "AND atb.balance > 0 "
+      + "GROUP BY atb.multiAsset.id")
   List<TokenNumberHoldersProjection> countByMultiAssetIn(List<MultiAsset> multiAssets);
 
   @Query("SELECT atb.addressId as addressId, atb.balance as quantity"

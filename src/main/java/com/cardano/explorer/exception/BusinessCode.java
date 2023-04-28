@@ -13,8 +13,8 @@ public enum BusinessCode implements ErrorCode {
   POLICY_NOT_FOUND("404-POLICY_NOT_FOUND", "Policy not found"),
   STAKE_DELEGATION_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
   STAKE_WITHDRAWAL_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
-  PROTOCOL_NOT_FOUND("404-PROTOCOL_NOT_FOUND", "Protocol not found");
-
+  PROTOCOL_NOT_FOUND("404-PROTOCOL_NOT_FOUND", "Protocol not found"),
+  STAKE_REPORT_HISTORY_NOT_FOUND("404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found");
   private final String code;
   private final String desc;
 

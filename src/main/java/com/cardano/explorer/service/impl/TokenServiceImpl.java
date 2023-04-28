@@ -83,8 +83,15 @@ public class TokenServiceImpl implements TokenService {
     Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
     List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(
         multiAssets.getContent(), txId);
-    var numberOfHolders = addressTokenBalanceRepository.countByMultiAssetIn(multiAssets.getContent());
-    Map<Long, Long> numberHoldersMap = numberOfHolders.stream().collect(
+    var numberOfHoldersWithStakeKey
+        = addressTokenBalanceRepository.countByMultiAssetIn(multiAssets.getContent());
+    var numberOfHoldersWithAddressNotHaveStakeKey
+        = addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(multiAssets.getContent());
+    Map<Long, Long> numberHoldersStakeKeyMap = numberOfHoldersWithStakeKey.stream().collect(
+        Collectors.toMap(TokenNumberHoldersProjection::getIdent,
+            TokenNumberHoldersProjection::getNumberOfHolders));
+    Map<Long, Long> numberHoldersAddressNotHaveStakeKeyMap
+        = numberOfHoldersWithAddressNotHaveStakeKey.stream().collect(
         Collectors.toMap(TokenNumberHoldersProjection::getIdent,
             TokenNumberHoldersProjection::getNumberOfHolders));
     Map<Long, BigInteger> tokenVolumeMap = volumes.stream().collect(
@@ -100,7 +107,8 @@ public class TokenServiceImpl implements TokenService {
             ma.setVolumeIn24h(String.valueOf(0));
           }
           ma.setVolumeIn24h(tokenVolumeMap.getOrDefault(ma.getId(), BigInteger.valueOf(0)).toString());
-          ma.setNumberOfHolders(numberHoldersMap.getOrDefault(ma.getId(), 0L));
+          ma.setNumberOfHolders(numberHoldersStakeKeyMap.getOrDefault(ma.getId(), 0L)
+              + numberHoldersAddressNotHaveStakeKeyMap.getOrDefault(ma.getId(), 0L));
           ma.setId(null);
         }
     );
@@ -119,7 +127,9 @@ public class TokenServiceImpl implements TokenService {
         LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
     Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
     var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, txId);
-    var numberOfHolders = addressTokenBalanceRepository.countByMultiAsset(multiAsset).orElse(0L);
+    var numberOfHolders =
+        addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(multiAsset).orElse(0L)
+        + addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset).orElse(0L);
     tokenResponse.setNumberOfHolders(numberOfHolders);
     if(Objects.isNull(volume)) {
       tokenResponse.setVolumeIn24h(String.valueOf(0));

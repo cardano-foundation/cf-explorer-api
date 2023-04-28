@@ -1,8 +1,15 @@
 package com.cardano.explorer.repository;
 
+
+import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
+import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
+import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
 import com.cardano.explorer.model.response.pool.projection.*;
 import com.sotatek.cardano.common.entity.PoolHash;
 import com.sotatek.cardano.common.entity.PoolUpdate;
+import com.sotatek.cardano.common.entity.StakeAddress;
+import com.sotatek.cardano.common.entity.Tx;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
@@ -96,6 +103,16 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE pu.id = :id ")
   PoolUpdateDetailProjection findPoolUpdateDetailById(@Param("id") Long id);
 
+  @Query("SELECT ph.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
+      + "pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, sa.view AS rewardAccount, "
+      + "pmr.url AS metadataUrl, pmr.hash as metadataHash "
+      + "FROM PoolUpdate pu "
+      + "INNER JOIN PoolHash ph ON pu.poolHash.id = ph.id "
+      + "INNER JOIN PoolMetadataRef pmr ON pu.meta = pmr "
+      + "INNER JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+      + "WHERE pu.registeredTx = :tx")
+  List<PoolUpdateDetailProjection> findByTx(Tx tx);
+
 
   @Query(value =
       "SELECT sa.view FROM PoolUpdate pu "
@@ -118,6 +135,16 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE ph.view = :poolView ")
   Page<PoolUpdateDetailProjection> findPoolUpdateByPool(@Param("poolView") String poolView, Pageable pageable);
 
+  @Query("SELECT poolHash.view FROM PoolUpdate poolUpdate "
+      + "INNER JOIN PoolHash poolHash ON poolUpdate.poolHash = poolHash "
+      + "WHERE poolUpdate.rewardAddr = :stakeAddress "
+      + "AND poolUpdate.registeredTx.id = "
+      + "(SELECT max(poolUpdate.registeredTx.id) "
+      + "FROM PoolUpdate poolUpdate "
+      + "WHERE poolUpdate.poolHash = poolHash) "
+      + "AND (SELECT COALESCE(max(poolRetire.retiringEpoch), 0) + 2 "
+      + "FROM PoolRetire poolRetire WHERE poolRetire.poolHash = poolHash) < poolUpdate.activeEpochNo")
+  List<String> findPoolByRewardAccount(StakeAddress stakeAddress);
   @Query(value =
           "SELECT  t.hash as txnHash, b.time as timestamp, t.outSum as adaValueHold, t.fee as adaValueFees, sa.view as owner "
         + "from Tx t "
@@ -127,4 +154,5 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
         + "where pu.poolHash.view = :poolView and b.epochNo between :epochBegin and :epochEnd"
   )
   List<PoolReportProjection> getPoolRegistrationByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd);
+
 }
