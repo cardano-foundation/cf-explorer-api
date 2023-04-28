@@ -1,7 +1,6 @@
 package com.cardano.explorer.model.response.tx;
 
 import java.math.BigInteger;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,12 +16,26 @@ public class ProtocolParamResponse {
 
   @Override
   public int hashCode() {
-    return Objects.hash(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
+    return hashCode(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
         poolDeposit,
         maxEpoch, optimalPoolCount, minUtxoValue, minPoolCost, maxTxExMem, maxTxExSteps,
         maxBlockExMem, maxBlockExSteps, maxValSize, coinsPerUtxoSize, influence, monetaryExpandRate,
         treasuryGrowthRate, decentralisation, priceMem, priceStep, protocolMajor, protocolMinor,
         collateralPercent, maxCollateralInputs, entropy, costModel);
+  }
+
+  public static int hashCode(Object... a) {
+    if (a == null) {
+      return -1;
+    }
+
+    int result = 1;
+
+    for (Object element : a) {
+      result = 31 * result + (element == null ? -1 : element.hashCode());
+    }
+
+    return result;
   }
 
   BigInteger minFeeB;

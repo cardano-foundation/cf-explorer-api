@@ -558,13 +558,14 @@ public class TxServiceImpl implements TxService {
           paramProposalRepository.getParamProposalBySmallerThanRegisteredTxId(tx.getId());
 
       txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(previousParam));
-
       //get previous value
-      paramProposals.removeAll(previousParam);
+      if(Objects.nonNull(txResponse.getProtocols())){
+        paramProposals.removeAll(previousParam);
 
-      txResponse.setPreviousProtocols(
-          protocolMapper.mapPreviousProtocolParamResponse(paramProposals
-              , txResponse.getProtocols()));
+        txResponse.setPreviousProtocols(
+            protocolMapper.mapPreviousProtocolParamResponse(paramProposals
+                , txResponse.getProtocols()));
+      }
     }
   }
 
