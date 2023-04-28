@@ -167,7 +167,7 @@
     <dependency>
       <groupId>com.sotatek.cardano</groupId>
       <artifactId>cardano-common-explorer</artifactId>
-      <version>1.0.7-SNAPSHOT</version>
+      <version>1.0.8-SNAPSHOT</version>
     </dependency>
 
     <dependency>
