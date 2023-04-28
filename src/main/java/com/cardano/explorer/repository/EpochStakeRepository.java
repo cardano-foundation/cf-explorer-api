@@ -3,6 +3,7 @@ package com.cardano.explorer.repository;
 import com.cardano.explorer.model.response.pool.projection.EpochChartProjection;
 import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolAmountProjection;
+import com.cardano.explorer.model.response.pool.projection.PoolReportProjection;
 import com.cardano.explorer.projection.StakeAddressProjection;
 import com.sotatek.cardano.common.entity.EpochStake;
 import java.math.BigInteger;
@@ -69,4 +70,11 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
           + "GROUP BY es.epochNo "
           + "ORDER BY es.epochNo ASC ")
   Page<EpochStakeProjection> getDataForEpochList(@Param("poolId") Long poolId, Pageable pageable);
+
+  @Query(value =
+          "SELECT es.epochNo as epochNo, sum(es.amount) as size "
+        + "FROM EpochStake es where es.pool.view = :poolView "
+        + "and es.epochNo between :epochBegin and :epochEnd "
+        + "group by es.epochNo")
+  Page<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd, Pageable pageable);
 }

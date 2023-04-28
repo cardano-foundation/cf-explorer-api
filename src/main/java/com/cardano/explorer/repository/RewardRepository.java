@@ -1,9 +1,6 @@
 package com.cardano.explorer.repository;
 
-import com.cardano.explorer.model.response.pool.projection.EpochStakeProjection;
-import com.cardano.explorer.model.response.pool.projection.LifeCycleRewardProjection;
-import com.cardano.explorer.model.response.pool.projection.PoolAmountProjection;
-import com.cardano.explorer.model.response.pool.projection.EpochRewardProjection;
+import com.cardano.explorer.model.response.pool.projection.*;
 import com.cardano.explorer.model.response.stake.StakeAnalyticRewardResponse;
 import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
 import com.sotatek.cardano.common.entity.Reward;
@@ -114,4 +111,13 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "AND rw.spendableEpoch IN :epochNos "
       + "GROUP BY rw.spendableEpoch")
   List<EpochRewardProjection> getDelegatorRewardByPool(@Param("poolId") Long poolId, @Param("epochNos") Set<Integer> epochNos);
+
+  @Query(value = "select e.no as epochNo, e.startTime as timestamp, sum(r.amount) as operatorReward, pu.rewardAddr.view as rewardAccount "
+          + "from PoolUpdate pu "
+          + "join Reward r on pu.activeEpochNo = r.earnedEpoch "
+          + "join Epoch e on pu.activeEpochNo = e.no "
+          + "where pu.poolHash.view = :poolView and pu.activeEpochNo between :epochBegin and :epochEnd "
+          + "group by r.earnedEpoch, e.no, e.startTime, pu.rewardAddrId"
+  )
+  List<PoolReportProjection> getRewardDistributionByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd);
 }
