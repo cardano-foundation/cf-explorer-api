@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PoolReportListResponse {
+    private Long reportId;
+
     private String reportName;
 
     private Integer[] epochRanges;
