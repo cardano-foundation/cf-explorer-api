@@ -1,9 +1,12 @@
 package com.cardano.explorer.repository;
 
+
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateDetailProjection;
 import com.cardano.explorer.model.response.pool.projection.PoolUpdateProjection;
 import com.cardano.explorer.model.response.pool.projection.StakeKeyProjection;
 import com.cardano.explorer.model.response.pool.projection.TxBlockEpochProjection;
+import com.cardano.explorer.model.response.pool.projection.*;
+import com.sotatek.cardano.common.entity.PoolHash;
 import com.sotatek.cardano.common.entity.PoolUpdate;
 import com.sotatek.cardano.common.entity.StakeAddress;
 import com.sotatek.cardano.common.entity.Tx;
@@ -142,4 +145,14 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "AND (SELECT COALESCE(max(poolRetire.retiringEpoch), 0) + 2 "
       + "FROM PoolRetire poolRetire WHERE poolRetire.poolHash = poolHash) < poolUpdate.activeEpochNo")
   List<String> findPoolByRewardAccount(StakeAddress stakeAddress);
+  @Query(value =
+          "SELECT  t.hash as txnHash, b.time as timestamp, t.outSum as adaValueHold, t.fee as adaValueFees, sa.view as owner "
+        + "from Tx t "
+        + "join Block b on t.blockId = b.id "
+        + "join PoolUpdate pu on t.id = pu.registeredTxId "
+        + "join StakeAddress sa on pu.rewardAddrId = sa.id "
+        + "where pu.poolHash.view = :poolView and b.epochNo between :epochBegin and :epochEnd"
+  )
+  List<PoolReportProjection> getPoolRegistrationByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd);
+
 }

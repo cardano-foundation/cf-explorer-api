@@ -34,4 +34,9 @@ public class BaseFilterResponse<T> implements Serializable {
     this.totalPages = page.getTotalPages();
     this.currentPage = page.getNumber();
   }
+
+  public <S> BaseFilterResponse(List<T> data, long totalItems) {
+    this.data = data;
+    this.totalItems = totalItems;
+  }
 }
