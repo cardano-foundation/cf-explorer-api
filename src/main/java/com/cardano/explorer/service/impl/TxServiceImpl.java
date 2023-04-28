@@ -585,7 +585,9 @@ public class TxServiceImpl implements TxService {
             item -> new TxStakeCertificate(item.getAddr().getView(),
                 CertificateType.STAKE_DEREGISTRATION)
         ).collect(Collectors.toList()));
-    txResponse.setStakeCertificates(stakeCertificates);
+    if(!CollectionUtils.isEmpty(stakeCertificates)){
+      txResponse.setStakeCertificates(stakeCertificates);
+    }
   }
 
   /**
@@ -654,8 +656,9 @@ public class TxServiceImpl implements TxService {
             .type(CertificateType.POOL_DEREGISTRATION)
             .build()
     ).collect(Collectors.toList()));
-
-    txResponse.setPoolCertificates(poolCertificates);
+    if(!CollectionUtils.isEmpty(poolCertificates)){
+      txResponse.setPoolCertificates(poolCertificates);
+    }
   }
 
   /**
