@@ -12,6 +12,7 @@ import lombok.Setter;
 public class StakeDelegationFilterResponse {
   private String txHash;
   private BigInteger outSum;
+  private BigInteger fee;
   private LocalDateTime time;
 
 }

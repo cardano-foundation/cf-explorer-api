@@ -65,4 +65,8 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " GROUP BY block.epochNo, epoch.endTime")
   List<StakeRewardResponse> findEpochWithdrawalByStake(StakeAddress stakeAddress);
 
+  @Query("SELECT sum(w.amount) FROM Withdrawal w"
+      + " WHERE w.addr = :stakeAddress AND w.tx.id < :txId")
+  Optional<BigInteger> sumByAddrAndTx(StakeAddress stakeAddress, Long txId);
+
 }

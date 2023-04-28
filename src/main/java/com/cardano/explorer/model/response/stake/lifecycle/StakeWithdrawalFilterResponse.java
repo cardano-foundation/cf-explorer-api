@@ -12,6 +12,7 @@ import lombok.Setter;
 public class StakeWithdrawalFilterResponse {
   private String txHash;
   private BigInteger value;
+  private BigInteger fee;
   private LocalDateTime time;
 
 }
