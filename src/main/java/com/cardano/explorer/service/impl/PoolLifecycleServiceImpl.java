@@ -192,7 +192,14 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
           refund -> refundAmountMap.put(refund.getEpochNo(), refund.getAmount()));
       deRegistrations.forEach(deRegistration -> {
         deRegistration.setPoolHold(refundAmountMap.get(deRegistration.getRetiringEpoch()));
-        deRegistration.setTotalFee(deRegistration.getFee().add(deRegistration.getPoolHold()));
+        BigInteger totalFee = BigInteger.ZERO;
+        if (Objects.nonNull(deRegistration.getPoolHold())) {
+          totalFee = totalFee.add(deRegistration.getPoolHold());
+        }
+        if (Objects.nonNull(deRegistration.getFee())) {
+          totalFee = totalFee.add(deRegistration.getFee());
+        }
+        deRegistration.setTotalFee(totalFee);
         deRegistration.setPoolId(poolInfo.getPoolId());
         deRegistration.setPoolName(poolInfo.getPoolName());
         deRegistration.setPoolView(poolInfo.getPoolView());
