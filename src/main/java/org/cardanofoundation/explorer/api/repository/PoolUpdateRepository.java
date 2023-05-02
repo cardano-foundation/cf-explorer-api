@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
-import com.sotatek.cardano.common.entity.PoolUpdate;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.data.domain.Page;

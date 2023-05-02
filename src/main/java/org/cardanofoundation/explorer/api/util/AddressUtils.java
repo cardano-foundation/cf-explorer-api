@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.util;
 import com.bloxbean.cardano.client.address.util.AddressUtil;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import com.sotatek.cardano.ledgersync.common.address.ShelleyAddress;
+import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 
 public class AddressUtils {

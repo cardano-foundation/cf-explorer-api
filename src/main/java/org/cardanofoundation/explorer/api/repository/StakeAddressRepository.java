@@ -2,7 +2,7 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
-import com.sotatek.cardano.common.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;

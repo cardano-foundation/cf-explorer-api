@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.util;
 
-import com.sotatek.cardano.ledgersync.util.StringUtil;
+import org.cardanofoundation.ledgersync.common.util.StringUtil;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.binary.Hex;
 

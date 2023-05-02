@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import com.sotatek.cardano.common.entity.Address;
-import com.sotatek.cardano.common.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;

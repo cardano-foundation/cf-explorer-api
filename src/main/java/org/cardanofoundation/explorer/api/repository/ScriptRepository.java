@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import com.sotatek.cardano.common.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

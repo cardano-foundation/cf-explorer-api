@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import com.sotatek.cardano.common.entity.AssetMetadata;
+import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

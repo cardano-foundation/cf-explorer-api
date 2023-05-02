@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import com.sotatek.cardano.common.entity.Tx;
-import com.sotatek.cardano.common.entity.Withdrawal;
-import com.sotatek.cardano.common.entity.Withdrawal_;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
+import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal_;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;

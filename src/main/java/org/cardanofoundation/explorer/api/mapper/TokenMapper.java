@@ -5,7 +5,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenFilterRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import com.sotatek.cardano.common.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 

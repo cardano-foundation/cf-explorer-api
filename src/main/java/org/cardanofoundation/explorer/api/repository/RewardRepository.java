@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
-import com.sotatek.cardano.common.entity.Reward;
+import org.cardanofoundation.explorer.consumercommon.entity.Reward;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;

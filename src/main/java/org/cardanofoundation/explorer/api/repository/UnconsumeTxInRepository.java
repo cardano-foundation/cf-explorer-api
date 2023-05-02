@@ -1,8 +1,8 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
-import com.sotatek.cardano.common.entity.Tx;
-import com.sotatek.cardano.common.entity.UnconsumeTxIn;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.consumercommon.entity.UnconsumeTxIn;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

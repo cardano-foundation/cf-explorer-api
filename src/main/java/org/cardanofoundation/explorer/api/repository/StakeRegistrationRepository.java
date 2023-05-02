@@ -2,8 +2,8 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStake;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
-import com.sotatek.cardano.common.entity.StakeAddress;
-import com.sotatek.cardano.common.entity.StakeRegistration;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;

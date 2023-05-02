@@ -10,7 +10,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 //@EnableJpaAuditing
 @EnableCaching
-@EntityScan( {"com.sotatek.cardano.common.*", "com.cardano.*"})
+@EntityScan( {"org.cardanofoundation.explorer.*", "org.cardanofoundation.*"})
 public class ExplorerApiApplication {
 
   public static void main(String[] args) {

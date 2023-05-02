@@ -2,9 +2,9 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import com.sotatek.cardano.common.entity.Block;
-import com.sotatek.cardano.common.entity.Tx;
-import com.sotatek.cardano.common.entity.Tx_;
+import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx_;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;

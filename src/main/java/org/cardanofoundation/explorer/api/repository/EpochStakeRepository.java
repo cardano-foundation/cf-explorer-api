@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.repository;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
-import com.sotatek.cardano.common.entity.EpochStake;
+import org.cardanofoundation.explorer.consumercommon.entity.EpochStake;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;

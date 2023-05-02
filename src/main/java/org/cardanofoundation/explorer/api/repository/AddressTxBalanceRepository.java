@@ -1,8 +1,8 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import com.sotatek.cardano.common.entity.Address;
-import com.sotatek.cardano.common.entity.AddressTxBalance;
-import com.sotatek.cardano.common.entity.Tx;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;

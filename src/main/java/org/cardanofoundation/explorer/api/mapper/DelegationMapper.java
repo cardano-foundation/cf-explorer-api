@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.mapper;
 
 import org.cardanofoundation.explorer.api.model.response.tx.TxDelegationResponse;
-import com.sotatek.cardano.common.entity.Delegation;
+import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

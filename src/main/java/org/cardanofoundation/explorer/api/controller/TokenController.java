@@ -9,8 +9,8 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
-import com.sotatek.cardano.common.entity.BaseEntity_;
-import com.sotatek.cardano.common.entity.MultiAsset_;
+import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;

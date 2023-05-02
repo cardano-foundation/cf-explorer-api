@@ -4,10 +4,10 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.Delegat
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
-import com.sotatek.cardano.common.entity.Delegation;
-import com.sotatek.cardano.common.entity.Delegation_;
-import com.sotatek.cardano.common.entity.StakeAddress;
-import com.sotatek.cardano.common.entity.Tx;
+import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
+import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

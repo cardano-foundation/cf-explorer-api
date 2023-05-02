@@ -1,0 +1,88 @@
+version: '3'
+
+services:
+  redis-master:
+    restart: unless-stopped
+    hostname: cardano.redis.master
+    image: redis:7.0.5
+    environment:
+      REDIS_REPLICATION_MODE: master
+      REDIS_PASSWORD: ${REDIS_MASTER_PASS:-redis_master_pass}
+    command: redis-server
+    ports:
+      - "26301:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 100m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "100"
+
+  redis-slave:
+    restart: unless-stopped
+    hostname: cardano.redis.slave
+    image: redis:7.0.5
+    environment:
+      REDIS_REPLICATION_MODE: slave
+      REDIS_MASTER_HOST: redis-master
+      REDIS_MASTER_PASSWORD: ${REDIS_MASTER_PASS:-redis_master_pass}
+      REDIS_PASSWORD: ${REDIS_SLAVE_PASS:-redis_slave_pass}
+    command: redis-server --slaveof redis-master 6379
+    ports:
+      - "26302:6379"
+    links:
+      - redis-master
+    deploy:
+      resources:
+        limits:
+          memory: 100m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "100"
+
+  redis-sentinel:
+    restart: unless-stopped
+    hostname: ${REDIS_SENTINEL_HOST:-cardano.redis.sentinel}
+    image: 'bitnami/redis-sentinel'
+    environment:
+      REDIS_MASTER_HOST: cardano.redis.master
+      REDIS_MASTER_PORT_NUMBER: 6379
+      REDIS_MASTER_PASSWORD: ${REDIS_MASTER_PASS:-redis_master_pass}
+      REDIS_SENTINEL_DOWN_AFTER_MILLISECONDS: 5000
+      REDIS_SENTINEL_FAILOVER_TIMEOUT: 500
+      REDIS_SENTINEL_QUORUM: 2
+      REDIS_SENTINEL_PASSWORD: ${REDIS_SENTINEL_PASS:-redis_sentinel_pass}
+    ports:
+      - "26379:26379"
+    depends_on:
+      - redis-master
+      - redis-slave
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "100"
+
+  api:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile.localdb_testing
+    platform: linux/arm64
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      DB: "explorer_api"
+      HOST: "host.docker.internal"
+      PASSWORD_DB: "dbpass"
+      PORT_DB: 5432
+      SCHEMA: public
+      USERNAME_DB: "cardano-master"
+      REDIS_SENTINEL_HOST: "redis-sentinel"
+    depends_on:
+      - redis-sentinel
+    restart: always
