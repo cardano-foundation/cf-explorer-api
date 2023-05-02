@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
-import com.sotatek.cardano.common.entity.PoolRetire;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolRetire;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

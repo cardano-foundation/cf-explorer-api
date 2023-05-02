@@ -1,8 +1,8 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import com.sotatek.cardano.common.entity.Address;
-import com.sotatek.cardano.common.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;

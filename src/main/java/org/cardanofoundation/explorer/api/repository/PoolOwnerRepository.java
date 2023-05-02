@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolOwnerProjection;
-import com.sotatek.cardano.common.entity.PoolOwner;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolOwner;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;

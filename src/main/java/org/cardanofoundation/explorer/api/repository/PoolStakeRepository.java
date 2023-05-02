@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import com.sotatek.cardano.common.entity.PoolStake;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolStake;
 import java.math.BigInteger;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

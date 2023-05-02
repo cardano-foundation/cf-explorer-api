@@ -6,7 +6,7 @@
 
     <groupId>org.cardanofoundation.explorer</groupId>
     <artifactId>api</artifactId>
-    <version>${revision}</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>Explorer REST API exposing functions to the explorer web frontend.</description>
 
@@ -43,7 +43,6 @@
     </organization>
 
     <properties>
-        <revision>1.0.0-SNAPSHOT</revision>
         <start-class>org.cardanofoundation.explorer.api.ExplorerApiApplication</start-class>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.java>11</version.java>
@@ -71,6 +70,9 @@
         <version.snakeyaml>2.0</version.snakeyaml>
         <version.mapstruct>1.5.3.Final</version.mapstruct>
         <version.lombok-mapstruct-binding>0.2.0</version.lombok-mapstruct-binding>
+        <version.ledgersync-common>1.1.1-SNAPSHOT</version.ledgersync-common>
+        <version.explorer-common>0.0.2-SNAPSHOT</version.explorer-common>
+        <version.explorer-consumer-common>1.0.6-SNAPSHOT</version.explorer-consumer-common>
         <sonar.coverage.jacoco.xmlReportPaths>../cardano-explorer-api/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
@@ -167,6 +169,11 @@
             <version>${version.springdoc-openapi-ui}</version>
         </dependency>
         <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${version.lombok}</version>
@@ -253,19 +260,19 @@
             <version>${version.google-gson}</version>
         </dependency>
         <dependency>
-            <groupId>com.sotatek.cardano</groupId>
-            <artifactId>cardano-common</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <groupId>org.cardanofoundation.ledgersync</groupId>
+            <artifactId>common</artifactId>
+            <version>${version.ledgersync-common}</version>
         </dependency>
         <dependency>
             <groupId>org.cardanofoundation.explorer</groupId>
             <artifactId>common</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${version.explorer-common}</version>
         </dependency>
         <dependency>
-            <groupId>com.sotatek.cardano</groupId>
-            <artifactId>cardano-common-explorer</artifactId>
-            <version>1.0.6-SNAPSHOT</version>
+            <groupId>org.cardanofoundation.explorer</groupId>
+            <artifactId>consumer-common</artifactId>
+            <version>${version.explorer-consumer-common}</version>
         </dependency>
     </dependencies>
 

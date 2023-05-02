@@ -8,7 +8,7 @@ import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
-import com.sotatek.cardano.common.entity.Epoch;
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import java.time.Instant;
 import java.time.LocalDateTime;

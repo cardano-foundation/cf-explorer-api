@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.repository;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailEpochProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
-import com.sotatek.cardano.common.entity.PoolHash;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;

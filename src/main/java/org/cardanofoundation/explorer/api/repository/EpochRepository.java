@@ -2,7 +2,7 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.RewardEpochProjection;
 import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
-import com.sotatek.cardano.common.entity.Epoch;
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

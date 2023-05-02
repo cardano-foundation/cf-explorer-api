@@ -4,7 +4,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxRespon
 import org.cardanofoundation.explorer.api.model.response.tx.TxMintingResponse;
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import com.sotatek.cardano.common.entity.MaTxMint;
+import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

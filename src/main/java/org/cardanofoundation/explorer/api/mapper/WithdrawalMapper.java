@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.mapper;
 
 import org.cardanofoundation.explorer.api.model.response.tx.WithdrawalResponse;
-import com.sotatek.cardano.common.entity.Withdrawal;
+import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

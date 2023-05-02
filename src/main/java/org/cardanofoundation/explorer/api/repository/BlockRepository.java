@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import com.sotatek.cardano.common.entity.Block;
-import com.sotatek.cardano.common.entity.Block_;
+import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.consumercommon.entity.Block_;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;

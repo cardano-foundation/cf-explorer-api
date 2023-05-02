@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.mapper;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
-import com.sotatek.cardano.common.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

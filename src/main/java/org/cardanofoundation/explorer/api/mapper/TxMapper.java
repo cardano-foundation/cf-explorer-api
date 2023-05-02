@@ -2,7 +2,7 @@ package org.cardanofoundation.explorer.api.mapper;
 
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
-import com.sotatek.cardano.common.entity.Tx;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import org.mapstruct.Mapper;

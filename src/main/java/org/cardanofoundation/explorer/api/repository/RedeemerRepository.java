@@ -1,8 +1,8 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
-import com.sotatek.cardano.common.entity.Redeemer;
-import com.sotatek.cardano.common.entity.Tx;
+import org.cardanofoundation.explorer.consumercommon.entity.Redeemer;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
