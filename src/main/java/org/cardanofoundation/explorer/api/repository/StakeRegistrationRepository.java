@@ -4,6 +4,8 @@ import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStak
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
+import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -39,4 +41,22 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
       + " WHERE sr.addr.id = (SELECT sa.id FROM StakeAddress sa WHERE sa.view = :stakeKey)"
       + " ORDER BY b.blockNo DESC, tx.blockIndex DESC")
   List<StakeHistoryProjection> getStakeRegistrationsByAddress(String stakeKey);
+
+  @Query(value = "SELECT sr.tx.id"
+      + " FROM StakeRegistration sr"
+      + " WHERE sr.addr = :stakeKey AND sr.tx.id IN :txIds")
+  List<Long> getStakeRegistrationsByAddressAndTxIn(StakeAddress stakeKey, Collection<Long> txIds);
+
+  @Query(value = "SELECT tx.hash as txHash, b.time as time,"
+      + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
+      + " 'Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
+      + " FROM StakeRegistration sr"
+      + " JOIN Tx tx ON tx.id = sr.tx.id"
+      + " JOIN Block b ON b.id = tx.blockId"
+      + " WHERE sr.addr = :stakeKey"
+      + " AND (b.time >= :fromTime ) "
+      + " AND (b.time <= :toTime)"
+      + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
+  Page<StakeHistoryProjection> getStakeRegistrationsByAddress(StakeAddress stakeKey, String txHash,
+      Timestamp fromTime, Timestamp toTime, Pageable pageable);
 }

@@ -26,11 +26,12 @@ import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -104,20 +105,17 @@ public class AddressServiceImpl implements AddressService {
     if(Long.valueOf(0).equals(txCount)) {
       return responses;
     }
-    LocalDate currentDate = LocalDate.now();
+    LocalDate currentDate =  LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
     List<LocalDate> dates = new ArrayList<>();
-    Calendar calendar = Calendar.getInstance();
     switch (type) {
       case ONE_WEEK:
-        var currentWeek = LocalDate.ofInstant(calendar.toInstant(),
-            calendar.getTimeZone().toZoneId());
+        var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
         for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
           dates.add(currentWeek.minusWeeks(i));
         }
         break;
       case ONE_MONTH:
-        var currentMonth = LocalDate.ofInstant(calendar.toInstant(),
-            calendar.getTimeZone().toZoneId());
+        var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
         for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
           dates.add(currentMonth.minusMonths(i));
         }

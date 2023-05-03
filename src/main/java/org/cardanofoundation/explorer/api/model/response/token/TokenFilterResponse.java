@@ -10,12 +10,14 @@ import lombok.Setter;
 @Setter
 @JsonInclude(Include.NON_NULL)
 public class TokenFilterResponse{
+  private Long id;
   private String name;
   private String displayName;
   private String policy;
   private String fingerprint;
   private Integer txCount;
   private String supply;
+  private String volumeIn24h;
   private LocalDateTime createdOn;
   private TokenMetadataResponse metadata;
 }

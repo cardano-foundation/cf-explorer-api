@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.model.response.address;
 
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import java.math.BigInteger;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,4 +21,5 @@ public class StakeAddressResponse {
   private BigInteger rewardAvailable;
   private BigInteger rewardWithdrawn;
   private DelegationPoolResponse pool;
+  private List<String> rewardPools;
 }
