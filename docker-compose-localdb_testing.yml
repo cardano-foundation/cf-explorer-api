@@ -80,7 +80,7 @@ services:
       HOST: "host.docker.internal"
       PASSWORD_DB: "dbpass"
       PORT_DB: 5432
-      SCHEMA: public
+      SCHEMA: mainnet
       USERNAME_DB: "cardano-master"
       REDIS_SENTINEL_HOST: "redis-sentinel"
     depends_on:

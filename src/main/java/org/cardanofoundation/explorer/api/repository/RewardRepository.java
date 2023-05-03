@@ -31,7 +31,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   List<EpochStakeProjection> totalRewardStakeByEpochNoAndPool(@Param("epochNo") Set<Long> epochNo,
       @Param("poolId") Long poolId);
 
-  @Query("SELECT new com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse"
+  @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
@@ -43,7 +43,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " AND r.addr = :stakeAddress")
   Optional<BigInteger> getAvailableRewardByStakeAddressAndEpoch(StakeAddress stakeAddress, Integer epoch);
 
-  @Query("SELECT new com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse"
+  @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
