@@ -14,6 +14,7 @@ import com.cardano.explorer.model.response.contract.ContractFilterResponse;
 import com.cardano.explorer.model.response.token.TokenAddressResponse;
 import com.cardano.explorer.projection.AddressTokenProjection;
 import com.cardano.explorer.repository.AddressRepository;
+import com.cardano.explorer.repository.AddressTokenBalanceRepository;
 import com.cardano.explorer.repository.AddressTxBalanceRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MultiAssetRepository;
@@ -58,6 +59,7 @@ public class AddressServiceImpl implements AddressService {
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final AddressRepository addressRepository;
   private final AssetMetadataRepository assetMetadataRepository;
+  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final TokenMapper tokenMapper;
   private final AddressMapper addressMapper;
   private final AssetMetadataMapper assetMetadataMapper;
@@ -207,8 +209,8 @@ public class AddressServiceImpl implements AddressService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    Page<AddressTokenProjection> addressTokenProjectionPage = multiAssetRepository.getIdentListByAddress(
-        addr, pageable);
+    Page<AddressTokenProjection> addressTokenProjectionPage =
+        addressTokenBalanceRepository.findAddressAndBalanceByAddress(addr, pageable);
 
     List<AddressTokenProjection> addressTokenProjectionList = addressTokenProjectionPage.getContent();
     long totalElements = addressTokenProjectionPage.getTotalElements();
@@ -253,8 +255,9 @@ public class AddressServiceImpl implements AddressService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    List<AddressTokenProjection> addressTokenProjectionList = multiAssetRepository.getAddressTokenByAddress(
-        addr)
+    List<AddressTokenProjection> addressTokenProjectionList =
+        addressTokenBalanceRepository.
+            findAddressAndBalanceByAddress(addr)
         .stream()
         .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
             addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))

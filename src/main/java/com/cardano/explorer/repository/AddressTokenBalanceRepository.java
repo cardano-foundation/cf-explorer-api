@@ -2,6 +2,7 @@ package com.cardano.explorer.repository;
 
 import com.cardano.explorer.projection.AddressTokenProjection;
 import com.cardano.explorer.projection.TokenNumberHoldersProjection;
+import com.sotatek.cardano.common.entity.Address;
 import com.sotatek.cardano.common.entity.AddressTokenBalance;
 import com.sotatek.cardano.common.entity.MultiAsset;
 import java.util.Collection;
@@ -50,11 +51,31 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
   Page<AddressTokenProjection> findAddressAndBalanceByMultiAsset(MultiAsset multiAsset,
       Pageable pageable);
 
+  @Query("SELECT ma.fingerprint as fingerprint, "
+      + " ma.policy as policy, "
+      + " ma.name as tokenName, "
+      + " atb.balance as quantity"
+      + " FROM AddressTokenBalance atb "
+      + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
+      + " WHERE atb.address = :address"
+      + " ORDER BY atb.balance DESC")
+  List<AddressTokenProjection> findAddressAndBalanceByAddress(Address address);
+
+  @Query("SELECT ma.fingerprint as fingerprint, ma.id as multiAssetId,"
+      + " ma.policy as policy, "
+      + " ma.name as tokenName, "
+      + " atb.balance as quantity"
+      + " FROM AddressTokenBalance atb "
+      + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
+      + " WHERE atb.address = :address"
+      + " ORDER BY atb.balance DESC")
+  Page<AddressTokenProjection> findAddressAndBalanceByAddress(Address address, Pageable pageable);
+
   @Query("SELECT atb.addressId as addressId, atb.balance as quantity"
       + " FROM AddressTokenBalance atb "
       + " WHERE atb.multiAsset IN :multiAssets"
       + " ORDER BY atb.balance DESC")
-  Page<AddressTokenProjection> findAddressAndBalanceByMultiAsset(Collection<MultiAsset> multiAssets,
+  Page<AddressTokenProjection> findAddressAndBalanceByMultiAssetIn(Collection<MultiAsset> multiAssets,
       Pageable pageable);
 
 }
