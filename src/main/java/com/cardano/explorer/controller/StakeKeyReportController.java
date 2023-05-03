@@ -1,6 +1,7 @@
 package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
+import com.cardano.explorer.model.request.report.ReportHistoryFilterRequest;
 import com.cardano.explorer.model.request.report.StakeKeyReport;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.report.ReportHistoryResponse;
@@ -8,11 +9,14 @@ import com.cardano.explorer.model.response.report.StakeKeyReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportResponse;
 import com.cardano.explorer.service.StakeKeyReportService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -68,8 +72,10 @@ public class StakeKeyReportController {
   @LogMessage
   @Operation(summary = "Get report history of stake key and pool id")
   public ResponseEntity<BaseFilterResponse<ReportHistoryResponse>> getReportHistory(
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(stakeKeyReportService.getReportHistory(pageable));
+      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(stakeKeyReportService.getReportHistory(filterRequest, pageable));
   }
 
 }

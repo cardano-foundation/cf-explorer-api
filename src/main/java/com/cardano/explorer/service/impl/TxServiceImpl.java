@@ -558,13 +558,14 @@ public class TxServiceImpl implements TxService {
           paramProposalRepository.getParamProposalBySmallerThanRegisteredTxId(tx.getId());
 
       txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(previousParam));
-
       //get previous value
-      paramProposals.removeAll(previousParam);
+      if(Objects.nonNull(txResponse.getProtocols())){
+        paramProposals.removeAll(previousParam);
 
-      txResponse.setPreviousProtocols(
-          protocolMapper.mapPreviousProtocolParamResponse(paramProposals
-              , txResponse.getProtocols()));
+        txResponse.setPreviousProtocols(
+            protocolMapper.mapPreviousProtocolParamResponse(previousParam
+                , txResponse.getProtocols()));
+      }
     }
   }
 
@@ -585,7 +586,9 @@ public class TxServiceImpl implements TxService {
             item -> new TxStakeCertificate(item.getAddr().getView(),
                 CertificateType.STAKE_DEREGISTRATION)
         ).collect(Collectors.toList()));
-    txResponse.setStakeCertificates(stakeCertificates);
+    if(!CollectionUtils.isEmpty(stakeCertificates)){
+      txResponse.setStakeCertificates(stakeCertificates);
+    }
   }
 
   /**
@@ -654,8 +657,9 @@ public class TxServiceImpl implements TxService {
             .type(CertificateType.POOL_DEREGISTRATION)
             .build()
     ).collect(Collectors.toList()));
-
-    txResponse.setPoolCertificates(poolCertificates);
+    if(!CollectionUtils.isEmpty(poolCertificates)){
+      txResponse.setPoolCertificates(poolCertificates);
+    }
   }
 
   /**

@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.StakeKeyReportMapper;
+import com.cardano.explorer.model.request.report.ReportHistoryFilterRequest;
 import com.cardano.explorer.model.request.report.StakeKeyReport;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
@@ -37,6 +38,7 @@ import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -67,8 +69,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   public static final String STAKE_KEY_DEREGISTRATION_TITLE = "Stake Key Deregistration";
   public static final String WALLET_ACTIVITY_TITLE = "Wallet Activity";
   public static final String REWARD_ACTIVITY_TITLE = "Reward Activity";
+  public static final String MIN_TIME = "1970-01-01 00:00:00";
   private final Pageable defaultPageable = PageRequest.of(0, 1000);
-
   private final StakeKeyLifeCycleService stakeKeyLifeCycleService;
   private final StakeKeyReportHistoryRepository stakeKeyReportHistoryRepository;
   private final ReportHistoryRepository reportHistoryRepository;
@@ -176,9 +178,22 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Override
-  public BaseFilterResponse<ReportHistoryResponse> getReportHistory(Pageable pageable) {
-    Page<ReportHistoryResponse> reportHistoryProjections = reportHistoryRepository.getAlLRecordHistory(
-            pageable)
+  public BaseFilterResponse<ReportHistoryResponse> getReportHistory(
+      ReportHistoryFilterRequest filterRequest, Pageable pageable) {
+
+    String reportName = DataUtil.makeLikeQuery(filterRequest.getReportName());
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+    Timestamp toDate = Timestamp.from(Instant.now());
+
+    if (!DataUtil.isNullOrEmpty(filterRequest.getFromDate())) {
+      fromDate = Timestamp.from(filterRequest.getFromDate().toInstant());
+    }
+    if (!DataUtil.isNullOrEmpty(filterRequest.getToDate())) {
+      toDate = Timestamp.from(filterRequest.getToDate().toInstant());
+    }
+
+    Page<ReportHistoryResponse> reportHistoryProjections = reportHistoryRepository.getRecordHistoryByFilter(
+            reportName, fromDate, toDate, pageable)
         .map(reportHistoryProjection -> ReportHistoryResponse.builder()
             .id(reportHistoryProjection.getId())
             .reportName(reportHistoryProjection.getReportName())

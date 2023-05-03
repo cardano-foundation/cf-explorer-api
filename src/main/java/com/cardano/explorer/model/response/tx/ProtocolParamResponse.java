@@ -1,7 +1,5 @@
 package com.cardano.explorer.model.response.tx;
 
-import java.math.BigInteger;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,72 +10,85 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProtocolParamResponse {
-  BigInteger minFeeA;
+  Object minFeeA;
 
+  public static int hashCode(Object... a) {
+    if (a == null) {
+      return -1;
+    }
+
+    int result = 1;
+
+    for (Object element : a) {
+      result = 31 * result + (element == null ? -1 : element.hashCode());
+    }
+
+    return result;
+  }
+
+  Object minFeeB;
+
+  Object maxBlockSize;
+
+  Object maxTxSize;
+
+  Object maxBhSize;
+
+  Object keyDeposit;
+
+  Object poolDeposit;
+
+  Object maxEpoch;
+
+  Object optimalPoolCount;
+
+  Object minUtxoValue;
+
+  Object minPoolCost;
+
+  Object maxTxExMem;
+
+  Object maxTxExSteps;
+
+  Object maxBlockExMem;
+
+  Object maxBlockExSteps;
+
+  Object maxValSize;
+
+  Object coinsPerUtxoSize;
+
+  Object influence;
+
+  Object monetaryExpandRate;
+
+  Object treasuryGrowthRate;
+
+  Object decentralisation;
+
+  Object priceMem;
+
+  Object priceStep;
+
+  Object protocolMajor;
+
+  Object protocolMinor;
+
+  Object collateralPercent;
+
+  Object maxCollateralInputs;
+
+  Object entropy;
+
+  Object costModel;
 
   @Override
   public int hashCode() {
-    return Objects.hash(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
+    return hashCode(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
         poolDeposit,
         maxEpoch, optimalPoolCount, minUtxoValue, minPoolCost, maxTxExMem, maxTxExSteps,
         maxBlockExMem, maxBlockExSteps, maxValSize, coinsPerUtxoSize, influence, monetaryExpandRate,
         treasuryGrowthRate, decentralisation, priceMem, priceStep, protocolMajor, protocolMinor,
         collateralPercent, maxCollateralInputs, entropy, costModel);
   }
-
-  BigInteger minFeeB;
-
-  BigInteger maxBlockSize;
-
-  BigInteger maxTxSize;
-
-  BigInteger maxBhSize;
-
-  BigInteger keyDeposit;
-
-  BigInteger poolDeposit;
-
-  BigInteger maxEpoch;
-
-  BigInteger optimalPoolCount;
-
-  BigInteger minUtxoValue;
-
-  BigInteger minPoolCost;
-
-  BigInteger maxTxExMem;
-
-  BigInteger maxTxExSteps;
-
-  BigInteger maxBlockExMem;
-
-  BigInteger maxBlockExSteps;
-
-  BigInteger maxValSize;
-
-  BigInteger coinsPerUtxoSize;
-
-  Double influence;
-
-  Double monetaryExpandRate;
-
-  Double treasuryGrowthRate;
-
-  Double decentralisation;
-
-  Double priceMem;
-
-  Double priceStep;
-
-  Integer protocolMajor;
-
-  Integer protocolMinor;
-
-  Integer collateralPercent;
-
-  Integer maxCollateralInputs;
-
-  String entropy;
-
-  String costModel;
 }
