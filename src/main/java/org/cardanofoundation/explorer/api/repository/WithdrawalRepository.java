@@ -55,7 +55,7 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   Page<StakeWithdrawalProjection> getWithdrawalByAddress(StakeAddress stakeKey, String txHash,
       Timestamp fromTime, Timestamp toTime, Pageable pageable);
 
-  @Query("SELECT new com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse("
+  @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse("
       + "block.epochNo, epoch.endTime, sum(withdrawal.amount))"
       + " FROM Withdrawal withdrawal"
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"
