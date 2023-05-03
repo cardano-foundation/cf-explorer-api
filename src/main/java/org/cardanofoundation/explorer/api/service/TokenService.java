@@ -1,11 +1,11 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
+import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface TokenService {
 
@@ -43,4 +43,13 @@ public interface TokenService {
    * @return list addresses hold token in this page
    */
   BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable);
+
+  /**
+   * Analysis volume of token
+   *
+   * @param tokenId token id (fingerprint)
+   * @param type type of analytic
+   * @return list analytic volume of token
+   */
+  List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type);
 }

@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api;
+package org.cardanofoundation.explorer.api.controller;
 
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;

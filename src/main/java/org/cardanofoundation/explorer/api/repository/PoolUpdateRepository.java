@@ -4,6 +4,8 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlock
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import java.sql.Timestamp;
 import java.util.List;
+
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -51,4 +53,15 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "WHERE pu.activeEpochNo = (SELECT min(pu.activeEpochNo) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId) "
       + "AND pu.poolHash.id = :poolId ")
   Timestamp getCreatedTimeOfPool(@Param("poolId") Long poolId);
+
+  @Query("SELECT poolHash.view FROM PoolUpdate poolUpdate "
+      + "INNER JOIN PoolHash poolHash ON poolUpdate.poolHash = poolHash "
+      + "WHERE poolUpdate.rewardAddr = :stakeAddress "
+      + "AND poolUpdate.registeredTx.id = "
+      + "(SELECT max(poolUpdate.registeredTx.id) "
+      + "FROM PoolUpdate poolUpdate "
+      + "WHERE poolUpdate.poolHash = poolHash) "
+      + "AND (SELECT COALESCE(max(poolRetire.retiringEpoch), 0) + 2 "
+      + "FROM PoolRetire poolRetire WHERE poolRetire.poolHash = poolHash) < poolUpdate.activeEpochNo")
+  List<String> findPoolByRewardAccount(StakeAddress stakeAddress);
 }

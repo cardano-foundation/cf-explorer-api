@@ -13,6 +13,7 @@ public class TokenResponse {
   private String fingerprint;
   private Integer txCount;
   private String supply;
+  private String volumeIn24h;
   private LocalDateTime createdOn;
   private TokenMetadataResponse metadata;
 }

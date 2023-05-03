@@ -10,7 +10,9 @@ public enum BusinessCode implements ErrorCode {
   ADDRESS_NOT_FOUND("404-ADDRESS_NOT_FOUND", "Wallet address not found"),
   STAKE_ADDRESS_NOT_FOUND("404-STAKE_ADDRESS_NOT_FOUND", "Stake address not found"),
   TOKEN_NOT_FOUND("404-TOKEN_NOT_FOUND", "Token not found"),
-  POLICY_NOT_FOUND("404-POLICY_NOT_FOUND", "Policy not found");
+  POLICY_NOT_FOUND("404-POLICY_NOT_FOUND", "Policy not found"),
+  STAKE_DELEGATION_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
+  STAKE_WITHDRAWAL_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found");
 
   private final String code;
   private final String desc;
