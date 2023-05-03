@@ -12,8 +12,10 @@ import com.cardano.explorer.model.response.token.TokenMintTxResponse;
 import com.cardano.explorer.model.response.token.TokenResponse;
 import com.cardano.explorer.model.response.token.TokenVolumeAnalyticsResponse;
 import com.cardano.explorer.projection.AddressTokenProjection;
+import com.cardano.explorer.projection.TokenNumberHoldersProjection;
 import com.cardano.explorer.projection.TokenVolumeProjection;
 import com.cardano.explorer.repository.AddressRepository;
+import com.cardano.explorer.repository.AddressTokenBalanceRepository;
 import com.cardano.explorer.repository.AddressTokenRepository;
 import com.cardano.explorer.repository.AssetMetadataRepository;
 import com.cardano.explorer.repository.MaTxMintRepository;
@@ -57,6 +59,8 @@ public class TokenServiceImpl implements TokenService {
   private final AddressTokenRepository addressTokenRepository;
   private final AddressRepository addressRepository;
   private final TxRepository txRepository;
+  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
+
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
@@ -79,6 +83,17 @@ public class TokenServiceImpl implements TokenService {
     Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
     List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(
         multiAssets.getContent(), txId);
+    var numberOfHoldersWithStakeKey
+        = addressTokenBalanceRepository.countByMultiAssetIn(multiAssets.getContent());
+    var numberOfHoldersWithAddressNotHaveStakeKey
+        = addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(multiAssets.getContent());
+    Map<Long, Long> numberHoldersStakeKeyMap = numberOfHoldersWithStakeKey.stream().collect(
+        Collectors.toMap(TokenNumberHoldersProjection::getIdent,
+            TokenNumberHoldersProjection::getNumberOfHolders));
+    Map<Long, Long> numberHoldersAddressNotHaveStakeKeyMap
+        = numberOfHoldersWithAddressNotHaveStakeKey.stream().collect(
+        Collectors.toMap(TokenNumberHoldersProjection::getIdent,
+            TokenNumberHoldersProjection::getNumberOfHolders));
     Map<Long, BigInteger> tokenVolumeMap = volumes.stream().collect(
         Collectors.toMap(TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume));
     multiAssetResponsesList.forEach(
@@ -86,11 +101,14 @@ public class TokenServiceImpl implements TokenService {
           ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
               assetMetadataMap.get(ma.getPolicy() + ma.getName()))
           );
-          if(tokenVolumeMap.containsKey(ma.getId())) {
+          if (tokenVolumeMap.containsKey(ma.getId())) {
             ma.setVolumeIn24h(tokenVolumeMap.get(ma.getId()).toString());
           } else {
             ma.setVolumeIn24h(String.valueOf(0));
           }
+          ma.setVolumeIn24h(tokenVolumeMap.getOrDefault(ma.getId(), BigInteger.valueOf(0)).toString());
+          ma.setNumberOfHolders(numberHoldersStakeKeyMap.getOrDefault(ma.getId(), 0L)
+              + numberHoldersAddressNotHaveStakeKeyMap.getOrDefault(ma.getId(), 0L));
           ma.setId(null);
         }
     );
@@ -107,7 +125,12 @@ public class TokenServiceImpl implements TokenService {
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
     Timestamp yesterday = Timestamp.valueOf(
         LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, yesterday);
+    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
+    var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, txId);
+    var numberOfHolders =
+        addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(multiAsset).orElse(0L)
+        + addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset).orElse(0L);
+    tokenResponse.setNumberOfHolders(numberOfHolders);
     if(Objects.isNull(volume)) {
       tokenResponse.setVolumeIn24h(String.valueOf(0));
     } else {
@@ -132,8 +155,8 @@ public class TokenServiceImpl implements TokenService {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
         () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
     );
-    Page<AddressTokenProjection> tokenAddresses = multiAssetRepository.findAddressByToken(
-        multiAsset, pageable);
+    Page<AddressTokenProjection> tokenAddresses
+        = addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
     Set<Long> addressIds = tokenAddresses.stream().map(AddressTokenProjection::getAddressId)
         .collect(Collectors.toSet());
     List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
