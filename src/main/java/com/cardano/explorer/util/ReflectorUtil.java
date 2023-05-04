@@ -3,11 +3,10 @@ package com.cardano.explorer.util;
 import java.lang.reflect.Field;
 import java.util.*;
 
-
 public class ReflectorUtil {
 
   public static Field getFieldByName(Class<?> clazz, String fieldName) {
-    Field[] fields = getAllFields(clazz);
+    List<Field> fields = getAllFields(clazz);
     for (Field field : fields) {
       if (field.getName().equals(fieldName)) {
         return field;
@@ -16,7 +15,7 @@ public class ReflectorUtil {
     return null;
   }
 
-  public static Field[] getAllFields(Class<?> clazz) {
+  public static List<Field> getAllFields(Class<?> clazz) {
     List<Class<?>> classes = getAllSuperclasses(clazz);
     classes.add(clazz);
     return getAllFields(classes);
@@ -29,13 +28,13 @@ public class ReflectorUtil {
    * @param classes The list of classes to reflect on
    * @return The complete list of fields
    */
-  private static Field[] getAllFields(List<Class<?>> classes) {
+  private static List<Field> getAllFields(List<Class<?>> classes) {
     Set<Field> fields = new HashSet<>();
     for (Class<?> clazz : classes) {
       fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
     }
 
-    return fields.toArray(new Field[fields.size()]);
+    return new ArrayList<>(fields);
   }
 
   /**
