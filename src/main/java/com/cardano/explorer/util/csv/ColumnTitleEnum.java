@@ -23,6 +23,13 @@ public enum ColumnTitleEnum {
   FEES_TITLE("Fees"),
   TX_TYPE_TITLE("Transaction Type"),
   TX_STATUS_TITLE("Transaction Status"),
-  STATUS_TITLE("Status");
+  STATUS_TITLE("Status"),
+  SIZE_TITLE("Size"),
+  ADA_VALUE_TITLE("Ada Value"),
+  ADA_VALUE_FEE_TITLE("Ada Value Fee"),
+  OWNER_TITLE("Owner"),
+  DATE_TITLE("Date"),
+  OPERATOR_REWARD_TITLE("Operator Reward"),
+  REWARD_ACCOUNT_TITLE("Reward Account");
   private String value;
 }

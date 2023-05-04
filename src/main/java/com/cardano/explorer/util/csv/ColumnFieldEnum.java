@@ -26,7 +26,13 @@ public enum ColumnFieldEnum {
   TYPE_COLUMN("type"),
   STATUS_COLUMN("status"),
   EPOCH_NO_COLUMN("epochNo"),
-  OUT_SUM_COLUMN("outSum");
+  OUT_SUM_COLUMN("outSum"),
+  SIZE_COLUMN("size"),
+  ADA_VALUE_COLUMN("adaValue"),
+  ADA_VALUE_FEE_COLUMN("adaValueFee"),
+  OWNER_COLUMN("owner"),
+  OPERATOR_REWARD_COLUMN("operatorReward"),
+  REWARD_ACCOUNT_COLUMN("rewardAccount");
 
   private String value;
 }
