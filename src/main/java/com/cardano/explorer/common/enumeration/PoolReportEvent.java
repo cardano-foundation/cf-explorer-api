@@ -16,8 +16,8 @@ public enum PoolReportEvent {
     @JsonProperty("registration")
     REGISTRATION("registration"),
 
-    @JsonProperty("delegate")
-    DELEGATE("delegate"),
+    @JsonProperty("deregistration")
+    DEREGISTRATION("deregistration"),
 
     @JsonProperty("reward")
     REWARD("reward"),
