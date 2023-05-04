@@ -16,6 +16,7 @@ import com.cardano.explorer.service.PoolReportService;
 import com.cardano.explorer.service.StakeKeyReportService;
 import com.cardano.explorer.util.DataUtil;
 import com.cardano.explorer.util.csv.CSVHelper;
+import com.cardano.explorer.util.csv.ExportContent;
 import com.sotatek.cardano.common.entity.PoolReport;
 import com.sotatek.cardano.common.entity.ReportHistory;
 import com.sotatek.cardano.common.enumeration.ReportStatus;
@@ -24,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -68,7 +70,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       ReportHistory reportHistory = ReportHistory.builder()
           .reportName("report_pool_" + poolReportCreateRequest.getPoolId())
           .status(ReportStatus.IN_PROGRESS)
-          .type(ReportType.STAKE_KEY)
+          .type(ReportType.POOL_ID)
           .username(poolReportCreateRequest.getPoolId())
           .createdAt(new Timestamp(System.currentTimeMillis()))
           .build();
@@ -165,51 +167,76 @@ public class PoolReportServiceImpl implements PoolReportService {
       String storageKey = poolReport.getReportHistory().getStorageKey();
       String reportName = poolReport.getReportHistory().getReportName();
       if (DataUtil.isNullOrEmpty(storageKey)) {
-        InputStream inputStream = InputStream.nullInputStream();
+        List<ExportContent> exportContents = new ArrayList<>();
         /// epoch size
         if (poolReport.getIsPoolSize()) {
           BaseFilterResponse<PoolReportDetailResponse.EpochSize> epochSizeBaseFilterResponse = this.fetchEpochSize(
               poolReport, null);
-          inputStream = CSVHelper.writeContent(epochSizeBaseFilterResponse.getData(),
-              PoolReportDetailResponse.EpochSize.designFile(), inputStream.readAllBytes(),
-              EPOCH_SIZE_TITLE);
+
+          exportContents.add(ExportContent.builder()
+              .clazz(PoolReportDetailResponse.EpochSize.class)
+              .headerTitle(EPOCH_SIZE_TITLE)
+              .lstColumn(PoolReportDetailResponse.EpochSize.designFile())
+              .lstData(epochSizeBaseFilterResponse.getData())
+              .build());
         }
         /// all
         boolean isAll = poolReport.getEvent().contains(PoolReportEvent.ALL.getValue());
-        inputStream = CSVHelper.writeContent(inputStream.readAllBytes(), LIFE_CYCLE_TITLE);
+        exportContents.add(ExportContent.builder()
+            .headerTitle(LIFE_CYCLE_TITLE)
+            .build());
         /// pool registrations
         if (isAll || poolReport.getEvent().contains(PoolReportEvent.REGISTRATION.getValue())) {
           BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> poolRegistrationBaseFilterResponse = this.fetchPoolRegistrations(
               poolReport);
-          inputStream = CSVHelper.writeContent(poolRegistrationBaseFilterResponse.getData(),
-              PoolReportDetailResponse.PoolRegistration.designFile(poolReport.getIsFeesPaid()),
-              inputStream.readAllBytes(), POOL_REGISTRATIONS_TITLE);
+
+          exportContents.add(ExportContent.builder()
+              .clazz(PoolReportDetailResponse.PoolRegistration.class)
+              .headerTitle(POOL_REGISTRATIONS_TITLE)
+              .lstColumn(
+                  PoolReportDetailResponse.PoolRegistration.designFile(poolReport.getIsFeesPaid()))
+              .lstData(poolRegistrationBaseFilterResponse.getData())
+              .build());
         }
         // pool update
         if (isAll || poolReport.getEvent().contains(PoolReportEvent.POOL_UPDATE.getValue())) {
           BaseFilterResponse<PoolReportDetailResponse.PoolUpdate> poolUpdateBaseFilterResponse = this.fetchPoolUpdate(
               poolReport);
-          inputStream = CSVHelper.writeContent(poolUpdateBaseFilterResponse.getData(),
-              PoolReportDetailResponse.PoolUpdate.designFile(poolReport.getIsFeesPaid()),
-              inputStream.readAllBytes(), POOL_UPDATE_TITLE);
+
+          exportContents.add(ExportContent.builder()
+              .clazz(PoolReportDetailResponse.PoolUpdate.class)
+              .headerTitle(POOL_UPDATE_TITLE)
+              .lstColumn(PoolReportDetailResponse.PoolUpdate.designFile(poolReport.getIsFeesPaid()))
+              .lstData(poolUpdateBaseFilterResponse.getData())
+              .build());
         }
         // reward distribution
         if (isAll || poolReport.getEvent().contains(PoolReportEvent.REWARD.getValue())) {
           BaseFilterResponse<PoolReportDetailResponse.RewardDistribution> rewardDistributionBaseFilterResponse = this.fetchRewardDistribution(
               poolReport);
-          inputStream = CSVHelper.writeContent(rewardDistributionBaseFilterResponse.getData(),
-              PoolReportDetailResponse.RewardDistribution.designFile(), inputStream.readAllBytes(),
-              REWARD_DISTRIBUTION_TITLE);
+
+          exportContents.add(ExportContent.builder()
+              .clazz(PoolReportDetailResponse.RewardDistribution.class)
+              .headerTitle(REWARD_DISTRIBUTION_TITLE)
+              .lstColumn(PoolReportDetailResponse.RewardDistribution.designFile())
+              .lstData(rewardDistributionBaseFilterResponse.getData())
+              .build());
         }
         // deregistration
         if (isAll || poolReport.getEvent().contains(PoolReportEvent.DEREGISTRATION.getValue())) {
           BaseFilterResponse<PoolReportDetailResponse.Deregistration> deregistrationBaseFilterResponse = this.fetchDeregistration(
               poolReport);
-          inputStream = CSVHelper.writeContent(deregistrationBaseFilterResponse.getData(),
-              PoolReportDetailResponse.Deregistration.designFile(poolReport.getIsFeesPaid()),
-              inputStream.readAllBytes(), DEREGISTRATION_TITLE);
+
+          exportContents.add(ExportContent.builder()
+              .clazz(PoolReportDetailResponse.Deregistration.class)
+              .headerTitle(DEREGISTRATION_TITLE)
+              .lstColumn(
+                  PoolReportDetailResponse.Deregistration.designFile(poolReport.getIsFeesPaid()))
+              .lstData(deregistrationBaseFilterResponse.getData())
+              .build());
         }
 
+        InputStream inputStream = CSVHelper.writeContent(exportContents);
         byte[] bytes = inputStream.readAllBytes();
         storageKey = generateStorageKey(poolReport);
         stakeKeyReportService.uploadFile(bytes, storageKey);
