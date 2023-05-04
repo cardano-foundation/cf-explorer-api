@@ -28,8 +28,9 @@ import com.cardano.explorer.service.StakeKeyReportService;
 import com.cardano.explorer.util.csv.CSVColumn;
 import com.cardano.explorer.util.csv.CSVHelper;
 import com.cardano.explorer.util.DataUtil;
-import com.cardano.explorer.util.csv.ColumFieldEnum;
+import com.cardano.explorer.util.csv.ColumnFieldEnum;
 import com.cardano.explorer.util.csv.ColumnTitleEnum;
+import com.cardano.explorer.util.csv.ExportContent;
 import com.sotatek.cardano.common.entity.StakeKeyReportHistory;
 import com.sotatek.cardano.common.entity.StakingLifeCycleEvent;
 import com.sotatek.cardano.common.enumeration.ReportStatus;
@@ -42,9 +43,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,8 +89,11 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
         stakeKeyReport);
 
-    String reportName = getReportName(stakeKeyReportHistory);
-    stakeKeyReportHistory.getReportHistory().setReportName(reportName);
+    if (DataUtil.isNullOrEmpty(stakeKeyReport.getReportName())) {
+      String reportName = generateReportName(stakeKeyReportHistory);
+      stakeKeyReportHistory.getReportHistory().setReportName(reportName);
+    }
+
     stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.IN_PROGRESS);
     stakeKeyReportHistory.getReportHistory().setType(ReportType.STAKE_KEY);
 
@@ -101,55 +103,61 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   private StakeKeyReportResponse exportStakeKeyReport(StakeKeyReportHistory stakeKeyReportHistory) {
     try {
-      InputStream inputStream = InputStream.nullInputStream();
-      Set<StakingLifeCycleEvent> stakingLifeCycleEvents = stakeKeyReportHistory.getStakingLifeCycleEvents()
+      List<StakingLifeCycleEvent> stakingLifeCycleEvents = stakeKeyReportHistory.getStakingLifeCycleEvents()
           .stream()
           .sorted(Comparator.comparingInt(o -> o.getType().getValue()))
-          .collect(Collectors.toCollection(LinkedHashSet::new));
+          .collect(Collectors.toList());
       StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
       stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
       stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
+
+      List<ExportContent> exportContents = new ArrayList<>();
+
       if (Boolean.TRUE.equals(stakeKeyReportHistory.getIsADATransfer())) {
-        inputStream = CSVHelper.writeContent(ADA_TRANSFER_TITLE);
-        inputStream = exportStakeWalletActivitys(inputStream, stakeKeyReportHistory.getStakeKey());
-        inputStream = exportStakeRewardActivitys(inputStream, stakeKeyReportHistory.getStakeKey());
+        exportContents.add(ExportContent.builder()
+            .headerTitle(ADA_TRANSFER_TITLE)
+            .build());
+
+        exportContents.add(exportStakeWalletActivitys(stakeKeyReportHistory.getStakeKey()));
+        exportContents.add(exportStakeRewardActivitys(stakeKeyReportHistory.getStakeKey()));
 
         if (Boolean.TRUE.equals(stakeKeyReportHistory.getIsFeesPaid())) {
           // TODO: export fees paid
         }
       }
 
-      if (!stakingLifeCycleEvents.isEmpty()) {
-        inputStream = CSVHelper.writeContent(inputStream.readAllBytes(),
-            STAKE_KEY_LIFE_CYCLE_TITLE);
-      }
+      exportContents.add(ExportContent.builder()
+          .headerTitle(STAKE_KEY_LIFE_CYCLE_TITLE)
+          .build());
 
-      for (StakingLifeCycleEvent stakingLifeCycleEvent : stakingLifeCycleEvents) {
+      for (int i = 0; i < stakingLifeCycleEvents.size(); i++) {
+        StakingLifeCycleEvent stakingLifeCycleEvent = stakingLifeCycleEvents.get(i);
+        ExportContent exportContent = ExportContent.builder().build();
         switch (stakingLifeCycleEvent.getType()) {
           case REGISTRATION:
-            inputStream = exportStakeRegistrations(inputStream, stakeKeyReportHistory.getStakeKey(),
+            exportContent = exportStakeRegistrations(stakeKeyReportHistory.getStakeKey(),
                 stakeLifeCycleFilterRequest);
             break;
           case DELEGATION:
-            inputStream = exportStakeDelegations(inputStream, stakeKeyReportHistory.getStakeKey(),
+            exportContent = exportStakeDelegations(stakeKeyReportHistory.getStakeKey(),
                 stakeLifeCycleFilterRequest);
             break;
           case REWARDS:
-            inputStream = exportStakeRewards(inputStream, stakeKeyReportHistory.getStakeKey());
+            exportContent = exportStakeRewards(stakeKeyReportHistory.getStakeKey());
             break;
           case WITHDRAWAL:
-            inputStream = exportStakeWithdrawals(inputStream, stakeKeyReportHistory.getStakeKey(),
+            exportContent = exportStakeWithdrawals(stakeKeyReportHistory.getStakeKey(),
                 stakeLifeCycleFilterRequest);
             break;
           case DEREGISTRATION:
-            inputStream = exportStakeDeregistrations(inputStream,
-                stakeKeyReportHistory.getStakeKey(),
+            exportContent = exportStakeDeregistrations(stakeKeyReportHistory.getStakeKey(),
                 stakeLifeCycleFilterRequest);
             break;
-          default:
-            break;
         }
+        exportContents.add(exportContent);
       }
+
+      InputStream inputStream = CSVHelper.writeContent(exportContents);
       byte[] bytes = inputStream.readAllBytes();
       String storageKey = generateStorageKey(stakeKeyReportHistory);
       uploadFile(bytes, storageKey);
@@ -180,18 +188,15 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Override
   public BaseFilterResponse<ReportHistoryResponse> getReportHistory(
       ReportHistoryFilterRequest filterRequest, Pageable pageable) {
-
     String reportName = DataUtil.makeLikeQuery(filterRequest.getReportName());
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(Instant.now());
-
     if (!DataUtil.isNullOrEmpty(filterRequest.getFromDate())) {
       fromDate = Timestamp.from(filterRequest.getFromDate().toInstant());
     }
     if (!DataUtil.isNullOrEmpty(filterRequest.getToDate())) {
       toDate = Timestamp.from(filterRequest.getToDate().toInstant());
     }
-
     Page<ReportHistoryResponse> reportHistoryProjections = reportHistoryRepository.getRecordHistoryByFilter(
             reportName, fromDate, toDate, pageable)
         .map(reportHistoryProjection -> ReportHistoryResponse.builder()
@@ -212,7 +217,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     Page<StakeKeyReportHistoryResponse> stakeKeyReportHistoriesResponse = stakeKeyReportHistoryRepository.findByStakeKey(
             stakeKey, pageable)
         .map(stakeKeyReportMapper::toStakeKeyReportHistoryResponse);
-
     return new BaseFilterResponse<>(stakeKeyReportHistoriesResponse);
   }
 
@@ -221,7 +225,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   public StakeKeyReportResponse exportStakeKeyReport(Long reportId) {
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
-
     String storageKey = stakeKeyReportHistory.getReportHistory().getStorageKey();
     String reportName = stakeKeyReportHistory.getReportHistory().getReportName();
     if (DataUtil.isNullOrEmpty(storageKey)) {
@@ -256,120 +259,145 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     }
   }
 
-  private InputStream exportStakeWalletActivitys(InputStream inputStream, String stakeKey)
-      throws IOException {
+  private ExportContent exportStakeWalletActivitys(String stakeKey) {
     List<StakeWalletActivityResponse> stakeWalletActivitys = stakeKeyLifeCycleService.getStakeWalletActivities(
         stakeKey, defaultPageable).getData();
-    return CSVHelper.writeContent(stakeWalletActivitys, buildStakeWalletActivityColumn(),
-        inputStream.readAllBytes(), WALLET_ACTIVITY_TITLE);
+    return ExportContent.builder()
+        .clazz(StakeWalletActivityResponse.class)
+        .headerTitle(WALLET_ACTIVITY_TITLE)
+        .lstColumn(buildStakeWalletActivityColumn())
+        .lstData(stakeWalletActivitys)
+        .build();
   }
 
-  private InputStream exportStakeRewardActivitys(InputStream inputStream, String stakeKey)
-      throws IOException {
+  private ExportContent exportStakeRewardActivitys(String stakeKey) {
     List<StakeRewardActivityResponse> stakeRewardActivitys = stakeKeyLifeCycleService.getStakeRewardActivities(
         stakeKey, defaultPageable).getData();
-    return CSVHelper.writeContent(stakeRewardActivitys, buildStakeRewardActivityColumn(),
-        inputStream.readAllBytes(), REWARD_ACTIVITY_TITLE);
+    return ExportContent.builder()
+        .clazz(StakeRewardActivityResponse.class)
+        .headerTitle(REWARD_ACTIVITY_TITLE)
+        .lstColumn(buildStakeRewardActivityColumn())
+        .lstData(stakeRewardActivitys)
+        .build();
   }
 
-  private InputStream exportStakeRegistrations(InputStream inputStream, String stakeKey,
-      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) throws IOException {
+  private ExportContent exportStakeRegistrations(String stakeKey,
+      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeRegistrationLifeCycle> stakeRegistrations = stakeKeyLifeCycleService.getStakeRegistrations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
-    return CSVHelper.writeContent(stakeRegistrations, buildStakeRegistrationColumn(),
-        inputStream.readAllBytes(), STAKE_KEY_REGISTRATION_TITLE);
+    return ExportContent.builder()
+        .clazz(StakeRegistrationLifeCycle.class)
+        .headerTitle(STAKE_KEY_REGISTRATION_TITLE)
+        .lstColumn(buildStakeRegistrationColumn())
+        .lstData(stakeRegistrations)
+        .build();
   }
 
-  private InputStream exportStakeDelegations(InputStream inputStream, String stakeKey,
-      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) throws IOException {
+  private ExportContent exportStakeDelegations(String stakeKey,
+      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeDelegationFilterResponse> stakeDelegations = stakeKeyLifeCycleService.getStakeDelegations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
-    return CSVHelper.writeContent(stakeDelegations, buildStakeDelegationColumn(),
-        inputStream.readAllBytes(), DELEGATION_HISTORY_TITLE);
+    return ExportContent.builder()
+        .clazz(StakeDelegationFilterResponse.class)
+        .headerTitle(DELEGATION_HISTORY_TITLE)
+        .lstColumn(buildStakeDelegationColumn())
+        .lstData(stakeDelegations)
+        .build();
   }
 
-  private InputStream exportStakeRewards(InputStream inputStream, String stakeKey)
-      throws IOException {
+  private ExportContent exportStakeRewards(String stakeKey) {
     List<StakeRewardResponse> stakeRewards = stakeKeyLifeCycleService.getStakeRewards(
         stakeKey, defaultPageable).getData();
-    return CSVHelper.writeContent(stakeRewards, buildStakeRewardColumn(),
-        inputStream.readAllBytes(), REWARDS_DISTRIBUTION_TITLE);
+    return ExportContent.builder()
+        .clazz(StakeRewardResponse.class)
+        .headerTitle(REWARDS_DISTRIBUTION_TITLE)
+        .lstColumn(buildStakeRewardColumn())
+        .lstData(stakeRewards)
+        .build();
   }
 
-  private InputStream exportStakeWithdrawals(InputStream inputStream, String stakeKey,
-      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) throws IOException {
+  private ExportContent exportStakeWithdrawals(String stakeKey,
+      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeWithdrawalFilterResponse> stakeWithdrawals = stakeKeyLifeCycleService.getStakeWithdrawals(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
-    return CSVHelper.writeContent(stakeWithdrawals, buildStakeWithdrawalColumn(),
-        inputStream.readAllBytes(), WITHDRAWAL_HISTORY_TITLE);
+    return ExportContent.builder()
+        .clazz(StakeWithdrawalFilterResponse.class)
+        .headerTitle(WITHDRAWAL_HISTORY_TITLE)
+        .lstColumn(buildStakeWithdrawalColumn())
+        .lstData(stakeWithdrawals)
+        .build();
   }
 
-  private InputStream exportStakeDeregistrations(InputStream inputStream, String stakeKey,
-      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) throws IOException {
+  private ExportContent exportStakeDeregistrations(String stakeKey,
+      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeRegistrationLifeCycle> stakeDeRegistrations = stakeKeyLifeCycleService.getStakeDeRegistrations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
-    return CSVHelper.writeContent(stakeDeRegistrations, buildStakeDeRegistrationColumn(),
-        inputStream.readAllBytes(), STAKE_KEY_DEREGISTRATION_TITLE);
+    return ExportContent.builder()
+        .clazz(StakeRegistrationLifeCycle.class)
+        .headerTitle(STAKE_KEY_DEREGISTRATION_TITLE)
+        .lstColumn(buildStakeDeRegistrationColumn())
+        .lstData(stakeDeRegistrations)
+        .build();
   }
 
   private List<CSVColumn> buildStakeRegistrationColumn() {
     List<CSVColumn> columns = new ArrayList<>();
-    columns.add(new CSVColumn(ColumFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.DEPOSIT_COLUMN, ColumnTitleEnum.DEPOSIT_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.DEPOSIT_COLUMN, ColumnTitleEnum.DEPOSIT_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE));
     return columns;
   }
 
   private List<CSVColumn> buildStakeDelegationColumn() {
     List<CSVColumn> columns = new ArrayList<>();
-    columns.add(new CSVColumn(ColumFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.OUT_SUM_COLUMN, ColumnTitleEnum.FEES_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.OUT_SUM_COLUMN, ColumnTitleEnum.FEES_TITLE));
     return columns;
   }
 
   private List<CSVColumn> buildStakeRewardColumn() {
     List<CSVColumn> columns = new ArrayList<>();
-    columns.add(new CSVColumn(ColumFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.REWARDS_PAID_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.REWARDS_PAID_TITLE));
     return columns;
   }
 
   private List<CSVColumn> buildStakeWithdrawalColumn() {
     List<CSVColumn> columns = new ArrayList<>();
-    columns.add(new CSVColumn(ColumFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.NET_AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_NET_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.NET_AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_NET_TITLE));
     return columns;
   }
 
   private List<CSVColumn> buildStakeDeRegistrationColumn() {
     List<CSVColumn> columns = new ArrayList<>();
-    columns.add(new CSVColumn(ColumFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.DEPOSIT_COLUMN, ColumnTitleEnum.DEPOSIT_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.DEPOSIT_COLUMN, ColumnTitleEnum.DEPOSIT_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE));
     return columns;
   }
 
   private List<CSVColumn> buildStakeWalletActivityColumn() {
     List<CSVColumn> columns = new ArrayList<>();
-    columns.add(new CSVColumn(ColumFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_ADA_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TYPE_COLUMN, ColumnTitleEnum.TX_TYPE_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.STATUS_COLUMN, ColumnTitleEnum.STATUS_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_ADA_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TYPE_COLUMN, ColumnTitleEnum.TX_TYPE_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.STATUS_COLUMN, ColumnTitleEnum.STATUS_TITLE));
     return columns;
   }
 
   private List<CSVColumn> buildStakeRewardActivityColumn() {
     List<CSVColumn> columns = new ArrayList<>();
-    columns.add(new CSVColumn(ColumFieldEnum.EPOCH_NO_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_ADA_TITLE));
-    columns.add(new CSVColumn(ColumFieldEnum.TYPE_COLUMN, ColumnTitleEnum.TX_TYPE_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.EPOCH_NO_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_ADA_TITLE));
+    columns.add(new CSVColumn(ColumnFieldEnum.TYPE_COLUMN, ColumnTitleEnum.TX_TYPE_TITLE));
     return columns;
   }
 
@@ -377,14 +405,15 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     return DataUtil.instantToString(instant, DATE_TIME_PATTERN);
   }
 
-  private String getReportName(StakeKeyReportHistory stakeKeyReportHistory) {
+  private String generateReportName(StakeKeyReportHistory stakeKeyReportHistory) {
     return "report_stake_" + stakeKeyReportHistory.getStakeKey() + "_" +
         instanceToString(stakeKeyReportHistory.getFromDate().toInstant()) + "_" + instanceToString(
         stakeKeyReportHistory.getToDate().toInstant());
   }
 
   private String generateStorageKey(StakeKeyReportHistory stakeKeyReportHistory) {
-    return stakeKeyReportHistory.getId() + "_" + stakeKeyReportHistory.getReportHistory()
+    return stakeKeyReportHistory.getReportHistory().getId() + "_"
+        + stakeKeyReportHistory.getReportHistory()
         .getReportName();
   }
 }

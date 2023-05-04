@@ -19,6 +19,7 @@ public interface StakeKeyReportMapper {
 
   @Mapping(target = "reportHistory.createdAt", expression = "java(new Timestamp(System.currentTimeMillis()))")
   @Mapping(target = "reportHistory.username", source = "stakeKey")
+  @Mapping(target = "reportHistory.reportName", source = "reportName")
   StakeKeyReportHistory toStakeKeyReportHistory(StakeKeyReport stakeKeyReport);
 
 }

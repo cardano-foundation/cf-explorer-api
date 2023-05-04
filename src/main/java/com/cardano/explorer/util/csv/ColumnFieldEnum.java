@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
  * Each enum value should have the same name as the field name of the data object
  * Each enum value should use for one field name of the one specific data object
  */
-public enum ColumFieldEnum {
+public enum ColumnFieldEnum {
 
   TX_HASH_COLUMN("txHash"),
   EPOCH_COLUMN("epoch"),

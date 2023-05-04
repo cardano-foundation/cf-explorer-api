@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class CSVColumn {
-  private ColumFieldEnum columnFiled;
+
+  private ColumnFieldEnum columnField;
   private ColumnTitleEnum columnTitle;
 }
