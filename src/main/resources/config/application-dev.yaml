@@ -48,6 +48,8 @@ spring:
       pageable:
         default-page-size: 20
         max-page-size: 100
+  jackson:
+    default-property-inclusion: NON_NULL
 
 redis:
   databaseIndex: 0
@@ -68,3 +70,25 @@ application:
   api.coin.gecko.market:
     interval-time: 120
     base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
+
+springdoc:
+  api-docs.path: /apidocs
+  show-actuator: true
+
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json
+    min-response-size: 1024
+
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      enabled: true
+    prometheus:
+      enabled: true
