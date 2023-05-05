@@ -78,6 +78,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   public static final String WALLET_ACTIVITY_TITLE = "Wallet Activity";
   public static final String REWARD_ACTIVITY_TITLE = "Reward Activity";
   public static final String MIN_TIME = "1970-01-01 00:00:00";
+  public static final String CSV_EXTENSION = ".csv";
+  public static final String EXCEL_EXTENSION = ".xlsx";
   private final Pageable defaultPageable = PageRequest.of(0, 1000, Sort.by("time").descending());
   private final StakeKeyLifeCycleService stakeKeyLifeCycleService;
   private final StakeKeyReportHistoryRepository stakeKeyReportHistoryRepository;
@@ -159,8 +161,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public StakeKeyReportResponse exportStakeKeyReport(Long reportId, String fileExtension) {
-    if (!fileExtension.equals(".csv") && !fileExtension.equals(".xlsx")) {
-      throw new BusinessException(BusinessCode.INVALID_FILE_EXTENSION);
+    if(!CSV_EXTENSION.equals(fileExtension) && !EXCEL_EXTENSION.equals(fileExtension)){
+      fileExtension = CSV_EXTENSION;
     }
 
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
@@ -173,7 +175,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     } else {
       byte[] bytes = downloadFile(storageKey + fileExtension);
       return StakeKeyReportResponse.builder()
-          .fileName(reportName)
+          .fileName(storageKey + fileExtension)
           .byteArrayInputStream(new ByteArrayInputStream(bytes))
           .build();
     }
@@ -185,6 +187,90 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
 
     return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
+  }
+
+  @Override
+  public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrationsByReportId(
+      Long reportId, Pageable pageable) {
+    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
+    stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
+    stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
+    String stakeKey = stakeKeyReportHistory.getStakeKey();
+    return stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, stakeLifeCycleFilterRequest, pageable);
+  }
+
+  @Override
+  public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrationsByReportId(
+      Long reportId, Pageable pageable) {
+    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
+    stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
+    stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
+    String stakeKey = stakeKeyReportHistory.getStakeKey();
+    return stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, stakeLifeCycleFilterRequest, pageable);
+  }
+
+  @Override
+  public BaseFilterResponse<StakeDelegationFilterResponse> getStakeDelegationsByReportId(
+      Long reportId, Pageable pageable) {
+    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
+    stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
+    stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
+    String stakeKey = stakeKeyReportHistory.getStakeKey();
+    return stakeKeyLifeCycleService.getStakeDelegations(stakeKey, stakeLifeCycleFilterRequest, pageable);
+  }
+
+  @Override
+  public BaseFilterResponse<StakeRewardResponse> getStakeRewardsByReportId(Long reportId,
+      Pageable pageable) {
+    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
+    stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
+    stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
+    String stakeKey = stakeKeyReportHistory.getStakeKey();
+    return stakeKeyLifeCycleService.getStakeRewards(stakeKey, pageable);
+  }
+
+  @Override
+  public BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawalsByReportId(
+      Long reportId, Pageable pageable) {
+    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
+    stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
+    stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
+    String stakeKey = stakeKeyReportHistory.getStakeKey();
+    return stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, stakeLifeCycleFilterRequest, pageable);
+  }
+
+  @Override
+  public BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(
+      Long reportId, Pageable pageable) {
+    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
+    stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
+    stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
+    String stakeKey = stakeKeyReportHistory.getStakeKey();
+    return stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pageable);
+  }
+
+  @Override
+  public BaseFilterResponse<StakeRewardActivityResponse> getRewardActivitiesByReportId(
+      Long reportId, Pageable pageable) {
+    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
+    stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
+    stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
+    String stakeKey = stakeKeyReportHistory.getStakeKey();
+    return stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pageable);
   }
 
   @Override
@@ -213,8 +299,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     try {
       List<ExportContent> exportContents = getExportContents(stakeKeyReportHistory);
       String storageKey = generateStorageKey(stakeKeyReportHistory);
-      String csvFileName = storageKey + ".csv";
-      String excelFileName = storageKey + ".xlsx";
+      String csvFileName = storageKey + CSV_EXTENSION;
+      String excelFileName = storageKey + EXCEL_EXTENSION;
       InputStream csvInputStream = CSVHelper.writeContent(exportContents);
       InputStream excelInputStream = ExcelHelper.writeContent(exportContents);
       uploadFile(csvInputStream.readAllBytes(), csvFileName);

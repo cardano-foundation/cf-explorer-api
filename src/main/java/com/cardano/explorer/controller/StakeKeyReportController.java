@@ -7,6 +7,12 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.report.ReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardActivityResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeWalletActivityResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import com.cardano.explorer.service.StakeKeyReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,13 +47,13 @@ public class StakeKeyReportController {
   @LogMessage
   @Operation(summary = "Export stake key report by id")
   public ResponseEntity<Resource> exportStakeKeyReportByStorageKey(@PathVariable Long reportId,
-      @RequestParam String fileExtension) {
+      @RequestParam(required = false) String fileExtension) {
     StakeKeyReportResponse response = stakeKeyReportService.exportStakeKeyReport(reportId,
         fileExtension);
     return ResponseEntity.ok()
         .contentLength(response.getByteArrayInputStream().available())
         .header(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + response.getFileName() + fileExtension + "\"")
+            "attachment; filename=\"" + response.getFileName() + "\"")
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .body(new InputStreamResource(response.getByteArrayInputStream()));
   }
@@ -88,5 +94,79 @@ public class StakeKeyReportController {
     return ResponseEntity.ok(stakeKeyReportService.getReportHistory(filterRequest, pageable));
   }
 
+  @GetMapping(value = "/stake-key/{reportId}/registrations")
+  @LogMessage
+  @Operation(summary = "Get stake registrations by report id")
+  public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeKeyRegistrationsByReportId(
+      @PathVariable Long reportId,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(
+        stakeKeyReportService.getStakeRegistrationsByReportId(reportId, pageable));
+  }
 
+  @GetMapping(value = "/stake-key/{reportId}/de-registrations")
+  @LogMessage
+  @Operation(summary = "Get stake deregistrations by report id")
+  public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeKeyDeregistrationsByReportId(
+      @PathVariable Long reportId,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(
+        stakeKeyReportService.getStakeDeRegistrationsByReportId(reportId, pageable));
+  }
+
+  @GetMapping(value = "/stake-key/{reportId}/delegations")
+  @LogMessage
+  @Operation(summary = "Get stake delegations by report id")
+  public ResponseEntity<BaseFilterResponse<StakeDelegationFilterResponse>> getStakeKeyDelegationsByReportId(
+      @PathVariable Long reportId,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(
+        stakeKeyReportService.getStakeDelegationsByReportId(reportId, pageable));
+  }
+
+  @GetMapping(value = "/stake-key/{reportId}/rewards")
+  @LogMessage
+  @Operation(summary = "Get stake rewards by report id")
+  public ResponseEntity<BaseFilterResponse<StakeRewardResponse>> getStakeKeyRewardsByReportId(
+      @PathVariable Long reportId,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(stakeKeyReportService.getStakeRewardsByReportId(reportId, pageable));
+  }
+
+  @GetMapping(value = "/stake-key/{reportId}/withdrawals")
+  @LogMessage
+  @Operation(summary = "Get stake withdrawals by report id")
+  public ResponseEntity<BaseFilterResponse<StakeWithdrawalFilterResponse>> getStakeKeyWithdrawalsByReportId(
+      @PathVariable Long reportId,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(
+        stakeKeyReportService.getStakeWithdrawalsByReportId(reportId, pageable));
+  }
+
+  @GetMapping(value = "/stake-key/{reportId}/wallet-activity")
+  @LogMessage
+  @Operation(summary = "Get wallet activity by report id")
+  public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>> getWalletActivityByReportId(
+      @PathVariable Long reportId,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(
+        stakeKeyReportService.getWalletActivitiesByReportId(reportId, pageable));
+  }
+
+  @GetMapping(value = "/stake-key/{reportId}/reward-activity")
+  @LogMessage
+  @Operation(summary = "Get reward activity by report id")
+  public ResponseEntity<BaseFilterResponse<StakeRewardActivityResponse>> getRewardActivityByReportId(
+      @PathVariable Long reportId,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(
+        stakeKeyReportService.getRewardActivitiesByReportId(reportId, pageable));
+  }
 }

@@ -6,6 +6,12 @@ import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.report.ReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeDelegationFilterResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardActivityResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeRewardResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeWalletActivityResponse;
+import com.cardano.explorer.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -60,4 +66,26 @@ public interface StakeKeyReportService extends StorageService {
    * @return StakeKeyReportHistoryResponse
    */
   StakeKeyReportHistoryResponse getStakeKeyReportHistoryByReportId(Long reportId);
+
+  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrationsByReportId(Long reportId,
+      Pageable pageable);
+
+
+  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrationsByReportId(Long reportId,
+      Pageable pageable);
+
+  BaseFilterResponse<StakeDelegationFilterResponse> getStakeDelegationsByReportId(Long reportId,
+      Pageable pageable);
+
+  BaseFilterResponse<StakeRewardResponse> getStakeRewardsByReportId(Long reportId,
+      Pageable pageable);
+
+  BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawalsByReportId(Long reportId,
+      Pageable pageable);
+
+  BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(Long reportId,
+      Pageable pageable);
+
+  BaseFilterResponse<StakeRewardActivityResponse> getRewardActivitiesByReportId(Long reportId,
+      Pageable pageable);
 }
