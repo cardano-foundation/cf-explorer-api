@@ -3,7 +3,6 @@ package com.cardano.explorer.util.report;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.util.DataUtil;
 import com.cardano.explorer.util.ReflectorUtil;
-import com.cardano.explorer.util.report.ExportColumn.Alignment;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,7 +18,6 @@ import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @Slf4j
@@ -73,6 +71,10 @@ public class ExcelHelper {
       Cell cell = row.createCell(0);
       CellStyle cellStyle = workbook.createCellStyle();
       cellStyle.setAlignment(HorizontalAlignment.CENTER);
+      Font font = workbook.createFont();
+      font.setFontName(HSSFFont.FONT_ARIAL);
+      font.setFontHeightInPoints((short) 11);
+      cellStyle.setFont(font);
       cell.setCellStyle(cellStyle);
       cell.setCellValue("No records");
       sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, lstColumn.size() - 1));
@@ -135,10 +137,10 @@ public class ExcelHelper {
     cellStyle.setWrapText(true);
     cellStyle.setDataFormat((short) BuiltinFormats.getBuiltinFormat("@"));
 
-    Font fontHeader = workbook.createFont();
-    fontHeader.setFontName(HSSFFont.FONT_ARIAL);
-    fontHeader.setFontHeightInPoints((short) 11);
-    cellStyle.setFont(fontHeader);
+    Font font = workbook.createFont();
+    font.setFontName(HSSFFont.FONT_ARIAL);
+    font.setFontHeightInPoints((short) 11);
+    cellStyle.setFont(font);
     return cellStyle;
   }
 
