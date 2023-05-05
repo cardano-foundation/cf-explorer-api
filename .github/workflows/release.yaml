@@ -18,6 +18,6 @@ jobs:
         uses: google-github-actions/release-please-action@v3
         with:
           release-type: maven
-          bootstrap-sha: 27655f37188248c9efe905a8c02e4cf52f3ea9f8
+          bootstrap-sha: 1cb79cab08bd34fef26e8f1002cf007d9c2cd6c2
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
