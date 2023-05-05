@@ -22,3 +22,4 @@ jobs:
           release-as: 0.3.7-SNAPSHOT
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
+          command: release-pr
