@@ -16,6 +16,7 @@ import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -50,7 +51,8 @@ public class PoolReportController {
 
   @GetMapping("list")
   public ResponseEntity<BaseFilterResponse<PoolReportListResponse>> listPoolReport(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 10, page = 0, sort = {"id"},
+          direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(poolReportService.list(pageable));
   }
 

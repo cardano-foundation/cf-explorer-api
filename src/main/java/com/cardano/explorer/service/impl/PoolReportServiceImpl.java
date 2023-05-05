@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -87,10 +88,11 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable) {
     try {
       //FIXME replace: find by username
-      List<PoolReport> poolReports = poolReportRepository.findAll(pageable).getContent();
+      Page<PoolReport> poolReportPage = poolReportRepository.findAll(pageable);
+      List<PoolReport> poolReports = poolReportPage.getContent();
       List<PoolReportListResponse> poolReportListResponses = poolReports.stream()
           .map(PoolReportListResponse::toDomain).collect(Collectors.toList());
-      return new BaseFilterResponse<>(poolReportListResponses, poolReportListResponses.size());
+      return new BaseFilterResponse<>(poolReportPage, poolReportListResponses);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       return null;
@@ -149,12 +151,12 @@ public class PoolReportServiceImpl implements PoolReportService {
     try {
       //FIXME replace: find by username
       PoolReport poolReport = poolReportRepository.findById(Long.parseLong(reportId)).get();
-      List<PoolReportProjection> epochSizeProjections = epochStakeRepository.getEpochSizeByPoolReport(
-              poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable)
-          .getContent();
+      Page<PoolReportProjection> epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(
+              poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
+      List<PoolReportProjection> epochSizeProjections = epochSizeProjectionPage.getContent();
       List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
           .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
-      return new BaseFilterResponse<>(epochSizes, epochSizes.size());
+      return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       return null;
@@ -334,19 +336,24 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(
       PoolReport poolReport, Pageable pageable) {
-    List<PoolReportProjection> epochSizeProjections = null;
+    Page<PoolReportProjection> epochSizeProjectionPage = null;
+    List<PoolReportProjection> epochSizeProjections;
     if (pageable == null) {
       epochSizeProjections = epochStakeRepository.getEpochSizeByPoolReport(poolReport.getPoolView(),
           poolReport.getBeginEpoch(), poolReport.getEndEpoch());
     } else {
-      epochSizeProjections = epochStakeRepository.getEpochSizeByPoolReport(poolReport.getPoolView(),
-          poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable).getContent();
+      epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(poolReport.getPoolView(),
+          poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
+      epochSizeProjections = epochSizeProjectionPage.getContent();
     }
     List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
         .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
-    BaseFilterResponse<PoolReportDetailResponse.EpochSize> epochSizeBaseFilterResponse =
-        new BaseFilterResponse<>(epochSizes, epochSizes.size());
-    return new BaseFilterResponse<>(epochSizes, epochSizes.size());
+    if (pageable == null) {
+      return new BaseFilterResponse<>(epochSizes, epochSizeProjections.size());
+    } else {
+      return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
+    }
+
   }
 
   private BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> fetchPoolRegistrations(
