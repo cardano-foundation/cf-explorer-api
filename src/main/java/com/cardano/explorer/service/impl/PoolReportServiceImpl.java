@@ -67,13 +67,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     try {
       //TODO check not null for fields
       //TODO check if duplicate report?
-      ReportHistory reportHistory = ReportHistory.builder()
-          .reportName("report_pool_" + poolReportCreateRequest.getPoolId())
-          .status(ReportStatus.IN_PROGRESS)
-          .type(ReportType.POOL_ID)
-          .username(poolReportCreateRequest.getPoolId())
-          .createdAt(new Timestamp(System.currentTimeMillis()))
-          .build();
+      ReportHistory reportHistory = this.initReportHistory(poolReportCreateRequest.getPoolId());
       poolReportRepository.save(poolReportCreateRequest.toEntity(reportHistory));
       return true;
     } catch (Exception e) {
@@ -164,8 +158,14 @@ public class PoolReportServiceImpl implements PoolReportService {
   public PoolReportExportResponse export(Long reportId) {
     try {
       PoolReport poolReport = poolReportRepository.findById(reportId).get();
-      String storageKey = poolReport.getReportHistory().getStorageKey();
-      String reportName = poolReport.getReportHistory().getReportName();
+      String storageKey = null, reportName = null;
+      if (poolReport.getReportHistory() != null) {
+        storageKey = poolReport.getReportHistory().getStorageKey();
+        reportName = poolReport.getReportHistory().getReportName();
+      } else {
+        poolReport.setReportHistory(this.initReportHistory(poolReport.getPoolView()));
+      }
+
       if (DataUtil.isNullOrEmpty(storageKey)) {
         List<ExportContent> exportContents = new ArrayList<>();
         /// epoch size
@@ -320,5 +320,15 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private String generateStorageKey(PoolReport PoolReport) {
     return PoolReport.getId() + "_" + PoolReport.getReportHistory().getReportName();
+  }
+
+  private ReportHistory initReportHistory(String poolId) {
+    return ReportHistory.builder()
+        .reportName("report_pool_" + poolId)
+        .status(ReportStatus.IN_PROGRESS)
+        .type(ReportType.POOL_ID)
+        .username(poolId)
+        .createdAt(new Timestamp(System.currentTimeMillis()))
+        .build();
   }
 }
