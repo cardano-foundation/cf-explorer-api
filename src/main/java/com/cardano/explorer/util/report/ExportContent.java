@@ -1,4 +1,4 @@
-package com.cardano.explorer.util.csv;
+package com.cardano.explorer.util.report;
 
 import java.util.List;
 import lombok.Builder;
@@ -11,6 +11,6 @@ import lombok.Setter;
 public class ExportContent {
   Class<?> clazz;
   List<?> lstData;
-  List<CSVColumn> lstColumn;
+  List<ExportColumn> lstColumn;
   String headerTitle;
 }

@@ -14,7 +14,8 @@ public enum BusinessCode implements ErrorCode {
   STAKE_DELEGATION_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
   STAKE_WITHDRAWAL_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
   PROTOCOL_NOT_FOUND("404-PROTOCOL_NOT_FOUND", "Protocol not found"),
-  STAKE_REPORT_HISTORY_NOT_FOUND("404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found");
+  STAKE_REPORT_HISTORY_NOT_FOUND("404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found"),
+  INVALID_FILE_EXTENSION("INVALID_FILE_EXTENSION", "Invalid file extension");
   private final String code;
   private final String desc;
 

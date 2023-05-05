@@ -1,4 +1,4 @@
-package com.cardano.explorer.util.csv;
+package com.cardano.explorer.util.report;
 
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.util.DataUtil;
@@ -43,7 +43,7 @@ public class CSVHelper {
         // print column header
         if (!DataUtil.isNullOrEmpty(exportContent.getLstColumn())) {
           columnHeaders = exportContent.getLstColumn().stream()
-              .map(csvColumn -> csvColumn.getColumnTitle().getValue())
+              .map(exportColumn -> exportColumn.getColumnTitle().getValue())
               .collect(Collectors.toList());
           printer.printRecord(columnHeaders);
 
@@ -62,17 +62,17 @@ public class CSVHelper {
         Map<String, Field> mapField = new HashMap<>();
 
         exportContent.getLstColumn()
-            .forEach(csvColumn -> fields.stream()
+            .forEach(exportColumn -> fields.stream()
                 .peek(f -> f.setAccessible(true))
-                .filter(f -> f.getName().equals(csvColumn.getColumnField().getValue()))
-                .forEach(f -> mapField.put(csvColumn.getColumnField().getValue(), f)));
+                .filter(f -> f.getName().equals(exportColumn.getColumnField().getValue()))
+                .forEach(f -> mapField.put(exportColumn.getColumnField().getValue(), f)));
 
         for (Object obj : exportContent.getLstData()) {
           List<String> record = new ArrayList<>();
-          for (CSVColumn csvColumn : exportContent.getLstColumn()) {
-            Field field = mapField.get(csvColumn.getColumnField().getValue());
+          for (ExportColumn exportColumn : exportContent.getLstColumn()) {
+            Field field = mapField.get(exportColumn.getColumnField().getValue());
             if (field == null) {
-              log.error("Field not found: " + csvColumn.getColumnField().getValue());
+              log.error("Field not found: " + exportColumn.getColumnField().getValue());
               throw new BusinessException(BusinessCode.INTERNAL_ERROR);
             }
             Object value = field.get(obj);

@@ -1,4 +1,4 @@
-package com.cardano.explorer.util.csv;
+package com.cardano.explorer.util.report;
 
 import lombok.AccessLevel;
 import lombok.Getter;
