@@ -19,6 +19,6 @@ jobs:
         with:
           release-type: maven
           snapshot: true
-          release-as: 0.1.0-SNAPSHOT
+          release-as: 0.3.6-SNAPSHOT
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
