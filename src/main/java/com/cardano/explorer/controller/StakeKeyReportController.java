@@ -2,7 +2,7 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.config.LogMessage;
 import com.cardano.explorer.model.request.report.ReportHistoryFilterRequest;
-import com.cardano.explorer.model.request.report.StakeKeyReport;
+import com.cardano.explorer.model.request.report.StakeKeyReportRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.report.ReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportHistoryResponse;
@@ -39,8 +39,9 @@ public class StakeKeyReportController {
   @LogMessage
   @Operation(summary = "Generate stake key report")
   public ResponseEntity<StakeKeyReportHistoryResponse> generateStakeKeyReport(
-      @RequestBody StakeKeyReport stakeKeyReport) {
-    return ResponseEntity.ok().body(stakeKeyReportService.generateStakeKeyReport(stakeKeyReport));
+      @RequestBody StakeKeyReportRequest stakeKeyReportRequest) {
+    return ResponseEntity.ok().body(stakeKeyReportService.generateStakeKeyReport(
+        stakeKeyReportRequest));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/export")

@@ -1,7 +1,7 @@
 package com.cardano.explorer.service;
 
 import com.cardano.explorer.model.request.report.ReportHistoryFilterRequest;
-import com.cardano.explorer.model.request.report.StakeKeyReport;
+import com.cardano.explorer.model.request.report.StakeKeyReportRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.report.ReportHistoryResponse;
 import com.cardano.explorer.model.response.report.StakeKeyReportHistoryResponse;
@@ -21,10 +21,10 @@ public interface StakeKeyReportService extends StorageService {
 
   /**
    * Generate stake key report
-   * @param stakeKeyReport stake key report
+   * @param stakeKeyReportRequest stake key report
    * @return StakeKeyReportHistoryResponse
    */
-  StakeKeyReportHistoryResponse generateStakeKeyReport(StakeKeyReport stakeKeyReport);
+  StakeKeyReportHistoryResponse generateStakeKeyReport(StakeKeyReportRequest stakeKeyReportRequest);
 
 
   /**
