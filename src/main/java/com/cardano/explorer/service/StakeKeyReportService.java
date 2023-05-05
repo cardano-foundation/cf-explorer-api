@@ -51,6 +51,6 @@ public interface StakeKeyReportService extends StorageService {
    * @param reportId report id
    * @return StakeKeyReportResponse
    */
-  StakeKeyReportResponse exportStakeKeyReport(Long reportId);
+  StakeKeyReportResponse exportStakeKeyReport(Long reportId, String fileExtension);
 
 }
