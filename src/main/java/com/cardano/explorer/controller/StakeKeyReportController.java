@@ -62,6 +62,14 @@ public class StakeKeyReportController {
         stakeKeyReportService.getStakeKeyReportHistoryByStakeKey(stakeKey, pageable));
   }
 
+  @GetMapping(value = "/stake-key/{reportId}/detail")
+  @LogMessage
+  @Operation(summary = "Get stake key report detail by report id")
+  public ResponseEntity<StakeKeyReportHistoryResponse> getStakeReportDetail(
+      @PathVariable Long reportId) {
+    return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistoryByReportId(reportId));
+  }
+
   @GetMapping(value = "/stake-key/history")
   @LogMessage
   @Operation(summary = "Get all stake key report history")
@@ -79,5 +87,6 @@ public class StakeKeyReportController {
           "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(stakeKeyReportService.getReportHistory(filterRequest, pageable));
   }
+
 
 }

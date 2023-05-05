@@ -6,7 +6,9 @@ import java.time.LocalDateTime;
 
 public interface ReportHistoryProjection {
 
-  Long getId();
+  Long getStakeKeyReportId();
+
+  Long getPoolReportId();
 
   String getReportName();
 
