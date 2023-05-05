@@ -21,3 +21,5 @@ jobs:
           bootstrap-sha: 1cb79cab08bd34fef26e8f1002cf007d9c2cd6c2
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
+          default-branch: main
+          command: manifest
