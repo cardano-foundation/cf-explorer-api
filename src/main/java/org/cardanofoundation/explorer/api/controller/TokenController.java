@@ -76,7 +76,7 @@ public class TokenController {
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
       @PathVariable String tokenId, @PathVariable
-  @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+      @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
     return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
   }
 }

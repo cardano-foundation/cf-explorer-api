@@ -10,6 +10,7 @@ import org.cardanofoundation.explorer.api.model.response.token.PolicyScriptRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
@@ -39,6 +40,7 @@ public class PolicyServiceImpl implements PolicyService {
   private final MultiAssetRepository multiAssetRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AddressRepository addressRepository;
+  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
@@ -93,7 +95,7 @@ public class PolicyServiceImpl implements PolicyService {
   public BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable) {
     List<MultiAsset> multiAssets = multiAssetRepository.findAllByPolicy(policyId);
     Page<AddressTokenProjection> multiAssetPage
-        = multiAssetRepository.findAddressTokenByMultiAssetIn(multiAssets, pageable);
+        = addressTokenBalanceRepository.findAddressAndBalanceByMultiAssetIn(multiAssets, pageable);
     Set<Long> addressIds = multiAssetPage.stream().map(AddressTokenProjection::getAddressId)
         .collect(Collectors.toSet());
     List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);

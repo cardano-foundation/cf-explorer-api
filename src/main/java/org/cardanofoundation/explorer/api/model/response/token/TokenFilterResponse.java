@@ -18,6 +18,8 @@ public class TokenFilterResponse{
   private Integer txCount;
   private String supply;
   private String volumeIn24h;
+  private String totalVolume;
+  private Long numberOfHolders;
   private LocalDateTime createdOn;
   private TokenMetadataResponse metadata;
 }

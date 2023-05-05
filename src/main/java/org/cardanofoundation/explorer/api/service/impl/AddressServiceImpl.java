@@ -1,5 +1,4 @@
 package org.cardanofoundation.explorer.api.service.impl;
-
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -13,6 +12,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
@@ -58,6 +58,7 @@ public class AddressServiceImpl implements AddressService {
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final AddressRepository addressRepository;
   private final AssetMetadataRepository assetMetadataRepository;
+  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final TokenMapper tokenMapper;
   private final AddressMapper addressMapper;
   private final AssetMetadataMapper assetMetadataMapper;
@@ -207,8 +208,8 @@ public class AddressServiceImpl implements AddressService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    Page<AddressTokenProjection> addressTokenProjectionPage = multiAssetRepository.getIdentListByAddress(
-        addr, pageable);
+    Page<AddressTokenProjection> addressTokenProjectionPage =
+        addressTokenBalanceRepository.findAddressAndBalanceByAddress(addr, pageable);
 
     List<AddressTokenProjection> addressTokenProjectionList = addressTokenProjectionPage.getContent();
     long totalElements = addressTokenProjectionPage.getTotalElements();
@@ -253,8 +254,9 @@ public class AddressServiceImpl implements AddressService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    List<AddressTokenProjection> addressTokenProjectionList = multiAssetRepository.getAddressTokenByAddress(
-        addr)
+    List<AddressTokenProjection> addressTokenProjectionList =
+        addressTokenBalanceRepository.
+            findAddressAndBalanceByAddress(addr)
         .stream()
         .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
             addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
