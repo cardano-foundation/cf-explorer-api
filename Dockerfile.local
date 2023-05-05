@@ -3,7 +3,7 @@ RUN apt update -qq && apt install -y gettext-base
 ARG PRIVATE_MVN_REGISTRY_URL
 ARG PRIVATE_MVN_REGISTRY_USER
 ARG PRIVATE_MVN_REGISTRY_PASS
-ARG SETTINGS_XML_TPL=.m2/settings.private.xml.tpl
+ARG SETTINGS_XML_TPL=.m2/settings.default.xml.tpl
 WORKDIR /app
 COPY ${SETTINGS_XML_TPL} /root/${SETTINGS_XML_TPL}
 RUN envsubst < /root/${SETTINGS_XML_TPL} > /root/.m2/settings.xml
