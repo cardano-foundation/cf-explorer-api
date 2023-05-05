@@ -11,7 +11,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ReportHistoryResponse {
-  private Long id;
+  private Long stakeKeyReportId;
+  private Long poolReportId;
   private LocalDateTime createdAt;
   private String reportName;
   private ReportStatus status;

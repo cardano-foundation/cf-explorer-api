@@ -136,7 +136,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     Page<ReportHistoryResponse> reportHistoryProjections = reportHistoryRepository.getRecordHistoryByFilter(
             reportName, fromDate, toDate, pageable)
         .map(reportHistoryProjection -> ReportHistoryResponse.builder()
-            .id(reportHistoryProjection.getId())
+            .stakeKeyReportId(reportHistoryProjection.getStakeKeyReportId())
+            .poolReportId(reportHistoryProjection.getPoolReportId())
             .reportName(reportHistoryProjection.getReportName())
             .status(reportHistoryProjection.getStatus())
             .type(reportHistoryProjection.getType())
@@ -176,6 +177,14 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
           .byteArrayInputStream(new ByteArrayInputStream(bytes))
           .build();
     }
+  }
+
+  @Override
+  public StakeKeyReportHistoryResponse getStakeKeyReportHistoryByReportId(Long reportId) {
+    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+
+    return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
   }
 
   @Override

@@ -10,9 +10,12 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Long> {
 
-  @Query("select skrh.id as id, rh.createdAt as createdAt,"
-      + " rh.reportName as reportName, rh.status as status, rh.type as type"
-      + " from ReportHistory rh left join StakeKeyReportHistory skrh on skrh.reportHistory.id = rh.id"
+  @Query("select rh.createdAt as createdAt,"
+      + " rh.reportName as reportName, rh.status as status, rh.type as type,"
+      + " skrh.id as stakeKeyReportId, prh.id as poolReportId"
+      + " from ReportHistory rh "
+      + " left join StakeKeyReportHistory skrh on skrh.reportHistory.id = rh.id"
+      + " left join PoolReport prh on prh.reportHistory.id = rh.id "
       + " where 1 = 1"
       + " and (rh.createdAt >= :fromDate)"
       + " and (rh.createdAt <= :toDate)"
