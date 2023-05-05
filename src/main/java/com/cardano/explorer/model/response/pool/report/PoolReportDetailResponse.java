@@ -2,9 +2,9 @@ package com.cardano.explorer.model.response.pool.report;
 
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.pool.projection.PoolReportProjection;
-import com.cardano.explorer.util.csv.CSVColumn;
-import com.cardano.explorer.util.csv.ColumnFieldEnum;
-import com.cardano.explorer.util.csv.ColumnTitleEnum;
+import com.cardano.explorer.util.report.ColumnFieldEnum;
+import com.cardano.explorer.util.report.ColumnTitleEnum;
+import com.cardano.explorer.util.report.ExportColumn;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,10 +47,10 @@ public class PoolReportDetailResponse {
           .build();
     }
 
-    public static List<CSVColumn> designFile() {
-      List<CSVColumn> epochSizeColumns = new ArrayList<>();
-      epochSizeColumns.add(new CSVColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
-      epochSizeColumns.add(new CSVColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE));
+    public static List<ExportColumn> designFile() {
+      List<ExportColumn> epochSizeColumns = new ArrayList<>();
+      epochSizeColumns.add(new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
+      epochSizeColumns.add(new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE));
       return epochSizeColumns;
     }
   }
@@ -85,20 +85,20 @@ public class PoolReportDetailResponse {
       return result;
     }
 
-    public static List<CSVColumn> designFile(boolean isFee) {
-      List<CSVColumn> poolRegistrationsColumns = new ArrayList<>();
+    public static List<ExportColumn> designFile(boolean isFee) {
+      List<ExportColumn> poolRegistrationsColumns = new ArrayList<>();
       poolRegistrationsColumns.add(
-          new CSVColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+          new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
       poolRegistrationsColumns.add(
-          new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
       poolRegistrationsColumns.add(
-          new CSVColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
+          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
       if (isFee) {
-        poolRegistrationsColumns.add(new CSVColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
+        poolRegistrationsColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
             ColumnTitleEnum.ADA_VALUE_FEE_TITLE));
       }
       poolRegistrationsColumns.add(
-          new CSVColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE));
+          new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE));
       return poolRegistrationsColumns;
     }
   }
@@ -130,16 +130,16 @@ public class PoolReportDetailResponse {
       return result;
     }
 
-    public static List<CSVColumn> designFile(boolean isFee) {
-      List<CSVColumn> poolUpdateColumns = new ArrayList<>();
+    public static List<ExportColumn> designFile(boolean isFee) {
+      List<ExportColumn> poolUpdateColumns = new ArrayList<>();
       poolUpdateColumns.add(
-          new CSVColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+          new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
       poolUpdateColumns.add(
-          new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
       poolUpdateColumns.add(
-          new CSVColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
+          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
       if (isFee) {
-        poolUpdateColumns.add(new CSVColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
+        poolUpdateColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
             ColumnTitleEnum.ADA_VALUE_FEE_TITLE));
       }
       return poolUpdateColumns;
@@ -169,15 +169,15 @@ public class PoolReportDetailResponse {
           .build();
     }
 
-    public static List<CSVColumn> designFile() {
-      List<CSVColumn> rewardDistributionColumns = new ArrayList<>();
+    public static List<ExportColumn> designFile() {
+      List<ExportColumn> rewardDistributionColumns = new ArrayList<>();
       rewardDistributionColumns.add(
-          new CSVColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
+          new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
       rewardDistributionColumns.add(
-          new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE));
-      rewardDistributionColumns.add(new CSVColumn(ColumnFieldEnum.OPERATOR_REWARD_COLUMN,
+          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE));
+      rewardDistributionColumns.add(new ExportColumn(ColumnFieldEnum.OPERATOR_REWARD_COLUMN,
           ColumnTitleEnum.OPERATOR_REWARD_TITLE));
-      rewardDistributionColumns.add(new CSVColumn(ColumnFieldEnum.REWARD_ACCOUNT_COLUMN,
+      rewardDistributionColumns.add(new ExportColumn(ColumnFieldEnum.REWARD_ACCOUNT_COLUMN,
           ColumnTitleEnum.REWARD_ACCOUNT_TITLE));
       return rewardDistributionColumns;
     }
@@ -213,20 +213,20 @@ public class PoolReportDetailResponse {
       return result;
     }
 
-    public static List<CSVColumn> designFile(boolean isFee) {
-      List<CSVColumn> deregistrationColumns = new ArrayList<>();
+    public static List<ExportColumn> designFile(boolean isFee) {
+      List<ExportColumn> deregistrationColumns = new ArrayList<>();
       deregistrationColumns.add(
-          new CSVColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+          new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
       deregistrationColumns.add(
-          new CSVColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE));
+          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE));
       deregistrationColumns.add(
-          new CSVColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
+          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
       if (isFee) {
-        deregistrationColumns.add(new CSVColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
+        deregistrationColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
             ColumnTitleEnum.ADA_VALUE_FEE_TITLE));
       }
       deregistrationColumns.add(
-          new CSVColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE));
+          new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE));
       return deregistrationColumns;
     }
   }

@@ -40,12 +40,14 @@ public class StakeKeyReportController {
   @GetMapping(value = "/stake-key/{reportId}/export")
   @LogMessage
   @Operation(summary = "Export stake key report by id")
-  public ResponseEntity<Resource> exportStakeKeyReportByStorageKey(@PathVariable Long reportId) {
-    StakeKeyReportResponse response = stakeKeyReportService.exportStakeKeyReport(reportId);
+  public ResponseEntity<Resource> exportStakeKeyReportByStorageKey(@PathVariable Long reportId,
+      @RequestParam String fileExtension) {
+    StakeKeyReportResponse response = stakeKeyReportService.exportStakeKeyReport(reportId,
+        fileExtension);
     return ResponseEntity.ok()
         .contentLength(response.getByteArrayInputStream().available())
         .header(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + response.getFileName() + ".csv\"")
+            "attachment; filename=\"" + response.getFileName() + fileExtension + "\"")
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .body(new InputStreamResource(response.getByteArrayInputStream()));
   }
