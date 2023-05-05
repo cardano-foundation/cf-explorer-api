@@ -1,8 +1,6 @@
 package com.cardano.explorer.model.request.report;
 
-import com.sotatek.cardano.common.entity.StakingLifeCycleEvent;
 import java.sql.Timestamp;
-import java.util.Set;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class StakeKeyReport {
+public class StakeKeyReportRequest {
 
   private String stakeKey;
   private String reportName;
@@ -18,5 +16,9 @@ public class StakeKeyReport {
   private Timestamp toDate;
   private Boolean isADATransfer;
   private Boolean isFeesPaid;
-  private Set<StakingLifeCycleEvent> stakingLifeCycleEvents;
+  private Boolean eventRegistration;
+  private Boolean eventDelegation;
+  private Boolean eventRewards;
+  private Boolean eventWithdrawal;
+  private Boolean eventDeregistration;
 }

@@ -1,6 +1,6 @@
 package com.cardano.explorer.mapper;
 
-import com.cardano.explorer.model.request.report.StakeKeyReport;
+import com.cardano.explorer.model.request.report.StakeKeyReportRequest;
 import com.cardano.explorer.model.response.report.StakeKeyReportHistoryResponse;
 import com.sotatek.cardano.common.entity.StakeKeyReportHistory;
 import java.sql.Timestamp;
@@ -20,6 +20,6 @@ public interface StakeKeyReportMapper {
   @Mapping(target = "reportHistory.createdAt", expression = "java(new Timestamp(System.currentTimeMillis()))")
   @Mapping(target = "reportHistory.username", source = "stakeKey")
   @Mapping(target = "reportHistory.reportName", source = "reportName")
-  StakeKeyReportHistory toStakeKeyReportHistory(StakeKeyReport stakeKeyReport);
+  StakeKeyReportHistory toStakeKeyReportHistory(StakeKeyReportRequest stakeKeyReportRequest);
 
 }

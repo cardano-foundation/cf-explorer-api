@@ -8,7 +8,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.cardano.explorer.exception.BusinessCode;
 import com.cardano.explorer.mapper.StakeKeyReportMapper;
 import com.cardano.explorer.model.request.report.ReportHistoryFilterRequest;
-import com.cardano.explorer.model.request.report.StakeKeyReport;
+import com.cardano.explorer.model.request.report.StakeKeyReportRequest;
 import com.cardano.explorer.model.request.stake.StakeLifeCycleFilterRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
 import com.cardano.explorer.model.response.report.ReportHistoryResponse;
@@ -34,7 +34,6 @@ import com.cardano.explorer.util.report.ColumnTitleEnum;
 import com.cardano.explorer.util.report.ExportColumn.Alignment;
 import com.cardano.explorer.util.report.ExportContent;
 import com.sotatek.cardano.common.entity.StakeKeyReportHistory;
-import com.sotatek.cardano.common.entity.StakingLifeCycleEvent;
 import com.sotatek.cardano.common.enumeration.ReportStatus;
 import com.sotatek.cardano.common.enumeration.ReportType;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
@@ -45,9 +44,7 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -92,16 +89,17 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   @Transactional
-  public StakeKeyReportHistoryResponse generateStakeKeyReport(StakeKeyReport stakeKeyReport) {
+  public StakeKeyReportHistoryResponse generateStakeKeyReport(
+      StakeKeyReportRequest stakeKeyReportRequest) {
 
-    stakeAddressRepository.findByView(stakeKeyReport.getStakeKey())
+    stakeAddressRepository.findByView(stakeKeyReportRequest.getStakeKey())
         .orElseThrow(
             () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
-        stakeKeyReport);
+        stakeKeyReportRequest);
 
-    if (DataUtil.isNullOrEmpty(stakeKeyReport.getReportName())) {
+    if (DataUtil.isNullOrEmpty(stakeKeyReportRequest.getReportName())) {
       String reportName = generateReportName(stakeKeyReportHistory);
       stakeKeyReportHistory.getReportHistory().setReportName(reportName);
     }
@@ -161,7 +159,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public StakeKeyReportResponse exportStakeKeyReport(Long reportId, String fileExtension) {
-    if(!CSV_EXTENSION.equals(fileExtension) && !EXCEL_EXTENSION.equals(fileExtension)){
+    if (!CSV_EXTENSION.equals(fileExtension) && !EXCEL_EXTENSION.equals(fileExtension)) {
       fileExtension = CSV_EXTENSION;
     }
 
@@ -175,7 +173,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     } else {
       byte[] bytes = downloadFile(storageKey + fileExtension);
       return StakeKeyReportResponse.builder()
-          .fileName(storageKey + fileExtension)
+          .fileName(reportName + fileExtension)
           .byteArrayInputStream(new ByteArrayInputStream(bytes))
           .build();
     }
@@ -198,7 +196,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
     stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
     String stakeKey = stakeKeyReportHistory.getStakeKey();
-    return stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, stakeLifeCycleFilterRequest, pageable);
+    return stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, stakeLifeCycleFilterRequest,
+        pageable);
   }
 
   @Override
@@ -210,7 +209,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
     stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
     String stakeKey = stakeKeyReportHistory.getStakeKey();
-    return stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, stakeLifeCycleFilterRequest, pageable);
+    return stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, stakeLifeCycleFilterRequest,
+        pageable);
   }
 
   @Override
@@ -222,7 +222,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
     stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
     String stakeKey = stakeKeyReportHistory.getStakeKey();
-    return stakeKeyLifeCycleService.getStakeDelegations(stakeKey, stakeLifeCycleFilterRequest, pageable);
+    return stakeKeyLifeCycleService.getStakeDelegations(stakeKey, stakeLifeCycleFilterRequest,
+        pageable);
   }
 
   @Override
@@ -246,7 +247,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
     stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
     String stakeKey = stakeKeyReportHistory.getStakeKey();
-    return stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, stakeLifeCycleFilterRequest, pageable);
+    return stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, stakeLifeCycleFilterRequest,
+        pageable);
   }
 
   @Override
@@ -322,10 +324,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private List<ExportContent> getExportContents(StakeKeyReportHistory stakeKeyReportHistory) {
-    List<StakingLifeCycleEvent> stakingLifeCycleEvents = stakeKeyReportHistory.getStakingLifeCycleEvents()
-        .stream()
-        .sorted(Comparator.comparingInt(o -> o.getType().getValue()))
-        .collect(Collectors.toList());
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = new StakeLifeCycleFilterRequest();
     stakeLifeCycleFilterRequest.setFromDate(stakeKeyReportHistory.getFromDate());
     stakeLifeCycleFilterRequest.setToDate(stakeKeyReportHistory.getToDate());
@@ -341,31 +339,28 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
       }
     }
 
-    for (int i = 0; i < stakingLifeCycleEvents.size(); i++) {
-      StakingLifeCycleEvent stakingLifeCycleEvent = stakingLifeCycleEvents.get(i);
-      ExportContent exportContent = ExportContent.builder().build();
-      switch (stakingLifeCycleEvent.getType()) {
-        case REGISTRATION:
-          exportContent = exportStakeRegistrations(stakeKeyReportHistory.getStakeKey(),
-              stakeLifeCycleFilterRequest);
-          break;
-        case DELEGATION:
-          exportContent = exportStakeDelegations(stakeKeyReportHistory.getStakeKey(),
-              stakeLifeCycleFilterRequest);
-          break;
-        case REWARDS:
-          exportContent = exportStakeRewards(stakeKeyReportHistory.getStakeKey());
-          break;
-        case WITHDRAWAL:
-          exportContent = exportStakeWithdrawals(stakeKeyReportHistory.getStakeKey(),
-              stakeLifeCycleFilterRequest);
-          break;
-        case DEREGISTRATION:
-          exportContent = exportStakeDeregistrations(stakeKeyReportHistory.getStakeKey(),
-              stakeLifeCycleFilterRequest);
-          break;
-      }
-      exportContents.add(exportContent);
+    if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventRegistration())) {
+      exportContents.add(exportStakeRegistrations(stakeKeyReportHistory.getStakeKey(),
+          stakeLifeCycleFilterRequest));
+    }
+
+    if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventDelegation())) {
+      exportContents.add(exportStakeDelegations(stakeKeyReportHistory.getStakeKey(),
+          stakeLifeCycleFilterRequest));
+    }
+
+    if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventRewards())) {
+      exportContents.add(exportStakeRewards(stakeKeyReportHistory.getStakeKey()));
+    }
+
+    if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventWithdrawal())) {
+      exportContents.add(exportStakeWithdrawals(stakeKeyReportHistory.getStakeKey(),
+          stakeLifeCycleFilterRequest));
+    }
+
+    if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventDeregistration())) {
+      exportContents.add(exportStakeDeregistrations(stakeKeyReportHistory.getStakeKey(),
+          stakeLifeCycleFilterRequest));
     }
     return exportContents;
   }
