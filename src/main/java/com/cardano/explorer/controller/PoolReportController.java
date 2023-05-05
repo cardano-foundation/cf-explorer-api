@@ -2,10 +2,15 @@ package com.cardano.explorer.controller;
 
 import com.cardano.explorer.model.request.pool.report.PoolReportCreateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.TabularRegisResponse;
 import com.cardano.explorer.model.response.pool.report.PoolReportDetailResponse;
 import com.cardano.explorer.model.response.pool.report.PoolReportExportResponse;
 import com.cardano.explorer.model.response.pool.report.PoolReportListResponse;
 import com.cardano.explorer.service.PoolReportService;
+import com.sotatek.cardano.common.entity.PoolReport;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.core.io.InputStreamResource;
@@ -49,10 +54,11 @@ public class PoolReportController {
     return ResponseEntity.ok(poolReportService.list(pageable));
   }
 
-  @GetMapping("detail/{reportId}")
-  public ResponseEntity<PoolReportDetailResponse> detailPoolReport(@PathVariable String reportId,
+  @GetMapping("detail/{reportId}/full")
+  public ResponseEntity<PoolReportDetailResponse> detailFullPoolReport(
+      @PathVariable String reportId,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.detail(reportId, pageable));
+    return ResponseEntity.ok(poolReportService.detailFull(reportId, pageable));
   }
 
   @GetMapping("detail/{reportId}/epoch-size")
@@ -73,4 +79,39 @@ public class PoolReportController {
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .body(new InputStreamResource(response.getByteArrayInputStream()));
   }
+
+  @GetMapping(value = "detail/{reportId}/pool-registration")
+  public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> detailPoolRegistration(
+      @PathVariable String reportId,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolReportService.detailPoolRegistration(reportId, pageable));
+  }
+
+  @GetMapping(value = "detail/{reportId}/pool-update")
+  public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> detailPoolUpdate(
+      @PathVariable String reportId,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolReportService.detailPoolUpdate(reportId, pageable));
+  }
+
+  @GetMapping(value = "detail/{reportId}/rewards-distribution")
+  public ResponseEntity<BaseFilterResponse<RewardResponse>> detailRewardsDistribution(
+      @PathVariable String reportId,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolReportService.detailRewardsDistribution(reportId, pageable));
+  }
+
+  @GetMapping(value = "detail/{reportId}/deregistration")
+  public ResponseEntity<BaseFilterResponse<DeRegistrationResponse>> detailDeregistration(
+      @PathVariable String reportId,
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolReportService.detailDeregistraion(reportId, pageable));
+  }
+
+  @GetMapping("detail/{reportId}")
+  public ResponseEntity<PoolReport> detailPoolReport(@PathVariable String reportId
+  ) {
+    return ResponseEntity.ok(poolReportService.detail(reportId));
+  }
+
 }

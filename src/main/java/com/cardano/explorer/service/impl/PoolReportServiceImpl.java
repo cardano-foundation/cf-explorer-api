@@ -3,6 +3,10 @@ package com.cardano.explorer.service.impl;
 import com.cardano.explorer.common.enumeration.PoolReportEvent;
 import com.cardano.explorer.model.request.pool.report.PoolReportCreateRequest;
 import com.cardano.explorer.model.response.BaseFilterResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.DeRegistrationResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.PoolUpdateDetailResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.RewardResponse;
+import com.cardano.explorer.model.response.pool.lifecycle.TabularRegisResponse;
 import com.cardano.explorer.model.response.pool.projection.PoolReportProjection;
 import com.cardano.explorer.model.response.pool.report.PoolReportDetailResponse;
 import com.cardano.explorer.model.response.pool.report.PoolReportExportResponse;
@@ -12,6 +16,7 @@ import com.cardano.explorer.repository.PoolReportRepository;
 import com.cardano.explorer.repository.PoolRetireRepository;
 import com.cardano.explorer.repository.PoolUpdateRepository;
 import com.cardano.explorer.repository.RewardRepository;
+import com.cardano.explorer.service.PoolLifecycleService;
 import com.cardano.explorer.service.PoolReportService;
 import com.cardano.explorer.service.StakeKeyReportService;
 import com.cardano.explorer.util.DataUtil;
@@ -62,6 +67,8 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private final StakeKeyReportService stakeKeyReportService;
 
+  private final PoolLifecycleService poolLifecycleService;
+
   @Override
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest) {
     try {
@@ -91,7 +98,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
-  public PoolReportDetailResponse detail(String reportId, Pageable pageable) {
+  public PoolReportDetailResponse detailFull(String reportId, Pageable pageable) {
     try {
       //FIXME replace: find by username
       PoolReport poolReport = poolReportRepository.findById(Long.parseLong(reportId)).get();
@@ -259,6 +266,66 @@ public class PoolReportServiceImpl implements PoolReportService {
     } catch (IOException e) {
       log.error(e.getMessage(), e);
       return null;
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return null;
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<TabularRegisResponse> detailPoolRegistration(String reportId,
+      Pageable pageable) {
+    try {
+      PoolReport poolReport = poolReportRepository.findById(Long.parseLong(reportId)).get();
+      return poolLifecycleService.registrationList(poolReport.getPoolView(), pageable);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return null;
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<PoolUpdateDetailResponse> detailPoolUpdate(String reportId,
+      Pageable pageable) {
+    try {
+      PoolReport poolReport = poolReportRepository.findById(Long.parseLong(reportId)).get();
+      return poolLifecycleService.poolUpdateList(poolReport.getPoolView(), pageable);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return null;
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<RewardResponse> detailRewardsDistribution(String reportId,
+      Pageable pageable) {
+    try {
+      PoolReport poolReport = poolReportRepository.findById(Long.parseLong(reportId)).get();
+      return poolLifecycleService.listReward(poolReport.getPoolView(), pageable);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return null;
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<DeRegistrationResponse> detailDeregistraion(String reportId,
+      Pageable pageable) {
+    try {
+      PoolReport poolReport = poolReportRepository.findById(Long.parseLong(reportId)).get();
+      return poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null, null,
+          pageable);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return null;
+    }
+  }
+
+  @Override
+  public PoolReport detail(String reportId) {
+    try {
+      PoolReport poolReport = poolReportRepository.findById(Long.parseLong(reportId)).get();
+      return poolReport;
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       return null;
