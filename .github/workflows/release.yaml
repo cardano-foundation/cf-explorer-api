@@ -21,3 +21,4 @@ jobs:
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
           command: release-pr
+          labels: release-please:force-run
