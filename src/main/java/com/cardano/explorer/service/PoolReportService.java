@@ -23,7 +23,7 @@ public interface PoolReportService {
   BaseFilterResponse<PoolReportDetailResponse.EpochSize> detailEpochSize(String reportId,
       Pageable pageable);
 
-  PoolReportExportResponse export(Long reportId);
+  PoolReportExportResponse export(Long reportId, String fileExtension);
 
   BaseFilterResponse<TabularRegisResponse> detailPoolRegistration(String reportId,
       Pageable pageable);

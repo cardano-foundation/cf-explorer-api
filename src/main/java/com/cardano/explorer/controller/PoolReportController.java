@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -71,13 +72,14 @@ public class PoolReportController {
   }
 
   @GetMapping("detail/{reportId}/export")
-  public ResponseEntity<Resource> export(@PathVariable Long reportId) {
+  public ResponseEntity<Resource> export(@PathVariable Long reportId,
+      @RequestParam(required = false) String fileExtension) {
     //TODO add processing
-    PoolReportExportResponse response = poolReportService.export(reportId);
+    PoolReportExportResponse response = poolReportService.export(reportId, fileExtension);
     return ResponseEntity.ok()
         .contentLength(response.getByteArrayInputStream().available())
         .header(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + response.getFileName() + ".csv\"")
+            "attachment; filename=\"" + response.getFileName() + "\"")
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .body(new InputStreamResource(response.getByteArrayInputStream()));
   }
