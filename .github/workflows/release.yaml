@@ -21,4 +21,4 @@ jobs:
           bootstrap-sha: 35b5d65403b02917a888235fe9b3a296f887edd5
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
-          command: release-pr
+          command: github-release
