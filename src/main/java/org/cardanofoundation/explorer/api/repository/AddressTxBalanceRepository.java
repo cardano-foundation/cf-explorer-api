@@ -36,6 +36,13 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   List<Tx> findAllByAddress(Address address, Pageable pageable);
 
+  @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
+          + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
+          + " WHERE addrTxBalance.address IN "
+          + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
+          + " ORDER BY addrTxBalance.tx.blockId ASC, addrTxBalance.tx.blockIndex ASC")
+  List<BigInteger> findAllByStakeAddress(StakeAddress stakeAddress);
+
   @Query(value = "SELECT DISTINCT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.address IN "
