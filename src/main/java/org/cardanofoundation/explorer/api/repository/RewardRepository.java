@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
@@ -31,6 +32,14 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "GROUP BY rw.earnedEpoch")
   List<EpochStakeProjection> totalRewardStakeByEpochNoAndPool(@Param("epochNo") Set<Long> epochNo,
       @Param("poolId") Long poolId);
+
+  @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse"
+          + " (rw.earnedEpoch , COALESCE(sum(rw.amount), 0))"
+          + " FROM Reward rw"
+          + " WHERE rw.spendableEpoch <= (SELECT max(no) FROM Epoch)"
+          + " AND rw.addr = (SELECT sa FROM StakeAddress sa WHERE sa.view = :stakeAddress)"
+          + " GROUP BY rw.earnedEpoch")
+  List<StakeAnalyticRewardResponse> findRewardByStake(String stakeAddress);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
