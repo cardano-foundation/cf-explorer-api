@@ -8,8 +8,12 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
+import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -59,4 +63,7 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
       + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
   Page<StakeHistoryProjection> getStakeRegistrationsByAddress(StakeAddress stakeKey, String txHash,
       Timestamp fromTime, Timestamp toTime, Pageable pageable);
+
+  @EntityGraph(attributePaths = {StakeRegistration_.ADDR})
+  List<StakeRegistration> findByTx(Tx tx);
 }
