@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long> {
 
@@ -47,4 +48,11 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + " ORDER BY totalStake DESC")
   List<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
 
+  @Query(value = "SELECT ph.view FROM StakeAddress sa "
+      + "JOIN PoolOwner po ON sa.id  = po.stakeAddress.id "
+      + "JOIN PoolUpdate pu ON po.poolUpdate.id  = pu.id "
+      + "JOIN PoolHash ph ON pu.poolHash.id = ph.id "
+      + "WHERE sa.view = :stakeKey "
+      + "GROUP BY ph.view ")
+  Page<String> getPoolViewByStakeKey(@Param("stakeKey") String stakeKey, Pageable pageable);
 }

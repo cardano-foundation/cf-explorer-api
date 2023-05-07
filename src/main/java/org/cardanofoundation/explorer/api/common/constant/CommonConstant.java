@@ -23,6 +23,10 @@ public class CommonConstant {
 
   public static final String TESTNET_ADDRESS_PREFIX = "addr_test";
 
+  public static final String POOL_STATUS_ACTIVE = "ACTIVE";
+
+  public static final String POOL_STATUS_RETIRING = "RETIRING";
+  
   public static final String MAINNET_ADDRESS_PREFIX = "addr";
 
   public static final String LOVELACE = "LOVELACE";
