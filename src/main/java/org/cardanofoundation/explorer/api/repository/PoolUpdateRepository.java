@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -46,6 +47,15 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId)")
   PoolUpdate findLastEpochByPool(@Param("poolId") Long poolId);
 
+  @Query("SELECT ph.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
+          + "pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, sa.view AS rewardAccount, "
+          + "pmr.url AS metadataUrl, pmr.hash as metadataHash "
+          + "FROM PoolUpdate pu "
+          + "INNER JOIN PoolHash ph ON pu.poolHash.id = ph.id "
+          + "INNER JOIN PoolMetadataRef pmr ON pu.meta = pmr "
+          + "INNER JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+          + "WHERE pu.registeredTx = :tx")
+  List<PoolUpdateDetailProjection> findByTx(Tx tx);
   @Query(value =
       "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.blockNo AS blockNo, bk.epochNo AS epochNo, bk.epochSlotNo AS slotNo, "
           + "pu.pledge AS pledge, pu.margin AS margin, pu.fixedCost AS cost, pu.poolHash.id AS poolId, po.json AS poolName, ph.view AS poolView "
