@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.repository;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolRetire;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,12 @@ import java.util.List;
 
 @Repository
 public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
+  @Query(value = "SELECT pr.announcedTx.id as txId, pr.retiringEpoch as retiringEpoch, "
+          + "ph.view as poolId "
+          + "FROM PoolRetire pr "
+          + "INNER JOIN PoolHash ph ON pr.poolHash.id = ph.id "
+          + "WHERE pr.announcedTx = :tx")
+  List<PoolDeRegistrationProjection> findByAnnouncedTx(Tx tx);
 
   @Query(value =
       "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.blockNo AS blockNo, bk.epochNo AS epochNo, bk.epochSlotNo AS slotNo, "
