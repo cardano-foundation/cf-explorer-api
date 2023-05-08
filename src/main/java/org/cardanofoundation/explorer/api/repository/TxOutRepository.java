@@ -17,7 +17,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " INNER JOIN Tx tx ON tx.id = txOut.tx.id"
       + " WHERE tx.id IN :txIds"
       + " ORDER BY txOut.index ASC")
-  List<AddressInputOutputProjection> findAddressOutputListByTxId(Collection<Long> txIds);
+  List<AddressInputOutputProjection> findAddressOutputListByTxId(@Param("txIds") Collection<Long> txIds);
 
 
   @Query("SELECT tx.id AS txId, txOut.address AS address"
@@ -26,7 +26,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + "   INNER JOIN Tx tx ON tx.id = txIn.txInput.id AND txIn.txOutIndex = txOut.index"
       + "   WHERE tx.id IN :txIds"
       + "   ORDER BY txIn.id ASC")
-  List<AddressInputOutputProjection> findAddressInputListByTxId(Collection<Long> txIds);
+  List<AddressInputOutputProjection> findAddressInputListByTxId(@Param("txIds") Collection<Long> txIds);
 
   @Query("SELECT txOut.address AS address, txOut.index as index, COALESCE(stake.view, txOut.address) AS stakeAddress,"
       + "   txOut.value AS value, maTxOut.quantity as assetQuantity,"
@@ -36,7 +36,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN MaTxOut maTxOut ON maTxOut.txOut = txOut"
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
       + " WHERE txOut.tx = :tx")
-  List<AddressInputOutputProjection> getTxAddressOutputInfo(Tx tx);
+  List<AddressInputOutputProjection> getTxAddressOutputInfo(@Param("tx") Tx tx);
 
 
   @Query("SELECT txOut.address AS address, txOut.index as index, txIn.txOut.hash AS txHash,"
@@ -49,7 +49,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN MaTxOut maTxOut ON maTxOut.txOut = txOut"
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
       + " WHERE txIn.txInput = :tx")
-  List<AddressInputOutputProjection> getTxAddressInputInfo(Tx tx);
+  List<AddressInputOutputProjection> getTxAddressInputInfo(@Param("tx") Tx tx);
 
 
   @Query("SELECT COUNT( DISTINCT(txo.tx.id)) "

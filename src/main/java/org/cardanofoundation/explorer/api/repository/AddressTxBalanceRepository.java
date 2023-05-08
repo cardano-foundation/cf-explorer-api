@@ -13,42 +13,43 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalance, Long> {
 
   @Query("SELECT count(addressTxBalance) FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.address = :address")
-  Long countByAddress(Address address);
+  Long countByAddress(@Param("address") Address address);
   @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.address = :address"
       + " AND addressTxBalance.time <= :time")
-  BigInteger getBalanceByAddressAndTime(Address address, Timestamp time);
+  BigInteger getBalanceByAddressAndTime(@Param("address") Address address, @Param("time") Timestamp time);
 
   @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.address = :address"
       + " ORDER BY addrTxBalance.tx.blockId ASC, addrTxBalance.tx.blockIndex ASC")
-  List<BigInteger> findAllByAddress(Address address);
+  List<BigInteger> findAllByAddress(@Param("address") Address address);
 
   @Query(value = "SELECT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.address = :address"
       + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
-  List<Tx> findAllByAddress(Address address, Pageable pageable);
+  List<Tx> findAllByAddress(@Param("address") Address address, Pageable pageable);
 
   @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.address IN "
       + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
       + " ORDER BY addrTxBalance.tx.blockId ASC, addrTxBalance.tx.blockIndex ASC")
-  List<BigInteger> findAllByStakeAddress(StakeAddress stakeAddress);
+  List<BigInteger> findAllByStakeAddress(@Param("stakeAddress") StakeAddress stakeAddress);
 
   @Query(value = "SELECT DISTINCT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.address IN "
       + " (SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress)"
       + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
-  Page<Tx> findAllByStake(String stakeAddress, Pageable pageable);
+  Page<Tx> findAllByStake(@Param("stakeAddress") String stakeAddress, Pageable pageable);
 
   @Query(value = "SELECT addrTxBalance.tx.id as txId, sum(addrTxBalance.balance) as amount,"
       + " addrTxBalance.time as time"
@@ -56,11 +57,12 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " WHERE addrTxBalance.address IN "
       + " (SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress)"
       + " GROUP BY addrTxBalance.tx.id, addrTxBalance.time")
-  Page<StakeTxProjection> findTxAndAmountByStake(String stakeAddress, Pageable pageable);
+  Page<StakeTxProjection> findTxAndAmountByStake(@Param("stakeAddress") String stakeAddress, Pageable pageable);
 
   @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.address IN "
       + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
       + " AND addressTxBalance.time <= :time")
-  Optional<BigInteger> getBalanceByStakeAddressAndTime(StakeAddress stakeAddress, Timestamp time);
+  Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                       @Param("time") Timestamp time);
 }

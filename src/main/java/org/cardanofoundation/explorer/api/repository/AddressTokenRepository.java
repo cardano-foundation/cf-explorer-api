@@ -10,6 +10,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AddressTokenRepository extends JpaRepository<AddressToken, Long> {
 
@@ -17,13 +18,13 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " FROM AddressToken addrToken "
       + " WHERE addrToken.multiAsset = :multiAsset "
       + " ORDER BY addrToken.tx.id DESC")
-  List<Long> findTxsByMultiAsset(MultiAsset multiAsset, Pageable pageable);
+  List<Long> findTxsByMultiAsset(@Param("multiAsset") MultiAsset multiAsset, Pageable pageable);
 
   @Query(value = "SELECT COALESCE(sum(addrToken.balance), 0)"
       + " FROM AddressToken addrToken"
       + " WHERE addrToken.multiAsset = :multiAsset "
       + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId")
-  BigInteger sumBalanceAfterTx(MultiAsset multiAsset, Long txId);
+  BigInteger sumBalanceAfterTx(@Param("multiAsset") MultiAsset multiAsset, @Param("txId") Long txId);
 
   @Query(value = "SELECT COALESCE(SUM(addrToken.balance), 0)"
       + " FROM AddressToken addrToken"
@@ -37,7 +38,8 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :to AND block.txCount > 0)"
       + "   )"
       + " AND addrToken.balance > 0")
-  BigInteger sumBalanceBetweenTx(MultiAsset multiAsset, Timestamp from, Timestamp to);
+  BigInteger sumBalanceBetweenTx(@Param("multiAsset") MultiAsset multiAsset, @Param("from") Timestamp from,
+                                 @Param("to") Timestamp to);
 
   @Query(value = "SELECT addrToken.multiAsset.id AS ident, "
       + " COALESCE(SUM(addrToken.balance), 0) AS volume"
@@ -45,5 +47,6 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " WHERE addrToken.multiAsset IN :multiAsset "
       + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId"
       + " GROUP BY addrToken.multiAsset")
-  List<TokenVolumeProjection> sumBalanceAfterTx(Collection<MultiAsset> multiAsset, Long txId);
+  List<TokenVolumeProjection> sumBalanceAfterTx(@Param("multiAsset") Collection<MultiAsset> multiAsset,
+                                                @Param("txId") Long txId);
 }

@@ -24,18 +24,18 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       , countQuery = "SELECT sum(e.txCount) FROM Epoch e")
   Page<Tx> findAllTx(Pageable pageable);
 
-  List<Tx> findByBlockIn(List<Block> blocks);
+  List<Tx> findByBlockIn(@Param("blocks") List<Block> blocks);
 
   @Query("SELECT tx FROM Tx tx INNER JOIN Block b ON b.id = tx.blockId "
       + "WHERE b.blockNo = :blockNo")
-  Page<Tx> findByBlockNo(Long blockNo, Pageable pageable);
+  Page<Tx> findByBlockNo(@Param("blockNo") Long blockNo, Pageable pageable);
 
   @Query("SELECT tx FROM Tx tx INNER JOIN Block b ON b.id = tx.blockId "
       + "WHERE b.hash = :blockHash")
-  Page<Tx> findByBlockHash(String blockHash, Pageable pageable);
+  Page<Tx> findByBlockHash(@Param("blockHash") String blockHash, Pageable pageable);
 
   @EntityGraph(attributePaths = {Tx_.BLOCK})
-  Optional<Tx> findByHash(String hash);
+  Optional<Tx> findByHash(@Param("hash") String hash);
 
   @Query(value = "SELECT tx.id FROM Tx tx ")
   List<Long> findLatestTxId(Pageable pageable);
@@ -59,7 +59,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "inp.index = txi.txOutIndex "
       + "WHERE tx.id IN :txIds "
       + "ORDER BY b.blockNo DESC, tx.blockIndex DESC")
-  List<TxIOProjection> findLatestTxIO(Collection<Long> txIds);
+  List<TxIOProjection> findLatestTxIO(@Param("txIds") Collection<Long> txIds);
 
   @Query(value =
       "SELECT MAX(b.id) AS maxBlockId, MIN(b.id) AS minBlockId, SUM(b.txCount) as transactionNo "
@@ -89,7 +89,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   Optional<Long> findMinTxByAfterTime(@Param("time") Timestamp time);
 
   @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
-  List<Tx> findByIdIn(List<Long> ids);
+  List<Tx> findByIdIn(@Param("ids")  List<Long> ids);
 
   @Query("SELECT MAX(tx.id) AS maxId, MIN(tx.id) AS minId FROM Tx tx WHERE tx.blockId IN :blockIds")
   TxLimit findRangeTxIdsByBlockIds(@Param("blockIds") List<Long> blockIds);

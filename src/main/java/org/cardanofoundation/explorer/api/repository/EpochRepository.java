@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
-  Optional<Epoch> findFirstByNo(Integer no);
+  Optional<Epoch> findFirstByNo(@Param("no") Integer no);
 
   @Query(value = "SELECT max(no) FROM Epoch")
   Optional<Integer> findCurrentEpochNo();
@@ -45,6 +45,6 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
       + "JOIN AddressTxBalance  atb ON atb.tx.id = tx.id "
       + "JOIN Address addr ON addr.id = atb.address.id "
       + "WHERE b.epochNo  = :epochNo ")
-  Integer getTotalAccountsAtEpoch(Integer epochNo);
+  Integer getTotalAccountsAtEpoch(@Param("epochNo") Integer epochNo);
 
 }

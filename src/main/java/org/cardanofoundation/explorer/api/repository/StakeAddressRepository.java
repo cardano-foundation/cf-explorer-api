@@ -2,17 +2,17 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long> {
 
-  Optional<StakeAddress> findByView(String aLong);
+  Optional<StakeAddress> findByView(@Param("aLong") String aLong);
 
   @Query(value = "SELECT sa.view as stakeAddress, sum(addr.balance) as totalStake"
       + " FROM StakeAddress sa"

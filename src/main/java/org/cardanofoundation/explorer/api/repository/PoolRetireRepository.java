@@ -54,7 +54,7 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       + "FROM PoolRetire pr "
       + "INNER JOIN PoolHash ph ON pr.poolHash.id = ph.id "
       + "WHERE pr.announcedTx = :tx")
-  List<PoolDeRegistrationProjection> findByAnnouncedTx(Tx tx);
+  List<PoolDeRegistrationProjection> findByAnnouncedTx(@Param("tx") Tx tx);
 
   @Query(value =
           "select t.hash as txnHash, b.time as timestamp, t.outSum as adaValueHold, t.fee as adaValueFees, pu.rewardAddr.view as owner "

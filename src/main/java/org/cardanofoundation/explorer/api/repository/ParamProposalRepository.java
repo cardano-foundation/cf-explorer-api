@@ -67,5 +67,5 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
       + "FROM ParamProposal pp "
       + "WHERE pp.registeredTx.id < :txId AND pp.epochNo >= :epochNo "
       + "ORDER BY pp.id DESC")
-  List<ParamProposal> getParamProposalSmallerRegisteredTxId(@Param("txId") Long txId, Integer epochNo);
+  List<ParamProposal> getParamProposalSmallerRegisteredTxId(@Param("txId") Long txId, @Param("epochNo") Integer epochNo);
 }

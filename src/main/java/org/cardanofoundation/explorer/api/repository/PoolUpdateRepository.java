@@ -110,7 +110,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "INNER JOIN PoolMetadataRef pmr ON pu.meta = pmr "
       + "INNER JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
       + "WHERE pu.registeredTx = :tx")
-  List<PoolUpdateDetailProjection> findByTx(Tx tx);
+  List<PoolUpdateDetailProjection> findByTx(@Param("tx") Tx tx);
 
 
   @Query(value =
@@ -143,7 +143,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "WHERE poolUpdate2.poolHash = poolHash) "
       + "AND (SELECT COALESCE(max(poolRetire.retiringEpoch), 0) + 2 "
       + "FROM PoolRetire poolRetire WHERE poolRetire.poolHash = poolHash) < poolUpdate.activeEpochNo")
-  List<String> findPoolByRewardAccount(StakeAddress stakeAddress);
+  List<String> findPoolByRewardAccount(@Param("stakeAddress") StakeAddress stakeAddress);
   @Query(value =
           "SELECT  t.hash as txnHash, b.time as timestamp, t.outSum as adaValueHold, t.fee as adaValueFees, sa.view as owner "
         + "from Tx t "

@@ -6,16 +6,17 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   Page<MultiAsset> findAll(Pageable pageable);
 
-  Optional<MultiAsset> findByFingerprint(String fingerprint);
+  Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
 
-  Integer countByPolicy(String policy);
+  Integer countByPolicy(@Param("policy") String policy);
 
-  Page<MultiAsset> findAllByPolicy(String policy, Pageable pageable);
+  Page<MultiAsset> findAllByPolicy(@Param("policy") String policy, Pageable pageable);
 
-  List<MultiAsset> findAllByPolicy(String policy);
+  List<MultiAsset> findAllByPolicy(@Param("policy") String policy);
 }

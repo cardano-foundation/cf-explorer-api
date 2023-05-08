@@ -27,7 +27,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " INNER JOIN StakeAddress stakeAddress ON r.addr.id = stakeAddress.id"
       + " WHERE r.spendableEpoch <= (SELECT max(no) FROM Epoch)"
       + " AND stakeAddress.view = :stakeAddress")
-  Optional<BigInteger> getAvailableRewardByStakeAddress(String stakeAddress);
+  Optional<BigInteger> getAvailableRewardByStakeAddress(@Param("stakeAddress") String stakeAddress);
 
   @Query(value = "SELECT rw.earnedEpoch AS epochNo, sum(rw.amount) AS totalStake FROM Reward rw "
       + "WHERE rw.pool.id = :poolId AND rw.earnedEpoch IN :epochNo "
@@ -63,27 +63,27 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " WHERE rw.spendableEpoch <= (SELECT max(no) FROM Epoch)"
       + " AND rw.addr = (SELECT sa FROM StakeAddress sa WHERE sa.view = :stakeAddress)"
       + " GROUP BY rw.earnedEpoch")
-  List<StakeAnalyticRewardResponse> findRewardByStake(String stakeAddress);
+  List<StakeAnalyticRewardResponse> findRewardByStake(@Param("stakeAddress") String stakeAddress);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
       + " WHERE rw.addr = :stakeAddress")
-  Page<StakeRewardResponse> findRewardByStake(StakeAddress stakeAddress, Pageable pageable);
+  Page<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress, Pageable pageable);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
       + " WHERE rw.addr = :stakeAddress")
-  List<StakeRewardResponse> findRewardByStake(StakeAddress stakeAddress);
+  List<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress);
 
   @Query("SELECT SUM(r.amount) FROM Reward r "
       + " WHERE r.spendableEpoch <= :epoch"
       + " AND r.addr = :stakeAddress")
-  Optional<BigInteger> getAvailableRewardByStakeAddressAndEpoch(StakeAddress stakeAddress,
-      Integer epoch);
+  Optional<BigInteger> getAvailableRewardByStakeAddressAndEpoch(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                                @Param("epoch") Integer epoch);
 
 
   @Query(value =
@@ -94,15 +94,14 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
           + "JOIN Epoch e ON rw.spendableEpoch = e.no "
           + "WHERE ph.view  = :poolView AND rw.type = 'leader' "
           + "ORDER BY rw.earnedEpoch DESC")
-  Page<LifeCycleRewardProjection> getRewardInfoByPool(@Param("poolView") String poolView,
-      Pageable pageable);
+  Page<LifeCycleRewardProjection> getRewardInfoByPool(@Param("poolView") String poolView, Pageable pageable);
 
   @Query(value = "SELECT rw.earnedEpoch AS epochNo, rw.amount AS amount "
       + "FROM Reward rw "
       + "JOIN PoolHash ph ON rw.pool.id = ph.id "
       + "WHERE ph.view = :poolView AND rw.type = 'refund' AND rw.earnedEpoch IN :epochNos")
   List<EpochRewardProjection> getRewardRefundByEpoch(@Param("poolView") String poolView,
-      @Param("epochNos") Set<Integer> epochNos);
+                                                     @Param("epochNos") Set<Integer> epochNos);
 
   @Query(value = "SELECT sum(rw.amount) FROM Reward rw "
       + "WHERE rw.pool.id = :poolId AND (rw.type = 'leader' or rw.type = 'member') AND rw.spendableEpoch = (SELECT max(e.no) FROM Epoch e)")
@@ -134,6 +133,8 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
           + "where pu.poolHash.view = :poolView and pu.activeEpochNo between :epochBegin and :epochEnd "
           + "group by r.earnedEpoch, e.no, e.startTime, pu.rewardAddr.view"
   )
-  List<PoolReportProjection> getRewardDistributionByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd);
+  List<PoolReportProjection> getRewardDistributionByPoolReport(@Param("poolView") String poolView,
+                                                               @Param("epochBegin") int epochBegin,
+                                                               @Param("epochEnd") int epochEnd);
 
 }

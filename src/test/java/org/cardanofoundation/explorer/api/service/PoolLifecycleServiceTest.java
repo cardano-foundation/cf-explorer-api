@@ -18,7 +18,7 @@ import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolLifecycleServiceImpl;
-import com.sotatek.cardano.common.entity.PoolUpdate;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;

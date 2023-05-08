@@ -29,7 +29,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   Integer numberDelegatorsByPool(@Param("poolId") Long poolId);
 
   @EntityGraph(attributePaths = {Delegation_.POOL_HASH, Delegation_.ADDRESS})
-  List<Delegation> findByTx(Tx tx);
+  List<Delegation> findByTx(@Param("tx") Tx tx);
 
   @Query(value =
       "SELECT dg.activeEpochNo AS chartKey, count(dg.id) AS chartValue FROM Delegation dg "
@@ -80,7 +80,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   @Query("SELECT delegation.tx.id"
       + " FROM Delegation delegation"
       + " WHERE delegation.address = :stakeKey AND delegation.tx.id IN :txIds")
-  List<Long> findDelegationByAddressAndTxIn(StakeAddress stakeKey, Collection<Long> txIds);
+  List<Long> findDelegationByAddressAndTxIn(@Param("stakeKey") StakeAddress stakeKey,
+                                            @Param("txIds") Collection<Long> txIds);
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, poolHash.view as poolId,"
@@ -94,7 +95,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
-  Page<StakeDelegationProjection> findDelegationByAddress(String stakeKey, Pageable pageable);
+  Page<StakeDelegationProjection> findDelegationByAddress(@Param("stakeKey") String stakeKey, Pageable pageable);
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, tx.fee as fee, tx.outSum as outSum"
@@ -105,8 +106,11 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " AND (block.time >= :fromTime ) "
       + " AND (block.time <= :toTime)"
       + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
-  Page<StakeDelegationProjection> findDelegationByAddress(StakeAddress stakeKey,
-      String txHash, Timestamp fromTime, Timestamp toTime, Pageable pageable);
+  Page<StakeDelegationProjection> findDelegationByAddress(@Param("stakeKey") StakeAddress stakeKey,
+                                                          @Param("txHash") String txHash,
+                                                          @Param("fromTime") Timestamp fromTime,
+                                                          @Param("toTime") Timestamp toTime,
+                                                          Pageable pageable);
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, poolHash.view as poolId,"
       + " poolOfflineData.json as poolData, poolOfflineData.tickerName as tickerName,"
@@ -118,7 +122,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.pmrId ="
       + " (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
       + " WHERE delegation.address = :stakeKey AND tx.hash = :txHash")
-  Optional<StakeDelegationProjection> findDelegationByAddressAndTx(StakeAddress stakeKey, String txHash);
+  Optional<StakeDelegationProjection> findDelegationByAddressAndTx(@Param("stakeKey") StakeAddress stakeKey,
+                                                                   @Param("txHash") String txHash);
 
   @Query("SELECT poolHash.view as poolId, poolOfflineData.json as poolData,"
       + " poolOfflineData.tickerName as tickerName"
@@ -127,7 +132,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.pmrId ="
       + " (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
       + " WHERE delegation.id = (SELECT max(d2.id) FROM Delegation d2 where d2.address = :address )")
-  Optional<StakeDelegationProjection> findPoolDataByAddress(StakeAddress address);
+  Optional<StakeDelegationProjection> findPoolDataByAddress(@Param("address") StakeAddress address);
 
   @Query("SELECT poolHash.view as poolId, poolOfflineData.json as poolData,"
       + " poolOfflineData.tickerName as tickerName, stake.view as stakeAddress"
@@ -141,7 +146,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " INNER JOIN StakeAddress sa ON d.address = sa"
       + " WHERE sa.view IN :addresses"
       + " GROUP BY sa.view )")
-  List<StakeDelegationProjection> findPoolDataByAddressIn(Set<String> addresses);
+  List<StakeDelegationProjection> findPoolDataByAddressIn(@Param("addresses") Set<String> addresses);
 
   @Query("SELECT sum(txo.value) "
       + "FROM TxOut txo "

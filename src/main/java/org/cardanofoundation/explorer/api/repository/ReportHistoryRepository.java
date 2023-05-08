@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Long> {
 
@@ -20,6 +21,7 @@ public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Lo
       + " and (rh.createdAt >= :fromDate)"
       + " and (rh.createdAt <= :toDate)"
       + " and :reportName is null or rh.reportName like :reportName")
-  Page<ReportHistoryProjection> getRecordHistoryByFilter(String reportName, Timestamp fromDate,
-      Timestamp toDate, Pageable pageable);
+  Page<ReportHistoryProjection> getRecordHistoryByFilter(@Param("reportName")String reportName,
+                                                         @Param("fromDate") Timestamp fromDate,
+                                                         @Param("toDate") Timestamp toDate, Pageable pageable);
 }
