@@ -1,11 +1,14 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
@@ -24,6 +27,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.math.BigInteger;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/stakes")
@@ -129,6 +135,31 @@ public class StakeKeyController {
   @Operation(summary = "Get active stake, live stake and total stake")
   public ResponseEntity<StakeAnalyticResponse> getStakeAnalytics() {
     return ResponseEntity.ok(stakeService.getStakeAnalytics());
+  }
+
+
+  @GetMapping("/analytics-balance/{stakeKey}/{type}")
+  @LogMessage
+  @Operation(summary = "Get stake balance analytics")
+  public ResponseEntity<List<StakeAnalyticBalanceResponse>> getStakeBalanceAnalytics(
+          @PathVariable String stakeKey, @PathVariable
+  @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+    return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
+  }
+
+  @GetMapping("/analytics-reward/{stakeKey}")
+  @LogMessage
+  @Operation(summary = "Get stake balance analytics")
+  public ResponseEntity<List<StakeAnalyticRewardResponse>> getStakeRewardAnalytics(
+          @PathVariable String stakeKey) {
+    return ResponseEntity.ok(stakeService.getStakeRewardAnalytics(stakeKey));
+  }
+
+  @GetMapping("/min-max-balance/{stakeKey}")
+  @LogMessage
+  @Operation(summary = "Get the highest and lowest balance address")
+  public ResponseEntity<List<BigInteger>> getAddressMinMaxBalance(@PathVariable String stakeKey) {
+    return ResponseEntity.ok(stakeService.getAddressMinMaxBalance(stakeKey));
   }
 
 }
