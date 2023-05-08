@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportRequest;
@@ -17,7 +18,6 @@ import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
-import javax.servlet.http.HttpServletRequest;
 
 import lombok.RequiredArgsConstructor;
 
