@@ -1,22 +1,20 @@
 package com.cardano.explorer.util;
 
-import org.springframework.beans.factory.annotation.Value;
+import java.time.ZoneOffset;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataUtil {
-
-  public static String TIME_ZONE;
 
   public static boolean isNullOrEmpty(CharSequence cs) {
     int strLen;
@@ -50,7 +48,7 @@ public class DataUtil {
   public static String instantToString(Instant value, String pattern) {
     if (pattern != null) {
       DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
-      return dtf.format(LocalDateTime.ofInstant(value, ZoneId.of(TIME_ZONE)));
+      return dtf.format(LocalDateTime.ofInstant(value, ZoneOffset.UTC));
     }
     return "";
   }
@@ -84,11 +82,5 @@ public class DataUtil {
       return null;
     }
     return "%" + s + "%";
-  }
-
-
-  @Value("${application.time-zone}")
-  public void setTimeZone(String timeZone) {
-    DataUtil.TIME_ZONE = timeZone;
   }
 }
