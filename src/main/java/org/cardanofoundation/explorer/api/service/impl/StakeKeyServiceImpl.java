@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.Objects;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -59,6 +61,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,18 +85,20 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final EpochRepository epochRepository;
   private final EpochStakeRepository epochStakeRepository;
   private final AddressTxBalanceRepository addressTxBalanceRepository;
-
+  private final RedisTemplate<String, Object> redisTemplate;
   private static final int STAKE_ANALYTIC_NUMBER = 5;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
-    Page<TrxBlockEpochStake> trxBlockEpochStakePage = stakeRegistrationRepository.getDataForStakeRegistration(pageable);
+    Page<TrxBlockEpochStake> trxBlockEpochStakePage = stakeRegistrationRepository.getDataForStakeRegistration(
+        pageable);
     return new BaseFilterResponse<>(trxBlockEpochStakePage.map(StakeTxResponse::new));
   }
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyDeRegistration(Pageable pageable) {
-    Page<TrxBlockEpochStake> trxBlockEpochStakePage = stakeDeRegistrationRepository.getDataForStakeDeRegistration(pageable);
+    Page<TrxBlockEpochStake> trxBlockEpochStakePage = stakeDeRegistrationRepository.getDataForStakeDeRegistration(
+        pageable);
     return new BaseFilterResponse<>(trxBlockEpochStakePage.map(StakeTxResponse::new));
   }
 
@@ -126,7 +131,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
     stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
     stakeAddressResponse.setTotalStake(stakeTotalBalance.add(stakeAvailableReward)
-            .subtract(stakeRewardWithdrawn));
+        .subtract(stakeRewardWithdrawn));
     StakeDelegationProjection poolData = delegationRepository.findPoolDataByAddress(stakeAddress)
         .orElse(null);
     if (poolData != null) {
@@ -141,10 +146,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         .orElse(0L);
     Long txIdDeregister = stakeDeRegistrationRepository.findMaxTxIdByStake(stakeAddress)
         .orElse(0L);
-    if(txIdRegister.compareTo(txIdDeregister) > 0) {
+    if (txIdRegister.compareTo(txIdDeregister) > 0) {
       stakeAddressResponse.setStatus(StakeAddressStatus.ACTIVE);
-    }
-    else {
+    } else {
       stakeAddressResponse.setStatus(StakeAddressStatus.DEACTIVATED);
     }
     stakeAddressResponse.setRewardPools(poolUpdateRepository.findPoolByRewardAccount(stakeAddress));
@@ -153,7 +157,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<StakeDelegationProjection> getDelegationHistories(String stakeKey, Pageable pageable) {
+  public BaseFilterResponse<StakeDelegationProjection> getDelegationHistories(String stakeKey,
+      Pageable pageable) {
     Page<StakeDelegationProjection> delegations
         = delegationRepository.findDelegationByAddress(stakeKey, pageable);
     return new BaseFilterResponse<>(delegations);
@@ -167,7 +172,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     List<StakeHistoryProjection> stakeHistoryList =
         stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress);
-    stakeHistoryList.addAll(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress));
+    stakeHistoryList.addAll(
+        stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress));
     stakeHistoryList.sort((o1, o2) -> {
       if (o1.getBlockNo().equals(o2.getBlockNo())) {
         return o2.getBlockIndex() - o1.getBlockIndex();
@@ -184,7 +190,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(String stakeKey, Pageable pageable) {
+  public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(String stakeKey,
+      Pageable pageable) {
     Page<StakeWithdrawalProjection> withdrawalHistories
         = withdrawalRepository.getWithdrawalByAddress(stakeKey, pageable);
     return new BaseFilterResponse<>(withdrawalHistories);
@@ -222,8 +229,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
     var poolDataMap = poolData.stream().collect(Collectors.toMap(
         StakeDelegationProjection::getStakeAddress, Function.identity()));
-    for(var stake : stakeList) {
-      StakeDelegationProjection delegation =  poolDataMap.get(stake.getStakeAddress());
+    for (var stake : stakeList) {
+      StakeDelegationProjection delegation = poolDataMap.get(stake.getStakeAddress());
       StakeFilterResponse stakeResponse
           = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
       stakeResponse.setPoolName(getNameValueFromJson(delegation.getPoolData()));
@@ -245,12 +252,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public StakeAnalyticResponse getStakeAnalytics() {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
-    response.setLiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch).orElse(BigInteger.ZERO));
-    if(1 > currentEpoch) {
-      response.setActiveStake(BigInteger.ZERO);
-    } else {
-      response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1).orElse(BigInteger.ZERO));
-    }
+    response.setActiveStake(
+        epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch).orElse(BigInteger.ZERO));
+    Object liveStake = redisTemplate.opsForValue().get(CommonConstant.REDIS_TOTAL_LIVE_STAKE);
+    response.setLiveStake(
+        Objects.nonNull(liveStake) ? new BigInteger(String.valueOf(liveStake)) : BigInteger.ZERO);
     return response;
   }
 
@@ -306,7 +312,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     responses = new ArrayList<>();
     int startEpoch = rewardMap.keySet().stream().mapToInt(v -> v).min().orElse(0);
     int currentEpoch = epochRepository.findCurrentEpochNo().orElse(2) - 2;
-    for (int epoch = startEpoch ; epoch <= currentEpoch; epoch++) {
+    for (int epoch = startEpoch; epoch <= currentEpoch; epoch++) {
       StakeAnalyticRewardResponse response;
       response = new StakeAnalyticRewardResponse(epoch,
           rewardMap.getOrDefault(epoch, BigInteger.ZERO));
@@ -320,19 +326,19 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     StakeAddress stake = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     List<BigInteger> balanceList = addressTxBalanceRepository.findAllByStakeAddress(stake);
-    if(balanceList.isEmpty()) {
+    if (balanceList.isEmpty()) {
       return new ArrayList<>();
     }
     BigInteger maxBalance = balanceList.get(0);
     BigInteger minBalance = balanceList.get(0);
     BigInteger sumBalance = balanceList.get(0);
     balanceList.remove(0);
-    for(BigInteger balance : balanceList) {
+    for (BigInteger balance : balanceList) {
       sumBalance = sumBalance.add(balance);
-      if(sumBalance.compareTo(maxBalance) > 0) {
+      if (sumBalance.compareTo(maxBalance) > 0) {
         maxBalance = sumBalance;
       }
-      if(sumBalance.compareTo(minBalance) < 0) {
+      if (sumBalance.compareTo(minBalance) < 0) {
         minBalance = sumBalance;
       }
     }
