@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
+import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
@@ -46,10 +48,9 @@ public class PoolReportController {
   private final PoolReportService poolReportService;
 
   @PostMapping("create")
-  public ResponseEntity<Boolean> createPoolReport(
-      @RequestBody PoolReportCreateRequest poolReportCreateRequest, HttpServletRequest request) {
+  public ResponseEntity<Boolean> createPoolReport(@RequestBody  String body, HttpServletRequest request) {
     String username = request.getAttribute("username").toString();
-    return ResponseEntity.ok(poolReportService.create(poolReportCreateRequest, username));
+    return ResponseEntity.ok(poolReportService.create(new Gson().fromJson(body, PoolReportCreateRequest.class), username));
   }
 
   @GetMapping("list")
