@@ -65,22 +65,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   public static final String DATE_TIME_PATTERN = "yyyyMMdd";
-  public static final String ADA_TRANSFER_TITLE = "ADA Transfer";
-  public static final String STAKE_KEY_LIFE_CYCLE_TITLE = "Stake Key Life Cycle";
   public static final String STAKE_KEY_REGISTRATION_TITLE = "Stake Key Registration";
   public static final String DELEGATION_HISTORY_TITLE = "Delegation History";
   public static final String REWARDS_DISTRIBUTION_TITLE = "Rewards Distribution";
   public static final String WITHDRAWAL_HISTORY_TITLE = "Withdrawal History";
   public static final String STAKE_KEY_DEREGISTRATION_TITLE = "Stake Key Deregistration";
   public static final String WALLET_ACTIVITY_TITLE = "Wallet Activity";
-  public static final String REWARD_ACTIVITY_TITLE = "Reward Activity";
-  public static final String MIN_TIME = "1970-01-01 00:00:00";
   public static final String CSV_EXTENSION = ".csv";
   public static final String EXCEL_EXTENSION = ".xlsx";
   private final Pageable defaultPageable = PageRequest.of(0, 1000, Sort.by("time").descending());
   private final StakeKeyLifeCycleService stakeKeyLifeCycleService;
   private final StakeKeyReportHistoryRepository stakeKeyReportHistoryRepository;
-  private final ReportHistoryRepository reportHistoryRepository;
   private final StakeKeyReportMapper stakeKeyReportMapper;
   private final StakeAddressRepository stakeAddressRepository;
   private final AmazonS3 s3Client;
@@ -122,33 +117,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     return new BaseFilterResponse<>(stakeKeyReportHistoriesResponse);
   }
-
-  @Override
-  public BaseFilterResponse<ReportHistoryResponse> getReportHistory(
-      ReportHistoryFilterRequest filterRequest, String username, Pageable pageable) {
-    String reportName = DataUtil.makeLikeQuery(filterRequest.getReportName());
-    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
-    Timestamp toDate = Timestamp.from(Instant.now());
-    if (!DataUtil.isNullOrEmpty(filterRequest.getFromDate())) {
-      fromDate = Timestamp.from(filterRequest.getFromDate().toInstant());
-    }
-    if (!DataUtil.isNullOrEmpty(filterRequest.getToDate())) {
-      toDate = Timestamp.from(filterRequest.getToDate().toInstant());
-    }
-    Page<ReportHistoryResponse> reportHistoryProjections = reportHistoryRepository.getRecordHistoryByFilter(
-            reportName, fromDate, toDate, username, pageable)
-        .map(reportHistoryProjection -> ReportHistoryResponse.builder()
-            .stakeKeyReportId(reportHistoryProjection.getStakeKeyReportId())
-            .poolReportId(reportHistoryProjection.getPoolReportId())
-            .reportName(reportHistoryProjection.getReportName())
-            .status(reportHistoryProjection.getStatus())
-            .type(reportHistoryProjection.getType())
-            .createdAt(reportHistoryProjection.getCreatedAt())
-            .build());
-
-    return new BaseFilterResponse<>(reportHistoryProjections);
-  }
-
   @Override
   public BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistoryByStakeKey(
       String stakeKey, String username, Pageable pageable) {
@@ -310,13 +278,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     }
   }
 
-  @Scheduled(fixedDelay = 1000 * 3)
-  public void exportStakeKeyReport() {
-    List<StakeKeyReportHistory> stakeKeyReportHistories = stakeKeyReportHistoryRepository
-        .findByStorageKeyNull();
-    stakeKeyReportHistories.forEach(this::exportStakeKeyReport);
-  }
-
   private List<ExportContent> getExportContents(StakeKeyReportHistory stakeKeyReportHistory) {
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
         stakeKeyReportHistory);
@@ -326,8 +287,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getIsADATransfer())) {
       exportContents.add(exportStakeWalletActivitys(stakeKeyReportHistory.getStakeKey(),
                                                     stakeKeyReportHistory.getIsFeesPaid()));
-      exportContents.add(exportStakeRewardActivitys(stakeKeyReportHistory.getStakeKey()));
-
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventRegistration())) {
@@ -372,17 +331,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         .headerTitle(WALLET_ACTIVITY_TITLE)
         .lstColumn(buildStakeWalletActivityColumn(isFeesPaid))
         .lstData(stakeWalletActivitys)
-        .build();
-  }
-
-  private ExportContent exportStakeRewardActivitys(String stakeKey) {
-    List<StakeRewardActivityResponse> stakeRewardActivitys = stakeKeyLifeCycleService.getStakeRewardActivities(
-        stakeKey, defaultPageable).getData();
-    return ExportContent.builder()
-        .clazz(StakeRewardActivityResponse.class)
-        .headerTitle(REWARD_ACTIVITY_TITLE)
-        .lstColumn(buildStakeRewardActivityColumn())
-        .lstData(stakeRewardActivitys)
         .build();
   }
 

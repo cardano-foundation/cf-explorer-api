@@ -30,4 +30,6 @@ public interface StakeKeyReportHistoryRepository extends
       + " left join ReportHistory rh on srh.reportHistory.id = rh.id"
       + " WHERE rh.storageKey is null or rh.storageKey = ''")
   List<StakeKeyReportHistory> findByStorageKeyNull();
+
+  StakeKeyReportHistory findByReportHistoryId(@Param("reportHistoryId") Long reportHistoryId);
 }

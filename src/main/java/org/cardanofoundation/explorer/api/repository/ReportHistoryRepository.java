@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.repository;
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,4 +29,6 @@ public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Lo
                                                          @Param("toDate") Timestamp toDate,
                                                          @Param("username") String username,
                                                          Pageable pageable);
+
+  List<ReportHistory> findByStorageKeyIsNullOrderByIdAsc();
 }
