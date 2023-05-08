@@ -253,6 +253,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
           stakeWalletActivity.setTxHash(txMap.get(item.getTxId()).getHash());
           stakeWalletActivity.setAmount(item.getAmount());
           stakeWalletActivity.setTime(item.getTime().toLocalDateTime());
+          stakeWalletActivity.setFee(txMap.get(item.getTxId()).getFee());
           if (Boolean.TRUE.equals(txMap.get(item.getTxId()).getValidContract())) {
             stakeWalletActivity.setStatus(TxStatus.SUCCESS);
           } else {

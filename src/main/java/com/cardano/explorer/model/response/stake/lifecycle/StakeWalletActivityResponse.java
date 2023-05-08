@@ -14,6 +14,7 @@ public class StakeWalletActivityResponse implements Serializable {
 
   private String txHash;
   private BigInteger amount;
+  private BigInteger fee;
   private LocalDateTime time;
   private StakeTxType type;
   private TxStatus status;
