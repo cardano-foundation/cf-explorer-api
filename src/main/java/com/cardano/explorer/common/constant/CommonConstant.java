@@ -34,4 +34,6 @@ public class CommonConstant {
   public static final String POOL_STATUS_RETIRING = "RETIRING";
 
   public static final Integer COLUMN_WITH = 255;
+
+  public static final String JWT = "jwt:blacklist:";
 }

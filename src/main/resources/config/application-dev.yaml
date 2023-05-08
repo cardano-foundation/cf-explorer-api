@@ -84,3 +84,7 @@ cloud:
       path-style:
         enabled: true
       endpoint: ${STORAGE_ENDPOINT:http://172.16.1.230:9000}
+
+rsa:
+  key:
+    path: /key/public_key
