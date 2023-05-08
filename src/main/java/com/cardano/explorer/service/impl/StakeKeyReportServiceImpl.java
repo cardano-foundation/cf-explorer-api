@@ -324,12 +324,10 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     List<ExportContent> exportContents = new ArrayList<>();
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getIsADATransfer())) {
-      exportContents.add(exportStakeWalletActivitys(stakeKeyReportHistory.getStakeKey()));
+      exportContents.add(exportStakeWalletActivitys(stakeKeyReportHistory.getStakeKey(),
+                                                    stakeKeyReportHistory.getIsFeesPaid()));
       exportContents.add(exportStakeRewardActivitys(stakeKeyReportHistory.getStakeKey()));
 
-      if (Boolean.TRUE.equals(stakeKeyReportHistory.getIsFeesPaid())) {
-        // TODO: export fees paid
-      }
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventRegistration())) {
@@ -366,13 +364,13 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     return stakeLifeCycleFilterRequest;
   }
 
-  private ExportContent exportStakeWalletActivitys(String stakeKey) {
+  private ExportContent exportStakeWalletActivitys(String stakeKey, Boolean isFeesPaid) {
     List<StakeWalletActivityResponse> stakeWalletActivitys = stakeKeyLifeCycleService.getStakeWalletActivities(
         stakeKey, defaultPageable).getData();
     return ExportContent.builder()
         .clazz(StakeWalletActivityResponse.class)
         .headerTitle(WALLET_ACTIVITY_TITLE)
-        .lstColumn(buildStakeWalletActivityColumn())
+        .lstColumn(buildStakeWalletActivityColumn(isFeesPaid))
         .lstData(stakeWalletActivitys)
         .build();
   }
@@ -508,7 +506,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     return columns;
   }
 
-  private List<ExportColumn> buildStakeWalletActivityColumn() {
+  private List<ExportColumn> buildStakeWalletActivityColumn(Boolean isFeePaid) {
     List<ExportColumn> columns = new ArrayList<>();
     columns.add(new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE,
                                  Alignment.LEFT, 60));
@@ -516,6 +514,10 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
                                  Alignment.CENTER));
     columns.add(new ExportColumn(ColumnFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_ADA_TITLE,
                                  Alignment.RIGHT));
+    if (Boolean.TRUE.equals(isFeePaid)) {
+      columns.add(new ExportColumn(ColumnFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE,
+                                   Alignment.RIGHT));
+    }
     columns.add(new ExportColumn(ColumnFieldEnum.TYPE_COLUMN, ColumnTitleEnum.TX_TYPE_TITLE,
                                  Alignment.CENTER));
     columns.add(new ExportColumn(ColumnFieldEnum.STATUS_COLUMN, ColumnTitleEnum.STATUS_TITLE,
