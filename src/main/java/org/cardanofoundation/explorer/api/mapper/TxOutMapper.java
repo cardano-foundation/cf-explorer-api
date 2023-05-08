@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface TxOutMapper {
 
+  @Mapping(target = "stakeAddress", source = "stakeView")
   TxOutResponse fromAddressInputOutput(AddressInputOutputProjection addressInputOutputProjection);
 
   @Mapping(target = "address", source = "stakeAddress")

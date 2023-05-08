@@ -534,13 +534,88 @@ public class TxServiceImpl implements TxService {
         .outputs(uTxOOutputs)
         .build();
     txResponse.setUTxOs(uTxOs);
-    SummaryResponse summary = SummaryResponse.builder()
-        .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
-        .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
-        .build();
+
+    List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
+    List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
+
+    Pair<List<TxOutResponse>, List<TxOutResponse>> newData =
+        removeDuplicateTx(addressesInfoInput, addressesInfoOutput);
+
+    SummaryResponse summary =
+        SummaryResponse.builder()
+            .stakeAddressTxInputs(newData.getFirst())
+            .stakeAddressTxOutputs(newData.getSecond())
+            .build();
 
     txResponse.setSummary(summary);
 
+  }
+
+  /**
+   * Combine 2 list input-tx and output-tx Group list tx by address(min 1 element, max 2 elements)
+   * Find TX with max value of each list tx and change the tx value = (max value - second value)
+   * remove the TX with second value if need
+   */
+  private Pair<List<TxOutResponse>, List<TxOutResponse>> removeDuplicateTx(
+      List<TxOutResponse> addressesInputs, List<TxOutResponse> addressesOutputs) {
+    addressesInputs.forEach(txOutResponse -> txOutResponse.setInput(true));
+    addressesOutputs.forEach(txOutResponse -> txOutResponse.setInput(false));
+
+    Map<String, List<TxOutResponse>> unionTxsByAddress =
+        Stream.concat(addressesInputs.stream(), addressesOutputs.stream())
+            .collect(
+                Collectors.groupingBy(
+                    TxOutResponse::getAddress, Collectors.toCollection(ArrayList::new)));
+
+    unionTxsByAddress.forEach(
+        (address, txs) -> {
+          if (txs.size() > 1) {
+            BigInteger valueIdxFirst = txs.get(0).getValue();
+            BigInteger valueIdxSecond = txs.get(1).getValue();
+
+            BigInteger max =
+                Stream.of(valueIdxFirst, valueIdxSecond).max(BigInteger::compareTo).get();
+            BigInteger subtract;
+
+            if (max.compareTo(valueIdxFirst) == 0) {
+              subtract = valueIdxFirst.subtract(valueIdxSecond);
+            } else {
+              subtract = valueIdxSecond.subtract(valueIdxFirst);
+              txs.set(0, txs.get(1));
+            }
+
+            txs.get(0).setValue(subtract);
+            txs.get(0).setChangeValue(true);
+          }
+        });
+
+    List<TxOutResponse> newTxOInputs = filterTxDuplicate(unionTxsByAddress, addressesInputs, true);
+    List<TxOutResponse> newTxOOutputs =
+        filterTxDuplicate(unionTxsByAddress, addressesOutputs, false);
+    return Pair.of(newTxOInputs, newTxOOutputs);
+  }
+
+
+  private List<TxOutResponse> filterTxDuplicate(
+      Map<String, List<TxOutResponse>> unionTxsByAddress,
+      List<TxOutResponse> txs,
+      boolean isInput) {
+    List<TxOutResponse> newTxOs = new ArrayList<>();
+    txs.forEach(
+        txOutResponse -> {
+          List<TxOutResponse> txsSameAddress = unionTxsByAddress.get(txOutResponse.getAddress());
+          TxOutResponse newValTx = txsSameAddress.get(0);
+
+          if (txsSameAddress.size() > 1) {
+            boolean canAdd = newValTx.isChangeValue() && isInput == newValTx.isInput();
+            if (canAdd) {
+              newTxOs.add(newValTx);
+            }
+          } else {
+            newTxOs.add(txOutResponse);
+          }
+        });
+    return newTxOs;
   }
 
   /**
