@@ -22,7 +22,7 @@ public class PoolReportCreateRequest {
 
   private Integer[] epochRanges;
 
-  private PoolReportEvent[] event;
+  private String[] event;
 
   public PoolReport toEntity(ReportHistory reportHistory, String username) {
     return PoolReport.builder()
@@ -32,8 +32,7 @@ public class PoolReportCreateRequest {
         .reportName(this.reportName)
         .beginEpoch(this.epochRanges[0])
         .endEpoch(this.epochRanges[1])
-        .event(Arrays.stream(this.event).map(PoolReportEvent::getValue)
-            .collect(Collectors.joining(",")))
+        .event(String.join(",", event))
         .reportHistory(reportHistory)
         .username(username)
         .build();
