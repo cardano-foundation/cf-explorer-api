@@ -69,8 +69,6 @@ application:
     interval-time: 60
     base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
 
-  time-zone: ${TIME_ZONE:GMT+1}
-
 cloud:
   aws:
     credentials:

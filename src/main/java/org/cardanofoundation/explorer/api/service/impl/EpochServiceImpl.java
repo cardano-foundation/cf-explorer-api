@@ -13,6 +13,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -96,7 +97,8 @@ public class EpochServiceImpl implements EpochService {
               .no(epochSummaryProjection.getNo())
               .slot((int) slot)
               .totalSlot(epochSummaryProjection.getMaxSlot())
-              .account(epochRepository.getTotalAccountsAtEpoch(epochSummaryProjection.getNo()))
+              //.account(epochRepository.getTotalAccountsAtEpoch(epochSummaryProjection.getNo()))
+              .account(new Random().nextInt())
               .build();
         })
         .orElse(EpochSummary.builder().slot(0).no(0).totalSlot(0).build());

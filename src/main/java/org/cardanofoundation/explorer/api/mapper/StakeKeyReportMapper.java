@@ -4,10 +4,11 @@ import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportReq
 import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
 import java.sql.Timestamp;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", imports={Timestamp.class})
+@Mapper(componentModel = "spring", imports = {Timestamp.class})
 public interface StakeKeyReportMapper {
 
 
@@ -15,10 +16,10 @@ public interface StakeKeyReportMapper {
   @Mapping(target = "reportName", source = "stakeKeyReportHistory.reportHistory.reportName")
   @Mapping(target = "status", source = "stakeKeyReportHistory.reportHistory.status")
   @Mapping(target = "type", source = "stakeKeyReportHistory.reportHistory.type")
-  StakeKeyReportHistoryResponse toStakeKeyReportHistoryResponse(StakeKeyReportHistory stakeKeyReportHistory);
+  StakeKeyReportHistoryResponse toStakeKeyReportHistoryResponse(
+      StakeKeyReportHistory stakeKeyReportHistory);
 
   @Mapping(target = "reportHistory.createdAt", expression = "java(new Timestamp(System.currentTimeMillis()))")
-  @Mapping(target = "reportHistory.username", source = "stakeKey")
   @Mapping(target = "reportHistory.reportName", source = "reportName")
   StakeKeyReportHistory toStakeKeyReportHistory(StakeKeyReportRequest stakeKeyReportRequest);
 
