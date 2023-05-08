@@ -1,13 +1,13 @@
 # Infrastructure domain
 infrastructure:
-  host: 10.4.10.231
+  host: 10.4.10.112
 
 spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:54321/explorer?currentSchema=preprod
-    username: read
+    url: jdbc:postgresql://${infrastructure.host}:54321/explorer?currentSchema=mainnet
+    username: cardano_read
     password: 1
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
@@ -39,7 +39,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: preprod
+        default_schema: mainnet
         show_sql: true
         format_sql: true
   flyway:
@@ -64,12 +64,25 @@ redis:
     - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
       port: 26379
 
-
+cloud:
+  aws:
+    credentials:
+      access-key: ${MINIO_ACCESS_KEY:miniominio}
+      secret-key: ${MINIO_SECRET_KEY:sekritsekrit}
+    region:
+      static: null
+    s3:
+      bucket:
+        name: ${BUCKET_NAME:cardano-explorer-api-storage}
+      path-style:
+        enabled: true
+      endpoint: ${STORAGE_ENDPOINT:http://localhost:9001}
 application:
   network: ${SCHEMA:mainnet}
   api.coin.gecko.market:
     interval-time: 60
     base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
+  time-zone: ${TIME_ZONE:GMT+1}
 
 rsa:
   key:
