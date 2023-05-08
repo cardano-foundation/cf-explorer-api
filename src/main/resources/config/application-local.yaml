@@ -70,3 +70,7 @@ application:
   api.coin.gecko.market:
     interval-time: 60
     base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
+
+rsa:
+  key:
+    path: /key/public_key
