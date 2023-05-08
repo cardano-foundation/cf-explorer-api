@@ -17,4 +17,6 @@ public class TxResponse {
   private List<WithdrawalResponse> withdrawals;
   private List<TxDelegationResponse> delegations;
   private List<TxMintingResponse> mints;
+  private List<TxStakeCertificate> stakeCertificates;
+  private List<TxPoolCertificate> poolCertificates;
 }

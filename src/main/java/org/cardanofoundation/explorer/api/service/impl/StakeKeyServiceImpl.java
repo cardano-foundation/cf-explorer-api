@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AddressMapper;
@@ -9,9 +10,7 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStake;
+import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
@@ -27,9 +26,12 @@ import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -58,10 +60,13 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final TreasuryRepository treasuryRepository;
   private final ReserveRepository reserveRepository;
   private final PoolUpdateRepository poolUpdateRepository;
+  private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
   private final EpochStakeRepository epochStakeRepository;
+
+  private static final int STAKE_ANALYTIC_NUMBER = 5;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -228,6 +233,92 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1).orElse(BigInteger.ZERO));
     }
     return response;
+  }
+
+  @Override
+  public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey,
+                                                                     AnalyticType type) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+            () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
+    LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+    List<LocalDate> dates = new ArrayList<>();
+    switch (type) {
+      case ONE_WEEK:
+        var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
+          dates.add(currentWeek.minusWeeks(i));
+        }
+        break;
+      case ONE_MONTH:
+        var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
+          dates.add(currentMonth.minusMonths(i));
+        }
+        break;
+      case THREE_MONTH:
+        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
+          dates.add(currentDate.minusMonths(i * 3L));
+        }
+        break;
+      default:
+        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
+          dates.add(currentDate.minusDays(i));
+        }
+    }
+    dates.forEach(
+            item -> {
+              StakeAnalyticBalanceResponse response = new StakeAnalyticBalanceResponse();
+              var balance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(stakeAddress,
+                      Timestamp.valueOf(item.atTime(LocalTime.MAX))).orElse(BigInteger.ZERO);
+              response.setValue(balance);
+              response.setDate(item);
+              responses.add(response);
+            }
+    );
+    return responses;
+  }
+
+  @Override
+  public List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey) {
+    List<StakeAnalyticRewardResponse> responses = rewardRepository.findRewardByStake(stakeKey);
+    Map<Integer, BigInteger> rewardMap = responses.stream().collect(Collectors.toMap(
+            StakeAnalyticRewardResponse::getEpoch, StakeAnalyticRewardResponse::getValue));
+    responses = new ArrayList<>();
+    int startEpoch = rewardMap.keySet().stream().mapToInt(v -> v)
+            .min().orElse(0);
+    int currentEpoch = epochRepository.findCurrentEpochNo().orElse(2) - 2;
+    for (int epoch = startEpoch ; epoch <= currentEpoch; epoch++) {
+      StakeAnalyticRewardResponse response;
+      response = new StakeAnalyticRewardResponse(epoch,
+              rewardMap.getOrDefault(epoch, BigInteger.ZERO));
+      responses.add(response);
+    }
+    return responses;
+  }
+
+  @Override
+  public List<BigInteger> getAddressMinMaxBalance(String stakeKey) {
+    StakeAddress stake = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+            () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    List<BigInteger> balanceList = addressTxBalanceRepository.findAllByStakeAddress(stake);
+    if(balanceList.isEmpty()) {
+      return new ArrayList<>();
+    }
+    BigInteger maxBalance = balanceList.get(0);
+    BigInteger minBalance = balanceList.get(0);
+    BigInteger sumBalance = balanceList.get(0);
+    balanceList.remove(0);
+    for(BigInteger balance : balanceList) {
+      sumBalance = sumBalance.add(balance);
+      if(sumBalance.compareTo(maxBalance) > 0) {
+        maxBalance = sumBalance;
+      }
+      if(sumBalance.compareTo(minBalance) < 0) {
+        minBalance = sumBalance;
+      }
+    }
+    return Arrays.asList(minBalance, maxBalance);
   }
 
   private String getNameValueFromJson(String json) {
