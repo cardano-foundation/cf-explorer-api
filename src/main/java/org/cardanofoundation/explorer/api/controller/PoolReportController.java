@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
@@ -46,36 +47,43 @@ public class PoolReportController {
 
   @PostMapping("create")
   public ResponseEntity<Boolean> createPoolReport(
-      @RequestBody PoolReportCreateRequest poolReportCreateRequest) {
-    return ResponseEntity.ok(poolReportService.create(poolReportCreateRequest));
+      @RequestBody PoolReportCreateRequest poolReportCreateRequest, HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.create(poolReportCreateRequest, username));
   }
 
   @GetMapping("list")
   public ResponseEntity<BaseFilterResponse<PoolReportListResponse>> listPoolReport(
       @ParameterObject @PageableDefault(size = 10, page = 0, sort = {"id"},
-          direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.list(pageable));
+          direction = Sort.Direction.DESC) Pageable pageable,
+      HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.list(pageable, username));
   }
 
   @GetMapping("detail/{reportId}/full")
   public ResponseEntity<PoolReportDetailResponse> detailFullPoolReport(
       @PathVariable String reportId,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.detailFull(reportId, pageable));
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.detailFull(reportId, pageable, username));
   }
 
   @GetMapping("detail/{reportId}/epoch-size")
   public ResponseEntity<BaseFilterResponse<PoolReportDetailResponse.EpochSize>> detailEpochSizePoolReport(
       @PathVariable String reportId,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.detailEpochSize(reportId, pageable));
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.detailEpochSize(reportId, pageable, username));
   }
 
   @GetMapping("detail/{reportId}/export")
   public ResponseEntity<Resource> export(@PathVariable Long reportId,
-      @RequestParam(required = false) String fileExtension) {
-    //TODO add processing
-    PoolReportExportResponse response = poolReportService.export(reportId, fileExtension);
+      @RequestParam(required = false) String fileExtension, HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    PoolReportExportResponse response = poolReportService.export(reportId, fileExtension, username);
     return ResponseEntity.ok()
         .contentLength(response.getByteArrayInputStream().available())
         .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -87,35 +95,40 @@ public class PoolReportController {
   @GetMapping(value = "detail/{reportId}/pool-registration")
   public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> detailPoolRegistration(
           @PathVariable String reportId,
-          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.fetchPoolRegistration(reportId, pageable));
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable, HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.fetchPoolRegistration(reportId, pageable, username));
   }
 
   @GetMapping(value = "detail/{reportId}/pool-update")
   public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> detailPoolUpdate(
           @PathVariable String reportId,
-          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.fetchPoolUpdate(reportId, pageable));
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable, HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.fetchPoolUpdate(reportId, pageable, username));
   }
 
   @GetMapping(value = "detail/{reportId}/rewards-distribution")
   public ResponseEntity<BaseFilterResponse<RewardResponse>> detailRewardsDistribution(
           @PathVariable String reportId,
-          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.fetchRewardsDistribution(reportId, pageable));
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable, HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.fetchRewardsDistribution(reportId, pageable, username));
   }
 
   @GetMapping(value = "detail/{reportId}/deregistration")
   public ResponseEntity<BaseFilterResponse<DeRegistrationResponse>> detailDeregistration(
           @PathVariable String reportId,
-          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.fetchDeregistraion(reportId, pageable));
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable, HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.fetchDeregistraion(reportId, pageable, username));
   }
 
   @GetMapping("detail/{reportId}")
-  public ResponseEntity<PoolReport> detailPoolReport(@PathVariable String reportId
+  public ResponseEntity<PoolReport> detailPoolReport(@PathVariable String reportId, HttpServletRequest request
   ) {
-    return ResponseEntity.ok(poolReportService.detail(reportId));
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(poolReportService.detail(reportId, username));
   }
 
 }

@@ -14,26 +14,26 @@ import org.springframework.data.domain.Pageable;
 
 public interface PoolReportService {
 
-  Boolean create(PoolReportCreateRequest poolReportCreateRequest);
+  Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username);
 
-  BaseFilterResponse<PoolReportListResponse> list(Pageable pageable);
+  BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username);
 
-  PoolReportDetailResponse detailFull(String reportId, Pageable pageable);
+  PoolReportDetailResponse detailFull(String reportId, Pageable pageable, String username);
 
   BaseFilterResponse<PoolReportDetailResponse.EpochSize> detailEpochSize(String reportId,
-      Pageable pageable);
+      Pageable pageable, String username);
 
-  PoolReportExportResponse export(Long reportId, String fileExtension);
+  PoolReportExportResponse export(Long reportId, String fileExtension, String username);
 
   BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(String reportId,
-      Pageable pageable);
+      Pageable pageable, String username);
 
-  BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(String reportId, Pageable pageable);
+  BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(String reportId, Pageable pageable, String username);
 
-  BaseFilterResponse<RewardResponse> fetchRewardsDistribution(String reportId, Pageable pageable);
+  BaseFilterResponse<RewardResponse> fetchRewardsDistribution(String reportId, Pageable pageable, String username);
 
   BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(String reportId,
-      Pageable pageable);
+      Pageable pageable, String username);
 
-  PoolReport detail(String reportId);
+  PoolReport detail(String reportId, String username);
 }
