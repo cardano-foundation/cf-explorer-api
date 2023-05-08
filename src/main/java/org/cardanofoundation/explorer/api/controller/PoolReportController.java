@@ -13,7 +13,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportL
 import org.cardanofoundation.explorer.api.service.PoolReportService;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolReport;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
