@@ -1,6 +1,10 @@
 package org.cardanofoundation.explorer.api.model.response.pool.report;
 
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.util.report.ColumnFieldEnum;
 import org.cardanofoundation.explorer.api.util.report.ColumnTitleEnum;
@@ -22,13 +26,13 @@ public class PoolReportDetailResponse {
 
   private BaseFilterResponse<EpochSize> epochSizes;
 
-  private BaseFilterResponse<PoolRegistration> poolRegistrations;
+  private BaseFilterResponse<TabularRegisResponse> poolRegistrations;
 
-  private BaseFilterResponse<PoolUpdate> poolUpdates;
+  private BaseFilterResponse<PoolUpdateDetailResponse> poolUpdates;
 
-  private BaseFilterResponse<RewardDistribution> rewardDistributions;
+  private BaseFilterResponse<RewardResponse> rewardDistributions;
 
-  private BaseFilterResponse<Deregistration> deregistrations;
+  private BaseFilterResponse<DeRegistrationResponse> deregistrations;
 
   @Data
   @AllArgsConstructor
@@ -73,14 +77,14 @@ public class PoolReportDetailResponse {
 
     private String owner;
 
-    public static PoolRegistration toDomain(PoolReportProjection projection) {
+    public static PoolRegistration toDomain(TabularRegisResponse response) {
       PoolRegistration result = PoolRegistration.builder()
-          .txHash(projection.getTxnHash())
-          .time(projection.getTimestamp())
-          .adaValueHold(new BigDecimal(projection.getAdaValueHold()))
-          .adaValueFee(new BigDecimal(projection.getAdaValueFees()))
-          .owner(projection.getOwner())
-          .build();
+              .txHash(response.getTxHash())
+              .time(response.getTime())
+              .adaValueHold(new BigDecimal(response.getDeposit()))
+              .adaValueFee(new BigDecimal(response.getFee()))
+              .owner(String.join("\n", response.getStakeKeys()))
+              .build();
       result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
       return result;
     }
@@ -119,13 +123,13 @@ public class PoolReportDetailResponse {
 
     private BigDecimal adaValue;
 
-    public static PoolUpdate toDomain(PoolReportProjection projection) {
+    public static PoolUpdate toDomain(PoolUpdateDetailResponse response) {
       PoolUpdate result = PoolUpdate.builder()
-          .txHash(projection.getTxnHash())
-          .time(projection.getTimestamp())
-          .adaValueHold(new BigDecimal(projection.getAdaValueHold()))
-          .adaValueFees(new BigDecimal(projection.getAdaValueFees()))
-          .build();
+              .txHash(response.getTxHash())
+              .time(response.getTime())
+              .adaValueHold(new BigDecimal(response.getPledge()))
+              .adaValueFees(new BigDecimal(response.getFee()))
+              .build();
       result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFees()));
       return result;
     }
@@ -160,13 +164,13 @@ public class PoolReportDetailResponse {
 
     private String rewardAccount;
 
-    public static RewardDistribution toDomain(PoolReportProjection projection) {
+    public static RewardDistribution toDomain(RewardResponse response) {
       return RewardDistribution.builder()
-          .epoch(projection.getEpochNo().toString())
-          .time(projection.getTimestamp())
-          .operatorReward(new BigDecimal(projection.getOperatorReward()))
-          .rewardAccount(projection.getRewardAccount())
-          .build();
+              .epoch(response.getEpochNo().toString())
+              .time(response.getTime())
+              .operatorReward(new BigDecimal(response.getAmount()))
+              .rewardAccount(response.getRewardAccount())
+              .build();
     }
 
     public static List<ExportColumn> designFile() {
@@ -201,14 +205,14 @@ public class PoolReportDetailResponse {
 
     private String owner;
 
-    public static Deregistration toDomain(PoolReportProjection projection) {
+    public static Deregistration toDomain(DeRegistrationResponse response) {
       Deregistration result = Deregistration.builder()
-          .txHash(projection.getTxnHash())
-          .time(projection.getTimestamp())
-          .adaValueHold(new BigDecimal(projection.getAdaValueHold()))
-          .adaValueFees(new BigDecimal(projection.getAdaValueFees()))
-          .owner(projection.getOwner())
-          .build();
+              .txHash(response.getTxHash())
+              .time(response.getTime())
+              .adaValueHold(new BigDecimal(response.getPoolHold()))
+              .adaValueFees(new BigDecimal(response.getFee()))
+              .owner(String.join("\n", response.getStakeKeys()))
+              .build();
       result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFees()));
       return result;
     }

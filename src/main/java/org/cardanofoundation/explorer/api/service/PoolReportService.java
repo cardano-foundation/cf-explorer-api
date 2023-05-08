@@ -25,14 +25,14 @@ public interface PoolReportService {
 
   PoolReportExportResponse export(Long reportId, String fileExtension);
 
-  BaseFilterResponse<TabularRegisResponse> detailPoolRegistration(String reportId,
+  BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(String reportId,
       Pageable pageable);
 
-  BaseFilterResponse<PoolUpdateDetailResponse> detailPoolUpdate(String reportId, Pageable pageable);
+  BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(String reportId, Pageable pageable);
 
-  BaseFilterResponse<RewardResponse> detailRewardsDistribution(String reportId, Pageable pageable);
+  BaseFilterResponse<RewardResponse> fetchRewardsDistribution(String reportId, Pageable pageable);
 
-  BaseFilterResponse<DeRegistrationResponse> detailDeregistraion(String reportId,
+  BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(String reportId,
       Pageable pageable);
 
   PoolReport detail(String reportId);
