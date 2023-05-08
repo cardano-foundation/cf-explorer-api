@@ -86,30 +86,30 @@ public class PoolReportController {
 
   @GetMapping(value = "detail/{reportId}/pool-registration")
   public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> detailPoolRegistration(
-      @PathVariable String reportId,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.detailPoolRegistration(reportId, pageable));
+          @PathVariable String reportId,
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolReportService.fetchPoolRegistration(reportId, pageable));
   }
 
   @GetMapping(value = "detail/{reportId}/pool-update")
   public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> detailPoolUpdate(
-      @PathVariable String reportId,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.detailPoolUpdate(reportId, pageable));
+          @PathVariable String reportId,
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolReportService.fetchPoolUpdate(reportId, pageable));
   }
 
   @GetMapping(value = "detail/{reportId}/rewards-distribution")
   public ResponseEntity<BaseFilterResponse<RewardResponse>> detailRewardsDistribution(
-      @PathVariable String reportId,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.detailRewardsDistribution(reportId, pageable));
+          @PathVariable String reportId,
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolReportService.fetchRewardsDistribution(reportId, pageable));
   }
 
   @GetMapping(value = "detail/{reportId}/deregistration")
   public ResponseEntity<BaseFilterResponse<DeRegistrationResponse>> detailDeregistration(
-      @PathVariable String reportId,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolReportService.detailDeregistraion(reportId, pageable));
+          @PathVariable String reportId,
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+    return ResponseEntity.ok(poolReportService.fetchDeregistraion(reportId, pageable));
   }
 
   @GetMapping("detail/{reportId}")
