@@ -24,7 +24,7 @@ public class PoolReportCreateRequest {
 
   private PoolReportEvent[] event;
 
-  public PoolReport toEntity(ReportHistory reportHistory) {
+  public PoolReport toEntity(ReportHistory reportHistory, String username) {
     return PoolReport.builder()
         .poolView(this.poolId)
         .isPoolSize(this.isPoolSize)
@@ -35,6 +35,7 @@ public class PoolReportCreateRequest {
         .event(Arrays.stream(this.event).map(PoolReportEvent::getValue)
             .collect(Collectors.joining(",")))
         .reportHistory(reportHistory)
+        .username(username)
         .build();
   }
 }
