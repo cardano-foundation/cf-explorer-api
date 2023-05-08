@@ -14,6 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRe
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 public class StakeKeyReportController {
 
   private final StakeKeyReportService stakeKeyReportService;
+  private final ReportHistoryService reportHistoryService;
 
   @PostMapping(value = "/stake-key")
   @LogMessage
@@ -111,7 +113,7 @@ public class StakeKeyReportController {
           "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getReportHistory(filterRequest, username, pageable));
+        reportHistoryService.getReportHistory(filterRequest, username, pageable));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/registrations")

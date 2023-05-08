@@ -11,9 +11,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class DataUtil {
 
   public static boolean isNullOrEmpty(CharSequence cs) {
