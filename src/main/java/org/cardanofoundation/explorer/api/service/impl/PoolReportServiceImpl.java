@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-
 import org.cardanofoundation.explorer.api.common.enumeration.PoolReportEvent;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
@@ -40,7 +39,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -68,91 +66,12 @@ public class PoolReportServiceImpl implements PoolReportService {
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
     try {
       ReportHistory reportHistory = this.initReportHistory(poolReportCreateRequest.getPoolId(), username);
-      this.exportPoolReport(poolReportRepository.save(
+      this.exportDirect(poolReportRepository.save(
               poolReportCreateRequest.toEntity(reportHistory, username)));
       return true;
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       return false;
-    }
-  }
-
-  @Override
-  public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username) {
-    try {
-      //FIXME replace: find by username
-      Page<PoolReport> poolReportPage = poolReportRepository.findByUsername(username, pageable);
-      List<PoolReport> poolReports = poolReportPage.getContent();
-      List<PoolReportListResponse> poolReportListResponses = poolReports.stream()
-              .map(PoolReportListResponse::toDomain).collect(Collectors.toList());
-      return new BaseFilterResponse<>(poolReportPage, poolReportListResponses);
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return new BaseFilterResponse<>(new ArrayList<>(), 0);
-    }
-  }
-
-  @Override
-  public PoolReportDetailResponse detailFull(String reportId, Pageable pageable, String username) {
-    try {
-      //FIXME replace: find by username
-      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
-      PoolReportDetailResponse poolReportDetailResponse = new PoolReportDetailResponse();
-      /// epoch size
-      if (poolReport.getIsPoolSize()) {
-        BaseFilterResponse<PoolReportDetailResponse.EpochSize> epochSizeBaseFilterResponse = this.fetchEpochSize(
-                poolReport, pageable);
-        poolReportDetailResponse.setEpochSizes(epochSizeBaseFilterResponse);
-      }
-      /// all
-      boolean isAll = poolReport.getEvent().contains(PoolReportEvent.ALL.getValue());
-      /// pool registrations
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.REGISTRATION.getValue())) {
-        BaseFilterResponse<TabularRegisResponse> poolRegistrationBaseFilterResponse = this.fetchPoolRegistration(
-                reportId, pageable, username);
-        poolReportDetailResponse.setPoolRegistrations(poolRegistrationBaseFilterResponse);
-      }
-      // pool update
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.POOL_UPDATE.getValue())) {
-        BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateBaseFilterResponse = this.fetchPoolUpdate(
-                reportId, pageable, username);
-        poolReportDetailResponse.setPoolUpdates(poolUpdateBaseFilterResponse);
-      }
-      // reward distribution
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.REWARD.getValue())) {
-        BaseFilterResponse<RewardResponse> rewardDistributionBaseFilterResponse = this.fetchRewardsDistribution(
-                reportId, pageable, username);
-        poolReportDetailResponse.setRewardDistributions(rewardDistributionBaseFilterResponse);
-      }
-      // deregistration
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.DEREGISTRATION.getValue())) {
-        BaseFilterResponse<DeRegistrationResponse> deregistrationBaseFilterResponse = this.fetchDeregistraion(
-                reportId, pageable, username);
-        poolReportDetailResponse.setDeregistrations(deregistrationBaseFilterResponse);
-      }
-      return poolReportDetailResponse;
-
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return new PoolReportDetailResponse();
-    }
-  }
-
-  @Override
-  public BaseFilterResponse<PoolReportDetailResponse.EpochSize> detailEpochSize(String reportId,
-                                                                                Pageable pageable, String username) {
-    try {
-      //FIXME replace: find by username
-      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
-      Page<PoolReportProjection> epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(
-              poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
-      List<PoolReportProjection> epochSizeProjections = epochSizeProjectionPage.getContent();
-      List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
-              .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
-      return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return new BaseFilterResponse<>(new ArrayList<>(), 0);
     }
   }
 
@@ -184,109 +103,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  @Override
-  public BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(String reportId,
-                                                                        Pageable pageable, String username) {
-    try {
-      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
-      return poolLifecycleService.registrationList(poolReport.getPoolView(), pageable);
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return new BaseFilterResponse<>(new ArrayList<>(), 0);
-    }
-  }
-
-  @Override
-  public BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(String reportId,
-                                                                      Pageable pageable, String username) {
-    try {
-      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
-      return poolLifecycleService.poolUpdateList(poolReport.getPoolView(), pageable);
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return new BaseFilterResponse<>(new ArrayList<>(), 0);
-    }
-  }
-
-  @Override
-  public BaseFilterResponse<RewardResponse> fetchRewardsDistribution(String reportId,
-                                                                     Pageable pageable, String username) {
-    try {
-      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
-      return poolLifecycleService.listReward(poolReport.getPoolView(), pageable);
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return new BaseFilterResponse<>(new ArrayList<>(), 0);
-    }
-  }
-
-  @Override
-  public BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(String reportId,
-                                                                       Pageable pageable, String username) {
-    try {
-      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
-      return poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null, null,
-              pageable);
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return new BaseFilterResponse<>(new ArrayList<>(), 0);
-    }
-  }
-
-  @Override
-  public PoolReport detail(String reportId, String username) {
-    try {
-      return poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      return new PoolReport();
-    }
-  }
-
-  @Scheduled(fixedDelay = 1000 * 3)
-  private void exportPoolReport() {
-    List<PoolReport> poolReports = poolReportRepository.findByStorageKeyNull();
-    poolReports.forEach(this::exportPoolReport);
-  }
-
-  private BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(
-          PoolReport poolReport, Pageable pageable) {
-    Page<PoolReportProjection> epochSizeProjectionPage = null;
-    List<PoolReportProjection> epochSizeProjections;
-    if (pageable == null) {
-      epochSizeProjections = epochStakeRepository.getEpochSizeByPoolReport(poolReport.getPoolView(),
-              poolReport.getBeginEpoch(), poolReport.getEndEpoch());
-    } else {
-      epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(
-              poolReport.getPoolView(),
-              poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
-      epochSizeProjections = epochSizeProjectionPage.getContent();
-    }
-    List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
-            .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
-    if (pageable == null) {
-      return new BaseFilterResponse<>(epochSizes, epochSizeProjections.size());
-    } else {
-      return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
-    }
-
-  }
-
-  private String generateStorageKey(PoolReport PoolReport) {
-    return PoolReport.getId() + "_" + PoolReport.getReportHistory().getReportName();
-  }
-
-  private ReportHistory initReportHistory(String poolId, String username) {
-    return ReportHistory.builder()
-            .reportName("report_pool_" + poolId)
-            .status(ReportStatus.IN_PROGRESS)
-            .type(ReportType.POOL_ID)
-            .username(username)
-            .createdAt(new Timestamp(System.currentTimeMillis()))
-            .build();
-  }
-
-  private void exportPoolReport(PoolReport poolReport) {
+  public void exportDirect(PoolReport poolReport) {
     try {
       if (poolReport.getReportHistory() == null) {
         poolReport.setReportHistory(this.initReportHistory(poolReport.getPoolView(), poolReport.getUsername()));
@@ -294,8 +111,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       List<ExportContent> exportContents = new ArrayList<>();
       /// epoch size
       if (poolReport.getIsPoolSize()) {
-        BaseFilterResponse<PoolReportDetailResponse.EpochSize> epochSizeBaseFilterResponse = this.fetchEpochSize(
-                poolReport, null);
+        BaseFilterResponse<PoolReportDetailResponse.EpochSize> epochSizeBaseFilterResponse = this.fetchEpochSize(poolReport);
 
         exportContents.add(ExportContent.builder()
                 .clazz(PoolReportDetailResponse.EpochSize.class)
@@ -373,6 +189,148 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   }
 
+  @Override
+  public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username) {
+    try {
+      Page<PoolReport> poolReportPage = poolReportRepository.findByUsername(username, pageable);
+      List<PoolReport> poolReports = poolReportPage.getContent();
+      List<PoolReportListResponse> poolReportListResponses = poolReports.stream()
+              .map(PoolReportListResponse::toDomain).collect(Collectors.toList());
+      return new BaseFilterResponse<>(poolReportPage, poolReportListResponses);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new BaseFilterResponse<>(new ArrayList<>(), 0);
+    }
+  }
+
+  @Override
+  public PoolReport detail(String reportId, String username) {
+    try {
+      return poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new PoolReport();
+    }
+  }
+
+  @Override
+  public PoolReportDetailResponse detailFull(String reportId, Pageable pageable, String username) {
+    try {
+      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
+      PoolReportDetailResponse poolReportDetailResponse = new PoolReportDetailResponse();
+      /// epoch size
+      if (poolReport.getIsPoolSize()) {
+        BaseFilterResponse<PoolReportDetailResponse.EpochSize> epochSizeBaseFilterResponse = this.fetchEpochSize(
+                reportId, pageable, username);
+        poolReportDetailResponse.setEpochSizes(epochSizeBaseFilterResponse);
+      }
+      /// all
+      boolean isAll = poolReport.getEvent().contains(PoolReportEvent.ALL.getValue());
+      /// pool registrations
+      if (isAll || poolReport.getEvent().contains(PoolReportEvent.REGISTRATION.getValue())) {
+        BaseFilterResponse<TabularRegisResponse> poolRegistrationBaseFilterResponse = this.fetchPoolRegistration(
+                reportId, pageable, username);
+        poolReportDetailResponse.setPoolRegistrations(poolRegistrationBaseFilterResponse);
+      }
+      // pool update
+      if (isAll || poolReport.getEvent().contains(PoolReportEvent.POOL_UPDATE.getValue())) {
+        BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateBaseFilterResponse = this.fetchPoolUpdate(
+                reportId, pageable, username);
+        poolReportDetailResponse.setPoolUpdates(poolUpdateBaseFilterResponse);
+      }
+      // reward distribution
+      if (isAll || poolReport.getEvent().contains(PoolReportEvent.REWARD.getValue())) {
+        BaseFilterResponse<RewardResponse> rewardDistributionBaseFilterResponse = this.fetchRewardsDistribution(
+                reportId, pageable, username);
+        poolReportDetailResponse.setRewardDistributions(rewardDistributionBaseFilterResponse);
+      }
+      // deregistration
+      if (isAll || poolReport.getEvent().contains(PoolReportEvent.DEREGISTRATION.getValue())) {
+        BaseFilterResponse<DeRegistrationResponse> deregistrationBaseFilterResponse = this.fetchDeregistraion(
+                reportId, pageable, username);
+        poolReportDetailResponse.setDeregistrations(deregistrationBaseFilterResponse);
+      }
+      return poolReportDetailResponse;
+
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new PoolReportDetailResponse();
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(String reportId,
+                                                                               Pageable pageable, String username) {
+    try {
+      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
+      Page<PoolReportProjection> epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(
+              poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
+      List<PoolReportProjection> epochSizeProjections = epochSizeProjectionPage.getContent();
+      List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
+              .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
+      return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new BaseFilterResponse<>(new ArrayList<>(), 0);
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(String reportId,
+                                                                        Pageable pageable, String username) {
+    try {
+      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
+      return poolLifecycleService.registrationList(poolReport.getPoolView(), pageable);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new BaseFilterResponse<>(new ArrayList<>(), 0);
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(String reportId,
+                                                                      Pageable pageable, String username) {
+    try {
+      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
+      return poolLifecycleService.poolUpdateList(poolReport.getPoolView(), pageable);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new BaseFilterResponse<>(new ArrayList<>(), 0);
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<RewardResponse> fetchRewardsDistribution(String reportId,
+                                                                     Pageable pageable, String username) {
+    try {
+      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
+      return poolLifecycleService.listReward(poolReport.getPoolView(), pageable);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new BaseFilterResponse<>(new ArrayList<>(), 0);
+    }
+  }
+
+  @Override
+  public BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(String reportId,
+                                                                       Pageable pageable, String username) {
+    try {
+      PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, Long.parseLong(reportId));
+      return poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null, null,
+              pageable);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new BaseFilterResponse<>(new ArrayList<>(), 0);
+    }
+  }
+
+  private BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(PoolReport poolReport) {
+    List<PoolReportProjection> epochSizeProjections = epochStakeRepository.getEpochSizeByPoolReport(poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch());
+    List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
+            .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
+    return new BaseFilterResponse<>(epochSizes, epochSizeProjections.size());
+  }
+
   private BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> fetchPoolRegistration(PoolReport poolReport) {
     try {
       List<TabularRegisResponse> tabularRegisResponses = poolLifecycleService.registrationList(poolReport.getPoolView(),
@@ -419,5 +377,19 @@ public class PoolReportServiceImpl implements PoolReportService {
       log.error(e.getMessage(), e);
       return new BaseFilterResponse<>(new ArrayList<>(), 0);
     }
+  }
+
+  private String generateStorageKey(PoolReport PoolReport) {
+    return PoolReport.getId() + "_" + PoolReport.getReportHistory().getReportName();
+  }
+
+  private ReportHistory initReportHistory(String poolId, String username) {
+    return ReportHistory.builder()
+            .reportName("report_pool_" + poolId)
+            .status(ReportStatus.IN_PROGRESS)
+            .type(ReportType.POOL_ID)
+            .username(username)
+            .createdAt(new Timestamp(System.currentTimeMillis()))
+            .build();
   }
 }
