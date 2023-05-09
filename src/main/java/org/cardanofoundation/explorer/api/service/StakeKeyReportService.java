@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 /**
  * StakeKeyReportService interface for stake key report
  */
-public interface StakeKeyReportService extends StorageService {
+public interface StakeKeyReportService {
 
   /**
    * Generate stake key report of current user
@@ -60,7 +60,8 @@ public interface StakeKeyReportService extends StorageService {
    * @param reportId report id
    * @return StakeKeyReportResponse
    */
-  StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username, ExportType exportType);
+  StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username,
+                                              ExportType exportType);
 
 
   /**
