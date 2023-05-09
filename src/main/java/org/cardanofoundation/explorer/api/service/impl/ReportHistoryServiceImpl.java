@@ -74,7 +74,7 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
   @Scheduled(fixedDelay = 1000 * 3)
   private void persistToStorage(){
     // will be replaced by redis cache later
-    List<ReportHistory> reportHistoryList = reportHistoryRepository.findByStorageKeyIsNullOrderByIdAsc();
+    List<ReportHistory> reportHistoryList = reportHistoryRepository.findNotYetPersistToStorage();
     reportHistoryList.forEach(reportHistory -> {
       if(ReportType.STAKE_KEY.equals(reportHistory.getType())) {
         stakeKeyReportService.exportStakeKeyReport(
