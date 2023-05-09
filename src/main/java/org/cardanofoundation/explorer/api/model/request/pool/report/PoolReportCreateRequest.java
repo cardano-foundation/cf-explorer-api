@@ -24,9 +24,15 @@ public class PoolReportCreateRequest {
 
   private Boolean isFeesPaid;
 
-  private Integer[] epochRanges;
+  private Boolean isRegistration;
 
-  private PoolReportEvent[] event;
+  private Boolean isDeregistration;
+
+  private Boolean isReward;
+
+  private Boolean isPoolUpdate;
+
+  private Integer[] epochRanges;
 
   public PoolReport toEntity(ReportHistory reportHistory, String username) {
     return PoolReport.builder()
@@ -36,8 +42,10 @@ public class PoolReportCreateRequest {
         .reportName(this.reportName)
         .beginEpoch(this.epochRanges[0])
         .endEpoch(this.epochRanges[1])
-        .event(Arrays.stream(this.event).map(PoolReportEvent::getValue)
-                .collect(Collectors.joining(",")))
+        .isRegistration(this.isRegistration)
+        .isReward(this.isReward)
+        .isDeregistration(this.isDeregistration)
+        .isPoolUpdate(this.isPoolUpdate)
         .reportHistory(reportHistory)
         .username(username)
         .build();
