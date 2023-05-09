@@ -28,8 +28,4 @@ public class TxOutResponse {
   private String assetId;
   private List<TxMintingResponse> tokens;
   private String stakeAddress;
-  @JsonIgnore
-  private boolean isChangeValue;
-  @JsonIgnore
-  private boolean isInput;
 }

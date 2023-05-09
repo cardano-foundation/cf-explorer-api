@@ -538,28 +538,29 @@ public class TxServiceImpl implements TxService {
     List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
     List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
 
-    Pair<List<TxOutResponse>, List<TxOutResponse>> newData =
-        removeDuplicateTx(addressesInfoInput, addressesInfoOutput);
+    List<TxOutResponse> stakeAddress = removeDuplicateTx(addressesInfoInput, addressesInfoOutput);
 
     SummaryResponse summary =
         SummaryResponse.builder()
-            .stakeAddressTxInputs(newData.getFirst())
-            .stakeAddressTxOutputs(newData.getSecond())
+            .stakeAddress(stakeAddress)
             .build();
 
     txResponse.setSummary(summary);
 
   }
 
-  /**
-   * Combine 2 list input-tx and output-tx Group list tx by address(min 1 element, max 2 elements)
-   * Find TX with max value of each list tx and change the tx value = (max value - second value)
-   * remove the TX with second value if need
-   */
-  private Pair<List<TxOutResponse>, List<TxOutResponse>> removeDuplicateTx(
+  private List<TxOutResponse> removeDuplicateTx(
       List<TxOutResponse> addressesInputs, List<TxOutResponse> addressesOutputs) {
-    addressesInputs.forEach(txOutResponse -> txOutResponse.setInput(true));
-    addressesOutputs.forEach(txOutResponse -> txOutResponse.setInput(false));
+    addressesInputs.forEach(
+        txOutResponse -> {
+          txOutResponse.setValue(txOutResponse.getValue().multiply(BigInteger.valueOf(-1)));
+          txOutResponse
+              .getTokens()
+              .forEach(
+                  token ->
+                      token.setAssetQuantity(
+                          token.getAssetQuantity().multiply(BigInteger.valueOf(-1))));
+        });
 
     Map<String, List<TxOutResponse>> unionTxsByAddress =
         Stream.concat(addressesInputs.stream(), addressesOutputs.stream())
@@ -567,61 +568,47 @@ public class TxServiceImpl implements TxService {
                 Collectors.groupingBy(
                     TxOutResponse::getAddress, Collectors.toCollection(ArrayList::new)));
 
+    List<TxOutResponse> summary = new ArrayList<>();
+
     unionTxsByAddress.forEach(
         (address, txs) -> {
           if (txs.size() > 1) {
-            BigInteger valueIdxFirst = txs.get(0).getValue();
-            BigInteger valueIdxSecond = txs.get(1).getValue();
+            BigInteger totalValue = txs.get(0).getValue().add(txs.get(1).getValue());
+            txs.get(0).setValue(totalValue);
 
-            BigInteger max =
-                Stream.of(valueIdxFirst, valueIdxSecond).max(BigInteger::compareTo).get();
-            BigInteger subtract;
+            Map<String, List<TxMintingResponse>> unionTokenByAsset =
+                Stream.concat(txs.get(0).getTokens().stream(), txs.get(1).getTokens().stream())
+                    .collect(
+                        Collectors.groupingBy(
+                            TxMintingResponse::getAssetId,
+                            Collectors.toCollection(ArrayList::new)));
 
-            if (max.compareTo(valueIdxFirst) == 0) {
-              subtract = valueIdxFirst.subtract(valueIdxSecond);
-            } else {
-              subtract = valueIdxSecond.subtract(valueIdxFirst);
-              txs.set(0, txs.get(1));
-            }
+            List<TxMintingResponse> tokenResponse = new ArrayList<>();
 
-            txs.get(0).setValue(subtract);
-            txs.get(0).setChangeValue(true);
+            unionTokenByAsset.forEach(
+                (asset, tokens) -> {
+                  if (tokens.size() > 1) {
+                    BigInteger totalQuantity =
+                        tokens.get(0).getAssetQuantity().add(tokens.get(1).getAssetQuantity());
+                    tokens.get(0).setAssetQuantity(totalQuantity);
+                  }
+
+                  tokenResponse.add(tokens.get(0));
+                });
+
+            txs.get(0).setTokens(tokenResponse);
           }
+
+          summary.add(txs.get(0));
         });
 
-    List<TxOutResponse> newTxOInputs = filterTxDuplicate(unionTxsByAddress, addressesInputs, true);
-    List<TxOutResponse> newTxOOutputs =
-        filterTxDuplicate(unionTxsByAddress, addressesOutputs, false);
-    return Pair.of(newTxOInputs, newTxOOutputs);
-  }
-
-
-  private List<TxOutResponse> filterTxDuplicate(
-      Map<String, List<TxOutResponse>> unionTxsByAddress,
-      List<TxOutResponse> txs,
-      boolean isInput) {
-    List<TxOutResponse> newTxOs = new ArrayList<>();
-    txs.forEach(
-        txOutResponse -> {
-          List<TxOutResponse> txsSameAddress = unionTxsByAddress.get(txOutResponse.getAddress());
-          TxOutResponse newValTx = txsSameAddress.get(0);
-
-          if (txsSameAddress.size() > 1) {
-            boolean canAdd = newValTx.isChangeValue() && isInput == newValTx.isInput();
-            if (canAdd) {
-              newTxOs.add(newValTx);
-            }
-          } else {
-            newTxOs.add(txOutResponse);
-          }
-        });
-    return newTxOs;
+    return summary;
   }
 
   /**
    * Get protocol params update in transaction
    *
-   * @param tx         transaction
+   * @param tx transaction
    * @param txResponse response data of transaction
    */
   private void getProtocols(Tx tx, TxResponse txResponse) {
