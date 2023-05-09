@@ -47,7 +47,7 @@ public class PoolReportController {
   private final PoolReportService poolReportService;
 
   @PostMapping("create")
-  public ResponseEntity<Boolean> createPoolReport(@RequestBody PoolReportCreateRequest body, HttpServletRequest request) {
+  public ResponseEntity<Boolean> createPoolReport(@RequestBody PoolReportCreateRequest body, HttpServletRequest request) throws Exception {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(poolReportService.create(body, username));
   }

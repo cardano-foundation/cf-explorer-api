@@ -64,7 +64,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   private final PoolLifecycleService poolLifecycleService;
 
   @Override
-  public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
+  public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) throws BusinessException {
     try {
       ReportHistory reportHistory = this.initReportHistory(poolReportCreateRequest.getPoolId(), username);
       this.exportDirect(poolReportRepository.save(
@@ -72,7 +72,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       return true;
     } catch (Exception e) {
       log.error(e.getMessage(), e);
-      return false;
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
     }
   }
 

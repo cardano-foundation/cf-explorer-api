@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface PoolReportService {
 
-  Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username);
+  Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) throws Exception;
 
   PoolReportExportResponse export(Long reportId, ExportType exportType, String username);
 
