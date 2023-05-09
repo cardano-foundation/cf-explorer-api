@@ -30,5 +30,9 @@ public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Lo
                                                          @Param("username") String username,
                                                          Pageable pageable);
 
-  List<ReportHistory> findByStorageKeyIsNullOrderByIdAsc();
+  @Query("select rh from ReportHistory rh "
+      + " where rh.status <> 'GENERATED'"
+      + " or rh.storageKey is null"
+      + " order by rh.createdAt asc")
+  List<ReportHistory> findNotYetPersistToStorage();
 }
