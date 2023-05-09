@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportHistoryResponse;
@@ -59,7 +60,7 @@ public interface StakeKeyReportService extends StorageService {
    * @param reportId report id
    * @return StakeKeyReportResponse
    */
-  StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username, String fileExtension);
+  StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username, ExportType exportType);
 
 
   /**

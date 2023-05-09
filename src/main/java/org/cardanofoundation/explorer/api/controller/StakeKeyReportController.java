@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportRequest;
@@ -58,10 +60,10 @@ public class StakeKeyReportController {
   @Operation(summary = "Export stake key report by id")
   public ResponseEntity<Resource> exportStakeKeyReportByStorageKey(HttpServletRequest request,
                                                                    @PathVariable Long reportId,
-                                                                   @RequestParam(required = false) String fileExtension) {
+                                                                   @RequestParam(required = false) ExportType exportType) {
     String username = request.getAttribute("username").toString();
     StakeKeyReportResponse response = stakeKeyReportService.exportStakeKeyReport(reportId, username,
-                                                                                 fileExtension);
+                                                                                 exportType);
     return ResponseEntity.ok()
         .contentLength(response.getByteArrayInputStream().available())
         .header(HttpHeaders.CONTENT_DISPOSITION,

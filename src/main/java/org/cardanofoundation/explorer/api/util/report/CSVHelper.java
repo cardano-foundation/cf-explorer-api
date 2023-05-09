@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.ReflectorUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,7 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.extern.log4j.Log4j2;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -50,6 +53,7 @@ public class CSVHelper {
 
           if (DataUtil.isNullOrEmpty(exportContent.getLstData())) {
             printer.printRecord(NO_RECORDS);
+            printer.printRecord();
             continue;
           }
         }
