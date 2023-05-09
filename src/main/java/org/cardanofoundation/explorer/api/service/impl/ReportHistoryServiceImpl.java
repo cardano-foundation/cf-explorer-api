@@ -3,15 +3,14 @@ package org.cardanofoundation.explorer.api.service.impl;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
+import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
+import org.cardanofoundation.explorer.api.service.PoolReportService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import org.cardanofoundation.explorer.api.model.request.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.report.ReportHistoryResponse;
@@ -33,6 +32,8 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
   private final ReportHistoryRepository reportHistoryRepository;
   private final StakeKeyReportHistoryRepository stakeKeyReportHistoryRepository;
   private final StakeKeyReportService stakeKeyReportService;
+  private final PoolReportService poolReportService;
+  private final PoolReportRepository poolReportRepository;
 
   /**
    * Get report history
@@ -80,8 +81,11 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
         stakeKeyReportService.exportStakeKeyReport(
             stakeKeyReportHistoryRepository.findByReportHistoryId(reportHistory.getId()));
       } else {
-        // TODO export pool report
+        poolReportService.exportDirect(
+            poolReportRepository.findByReportHistoryId(reportHistory.getId())
+        );
       }
+
     });
   }
 }

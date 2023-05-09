@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolRetire;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
@@ -55,15 +54,4 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       + "INNER JOIN PoolHash ph ON pr.poolHash.id = ph.id "
       + "WHERE pr.announcedTx = :tx")
   List<PoolDeRegistrationProjection> findByAnnouncedTx(@Param("tx") Tx tx);
-
-  @Query(value =
-          "select t.hash as txnHash, b.time as timestamp, t.outSum as adaValueHold, t.fee as adaValueFees, pu.rewardAddr.view as owner "
-        + "from PoolRetire pr "
-        + "join Tx t on pr.announcedTxId = t.id "
-        + "join Block b on t.blockId = b.id "
-        + "join PoolUpdate pu on pr.poolHashId = pu.poolHash.id "
-        + "where pu.poolHash.view = :poolView and b.epochNo between :epochBegin and :epochEnd"
-  )
-  List<PoolReportProjection> getDeregistrationByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd);
-
 }

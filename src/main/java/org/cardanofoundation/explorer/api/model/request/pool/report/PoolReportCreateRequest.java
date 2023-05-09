@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.model.request.pool.report;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.cardanofoundation.explorer.api.common.enumeration.PoolReportEvent;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolReport;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
@@ -10,6 +12,8 @@ import lombok.Data;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PoolReportCreateRequest {
 
   private String reportName;
@@ -22,7 +26,7 @@ public class PoolReportCreateRequest {
 
   private Integer[] epochRanges;
 
-  private String[] event;
+  private PoolReportEvent[] event;
 
   public PoolReport toEntity(ReportHistory reportHistory, String username) {
     return PoolReport.builder()
@@ -32,7 +36,8 @@ public class PoolReportCreateRequest {
         .reportName(this.reportName)
         .beginEpoch(this.epochRanges[0])
         .endEpoch(this.epochRanges[1])
-        .event(String.join(",", event))
+        .event(Arrays.stream(this.event).map(PoolReportEvent::getValue)
+                .collect(Collectors.joining(",")))
         .reportHistory(reportHistory)
         .username(username)
         .build();

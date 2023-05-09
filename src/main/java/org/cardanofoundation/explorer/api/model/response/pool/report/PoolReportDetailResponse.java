@@ -119,7 +119,7 @@ public class PoolReportDetailResponse {
 
     private BigDecimal adaValueHold;
 
-    private BigDecimal adaValueFees;
+    private BigDecimal adaValueFee;
 
     private BigDecimal adaValue;
 
@@ -128,9 +128,9 @@ public class PoolReportDetailResponse {
               .txHash(response.getTxHash())
               .time(response.getTime())
               .adaValueHold(new BigDecimal(response.getPledge()))
-              .adaValueFees(new BigDecimal(response.getFee()))
+              .adaValueFee(new BigDecimal(response.getFee()))
               .build();
-      result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFees()));
+      result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
       return result;
     }
 
@@ -199,7 +199,7 @@ public class PoolReportDetailResponse {
 
     private BigDecimal adaValueHold;
 
-    private BigDecimal adaValueFees;
+    private BigDecimal adaValueFee;
 
     private BigDecimal adaValue;
 
@@ -210,10 +210,10 @@ public class PoolReportDetailResponse {
               .txHash(response.getTxHash())
               .time(response.getTime())
               .adaValueHold(new BigDecimal(response.getPoolHold()))
-              .adaValueFees(new BigDecimal(response.getFee()))
+              .adaValueFee(new BigDecimal(response.getFee()))
               .owner(String.join("\n", response.getStakeKeys()))
               .build();
-      result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFees()));
+      result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
       return result;
     }
 

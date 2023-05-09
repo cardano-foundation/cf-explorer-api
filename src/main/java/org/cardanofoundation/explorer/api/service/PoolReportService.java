@@ -16,24 +16,23 @@ public interface PoolReportService {
 
   Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username);
 
+  PoolReportExportResponse export(Long reportId, String fileExtension, String username);
+
+  void exportDirect(PoolReport poolReport);
+
   BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username);
+
+  PoolReport detail(String reportId, String username);
 
   PoolReportDetailResponse detailFull(String reportId, Pageable pageable, String username);
 
-  BaseFilterResponse<PoolReportDetailResponse.EpochSize> detailEpochSize(String reportId,
-      Pageable pageable, String username);
+  BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(String reportId, Pageable pageable, String username);
 
-  PoolReportExportResponse export(Long reportId, String fileExtension, String username);
-
-  BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(String reportId,
-      Pageable pageable, String username);
+  BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(String reportId, Pageable pageable, String username);
 
   BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(String reportId, Pageable pageable, String username);
 
   BaseFilterResponse<RewardResponse> fetchRewardsDistribution(String reportId, Pageable pageable, String username);
 
-  BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(String reportId,
-      Pageable pageable, String username);
-
-  PoolReport detail(String reportId, String username);
+  BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(String reportId, Pageable pageable, String username);
 }
