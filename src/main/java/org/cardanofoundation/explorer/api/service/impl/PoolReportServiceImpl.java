@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.common.enumeration.PoolReportEvent;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
@@ -76,10 +77,10 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
-  public PoolReportExportResponse export(Long reportId, String fileExtension, String username) {
+  public PoolReportExportResponse export(Long reportId, ExportType exportType, String username) {
     try {
-      if (!CSV_EXTENSION.equals(fileExtension) && !EXCEL_EXTENSION.equals(fileExtension)) {
-        fileExtension = CSV_EXTENSION;
+      if (!ExportType.CSV.equals(exportType) && !ExportType.EXCEL.equals(exportType)) {
+        exportType = ExportType.CSV;
       }
       PoolReport poolReport = poolReportRepository.findByUsernameAndId(username, reportId);
       String storageKey = null, reportName = null;
@@ -91,9 +92,9 @@ public class PoolReportServiceImpl implements PoolReportService {
       if (DataUtil.isNullOrEmpty(storageKey)) {
         throw new BusinessException(BusinessCode.INTERNAL_ERROR);
       } else {
-        byte[] bytes = stakeKeyReportService.downloadFile(storageKey + fileExtension);
+        byte[] bytes = stakeKeyReportService.downloadFile(storageKey + exportType.getValue());
         return PoolReportExportResponse.builder()
-                .fileName(reportName + fileExtension)
+                .fileName(reportName + exportType.getValue())
                 .byteArrayInputStream(new ByteArrayInputStream(bytes))
                 .build();
       }
@@ -120,11 +121,9 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .lstData(epochSizeBaseFilterResponse.getData())
                 .build());
       }
-      /// all
 
-      boolean isAll = poolReport.getEvent().contains(PoolReportEvent.ALL.getValue());
       /// pool registrations
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.REGISTRATION.getValue())) {
+      if (poolReport.getIsRegistration()) {
         BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> poolRegistrationBaseFilterResponse = this.fetchPoolRegistration(
                 poolReport);
 
@@ -137,7 +136,7 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .build());
       }
       // pool update
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.POOL_UPDATE.getValue())) {
+      if (poolReport.getIsPoolUpdate()) {
         BaseFilterResponse<PoolReportDetailResponse.PoolUpdate> poolUpdateBaseFilterResponse = this.fetchPoolUpdate(
                 poolReport);
 
@@ -149,7 +148,7 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .build());
       }
       // reward distribution
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.REWARD.getValue())) {
+      if (poolReport.getIsReward()) {
         BaseFilterResponse<PoolReportDetailResponse.RewardDistribution> rewardDistributionBaseFilterResponse = this.fetchRewardsDistribution(
                 poolReport);
 
@@ -161,7 +160,7 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .build());
       }
       // deregistration
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.DEREGISTRATION.getValue())) {
+      if (poolReport.getIsDeregistration()) {
         BaseFilterResponse<PoolReportDetailResponse.Deregistration> deregistrationBaseFilterResponse = this.fetchDeregistraion(
                 poolReport);
 
@@ -224,28 +223,26 @@ public class PoolReportServiceImpl implements PoolReportService {
                 reportId, pageable, username);
         poolReportDetailResponse.setEpochSizes(epochSizeBaseFilterResponse);
       }
-      /// all
-      boolean isAll = poolReport.getEvent().contains(PoolReportEvent.ALL.getValue());
       /// pool registrations
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.REGISTRATION.getValue())) {
+      if (poolReport.getIsRegistration()) {
         BaseFilterResponse<TabularRegisResponse> poolRegistrationBaseFilterResponse = this.fetchPoolRegistration(
                 reportId, pageable, username);
         poolReportDetailResponse.setPoolRegistrations(poolRegistrationBaseFilterResponse);
       }
       // pool update
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.POOL_UPDATE.getValue())) {
+      if (poolReport.getIsPoolUpdate()) {
         BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateBaseFilterResponse = this.fetchPoolUpdate(
                 reportId, pageable, username);
         poolReportDetailResponse.setPoolUpdates(poolUpdateBaseFilterResponse);
       }
       // reward distribution
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.REWARD.getValue())) {
+      if (poolReport.getIsReward()) {
         BaseFilterResponse<RewardResponse> rewardDistributionBaseFilterResponse = this.fetchRewardsDistribution(
                 reportId, pageable, username);
         poolReportDetailResponse.setRewardDistributions(rewardDistributionBaseFilterResponse);
       }
       // deregistration
-      if (isAll || poolReport.getEvent().contains(PoolReportEvent.DEREGISTRATION.getValue())) {
+      if (poolReport.getIsDeregistration()) {
         BaseFilterResponse<DeRegistrationResponse> deregistrationBaseFilterResponse = this.fetchDeregistraion(
                 reportId, pageable, username);
         poolReportDetailResponse.setDeregistrations(deregistrationBaseFilterResponse);

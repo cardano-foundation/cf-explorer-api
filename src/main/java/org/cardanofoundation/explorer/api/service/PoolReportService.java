@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
@@ -16,7 +17,7 @@ public interface PoolReportService {
 
   Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username);
 
-  PoolReportExportResponse export(Long reportId, String fileExtension, String username);
+  PoolReportExportResponse export(Long reportId, ExportType exportType, String username);
 
   void exportDirect(PoolReport poolReport);
 

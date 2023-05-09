@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
@@ -80,9 +81,9 @@ public class PoolReportController {
 
   @GetMapping("detail/{reportId}/export")
   public ResponseEntity<Resource> export(@PathVariable Long reportId,
-      @RequestParam(required = false) String fileExtension, HttpServletRequest request) {
+      @RequestParam(required = false) ExportType exportType, HttpServletRequest request) {
     String username = request.getAttribute("username").toString();
-    PoolReportExportResponse response = poolReportService.export(reportId, fileExtension, username);
+    PoolReportExportResponse response = poolReportService.export(reportId, exportType, username);
     return ResponseEntity.ok()
         .contentLength(response.getByteArrayInputStream().available())
         .header(HttpHeaders.CONTENT_DISPOSITION,
