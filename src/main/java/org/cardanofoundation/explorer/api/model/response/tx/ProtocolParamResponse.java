@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
+import java.math.BigInteger;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,13 +16,13 @@ public class ProtocolParamResponse {
 
   public static int hashCode(Object... a) {
     if (a == null) {
-      return -1;
+      return -BigInteger.ONE.intValue();
     }
 
-    int result = 1;
+    int result = BigInteger.ONE.intValue();
 
     for (Object element : a) {
-      result = 31 * result + (element == null ? -1 : element.hashCode());
+      result = 31 * result + (element == null ? -BigInteger.ONE.intValue() : element.hashCode());
     }
 
     return result;

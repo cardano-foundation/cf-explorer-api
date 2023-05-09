@@ -1,17 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
-import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
-import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
-import org.cardanofoundation.explorer.api.projection.ParamHistory;
-import org.cardanofoundation.explorer.api.repository.CostModelRepository;
-import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.service.ProtocolParamService;
-import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
-import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,13 +15,30 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import jakarta.annotation.PostConstruct;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+
+import org.cardanofoundation.explorer.api.projection.ParamHistory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+
+
+import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
+import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
+import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
+import org.cardanofoundation.explorer.api.repository.CostModelRepository;
+import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
+import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.service.ProtocolParamService;
+import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
+import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 
 @Service
 @Log4j2
@@ -59,12 +64,12 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       return historiesChange
           .filter(paramProposal -> Objects.nonNull(paramProposal.getCostModel()))
           .map(paramProposal ->
-              ProtocolHistory
-                  .builder()
-                  .value(paramProposal.getCostModel().getCosts())
-                  .transactionHash(paramProposal.getRegisteredTx().getHash())
-                  .time(paramProposal.getRegisteredTx().getBlock().getTime())
-                  .build())
+                   ProtocolHistory
+                       .builder()
+                       .value(paramProposal.getCostModel().getCosts())
+                       .transactionHash(paramProposal.getRegisteredTx().getHash())
+                       .time(paramProposal.getRegisteredTx().getBlock().getTime())
+                       .build())
           .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -99,132 +104,130 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
     var protocols = Protocols.builder()
         .minFeeA(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMinFeeA,
-            currentProtocols.getMinFeeA(), txs))
+                                   ParamHistory::getMinFeeA,
+                                   currentProtocols.getMinFeeA(), txs))
         .minFeeB(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMinFeeB,
-            currentProtocols.getMinFeeB(), txs))
+                                   ParamHistory::getMinFeeB,
+                                   currentProtocols.getMinFeeB(), txs))
         .maxBlockSize(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxBlockSize,
-            currentProtocols.getMaxBlockSize(), txs))
+                                        ParamHistory::getMaxBlockSize,
+                                        currentProtocols.getMaxBlockSize(), txs))
         .maxTxSize(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxTxSize,
-            currentProtocols.getMaxTxSize(), txs))
+                                     ParamHistory::getMaxTxSize,
+                                     currentProtocols.getMaxTxSize(), txs))
         .maxBhSize(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxBhSize,
-            currentProtocols.getMaxBhSize(), txs))
+                                     ParamHistory::getMaxBhSize,
+                                     currentProtocols.getMaxBhSize(), txs))
         .keyDeposit(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getKeyDeposit,
-            currentProtocols.getKeyDeposit(), txs))
+                                      ParamHistory::getKeyDeposit,
+                                      currentProtocols.getKeyDeposit(), txs))
         .poolDeposit(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getPoolDeposit,
-            currentProtocols.getPoolDeposit(), txs))
+                                       ParamHistory::getPoolDeposit,
+                                       currentProtocols.getPoolDeposit(), txs))
         .maxEpoch(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxEpoch,
-            currentProtocols.getMaxEpoch(), txs))
+                                    ParamHistory::getMaxEpoch,
+                                    currentProtocols.getMaxEpoch(), txs))
         .optimalPoolCount(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getOptimalPoolCount,
-            currentProtocols.getOptimalPoolCount(), txs))
+                                            ParamHistory::getOptimalPoolCount,
+                                            currentProtocols.getOptimalPoolCount(), txs))
         .influence(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getInfluence,
-            currentProtocols.getInfluence(), txs))
+                                     ParamHistory::getInfluence,
+                                     currentProtocols.getInfluence(), txs))
         .monetaryExpandRate(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMonetaryExpandRate,
-            currentProtocols.getMonetaryExpandRate(), txs))
+                                              ParamHistory::getMonetaryExpandRate,
+                                              currentProtocols.getMonetaryExpandRate(), txs))
         .treasuryGrowthRate(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getTreasuryGrowthRate,
-            currentProtocols.getTreasuryGrowthRate(), txs))
+                                              ParamHistory::getTreasuryGrowthRate,
+                                              currentProtocols.getTreasuryGrowthRate(), txs))
         .decentralisation(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getDecentralisation,
-            currentProtocols.getDecentralisation(), txs))
+                                            ParamHistory::getDecentralisation,
+                                            currentProtocols.getDecentralisation(), txs))
         .entropy(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getEntropy,
-            currentProtocols.getExtraEntropy(), txs))
+                                   ParamHistory::getEntropy,
+                                   currentProtocols.getExtraEntropy(), txs))
         .protocolMajor(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getProtocolMajor,
-            currentProtocols.getProtocolMajor(), txs))
+                                         ParamHistory::getProtocolMajor,
+                                         currentProtocols.getProtocolMajor(), txs))
         .protocolMinor(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getProtocolMinor,
-            currentProtocols.getProtocolMinor(), txs))
+                                         ParamHistory::getProtocolMinor,
+                                         currentProtocols.getProtocolMinor(), txs))
         .minUtxoValue(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMinUtxoValue,
-            currentProtocols.getMinUtxoValue(), txs))
+                                        ParamHistory::getMinUtxoValue,
+                                        currentProtocols.getMinUtxoValue(), txs))
         .minPoolCost(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMinPoolCost,
-            currentProtocols.getMinPoolCost(), txs))
+                                       ParamHistory::getMinPoolCost,
+                                       currentProtocols.getMinPoolCost(), txs))
         .priceMem(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getPriceMem,
-            currentProtocols.getPriceMem(), txs))
+                                    ParamHistory::getPriceMem,
+                                    currentProtocols.getPriceMem(), txs))
         .priceStep(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getPriceStep,
-            currentProtocols.getPriceStep(), txs))
+                                     ParamHistory::getPriceStep,
+                                     currentProtocols.getPriceStep(), txs))
         .maxTxExMem(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxTxExMem,
-            currentProtocols.getMaxTxExMem(), txs))
+                                      ParamHistory::getMaxTxExMem,
+                                      currentProtocols.getMaxTxExMem(), txs))
         .maxTxExSteps(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxTxExSteps,
-            currentProtocols.getMaxTxExSteps(), txs))
+                                        ParamHistory::getMaxTxExSteps,
+                                        currentProtocols.getMaxTxExSteps(), txs))
         .maxBlockExMem(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxBlockExMem,
-            currentProtocols.getMaxBlockExMem(), txs))
+                                         ParamHistory::getMaxBlockExMem,
+                                         currentProtocols.getMaxBlockExMem(), txs))
         .maxBlockExSteps(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxBlockExSteps,
-            currentProtocols.getMaxBlockExSteps(), txs))
+                                           ParamHistory::getMaxBlockExSteps,
+                                           currentProtocols.getMaxBlockExSteps(), txs))
         .maxValSize(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxValSize,
-            currentProtocols.getMaxValSize(), txs))
+                                      ParamHistory::getMaxValSize,
+                                      currentProtocols.getMaxValSize(), txs))
         .collateralPercent(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getCollateralPercent,
-            currentProtocols.getCollateralPercent(), txs))
+                                             ParamHistory::getCollateralPercent,
+                                             currentProtocols.getCollateralPercent(), txs))
         .maxCollateralInputs(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getMaxCollateralInputs,
-            currentProtocols.getMaxCollateralInputs(), txs))
+                                               ParamHistory::getMaxCollateralInputs,
+                                               currentProtocols.getMaxCollateralInputs(), txs))
         .coinsPerUtxoSize(getChangeProtocol(previousProtocolsChange.stream(),
-            ParamHistory::getCoinsPerUtxoSize,
-            currentProtocols.getCoinsPerUtxoSize(), txs))
+                                            ParamHistory::getCoinsPerUtxoSize,
+                                            currentProtocols.getCoinsPerUtxoSize(), txs))
         .build();
 
     protocols.setCostModel(getChangeCostModelProtocol(previousProtocolsChange.stream(),
-        currentProtocols.getCostModel().getCosts(),
-        txs));
+                                                      currentProtocols.getCostModel().getCosts(),
+                                                      txs));
 
     return protocols;
   }
 
   private Stream<ProtocolHistory> getHistoryStream(Stream<ParamProposal> historiesChange,
-      Function<ParamProposal, ?> function) {
+                                                   Function<ParamProposal, ?> function) {
 
     return historiesChange
         .filter(paramProposal -> Objects.nonNull(function.apply(paramProposal)))
         .map(paramProposal ->
-            ProtocolHistory
-                .builder()
-                .value(function.apply(paramProposal))
-                .transactionHash(paramProposal.getRegisteredTx().getHash())
-                .time(paramProposal.getRegisteredTx().getBlock().getTime())
-                .build()
+                 ProtocolHistory
+                     .builder()
+                     .value(function.apply(paramProposal))
+                     .transactionHash(paramProposal.getRegisteredTx().getHash())
+                     .time(paramProposal.getRegisteredTx().getBlock().getTime())
+                     .build()
         );
   }
 
   private ProtocolHistory getChangeProtocol(Stream<ParamHistory> proposalChange,
-      Function<ParamHistory, ?> function,
-      Object currentProtocol,
-      Map<Long, Tx> txs) {
+                                            Function<ParamHistory, ?> function,
+                                            Object currentProtocol,
+                                            Map<Long, Tx> txs) {
 
     var histories = proposalChange
         .filter(paramProposal -> Objects.nonNull(function.apply(paramProposal)))
         .collect(Collectors.toList());
 
-
     if (ObjectUtils.isEmpty(histories)) {
       return getDefaultProtocol(currentProtocol);
     }
 
-
     ProtocolHistory past = new ProtocolHistory();
 
     if (histories.size() >= TWO) {
-      ParamHistory pastParamHistory =  histories.get(1);
+      ParamHistory pastParamHistory = histories.get(1);
       Tx pastTX = txs.get(pastParamHistory.getTx());
       past.setValue(function.apply(pastParamHistory));
       past.setTime(pastTX.getBlock().getTime());
@@ -243,8 +246,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   private ProtocolHistory getChangeCostModelProtocol(Stream<ParamHistory> proposalChange,
-      String currentProtocol,
-      Map<Long, Tx> txs) {
+                                                     String currentProtocol,
+                                                     Map<Long, Tx> txs) {
 
     var histories = proposalChange
         .filter(paramProposal -> Objects.nonNull(paramProposal.getCostModel()))
@@ -261,7 +264,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .build();
 
     if (histories.size() >= TWO) {
-      ParamHistory pastParamHistory =  histories.get(1);
+      ParamHistory pastParamHistory = histories.get(1);
       past.setValue(
           costModelRepository
               .getReferenceById(pastParamHistory.getCostModel()).getCosts());

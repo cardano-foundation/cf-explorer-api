@@ -1,19 +1,22 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
-import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
-import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
-import org.cardanofoundation.explorer.api.service.ProtocolParamService;
-import io.swagger.v3.oas.annotations.Operation;
 import java.util.Set;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
+import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
+import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
+import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 
 @RestController
 @RequestMapping("/api/v1/protocol")

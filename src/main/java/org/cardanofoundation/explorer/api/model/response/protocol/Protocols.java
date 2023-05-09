@@ -3,6 +3,8 @@ package org.cardanofoundation.explorer.api.model.response.protocol;
 import lombok.Builder;
 import lombok.Data;
 
+import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
+
 @Builder
 @Data
 public class Protocols {

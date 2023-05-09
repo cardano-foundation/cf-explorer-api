@@ -1,9 +1,10 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 
 @Repository
 public interface EpochParamRepository extends JpaRepository<EpochParam, Long> {
