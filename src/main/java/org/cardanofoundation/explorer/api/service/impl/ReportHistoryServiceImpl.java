@@ -7,10 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import org.cardanofoundation.explorer.api.model.request.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.report.ReportHistoryResponse;
@@ -73,11 +75,11 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
    * Get all report history that not yet persisted to storage, then persist to storage
    */
   @Scheduled(fixedDelay = 1000 * 3)
-  private void persistToStorage(){
+  private void persistToStorage() {
     // will be replaced by redis cache later
     List<ReportHistory> reportHistoryList = reportHistoryRepository.findNotYetPersistToStorage();
     reportHistoryList.forEach(reportHistory -> {
-      if(ReportType.STAKE_KEY.equals(reportHistory.getType())) {
+      if (ReportType.STAKE_KEY.equals(reportHistory.getType())) {
         stakeKeyReportService.exportStakeKeyReport(
             stakeKeyReportHistoryRepository.findByReportHistoryId(reportHistory.getId()));
       } else {
@@ -85,7 +87,6 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
             poolReportRepository.findByReportHistoryId(reportHistory.getId())
         );
       }
-
     });
   }
 }

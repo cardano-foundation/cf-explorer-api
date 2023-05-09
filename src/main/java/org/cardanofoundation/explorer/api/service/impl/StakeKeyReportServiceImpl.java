@@ -1,10 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.StakeKeyReportMapper;
@@ -23,6 +18,7 @@ import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
+import org.cardanofoundation.explorer.api.service.StorageService;
 import org.cardanofoundation.explorer.api.util.report.ExcelHelper;
 import org.cardanofoundation.explorer.api.util.report.CSVHelper;
 import org.cardanofoundation.explorer.api.util.DataUtil;
@@ -33,7 +29,6 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +36,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,9 +62,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private final StakeKeyReportHistoryRepository stakeKeyReportHistoryRepository;
   private final StakeKeyReportMapper stakeKeyReportMapper;
   private final StakeAddressRepository stakeAddressRepository;
-  private final AmazonS3 s3Client;
-  @Value("${cloud.aws.s3.bucket.name}")
-  private String bucketName;
+  private final StorageService storageService;
 
   @Override
   @Transactional
@@ -101,7 +92,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(String username,
-                                                                                    Pageable pageable) {
+      Pageable pageable) {
     Page<StakeKeyReportHistoryResponse> stakeKeyReportHistoriesResponse =
         stakeKeyReportHistoryRepository.findByUsername(username, pageable)
             .map(stakeKeyReportMapper::toStakeKeyReportHistoryResponse);
@@ -121,7 +112,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username,
-                                                     ExportType exportType) {
+      ExportType exportType) {
     if (!ExportType.CSV.equals(exportType) && !ExportType.EXCEL.equals(exportType)) {
       exportType = ExportType.CSV;
     }
@@ -133,7 +124,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     if (DataUtil.isNullOrEmpty(storageKey) || ReportStatus.IN_PROGRESS.equals(reportStatus)) {
       throw new BusinessException(BusinessCode.REPORT_IS_IN_PROGRESS);
     } else {
-      byte[] bytes = downloadFile(storageKey + exportType.getValue());
+      byte[] bytes = storageService.downloadFile(storageKey + exportType.getValue());
       return StakeKeyReportResponse.builder()
           .fileName(reportName + exportType.getValue())
           .byteArrayInputStream(new ByteArrayInputStream(bytes))
@@ -143,7 +134,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public StakeKeyReportHistoryResponse getStakeKeyReportHistoryByReportId(Long reportId,
-                                                                          String username) {
+      String username) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
 
     return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
@@ -168,7 +159,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, stakeLifeCycleFilterRequest,
-                                                          pageable);
+        pageable);
   }
 
   @Override
@@ -179,7 +170,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, stakeLifeCycleFilterRequest,
-                                                            pageable);
+        pageable);
   }
 
   @Override
@@ -190,13 +181,13 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeDelegations(stakeKey, stakeLifeCycleFilterRequest,
-                                                        pageable);
+        pageable);
   }
 
   @Override
   public BaseFilterResponse<StakeRewardResponse> getStakeRewardsByReportId(Long reportId,
-                                                                           String username,
-                                                                           Pageable pageable) {
+      String username,
+      Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeRewards(stakeKey, pageable);
@@ -210,7 +201,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, stakeLifeCycleFilterRequest,
-                                                        pageable);
+        pageable);
   }
 
   @Override
@@ -229,27 +220,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     return stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pageable);
   }
 
-  @Override
-  public void uploadFile(byte[] bytes, String fileName) {
-    ObjectMetadata metadata = new ObjectMetadata();
-    metadata.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-    metadata.setContentLength(bytes.length);
-    s3Client.putObject(
-        new PutObjectRequest(bucketName, fileName, new ByteArrayInputStream(bytes), metadata));
-  }
-
-  @Override
-  public byte[] downloadFile(String fileName) {
-    S3Object s3Object = s3Client.getObject(bucketName, fileName);
-    S3ObjectInputStream inputStream = s3Object.getObjectContent();
-    try {
-      return inputStream.readAllBytes();
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
-    }
-  }
-
   @Transactional
   public void exportStakeKeyReport(StakeKeyReportHistory stakeKeyReportHistory) {
     try {
@@ -259,11 +229,11 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
       String excelFileName = storageKey + EXCEL_EXTENSION;
       InputStream csvInputStream = CSVHelper.writeContent(exportContents);
       InputStream excelInputStream = ExcelHelper.writeContent(exportContents);
-      uploadFile(csvInputStream.readAllBytes(), csvFileName);
-      uploadFile(excelInputStream.readAllBytes(), excelFileName);
+      storageService.uploadFile(csvInputStream.readAllBytes(), csvFileName);
+      storageService.uploadFile(excelInputStream.readAllBytes(), excelFileName);
       stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.GENERATED);
       stakeKeyReportHistory.getReportHistory().setStorageKey(storageKey);
-    } catch (IOException e) {
+    } catch (Exception e) {
       stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.FAILED);
       e.printStackTrace();
       throw new BusinessException(BusinessCode.INTERNAL_ERROR);
@@ -280,17 +250,17 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getIsADATransfer())) {
       exportContents.add(exportStakeWalletActivitys(stakeKeyReportHistory.getStakeKey(),
-                                                    stakeKeyReportHistory.getIsFeesPaid()));
+          stakeKeyReportHistory.getIsFeesPaid()));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventRegistration())) {
       exportContents.add(exportStakeRegistrations(stakeKeyReportHistory.getStakeKey(),
-                                                  stakeLifeCycleFilterRequest));
+          stakeLifeCycleFilterRequest));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventDelegation())) {
       exportContents.add(exportStakeDelegations(stakeKeyReportHistory.getStakeKey(),
-                                                stakeLifeCycleFilterRequest));
+          stakeLifeCycleFilterRequest));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventRewards())) {
@@ -299,12 +269,12 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventWithdrawal())) {
       exportContents.add(exportStakeWithdrawals(stakeKeyReportHistory.getStakeKey(),
-                                                stakeLifeCycleFilterRequest));
+          stakeLifeCycleFilterRequest));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventDeregistration())) {
       exportContents.add(exportStakeDeregistrations(stakeKeyReportHistory.getStakeKey(),
-                                                    stakeLifeCycleFilterRequest));
+          stakeLifeCycleFilterRequest));
     }
     return exportContents;
   }
@@ -329,7 +299,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private ExportContent exportStakeRegistrations(String stakeKey,
-                                                 StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeRegistrationLifeCycle> stakeRegistrations = stakeKeyLifeCycleService.getStakeRegistrations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
     return ExportContent.builder()
@@ -341,7 +311,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private ExportContent exportStakeDelegations(String stakeKey,
-                                               StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeDelegationFilterResponse> stakeDelegations = stakeKeyLifeCycleService.getStakeDelegations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
     return ExportContent.builder()
@@ -365,7 +335,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private ExportContent exportStakeWithdrawals(String stakeKey,
-                                               StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeWithdrawalFilterResponse> stakeWithdrawals = stakeKeyLifeCycleService.getStakeWithdrawals(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
     return ExportContent.builder()
@@ -377,7 +347,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private ExportContent exportStakeDeregistrations(String stakeKey,
-                                                   StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeRegistrationLifeCycle> stakeDeRegistrations = stakeKeyLifeCycleService.getStakeDeRegistrations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
     return ExportContent.builder()
