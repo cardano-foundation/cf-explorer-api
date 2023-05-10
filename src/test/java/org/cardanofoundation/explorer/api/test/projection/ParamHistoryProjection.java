@@ -209,4 +209,9 @@ public class ParamHistoryProjection implements ParamHistory {
   public String getHash() {
     return this.hash;
   }
+
+  @Override
+  public Integer getEpochNo() {
+    return null;
+  }
 }

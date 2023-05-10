@@ -67,4 +67,6 @@ public interface ParamHistory   {
   Date getTime();
 
   String getHash();
+
+  Integer getEpochNo();
 }
