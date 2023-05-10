@@ -111,6 +111,9 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
+    if (Objects.nonNull(search) && search.isBlank()) {
+      search = null;
+    }
     Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search,
         search, pageable);
     List<PoolResponse> poolList = new ArrayList<>();
