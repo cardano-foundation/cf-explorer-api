@@ -13,6 +13,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportD
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
@@ -62,9 +63,15 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private final PoolLifecycleService poolLifecycleService;
 
+  private final PoolHashRepository poolHashRepository;
+
   @Override
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) throws BusinessException {
     try {
+      poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
+              .orElseThrow(
+                      () -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+
       ReportHistory reportHistory = this.initReportHistory(poolReportCreateRequest.getPoolId(), username);
       this.exportDirect(poolReportRepository.save(
               poolReportCreateRequest.toEntity(reportHistory, username)));
@@ -97,6 +104,8 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .byteArrayInputStream(new ByteArrayInputStream(bytes))
                 .build();
       }
+    } catch (BusinessException e) {
+      throw e;
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       return null;
@@ -110,6 +119,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       }
       List<ExportContent> exportContents = new ArrayList<>();
       /// epoch size
+      System.out.println(poolReport);
       if (poolReport.getIsPoolSize()) {
         BaseFilterResponse<PoolReportDetailResponse.EpochSize> epochSizeBaseFilterResponse = this.fetchEpochSize(poolReport);
 
@@ -183,6 +193,8 @@ public class PoolReportServiceImpl implements PoolReportService {
       csvInputStream.close();
     } catch (IOException e) {
       log.error(e.getMessage(), e);
+    } catch (RuntimeException e) {
+      throw e;
     }
 
   }
@@ -320,14 +332,14 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  private BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(PoolReport poolReport) {
+  public BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(PoolReport poolReport) {
     List<PoolReportProjection> epochSizeProjections = epochStakeRepository.getEpochSizeByPoolReport(poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch());
     List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
             .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
     return new BaseFilterResponse<>(epochSizes, epochSizeProjections.size());
   }
 
-  private BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> fetchPoolRegistration(PoolReport poolReport) {
+  public BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> fetchPoolRegistration(PoolReport poolReport) {
     try {
       List<TabularRegisResponse> tabularRegisResponses = poolLifecycleService.registrationList(poolReport.getPoolView(),
               PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "id")).getData();
@@ -339,7 +351,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  private BaseFilterResponse<PoolReportDetailResponse.PoolUpdate> fetchPoolUpdate(PoolReport poolReport) {
+  public BaseFilterResponse<PoolReportDetailResponse.PoolUpdate> fetchPoolUpdate(PoolReport poolReport) {
     try {
       List<PoolUpdateDetailResponse> poolUpdateDetailResponses = poolLifecycleService.poolUpdateList(poolReport.getPoolView(),
               PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "id")).getData();
@@ -351,7 +363,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  private BaseFilterResponse<PoolReportDetailResponse.RewardDistribution> fetchRewardsDistribution(PoolReport poolReport) {
+  public BaseFilterResponse<PoolReportDetailResponse.RewardDistribution> fetchRewardsDistribution(PoolReport poolReport) {
     try {
       List<RewardResponse> rewardResponses = poolLifecycleService.listReward(poolReport.getPoolView(),
               PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "id")).getData();
@@ -363,7 +375,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  private BaseFilterResponse<PoolReportDetailResponse.Deregistration> fetchDeregistraion(PoolReport poolReport) {
+  public BaseFilterResponse<PoolReportDetailResponse.Deregistration> fetchDeregistraion(PoolReport poolReport) {
     try {
       List<DeRegistrationResponse> deRegistrationResponses = poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null, null,
               PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "id")).getData();
