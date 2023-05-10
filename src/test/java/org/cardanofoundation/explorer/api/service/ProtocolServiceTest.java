@@ -1,8 +1,18 @@
+/*
 package org.cardanofoundation.explorer.api.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
+
 
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
@@ -18,23 +28,18 @@ import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ProtocolServiceTest {
@@ -400,7 +405,7 @@ class ProtocolServiceTest {
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class)))
         .thenReturn(paramProposals);
 
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.MIN_FEE_A);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.MIN_FEE_A);
 
     Assertions.assertEquals(response, expect);
   }
@@ -440,7 +445,7 @@ class ProtocolServiceTest {
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class)))
         .thenReturn(paramProposals);
 
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.COST_MODEL);
 
     Assertions.assertEquals(response, expect);
@@ -464,7 +469,7 @@ class ProtocolServiceTest {
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
 
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.MIN_FEE_A);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.MIN_FEE_A);
     Assertions.assertEquals(response.size(), BigInteger.ONE.intValue());
   }
 
@@ -486,7 +491,7 @@ class ProtocolServiceTest {
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
 
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.MIN_FEE_B);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.MIN_FEE_B);
     Assertions.assertEquals(response.size(), BigInteger.ONE.intValue());
   }
 
@@ -495,7 +500,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_BLOCK_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -505,7 +510,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_TX_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -515,7 +520,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_BH_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -525,7 +530,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.KEY_DEPOSIT);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -535,7 +540,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.POOL_DEPOSIT);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -545,7 +550,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.MAX_EPOCH);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.MAX_EPOCH);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -554,7 +559,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.OPTIMAL_POOL_COUNT);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -564,7 +569,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MIN_UTXO_VALUE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -574,7 +579,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MIN_POOL_COST);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -584,7 +589,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_TX_EX_MEM);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -594,7 +599,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_TX_EX_STEPS);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -604,7 +609,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_BLOCK_EX_MEM);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -614,7 +619,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_BLOCK_EX_STEPS);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -624,7 +629,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_VAL_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -634,7 +639,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.COINS_PER_UTXO_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -644,7 +649,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.INFLUENCE);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.INFLUENCE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -653,7 +658,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MONETARY_EXPAND_RATE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -663,7 +668,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.TREASURY_GROWTH_RATE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -673,7 +678,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.DECENTRALISATION);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -683,7 +688,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.PRICE_MEM);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.PRICE_MEM);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -692,7 +697,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.PRICE_STEP);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -702,7 +707,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.PROTOCOL_MAJOR);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -712,7 +717,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.PROTOCOL_MINOR);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -722,7 +727,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.COLLATERAL_PERCENT);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -732,7 +737,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_COLLATERAL_INPUTS);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -742,7 +747,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.ENTROPY);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.ENTROPY);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -754,7 +759,7 @@ class ProtocolServiceTest {
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
 
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.MIN_FEE_A);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.MIN_FEE_A);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -763,7 +768,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.MIN_FEE_B);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.MIN_FEE_B);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -772,7 +777,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_BLOCK_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -782,7 +787,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_TX_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -792,7 +797,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_BH_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -803,7 +808,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.KEY_DEPOSIT);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -814,7 +819,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.POOL_DEPOSIT);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -824,7 +829,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.MAX_EPOCH);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.MAX_EPOCH);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -833,7 +838,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.OPTIMAL_POOL_COUNT);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -843,7 +848,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MIN_UTXO_VALUE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -853,7 +858,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MIN_POOL_COST);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -863,7 +868,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_TX_EX_MEM);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -873,7 +878,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_TX_EX_STEPS);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -883,7 +888,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_BLOCK_EX_MEM);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -893,7 +898,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_BLOCK_EX_STEPS);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -903,7 +908,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_VAL_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -913,7 +918,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.COINS_PER_UTXO_SIZE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -923,7 +928,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.INFLUENCE);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.INFLUENCE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -932,7 +937,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MONETARY_EXPAND_RATE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -942,7 +947,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.TREASURY_GROWTH_RATE);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -952,7 +957,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.DECENTRALISATION);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -962,7 +967,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.PRICE_MEM);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.PRICE_MEM);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
@@ -971,7 +976,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.PRICE_STEP);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -981,7 +986,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.PROTOCOL_MAJOR);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -991,7 +996,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.PROTOCOL_MINOR);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -1001,7 +1006,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.COLLATERAL_PERCENT);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -1011,7 +1016,7 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(
         ProtocolType.MAX_COLLATERAL_INPUTS);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
@@ -1021,8 +1026,9 @@ class ProtocolServiceTest {
     List<ParamProposal> paramProposals = new ArrayList<>();
     when(paramProposalRepository.getAllDistinctProtocolParam(any(Long.class))).thenReturn(
         paramProposals);
-    Set<ProtocolHistory> response = protocolParamService.getProtocolHistory(ProtocolType.ENTROPY);
+    Set<ProtocolHistory> response = protocolParamService.getSingleProtocolHistory(ProtocolType.ENTROPY);
     Assertions.assertEquals(response.size(), BigInteger.ZERO.intValue());
   }
 
 }
+*/
