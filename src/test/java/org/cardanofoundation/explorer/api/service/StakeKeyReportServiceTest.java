@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -503,7 +504,8 @@ public class StakeKeyReportServiceTest {
     StakeRewardResponse expect = StakeRewardResponse.builder()
         .epoch(1)
         .amount(BigInteger.TEN)
-        .time(new Date()).build();
+        .time(Date.from(toDate.toInstant()))
+        .build();
 
     when(stakeKeyLifeCycleService.getStakeRewards(anyString(), any(Pageable.class)))
         .thenReturn(new BaseFilterResponse<>(new PageImpl<>(List.of(expect), pageable, 1)));
@@ -576,7 +578,7 @@ public class StakeKeyReportServiceTest {
 
     StakeWalletActivityResponse expect = new StakeWalletActivityResponse();
     expect.setFee(BigInteger.TWO);
-    expect.setTime(LocalDateTime.now());
+    expect.setTime(LocalDateTime.ofInstant(toDate.toInstant(), ZoneOffset.UTC));
     expect.setType(StakeTxType.SENT);
     expect.setStatus(TxStatus.FAIL);
     expect.setTxHash("txHash");
