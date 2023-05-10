@@ -16,17 +16,31 @@ import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 
 @RestController
-@RequestMapping("/api/v1/protocol")
+@RequestMapping("/api/v1/protocols")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProtocolParamController {
 
   final ProtocolParamService protocolParamService;
 
-  @GetMapping("")
+  @GetMapping("histories")
   @LogMessage
   @Operation(summary = "Get current protocol history change")
-  public List<Protocols> getCurrentProtocol (){
+  public List<Protocols> getCurrentProtocol() {
     return protocolParamService.getHistoryProtocolParam();
+  }
+
+  @GetMapping("latest")
+  @LogMessage
+  @Operation(summary = "Get current protocol history change")
+  public Protocols getLatestChange() {
+    return protocolParamService.getLatestChange();
+  }
+
+  @GetMapping("fixed")
+  @LogMessage
+  @Operation(summary = "Get current protocol history change")
+  public Protocols getFixedProtocols() {
+    return protocolParamService.getFixedProtocols();
   }
 }

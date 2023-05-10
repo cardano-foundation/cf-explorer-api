@@ -10,4 +10,10 @@ public interface ProtocolParamService {
 
   @Transactional(readOnly = true)
   List<Protocols> getHistoryProtocolParam();
+
+  @Transactional(readOnly = true)
+  Protocols getLatestChange();
+
+  @Transactional(readOnly = true)
+  Protocols getFixedProtocols();
 }

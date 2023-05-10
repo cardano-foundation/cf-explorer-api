@@ -1,13 +1,21 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import jakarta.annotation.PostConstruct;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,6 +24,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
 import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.projection.ParamHistory;
@@ -29,6 +39,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 
 @Service
 @Log4j2
@@ -40,7 +51,10 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   final EpochParamRepository epochParamRepository;
   final TxRepository txRepository;
   final CostModelRepository costModelRepository;
+  public static final String GET = "get";
+  Map<ProtocolType, Method> paramProtocolMethod;
 
+  @Override
   public List<Protocols> getHistoryProtocolParam() {
     List<ParamHistory> historiesChange = paramProposalRepository.findProtocolsChange();
     Map<Integer, EpochParam> epochParams = epochParamRepository.findAll().stream()
@@ -66,7 +80,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           return protocolsChange;
         }).collect(Collectors.toMap(Protocols::getStartEpoch, Function.identity()));
 
-    List<Protocols> processPrototocols = new ArrayList<>();
+    List<Protocols> processProtocols = new ArrayList<>();
 
     final Set<Integer> epochs = historiesChangeByEpoch.keySet();
 
@@ -100,13 +114,89 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
           fillMissingProtocolField(markProtocol, epochParams.get(epoch));
 
-          processPrototocols.add(protocols.get());
+          processProtocols.add(protocols.get());
           protocols.set(currentProtocol);
         });
 
-    return processPrototocols;
+    return processProtocols;
   }
 
+  @Override
+  public Protocols getLatestChange() {
+    Integer epoch = paramProposalRepository.findMaxEpoch();
+    List<ParamHistory> paramHistories = paramProposalRepository.findEpochProtocolsChange(epoch);
+    Optional<EpochParam> epochParamOptional = epochParamRepository.findEpochParamByEpochNo(epoch);
+
+    return epochParamOptional
+        .map(epochParam -> {
+
+          Map<Long, Tx> txs = txRepository.findByIdIn(
+                  paramHistories.stream().map(ParamHistory::getTx).toList())
+              .parallelStream().collect(Collectors.toMap(Tx::getId, Function.identity()));
+
+          Protocols epochChange = getProtocolChangeInOneEpoch(paramHistories, txs);
+          epochChange.setStartEpoch(epoch);
+          fillMissingProtocolField(epochChange, epochParam);
+          return epochChange;
+        }).orElse(Protocols.builder().build());
+  }
+
+  @Override
+  public Protocols getFixedProtocols() {
+    Protocols fixedProtocol = Protocols.builder().build();
+    List<EpochParam> epochParams = epochParamRepository.findAll()
+        .stream()
+        .sorted(Comparator.comparing(EpochParam::getId).reversed())
+        .toList();
+
+    if (ObjectUtils.isEmpty(epochParams)) {
+      return fixedProtocol;
+    }
+
+    EpochParam maxEpochParam = epochParams.stream()
+        .max(Comparator.comparing(EpochParam::getEpochNo)).get();
+
+    EpochParam minEpochParam = epochParams.stream()
+        .min(Comparator.comparing(EpochParam::getEpochNo)).get();
+
+    fixedProtocol.setStartEpoch(maxEpochParam.getEpochNo());
+    fixedProtocol.setEndEpoch(minEpochParam.getEpochNo());
+
+    Map<ProtocolType, Object> fixedProtocolMap = new ConcurrentHashMap<>();
+
+    paramProtocolMethod.keySet()
+        .forEach(key -> {
+          try {
+            Object object = paramProtocolMethod.get(key).invoke(maxEpochParam);
+            if (Objects.nonNull(object)) {
+              fixedProtocolMap.put(key, object);
+            }
+          } catch (IllegalAccessException | InvocationTargetException e) {
+            log.error(e.getMessage());
+          }
+        });
+
+    epochParams.forEach(
+        epochParam ->
+            fixedProtocolMap.keySet()
+                .forEach(key -> {
+                  try {
+                    Object currentValue = fixedProtocolMap.get(key);
+                    Object oldValue = paramProtocolMethod.get(key)
+                        .invoke(epochParam);
+
+                    if (!Objects.equals(currentValue, oldValue) && Objects.nonNull(oldValue)) {
+                      fixedProtocolMap.remove(key);
+                    }
+                  } catch (IllegalAccessException |
+                           InvocationTargetException e) {
+                    log.error(e.getMessage());
+                  }
+                })
+    );
+    fillFixedProtocolField(fixedProtocolMap, fixedProtocol);
+    return fixedProtocol;
+  }
 
   private Protocols getEpochProtocol(Integer epochNo) {
     return Protocols.builder()
@@ -115,8 +205,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .build();
   }
 
-  public Protocols getProtocolChangeInOneEpoch(List<ParamHistory> paramHistories,
-                                               Map<Long, Tx> txs) {
+  private Protocols getProtocolChangeInOneEpoch(List<ParamHistory> paramHistories,
+                                                Map<Long, Tx> txs) {
     Protocols protocols = getEpochProtocol(
         paramHistories.get(BigInteger.ZERO.intValue()).getEpochNo());
     mapProtocols(paramHistories, protocols, txs);
@@ -659,6 +749,130 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     if (Objects.isNull(protocols.getCostModel()) && Objects.nonNull(epochParam.getCostModel())) {
       protocols.setCostModel(
           getChangeCostModelProtocol(epochParam.getCostModel().getCosts()));
+    }
+  }
+
+  private void fillFixedProtocolField(Map<ProtocolType, Object> fixedProtocols,
+                                      Protocols protocols) {
+
+    fixedProtocols.keySet().forEach(fieldName -> {
+      Object object = fixedProtocols.get(fieldName);
+      switch (fieldName) {
+        case MIN_FEE_A:
+          protocols.setMinFeeA(getChangeProtocol(object));
+          break;
+        case MIN_FEE_B:
+          protocols.setMinFeeA(getChangeProtocol(object));
+          break;
+        case MAX_BLOCK_SIZE:
+          protocols.setMaxBlockSize(getChangeProtocol(object));
+          break;
+        case MAX_TX_SIZE:
+          protocols.setMaxTxSize(getChangeProtocol(object));
+          break;
+        case MAX_BH_SIZE:
+          protocols.setMaxBhSize(getChangeProtocol(object));
+          break;
+        case KEY_DEPOSIT:
+          protocols.setKeyDeposit(getChangeProtocol(object));
+          break;
+        case POOL_DEPOSIT:
+          protocols.setPoolDeposit(getChangeProtocol(object));
+          break;
+        case MAX_EPOCH:
+          protocols.setMaxEpoch(getChangeProtocol(object));
+          break;
+        case OPTIMAL_POOL_COUNT:
+          protocols.setOptimalPoolCount(getChangeProtocol(object));
+          break;
+        case MIN_UTXO_VALUE:
+          protocols.setMinUtxoValue(getChangeProtocol(object));
+          break;
+        case MIN_POOL_COST:
+          protocols.setMinPoolCost(getChangeProtocol(object));
+          break;
+        case MAX_TX_EX_MEM:
+          protocols.setMaxTxExMem(getChangeProtocol(object));
+          break;
+        case MAX_TX_EX_STEPS:
+          protocols.setMaxTxExSteps(getChangeProtocol(object));
+          break;
+        case MAX_BLOCK_EX_MEM:
+          protocols.setMaxBlockExMem(getChangeProtocol(object));
+          break;
+        case MAX_BLOCK_EX_STEPS:
+          protocols.setMaxBlockExSteps(getChangeProtocol(object));
+          break;
+        case MAX_VAL_SIZE:
+          protocols.setMaxValSize(getChangeProtocol(object));
+          break;
+        case COINS_PER_UTXO_SIZE:
+          protocols.setCoinsPerUtxoSize(getChangeProtocol(object));
+          break;
+        case INFLUENCE:
+          protocols.setInfluence(getChangeProtocol(object));
+          break;
+        case MONETARY_EXPAND_RATE:
+          protocols.setMonetaryExpandRate(getChangeProtocol(object));
+          break;
+        case TREASURY_GROWTH_RATE:
+          protocols.setTreasuryGrowthRate(getChangeProtocol(object));
+          break;
+        case DECENTRALISATION:
+          protocols.setDecentralisation(getChangeProtocol(object));
+          break;
+        case PRICE_MEM:
+          protocols.setPriceMem(getChangeProtocol(object));
+          break;
+        case PRICE_STEP:
+          protocols.setPriceStep(getChangeProtocol(object));
+          break;
+        case PROTOCOL_MAJOR:
+          protocols.setProtocolMajor(getChangeProtocol(object));
+          break;
+        case PROTOCOL_MINOR:
+          protocols.setProtocolMinor(getChangeProtocol(object));
+          break;
+        case COLLATERAL_PERCENT:
+          protocols.setCollateralPercent(getChangeProtocol(object));
+          break;
+        case MAX_COLLATERAL_INPUTS:
+          protocols.setMaxCollateralInputs(getChangeProtocol(object));
+          break;
+        case ENTROPY:
+          protocols.setEntropy(getChangeProtocol(object));
+          break;
+        case COST_MODEL:
+          CostModel costModel = (CostModel) object;
+          protocols.setCostModel(getChangeProtocol(costModel.getCosts()));
+          break;
+        default:
+          throw new BusinessException(BusinessCode.PROTOCOL_FIELD_NOT_FOUND);
+      }
+    });
+  }
+
+  @PostConstruct
+  void setup() {
+    paramProtocolMethod = new HashMap<>();
+    Field[] fields = EpochParam.class.getDeclaredFields();
+    Method[] methods = EpochParam.class.getDeclaredMethods();
+    List<String> fieldNames = Arrays.stream(ProtocolType.values())
+        .map(ProtocolType::getFieldName).toList();
+
+    for (Field field : fields) {
+      Method methodUsed = Arrays.stream(methods)
+          .filter(method -> {
+            var methodLowerCase = method.getName().toLowerCase();
+            var fieldLowerCase = field.getName().toLowerCase();
+            return methodLowerCase.contains(fieldLowerCase) && methodLowerCase.contains(GET);
+          })
+          .findFirst()
+          .orElse(null); // Method null is ok, because we not use it anyway
+      if (Objects.nonNull(methodUsed) &&
+          fieldNames.contains(field.getName())) {
+        paramProtocolMethod.put(ProtocolType.valueStringOf(field.getName()), methodUsed);
+      }
     }
   }
 }
