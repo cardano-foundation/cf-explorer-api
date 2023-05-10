@@ -119,7 +119,6 @@ public class PoolReportServiceImpl implements PoolReportService {
       }
       List<ExportContent> exportContents = new ArrayList<>();
       /// epoch size
-      System.out.println(poolReport);
       if (poolReport.getIsPoolSize()) {
         BaseFilterResponse<PoolReportDetailResponse.EpochSize> epochSizeBaseFilterResponse = this.fetchEpochSize(poolReport);
 
