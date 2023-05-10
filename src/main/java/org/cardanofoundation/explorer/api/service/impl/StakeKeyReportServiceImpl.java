@@ -3,11 +3,11 @@ package org.cardanofoundation.explorer.api.service.impl;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.StakeKeyReportMapper;
-import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportHistoryResponse;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
@@ -30,13 +30,17 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -92,7 +96,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(String username,
-      Pageable pageable) {
+                                                                                    Pageable pageable) {
     Page<StakeKeyReportHistoryResponse> stakeKeyReportHistoriesResponse =
         stakeKeyReportHistoryRepository.findByUsername(username, pageable)
             .map(stakeKeyReportMapper::toStakeKeyReportHistoryResponse);
@@ -112,7 +116,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username,
-      ExportType exportType) {
+                                                     ExportType exportType) {
     if (!ExportType.CSV.equals(exportType) && !ExportType.EXCEL.equals(exportType)) {
       exportType = ExportType.CSV;
     }
@@ -134,7 +138,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public StakeKeyReportHistoryResponse getStakeKeyReportHistoryByReportId(Long reportId,
-      String username) {
+                                                                          String username) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
 
     return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
@@ -159,7 +163,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, stakeLifeCycleFilterRequest,
-        pageable);
+                                                          pageable);
   }
 
   @Override
@@ -170,7 +174,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, stakeLifeCycleFilterRequest,
-        pageable);
+                                                            pageable);
   }
 
   @Override
@@ -181,16 +185,26 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeDelegations(stakeKey, stakeLifeCycleFilterRequest,
-        pageable);
+                                                        pageable);
   }
 
   @Override
   public BaseFilterResponse<StakeRewardResponse> getStakeRewardsByReportId(Long reportId,
-      String username,
-      Pageable pageable) {
+                                                                           String username,
+                                                                           Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
-    return stakeKeyLifeCycleService.getStakeRewards(stakeKey, pageable);
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
+        stakeKeyReportHistory);
+
+    List<StakeRewardResponse> stakeRewardResponses = stakeKeyLifeCycleService
+        .getStakeRewards(stakeKey, pageable).getData()
+        .stream()
+        .filter(response -> isTimeInFilterRange(response.getTime(), stakeLifeCycleFilterRequest))
+        .toList();
+
+    return new BaseFilterResponse<>(
+        new PageImpl<>(stakeRewardResponses, pageable, stakeRewardResponses.size()));
   }
 
   @Override
@@ -201,7 +215,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, stakeLifeCycleFilterRequest,
-        pageable);
+                                                        pageable);
   }
 
   @Override
@@ -209,7 +223,18 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
       Long reportId, String username, Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
-    return stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pageable);
+    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
+        stakeKeyReportHistory);
+    List<StakeWalletActivityResponse> stakeWalletActivityResponses = stakeKeyLifeCycleService
+        .getStakeWalletActivities(stakeKey, pageable).getData()
+        .stream()
+        .filter(
+            response -> isTimeInFilterRange(Date.from(response.getTime().toInstant(ZoneOffset.UTC)),
+                                            stakeLifeCycleFilterRequest))
+        .toList();
+
+    return new BaseFilterResponse<>(new PageImpl<>(stakeWalletActivityResponses, pageable,
+                                                   stakeWalletActivityResponses.size()));
   }
 
   @Override
@@ -250,31 +275,33 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getIsADATransfer())) {
       exportContents.add(exportStakeWalletActivitys(stakeKeyReportHistory.getStakeKey(),
-          stakeKeyReportHistory.getIsFeesPaid()));
+                                                    stakeKeyReportHistory.getIsFeesPaid(),
+                                                    stakeLifeCycleFilterRequest));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventRegistration())) {
       exportContents.add(exportStakeRegistrations(stakeKeyReportHistory.getStakeKey(),
-          stakeLifeCycleFilterRequest));
+                                                  stakeLifeCycleFilterRequest));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventDelegation())) {
       exportContents.add(exportStakeDelegations(stakeKeyReportHistory.getStakeKey(),
-          stakeLifeCycleFilterRequest));
+                                                stakeLifeCycleFilterRequest));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventRewards())) {
-      exportContents.add(exportStakeRewards(stakeKeyReportHistory.getStakeKey()));
+      exportContents.add(exportStakeRewards(stakeKeyReportHistory.getStakeKey(),
+                                            stakeLifeCycleFilterRequest));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventWithdrawal())) {
       exportContents.add(exportStakeWithdrawals(stakeKeyReportHistory.getStakeKey(),
-          stakeLifeCycleFilterRequest));
+                                                stakeLifeCycleFilterRequest));
     }
 
     if (Boolean.TRUE.equals(stakeKeyReportHistory.getEventDeregistration())) {
       exportContents.add(exportStakeDeregistrations(stakeKeyReportHistory.getStakeKey(),
-          stakeLifeCycleFilterRequest));
+                                                    stakeLifeCycleFilterRequest));
     }
     return exportContents;
   }
@@ -287,9 +314,16 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     return stakeLifeCycleFilterRequest;
   }
 
-  private ExportContent exportStakeWalletActivitys(String stakeKey, Boolean isFeesPaid) {
+  private ExportContent exportStakeWalletActivitys(String stakeKey, Boolean isFeesPaid,
+                                                   StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeWalletActivityResponse> stakeWalletActivitys = stakeKeyLifeCycleService.getStakeWalletActivities(
-        stakeKey, defaultPageable).getData();
+            stakeKey, defaultPageable).getData()
+        .stream()
+        .filter(
+            response -> isTimeInFilterRange(Date.from(response.getTime().toInstant(ZoneOffset.UTC)),
+                                            stakeLifeCycleFilterRequest))
+        .toList();
+
     return ExportContent.builder()
         .clazz(StakeWalletActivityResponse.class)
         .headerTitle(WALLET_ACTIVITY_TITLE)
@@ -299,7 +333,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private ExportContent exportStakeRegistrations(String stakeKey,
-      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+                                                 StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeRegistrationLifeCycle> stakeRegistrations = stakeKeyLifeCycleService.getStakeRegistrations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
     return ExportContent.builder()
@@ -311,7 +345,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private ExportContent exportStakeDelegations(String stakeKey,
-      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+                                               StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeDelegationFilterResponse> stakeDelegations = stakeKeyLifeCycleService.getStakeDelegations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
     return ExportContent.builder()
@@ -322,10 +356,14 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         .build();
   }
 
-  private ExportContent exportStakeRewards(String stakeKey) {
+  private ExportContent exportStakeRewards(String stakeKey,
+                                           StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     Pageable rewardPageable = PageRequest.of(0, 1000, Sort.by("id").descending());
     List<StakeRewardResponse> stakeRewards = stakeKeyLifeCycleService.getStakeRewards(
-        stakeKey, rewardPageable).getData();
+            stakeKey, rewardPageable).getData()
+        .stream()
+        .filter(response -> isTimeInFilterRange(response.getTime(), stakeLifeCycleFilterRequest))
+        .toList();
     return ExportContent.builder()
         .clazz(StakeRewardResponse.class)
         .headerTitle(REWARDS_DISTRIBUTION_TITLE)
@@ -335,7 +373,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private ExportContent exportStakeWithdrawals(String stakeKey,
-      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+                                               StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeWithdrawalFilterResponse> stakeWithdrawals = stakeKeyLifeCycleService.getStakeWithdrawals(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
     return ExportContent.builder()
@@ -347,7 +385,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   private ExportContent exportStakeDeregistrations(String stakeKey,
-      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+                                                   StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
     List<StakeRegistrationLifeCycle> stakeDeRegistrations = stakeKeyLifeCycleService.getStakeDeRegistrations(
         stakeKey, stakeLifeCycleFilterRequest, defaultPageable).getData();
     return ExportContent.builder()
@@ -369,5 +407,13 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     return stakeKeyReportHistory.getReportHistory().getId() + "_"
         + stakeKeyReportHistory.getReportHistory()
         .getReportName();
+  }
+
+  private Boolean isTimeInFilterRange(Date time,
+                                      StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest) {
+    Date fromDate = stakeLifeCycleFilterRequest.getFromDate();
+    Date toDate = stakeLifeCycleFilterRequest.getToDate();
+    return time.compareTo(fromDate) >= BigInteger.ZERO.intValue()
+        && time.compareTo(toDate) <= BigInteger.ZERO.intValue();
   }
 }

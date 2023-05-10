@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +23,11 @@ import org.springframework.data.domain.Pageable;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.mapper.StakeKeyReportMapper;
-import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportHistoryResponse;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
@@ -503,7 +504,8 @@ public class StakeKeyReportServiceTest {
     StakeRewardResponse expect = StakeRewardResponse.builder()
         .epoch(1)
         .amount(BigInteger.TEN)
-        .time(new Date()).build();
+        .time(Date.from(toDate.toInstant()))
+        .build();
 
     when(stakeKeyLifeCycleService.getStakeRewards(anyString(), any(Pageable.class)))
         .thenReturn(new BaseFilterResponse<>(new PageImpl<>(List.of(expect), pageable, 1)));
@@ -576,7 +578,7 @@ public class StakeKeyReportServiceTest {
 
     StakeWalletActivityResponse expect = new StakeWalletActivityResponse();
     expect.setFee(BigInteger.TWO);
-    expect.setTime(LocalDateTime.now());
+    expect.setTime(LocalDateTime.ofInstant(toDate.toInstant(), ZoneOffset.UTC));
     expect.setType(StakeTxType.SENT);
     expect.setStatus(TxStatus.FAIL);
     expect.setTxHash("txHash");

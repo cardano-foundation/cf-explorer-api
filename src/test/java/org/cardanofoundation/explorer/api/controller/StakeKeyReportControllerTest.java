@@ -16,13 +16,13 @@ import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
-import org.cardanofoundation.explorer.api.model.request.report.ReportHistoryFilterRequest;
-import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.report.ReportHistoryResponse;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportHistoryResponse;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
@@ -66,8 +66,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 class StakeKeyReportControllerTest {
 
-  private final String DATE_TIME_PATTERN = "yyyyMMdd";
-
   private final String END_POINT = "/api/v1/staking-lifecycle/report";
 
   @Autowired
@@ -81,14 +79,6 @@ class StakeKeyReportControllerTest {
 
   @MockBean
   private AuthInterceptor authInterceptor;
-
-  public static String asJsonString(final Object obj) {
-    try {
-      return new ObjectMapper().writeValueAsString(obj);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   @BeforeEach
   void preControllerTest() throws Exception {
@@ -487,5 +477,13 @@ class StakeKeyReportControllerTest {
         .eventDeregistration(Boolean.FALSE)
         .build();
     return stakeKeyReportHistoryResponse;
+  }
+
+  public static String asJsonString(final Object obj) {
+    try {
+      return new ObjectMapper().writeValueAsString(obj);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

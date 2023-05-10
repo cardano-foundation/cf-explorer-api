@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.model.response.report;
+package org.cardanofoundation.explorer.api.model.response.stake.report;
 
 import java.io.ByteArrayInputStream;
 import lombok.Builder;

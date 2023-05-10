@@ -2,9 +2,9 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.springframework.data.domain.Pageable;
 
-import org.cardanofoundation.explorer.api.model.request.report.ReportHistoryFilterRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.report.ReportHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 
 public interface ReportHistoryService {
 
