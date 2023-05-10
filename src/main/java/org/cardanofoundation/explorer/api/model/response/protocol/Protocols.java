@@ -2,16 +2,19 @@ package org.cardanofoundation.explorer.api.model.response.protocol;
 
 import java.util.Objects;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Protocols {
 
-  Integer startEpoch;
-  Integer endEpoch;
+  EpochChange epochChange;
   ProtocolHistory minFeeA;
   ProtocolHistory minFeeB;
   ProtocolHistory maxBlockSize;

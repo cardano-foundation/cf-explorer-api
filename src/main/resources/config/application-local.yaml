@@ -76,7 +76,7 @@ cloud:
         name: ${BUCKET_NAME:cardano-explorer-api-storage}
       path-style:
         enabled: true
-      endpoint: ${STORAGE_ENDPOINT:http://localhost:9001}
+      endpoint: ${STORAGE_ENDPOINT:http://172.16.1.230:9000}
 application:
   network: ${SCHEMA:mainnet}
   api.coin.gecko.market:
