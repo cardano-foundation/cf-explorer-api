@@ -331,14 +331,14 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  public BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(PoolReport poolReport) {
+  private BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(PoolReport poolReport) {
     List<PoolReportProjection> epochSizeProjections = epochStakeRepository.getEpochSizeByPoolReport(poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch());
     List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
             .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
     return new BaseFilterResponse<>(epochSizes, epochSizeProjections.size());
   }
 
-  public BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> fetchPoolRegistration(PoolReport poolReport) {
+  private BaseFilterResponse<PoolReportDetailResponse.PoolRegistration> fetchPoolRegistration(PoolReport poolReport) {
     try {
       List<TabularRegisResponse> tabularRegisResponses = poolLifecycleService.registrationList(poolReport.getPoolView(),
               PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "id")).getData();
@@ -350,7 +350,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  public BaseFilterResponse<PoolReportDetailResponse.PoolUpdate> fetchPoolUpdate(PoolReport poolReport) {
+  private BaseFilterResponse<PoolReportDetailResponse.PoolUpdate> fetchPoolUpdate(PoolReport poolReport) {
     try {
       List<PoolUpdateDetailResponse> poolUpdateDetailResponses = poolLifecycleService.poolUpdateList(poolReport.getPoolView(),
               PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "id")).getData();
@@ -362,7 +362,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  public BaseFilterResponse<PoolReportDetailResponse.RewardDistribution> fetchRewardsDistribution(PoolReport poolReport) {
+  private BaseFilterResponse<PoolReportDetailResponse.RewardDistribution> fetchRewardsDistribution(PoolReport poolReport) {
     try {
       List<RewardResponse> rewardResponses = poolLifecycleService.listReward(poolReport.getPoolView(),
               PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "id")).getData();
@@ -374,7 +374,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     }
   }
 
-  public BaseFilterResponse<PoolReportDetailResponse.Deregistration> fetchDeregistraion(PoolReport poolReport) {
+  private BaseFilterResponse<PoolReportDetailResponse.Deregistration> fetchDeregistraion(PoolReport poolReport) {
     try {
       List<DeRegistrationResponse> deRegistrationResponses = poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null, null,
               PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "id")).getData();
