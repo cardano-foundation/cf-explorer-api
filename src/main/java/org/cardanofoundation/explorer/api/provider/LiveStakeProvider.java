@@ -50,6 +50,9 @@ public class LiveStakeProvider {
         withdrawalStake = BigInteger.ZERO;
       }
       BigInteger liveStake = delegateStake.add(rewardStake).subtract(withdrawalStake);
+      if (liveStake.compareTo(BigInteger.ZERO) < 0) {
+        liveStake = BigInteger.ZERO;
+      }
       totalLiveStake = totalLiveStake.add(liveStake);
       redisTemplate.opsForValue().set(CommonConstant.REDIS_POOL_PREFIX + network + view, liveStake);
     }
