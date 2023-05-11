@@ -28,6 +28,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
@@ -138,14 +139,16 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       return new Protocols();
     }
 
-    final var proposalEpoch = epoch - BigInteger.ONE.intValue();
-
     List<ParamHistory> paramHistories = paramProposalRepository
-        .findEpochProtocolsChange(proposalEpoch)
+        .findEpochProtocolsChange(epoch)
         .stream()
         .sorted((proposalOld, proposalNew)
                     -> proposalNew.getTx().compareTo(proposalOld.getTx()))
         .toList();
+
+    if(CollectionUtils.isEmpty(paramHistories)){
+      return new Protocols();
+    }
 
     Optional<EpochParam> epochParamOptional = epochParamRepository.findEpochParamByEpochNo(epoch);
 

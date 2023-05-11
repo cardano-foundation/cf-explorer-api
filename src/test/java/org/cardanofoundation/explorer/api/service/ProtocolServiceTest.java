@@ -2155,6 +2155,18 @@ class ProtocolServiceTest {
   }
 
   @Test
+  void testEmptyProposalProtocols() {
+    when(paramProposalRepository.findMaxEpoch()).thenReturn(BigInteger.ONE.intValue());
+    when(paramProposalRepository
+             .findEpochProtocolsChange(any(Integer.class)))
+        .thenReturn(Collections.emptyList());
+
+    Protocols expect = new Protocols();
+    Protocols actual = protocolParamService.getLatestChange();
+    Assertions.assertEquals(expect.hashCode(), actual.hashCode());
+  }
+
+  @Test
   void testEmptyProtocols() {
     when(paramProposalRepository.findMaxEpoch()).thenReturn(null);
     Protocols expect = new Protocols();
