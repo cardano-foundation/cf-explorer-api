@@ -378,6 +378,7 @@ public class TxServiceImpl implements TxService {
           if (addressTokenMap.containsKey(tx.getId())) {
             List<TokenAddressResponse> tokenAddressResponseList =
                 addressTokenMap.get(tx.getId()).stream()
+                    .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
                     .map(
                         addressToken -> {
                           TokenAddressResponse tokenAddressResponse =
