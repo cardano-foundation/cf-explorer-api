@@ -49,4 +49,9 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " GROUP BY addrToken.multiAsset")
   List<TokenVolumeProjection> sumBalanceAfterTx(@Param("multiAsset") Collection<MultiAsset> multiAsset,
                                                 @Param("txId") Long txId);
+
+  @Query("SELECT addrToken FROM AddressToken addrToken"
+      + " WHERE addrToken.tx.id in :ids and addrToken.address.address = :address")
+  List<AddressToken> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
+                                              @Param("address") String address);
 }
