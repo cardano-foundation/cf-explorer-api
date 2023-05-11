@@ -363,12 +363,15 @@ public class TxServiceImpl implements TxService {
             .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
 
     // get metadata
-    List<MultiAsset> multiAssets = addressTokens.stream().map(AddressToken::getMultiAsset).toList();
-    Set<String> subjects = multiAssets.stream().map(
-        ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
+    List<Long> multiAssetIdList =
+        addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
+    List<MultiAsset> multiAssets = multiAssetRepository.findAllByIdIn(multiAssetIdList);
+    Set<String> subjects =
+        multiAssets.stream().map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+    Map<String, AssetMetadata> assetMetadataMap =
+        assetMetadataList.stream()
+            .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
 
     txFilterResponses.forEach(
         tx -> {
