@@ -1,0 +1,7 @@
+spring:
+  redis:
+    cluster:
+      nodes: ${NODE_ADDRESSES:127.0.0.1:6382,127.0.0.1:6383}
+    password: ${REDIS_CLUSTER_PASSWORD:bitnami}
+
+
