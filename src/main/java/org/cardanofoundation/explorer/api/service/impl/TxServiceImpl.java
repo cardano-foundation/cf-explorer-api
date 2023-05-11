@@ -655,7 +655,9 @@ public class TxServiceImpl implements TxService {
                     tokens.get(0).setAssetQuantity(totalQuantity);
                   }
 
-                  tokenResponse.add(tokens.get(0));
+                  if (!BigInteger.ZERO.equals(tokens.get(0).getAssetQuantity())) {
+                    tokenResponse.add(tokens.get(0));
+                  }
                 });
 
             txs.get(0).setTokens(tokenResponse);
