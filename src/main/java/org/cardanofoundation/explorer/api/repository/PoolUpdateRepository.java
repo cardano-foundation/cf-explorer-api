@@ -8,9 +8,11 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlock
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -86,8 +88,10 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
   Page<PoolUpdateProjection> findPoolUpdateByPool(@Param("poolView") String poolView,
-      @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
-      @Param("toDate") Timestamp toDate, Pageable pageable);
+                                                  @Param("txHash") String txHash,
+                                                  @Param("fromDate") Timestamp fromDate,
+                                                  @Param("toDate") Timestamp toDate,
+                                                  Pageable pageable);
 
 
   @Query(value =
@@ -101,7 +105,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE pu.id = :id ")
   PoolUpdateDetailProjection findPoolUpdateDetailById(@Param("id") Long id);
 
-  @Query("SELECT ph.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
+  @Query("SELECT pu.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
       + "pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, sa.view AS rewardAccount, "
       + "pmr.url AS metadataUrl, pmr.hash as metadataHash "
       + "FROM PoolUpdate pu "
@@ -120,7 +124,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   List<String> findOwnerAccountByPoolUpdate(@Param("id") Long id);
 
   PoolUpdate findTopByIdLessThanAndPoolHashIdOrderByIdDesc(@Param("id") Long id,
-      @Param("poolHashId") Long poolHashId);
+                                                           @Param("poolHashId") Long poolHashId);
 
   @Query(value =
       "SELECT pu.id AS poolUpdateId, ph.id AS hashId, ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
@@ -131,7 +135,8 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN Block bk ON tx.block.id  = bk.id "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
           + "WHERE ph.view = :poolView ")
-  Page<PoolUpdateDetailProjection> findPoolUpdateByPool(@Param("poolView") String poolView, Pageable pageable);
+  Page<PoolUpdateDetailProjection> findPoolUpdateByPool(@Param("poolView") String poolView,
+                                                        Pageable pageable);
 
   @Query("SELECT poolHash.view FROM PoolUpdate poolUpdate "
       + "INNER JOIN PoolHash poolHash ON poolUpdate.poolHash = poolHash "
