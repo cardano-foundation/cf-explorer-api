@@ -38,9 +38,16 @@ public class LiveStakeProvider {
     BigInteger totalLiveStake = BigInteger.ZERO;
     for (String view : poolViews) {
       log.info("pool=" + view);
-      BigInteger delegateStake = delegationRepository.findDelegateStakeByPool(view);
-      BigInteger rewardStake = rewardRepository.findRewardStakeByPool(view);
-      BigInteger withdrawalStake = withdrawalRepository.findWithdrawalStakeByPool(view);
+      BigInteger delegateStake = null;
+      BigInteger rewardStake = null;
+      BigInteger withdrawalStake = null;
+      try {
+        delegateStake = delegationRepository.findDelegateStakeByPool(view);
+        rewardStake = rewardRepository.findRewardStakeByPool(view);
+        withdrawalStake = withdrawalRepository.findWithdrawalStakeByPool(view);
+      } catch (Exception e) {
+        log.error("Error=" + e.getMessage(), "View=" + view);
+      }
       if (Objects.isNull(delegateStake)) {
         delegateStake = BigInteger.ZERO;
       }
