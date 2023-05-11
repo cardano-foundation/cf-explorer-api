@@ -86,6 +86,8 @@ public class DelegationServiceImpl implements DelegationService {
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
 
+  @Value("${application.network}")
+  private String network;
 
   @Override
   public DelegationHeaderResponse getDataForDelegationHeader() {
@@ -96,7 +98,7 @@ public class DelegationServiceImpl implements DelegationService {
     long countDownTime = endTime.getTime() - Timestamp.from(Instant.now()).getTime();
     Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo);
     Object liveStake = redisTemplate.opsForValue()
-        .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE);
+        .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
     Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
         Long.valueOf(epochNo));
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
@@ -109,6 +111,9 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
+    if (Objects.nonNull(search) && search.isBlank()) {
+      search = null;
+    }
     Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search,
         search, pageable);
     List<PoolResponse> poolList = new ArrayList<>();
@@ -320,7 +325,7 @@ public class DelegationServiceImpl implements DelegationService {
       return BigDecimal.ZERO.doubleValue();
     }
     Object liveStakeObject = redisTemplate.opsForValue()
-        .get(CommonConstant.REDIS_POOL_PREFIX + poolView);
+        .get(CommonConstant.REDIS_POOL_PREFIX + network + poolView);
     if (Objects.isNull(liveStakeObject)) {
       return BigDecimal.ZERO.doubleValue();
     }

@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
-import org.cardanofoundation.explorer.api.common.enumeration.PoolReportEvent;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -14,10 +13,11 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportD
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
-import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
+import org.cardanofoundation.explorer.api.service.StorageService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.report.CSVHelper;
 import org.cardanofoundation.explorer.api.util.report.ExcelHelper;
@@ -59,20 +59,26 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private final EpochStakeRepository epochStakeRepository;
 
-  private final StakeKeyReportService stakeKeyReportService;
+  private final StorageService storageService;
 
   private final PoolLifecycleService poolLifecycleService;
 
+  private final PoolHashRepository poolHashRepository;
+
   @Override
-  public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
+  public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) throws BusinessException {
     try {
+      poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
+              .orElseThrow(
+                      () -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+
       ReportHistory reportHistory = this.initReportHistory(poolReportCreateRequest.getPoolId(), username);
       this.exportDirect(poolReportRepository.save(
               poolReportCreateRequest.toEntity(reportHistory, username)));
       return true;
     } catch (Exception e) {
       log.error(e.getMessage(), e);
-      return false;
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
     }
   }
 
@@ -92,12 +98,14 @@ public class PoolReportServiceImpl implements PoolReportService {
       if (DataUtil.isNullOrEmpty(storageKey)) {
         throw new BusinessException(BusinessCode.INTERNAL_ERROR);
       } else {
-        byte[] bytes = stakeKeyReportService.downloadFile(storageKey + exportType.getValue());
+        byte[] bytes = storageService.downloadFile(storageKey + exportType.getValue());
         return PoolReportExportResponse.builder()
                 .fileName(reportName + exportType.getValue())
                 .byteArrayInputStream(new ByteArrayInputStream(bytes))
                 .build();
       }
+    } catch (BusinessException e) {
+      throw e;
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       return null;
@@ -175,8 +183,8 @@ public class PoolReportServiceImpl implements PoolReportService {
       InputStream csvInputStream = CSVHelper.writeContent(exportContents);
       InputStream excelInputStream = ExcelHelper.writeContent(exportContents);
       String storageKey = generateStorageKey(poolReport);
-      stakeKeyReportService.uploadFile(csvInputStream.readAllBytes(), storageKey + CSV_EXTENSION);
-      stakeKeyReportService.uploadFile(excelInputStream.readAllBytes(), storageKey + EXCEL_EXTENSION);
+      storageService.uploadFile(csvInputStream.readAllBytes(), storageKey + CSV_EXTENSION);
+      storageService.uploadFile(excelInputStream.readAllBytes(), storageKey + EXCEL_EXTENSION);
       poolReport.getReportHistory().setStatus(ReportStatus.GENERATED);
       poolReport.getReportHistory().setStorageKey(storageKey);
       poolReportRepository.save(poolReport);
@@ -184,6 +192,8 @@ public class PoolReportServiceImpl implements PoolReportService {
       csvInputStream.close();
     } catch (IOException e) {
       log.error(e.getMessage(), e);
+    } catch (RuntimeException e) {
+      throw e;
     }
 
   }

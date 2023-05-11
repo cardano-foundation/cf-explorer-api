@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
+
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -13,26 +14,26 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Long> {
 
-  @Query("select rh.createdAt as createdAt,"
-      + " rh.reportName as reportName, rh.status as status, rh.type as type,"
-      + " skrh.id as stakeKeyReportId, prh.id as poolReportId"
-      + " from ReportHistory rh "
-      + " left join StakeKeyReportHistory skrh on skrh.reportHistory.id = rh.id"
-      + " left join PoolReport prh on prh.reportHistory.id = rh.id "
-      + " where 1 = 1"
-      + " and (rh.username = :username)"
-      + " and (rh.createdAt >= :fromDate)"
-      + " and (rh.createdAt <= :toDate)"
-      + " and :reportName is null or rh.reportName like :reportName")
+  @Query("SELECT rh.createdAt AS createdAt,"
+      + " rh.reportName AS reportName, rh.status AS status, rh.type AS type,"
+      + " skrh.id AS stakeKeyReportId, prh.id AS poolReportId"
+      + " FROM ReportHistory rh "
+      + " LEFT JOIN StakeKeyReportHistory skrh ON skrh.reportHistory.id = rh.id"
+      + " LEFT JOIN PoolReport prh ON prh.reportHistory.id = rh.id "
+      + " WHERE 1 = 1"
+      + " AND (rh.username = :username)"
+      + " AND (rh.createdAt >= :fromDate)"
+      + " AND (rh.createdAt <= :toDate)"
+      + " AND :reportName IS NULL OR rh.reportName LIKE :reportName")
   Page<ReportHistoryProjection> getRecordHistoryByFilter(@Param("reportName") String reportName,
                                                          @Param("fromDate") Timestamp fromDate,
                                                          @Param("toDate") Timestamp toDate,
                                                          @Param("username") String username,
                                                          Pageable pageable);
 
-  @Query("select rh from ReportHistory rh "
-      + " where rh.status <> 'GENERATED'"
-      + " or rh.storageKey is null"
-      + " order by rh.createdAt asc")
+  @Query("SELECT rh FROM ReportHistory rh "
+      + " WHERE rh.status <> 'GENERATED'"
+      + " OR rh.storageKey IS NULL"
+      + " ORDER BY rh.createdAt ASC")
   List<ReportHistory> findNotYetPersistToStorage();
 }

@@ -1,10 +1,10 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
-import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportHistoryResponse;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 /**
  * StakeKeyReportService interface for stake key report
  */
-public interface StakeKeyReportService extends StorageService {
+public interface StakeKeyReportService {
 
   /**
    * Generate stake key report of current user
@@ -60,7 +60,8 @@ public interface StakeKeyReportService extends StorageService {
    * @param reportId report id
    * @return StakeKeyReportResponse
    */
-  StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username, ExportType exportType);
+  StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username,
+                                              ExportType exportType);
 
 
   /**

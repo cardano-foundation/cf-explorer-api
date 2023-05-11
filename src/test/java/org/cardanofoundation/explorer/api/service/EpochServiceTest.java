@@ -3,14 +3,7 @@ package org.cardanofoundation.explorer.api.service;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
-import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
-import org.cardanofoundation.explorer.api.mapper.EpochMapper;
-import org.cardanofoundation.explorer.api.model.response.EpochResponse;
-import org.cardanofoundation.explorer.api.repository.EpochRepository;
-import org.cardanofoundation.explorer.api.service.impl.EpochServiceImpl;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -19,6 +12,15 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
+import org.cardanofoundation.explorer.api.mapper.EpochMapper;
+import org.cardanofoundation.explorer.api.model.response.EpochResponse;
+import org.cardanofoundation.explorer.api.repository.EpochRepository;
+import org.cardanofoundation.explorer.api.service.impl.EpochServiceImpl;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -63,7 +65,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .maxSlot(12)
         .startTime(epoch.getStartTime().toLocalDateTime())
         .endTime(epoch.getEndTime().toLocalDateTime())
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .build();
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
@@ -103,7 +105,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .maxSlot(12)
         .startTime(epoch.getStartTime().toLocalDateTime())
         .endTime(epoch.getEndTime().toLocalDateTime())
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .build();
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
@@ -129,7 +131,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .fees(BigInteger.ONE)
         .outSum(BigInteger.valueOf(12L))
         .maxSlot(12)
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .startTime(Timestamp.valueOf(LocalDateTime.now()))
         .endTime(Timestamp.valueOf(LocalDateTime.now()))
         .build();
@@ -143,7 +145,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .maxSlot(12)
         .startTime(epoch.getStartTime().toLocalDateTime())
         .endTime(epoch.getEndTime().toLocalDateTime())
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .build();
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
@@ -169,7 +171,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .fees(BigInteger.ONE)
         .outSum(BigInteger.valueOf(12L))
         .maxSlot(12)
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .startTime(Timestamp.valueOf(LocalDateTime.now()))
         .endTime(Timestamp.valueOf(LocalDateTime.now().minusDays(10)))
         .build();
@@ -183,7 +185,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .maxSlot(12)
         .startTime(epoch.getStartTime().toLocalDateTime())
         .endTime(epoch.getEndTime().toLocalDateTime())
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .build();
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
@@ -209,7 +211,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .fees(BigInteger.ONE)
         .outSum(BigInteger.valueOf(12L))
         .maxSlot(12)
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .startTime(Timestamp.valueOf(LocalDateTime.now()))
         .endTime(Timestamp.valueOf(LocalDateTime.now()))
         .build();
@@ -221,7 +223,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .txCount(2)
         .outSum(BigInteger.valueOf(12L))
         .maxSlot(12)
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .status(EpochStatus.IN_PROGRESS)
         .build();
 
@@ -240,7 +242,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .fees(BigInteger.ONE)
         .outSum(BigInteger.valueOf(12L))
         .maxSlot(12)
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .startTime(Timestamp.valueOf(LocalDateTime.now()))
         .endTime(Timestamp.valueOf(LocalDateTime.now()))
         .build();
@@ -252,7 +254,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
         .txCount(2)
         .outSum(BigInteger.valueOf(12L))
         .maxSlot(12)
-        .rewardsDistributed(BigInteger.ONE)
+        //.rewardsDistributed(BigInteger.ONE)
         .status(EpochStatus.IN_PROGRESS)
         .build();
 

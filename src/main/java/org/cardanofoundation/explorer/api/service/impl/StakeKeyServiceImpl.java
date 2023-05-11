@@ -58,6 +58,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -87,6 +88,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final RedisTemplate<String, Object> redisTemplate;
   private static final int STAKE_ANALYTIC_NUMBER = 5;
+
+  @Value("${application.network}")
+  private String network;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -254,7 +258,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
     response.setActiveStake(
         epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch).orElse(BigInteger.ZERO));
-    Object liveStake = redisTemplate.opsForValue().get(CommonConstant.REDIS_TOTAL_LIVE_STAKE);
+    Object liveStake = redisTemplate.opsForValue().get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
     response.setLiveStake(
         Objects.nonNull(liveStake) ? new BigInteger(String.valueOf(liveStake)) : BigInteger.ZERO);
     return response;

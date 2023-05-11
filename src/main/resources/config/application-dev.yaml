@@ -86,3 +86,13 @@ cloud:
 rsa:
   key:
     path: /key/public_key
+
+management:
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus

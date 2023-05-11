@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.explorer.api.util.report.ColumnFieldEnum;
@@ -15,6 +16,7 @@ import org.cardanofoundation.explorer.api.util.report.ExportColumn.Alignment;
 @Getter
 @Setter
 @AllArgsConstructor
+@Builder
 public class StakeRewardResponse {
   private Integer epoch;
   private Date time;

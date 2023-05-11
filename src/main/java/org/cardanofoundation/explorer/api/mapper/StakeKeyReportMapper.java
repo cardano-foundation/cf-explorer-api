@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.mapper;
 
-import org.cardanofoundation.explorer.api.model.request.report.StakeKeyReportRequest;
-import org.cardanofoundation.explorer.api.model.response.report.StakeKeyReportHistoryResponse;
+import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
 import java.sql.Timestamp;
 

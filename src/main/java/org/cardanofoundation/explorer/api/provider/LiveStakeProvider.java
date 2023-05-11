@@ -10,6 +10,7 @@ import org.cardanofoundation.explorer.api.repository.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -28,11 +29,15 @@ public class LiveStakeProvider {
 
   private final RedisTemplate<String, Object> redisTemplate;
 
+  @Value("${application.network}")
+  private String network;
+
   public void calculateLiveStake() {
     log.info("start calculate live stake for pool...");
     List<String> poolViews = poolHashRepository.findAllView();
     BigInteger totalLiveStake = BigInteger.ZERO;
     for (String view : poolViews) {
+      log.info("pool=" + view);
       BigInteger delegateStake = delegationRepository.findDelegateStakeByPool(view);
       BigInteger rewardStake = rewardRepository.findRewardStakeByPool(view);
       BigInteger withdrawalStake = withdrawalRepository.findWithdrawalStakeByPool(view);
@@ -46,10 +51,14 @@ public class LiveStakeProvider {
         withdrawalStake = BigInteger.ZERO;
       }
       BigInteger liveStake = delegateStake.add(rewardStake).subtract(withdrawalStake);
+      if (liveStake.compareTo(BigInteger.ZERO) < 0) {
+        liveStake = BigInteger.ZERO;
+      }
       totalLiveStake = totalLiveStake.add(liveStake);
-      redisTemplate.opsForValue().set(CommonConstant.REDIS_POOL_PREFIX + view, liveStake);
+      redisTemplate.opsForValue().set(CommonConstant.REDIS_POOL_PREFIX + network + view, liveStake);
     }
-    redisTemplate.opsForValue().set(CommonConstant.REDIS_TOTAL_LIVE_STAKE, totalLiveStake);
+    redisTemplate.opsForValue()
+        .set(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network, totalLiveStake);
     log.info("...end...");
   }
 }

@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.model.request.report;
+package org.cardanofoundation.explorer.api.model.request.stake.report;
 
 import java.util.Date;
 import lombok.Builder;
