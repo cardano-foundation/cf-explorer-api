@@ -5,7 +5,6 @@ import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjectio
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTokenBalance;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -72,11 +71,13 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
       + " ORDER BY atb.balance DESC")
   Page<AddressTokenProjection> findAddressAndBalanceByAddress(@Param("address") Address address, Pageable pageable);
 
-  @Query("SELECT atb.addressId as addressId, atb.balance as quantity"
+  @Query("SELECT ma.name as tokenName, ma.fingerprint as fingerprint,"
+      + " atb.addressId as addressId, atb.balance as quantity"
       + " FROM AddressTokenBalance atb "
-      + " WHERE atb.multiAsset IN :multiAssets"
+      + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
+      + " WHERE ma.policy = :policy"
       + " ORDER BY atb.balance DESC")
-  Page<AddressTokenProjection> findAddressAndBalanceByMultiAssetIn(@Param("multiAssets") Collection<MultiAsset> multiAssets,
+  Page<AddressTokenProjection> findAddressAndBalanceByMultiAssetIn(@Param("policy") String policy,
       Pageable pageable);
 
 }
