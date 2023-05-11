@@ -1,11 +1,17 @@
 package org.cardanofoundation.explorer.api.test.projection;
 
-import org.cardanofoundation.explorer.api.projection.ParamHistory;
+
 import java.math.BigInteger;
 import java.util.Date;
 import lombok.Builder;
+import lombok.Setter;
+
+import org.cardanofoundation.explorer.api.projection.ParamHistory;
+
+import org.cardanofoundation.explorer.api.projection.ParamHistory;
 
 @Builder
+@Setter
 public class ParamHistoryProjection implements ParamHistory {
 
   private Long id;
@@ -41,6 +47,7 @@ public class ParamHistoryProjection implements ParamHistory {
   private String hash;
   private BigInteger minUtxoValue;
   private BigInteger minPoolCost;
+  private Integer epochNo;
 
   @Override
   public Long getId() {
@@ -209,4 +216,11 @@ public class ParamHistoryProjection implements ParamHistory {
   public String getHash() {
     return this.hash;
   }
+
+  @Override
+  public Integer getEpochNo() {
+    return this.epochNo;
+  }
+
+
 }

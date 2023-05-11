@@ -62,9 +62,12 @@ public interface ParamHistory   {
   String getEntropy();
 
   Long getCostModel();
+
   Long getTx();
 
   Date getTime();
 
   String getHash();
+
+  Integer getEpochNo();
 }

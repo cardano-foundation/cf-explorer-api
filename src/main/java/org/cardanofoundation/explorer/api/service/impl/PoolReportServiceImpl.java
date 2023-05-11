@@ -13,6 +13,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportD
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
@@ -62,9 +63,15 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private final PoolLifecycleService poolLifecycleService;
 
+  private final PoolHashRepository poolHashRepository;
+
   @Override
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) throws BusinessException {
     try {
+      poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
+              .orElseThrow(
+                      () -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+
       ReportHistory reportHistory = this.initReportHistory(poolReportCreateRequest.getPoolId(), username);
       this.exportDirect(poolReportRepository.save(
               poolReportCreateRequest.toEntity(reportHistory, username)));
@@ -97,6 +104,8 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .byteArrayInputStream(new ByteArrayInputStream(bytes))
                 .build();
       }
+    } catch (BusinessException e) {
+      throw e;
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       return null;
@@ -183,6 +192,8 @@ public class PoolReportServiceImpl implements PoolReportService {
       csvInputStream.close();
     } catch (IOException e) {
       log.error(e.getMessage(), e);
+    } catch (RuntimeException e) {
+      throw e;
     }
 
   }

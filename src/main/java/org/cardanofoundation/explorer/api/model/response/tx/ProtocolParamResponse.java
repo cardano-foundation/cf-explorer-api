@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
+import java.math.BigInteger;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,21 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProtocolParamResponse {
+
+  public static final int HASH_LENGTH = 31;
   Object minFeeA;
-
-  public static int hashCode(Object... a) {
-    if (a == null) {
-      return -1;
-    }
-
-    int result = 1;
-
-    for (Object element : a) {
-      result = 31 * result + (element == null ? -1 : element.hashCode());
-    }
-
-    return result;
-  }
 
   Object minFeeB;
 
@@ -82,6 +72,19 @@ public class ProtocolParamResponse {
 
   Object costModel;
 
+  public int hashCode(Object... a) {
+    if (a == null) {
+      return -BigInteger.ONE.intValue();
+    }
+
+    int result = BigInteger.ONE.intValue();
+
+    for (Object element : a) {
+      result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue() : element.hashCode());
+    }
+
+    return result;
+  }
   @Override
   public int hashCode() {
     return hashCode(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
