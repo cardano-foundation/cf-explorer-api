@@ -9,6 +9,6 @@ import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 
 @Repository
 public interface EpochParamRepository extends JpaRepository<EpochParam, Long> {
-
+  
   Optional<EpochParam> findEpochParamByEpochNo(Integer epochNo);
 }

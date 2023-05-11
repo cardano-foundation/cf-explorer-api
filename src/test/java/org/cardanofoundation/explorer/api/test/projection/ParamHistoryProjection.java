@@ -4,10 +4,14 @@ package org.cardanofoundation.explorer.api.test.projection;
 import java.math.BigInteger;
 import java.util.Date;
 import lombok.Builder;
+import lombok.Setter;
+
+import org.cardanofoundation.explorer.api.projection.ParamHistory;
 
 import org.cardanofoundation.explorer.api.projection.ParamHistory;
 
 @Builder
+@Setter
 public class ParamHistoryProjection implements ParamHistory {
 
   private Long id;
@@ -217,4 +221,6 @@ public class ParamHistoryProjection implements ParamHistory {
   public Integer getEpochNo() {
     return this.epochNo;
   }
+
+
 }

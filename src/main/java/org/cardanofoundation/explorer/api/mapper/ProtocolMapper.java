@@ -1,10 +1,14 @@
 package org.cardanofoundation.explorer.api.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.cardanofoundation.explorer.api.model.response.protocol.HistoriesProtocol;
+import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.model.response.tx.ProtocolParamResponse;
 import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
 import org.cardanofoundation.ledgersync.common.util.JsonUtil;
-import java.util.List;
-import java.util.Objects;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
@@ -173,7 +177,7 @@ public interface ProtocolMapper {
   }
 
   default ProtocolParamResponse mapPreviousProtocolParamResponse(List<ParamProposal> paramProposals,
-                                                                 ProtocolParamResponse currentParam) {
+      ProtocolParamResponse currentParam) {
     ProtocolParamResponse previousParam = new ProtocolParamResponse();
 
     paramProposals.forEach(paramProposal -> {
@@ -356,4 +360,72 @@ public interface ProtocolMapper {
     return previousParam;
   }
 
+  default HistoriesProtocol mapProtocolsToHistoriesProtocol(List<Protocols> protocols){
+    HistoriesProtocol historiesProtocol = HistoriesProtocol.builder()
+        .minFeeA(new ArrayList<>())
+        .minFeeB(new ArrayList<>())
+        .maxBlockSize(new ArrayList<>())
+        .maxTxSize(new ArrayList<>())
+        .maxBhSize(new ArrayList<>())
+        .keyDeposit(new ArrayList<>())
+        .poolDeposit(new ArrayList<>())
+        .maxEpoch(new ArrayList<>())
+        .optimalPoolCount(new ArrayList<>())
+        .influence(new ArrayList<>())
+        .monetaryExpandRate(new ArrayList<>())
+        .treasuryGrowthRate(new ArrayList<>())
+        .decentralisation(new ArrayList<>())
+        .entropy(new ArrayList<>())
+        .protocolMajor(new ArrayList<>())
+        .protocolMinor(new ArrayList<>())
+        .minUtxoValue(new ArrayList<>())
+        .minPoolCost(new ArrayList<>())
+        .priceMem(new ArrayList<>())
+        .priceStep(new ArrayList<>())
+        .maxTxExMem(new ArrayList<>())
+        .maxTxExSteps(new ArrayList<>())
+        .maxBlockExMem(new ArrayList<>())
+        .maxBlockExSteps(new ArrayList<>())
+        .maxValSize(new ArrayList<>())
+        .collateralPercent(new ArrayList<>())
+        .maxCollateralInputs(new ArrayList<>())
+        .coinsPerUtxoSize(new ArrayList<>())
+        .epochChanges(new ArrayList<>())
+        .costModel(new ArrayList<>())
+        .build();
+
+    protocols.forEach(protocol -> {
+      historiesProtocol.getEpochChanges().add(protocol.getEpochChange());
+      historiesProtocol.getMinFeeA().add(protocol.getMinFeeA());
+      historiesProtocol.getMinFeeB().add(protocol.getMinFeeB());
+      historiesProtocol.getMaxBlockSize().add(protocol.getMaxBlockSize());
+      historiesProtocol.getMaxTxSize().add(protocol.getMaxTxSize());
+      historiesProtocol.getMaxBhSize().add(protocol.getMaxBhSize());
+      historiesProtocol.getKeyDeposit().add(protocol.getKeyDeposit());
+      historiesProtocol.getPoolDeposit().add(protocol.getPoolDeposit());
+      historiesProtocol.getMaxEpoch().add(protocol.getMaxEpoch());
+      historiesProtocol.getOptimalPoolCount().add(protocol.getOptimalPoolCount());
+      historiesProtocol.getMinUtxoValue().add(protocol.getMinUtxoValue());
+      historiesProtocol.getMinPoolCost().add(protocol.getMinPoolCost());
+      historiesProtocol.getMaxTxExMem().add(protocol.getMaxTxExMem());
+      historiesProtocol.getMaxTxExSteps().add(protocol.getMaxTxExSteps());
+      historiesProtocol.getMaxBlockExMem().add(protocol.getMaxBlockExMem());
+      historiesProtocol.getMaxBlockExSteps().add(protocol.getMaxBlockExSteps());
+      historiesProtocol.getMaxValSize().add(protocol.getMaxValSize());
+      historiesProtocol.getCoinsPerUtxoSize().add(protocol.getCoinsPerUtxoSize());
+      historiesProtocol.getInfluence().add(protocol.getInfluence());
+      historiesProtocol.getMonetaryExpandRate().add(protocol.getMonetaryExpandRate());
+      historiesProtocol.getTreasuryGrowthRate().add(protocol.getTreasuryGrowthRate());
+      historiesProtocol.getDecentralisation().add(protocol.getDecentralisation());
+      historiesProtocol.getPriceMem().add(protocol.getPriceMem());
+      historiesProtocol.getPriceStep().add(protocol.getPriceStep());
+      historiesProtocol.getProtocolMajor().add(protocol.getProtocolMajor());
+      historiesProtocol.getProtocolMinor().add(protocol.getProtocolMinor());
+      historiesProtocol.getCollateralPercent().add(protocol.getCollateralPercent());
+      historiesProtocol.getMaxCollateralInputs().add(protocol.getMaxCollateralInputs());
+      historiesProtocol.getEntropy().add(protocol.getEntropy());
+      historiesProtocol.getCostModel().add(protocol.getCostModel());
+    });
+    return historiesProtocol;
+  }
 }
