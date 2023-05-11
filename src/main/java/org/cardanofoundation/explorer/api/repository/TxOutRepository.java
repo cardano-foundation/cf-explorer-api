@@ -30,6 +30,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
 
   @Query("SELECT txOut.address AS address, txOut.index as index, COALESCE(stake.view, txOut.address) AS stakeAddress,"
       + "   txOut.value AS value, maTxOut.quantity as assetQuantity,"
+      + "   stake.view as stakeView, "
       + "   asset.name as assetName, asset.fingerprint as assetId"
       + " FROM TxOut txOut "
       + " LEFT JOIN StakeAddress stake ON txOut.stakeAddress = stake "
@@ -41,6 +42,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
 
   @Query("SELECT txOut.address AS address, txOut.index as index, txIn.txOut.hash AS txHash,"
       + "   COALESCE(stake.view,txOut.address) AS stakeAddress,"
+      + "   stake.view as stakeView, "
       + "   txOut.value AS value, maTxOut.quantity as assetQuantity,"
       + "   asset.name as assetName, asset.fingerprint as assetId"
       + " FROM TxOut txOut "

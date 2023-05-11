@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.math.BigInteger;
@@ -26,4 +27,5 @@ public class TxOutResponse {
   @EqualsAndHashCode.Exclude
   private String assetId;
   private List<TxMintingResponse> tokens;
+  private String stakeAddress;
 }

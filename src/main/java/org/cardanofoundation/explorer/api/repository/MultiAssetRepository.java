@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.util.Collection;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,6 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   Page<MultiAsset> findAllByPolicy(@Param("policy") String policy, Pageable pageable);
 
   List<MultiAsset> findAllByPolicy(@Param("policy") String policy);
+
+  List<MultiAsset> findAllByIdIn(@Param("ids") Collection<Long> ids);
 }

@@ -10,6 +10,7 @@ import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.DelegationMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
+import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.mapper.TxMapper;
 import org.cardanofoundation.explorer.api.mapper.TxOutMapper;
 import org.cardanofoundation.explorer.api.mapper.WithdrawalMapper;
@@ -22,6 +23,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeR
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRelayProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.CollateralResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.SummaryResponse;
@@ -64,6 +66,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
+import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
@@ -125,6 +129,7 @@ public class TxServiceImpl implements TxService {
   private final BlockRepository blockRepository;
   private final TxMapper txMapper;
   private final TxOutMapper txOutMapper;
+  private final TokenMapper tokenMapper;
   private final RedeemerRepository redeemerRepository;
   private final EpochRepository epochRepository;
   private final UnconsumeTxInRepository unconsumeTxInRepository;
@@ -255,8 +260,9 @@ public class TxServiceImpl implements TxService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
     List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
+
     Page<Tx> txPage = new PageImpl<>(txList, pageable, addr.getTxCount());
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, address));
   }
 
   @Override
@@ -331,8 +337,68 @@ public class TxServiceImpl implements TxService {
       } else {
         txResponse.setAddressesInput(new ArrayList<>());
       }
+
       txFilterResponses.add(txResponse);
     }
+    return txFilterResponses;
+  }
+
+  private List<TxFilterResponse> mapDataFromTxListToResponseList(Page<Tx> txPage, String address) {
+    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
+
+    Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
+
+    // get address tx balance
+    List<AddressTxBalance> addressTxBalances =
+        addressTxBalanceRepository.findByTxIdInAndByAddress(txIdList, address);
+    Map<Long, AddressTxBalance> addressTxBalanceMap =
+        addressTxBalances.stream()
+            .collect(Collectors.toMap(AddressTxBalance::getTxId, Function.identity()));
+
+    // get address token
+    List<AddressToken> addressTokens =
+        addressTokenRepository.findByTxIdInAndByAddress(txIdList, address);
+    Map<Long, List<AddressToken>> addressTokenMap =
+        addressTokens.stream()
+            .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
+
+    // get metadata
+    List<Long> multiAssetIdList =
+        addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
+    List<MultiAsset> multiAssets = multiAssetRepository.findAllByIdIn(multiAssetIdList);
+    Set<String> subjects =
+        multiAssets.stream().map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap =
+        assetMetadataList.stream()
+            .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+
+    txFilterResponses.forEach(
+        tx -> {
+          if (addressTxBalanceMap.containsKey(tx.getId())) {
+            tx.setBalance(addressTxBalanceMap.get(tx.getId()).getBalance());
+          }
+          if (addressTokenMap.containsKey(tx.getId())) {
+            List<TokenAddressResponse> tokenAddressResponseList =
+                addressTokenMap.get(tx.getId()).stream()
+                    .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
+                    .map(
+                        addressToken -> {
+                          TokenAddressResponse tokenAddressResponse =
+                              tokenMapper.fromMultiAssetAndAddressToken(
+                                  addressToken.getMultiAsset(), addressToken);
+                          String subject =
+                              addressToken.getMultiAsset().getPolicy()
+                                  + addressToken.getMultiAsset().getName();
+                          tokenAddressResponse.setMetadata(
+                              assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
+                          return tokenAddressResponse;
+                        })
+                    .toList();
+            tx.setTokens(tokenAddressResponseList);
+          }
+        });
+
     return txFilterResponses;
   }
 
@@ -534,19 +600,83 @@ public class TxServiceImpl implements TxService {
         .outputs(uTxOOutputs)
         .build();
     txResponse.setUTxOs(uTxOs);
-    SummaryResponse summary = SummaryResponse.builder()
-        .stakeAddressTxInputs(getStakeAddressInfo(addressInputInfo))
-        .stakeAddressTxOutputs(getStakeAddressInfo(addressOutputInfo))
-        .build();
+
+    List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
+    List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
+
+    List<TxOutResponse> stakeAddress = removeDuplicateTx(addressesInfoInput, addressesInfoOutput);
+
+    SummaryResponse summary =
+        SummaryResponse.builder()
+            .stakeAddress(stakeAddress)
+            .build();
 
     txResponse.setSummary(summary);
 
   }
 
+  private List<TxOutResponse> removeDuplicateTx(
+      List<TxOutResponse> addressesInputs, List<TxOutResponse> addressesOutputs) {
+    addressesInputs.forEach(
+        txOutResponse -> {
+          txOutResponse.setValue(txOutResponse.getValue().multiply(BigInteger.valueOf(-1)));
+          txOutResponse
+              .getTokens()
+              .forEach(
+                  token ->
+                      token.setAssetQuantity(
+                          token.getAssetQuantity().multiply(BigInteger.valueOf(-1))));
+        });
+
+    Map<String, List<TxOutResponse>> unionTxsByAddress =
+        Stream.concat(addressesInputs.stream(), addressesOutputs.stream())
+            .collect(
+                Collectors.groupingBy(
+                    TxOutResponse::getAddress, Collectors.toCollection(ArrayList::new)));
+
+    List<TxOutResponse> summary = new ArrayList<>();
+
+    unionTxsByAddress.forEach(
+        (address, txs) -> {
+          if (txs.size() > 1) {
+            BigInteger totalValue = txs.get(0).getValue().add(txs.get(1).getValue());
+            txs.get(0).setValue(totalValue);
+
+            Map<String, List<TxMintingResponse>> unionTokenByAsset =
+                Stream.concat(txs.get(0).getTokens().stream(), txs.get(1).getTokens().stream())
+                    .collect(
+                        Collectors.groupingBy(
+                            TxMintingResponse::getAssetId,
+                            Collectors.toCollection(ArrayList::new)));
+
+            List<TxMintingResponse> tokenResponse = new ArrayList<>();
+
+            unionTokenByAsset.forEach(
+                (asset, tokens) -> {
+                  if (tokens.size() > 1) {
+                    BigInteger totalQuantity =
+                        tokens.get(0).getAssetQuantity().add(tokens.get(1).getAssetQuantity());
+                    tokens.get(0).setAssetQuantity(totalQuantity);
+                  }
+
+                  if (!BigInteger.ZERO.equals(tokens.get(0).getAssetQuantity())) {
+                    tokenResponse.add(tokens.get(0));
+                  }
+                });
+
+            txs.get(0).setTokens(tokenResponse);
+          }
+
+          summary.add(txs.get(0));
+        });
+
+    return summary;
+  }
+
   /**
    * Get protocol params update in transaction
    *
-   * @param tx         transaction
+   * @param tx transaction
    * @param txResponse response data of transaction
    */
   private void getProtocols(Tx tx, TxResponse txResponse) {
