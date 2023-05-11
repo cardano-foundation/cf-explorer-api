@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -360,7 +361,39 @@ public interface ProtocolMapper {
   }
 
   default HistoriesProtocol mapProtocolsToHistoriesProtocol(List<Protocols> protocols){
-    HistoriesProtocol historiesProtocol = new HistoriesProtocol();
+    HistoriesProtocol historiesProtocol = HistoriesProtocol.builder()
+        .minFeeA(new ArrayList<>())
+        .minFeeB(new ArrayList<>())
+        .maxBlockSize(new ArrayList<>())
+        .maxTxSize(new ArrayList<>())
+        .maxBhSize(new ArrayList<>())
+        .keyDeposit(new ArrayList<>())
+        .poolDeposit(new ArrayList<>())
+        .maxEpoch(new ArrayList<>())
+        .optimalPoolCount(new ArrayList<>())
+        .influence(new ArrayList<>())
+        .monetaryExpandRate(new ArrayList<>())
+        .treasuryGrowthRate(new ArrayList<>())
+        .decentralisation(new ArrayList<>())
+        .entropy(new ArrayList<>())
+        .protocolMajor(new ArrayList<>())
+        .protocolMinor(new ArrayList<>())
+        .minUtxoValue(new ArrayList<>())
+        .minPoolCost(new ArrayList<>())
+        .priceMem(new ArrayList<>())
+        .priceStep(new ArrayList<>())
+        .maxTxExMem(new ArrayList<>())
+        .maxTxExSteps(new ArrayList<>())
+        .maxBlockExMem(new ArrayList<>())
+        .maxBlockExSteps(new ArrayList<>())
+        .maxValSize(new ArrayList<>())
+        .collateralPercent(new ArrayList<>())
+        .maxCollateralInputs(new ArrayList<>())
+        .coinsPerUtxoSize(new ArrayList<>())
+        .epochChanges(new ArrayList<>())
+        .costModel(new ArrayList<>())
+        .build();
+
     protocols.forEach(protocol -> {
       historiesProtocol.getEpochChanges().add(protocol.getEpochChange());
       historiesProtocol.getMinFeeA().add(protocol.getMinFeeA());
