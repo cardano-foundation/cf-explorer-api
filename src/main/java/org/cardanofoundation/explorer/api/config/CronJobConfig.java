@@ -11,7 +11,7 @@ public class CronJobConfig {
 
   private final LiveStakeProvider liveStakeProvider;
 
-  @Scheduled(cron = "0 30 10 * * *")
+  @Scheduled(cron = "0 30 14 * * *")
   public void pushLiveStakeToRedis() {
     liveStakeProvider.calculateLiveStake();
   }

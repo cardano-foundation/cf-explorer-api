@@ -37,6 +37,7 @@ public class LiveStakeProvider {
     List<String> poolViews = poolHashRepository.findAllView();
     BigInteger totalLiveStake = BigInteger.ZERO;
     for (String view : poolViews) {
+      log.info("pool=" + view);
       BigInteger delegateStake = delegationRepository.findDelegateStakeByPool(view);
       BigInteger rewardStake = rewardRepository.findRewardStakeByPool(view);
       BigInteger withdrawalStake = withdrawalRepository.findWithdrawalStakeByPool(view);
