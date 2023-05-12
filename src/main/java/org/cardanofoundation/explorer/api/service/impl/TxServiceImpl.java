@@ -653,13 +653,12 @@ public class TxServiceImpl implements TxService {
 
             unionTokenByAsset.forEach(
                 (asset, tokens) -> {
-                  if (tokens.size() > 1) {
-                    BigInteger totalQuantity =
-                        tokens.get(0).getAssetQuantity().add(tokens.get(1).getAssetQuantity());
-                    tokens.get(0).setAssetQuantity(totalQuantity);
-                  }
+                  BigInteger totalQuantity =
+                      tokens.stream()
+                          .map(TxMintingResponse::getAssetQuantity)
+                          .reduce(BigInteger.ZERO, BigInteger::add);
 
-                  if (!BigInteger.ZERO.equals(tokens.get(0).getAssetQuantity())) {
+                  if (!BigInteger.ZERO.equals(totalQuantity)) {
                     tokenResponse.add(tokens.get(0));
                   }
                 });
