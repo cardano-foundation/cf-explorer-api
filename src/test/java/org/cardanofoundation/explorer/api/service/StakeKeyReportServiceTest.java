@@ -726,6 +726,7 @@ public class StakeKeyReportServiceTest {
         .thenReturn(defaultBaseFilterResponse);
 
     doNothing().when(storageService).uploadFile(any(), anyString());
-    stakeKeyReportService.exportStakeKeyReport(stakeKeyReportHistory);
+    Assertions.assertDoesNotThrow(
+        () -> stakeKeyReportService.exportStakeKeyReport(stakeKeyReportHistory));
   }
 }

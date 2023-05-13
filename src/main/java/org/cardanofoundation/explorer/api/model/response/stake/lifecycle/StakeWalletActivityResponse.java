@@ -28,7 +28,7 @@ public class StakeWalletActivityResponse implements Serializable {
   public static List<ExportColumn> buildStakeWalletActivityColumn(Boolean isFeePaid) {
     List<ExportColumn> columns = new ArrayList<>();
     columns.add(new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE,
-        Alignment.LEFT, 60));
+        Alignment.LEFT));
     columns.add(new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE,
         Alignment.CENTER));
     columns.add(new ExportColumn(ColumnFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_ADA_TITLE,

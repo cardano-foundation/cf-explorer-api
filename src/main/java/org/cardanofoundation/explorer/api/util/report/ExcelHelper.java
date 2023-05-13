@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.*;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -42,7 +43,7 @@ public class ExcelHelper {
           Cell cell = rowHeader.createCell(i);
           cell.setCellValue(lstColumn.get(i).getColumnTitle().getValue());
           cell.setCellStyle(cellStyleHeader);
-          sheet.setColumnWidth(i, lstColumn.get(i).getColumnWidth());
+          sheet.autoSizeColumn(i);
         }
         writeDataReport(workbook, exportContent, sheet, lstColumn, lstData);
       }
@@ -105,12 +106,15 @@ public class ExcelHelper {
           text = DataUtil.instantToString(((Date) value).toInstant(), DATE_TIME_PATTERN);
         } else if (value instanceof LocalDateTime) {
           text = DataUtil.instantToString(
-              ((LocalDateTime) value).atZone(ZoneId.systemDefault()).toInstant(),
+              ((LocalDateTime) value).atZone(ZoneOffset.UTC).toInstant(),
               DATE_TIME_PATTERN);
         } else {
           text = DataUtil.objectToString(value);
         }
         cell.setCellValue(text);
+        int numberOfLines = text.split("\n").length;
+        row.setHeightInPoints(numberOfLines * sheet.getDefaultRowHeightInPoints());
+        sheet.autoSizeColumn(j);
         switch (exportColumn.getAlign()){
           case LEFT:
             cell.setCellStyle(createCellStyle(workbook, HorizontalAlignment.LEFT));

@@ -52,15 +52,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
-  public static final String DATE_TIME_PATTERN = "yyyyMMdd";
-  public static final String STAKE_KEY_REGISTRATION_TITLE = "Stake Key Registration";
-  public static final String DELEGATION_HISTORY_TITLE = "Delegation History";
-  public static final String REWARDS_DISTRIBUTION_TITLE = "Rewards Distribution";
-  public static final String WITHDRAWAL_HISTORY_TITLE = "Withdrawal History";
-  public static final String STAKE_KEY_DEREGISTRATION_TITLE = "Stake Key Deregistration";
-  public static final String WALLET_ACTIVITY_TITLE = "Wallet Activity";
-  public static final String CSV_EXTENSION = ".csv";
-  public static final String EXCEL_EXTENSION = ".xlsx";
+  private static final String DATE_TIME_PATTERN = "yyyyMMdd";
+  private static final String STAKE_KEY_REGISTRATION_TITLE = "Stake Key Registration";
+  private static final String DELEGATION_HISTORY_TITLE = "Delegation History";
+  private static final String REWARDS_DISTRIBUTION_TITLE = "Rewards Distribution";
+  private static final String WITHDRAWAL_HISTORY_TITLE = "Withdrawal History";
+  private static final String STAKE_KEY_DEREGISTRATION_TITLE = "Stake Key Deregistration";
+  private static final String WALLET_ACTIVITY_TITLE = "Wallet Activity";
   private final Pageable defaultPageable = PageRequest.of(0, 1000, Sort.by("time").descending());
   private final StakeKeyLifeCycleService stakeKeyLifeCycleService;
   private final StakeKeyReportHistoryRepository stakeKeyReportHistoryRepository;
@@ -74,8 +72,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
       StakeKeyReportRequest stakeKeyReportRequest, String username) {
 
     stakeAddressRepository.findByView(stakeKeyReportRequest.getStakeKey())
-        .orElseThrow(
-            () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
         stakeKeyReportRequest);
@@ -250,8 +247,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     try {
       List<ExportContent> exportContents = getExportContents(stakeKeyReportHistory);
       String storageKey = generateStorageKey(stakeKeyReportHistory);
-      String csvFileName = storageKey + CSV_EXTENSION;
-      String excelFileName = storageKey + EXCEL_EXTENSION;
+      String csvFileName = storageKey + ExportType.CSV.getValue();
+      String excelFileName = storageKey + ExportType.EXCEL.getValue();
       InputStream csvInputStream = CSVHelper.writeContent(exportContents);
       InputStream excelInputStream = ExcelHelper.writeContent(exportContents);
       storageService.uploadFile(csvInputStream.readAllBytes(), csvFileName);
@@ -260,7 +257,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
       stakeKeyReportHistory.getReportHistory().setStorageKey(storageKey);
     } catch (Exception e) {
       stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.FAILED);
-      e.printStackTrace();
+      log.error("Error while generating report", e);
       throw new BusinessException(BusinessCode.INTERNAL_ERROR);
     } finally {
       stakeKeyReportHistoryRepository.save(stakeKeyReportHistory);

@@ -9,10 +9,13 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRep
 import org.cardanofoundation.explorer.api.util.report.ColumnFieldEnum;
 import org.cardanofoundation.explorer.api.util.report.ColumnTitleEnum;
 import org.cardanofoundation.explorer.api.util.report.ExportColumn;
+import org.cardanofoundation.explorer.api.util.report.ExportColumn.Alignment;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -53,8 +56,10 @@ public class PoolReportDetailResponse {
 
     public static List<ExportColumn> designFile() {
       List<ExportColumn> epochSizeColumns = new ArrayList<>();
-      epochSizeColumns.add(new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
-      epochSizeColumns.add(new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE));
+      epochSizeColumns.add(
+          new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
+      epochSizeColumns.add(
+          new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE));
       return epochSizeColumns;
     }
   }
@@ -79,12 +84,12 @@ public class PoolReportDetailResponse {
 
     public static PoolRegistration toDomain(TabularRegisResponse response) {
       PoolRegistration result = PoolRegistration.builder()
-              .txHash(response.getTxHash())
-              .time(response.getTime())
-              .adaValueHold(new BigDecimal(response.getDeposit()))
-              .adaValueFee(new BigDecimal(response.getFee()))
-              .owner(String.join("\n", response.getStakeKeys()))
-              .build();
+          .txHash(response.getTxHash())
+          .time(response.getTime())
+          .adaValueHold(new BigDecimal(response.getDeposit()))
+          .adaValueFee(new BigDecimal(response.getFee()))
+          .owner(String.join("\n", response.getStakeKeys()))
+          .build();
       result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
       return result;
     }
@@ -92,17 +97,22 @@ public class PoolReportDetailResponse {
     public static List<ExportColumn> designFile(boolean isFee) {
       List<ExportColumn> poolRegistrationsColumns = new ArrayList<>();
       poolRegistrationsColumns.add(
-          new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
+          new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE,
+                           Alignment.LEFT));
       poolRegistrationsColumns.add(
-          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE,
+                           Alignment.CENTER));
       poolRegistrationsColumns.add(
-          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
+          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
+                           Alignment.RIGHT));
       if (isFee) {
         poolRegistrationsColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-            ColumnTitleEnum.ADA_VALUE_FEE_TITLE));
+                                                      ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
+                                                      Alignment.RIGHT));
       }
       poolRegistrationsColumns.add(
-          new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE));
+          new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE,
+                           Alignment.LEFT));
       return poolRegistrationsColumns;
     }
   }
@@ -125,11 +135,11 @@ public class PoolReportDetailResponse {
 
     public static PoolUpdate toDomain(PoolUpdateDetailResponse response) {
       PoolUpdate result = PoolUpdate.builder()
-              .txHash(response.getTxHash())
-              .time(response.getTime())
-              .adaValueHold(new BigDecimal(response.getPledge()))
-              .adaValueFee(new BigDecimal(response.getFee()))
-              .build();
+          .txHash(response.getTxHash())
+          .time(response.getTime())
+          .adaValueHold(new BigDecimal(response.getPledge()))
+          .adaValueFee(new BigDecimal(response.getFee()))
+          .build();
       result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
       return result;
     }
@@ -139,12 +149,15 @@ public class PoolReportDetailResponse {
       poolUpdateColumns.add(
           new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
       poolUpdateColumns.add(
-          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE));
+          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE,
+                           Alignment.CENTER));
       poolUpdateColumns.add(
-          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
+          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
+                           Alignment.RIGHT));
       if (isFee) {
         poolUpdateColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-            ColumnTitleEnum.ADA_VALUE_FEE_TITLE));
+                                               ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
+                                               Alignment.RIGHT));
       }
       return poolUpdateColumns;
     }
@@ -166,23 +179,26 @@ public class PoolReportDetailResponse {
 
     public static RewardDistribution toDomain(RewardResponse response) {
       return RewardDistribution.builder()
-              .epoch(response.getEpochNo().toString())
-              .time(response.getTime())
-              .operatorReward(new BigDecimal(response.getAmount()))
-              .rewardAccount(response.getRewardAccount())
-              .build();
+          .epoch(response.getEpochNo().toString())
+          .time(response.getTime())
+          .operatorReward(new BigDecimal(response.getAmount()))
+          .rewardAccount(response.getRewardAccount())
+          .build();
     }
 
     public static List<ExportColumn> designFile() {
       List<ExportColumn> rewardDistributionColumns = new ArrayList<>();
       rewardDistributionColumns.add(
-          new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
+          new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE,
+                           Alignment.RIGHT));
       rewardDistributionColumns.add(
-          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE));
+          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE,
+                           Alignment.CENTER));
       rewardDistributionColumns.add(new ExportColumn(ColumnFieldEnum.OPERATOR_REWARD_COLUMN,
-          ColumnTitleEnum.OPERATOR_REWARD_TITLE));
+                                                     ColumnTitleEnum.OPERATOR_REWARD_TITLE,
+                                                     Alignment.RIGHT));
       rewardDistributionColumns.add(new ExportColumn(ColumnFieldEnum.REWARD_ACCOUNT_COLUMN,
-          ColumnTitleEnum.REWARD_ACCOUNT_TITLE));
+                                                     ColumnTitleEnum.REWARD_ACCOUNT_TITLE));
       return rewardDistributionColumns;
     }
   }
@@ -207,12 +223,12 @@ public class PoolReportDetailResponse {
 
     public static Deregistration toDomain(DeRegistrationResponse response) {
       Deregistration result = Deregistration.builder()
-              .txHash(response.getTxHash())
-              .time(response.getTime())
-              .adaValueHold(new BigDecimal(response.getPoolHold()))
-              .adaValueFee(new BigDecimal(response.getFee()))
-              .owner(String.join("\n", response.getStakeKeys()))
-              .build();
+          .txHash(response.getTxHash())
+          .time(response.getTime())
+          .adaValueHold(new BigDecimal(response.getPoolHold()))
+          .adaValueFee(new BigDecimal(response.getFee()))
+          .owner(String.join("\n", response.getStakeKeys()))
+          .build();
       result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
       return result;
     }
@@ -222,12 +238,15 @@ public class PoolReportDetailResponse {
       deregistrationColumns.add(
           new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
       deregistrationColumns.add(
-          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE));
+          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE,
+                           Alignment.CENTER));
       deregistrationColumns.add(
-          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE));
+          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
+                           Alignment.RIGHT));
       if (isFee) {
         deregistrationColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-            ColumnTitleEnum.ADA_VALUE_FEE_TITLE));
+                                                   ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
+                                                   Alignment.RIGHT));
       }
       deregistrationColumns.add(
           new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE));
