@@ -19,7 +19,7 @@ public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Lo
       + " skrh.id AS stakeKeyReportId, prh.id AS poolReportId"
       + " FROM ReportHistory rh "
       + " LEFT JOIN StakeKeyReportHistory skrh ON skrh.reportHistory.id = rh.id"
-      + " LEFT JOIN PoolReport prh ON prh.reportHistory.id = rh.id "
+      + " LEFT JOIN PoolReportHistory prh ON prh.reportHistory.id = rh.id "
       + " WHERE 1 = 1"
       + " AND (rh.username = :username)"
       + " AND (rh.createdAt >= :fromDate)"

@@ -2,11 +2,8 @@ package org.cardanofoundation.explorer.api.model.request.pool.report;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.cardanofoundation.explorer.api.common.enumeration.PoolReportEvent;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolReport;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
 
@@ -34,20 +31,18 @@ public class PoolReportCreateRequest {
 
   private Integer[] epochRanges;
 
-  public PoolReport toEntity(ReportHistory reportHistory, String username) {
-    return PoolReport.builder()
+  public PoolReportHistory toEntity(ReportHistory reportHistory) {
+    return PoolReportHistory.builder()
         .poolView(this.poolId)
         .isPoolSize(this.isPoolSize)
         .isFeesPaid(this.isFeesPaid)
-        .reportName(this.reportName)
         .beginEpoch(this.epochRanges[0])
         .endEpoch(this.epochRanges[1])
-        .isRegistration(this.isRegistration)
-        .isReward(this.isReward)
-        .isDeregistration(this.isDeregistration)
-        .isPoolUpdate(this.isPoolUpdate)
+        .eventRegistration(this.isRegistration)
+        .eventReward(this.isReward)
+        .eventDeregistration(this.isDeregistration)
+        .eventPoolUpdate(this.isPoolUpdate)
         .reportHistory(reportHistory)
-        .username(username)
         .build();
   }
 }

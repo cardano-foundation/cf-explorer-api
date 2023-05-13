@@ -57,7 +57,9 @@ public interface StakeKeyReportService {
   /**
    * Download the export file of stake key report from storage of current user
    *
-   * @param reportId report id
+   * @param reportId   report id
+   * @param exportType export type
+   * @param username   username
    * @return StakeKeyReportResponse
    */
   StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username,

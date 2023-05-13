@@ -6,10 +6,12 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolAmo
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochStake;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,7 +26,7 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
       + "WHERE es.epochNo IN :epochNo AND es.pool.id = :poolId "
       + "GROUP BY es.epochNo")
   List<EpochStakeProjection> totalStakeByEpochNoAndPool(@Param("epochNo") Set<Integer> epochNo,
-      @Param("poolId") Long poolId);
+                                                        @Param("poolId") Long poolId);
 
   @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.epochNo = :epochNo")
   Optional<BigInteger> totalStakeAllPoolByEpochNo(@Param("epochNo") Integer epochNo);
@@ -48,7 +50,8 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
   BigInteger activeStakeByPool(@Param("poolId") Long poolId);
 
   @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.pool.id = :poolId AND es.epochNo = :epochNo")
-  BigInteger getPoolSizeByPoolAndEpochNo(@Param("poolId") Long poolId, @Param("epochNo") Integer epochNo);
+  BigInteger getPoolSizeByPoolAndEpochNo(@Param("poolId") Long poolId,
+                                         @Param("epochNo") Integer epochNo);
 
   @Query(value = "SELECT es.pool.id AS poolId, sum(es.amount) AS amount FROM EpochStake es "
       + "WHERE es.pool.id IN :poolIds "
@@ -72,16 +75,21 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
   Page<EpochStakeProjection> getDataForEpochList(@Param("poolId") Long poolId, Pageable pageable);
 
   @Query(value =
-          "SELECT es.epochNo as epochNo, sum(es.amount) as size "
-        + "FROM EpochStake es where es.pool.view = :poolView "
-        + "and es.epochNo between :epochBegin and :epochEnd "
-        + "group by es.epochNo")
-  Page<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd, Pageable pageable);
+      "SELECT es.epochNo as epochNo, sum(es.amount) as size "
+          + "FROM EpochStake es where es.pool.view = :poolView "
+          + "and es.epochNo between :epochBegin and :epochEnd "
+          + "group by es.epochNo")
+  Page<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView,
+                                                      @Param("epochBegin") int epochBegin,
+                                                      @Param("epochEnd") int epochEnd,
+                                                      Pageable pageable);
 
   @Query(value =
       "SELECT es.epochNo as epochNo, sum(es.amount) as size "
           + "FROM EpochStake es where es.pool.view = :poolView "
           + "and es.epochNo between :epochBegin and :epochEnd "
           + "group by es.epochNo")
-  List<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView, @Param("epochBegin") int epochBegin, @Param("epochEnd") int epochEnd);
+  List<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView,
+                                                      @Param("epochBegin") int epochBegin,
+                                                      @Param("epochEnd") int epochEnd);
 }

@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.pool.report;
 
 
-import org.cardanofoundation.explorer.consumercommon.entity.PoolReport;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,17 +30,17 @@ public class PoolReportListResponse {
 
     private Boolean isPoolUpdate;
 
-    public static PoolReportListResponse toDomain(PoolReport entity) {
+    public static PoolReportListResponse toDomain(PoolReportHistory entity) {
         return PoolReportListResponse.builder()
                 .reportId(entity.getId())
-                .reportName(entity.getReportName())
+                .reportName(entity.getReportHistory().getReportName())
                 .epochRanges(new Integer[]{entity.getBeginEpoch(), entity.getEndEpoch()})
                 .isPoolSize(entity.getIsPoolSize())
                 .isFreePaid(entity.getIsFeesPaid())
-                .isRegistration(entity.getIsRegistration())
-                .isDeregistration(entity.getIsDeregistration())
-                .isReward(entity.getIsReward())
-                .isPoolUpdate(entity.getIsPoolUpdate())
+                .isRegistration(entity.getEventRegistration())
+                .isDeregistration(entity.getEventDeregistration())
+                .isReward(entity.getEventReward())
+                .isPoolUpdate(entity.getEventPoolUpdate())
                 .build();
     }
 }
