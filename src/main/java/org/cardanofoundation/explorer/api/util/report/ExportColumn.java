@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.util.report;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +13,6 @@ public class ExportColumn {
 
   // use for export excel
   private Alignment align;
-  private Integer columnWidth;
 
   public enum Alignment {
     LEFT, RIGHT, CENTER
@@ -24,7 +22,6 @@ public class ExportColumn {
     this.columnField = column;
     this.columnTitle = title;
     this.align = align;
-    this.columnWidth = CommonConstant.COLUMN_WITH * 30;
   }
 
   /**
@@ -35,13 +32,5 @@ public class ExportColumn {
     this.columnField = column;
     this.columnTitle = title;
     this.align = Alignment.LEFT;
-    this.columnWidth = CommonConstant.COLUMN_WITH * 30;
-  }
-
-  public ExportColumn(ColumnFieldEnum column, ColumnTitleEnum title, Alignment align, Integer columnWidth) {
-    this.columnField = column;
-    this.columnTitle = title;
-    this.align = align;
-    this.columnWidth = CommonConstant.COLUMN_WITH * columnWidth;
   }
 }
