@@ -26,4 +26,5 @@ public class TxOutResponse {
   @EqualsAndHashCode.Exclude
   private String assetId;
   private List<TxMintingResponse> tokens;
+  private String stakeAddress;
 }
