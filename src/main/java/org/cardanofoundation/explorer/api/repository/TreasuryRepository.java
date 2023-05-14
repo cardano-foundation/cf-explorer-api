@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Treasury;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface TreasuryRepository extends JpaRepository<Treasury, Long> {
 
@@ -17,5 +18,5 @@ public interface TreasuryRepository extends JpaRepository<Treasury, Long> {
       + " INNER JOIN StakeAddress stake ON treasury.addr = stake"
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
-  List<StakeInstantaneousRewardsProjection> getTreasuryByAddress(String stakeKey);
+  List<StakeInstantaneousRewardsProjection> getTreasuryByAddress(@Param("stakeKey") String stakeKey);
 }

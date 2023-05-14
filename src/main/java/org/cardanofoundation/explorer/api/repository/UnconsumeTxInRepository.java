@@ -6,6 +6,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.UnconsumeTxIn;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface UnconsumeTxInRepository extends JpaRepository<UnconsumeTxIn, Long> {
   @Query("SELECT txOut.address AS address, txOut.index AS index, cti.txOut.hash AS txHash,"
@@ -16,5 +17,5 @@ public interface UnconsumeTxInRepository extends JpaRepository<UnconsumeTxIn, Lo
       + " LEFT JOIN MaTxOut maTxOut ON maTxOut.txOut = txOut"
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
       + " WHERE cti.txIn = :tx")
-  List<AddressInputOutputProjection> findTxCollateralInput(Tx tx);
+  List<AddressInputOutputProjection> findTxCollateralInput(@Param("tx") Tx tx);
 }
