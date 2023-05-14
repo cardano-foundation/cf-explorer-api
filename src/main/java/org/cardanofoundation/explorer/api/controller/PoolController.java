@@ -5,7 +5,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
 import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
