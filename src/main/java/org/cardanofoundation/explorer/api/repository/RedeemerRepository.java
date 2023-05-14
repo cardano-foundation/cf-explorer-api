@@ -6,6 +6,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
 
@@ -15,5 +16,5 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " LEFT JOIN TxIn txIn ON txIn.redeemer = re"
       + " LEFT JOIN TxOut txOut ON txIn.txOut = txOut.tx AND txIn.txOutIndex = txOut.index "
       + " WHERE tx = :tx")
-  List<TxContractProjection> findContractByTx(Tx tx);
+  List<TxContractProjection> findContractByTx(@Param("tx") Tx tx);
 }
