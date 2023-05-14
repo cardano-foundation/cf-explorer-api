@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AddressTokenRepository extends JpaRepository<AddressToken, Long> {
 
@@ -47,4 +48,10 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId"
       + " GROUP BY addrToken.multiAsset")
   List<TokenVolumeProjection> sumBalanceAfterTx(Collection<MultiAsset> multiAsset, Long txId);
+
+
+  @Query("SELECT addrToken FROM AddressToken addrToken"
+      + " WHERE addrToken.tx.id in :ids and addrToken.address.address = :address")
+  List<AddressToken> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
+                                              @Param("address") String address);
 }
