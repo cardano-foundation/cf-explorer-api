@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,6 +19,7 @@ public class ProtocolHistory {
   Date time;
   String transactionHash;
   Object value;
+  ProtocolStatus status;
 
   @Override
   public boolean equals(Object o) {

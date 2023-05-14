@@ -426,6 +426,8 @@ public interface ProtocolMapper {
       historiesProtocol.getEntropy().add(protocol.getEntropy());
       historiesProtocol.getCostModel().add(protocol.getCostModel());
     });
+
+
     return historiesProtocol;
   }
 }
