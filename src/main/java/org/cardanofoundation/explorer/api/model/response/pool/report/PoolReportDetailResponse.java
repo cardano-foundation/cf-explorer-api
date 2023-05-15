@@ -6,6 +6,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
+import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.report.ColumnFieldEnum;
 import org.cardanofoundation.explorer.api.util.report.ColumnTitleEnum;
 import org.cardanofoundation.explorer.api.util.report.ExportColumn;
@@ -225,11 +226,14 @@ public class PoolReportDetailResponse {
       Deregistration result = Deregistration.builder()
           .txHash(response.getTxHash())
           .time(response.getTime())
-          .adaValueHold(new BigDecimal(response.getPoolHold()))
+          .adaValueHold(DataUtil.isNullOrEmpty(response.getPoolHold()) ? null : new BigDecimal(
+              response.getPoolHold()))
           .adaValueFee(new BigDecimal(response.getFee()))
           .owner(String.join("\n", response.getStakeKeys()))
           .build();
-      result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
+      result.setAdaValue(DataUtil.isNullOrEmpty(result.getAdaValueHold()) ? result.getAdaValueFee()
+                                                                          : result.getAdaValueHold()
+                             .subtract(result.getAdaValueFee()));
       return result;
     }
 
