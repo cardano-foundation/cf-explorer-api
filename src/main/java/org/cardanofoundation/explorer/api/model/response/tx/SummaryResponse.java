@@ -13,6 +13,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class SummaryResponse {
-  private List<TxOutResponse> stakeAddressTxInputs;
-  private List<TxOutResponse> stakeAddressTxOutputs;
+  private List<TxOutResponse> stakeAddress;
 }
