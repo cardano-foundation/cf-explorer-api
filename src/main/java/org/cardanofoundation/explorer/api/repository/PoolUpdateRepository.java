@@ -47,7 +47,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId)")
   PoolUpdate findLastEpochByPool(@Param("poolId") Long poolId);
 
-  @Query("SELECT ph.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
+  @Query("SELECT pu.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
           + "pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, sa.view AS rewardAccount, "
           + "pmr.url AS metadataUrl, pmr.hash as metadataHash "
           + "FROM PoolUpdate pu "
