@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.BlockController;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
 import org.cardanofoundation.explorer.api.service.BlockService;
 import org.cardanofoundation.explorer.api.service.TxService;
@@ -13,6 +14,7 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -23,6 +25,7 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
   JacksonMapperDateConfig.class,
   GlobalRestControllerExceptionHandler.class
 })
+@AutoConfigureMockMvc(addFilters = false)
 public class BlockControllerIntegrationTest {
 
   private static final String NON_EXISTING_BLOCK_ID = "12345";
@@ -46,6 +50,14 @@ public class BlockControllerIntegrationTest {
   @MockBean private BlockService blockService;
 
   @MockBean private TxService txService;
+
+  @MockBean
+  private AuthInterceptor authInterceptor;
+
+  @BeforeEach
+  void preControllerTest() throws Exception {
+    when(authInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+  }
 
   @BeforeEach
   void setUp() {
