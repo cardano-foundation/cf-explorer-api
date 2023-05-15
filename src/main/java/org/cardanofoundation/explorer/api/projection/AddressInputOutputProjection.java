@@ -23,4 +23,6 @@ public interface AddressInputOutputProjection {
   String getAssetId();
 
   String getAssetsJson();
+
+  String getStakeView();
 }
