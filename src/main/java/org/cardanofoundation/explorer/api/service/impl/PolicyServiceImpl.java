@@ -93,9 +93,8 @@ public class PolicyServiceImpl implements PolicyService {
 
   @Override
   public BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable) {
-    List<MultiAsset> multiAssets = multiAssetRepository.findAllByPolicy(policyId);
     Page<AddressTokenProjection> multiAssetPage
-        = addressTokenBalanceRepository.findAddressAndBalanceByMultiAssetIn(multiAssets, pageable);
+        = addressTokenBalanceRepository.findAddressAndBalanceByMultiAssetIn(policyId, pageable);
     Set<Long> addressIds = multiAssetPage.stream().map(AddressTokenProjection::getAddressId)
         .collect(Collectors.toSet());
     List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);

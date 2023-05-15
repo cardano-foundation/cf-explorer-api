@@ -47,7 +47,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       "WHERE bk.id IN :blockIds ")
   List<Long> getListPoolIdIn(@Param("blockIds") List<Long> blockIds);
 
-  Optional<PoolHash> findByView(String view);
+  Optional<PoolHash> findByView(@Param("view") String view);
 
   @Query(value =
       "SELECT ph.id AS poolId, ph.hashRaw AS hashRaw, ph.poolSize AS poolSize, po.json AS poolName, po.tickerName AS tickerName, pu.pledge AS pledge, pu.margin AS margin, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize, "
