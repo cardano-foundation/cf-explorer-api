@@ -92,3 +92,7 @@ management:
       enabled: true
     prometheus:
       enabled: true
+
+rsa:
+  key:
+    path: /key/public_key
