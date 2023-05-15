@@ -56,7 +56,8 @@ import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 @RequiredArgsConstructor
 public class ProtocolParamServiceImpl implements ProtocolParamService {
 
-  public static final String EPOCH_CHANGE_FIELD = "epochChange";
+  public static final String EPOCH_CHANGE_FIELD = "epochchanges";
+  public static final String STATUS = "status";
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
   final TxRepository txRepository;
@@ -72,7 +73,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @return histories change
    */
   @Override
-  public HistoriesProtocol getHistoryProtocolParam() {
+  public HistoriesProtocol getHistoryProtocolParameters() {
     // find all param proposal change, and take the last change
     List<ParamHistory> historiesChange = paramProposalRepository.findProtocolsChange();
     // find all epoch param group there in to map of key:epoch value:epoch_param
@@ -87,32 +88,40 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             historiesChange.stream().map(ParamHistory::getTx).toList())
         .parallelStream().collect(Collectors.toMap(Tx::getId, Function.identity()));
 
-    Map<Integer, Protocols> unprocessedProtocols = historiesChangeByEpoch.entrySet().stream()
-        .sorted((paramOld, paramNew) -> paramNew.getKey().compareTo(paramOld.getKey()))
-        .map(entry -> {
-          Protocols protocols = getEpochProtocol(entry.getKey());
-          Protocols protocolsChange = getProtocolChangeInOneEpoch(entry.getValue(), txs);
+    Map<Integer, Protocols> unprocessedProtocols = epochParams.keySet()
+        .stream()
+        .sorted(Integer::compareTo)
+        .map(epoch -> {
+          Protocols protocols = getEpochProtocol(epoch);
+          List<ParamHistory> protocolHistories = historiesChangeByEpoch.get(epoch);
+
+          if (ObjectUtils.isEmpty(protocolHistories)) {
+            return protocols;
+          }
+
+          Protocols protocolsChange = getProtocolChangeInOneEpoch(protocolHistories, txs);
 
           if (Objects.equals(protocols, protocolsChange)) {
             return protocols;
           }
           return protocolsChange;
-        }).collect(Collectors.toMap(protocols -> protocols.getEpochChange().getStartEpoch(),
-            Function.identity()));
+        })
+        .collect(Collectors
+            .toMap(protocols -> protocols.getEpochChange().getStartEpoch(), Function.identity()));
 
     List<Protocols> processProtocols = new ArrayList<>();
 
-    final Set<Integer> epochs = historiesChangeByEpoch.keySet();
-
-    if (ObjectUtils.isEmpty(epochs)) {
-      return new HistoriesProtocol();
+    if (ObjectUtils.isEmpty(epochParams.keySet())) {
+      return new HistoriesProtocol(); // return empty if epoch param is empty
     }
 
-    final Integer min = epochs.stream().min(Integer::compareTo).orElse(BigInteger.ZERO.intValue());
-    final Integer max = epochs.stream().max(Integer::compareTo).orElse(BigInteger.ZERO.intValue())
+    final Integer min = epochParams.keySet().stream().min(Integer::compareTo)
+        .orElse(BigInteger.ZERO.intValue());
+    final Integer max = historiesChangeByEpoch.keySet().stream().max(Integer::compareTo)
+        .orElse(BigInteger.ZERO.intValue())
         + BigInteger.ONE.intValue();
 
-    AtomicReference<Protocols> protocols = new AtomicReference<>(
+    AtomicReference<Protocols> currentMarkProtocols = new AtomicReference<>(
         unprocessedProtocols.get(max - BigInteger.ONE.intValue()));
 
     IntStream.range(min, max)
@@ -120,7 +129,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .sorted(Collections.reverseOrder())
         .forEach(epoch -> {
 
-          Protocols markProtocol = protocols.get();
+          Protocols markProtocol = currentMarkProtocols.get();
           Protocols currentProtocol = unprocessedProtocols.get(epoch);
 
           if (Objects.isNull(currentProtocol)) {
@@ -129,13 +138,18 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
           if (Objects.equals(markProtocol, currentProtocol)) {
             markProtocol.getEpochChange().setEndEpoch(epoch);
+
+            if (min.equals(epoch)) {
+              fillMissingProtocolField(markProtocol, epochParams.get(epoch));
+              processProtocols.add(markProtocol);
+            }
             return;
           }
 
           fillMissingProtocolField(markProtocol, epochParams.get(epoch));
 
-          processProtocols.add(protocols.get());
-          protocols.set(currentProtocol);
+          processProtocols.add(currentMarkProtocols.get());
+          currentMarkProtocols.set(currentProtocol);
         });
 
     HistoriesProtocol historiesProtocol = protocolMapper.mapProtocolsToHistoriesProtocol(
@@ -192,10 +206,12 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     }
 
     EpochParam maxEpochParam = epochParams.stream()
-        .max(Comparator.comparing(EpochParam::getEpochNo)).get();
+        .max(Comparator.comparing(EpochParam::getEpochNo))
+        .orElse(EpochParam.builder().build());
 
     EpochParam minEpochParam = epochParams.stream()
-        .min(Comparator.comparing(EpochParam::getEpochNo)).get();
+        .min(Comparator.comparing(EpochParam::getEpochNo))
+        .orElse(EpochParam.builder().build());
 
     fixedProtocol.setEpochChange(EpochChange.builder()
         .startEpoch(maxEpochParam.getEpochNo())
@@ -800,7 +816,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       if (Objects.nonNull(epochParam.getCostModel())) {
         protocols.setCostModel(
             getChangeCostModelProtocol(epochParam.getCostModel().getCosts()));
-      return;
+        return;
       }
       protocols.setCostModel(
           getChangeProtocol(epochParam.getCostModel()));
@@ -910,11 +926,11 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   private void handleHistoriesChange(HistoriesProtocol historiesProtocol) {
     historyMethods.values()
-        //.parallelStream()
+        .parallelStream()
         .forEach(
             method -> {
               try {
-                //log.info("method {}", method.getName());
+                log.debug("method {}", method.getName());
                 handleHistoryStatus((List<ProtocolHistory>) method.invoke(historiesProtocol));
               } catch (Exception e) {
                 log.error(e.getMessage());
@@ -935,8 +951,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           final ProtocolHistory currentProtocolHistory = protocolHistories.get(index);
           if (Objects.isNull(nextProtocolHistory)) {
 
-            if (Objects.nonNull(currentProtocolHistory.getValue()) &&
-                Objects.nonNull(currentProtocolHistory.getValue())) {
+            if (Objects.nonNull(currentProtocolHistory.getValue())) {
               currentProtocolHistory.setStatus(ProtocolStatus.ADDED);
             }
             return;
@@ -952,7 +967,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             return;
           }
 
-          if (!(currentProtocolHistory.getValue().hashCode() == nextProtocolHistory.getValue().hashCode())) {
+          if (currentProtocolHistory.getValue().hashCode() != nextProtocolHistory.getValue()
+              .hashCode()) {
             currentProtocolHistory.setStatus(ProtocolStatus.UPDATED);
             return;
           }
@@ -960,7 +976,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         });
 
     ProtocolHistory lastProtocol = protocolHistories.get(size);
-    if(Objects.isNull(lastProtocol.getValue())){
+    if (Objects.isNull(lastProtocol.getValue())) {
       lastProtocol.setStatus(ProtocolStatus.NOT_EXIST);
       return;
     }
@@ -1003,7 +1019,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             return methodLowerCase.contains(fieldLowerCase) &&
                 methodLowerCase.contains(GET) &&
                 !methodLowerCase.contains(EPOCH_CHANGE_FIELD) &&
-                !methodLowerCase.contains("status");
+                !methodLowerCase.contains(STATUS);
           })
           .findFirst()
           .orElse(null); // Method null is ok, because we not use it anyway

@@ -10,7 +10,7 @@ import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 public interface ProtocolParamService {
 
   @Transactional(readOnly = true)
-  HistoriesProtocol getHistoryProtocolParam();
+  HistoriesProtocol getHistoryProtocolParameters();
 
   @Transactional(readOnly = true)
   Protocols getLatestChange();

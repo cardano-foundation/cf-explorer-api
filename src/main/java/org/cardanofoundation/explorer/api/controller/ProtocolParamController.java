@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,7 +25,7 @@ public class ProtocolParamController {
   @LogMessage
   @Operation(summary = "Get current protocol history change")
   public HistoriesProtocol  getCurrentProtocol() {
-    return protocolParamService.getHistoryProtocolParam();
+    return protocolParamService.getHistoryProtocolParameters();
   }
 
   @GetMapping("latest")
