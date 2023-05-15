@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Reserve;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ReserveRepository extends JpaRepository<Reserve, Long> {
 
@@ -17,5 +18,5 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
       + " INNER JOIN StakeAddress stake ON reserve.addr = stake"
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
-  List<StakeInstantaneousRewardsProjection> getReserveByAddress(String stakeKey);
+  List<StakeInstantaneousRewardsProjection> getReserveByAddress(@Param("stakeKey") String stakeKey);
 }

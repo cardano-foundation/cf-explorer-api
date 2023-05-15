@@ -10,7 +10,7 @@ import org.cardanofoundation.explorer.api.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -29,7 +29,7 @@ public class BlockController {
   @LogMessage
   @Operation(summary = "Get a block detail")
   public ResponseEntity<BlockResponse> getBlockDetailByBlockId(
-      @PathVariable @Parameter(description = "Block number or block hash") String blockId) throws Exception {
+      @PathVariable @Parameter(description = "Block number or block hash") String blockId) {
     return ResponseEntity.ok(blockService.getBlockDetailByBlockId(blockId));
   }
 

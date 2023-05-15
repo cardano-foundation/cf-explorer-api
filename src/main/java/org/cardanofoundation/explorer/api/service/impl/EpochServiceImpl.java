@@ -36,7 +36,9 @@ public class EpochServiceImpl implements EpochService {
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
       );
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
-      checkEpochStatus(response);
+      var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
+          () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+      checkEpochStatus(response, currentEpoch);
       return response;
     } catch (NumberFormatException e) {
       throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
@@ -48,7 +50,9 @@ public class EpochServiceImpl implements EpochService {
   public BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable) {
     Page<Epoch> epochs = epochRepository.findAll(pageable);
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
-    pageResponse.getContent().forEach(this::checkEpochStatus);
+    var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
+        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+    pageResponse.getContent().forEach(epoch -> checkEpochStatus(epoch, currentEpoch));
     return new BaseFilterResponse<>(pageResponse);
   }
 
@@ -61,12 +65,10 @@ public class EpochServiceImpl implements EpochService {
    *
    * @param epoch epoch response
    */
-  private void checkEpochStatus(EpochResponse epoch) {
+  private void checkEpochStatus(EpochResponse epoch, Integer currentEpoch) {
     var rewardTime = LocalDateTime.now().minusDays(10);
-    var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
-        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
     if (epoch.getStartTime().plusDays(5).isAfter(LocalDateTime.now(ZoneId.of("UTC")))
-     && epoch.getStartTime().isBefore(LocalDateTime.now(ZoneId.of("UTC")))) {
+        && epoch.getStartTime().isBefore(LocalDateTime.now(ZoneId.of("UTC")))) {
       epoch.setStatus(EpochStatus.IN_PROGRESS);
       epoch.setEndTime(epoch.getStartTime().plusDays(5));
     } else if (rewardTime.isBefore(epoch.getEndTime())) {

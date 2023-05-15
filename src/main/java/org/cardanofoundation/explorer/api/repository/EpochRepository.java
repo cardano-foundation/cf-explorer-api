@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
-  Optional<Epoch> findFirstByNo(Integer no);
+  Optional<Epoch> findFirstByNo(@Param("no") Integer no);
 
   @Query(value = "SELECT max(no) FROM Epoch")
   Optional<Integer> findCurrentEpochNo();
