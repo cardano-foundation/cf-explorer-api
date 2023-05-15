@@ -40,4 +40,4 @@ jobs:
 
       - name: Test
         run: |
-          mvn --batch-mode --update-snapshots -Dmaven.test.failure.ignore=true test
+          mvn --batch-mode --update-snapshots test
