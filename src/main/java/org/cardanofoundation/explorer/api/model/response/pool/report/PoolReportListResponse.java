@@ -22,13 +22,13 @@ public class PoolReportListResponse {
 
     private Boolean isFreePaid;
 
-    private Boolean isRegistration;
+    private Boolean eventRegistration;
 
-    private Boolean isDeregistration;
+    private Boolean eventDeregistration;
 
-    private Boolean isReward;
+    private Boolean eventReward;
 
-    private Boolean isPoolUpdate;
+    private Boolean eventPoolUpdate;
 
     public static PoolReportListResponse toDomain(PoolReportHistory entity) {
         return PoolReportListResponse.builder()
@@ -37,10 +37,10 @@ public class PoolReportListResponse {
                 .epochRanges(new Integer[]{entity.getBeginEpoch(), entity.getEndEpoch()})
                 .isPoolSize(entity.getIsPoolSize())
                 .isFreePaid(entity.getIsFeesPaid())
-                .isRegistration(entity.getEventRegistration())
-                .isDeregistration(entity.getEventDeregistration())
-                .isReward(entity.getEventReward())
-                .isPoolUpdate(entity.getEventPoolUpdate())
+                .eventRegistration(entity.getEventRegistration())
+                .eventDeregistration(entity.getEventDeregistration())
+                .eventReward(entity.getEventReward())
+                .eventPoolUpdate(entity.getEventPoolUpdate())
                 .build();
     }
 }
