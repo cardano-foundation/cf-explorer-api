@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.8](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.7...v0.3.8) (2023-05-15)
+
+
+### Bug Fixes
+
+* bump common versions ([3701cbb](https://github.com/cardano-foundation/cf-explorer-api/commit/3701cbb93fabb0a1d55dac63be8edf1188a55fb9))
+
 ## [0.3.7](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.7-SNAPSHOT...v0.3.7) (2023-05-15)
 
 
