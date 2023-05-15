@@ -9,16 +9,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
 
   @EntityGraph(attributePaths = {MaTxMint_.IDENT})
-  List<MaTxMint> findByTx(Tx tx);
+  List<MaTxMint> findByTx(@Param("tx") Tx tx);
 
   @Query("SELECT maTxMint"
       + " FROM MaTxMint maTxMint "
       + " WHERE maTxMint.ident.fingerprint = :tokenId ")
   @EntityGraph(attributePaths = {MaTxMint_.TX, "tx.block"})
-  Page<MaTxMint> findByIdent(String tokenId, Pageable pageable);
+  Page<MaTxMint> findByIdent(@Param("tokenId") String tokenId, Pageable pageable);
 
 }

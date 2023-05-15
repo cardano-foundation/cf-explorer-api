@@ -18,19 +18,19 @@ import org.springframework.stereotype.Repository;
 public interface BlockRepository extends JpaRepository<Block, Long>,
     JpaSpecificationExecutor<Block> {
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
-  Optional<Block> findFirstByBlockNo(Long no);
+  Optional<Block> findFirstByBlockNo(@Param("no") Long no);
 
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
-  Optional<Block> findFirstByHash(String hash);
+  Optional<Block> findFirstByHash(@Param("hash") String hash);
 
   @Query(value = "SELECT b FROM Block b WHERE b.epochNo IS NOT NULL",
       countQuery = "SELECT sum (e.blkCount) FROM Epoch e")
   Page<Block> findAllBlock(Pageable pageable);
 
-  List<Block> findAllByIdIn(Collection<Long> ids);
+  List<Block> findAllByIdIn(@Param("ids") Collection<Long> ids);
 
   @Query(value = "SELECT b FROM Block b WHERE b.epochNo = :epochNo")
-  Page<Block> findBlockByEpochNo(Integer epochNo, Pageable pageable);
+  Page<Block> findBlockByEpochNo(@Param("epochNo") Integer epochNo, Pageable pageable);
 
   @Query(value = "SELECT max(blockNo) FROM Block")
   Optional<Integer> findCurrentBlock();
