@@ -75,22 +75,24 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
   Page<EpochStakeProjection> getDataForEpochList(@Param("poolId") Long poolId, Pageable pageable);
 
   @Query(value =
-      "SELECT es.epochNo as epochNo, pu.fixedCost as fee, es.amount as size "
+      "SELECT es.epochNo as epochNo, pu.fixedCost as fee, sum(es.amount) as size "
           + "FROM EpochStake es "
           + "LEFT JOIN PoolUpdate pu ON pu.poolHashId = es.pool.id "
           + "where es.pool.view = :poolView "
-          + "and es.epochNo between :epochBegin and :epochEnd")
+          + "and es.epochNo between :epochBegin and :epochEnd "
+          + "group by es.epochNo, pu.fixedCost")
   Page<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView,
                                                       @Param("epochBegin") int epochBegin,
                                                       @Param("epochEnd") int epochEnd,
                                                       Pageable pageable);
 
   @Query(value =
-      "SELECT es.epochNo as epochNo, pu.fixedCost as fixedCost, es.amount as size "
+      "SELECT es.epochNo as epochNo, pu.fixedCost as fee, sum(es.amount) as size "
           + "FROM EpochStake es "
           + "LEFT JOIN PoolUpdate pu ON pu.poolHashId = es.pool.id "
           + "where es.pool.view = :poolView "
-          + "and es.epochNo between :epochBegin and :epochEnd")
+          + "and es.epochNo between :epochBegin and :epochEnd "
+          + "group by es.epochNo, pu.fixedCost")
   List<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView,
                                                       @Param("epochBegin") int epochBegin,
                                                       @Param("epochEnd") int epochEnd);
