@@ -8,17 +8,7 @@ public interface PoolReportProjection {
 
     BigInteger  getSize();
 
-    String getTxnHash();
-
     Date getTimestamp();
 
-    BigInteger getAdaValueHold();
-
-    BigInteger getAdaValueFees();
-
-    String getOwner();
-
-    BigInteger getOperatorReward();
-
-    String getRewardAccount();
+    BigInteger getFee();
 }

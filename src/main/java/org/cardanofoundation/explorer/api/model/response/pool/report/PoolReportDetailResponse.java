@@ -13,6 +13,7 @@ import org.cardanofoundation.explorer.api.util.report.ExportColumn;
 import org.cardanofoundation.explorer.api.util.report.ExportColumn.Alignment;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,19 +47,26 @@ public class PoolReportDetailResponse {
 
     private String epoch;
 
+    private BigInteger fee;
+
     private BigDecimal size;
 
     public static EpochSize toDomain(PoolReportProjection projection) {
       return EpochSize.builder()
           .epoch(projection.getEpochNo().toString())
+          .fee(projection.getFee())
           .size(new BigDecimal(projection.getSize()))
           .build();
     }
 
-    public static List<ExportColumn> designFile() {
+    public static List<ExportColumn> designFile(Boolean isFeePaid) {
       List<ExportColumn> epochSizeColumns = new ArrayList<>();
       epochSizeColumns.add(
           new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
+      if (Boolean.TRUE.equals(isFeePaid)) {
+        epochSizeColumns.add(
+            new ExportColumn(ColumnFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE));
+      }
       epochSizeColumns.add(
           new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE));
       return epochSizeColumns;
@@ -95,7 +103,7 @@ public class PoolReportDetailResponse {
       return result;
     }
 
-    public static List<ExportColumn> designFile(boolean isFee) {
+    public static List<ExportColumn> designFile() {
       List<ExportColumn> poolRegistrationsColumns = new ArrayList<>();
       poolRegistrationsColumns.add(
           new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE,
@@ -106,11 +114,9 @@ public class PoolReportDetailResponse {
       poolRegistrationsColumns.add(
           new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
                            Alignment.RIGHT));
-      if (isFee) {
-        poolRegistrationsColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-                                                      ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
-                                                      Alignment.RIGHT));
-      }
+      poolRegistrationsColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
+                                                    ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
+                                                    Alignment.RIGHT));
       poolRegistrationsColumns.add(
           new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE,
                            Alignment.LEFT));
@@ -145,7 +151,7 @@ public class PoolReportDetailResponse {
       return result;
     }
 
-    public static List<ExportColumn> designFile(boolean isFee) {
+    public static List<ExportColumn> designFile() {
       List<ExportColumn> poolUpdateColumns = new ArrayList<>();
       poolUpdateColumns.add(
           new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
@@ -155,11 +161,9 @@ public class PoolReportDetailResponse {
       poolUpdateColumns.add(
           new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
                            Alignment.RIGHT));
-      if (isFee) {
-        poolUpdateColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-                                               ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
-                                               Alignment.RIGHT));
-      }
+      poolUpdateColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
+                                             ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
+                                             Alignment.RIGHT));
       return poolUpdateColumns;
     }
   }
@@ -237,7 +241,7 @@ public class PoolReportDetailResponse {
       return result;
     }
 
-    public static List<ExportColumn> designFile(boolean isFee) {
+    public static List<ExportColumn> designFile() {
       List<ExportColumn> deregistrationColumns = new ArrayList<>();
       deregistrationColumns.add(
           new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
@@ -247,11 +251,9 @@ public class PoolReportDetailResponse {
       deregistrationColumns.add(
           new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
                            Alignment.RIGHT));
-      if (isFee) {
-        deregistrationColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-                                                   ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
-                                                   Alignment.RIGHT));
-      }
+      deregistrationColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
+                                                 ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
+                                                 Alignment.RIGHT));
       deregistrationColumns.add(
           new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE));
       return deregistrationColumns;
