@@ -56,7 +56,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 @RequiredArgsConstructor
 public class ProtocolParamServiceImpl implements ProtocolParamService {
 
-  public static final String EPOCH_FIELD = "epoch";
+  public static final String EPOCH_CHANGE_FIELD = "epochChange";
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
   final TxRepository txRepository;
@@ -910,10 +910,11 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   private void handleHistoriesChange(HistoriesProtocol historiesProtocol) {
     historyMethods.values()
-        .parallelStream()
+        //.parallelStream()
         .forEach(
             method -> {
               try {
+                //log.info("method {}", method.getName());
                 handleHistoryStatus((List<ProtocolHistory>) method.invoke(historiesProtocol));
               } catch (Exception e) {
                 log.error(e.getMessage());
@@ -951,7 +952,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             return;
           }
 
-          if (!currentProtocolHistory.getValue().equals(nextProtocolHistory.getValue())) {
+          if (!(currentProtocolHistory.getValue().hashCode() == nextProtocolHistory.getValue().hashCode())) {
             currentProtocolHistory.setStatus(ProtocolStatus.UPDATED);
             return;
           }
@@ -1001,7 +1002,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             var fieldLowerCase = field.getName().toLowerCase();
             return methodLowerCase.contains(fieldLowerCase) &&
                 methodLowerCase.contains(GET) &&
-                !methodLowerCase.contains(EPOCH_FIELD) &&
+                !methodLowerCase.contains(EPOCH_CHANGE_FIELD) &&
                 !methodLowerCase.contains("status");
           })
           .findFirst()
