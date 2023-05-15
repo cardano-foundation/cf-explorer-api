@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.boot.test.context.SpringBootTest;
+
+import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
 import org.cardanofoundation.explorer.api.model.response.protocol.EpochChange;
 import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.projection.ParamHistory;
@@ -78,70 +81,6 @@ class ProtocolServiceTest {
   }
 
   // History Protocols
-  /*@Test
-  void testLatestMinFeeA() {
-    when(paramProposalRepository.findMaxEpoch()).thenReturn(MAX_EPOCH_LATEST);
-
-    EpochParam epochParamOne = getBuildEpochParam(BigInteger.ZERO);
-    epochParamOne.setMinFeeA(BigInteger.ZERO.intValue());
-
-    EpochParam epochParamTwo = getBuildEpochParam(BigInteger.ONE);
-    epochParamTwo.setMinFeeA(BigInteger.ONE.intValue());
-
-    EpochParam epochParamThree = getBuildEpochParam(BigInteger.TWO);
-    epochParamThree.setMinFeeA(BigInteger.TWO.intValue());
-
-    when(epochParamRepository.findAll())
-        .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
-
-    ParamHistoryProjection paramProposalOne = getBuildParamHistory(BigInteger.ZERO);
-    paramProposalOne.setMinFeeA(BigInteger.ONE);
-
-    ParamHistoryProjection paramProposalTwo = getBuildParamHistory(BigInteger.ONE);
-    paramProposalTwo.setMinFeeA(BigInteger.TWO);
-
-
-    List<ParamHistory> paramHistories = new ArrayList<>();
-    paramHistories.add(paramProposalOne);
-    paramHistories.add(paramProposalTwo);
-
-    when(paramProposalRepository
-             .findEpochProtocolsChange(BigInteger.TWO.intValue()))
-        .thenReturn(paramHistories);
-    
-    final Timestamp txOneDate = Timestamp.valueOf(LocalDateTime.now());
-    final Timestamp txTwoDate = Timestamp.valueOf(LocalDateTime.now());
-    
-    Tx txOne = Tx.builder()
-        .id(BigInteger.ZERO.longValue())
-        .hash(BigInteger.ZERO.toString())
-        .block(Block.builder()
-                   .time(txOneDate)
-                   .build())
-        .build();
-
-    Tx txTwo = Tx.builder()
-        .id(BigInteger.ONE.longValue())
-        .hash(BigInteger.ONE.toString())
-        .block(Block.builder()
-                   .time(txTwoDate)
-                   .build())
-        .build();
-    
-    when(txRepository.findByIdIn(List.of(BigInteger.ZERO.longValue(),
-                                         BigInteger.ONE.longValue())))
-        .thenReturn(List.of(txOne, txTwo));
-
-    Protocols expect = Protocols.builder()
-        .startEpoch(BigInteger.TWO.intValue())
-        .endEpoch(BigInteger.TWO.intValue())
-        .build();
-
-    expect.setMinFeeA(getChangeProtocol(BigInteger.TWO.intValue()));
-
-    Protocols actual = protocolParamService.getLatestChange();
-    Assertions.assertEquals(expect.hashCode(), actual.hashCode());
-  }*/
 
   // Last change Protocols
   @Test
@@ -3107,6 +3046,7 @@ class ProtocolServiceTest {
 
   @Test
   void testFixedCostModel() {
+
     EpochParam epochParamOne = EpochParam.builder()
         .id(BigInteger.ONE.longValue())
         .epochNo(BigInteger.ONE.intValue())
