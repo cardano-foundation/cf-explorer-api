@@ -45,3 +45,6 @@ out/
 
 ### Maven ###
 .m2/settings.xml
+
+### Jenv ###
+.java-version

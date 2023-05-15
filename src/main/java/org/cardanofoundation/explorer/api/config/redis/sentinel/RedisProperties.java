@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.config.redis;
+package org.cardanofoundation.explorer.api.config.redis.sentinel;
 
 import java.util.List;
 import lombok.AccessLevel;

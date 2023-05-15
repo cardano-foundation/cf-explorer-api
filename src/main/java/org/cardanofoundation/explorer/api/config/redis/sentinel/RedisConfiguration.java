@@ -1,6 +1,6 @@
-package org.cardanofoundation.explorer.api.config.redis;
+package org.cardanofoundation.explorer.api.config.redis.sentinel;
 
-import org.cardanofoundation.explorer.api.config.redis.RedisProperties.SentinelNode;
+import org.cardanofoundation.explorer.api.config.redis.sentinel.RedisProperties.SentinelNode;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,6 +19,7 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -43,6 +44,7 @@ import redis.clients.jedis.JedisPoolConfig;
 @Log4j2
 @Configuration
 @EnableCaching
+@Profile("sentinel")
 @RequiredArgsConstructor
 public class RedisConfiguration extends CachingConfigurerSupport {
 
