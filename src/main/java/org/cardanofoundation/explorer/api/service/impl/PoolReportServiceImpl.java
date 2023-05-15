@@ -134,7 +134,8 @@ public class PoolReportServiceImpl implements PoolReportService {
       exportContents.add(ExportContent.builder()
                              .clazz(PoolReportDetailResponse.EpochSize.class)
                              .headerTitle(EPOCH_SIZE_TITLE)
-                             .lstColumn(PoolReportDetailResponse.EpochSize.designFile())
+                             .lstColumn(PoolReportDetailResponse.EpochSize.designFile(
+                                 poolReport.getIsFeesPaid()))
                              .lstData(epochSizeBaseFilterResponse.getData())
                              .build());
     }
@@ -146,9 +147,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       exportContents.add(ExportContent.builder()
                              .clazz(PoolReportDetailResponse.PoolRegistration.class)
                              .headerTitle(POOL_REGISTRATIONS_TITLE)
-                             .lstColumn(
-                                 PoolReportDetailResponse.PoolRegistration.designFile(
-                                     poolReport.getIsFeesPaid()))
+                             .lstColumn(PoolReportDetailResponse.PoolRegistration.designFile())
                              .lstData(poolRegistrationBaseFilterResponse.getData())
                              .build());
     }
@@ -159,8 +158,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       exportContents.add(ExportContent.builder()
                              .clazz(PoolReportDetailResponse.PoolUpdate.class)
                              .headerTitle(POOL_UPDATE_TITLE)
-                             .lstColumn(PoolReportDetailResponse.PoolUpdate.designFile(
-                                 poolReport.getIsFeesPaid()))
+                             .lstColumn(PoolReportDetailResponse.PoolUpdate.designFile())
                              .lstData(poolUpdateBaseFilterResponse.getData())
                              .build());
     }
@@ -182,9 +180,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       exportContents.add(ExportContent.builder()
                              .clazz(PoolReportDetailResponse.Deregistration.class)
                              .headerTitle(DEREGISTRATION_TITLE)
-                             .lstColumn(
-                                 PoolReportDetailResponse.Deregistration.designFile(
-                                     poolReport.getIsFeesPaid()))
+                             .lstColumn(PoolReportDetailResponse.Deregistration.designFile())
                              .lstData(deregistrationBaseFilterResponse.getData())
                              .build());
     }
