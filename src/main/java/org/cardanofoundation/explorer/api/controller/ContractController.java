@@ -7,7 +7,7 @@ import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.consumercommon.entity.Address_;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -35,7 +36,7 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
   @Query("SELECT max(stakeDeregis.tx.id) "
       + " FROM StakeDeregistration stakeDeregis"
       + " WHERE stakeDeregis.addr = :stake")
-  Optional<Long> findMaxTxIdByStake(StakeAddress stake);
+  Optional<Long> findMaxTxIdByStake(@Param("stake") StakeAddress stake);
 
 
   @Query(value = "SELECT DISTINCT tx.hash as txHash, b.time as time,"
@@ -46,12 +47,13 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
       + " JOIN Block b ON b.id = tx.blockId"
       + " WHERE sd.addr.id = (SELECT sa.id FROM StakeAddress sa WHERE sa.view = :stakeKey)"
       + " ORDER BY b.blockNo DESC, tx.blockIndex DESC")
-  List<StakeHistoryProjection> getStakeDeRegistrationsByAddress(String stakeKey);
+  List<StakeHistoryProjection> getStakeDeRegistrationsByAddress(@Param("stakeKey") String stakeKey);
 
   @Query(value = "SELECT sd.tx.id"
       + " FROM StakeDeregistration sd"
       + " WHERE sd.addr = :stakeKey AND sd.tx.id IN :txIds")
-  List<Long> getStakeDeRegistrationsByAddressAndTxIn(StakeAddress stakeKey, Collection<Long> txIds);
+  List<Long> getStakeDeRegistrationsByAddressAndTxIn(@Param("stakeKey") StakeAddress stakeKey,
+                                                     @Param("txIds") Collection<Long> txIds);
 
   @Query(value = "SELECT tx.hash as txHash, b.time as time,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
@@ -63,9 +65,10 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
       + " AND (b.time >= :fromTime ) "
       + " AND (b.time <= :toTime)"
       + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
-  Page<StakeHistoryProjection> getStakeDeRegistrationsByAddress(StakeAddress stakeKey, String txHash,
-                                                                Timestamp fromTime, Timestamp toTime, Pageable pageable);
+  Page<StakeHistoryProjection> getStakeDeRegistrationsByAddress(
+      @Param("stakeKey") StakeAddress stakeKey, @Param("txHash") String txHash,
+      @Param("fromTime") Timestamp fromTime, @Param("toTime") Timestamp toTime, Pageable pageable);
 
   @EntityGraph(attributePaths = {StakeRegistration_.ADDR})
-  List<StakeDeregistration> findByTx(Tx tx);
+  List<StakeDeregistration> findByTx(@Param("tx") Tx tx);
 }

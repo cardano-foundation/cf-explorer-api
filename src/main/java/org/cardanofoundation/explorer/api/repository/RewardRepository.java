@@ -25,7 +25,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " INNER JOIN StakeAddress stakeAddress ON r.addr.id = stakeAddress.id"
       + " WHERE r.spendableEpoch <= (SELECT max(no) FROM Epoch)"
       + " AND stakeAddress.view = :stakeAddress")
-  Optional<BigInteger> getAvailableRewardByStakeAddress(String stakeAddress);
+  Optional<BigInteger> getAvailableRewardByStakeAddress(@Param("stakeAddress") String stakeAddress);
 
   @Query(value = "SELECT rw.earnedEpoch AS epochNo, sum(rw.amount) AS totalStake FROM Reward rw "
       + "WHERE rw.pool.id = :poolId AND rw.earnedEpoch IN :epochNo "
@@ -39,26 +39,28 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
           + " WHERE rw.spendableEpoch <= (SELECT max(no) FROM Epoch)"
           + " AND rw.addr = (SELECT sa FROM StakeAddress sa WHERE sa.view = :stakeAddress)"
           + " GROUP BY rw.earnedEpoch")
-  List<StakeAnalyticRewardResponse> findRewardByStake(String stakeAddress);
+  List<StakeAnalyticRewardResponse> findRewardByStake(@Param("stakeAddress") String stakeAddress);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
       + " WHERE rw.addr = :stakeAddress")
-  List<StakeRewardResponse> findRewardByStake(StakeAddress stakeAddress);
+  List<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress);
 
   @Query("SELECT SUM(r.amount) FROM Reward r "
       + " WHERE r.spendableEpoch <= :epoch"
       + " AND r.addr = :stakeAddress")
-  Optional<BigInteger> getAvailableRewardByStakeAddressAndEpoch(StakeAddress stakeAddress, Integer epoch);
+  Optional<BigInteger> getAvailableRewardByStakeAddressAndEpoch(
+      @Param("stakeAddress") StakeAddress stakeAddress, @Param("epoch") Integer epoch);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.endTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
       + " WHERE rw.addr = :stakeAddress")
-  Page<StakeRewardResponse> findRewardByStake(StakeAddress stakeAddress, Pageable pageable);
+  Page<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress,
+                                              Pageable pageable);
 
 
   @Query(value =
