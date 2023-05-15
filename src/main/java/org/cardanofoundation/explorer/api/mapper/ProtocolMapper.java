@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.cardanofoundation.explorer.api.model.response.protocol.HistoriesProtocol;
 import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.model.response.tx.ProtocolParamResponse;
+import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
 import org.cardanofoundation.ledgersync.common.util.JsonUtil;
 import org.mapstruct.Mapper;
@@ -177,7 +178,7 @@ public interface ProtocolMapper {
   }
 
   default ProtocolParamResponse mapPreviousProtocolParamResponse(List<ParamProposal> paramProposals,
-      ProtocolParamResponse currentParam) {
+                                                                 ProtocolParamResponse currentParam) {
     ProtocolParamResponse previousParam = new ProtocolParamResponse();
 
     paramProposals.forEach(paramProposal -> {
@@ -360,7 +361,187 @@ public interface ProtocolMapper {
     return previousParam;
   }
 
-  default HistoriesProtocol mapProtocolsToHistoriesProtocol(List<Protocols> protocols){
+  default ProtocolParamResponse mapPreviousProtocolParamResponse(EpochParam epochParam,
+                                                                 ProtocolParamResponse currentParam) {
+    ProtocolParamResponse previousParam = new ProtocolParamResponse();
+
+    if (Objects.nonNull(currentParam.getMinFeeA()) &&
+        Objects.nonNull(epochParam.getMinFeeA()) &&
+        Objects.isNull(previousParam.getMinFeeA())) {
+      previousParam.setMinFeeA(epochParam.getMinFeeA());
+    }
+
+    if (Objects.nonNull(currentParam.getMinFeeB()) &&
+        Objects.nonNull(epochParam.getMinFeeB()) &&
+        Objects.isNull(previousParam.getMinFeeB())) {
+      previousParam.setMinFeeB(epochParam.getMinFeeB());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxBlockSize()) &&
+        Objects.nonNull(epochParam.getMaxBlockSize()) &&
+        Objects.isNull(previousParam.getMaxBlockSize())) {
+      previousParam.setMaxBlockSize(epochParam.getMaxBlockSize());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxTxSize()) &&
+        Objects.nonNull(epochParam.getMaxBlockSize()) &&
+        Objects.isNull(previousParam.getMaxTxSize())
+    ) {
+      previousParam.setMaxTxSize(epochParam.getMaxTxSize());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxBhSize()) &&
+        Objects.nonNull(epochParam.getMaxBhSize()) &&
+        Objects.isNull(previousParam.getMaxBhSize())) {
+      previousParam.setMaxBhSize(epochParam.getMaxBhSize());
+    }
+
+    if (Objects.nonNull(currentParam.getKeyDeposit()) &&
+        Objects.nonNull(epochParam.getKeyDeposit()) &&
+        Objects.isNull(previousParam.getKeyDeposit())) {
+      previousParam.setKeyDeposit(epochParam.getKeyDeposit());
+    }
+
+    if (Objects.nonNull(currentParam.getPoolDeposit()) &&
+        Objects.nonNull(epochParam.getPoolDeposit()) &&
+        Objects.isNull(previousParam.getPoolDeposit())) {
+      previousParam.setPoolDeposit(epochParam.getPoolDeposit());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxEpoch()) &&
+        Objects.nonNull(epochParam.getMaxEpoch()) &&
+        Objects.isNull(previousParam.getMaxEpoch())) {
+      previousParam.setMaxEpoch(epochParam.getMaxEpoch());
+    }
+
+    if (Objects.nonNull(currentParam.getOptimalPoolCount()) &&
+        Objects.nonNull(epochParam.getOptimalPoolCount()) &&
+        Objects.isNull(previousParam.getOptimalPoolCount())) {
+      previousParam.setOptimalPoolCount(epochParam.getOptimalPoolCount());
+    }
+
+    if (Objects.nonNull(currentParam.getMinUtxoValue()) &&
+        Objects.nonNull(epochParam.getMinUtxoValue()) &&
+        Objects.isNull(previousParam.getMinUtxoValue())) {
+      previousParam.setMinUtxoValue(epochParam.getMinUtxoValue());
+    }
+
+    if (Objects.nonNull(currentParam.getMinPoolCost()) &&
+        Objects.nonNull(epochParam.getMinPoolCost()) &&
+        Objects.isNull(previousParam.getMinPoolCost())) {
+      previousParam.setMinPoolCost(epochParam.getMinPoolCost());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxTxExMem()) &&
+        Objects.nonNull(epochParam.getMaxTxExMem()) &&
+        Objects.isNull(previousParam.getMaxTxExMem())) {
+      previousParam.setMaxTxExMem(epochParam.getMaxTxExMem());
+    }
+    if (Objects.nonNull(currentParam.getMaxTxExSteps()) &&
+        Objects.nonNull(epochParam.getMaxTxExSteps()) &&
+        Objects.isNull(previousParam.getMaxTxExSteps())) {
+      previousParam.setMaxTxExSteps(epochParam.getMaxTxExSteps());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxBlockExMem()) &&
+        Objects.nonNull(epochParam.getMaxBlockExMem()) &&
+        Objects.isNull(previousParam.getMaxBlockExMem())) {
+      previousParam.setMaxBlockExMem(epochParam.getMaxBlockExMem());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxBlockExSteps()) &&
+        Objects.nonNull(epochParam.getMaxBlockExSteps()) &&
+        Objects.isNull(previousParam.getMaxBlockExSteps())) {
+      previousParam.setMaxBlockExSteps(epochParam.getMaxBlockExSteps());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxValSize()) &&
+        Objects.nonNull(epochParam.getMaxValSize()) &&
+        Objects.isNull(previousParam.getMaxValSize())) {
+      previousParam.setMaxValSize(epochParam.getMaxValSize());
+    }
+
+    if (Objects.nonNull(currentParam.getCoinsPerUtxoSize()) &&
+        Objects.nonNull(epochParam.getCoinsPerUtxoSize()) &&
+        Objects.isNull(previousParam.getCoinsPerUtxoSize())) {
+      previousParam.setCoinsPerUtxoSize(epochParam.getCoinsPerUtxoSize());
+    }
+    if (Objects.nonNull(currentParam.getInfluence()) &&
+        Objects.nonNull(epochParam.getInfluence()) &&
+        Objects.isNull(previousParam.getInfluence())) {
+      previousParam.setInfluence(epochParam.getInfluence());
+    }
+
+    if (Objects.nonNull(currentParam.getMonetaryExpandRate()) &&
+        Objects.nonNull(epochParam.getMonetaryExpandRate()) &&
+        Objects.isNull(previousParam.getMonetaryExpandRate())) {
+      previousParam.setMonetaryExpandRate(epochParam.getMonetaryExpandRate());
+    }
+
+    if (Objects.nonNull(currentParam.getTreasuryGrowthRate()) &&
+        Objects.nonNull(epochParam.getTreasuryGrowthRate()) &&
+        Objects.isNull(previousParam.getTreasuryGrowthRate())) {
+      previousParam.setTreasuryGrowthRate(epochParam.getTreasuryGrowthRate());
+    }
+
+    if (Objects.nonNull(currentParam.getDecentralisation()) &&
+        Objects.nonNull(epochParam.getDecentralisation()) &&
+        Objects.isNull(previousParam.getDecentralisation())) {
+      previousParam.setDecentralisation(epochParam.getDecentralisation());
+    }
+
+    if (Objects.nonNull(currentParam.getPriceMem()) &&
+        Objects.nonNull(epochParam.getPriceMem()) &&
+        Objects.isNull(previousParam.getPriceMem())) {
+      previousParam.setPriceMem(epochParam.getPriceMem());
+    }
+
+    if (Objects.nonNull(currentParam.getPriceStep()) &&
+        Objects.nonNull(epochParam.getPriceStep()) &&
+        Objects.isNull(previousParam.getPriceStep())) {
+      previousParam.setPriceStep(epochParam.getPriceStep());
+    }
+
+    if (Objects.nonNull(currentParam.getProtocolMajor()) &&
+        Objects.nonNull(epochParam.getProtocolMajor()) &&
+        Objects.isNull(previousParam.getProtocolMajor())) {
+      previousParam.setProtocolMajor(epochParam.getProtocolMajor());
+    }
+
+    if (Objects.nonNull(currentParam.getProtocolMinor()) &&
+        Objects.nonNull(epochParam.getProtocolMinor()) &&
+        Objects.isNull(previousParam.getProtocolMinor())) {
+      previousParam.setProtocolMinor(epochParam.getProtocolMinor());
+    }
+
+    if (Objects.nonNull(currentParam.getCollateralPercent()) &&
+        Objects.nonNull(epochParam.getCollateralPercent()) &&
+        Objects.isNull(previousParam.getCollateralPercent())) {
+      currentParam.setCollateralPercent(epochParam.getCollateralPercent());
+    }
+
+    if (Objects.nonNull(currentParam.getMaxCollateralInputs()) &&
+        Objects.nonNull(epochParam.getMaxCollateralInputs()) &&
+        Objects.isNull(previousParam.getMaxCollateralInputs())) {
+      previousParam.setMaxCollateralInputs(epochParam.getMaxCollateralInputs());
+    }
+
+    if (Objects.nonNull(currentParam.getEntropy()) &&
+        Objects.nonNull(epochParam.getExtraEntropy()) &&
+        Objects.isNull(previousParam.getEntropy())) {
+      previousParam.setEntropy(epochParam.getExtraEntropy());
+    }
+
+    if (Objects.nonNull(epochParam.getCostModel()) &&
+        Objects.nonNull(currentParam.getCostModel()) &&
+        Objects.isNull(previousParam.getCostModel())) {
+      previousParam.setCostModel(JsonUtil.getPrettyJson(epochParam.getCostModel().getCosts()));
+    }
+
+    return previousParam;
+  }
+
+  default HistoriesProtocol mapProtocolsToHistoriesProtocol(List<Protocols> protocols) {
     HistoriesProtocol historiesProtocol = HistoriesProtocol.builder()
         .minFeeA(new ArrayList<>())
         .minFeeB(new ArrayList<>())
@@ -426,7 +607,6 @@ public interface ProtocolMapper {
       historiesProtocol.getEntropy().add(protocol.getEntropy());
       historiesProtocol.getCostModel().add(protocol.getCostModel());
     });
-
 
     return historiesProtocol;
   }

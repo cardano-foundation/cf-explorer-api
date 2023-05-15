@@ -45,6 +45,7 @@ import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.DelegationRepository;
+import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.FailedTxOutRepository;
 import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
@@ -80,6 +81,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -146,12 +148,13 @@ public class TxServiceImpl implements TxService {
   private final AddressTokenRepository addressTokenRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
-  private final ParamProposalRepository paramProposalRepository;
   private final StakeRegistrationRepository stakeRegistrationRepository;
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
   private final PoolUpdateRepository poolUpdateRepository;
   private final PoolRelayRepository poolRelayRepository;
   private final PoolRetireRepository poolRetireRepository;
+  private final ParamProposalRepository paramProposalRepository;
+  private final EpochParamRepository epochParamRepository;
   private final ProtocolMapper protocolMapper;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
@@ -432,9 +435,9 @@ public class TxServiceImpl implements TxService {
     getWithdrawals(tx, txResponse);
     getDelegations(tx, txResponse);
     getMints(tx, txResponse);
-    getProtocols(tx, txResponse);
     getStakeCertificates(tx, txResponse);
     getPoolCertificates(tx, txResponse);
+    getProtocols(tx, txResponse);
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -673,32 +676,6 @@ public class TxServiceImpl implements TxService {
     return summary.stream()
         .sorted(Comparator.comparing(TxOutResponse::getValue))
         .collect(Collectors.toList());
-  }
-
-  /**
-   * Get protocol params update in transaction
-   *
-   * @param tx transaction
-   * @param txResponse response data of transaction
-   */
-  private void getProtocols(Tx tx, TxResponse txResponse) {
-    List<ParamProposal> paramProposals = paramProposalRepository
-        .getParamProposalByRegisteredTxId(tx.getId());
-
-    if (!ObjectUtils.isEmpty(paramProposals)) {
-      List<ParamProposal> previousParam =
-          paramProposalRepository.getParamProposalBySmallerThanRegisteredTxId(tx.getId());
-
-      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(previousParam));
-      //get previous value
-      if(Objects.nonNull(txResponse.getProtocols())){
-        paramProposals.removeAll(previousParam);
-
-        txResponse.setPreviousProtocols(
-            protocolMapper.mapPreviousProtocolParamResponse(previousParam
-                , txResponse.getProtocols()));
-      }
-    }
   }
 
   /**
@@ -1026,4 +1003,39 @@ public class TxServiceImpl implements TxService {
     }
   }
 
+  /**
+   * Get protocol params update in transaction
+   *
+   * @param tx transaction
+   * @param txResponse response data of transaction
+   */
+  private void getProtocols(Tx tx, TxResponse txResponse) {
+
+    List<ParamProposal> paramProposals = paramProposalRepository
+        .getParamProposalByRegisteredTxId(tx.getId());
+
+    if (!ObjectUtils.isEmpty(paramProposals)) {
+      //find current change param
+      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
+      //get previous value
+      if (Objects.nonNull(txResponse.getProtocols())) {
+        Integer epochNo = tx.getBlock().getEpochNo();
+        List<ParamProposal> previousParam =
+            paramProposalRepository.getParamProposalBySmallerThanRegisteredTxId(tx.getId());
+
+        if (ObjectUtils.isEmpty(previousParam)) {
+          epochParamRepository.findEpochParamByEpochNo(epochNo)
+              .ifPresent(epochParam ->
+                  txResponse.setPreviousProtocols(
+                      protocolMapper.mapPreviousProtocolParamResponse(epochParam,
+                          txResponse.getProtocols()))
+              );
+        } else {
+          txResponse.setPreviousProtocols(
+              protocolMapper.mapPreviousProtocolParamResponse(previousParam
+                  , txResponse.getProtocols()));
+        }
+      }
+    }
+  }
 }
