@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.7](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.7-SNAPSHOT...v0.3.7) (2023-05-15)
+
+
+### Features
+
+* added Standalone and Cluster mode for Redis ([3d82da8](https://github.com/cardano-foundation/cf-explorer-api/commit/3d82da83918ca03f02306b2bb4c6f426064358fc))
+* MET-665 revise transaction data shown on address details and transaction details pages ([2cdc9d5](https://github.com/cardano-foundation/cf-explorer-api/commit/2cdc9d57ca171857f0977234cb6a08e4eec3c75e))
+
+
+### Bug Fixes
+
+* MET-1071 transaction detail pool certificates display pool owner wrong ([d778f37](https://github.com/cardano-foundation/cf-explorer-api/commit/d778f370b4848bc27c91681d483f7f180d62cf5f))
+
 ## [0.3.7-SNAPSHOT](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.5...v0.3.7-SNAPSHOT) (2023-05-05)
 
 
