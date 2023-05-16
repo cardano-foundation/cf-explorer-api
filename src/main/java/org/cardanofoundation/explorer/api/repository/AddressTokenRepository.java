@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
@@ -56,7 +57,7 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
                                               @Param("address") String address);
 
   @Query("SELECT addrToken FROM AddressToken addrToken"
-      + " WHERE addrToken.tx.id in :ids and addrToken.address.stakeAddress.view = :stakeAddress")
-  List<AddressToken> findByTxIdInAndByStake(@Param("ids") Collection<Long> ids,
-                                            @Param("stakeAddress") String stakeAddress);
+      + " WHERE addrToken.tx.id in :ids and addrToken.addressId in :addressIds")
+  List<AddressToken> findByTxIdInAndByAddressIn(@Param("ids") Collection<Long> ids,
+                                                @Param("addressIds") Set<Long> addressIds);
 }

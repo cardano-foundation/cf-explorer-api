@@ -377,15 +377,18 @@ public class TxServiceImpl implements TxService {
     List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
     Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
 
+    Set<Long> addressIds = addressRepository.findByStakeAddress(stake).stream().map(Address::getId).collect(
+        Collectors.toSet());
+
     // get address tx balance
     List<AddressTxBalance> addressTxBalances =
-        addressTxBalanceRepository.findByTxIdInAndByStake(txIdList, stake);
+        addressTxBalanceRepository.findByTxIdInAndByAddressIn(txIdList, addressIds);
 
     Map<Long, List<AddressTxBalance>> addressTxBalanceMap =
         addressTxBalances.stream().collect(Collectors.groupingBy(AddressTxBalance::getTxId));
 
     List<AddressToken> addressTokens =
-        addressTokenRepository.findByTxIdInAndByStake(txIdList, stake);
+        addressTokenRepository.findByTxIdInAndByAddressIn(txIdList, addressIds);
     Map<Long, List<AddressToken>> addressTokenMap =
         addressTokens.stream()
             .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
@@ -428,11 +431,9 @@ public class TxServiceImpl implements TxService {
           addressTokenMap.get(tx.getId()).stream()
               .map(
                   addressToken -> {
-                    TokenAddressResponse taResponse =
-                        tokenMapper.fromMultiAssetAndAddressToken(
-                            addressToken.getMultiAsset(), addressToken);
-
                     MultiAsset multiAsset = addressToken.getMultiAsset();
+                    TokenAddressResponse taResponse =
+                        tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressToken);
                     String subject = multiAsset.getPolicy() + multiAsset.getName();
                     taResponse.setMetadata(
                         assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
