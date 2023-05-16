@@ -50,13 +50,6 @@ spring:
   jackson:
     default-property-inclusion: NON_NULL
 
-rsa:
-  key:
-    public-key-file: /key/public_key
-
-authentication:
-  ignore-check: true #ignore authentication check
-
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true
@@ -78,3 +71,7 @@ management:
       enabled: true
     prometheus:
       enabled: true
+
+rsa:
+  key:
+    path: /key/public_key
