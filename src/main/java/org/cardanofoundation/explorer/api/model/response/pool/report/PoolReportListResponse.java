@@ -20,7 +20,7 @@ public class PoolReportListResponse {
 
     private Boolean isPoolSize;
 
-    private Boolean isFreePaid;
+    private Boolean isFeesPaid;
 
     private Boolean eventRegistration;
 
@@ -36,7 +36,7 @@ public class PoolReportListResponse {
                 .reportName(entity.getReportHistory().getReportName())
                 .epochRanges(new Integer[]{entity.getBeginEpoch(), entity.getEndEpoch()})
                 .isPoolSize(entity.getIsPoolSize())
-                .isFreePaid(entity.getIsFeesPaid())
+                .isFeesPaid(entity.getIsFeesPaid())
                 .eventRegistration(entity.getEventRegistration())
                 .eventDeregistration(entity.getEventDeregistration())
                 .eventReward(entity.getEventReward())
