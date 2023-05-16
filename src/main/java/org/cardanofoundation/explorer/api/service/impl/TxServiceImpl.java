@@ -670,7 +670,9 @@ public class TxServiceImpl implements TxService {
           summary.add(txs.get(0));
         });
 
-    return summary;
+    return summary.stream()
+        .sorted(Comparator.comparing(TxOutResponse::getValue))
+        .collect(Collectors.toList());
   }
 
   /**
