@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import java.util.Collection;
+import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
@@ -71,4 +72,9 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.address = :address")
   List<AddressTxBalance> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
                                                   @Param("address") String address);
+
+  @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.addressId in :addressIds")
+  List<AddressTxBalance> findByTxIdInAndByAddressIn(@Param("ids") Collection<Long> ids,
+                                                    @Param("addressIds") Set<Long> addressIds);
 }
