@@ -1,5 +1,24 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -36,25 +55,6 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -83,6 +83,8 @@ public class DelegationServiceImpl implements DelegationService {
 
   private final RedisTemplate<String, Object> redisTemplate;
 
+  public static final int MILLI = 1000;
+
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
 
@@ -94,14 +96,16 @@ public class DelegationServiceImpl implements DelegationService {
     Epoch epoch = epochRepository.findByCurrentEpochNo()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Integer epochNo = epoch.getNo();
-    Timestamp endTime = epoch.getEndTime();
-    long countDownTime = endTime.getTime() - Timestamp.from(Instant.now()).getTime();
-    Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo);
+    Timestamp startTime = epoch.getStartTime();
+    Long slot = (Instant.now().toEpochMilli() - startTime.getTime()) / MILLI;
+    long countDownTime =
+        Timestamp.valueOf(startTime.toLocalDateTime().plusDays(5)).getTime() - Timestamp.from(
+            Instant.now()).getTime();
     Object liveStake = redisTemplate.opsForValue()
         .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
     Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
         Long.valueOf(epochNo));
-    return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
+    return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(Objects.nonNull(liveStake) ? new BigInteger(String.valueOf(liveStake))
             : BigInteger.ZERO).delegators(delegators)
         .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
