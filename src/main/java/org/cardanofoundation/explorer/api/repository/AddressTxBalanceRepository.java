@@ -71,4 +71,9 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.address = :address")
   List<AddressTxBalance> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
                                                   @Param("address") String address);
+
+  @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.stakeAddress.view = :stakeAddress")
+  List<AddressTxBalance> findByTxIdInAndByStake(@Param("ids") Collection<Long> ids,
+                                                @Param("stakeAddress") String stakeAddress);
 }

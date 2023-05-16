@@ -54,4 +54,9 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " WHERE addrToken.tx.id in :ids and addrToken.address.address = :address")
   List<AddressToken> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
                                               @Param("address") String address);
+
+  @Query("SELECT addrToken FROM AddressToken addrToken"
+      + " WHERE addrToken.tx.id in :ids and addrToken.address.stakeAddress.view = :stakeAddress")
+  List<AddressToken> findByTxIdInAndByStake(@Param("ids") Collection<Long> ids,
+                                            @Param("stakeAddress") String stakeAddress);
 }

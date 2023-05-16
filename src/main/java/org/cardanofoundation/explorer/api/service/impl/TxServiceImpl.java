@@ -262,7 +262,7 @@ public class TxServiceImpl implements TxService {
     List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
 
     Page<Tx> txPage = new PageImpl<>(txList, pageable, addr.getTxCount());
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, address));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxByAddressListToResponses(txPage, address));
   }
 
   @Override
@@ -282,10 +282,12 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
-      Pageable pageable) {
+                                                                     Pageable pageable) {
     Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeKey, pageable);
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
+    List<TxFilterResponse> data = mapDataFromTxByStakeListToResponseList(txPage, stakeKey);
+    return new BaseFilterResponse<>(txPage, data);
   }
 
   /**
@@ -343,7 +345,8 @@ public class TxServiceImpl implements TxService {
     return txFilterResponses;
   }
 
-  private List<TxFilterResponse> mapDataFromTxListToResponseList(Page<Tx> txPage, String address) {
+  private List<TxFilterResponse> mapDataFromTxByAddressListToResponses(Page<Tx> txPage,
+                                                                       String address) {
     List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
 
     Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
@@ -351,9 +354,8 @@ public class TxServiceImpl implements TxService {
     // get address tx balance
     List<AddressTxBalance> addressTxBalances =
         addressTxBalanceRepository.findByTxIdInAndByAddress(txIdList, address);
-    Map<Long, AddressTxBalance> addressTxBalanceMap =
-        addressTxBalances.stream()
-            .collect(Collectors.toMap(AddressTxBalance::getTxId, Function.identity()));
+    Map<Long, List<AddressTxBalance>> addressTxBalanceMap =
+        addressTxBalances.stream().collect(Collectors.groupingBy(AddressTxBalance::getTxId));
 
     // get address token
     List<AddressToken> addressTokens =
@@ -362,44 +364,86 @@ public class TxServiceImpl implements TxService {
         addressTokens.stream()
             .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
 
-    // get metadata
+    txFilterResponses.forEach(
+        tx ->
+            setAdditionalData(
+                addressTxBalanceMap, addressTokenMap, getMetadata(addressTokens), tx));
+    return txFilterResponses;
+  }
+
+  private List<TxFilterResponse> mapDataFromTxByStakeListToResponseList(
+      Page<Tx> txPage, String stake) {
+    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
+    Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
+
+    // get address tx balance
+    List<AddressTxBalance> addressTxBalances =
+        addressTxBalanceRepository.findByTxIdInAndByStake(txIdList, stake);
+
+    Map<Long, List<AddressTxBalance>> addressTxBalanceMap =
+        addressTxBalances.stream().collect(Collectors.groupingBy(AddressTxBalance::getTxId));
+
+    List<AddressToken> addressTokens =
+        addressTokenRepository.findByTxIdInAndByStake(txIdList, stake);
+    Map<Long, List<AddressToken>> addressTokenMap =
+        addressTokens.stream()
+            .filter(
+                addressToken ->
+                    !BigInteger.ZERO.equals(addressToken.getBalance())
+                        && addressToken.getMultiAsset() != null
+                        && addressToken.getAddress() != null)
+            .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
+
+    txFilterResponses.forEach(
+        tx ->
+            setAdditionalData(
+                addressTxBalanceMap, addressTokenMap, getMetadata(addressTokens), tx));
+    return txFilterResponses;
+  }
+
+  private Map<String, AssetMetadata> getMetadata(List<AddressToken> addressTokens) {
     List<Long> multiAssetIdList =
         addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
     List<MultiAsset> multiAssets = multiAssetRepository.findAllByIdIn(multiAssetIdList);
     Set<String> subjects =
         multiAssets.stream().map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap =
-        assetMetadataList.stream()
-            .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+    return assetMetadataList.stream()
+        .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+  }
 
-    txFilterResponses.forEach(
-        tx -> {
-          if (addressTxBalanceMap.containsKey(tx.getId())) {
-            tx.setBalance(addressTxBalanceMap.get(tx.getId()).getBalance());
-          }
-          if (addressTokenMap.containsKey(tx.getId())) {
-            List<TokenAddressResponse> tokenAddressResponseList =
-                addressTokenMap.get(tx.getId()).stream()
-                    .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
-                    .map(
-                        addressToken -> {
-                          TokenAddressResponse tokenAddressResponse =
-                              tokenMapper.fromMultiAssetAndAddressToken(
-                                  addressToken.getMultiAsset(), addressToken);
-                          String subject =
-                              addressToken.getMultiAsset().getPolicy()
-                                  + addressToken.getMultiAsset().getName();
-                          tokenAddressResponse.setMetadata(
-                              assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
-                          return tokenAddressResponse;
-                        })
-                    .toList();
-            tx.setTokens(tokenAddressResponseList);
-          }
-        });
+  private void setAdditionalData(
+      Map<Long, List<AddressTxBalance>> addressTxBalanceMap,
+      Map<Long, List<AddressToken>> addressTokenMap,
+      Map<String, AssetMetadata> assetMetadataMap,
+      TxFilterResponse tx) {
 
-    return txFilterResponses;
+    if (addressTxBalanceMap.containsKey(tx.getId())) {
+      BigInteger balance =
+          addressTxBalanceMap.get(tx.getId()).stream()
+              .map(AddressTxBalance::getBalance)
+              .reduce(BigInteger.ZERO, BigInteger::add);
+      tx.setBalance(balance);
+    }
+
+    if (addressTokenMap.containsKey(tx.getId())) {
+      List<TokenAddressResponse> tokenAddressResponses =
+          addressTokenMap.get(tx.getId()).stream()
+              .map(
+                  addressToken -> {
+                    TokenAddressResponse taResponse =
+                        tokenMapper.fromMultiAssetAndAddressToken(
+                            addressToken.getMultiAsset(), addressToken);
+
+                    MultiAsset multiAsset = addressToken.getMultiAsset();
+                    String subject = multiAsset.getPolicy() + multiAsset.getName();
+                    taResponse.setMetadata(
+                        assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
+                    return taResponse;
+                  })
+              .toList();
+      tx.setTokens(tokenAddressResponses);
+    }
   }
 
   @Override
