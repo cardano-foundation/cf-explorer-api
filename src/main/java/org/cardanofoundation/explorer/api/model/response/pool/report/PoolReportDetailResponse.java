@@ -62,10 +62,12 @@ public class PoolReportDetailResponse {
     public static List<ExportColumn> designFile(Boolean isFeePaid) {
       List<ExportColumn> epochSizeColumns = new ArrayList<>();
       epochSizeColumns.add(
-          new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE));
+          new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE,
+                           Alignment.RIGHT));
       if (Boolean.TRUE.equals(isFeePaid)) {
         epochSizeColumns.add(
-            new ExportColumn(ColumnFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE));
+            new ExportColumn(ColumnFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE,
+                             Alignment.RIGHT));
       }
       epochSizeColumns.add(
           new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE));

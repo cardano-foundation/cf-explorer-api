@@ -117,7 +117,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       poolReportRepository.save(poolReport);
       excelInputStream.close();
       csvInputStream.close();
-    } catch (IOException e) {
+    } catch (Exception e) {
       poolReport.getReportHistory().setStatus(ReportStatus.FAILED);
       log.error("Error while generating report", e);
     } finally {

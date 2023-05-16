@@ -73,6 +73,8 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
 
   /**
    * Get all report history that not yet persisted to storage, then persist to storage
+   * Now it will persist to storage every 3 seconds.
+   * Will create an queue-ing system to persist to storage later
    */
   @Scheduled(fixedDelay = 1000 * 3)
   private void persistToStorage() {
