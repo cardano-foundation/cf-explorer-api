@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.9](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.8...v0.3.9) (2023-05-16)
+
+
+### Features
+
+* setup authentication for report function ([be325cd](https://github.com/cardano-foundation/cf-explorer-api/commit/be325cdb64f0646ba19b3fe85dd37b3606e94b87))
+
+
+### Bug Fixes
+
+* bug top delegations error 500 ([b2e92bf](https://github.com/cardano-foundation/cf-explorer-api/commit/b2e92bf3140d53d7725753d66f33336fc3701d25))
+* ignore authentication check with unit test ([af0f10a](https://github.com/cardano-foundation/cf-explorer-api/commit/af0f10a3af3738c58e357960c1ada971634ef2aa))
+
 ## [0.3.8](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.7...v0.3.8) (2023-05-15)
 
 
