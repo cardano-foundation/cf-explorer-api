@@ -37,21 +37,8 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   @Query("SELECT sum(rw.amount) "
       + "FROM Reward rw "
       + "WHERE rw.spendableEpoch <= (SELECT max(epochNo) FROM Block) "
-      + "AND rw.addr.id IN (SELECT d1.address.id "
-      + "FROM Delegation d1, PoolHash ph "
-      + "WHERE ph.id = d1.poolHash.id "
-      + "AND ph.view = :poolView "
-      + "AND NOT EXISTS "
-      + "(SELECT TRUE "
-      + "FROM Delegation d2 "
-      + "WHERE d2.address.id = d1.address.id "
-      + "AND d2.tx.id > d1.tx.id) "
-      + "AND NOT EXISTS "
-      + "(SELECT TRUE "
-      + "FROM StakeDeregistration sd "
-      + "WHERE sd.addr.id = d1.address.id "
-      + "AND sd.tx.id > d1.tx.id))")
-  BigInteger findRewardStakeByPool(@Param("poolView") String poolView);
+      + "AND rw.addr.id IN :addressIds")
+  BigInteger findRewardStakeByAddress(@Param("addressIds") Set<Long> addressIds);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse"
       + " (rw.earnedEpoch , COALESCE(sum(rw.amount), 0))"
