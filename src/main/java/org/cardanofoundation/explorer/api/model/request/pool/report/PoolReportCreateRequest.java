@@ -21,13 +21,13 @@ public class PoolReportCreateRequest {
 
   private Boolean isFeesPaid;
 
-  private Boolean isRegistration;
+  private Boolean eventRegistration;
 
-  private Boolean isDeregistration;
+  private Boolean eventDeregistration;
 
-  private Boolean isReward;
+  private Boolean eventReward;
 
-  private Boolean isPoolUpdate;
+  private Boolean eventPoolUpdate;
 
   private Integer[] epochRanges;
 
@@ -38,10 +38,10 @@ public class PoolReportCreateRequest {
         .isFeesPaid(this.isFeesPaid)
         .beginEpoch(this.epochRanges[0])
         .endEpoch(this.epochRanges[1])
-        .eventRegistration(this.isRegistration)
-        .eventReward(this.isReward)
-        .eventDeregistration(this.isDeregistration)
-        .eventPoolUpdate(this.isPoolUpdate)
+        .eventRegistration(this.eventRegistration)
+        .eventReward(this.eventReward)
+        .eventDeregistration(this.eventDeregistration)
+        .eventPoolUpdate(this.eventPoolUpdate)
         .reportHistory(reportHistory)
         .build();
   }
