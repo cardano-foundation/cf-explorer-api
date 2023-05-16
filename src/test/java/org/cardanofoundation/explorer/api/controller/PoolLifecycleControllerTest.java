@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import static org.hamcrest.core.StringContains.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -12,6 +13,7 @@ import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
+import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolInfoResponse;
@@ -33,11 +35,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -51,6 +55,7 @@ import org.springframework.test.web.servlet.MockMvc;
         JacksonMapperDateConfig.class,
         GlobalRestControllerExceptionHandler.class
 })
+@AutoConfigureMockMvc(addFilters = false)
 class PoolLifecycleControllerTest {
 
   @Autowired
@@ -58,6 +63,14 @@ class PoolLifecycleControllerTest {
 
   @MockBean
   private PoolLifecycleService poolLifecycleService;
+
+  @MockBean
+  private AuthInterceptor authInterceptor;
+
+  @BeforeEach
+  void preControllerTest() throws Exception {
+    when(authInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+  }
 
   @Test
   void whenCallRegistrations() throws Exception {
