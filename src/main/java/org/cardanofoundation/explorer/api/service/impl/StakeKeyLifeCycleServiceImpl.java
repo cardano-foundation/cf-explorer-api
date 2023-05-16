@@ -80,6 +80,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     if (Objects.nonNull(condition.getToDate())) {
       toDate = Timestamp.from(condition.getToDate().toInstant());
     }
+    if (Objects.nonNull(condition.getTxHash()) && condition.getTxHash().isBlank()) {
+      condition.setTxHash(null);
+    }
     Page<StakeHistoryProjection> stakeHistoryList =
         stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress,
             condition.getTxHash(), fromDate, toDate, pageable);
@@ -106,6 +109,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     }
     if (Objects.nonNull(condition.getToDate())) {
       toDate = Timestamp.from(condition.getToDate().toInstant());
+    }
+    if (Objects.nonNull(condition.getTxHash()) && condition.getTxHash().isBlank()) {
+      condition.setTxHash(null);
     }
     var response = delegationRepository.findDelegationByAddress(stakeAddress, condition.getTxHash(),
         fromDate, toDate, pageable);
@@ -166,6 +172,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     if (Objects.nonNull(condition.getToDate())) {
       toDate = Timestamp.from(condition.getToDate().toInstant());
     }
+    if (Objects.nonNull(condition.getTxHash()) && condition.getTxHash().isBlank()) {
+      condition.setTxHash(null);
+    }
     var response = withdrawalRepository.getWithdrawalByAddress(stakeAddress, condition.getTxHash(),
         fromDate, toDate, pageable);
     return new BaseFilterResponse<>(
@@ -216,6 +225,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     }
     if (Objects.nonNull(condition.getToDate())) {
       toDate = Timestamp.from(condition.getToDate().toInstant());
+    }
+    if (Objects.nonNull(condition.getTxHash()) && condition.getTxHash().isBlank()) {
+      condition.setTxHash(null);
     }
     Page<StakeHistoryProjection> stakeHistoryList =
         stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress,
