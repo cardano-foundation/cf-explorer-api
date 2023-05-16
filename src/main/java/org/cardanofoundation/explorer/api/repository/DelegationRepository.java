@@ -70,8 +70,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "JOIN EpochParam ep ON ep.epochNo = ph.epochNo "
           + "JOIN AdaPots ad ON ad.epochNo = ph.epochNo "
           + "JOIN Epoch e ON e.no = ph.epochNo "
-          + "WHERE pu.activeEpochNo = "
-          + "(SELECT MAX(pu.activeEpochNo) FROM pu.activeEpochNo WHERE pu.poolHash.id = ph.id) AND "
+          + "WHERE pu.id = "
+          + "(SELECT MAX(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) AND "
           + "pod.pmrId = (SELECT MAX(pod.pmrId) FROM PoolOfflineData pod WHERE pod.pool.id = ph.id) AND "
           + "ph.poolSize IS NOT NULL "
           + "ORDER BY poolSize DESC ")
