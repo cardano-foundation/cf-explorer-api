@@ -174,6 +174,9 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     if (Objects.nonNull(toDate)) {
       toTimestamp = new Timestamp(toDate.getTime());
     }
+    if (Objects.nonNull(txHash) && txHash.isBlank()) {
+      txHash = null;
+    }
     Page<PoolDeRegistrationProjection> projections = poolRetireRepository.getPoolDeRegistration(
         poolView,
         txHash, fromTimestamp, toTimestamp, pageable);
@@ -277,6 +280,9 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     if (Objects.nonNull(toDate)) {
       toTimestamp = new Timestamp(toDate.getTime());
+    }
+    if (Objects.nonNull(txHash) && txHash.isBlank()) {
+      txHash = null;
     }
     Page<PoolUpdateProjection> projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
         txHash, fromTimestamp, toTimestamp, pageable);

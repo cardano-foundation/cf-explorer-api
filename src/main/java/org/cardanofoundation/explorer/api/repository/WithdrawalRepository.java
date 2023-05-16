@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.util.Set;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
@@ -63,21 +64,8 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
 
   @Query("SELECT sum(wd.amount) "
       + "FROM Withdrawal wd "
-      + "WHERE wd.addr.id IN (SELECT d1.address.id "
-      + "FROM Delegation d1, PoolHash ph "
-      + "WHERE ph.id = d1.poolHash.id "
-      + "AND ph.view = :poolView "
-      + "AND NOT EXISTS "
-      + "(SELECT TRUE "
-      + "FROM Delegation d2 "
-      + "WHERE d2.address.id = d1.address.id "
-      + "AND d2.tx.id > d1.tx.id) "
-      + "AND NOT EXISTS "
-      + "(SELECT TRUE "
-      + "FROM StakeDeregistration sd "
-      + "WHERE sd.addr.id = d1.address.id "
-      + "AND sd.tx.id > d1.tx.id))")
-  BigInteger findWithdrawalStakeByPool(@Param("poolView") String poolView);
+      + "WHERE wd.addr.id IN :addressIds")
+  BigInteger findWithdrawalStakeByAddress(@Param("addressIds") Set<Long> addressIds);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse("
       + "block.epochNo, epoch.endTime, sum(withdrawal.amount))"

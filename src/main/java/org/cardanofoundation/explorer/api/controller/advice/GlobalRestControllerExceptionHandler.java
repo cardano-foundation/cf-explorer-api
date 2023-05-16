@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalRestControllerExceptionHandler {
   @ExceptionHandler({BusinessException.class})
   public ResponseEntity<ErrorResponse> handleException(BusinessException e) {
-    log.warn("Business logic exception: {}, stack trace:", e.getMessage());
+    log.warn("Business logic exception: {}, stack trace:", e);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
             ErrorResponse.builder()
@@ -24,7 +24,7 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({IgnoreRollbackException.class})
   public ResponseEntity<ErrorResponse> handleException(IgnoreRollbackException e) {
-    log.warn("No rollback exception: {}, stack trace:", e.getMessage());
+    log.warn("No rollback exception: {}, stack trace:", e.getMessage(), e);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
             ErrorResponse.builder()
@@ -35,7 +35,7 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity<ErrorResponse> handleException(Exception e) {
-    log.warn("Unknown exception: {}, stack trace:", e.getMessage());
+    log.warn("Unknown exception: {}, stack trace:", e.getMessage(), e);
     return new ResponseEntity<>(
         ErrorResponse.builder()
             .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
@@ -46,7 +46,7 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({TokenRefreshException.class})
   public ResponseEntity<ErrorResponse> handleAuthException(TokenRefreshException e) {
-    log.warn("Refresh token exception: {}, stack trace:", e.getMessage());
+    log.warn("Refresh token exception: {}, stack trace:", e.getMessage(), e);
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(
             ErrorResponse.builder()
@@ -57,7 +57,7 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({AccessTokenExpireException.class})
   public ResponseEntity<ErrorResponse> handleAuthException(AccessTokenExpireException e) {
-    log.warn("Access token expired: {}, stack trace:", e.getMessage());
+    log.warn("Access token expired: {}, stack trace:", e.getMessage(), e);
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(
             ErrorResponse.builder()
@@ -68,7 +68,7 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({InvalidAccessTokenException.class})
   public ResponseEntity<ErrorResponse> handleAuthException(InvalidAccessTokenException e) {
-    log.warn("Invalid access token: {}", e.getErrorCode());
+    log.warn("Invalid access token: {}", e.getErrorCode(), e);
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(
             ErrorResponse.builder()

@@ -76,10 +76,10 @@ public class PoolReportServiceTest {
         .poolId("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
         .isPoolSize(true)
         .isFeesPaid(true)
-        .isRegistration(true)
-        .isDeregistration(true)
-        .isReward(true)
-        .isPoolUpdate(true)
+        .eventRegistration(true)
+        .eventDeregistration(true)
+        .eventPoolUpdate(true)
+        .eventReward(true)
         .epochRanges(new Integer[]{300, 410})
         .build();
     String username = "username";

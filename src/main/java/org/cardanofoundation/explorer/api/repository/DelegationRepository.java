@@ -154,21 +154,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + "LEFT JOIN Tx tx ON tx.id = txo.tx.id "
       + "LEFT JOIN Block block ON tx.block.id = block.id "
       + "WHERE (txi.txInput.id IS NULL) AND (block.epochNo IS NOT NULL) "
-      + "AND txo.stakeAddress.id IN (SELECT d1.address.id "
-      + "FROM Delegation d1, PoolHash ph "
-      + "WHERE ph.id = d1.poolHash.id "
-      + "AND ph.view = :poolView "
-      + "AND NOT EXISTS "
-      + "(SELECT TRUE "
-      + "FROM Delegation d2 "
-      + "WHERE d2.address.id = d1.address.id "
-      + "AND d2.tx.id > d1.tx.id) "
-      + "AND NOT EXISTS "
-      + "(SELECT TRUE "
-      + "FROM StakeDeregistration sd "
-      + "WHERE sd.addr.id = d1.address.id "
-      + "AND sd.tx.id > d1.tx.id))")
-  BigInteger findDelegateStakeByPool(@Param("poolView") String poolView);
+      + "AND txo.stakeAddress.id IN :addressIds")
+  BigInteger findDelegateStakeByAddress(@Param("addressIds") Set<Long> addressIds);
 
   @Query(value =
       "SELECT ph.id AS poolId, ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee,"
