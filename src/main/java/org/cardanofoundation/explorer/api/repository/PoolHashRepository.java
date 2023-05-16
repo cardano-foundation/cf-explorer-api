@@ -63,9 +63,6 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "WHERE ph.view = :poolView ")
   PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolView") String poolView);
 
-  @Query(value = "SELECT ph.view FROM PoolHash ph")
-  List<String> findAllView();
-
   @Query(value =
       "SELECT pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, ep.poolDeposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
           + "FROM PoolUpdate pu "
