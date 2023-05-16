@@ -63,7 +63,7 @@ public interface PoolReportService {
   PoolReportHistory detail(Long reportId, String username);
 
   /**
-   * Get pool report detail by report id
+   * Get pool size detail by report id
    *
    * @param reportId report id
    * @param pageable pageable
@@ -74,7 +74,7 @@ public interface PoolReportService {
                                                                         Pageable pageable,
                                                                         String username);
   /**
-   * Get pool report detail by report id
+   * Get pool registration detail by report id
    *
    * @param reportId report id
    * @param pageable pageable
@@ -85,7 +85,7 @@ public interface PoolReportService {
                                                                  String username);
 
   /**
-   * Get pool report detail by report id
+   * Get pool update detail by report id
    *
    * @param reportId report id
    * @param pageable pageable
@@ -96,7 +96,7 @@ public interface PoolReportService {
                                                                String username);
 
   /**
-   * Get pool report detail by report id
+   * Get rewards distribution detail by report id
    *
    * @param reportId report id
    * @param pageable pageable
@@ -107,7 +107,7 @@ public interface PoolReportService {
                                                               String username);
 
   /**
-   * Get pool report detail by report id
+   * Get pool deregistration detail by report id
    *
    * @param reportId report id
    * @param pageable pageable
