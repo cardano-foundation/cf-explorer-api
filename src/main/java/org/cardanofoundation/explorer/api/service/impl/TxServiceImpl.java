@@ -362,6 +362,7 @@ public class TxServiceImpl implements TxService {
         addressTokenRepository.findByTxIdInAndByAddress(txIdList, address);
     Map<Long, List<AddressToken>> addressTokenMap =
         addressTokens.stream()
+            .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
             .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
 
     txFilterResponses.forEach(
@@ -387,11 +388,7 @@ public class TxServiceImpl implements TxService {
         addressTokenRepository.findByTxIdInAndByStake(txIdList, stake);
     Map<Long, List<AddressToken>> addressTokenMap =
         addressTokens.stream()
-            .filter(
-                addressToken ->
-                    !BigInteger.ZERO.equals(addressToken.getBalance())
-                        && addressToken.getMultiAsset() != null
-                        && addressToken.getAddress() != null)
+            .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
             .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
 
     txFilterResponses.forEach(
