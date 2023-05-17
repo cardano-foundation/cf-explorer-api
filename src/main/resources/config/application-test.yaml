@@ -90,7 +90,7 @@ cloud:
       bucket:
         name: ${S3_BUCKET_NAME}
       path-style:
-        enabled: true
+        enabled: false
       endpoint: ${STORAGE_ENDPOINT}
 
 logging:
