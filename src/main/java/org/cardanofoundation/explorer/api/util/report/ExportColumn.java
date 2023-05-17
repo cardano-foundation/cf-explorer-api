@@ -24,10 +24,6 @@ public class ExportColumn {
     this.align = align;
   }
 
-  /**
-   * @param column
-   * @param title
-   */
   public ExportColumn(ColumnFieldEnum column, ColumnTitleEnum title){
     this.columnField = column;
     this.columnTitle = title;

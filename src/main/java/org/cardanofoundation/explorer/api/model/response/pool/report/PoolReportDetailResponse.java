@@ -70,7 +70,7 @@ public class PoolReportDetailResponse {
                              Alignment.RIGHT));
       }
       epochSizeColumns.add(
-          new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE));
+          new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE, Alignment.RIGHT));
       return epochSizeColumns;
     }
   }

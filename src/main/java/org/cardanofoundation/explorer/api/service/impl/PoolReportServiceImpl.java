@@ -19,7 +19,6 @@ import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.api.util.report.CSVHelper;
 import org.cardanofoundation.explorer.api.util.report.ExcelHelper;
 import org.cardanofoundation.explorer.api.util.report.ExportContent;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -29,7 +28,6 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -82,9 +80,10 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   @Override
   public PoolReportExportResponse export(Long reportId, ExportType exportType, String username) {
-    if (!ExportType.CSV.equals(exportType) && !ExportType.EXCEL.equals(exportType)) {
-      exportType = ExportType.CSV;
+    if (!ExportType.EXCEL.equals(exportType)) {
+      throw new BusinessException(BusinessCode.EXPORT_TYPE_NOT_SUPPORTED);
     }
+
     PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username, reportId);
     String storageKey = poolReport.getReportHistory().getStorageKey();
     String reportName = poolReport.getReportHistory().getReportName();
@@ -106,17 +105,13 @@ public class PoolReportServiceImpl implements PoolReportService {
     try {
       List<ExportContent> exportContents = getExportContents(poolReport);
       String storageKey = generateStorageKey(poolReport);
-      String csvFileName = storageKey + ExportType.CSV.getValue();
       String excelFileName = storageKey + ExportType.EXCEL.getValue();
-      InputStream csvInputStream = CSVHelper.writeContent(exportContents);
       InputStream excelInputStream = ExcelHelper.writeContent(exportContents);
-      storageService.uploadFile(csvInputStream.readAllBytes(), csvFileName);
       storageService.uploadFile(excelInputStream.readAllBytes(), excelFileName);
       poolReport.getReportHistory().setStatus(ReportStatus.GENERATED);
       poolReport.getReportHistory().setStorageKey(storageKey);
       poolReportRepository.save(poolReport);
       excelInputStream.close();
-      csvInputStream.close();
     } catch (Exception e) {
       poolReport.getReportHistory().setStatus(ReportStatus.FAILED);
       log.error("Error while generating report", e);
