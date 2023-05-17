@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -99,7 +100,7 @@ public class DelegationServiceImpl implements DelegationService {
     Timestamp startTime = epoch.getStartTime();
     Long slot = (Instant.now().toEpochMilli() - startTime.getTime()) / MILLI;
     long countDownTime =
-        Timestamp.valueOf(startTime.toLocalDateTime().plusDays(5)).getTime() - Timestamp.from(
+        Timestamp.from(startTime.toInstant().plus(5, ChronoUnit.DAYS)).getTime() - Timestamp.from(
             Instant.now()).getTime();
     Object liveStake = redisTemplate.opsForValue()
         .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
