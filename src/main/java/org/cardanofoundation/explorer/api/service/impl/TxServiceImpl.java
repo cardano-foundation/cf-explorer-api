@@ -1,9 +1,49 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import com.bloxbean.cardano.client.util.AssetUtil;
-import jakarta.annotation.PostConstruct;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
+import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
@@ -38,7 +78,6 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.projection.TxLimit;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
@@ -57,15 +96,14 @@ import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.RedeemerRepository;
 import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.TxChartRepository;
 import org.cardanofoundation.explorer.api.repository.TxOutRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.repository.UnconsumeTxInRepository;
 import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
@@ -80,52 +118,12 @@ import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class TxServiceImpl implements TxService {
 
-  public static final int ONE_DAY_HOURS = 25;
   private final TxRepository txRepository;
   private final TxOutRepository txOutRepository;
   private final BlockRepository blockRepository;
@@ -155,16 +153,24 @@ public class TxServiceImpl implements TxService {
   private final PoolRetireRepository poolRetireRepository;
   private final ParamProposalRepository paramProposalRepository;
   private final EpochParamRepository epochParamRepository;
+  private final TxChartRepository txChartRepository;
   private final ProtocolMapper protocolMapper;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   @Value("${application.network}")
   private String network;
+
   private static final int SUMMARY_SIZE = 4;
-  private static final long MONTH = 32;
+  public static final long HOURS_IN_DAY = 24;
+  public static final long DAY_IN_WEEK = 7;
+  public static final long DAY_IN_TWO_WEEK = DAY_IN_WEEK * 2;
+  public static final long DAYS_IN_MONTH = 31;
+
   private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
-  private static final String TRANSACTION_GRAPH_DAY_KEY = "TRANSACTION_GRAPH_DAY_KEY";
-  private final ObjectMapper objectMapper;
+
+
+
+
 
   @Override
   @Transactional(readOnly = true)
@@ -224,13 +230,20 @@ public class TxServiceImpl implements TxService {
     return summaries;
   }
 
+
   @Override
-  @Transactional(readOnly = true)
-  public List<TxGraph> getTxsAfterTime(long minusDays) {
-    if (minusDays != BigInteger.ONE.longValue()) {
-      return getTxGraphsInDays(minusDays);
+  public List<TxGraph> getTransactionChartByRange(TxChartRange range) {
+    if (range.equals(TxChartRange.ONE_DAY)) {
+      return getTransactionChartInOneDay();
     }
-    return getTxGraphsToday();
+    long day = DAY_IN_WEEK;
+
+    if (range.equals(TxChartRange.TWO_WEEK)) {
+      day = DAY_IN_TWO_WEEK;
+    } else if (range.equals(TxChartRange.ONE_MONTH)) {
+      day = DAYS_IN_MONTH;
+    }
+    return getTransactionChartInRange(day);
   }
 
   @Override
@@ -244,7 +257,7 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByBlock(String blockId,
-      Pageable pageable) {
+                                                                     Pageable pageable) {
     Page<Tx> txPage;
     try {
       Long blockNo = Long.parseLong(blockId);
@@ -258,7 +271,7 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
-      Pageable pageable) {
+                                                                       Pageable pageable) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
@@ -271,7 +284,7 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId,
-      Pageable pageable) {
+                                                                     Pageable pageable) {
     BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
     Optional<MultiAsset> multiAsset = multiAssetRepository.findByFingerprint(tokenId);
     if (multiAsset.isPresent()) {
@@ -342,7 +355,6 @@ public class TxServiceImpl implements TxService {
       } else {
         txResponse.setAddressesInput(new ArrayList<>());
       }
-
       txFilterResponses.add(txResponse);
     }
     return txFilterResponses;
@@ -380,8 +392,9 @@ public class TxServiceImpl implements TxService {
     List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
     Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
 
-    Set<Long> addressIds = addressRepository.findByStakeAddress(stake).stream().map(Address::getId).collect(
-        Collectors.toSet());
+    Set<Long> addressIds = addressRepository.findByStakeAddress(stake).stream().map(Address::getId)
+        .collect(
+            Collectors.toSet());
 
     // get address tx balance
     List<AddressTxBalance> addressTxBalances =
@@ -737,14 +750,15 @@ public class TxServiceImpl implements TxService {
             item -> new TxStakeCertificate(item.getAddr().getView(),
                 CertificateType.STAKE_DEREGISTRATION)
         ).collect(Collectors.toList()));
-    if(!CollectionUtils.isEmpty(stakeCertificates)){
+    if (!CollectionUtils.isEmpty(stakeCertificates)) {
       txResponse.setStakeCertificates(stakeCertificates);
     }
   }
 
   /**
    * Get transaction pool certificates info
-   * @param tx transaction
+   *
+   * @param tx         transaction
    * @param txResponse response data of pool certificates
    */
   private void getPoolCertificates(Tx tx, TxResponse txResponse) {
@@ -767,7 +781,7 @@ public class TxServiceImpl implements TxService {
         .map(
             item -> {
               List<PoolRelayResponse> relays = null;
-              if(poolRelayMap.containsKey(item.getPoolUpdateId())) {
+              if (poolRelayMap.containsKey(item.getPoolUpdateId())) {
                 relays = poolRelayMap.get(item.getPoolUpdateId())
                     .stream().map(relay ->
                         PoolRelayResponse.builder()
@@ -779,7 +793,7 @@ public class TxServiceImpl implements TxService {
                             .build()).collect(Collectors.toList());
               }
               List<String> poolOwnersList = new ArrayList<>();
-              if(poolOwnerMap.containsKey(item.getPoolUpdateId())) {
+              if (poolOwnerMap.containsKey(item.getPoolUpdateId())) {
                 poolOwnersList = poolOwnerMap.get(item.getPoolUpdateId());
               }
               return TxPoolCertificate.builder()
@@ -808,7 +822,7 @@ public class TxServiceImpl implements TxService {
             .type(CertificateType.POOL_DEREGISTRATION)
             .build()
     ).collect(Collectors.toList()));
-    if(!CollectionUtils.isEmpty(poolCertificates)){
+    if (!CollectionUtils.isEmpty(poolCertificates)) {
       txResponse.setPoolCertificates(poolCertificates);
     }
   }
@@ -848,8 +862,8 @@ public class TxServiceImpl implements TxService {
     List<String> tokenStringList = addressInputOutputMap.get(txOut).stream().map(
         AddressInputOutputProjection::getAssetsJson).filter(
         StringUtils::isNotEmpty
-    ).collect(Collectors.toList());
-
+    ).toList();
+    ObjectMapper objectMapper = new ObjectMapper();
     tokenStringList.forEach(tokenString -> {
           if (StringUtils.isNotEmpty(tokenString)) {
             try {
@@ -915,140 +929,157 @@ public class TxServiceImpl implements TxService {
     return stakeAddressTxInputList;
   }
 
+  private List<TxGraph> getTransactionChartInRange(long day) {
+    final String key = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
+    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+
+    final LocalDateTime currentLocalDate =
+        LocalDateTime.of(
+            LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
+            LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
+
+    final BigInteger previousMonth = BigInteger
+        .valueOf(currentLocalDate.minusMonths(BigInteger.ONE.longValue())
+            .toInstant(ZoneOffset.UTC).getEpochSecond());
+
+    var keySize = redisTemplate.opsForList().size(key);
+
+    if (Objects.isNull(keySize) || keySize.equals(BigInteger.ZERO.longValue())) {
+      List<TxGraph> txCharts = toTxGraph(txChartRepository
+          .getTransactionGraphDayGreaterThan(previousMonth));
+      updateRedisTxGraph(txCharts, key, Boolean.TRUE);
+
+      return getTxGraphsByDayRange((int) day, txCharts);
+    }
+
+    List<TxGraph> txGraphsRedis = redisTemplate.opsForList()
+        .range(key, BigInteger.ZERO.longValue(), DAYS_IN_MONTH);
+
+    final var latestDay = txGraphsRedis.get(BigInteger.ZERO.intValue()).getDate();
+    final var latestLocalDateTime = Instant.ofEpochMilli(latestDay.getTime())
+        .atZone(ZoneOffset.UTC)
+        .toLocalDateTime();
+
+    var distanceFromRealAndCache = ChronoUnit.DAYS.between(latestLocalDateTime, currentLocalDate);
+
+    if (distanceFromRealAndCache > BigInteger.TWO.longValue()) {
+      List<TxGraph> txCharts = toTxGraph(txChartRepository
+          .getTransactionGraphDayGreaterThan(previousMonth));
+      updateRedisTxGraph(txCharts, key, Boolean.TRUE);
+      return getTxGraphsByDayRange((int) day, txCharts);
+    }
+
+    List<BigInteger> days = LongStream.range(BigInteger.ZERO.intValue(), BigInteger.TWO.longValue())
+        .boxed()
+        .map(dayMinus -> {
+          var markDay = currentLocalDate.minusDays(dayMinus);
+          return BigInteger.valueOf(markDay.toInstant(ZoneOffset.UTC).getEpochSecond());
+        }).toList();
+
+    List<TxGraph> txs = toTxGraph(txChartRepository.getTransactionGraphByDay(days));
+
+    if (ObjectUtils.isEmpty(txs)) {
+      return txGraphsRedis.subList(BigInteger.ZERO.intValue(), (int) day);
+    }
+
+    final var txGraphs = new ArrayList<TxGraph>();
+
+    if (distanceFromRealAndCache == BigInteger.ONE.longValue()
+        && txs.size() == BigInteger.TWO.intValue()) {
+      var latestChart = txs.get(BigInteger.ONE.intValue());
+      var previousChart = txs.get(BigInteger.ZERO.intValue());
+
+      redisTemplate.opsForList()
+          .set(key, BigInteger.ZERO.intValue(), previousChart);
+      redisTemplate.opsForList().leftPush(key, latestChart);
+
+      txGraphs.add(latestChart);
+      txGraphs.add(previousChart);
+      txGraphs.addAll(txGraphsRedis.subList(BigInteger.TWO.intValue(),
+          txGraphsRedis.size() - BigInteger.ONE.intValue()));
+
+      return getTxGraphsByDayRange((int) day, txGraphs);
+    }
+
+    txGraphs.add(txs.get(BigInteger.ZERO.intValue()));
+    txGraphs.addAll(txGraphsRedis.subList(BigInteger.ONE.intValue(),
+        txGraphsRedis.size() - BigInteger.ONE.intValue()));
+
+    return getTxGraphsByDayRange((int) day, txGraphs);
+  }
+
+  private static List<TxGraph> getTxGraphsByDayRange(int day, List<TxGraph> txCharts) {
+    if (txCharts.size() < day) {
+      return txCharts;
+    }
+
+    return txCharts.subList(BigInteger.ZERO.intValue(), day);
+  }
+
+  private List<TxGraph> getTransactionChartInOneDay() {
+    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+
+    final LocalDateTime currentLoaLocalDateTime =
+        LocalDateTime.of(
+            LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
+            LocalTime.of(localDate.getHour(), BigInteger.ZERO.intValue()));
+
+    List<BigInteger> hours = LongStream.range(BigInteger.ZERO.intValue(), HOURS_IN_DAY)
+        .boxed()
+        .map(currentLoaLocalDateTime::minusHours)
+        .map(hour -> BigInteger.valueOf(hour.toInstant(ZoneOffset.UTC).getEpochSecond()))
+        .toList();
+
+    List<TxGraphProjection> txs = txChartRepository.getTransactionGraphByHour(hours);
+
+    if (CollectionUtils.isEmpty(txs)) {
+      return Collections.emptyList();
+    }
+
+    return toTxGraph(txs);
+  }
+
+  private static List<TxGraph> toTxGraph(List<TxGraphProjection> txs) {
+    return txs.stream()
+        .map(txChart -> TxGraph.builder()
+            .date(Date.from(Instant.ofEpochSecond(txChart.getTime().longValue())))
+            .simpleTransactions(txChart.getSimpleTransactions())
+            .smartContract(txChart.getSmartContract())
+            .metadata(txChart.getMetadata())
+            .build())
+        .sorted(Comparator.comparing(TxGraph::getDate).reversed())
+        .toList();
+  }
+
+  /**
+   * Update redis index
+   *
+   * @param txGraphs
+   * @param key
+   * @param isEmpty
+   */
+  private void updateRedisTxGraph(List<TxGraph> txGraphs, String key, boolean isEmpty) {
+
+    if (isEmpty) {
+      txGraphs.forEach(txGraph ->
+          redisTemplate.opsForList().rightPush(key, txGraph));
+    }
+  }
+
+  /**
+   * create redis key
+   *
+   * @param rawKey
+   * @return
+   */
   private String getRedisKey(String rawKey) {
     return String.join("_", this.network, rawKey);
-  }
-
-  private List<TxGraph> getTxGraphsToday() {
-
-    var streamTxGraph = IntStream.range(BigInteger.ONE.intValue(), ONE_DAY_HOURS - 1)
-        .boxed()
-        .map(hour -> {
-          LocalDateTime markTime = LocalDateTime.now(ZoneOffset.UTC).minus(hour, ChronoUnit.HOURS);
-          LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC)
-              .minus(hour + 1L, ChronoUnit.HOURS);
-
-          markTime = LocalDateTime.of(markTime.toLocalDate(),
-              LocalTime.of(markTime.getHour(), 0, 0));
-          endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0, 0));
-
-          return getTxGraph(Pair.of(markTime, endTime), Boolean.TRUE);
-        });
-
-    LocalDateTime currentHour = LocalDateTime.now(ZoneOffset.UTC);
-
-    LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC);
-    endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), 0, 0));
-
-    return Stream.concat(Stream.of(getTxGraph(Pair.of(currentHour, endTime), Boolean.TRUE)),
-            streamTxGraph)
-        .sorted(Comparator.comparing(TxGraph::getDate))
-        .collect(Collectors.toList());
-  }
-
-  private List<TxGraph> getTxGraphsInDays(long minusDays) {
-
-    var txGraphs = LongStream.range(BigInteger.ZERO.longValue(), minusDays)
-        .boxed()
-        .parallel()
-        .map(day -> {
-          LocalDateTime markTime = LocalDateTime.now(ZoneOffset.UTC).minusDays(day)
-              .toLocalDate().atStartOfDay();
-          LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC)
-              .minusDays(day + BigInteger.ONE.longValue())
-              .toLocalDate().atStartOfDay();
-          var keyMonth = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
-          var index = endTime.getDayOfMonth() % MONTH;
-          var redisGraph = redisTemplate.opsForList().index(keyMonth, index);
-
-          if (Objects.nonNull(redisGraph)) {
-            var distance = Math.abs(
-                ChronoUnit.DAYS.between(
-                    LocalDateTime.ofInstant(redisGraph.getDate().toInstant(),
-                        ZoneId.systemDefault()),
-                    endTime));
-            if (distance == BigInteger.ZERO.longValue()) {
-              return redisGraph;
-            }
-          }
-
-          TxGraph txGraph = getTxGraph(Pair.of(markTime, endTime), Boolean.FALSE);
-          redisTemplate.opsForList().set(keyMonth, index - 1, txGraph);
-          return txGraph;
-        });
-
-    return Stream.concat(txGraphs, Stream.of(getTxGraph(
-            Pair.of(LocalDateTime.now(ZoneOffset.UTC),
-                LocalDateTime.now(ZoneOffset.UTC).toLocalDate().atStartOfDay()),
-            Boolean.FALSE)))
-        .sorted(Comparator.comparing(TxGraph::getDate))
-        .collect(Collectors.toList());
-  }
-
-  private TxGraph getTxGraph(Pair<LocalDateTime, LocalDateTime> markAndEnd, boolean isOneDay) {
-    var markTime = markAndEnd.getFirst();
-    var endTime = markAndEnd.getSecond();
-
-    Supplier<TxGraphProjection> supplier;
-    if (isOneDay) {
-      supplier = () -> txRepository.getTransactionsAfterDateTime(Timestamp.valueOf(markTime),
-          Timestamp.valueOf(endTime));
-    } else {
-      supplier = () -> txRepository.getTransactionsAfterDate(
-          Timestamp.valueOf(markTime),
-          Timestamp.valueOf(endTime));
-    }
-
-    TxGraphProjection txGraphProjection = supplier.get();
-
-    if (Objects.isNull(txGraphProjection)) {
-      return TxGraph.builder()
-          .date(Timestamp.valueOf(endTime))
-          .txs(BigInteger.ZERO.intValue())
-          .complexTxs(BigInteger.ZERO.intValue())
-          .simpleTxs(BigInteger.ZERO.intValue())
-          .build();
-    }
-
-    TxLimit txLimit = txRepository.findRangeTxIdsByBlockIds(
-        List.of(txGraphProjection.getMinBlockId(),
-            txGraphProjection.getMaxBlockId()));
-
-    var totalComplexTx = txOutRepository.getTotalTokenAndSmartContract(
-        txLimit.getMinId(),
-        txLimit.getMaxId());
-
-    return TxGraph.builder()
-        .date(Timestamp.valueOf(endTime))
-        .txs(txGraphProjection.getTransactionNo())
-        .complexTxs(totalComplexTx)
-        .simpleTxs(txGraphProjection.getTransactionNo() - totalComplexTx)
-        .build();
-  }
-
-
-  @PostConstruct
-  public void setup() {
-    var keyMonth = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
-    var size = redisTemplate.opsForList().size(keyMonth);
-    if (Objects.isNull(size)) {
-      size = 0L;
-    }
-    if (size < MONTH - 1) {
-      LongStream.range(0, MONTH - 1 - size).forEach(time ->
-          redisTemplate.opsForList().leftPush(keyMonth, TxGraph.builder()
-              .date(new Date())
-              .txs(BigInteger.ZERO.intValue())
-              .complexTxs(BigInteger.ZERO.intValue())
-              .simpleTxs(BigInteger.ZERO.intValue())
-              .build()));
-    }
   }
 
   /**
    * Get protocol params update in transaction
    *
-   * @param tx transaction
+   * @param tx         transaction
    * @param txResponse response data of transaction
    */
   private void getProtocols(Tx tx, TxResponse txResponse) {
