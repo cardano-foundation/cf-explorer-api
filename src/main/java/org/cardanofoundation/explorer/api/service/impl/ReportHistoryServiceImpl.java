@@ -3,8 +3,10 @@ package org.cardanofoundation.explorer.api.service.impl;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
 
@@ -20,7 +22,7 @@ import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
-import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.common.utils.DataUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 
@@ -72,9 +74,8 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
   }
 
   /**
-   * Get all report history that not yet persisted to storage, then persist to storage
-   * Now it will persist to storage every 3 seconds.
-   * Will create an queue-ing system to persist to storage later
+   * Get all report history that not yet persisted to storage, then persist to storage Now it will
+   * Persist to storage every 3 seconds. Will create an queue-ing system to persist to storage later
    */
   @Scheduled(fixedDelay = 1000 * 3)
   private void persistToStorage() {
