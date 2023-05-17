@@ -20,7 +20,6 @@ import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
 import org.cardanofoundation.explorer.api.util.report.ExcelHelper;
-import org.cardanofoundation.explorer.api.util.report.CSVHelper;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.report.ExportContent;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
@@ -114,8 +113,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Override
   public StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username,
                                                      ExportType exportType) {
-    if (!ExportType.CSV.equals(exportType) && !ExportType.EXCEL.equals(exportType)) {
-      exportType = ExportType.CSV;
+    if (!ExportType.EXCEL.equals(exportType)) {
+      throw new BusinessException(BusinessCode.EXPORT_TYPE_NOT_SUPPORTED);
     }
 
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
@@ -247,11 +246,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     try {
       List<ExportContent> exportContents = getExportContents(stakeKeyReportHistory);
       String storageKey = generateStorageKey(stakeKeyReportHistory);
-      String csvFileName = storageKey + ExportType.CSV.getValue();
       String excelFileName = storageKey + ExportType.EXCEL.getValue();
-      InputStream csvInputStream = CSVHelper.writeContent(exportContents);
       InputStream excelInputStream = ExcelHelper.writeContent(exportContents);
-      storageService.uploadFile(csvInputStream.readAllBytes(), csvFileName);
       storageService.uploadFile(excelInputStream.readAllBytes(), excelFileName);
       stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.GENERATED);
       stakeKeyReportHistory.getReportHistory().setStorageKey(storageKey);

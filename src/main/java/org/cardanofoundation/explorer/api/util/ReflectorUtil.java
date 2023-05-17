@@ -4,17 +4,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class ReflectorUtil {
-
-  public static Field getFieldByName(Class<?> clazz, String fieldName) {
-    List<Field> fields = getAllFields(clazz);
-    for (Field field : fields) {
-      if (field.getName().equals(fieldName)) {
-        return field;
-      }
-    }
-    return null;
-  }
-
   public static List<Field> getAllFields(Class<?> clazz) {
     List<Class<?>> classes = getAllSuperclasses(clazz);
     classes.add(clazz);
