@@ -74,6 +74,7 @@
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
         <sonar.cpd.exclusions>**/entity/*, **/model/*</sonar.cpd.exclusions>
+        <spring-cloud-aws.version>2.4.2</spring-cloud-aws.version>
     </properties>
 
     <repositories>
@@ -270,6 +271,11 @@
             <groupId>org.cardanofoundation.explorer</groupId>
             <artifactId>consumer-common</artifactId>
             <version>${version.explorer-consumer-common}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-context</artifactId>
+            <version>${spring-cloud-aws.version}</version>
         </dependency>
     </dependencies>
 

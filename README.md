@@ -31,7 +31,11 @@
 - `PASSWORD_DB`: Database password (in your case, do not fill this field because local profile is using a read-only user)
 - `SCHEMA`: Schema of database
 - `DB`: Database name
-
+- `S3_ACCESS_KEY`: the AWS access key
+- `S3_SECRET_KEY`: the AWS secret key
+- `S3_REGION`: the AWS region
+- `S3_BUCKET_NAME`: the AWS bucket
+- `S3_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
 
 ### We have 3 options for redis cache:
 - `redis standalone`
