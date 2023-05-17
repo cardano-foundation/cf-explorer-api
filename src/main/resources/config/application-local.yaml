@@ -98,3 +98,26 @@ management:
 rsa:
   key:
     path: /key/public_key
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${S3_ACCESS_KEY}
+      secret-key: ${S3_SECRET_KEY}
+    region:
+      static: ${S3_REGION}
+    s3:
+      bucket:
+        name: ${S3_BUCKET_NAME}
+      path-style:
+        enabled: false
+      endpoint: ${STORAGE_ENDPOINT}
+
+logging:
+  level:
+    com:
+      amazonaws:
+        internal:
+          InstanceMetadataServiceResourceFetcher: error
+        util:
+          EC2MetadataUtils: error
