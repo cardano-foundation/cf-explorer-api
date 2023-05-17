@@ -100,16 +100,16 @@ rsa:
 cloud:
   aws:
     credentials:
-      access-key: ${S3_ACCESS_KEY:miniominio}
-      secret-key: ${S3_SECRET_KEY:sekritsekrit}
+      access-key: ${S3_ACCESS_KEY}
+      secret-key: ${S3_SECRET_KEY}
     region:
-      static: ${S3_REGION:null}
+      static: ${S3_REGION}
     s3:
       bucket:
-        name: ${S3_BUCKET_NAME:cardano-explorer-api-storage}
+        name: ${S3_BUCKET_NAME}
       path-style:
         enabled: true
-      endpoint: ${STORAGE_ENDPOINT:http://172.16.1.230:9000}
+      endpoint: ${STORAGE_ENDPOINT}
 
 logging:
   level:
