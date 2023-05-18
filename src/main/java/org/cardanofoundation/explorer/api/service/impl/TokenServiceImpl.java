@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
@@ -119,8 +120,8 @@ public class TokenServiceImpl implements TokenService {
   @Override
   @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
-    MultiAsset multiAsset = multiAssetRepository.findByFingerprintOrName(tokenId, tokenId).orElseThrow(
-        () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
+    MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
+            () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
     );
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
     Timestamp yesterday = Timestamp.valueOf(
