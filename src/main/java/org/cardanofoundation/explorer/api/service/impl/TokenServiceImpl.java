@@ -119,7 +119,7 @@ public class TokenServiceImpl implements TokenService {
   @Override
   @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
-    MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
+    MultiAsset multiAsset = multiAssetRepository.findByFingerprintOrName(tokenId, tokenId).orElseThrow(
         () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
     );
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
