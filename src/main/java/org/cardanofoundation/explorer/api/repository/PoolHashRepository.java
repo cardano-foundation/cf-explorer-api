@@ -60,7 +60,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "LEFT JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
           + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "LEFT JOIN AdaPots ap ON ap.epochNo = (SELECT max(e.no) FROM Epoch e) "
-          + "WHERE ph.view = :poolView ")
+          + "WHERE ph.view = :poolView or po.poolName = :poolView")
   PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolView") String poolView);
 
   @Query(value =

@@ -15,6 +15,8 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
 
+  Optional<MultiAsset> findByFingerprintOrName(@Param("fingerprint") String fingerprint, @Param("name") String name);
+
   Integer countByPolicy(@Param("policy") String policy);
 
   Page<MultiAsset> findAllByPolicy(@Param("policy") String policy, Pageable pageable);
