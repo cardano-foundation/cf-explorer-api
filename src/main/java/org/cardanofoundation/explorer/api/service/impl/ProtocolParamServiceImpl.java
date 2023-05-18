@@ -27,15 +27,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
 import org.cardanofoundation.explorer.api.model.response.protocol.EpochChange;
+import org.cardanofoundation.explorer.api.model.response.protocol.FixedProtocol;
 import org.cardanofoundation.explorer.api.model.response.protocol.HistoriesProtocol;
 import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
 import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
@@ -63,6 +66,9 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   final TxRepository txRepository;
   final CostModelRepository costModelRepository;
   final ProtocolMapper protocolMapper;
+
+  @Value("${application.network}")
+  String network;
   public static final String GET = "get";
   Map<ProtocolType, Method> paramProtocolMethods;
   Map<String, Method> historyMethods;
@@ -194,72 +200,16 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   @Override
-  public Protocols getFixedProtocols() {
-    Protocols fixedProtocol = Protocols.builder().build();
-    List<EpochParam> epochParams = epochParamRepository.findAll()
-        .stream()
-        .sorted(Comparator.comparing(EpochParam::getId).reversed())
-        .toList();
-
-    if (ObjectUtils.isEmpty(epochParams)) {
-      return fixedProtocol;
+  public FixedProtocol getFixedProtocols() {
+    FixedProtocol fixedProtocol = null;
+    try {
+      return protocolMapper.mapFixedProtocol(network);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
     }
 
-    EpochParam maxEpochParam = epochParams.stream()
-        .max(Comparator.comparing(EpochParam::getEpochNo))
-        .orElse(EpochParam.builder().build());
+    log.error("{} network is not prepared ", network);
 
-    EpochParam minEpochParam = epochParams.stream()
-        .min(Comparator.comparing(EpochParam::getEpochNo))
-        .orElse(EpochParam.builder().build());
-
-    fixedProtocol.setEpochChange(EpochChange.builder()
-        .startEpoch(maxEpochParam.getEpochNo())
-        .endEpoch(minEpochParam.getEpochNo())
-        .build());
-
-    Map<ProtocolType, Object> fixedProtocolMap = new ConcurrentHashMap<>();
-
-    paramProtocolMethods.keySet()
-        .forEach(key -> {
-          try {
-            Object object = paramProtocolMethods.get(key).invoke(maxEpochParam);
-            if (Objects.nonNull(object)) {
-              fixedProtocolMap.put(key, object);
-            }
-          } catch (IllegalAccessException | InvocationTargetException e) {
-            log.error(e.getMessage());
-          }
-        });
-
-    epochParams.forEach(
-        epochParam ->
-            fixedProtocolMap.keySet()
-                .forEach(key -> {
-                  try {
-                    Object currentValue = fixedProtocolMap.get(key);
-                    Object oldValue = paramProtocolMethods.get(key)
-                        .invoke(epochParam);
-
-                    if (key.equals(ProtocolType.COST_MODEL)) {
-                      CostModel currentCostModel = (CostModel) currentValue;
-                      CostModel oldCostModel = (CostModel) oldValue;
-                      if (!currentCostModel.getCosts().equals(oldCostModel.getCosts())) {
-                        fixedProtocolMap.remove(key);
-                      }
-                      return;
-                    }
-
-                    if (!Objects.equals(currentValue, oldValue) && Objects.nonNull(oldValue)) {
-                      fixedProtocolMap.remove(key);
-                    }
-                  } catch (IllegalAccessException |
-                           InvocationTargetException e) {
-                    log.error(e.getMessage());
-                  }
-                })
-    );
-    fillFixedProtocolField(fixedProtocolMap, fixedProtocol);
     return fixedProtocol;
   }
 
@@ -822,106 +772,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           getChangeProtocol(epochParam.getCostModel()));
 
     }
-  }
-
-  private void fillFixedProtocolField(Map<ProtocolType, Object> fixedProtocols,
-                                      Protocols protocols) {
-
-    fixedProtocols.keySet().forEach(fieldName -> {
-      Object object = fixedProtocols.get(fieldName);
-      switch (fieldName) {
-        case MIN_FEE_A:
-          protocols.setMinFeeA(getChangeProtocol(object));
-          break;
-        case MIN_FEE_B:
-          protocols.setMinFeeB(getChangeProtocol(object));
-          break;
-        case MAX_BLOCK_SIZE:
-          protocols.setMaxBlockSize(getChangeProtocol(object));
-          break;
-        case MAX_TX_SIZE:
-          protocols.setMaxTxSize(getChangeProtocol(object));
-          break;
-        case MAX_BH_SIZE:
-          protocols.setMaxBhSize(getChangeProtocol(object));
-          break;
-        case KEY_DEPOSIT:
-          protocols.setKeyDeposit(getChangeProtocol(object));
-          break;
-        case POOL_DEPOSIT:
-          protocols.setPoolDeposit(getChangeProtocol(object));
-          break;
-        case MAX_EPOCH:
-          protocols.setMaxEpoch(getChangeProtocol(object));
-          break;
-        case OPTIMAL_POOL_COUNT:
-          protocols.setOptimalPoolCount(getChangeProtocol(object));
-          break;
-        case MIN_UTXO_VALUE:
-          protocols.setMinUtxoValue(getChangeProtocol(object));
-          break;
-        case MIN_POOL_COST:
-          protocols.setMinPoolCost(getChangeProtocol(object));
-          break;
-        case MAX_TX_EX_MEM:
-          protocols.setMaxTxExMem(getChangeProtocol(object));
-          break;
-        case MAX_TX_EX_STEPS:
-          protocols.setMaxTxExSteps(getChangeProtocol(object));
-          break;
-        case MAX_BLOCK_EX_MEM:
-          protocols.setMaxBlockExMem(getChangeProtocol(object));
-          break;
-        case MAX_BLOCK_EX_STEPS:
-          protocols.setMaxBlockExSteps(getChangeProtocol(object));
-          break;
-        case MAX_VAL_SIZE:
-          protocols.setMaxValSize(getChangeProtocol(object));
-          break;
-        case COINS_PER_UTXO_SIZE:
-          protocols.setCoinsPerUtxoSize(getChangeProtocol(object));
-          break;
-        case INFLUENCE:
-          protocols.setInfluence(getChangeProtocol(object));
-          break;
-        case MONETARY_EXPAND_RATE:
-          protocols.setMonetaryExpandRate(getChangeProtocol(object));
-          break;
-        case TREASURY_GROWTH_RATE:
-          protocols.setTreasuryGrowthRate(getChangeProtocol(object));
-          break;
-        case DECENTRALISATION:
-          protocols.setDecentralisation(getChangeProtocol(object));
-          break;
-        case PRICE_MEM:
-          protocols.setPriceMem(getChangeProtocol(object));
-          break;
-        case PRICE_STEP:
-          protocols.setPriceStep(getChangeProtocol(object));
-          break;
-        case PROTOCOL_MAJOR:
-          protocols.setProtocolMajor(getChangeProtocol(object));
-          break;
-        case PROTOCOL_MINOR:
-          protocols.setProtocolMinor(getChangeProtocol(object));
-          break;
-        case COLLATERAL_PERCENT:
-          protocols.setCollateralPercent(getChangeProtocol(object));
-          break;
-        case MAX_COLLATERAL_INPUTS:
-          protocols.setMaxCollateralInputs(getChangeProtocol(object));
-          break;
-        case ENTROPY:
-          protocols.setEntropy(getChangeProtocol(object));
-          break;
-        case COST_MODEL:
-          CostModel costModel = (CostModel) object;
-          protocols.setCostModel(getChangeProtocol(costModel.getCosts()));
-          break;
-        default:
-          throw new BusinessException(BusinessCode.PROTOCOL_FIELD_NOT_FOUND);
-      }
-    });
   }
 
   private void handleHistoriesChange(HistoriesProtocol historiesProtocol) {
