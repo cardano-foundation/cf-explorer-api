@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -1042,7 +1043,9 @@ public class TxServiceImpl implements TxService {
   private static List<TxGraph> toTxGraph(List<TxGraphProjection> txs) {
     return txs.stream()
         .map(txChart -> TxGraph.builder()
-            .date(Date.from(Instant.ofEpochSecond(txChart.getTime().longValue())))
+            .date(Date.from(
+                OffsetDateTime.ofInstant(Instant.ofEpochSecond(txChart.getTime().longValue()),
+                    ZoneOffset.UTC).toInstant()))
             .simpleTransactions(txChart.getSimpleTransactions())
             .smartContract(txChart.getSmartContract())
             .metadata(txChart.getMetadata())
