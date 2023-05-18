@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.response.protocol.FixedProtocol;
 import org.cardanofoundation.explorer.api.model.response.protocol.HistoriesProtocol;
 import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
@@ -38,7 +39,7 @@ public class ProtocolParamController {
   @GetMapping("fixed")
   @LogMessage
   @Operation(summary = "Get current protocol history change")
-  public Protocols getFixedProtocols() {
+  public FixedProtocol getFixedProtocols() {
     return protocolParamService.getFixedProtocols();
   }
 }
