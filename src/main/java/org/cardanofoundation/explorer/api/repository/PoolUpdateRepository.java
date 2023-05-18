@@ -81,7 +81,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin "
           + "FROM PoolHash ph "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
+          + "JOIN Tx tx ON pu.registeredTx.id  = tx.id AND (tx.deposit IS NULL OR tx.deposit = 0) "
           + "JOIN Block bk ON tx.blockId = bk.id "
           + "WHERE ph.view = :poolView "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
@@ -95,7 +95,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
 
   @Query(value =
-      "SELECT ph.id AS hashId, ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
+      "SELECT ph.id AS hashId, ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount, tx.deposit AS deposit "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id) "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
@@ -131,7 +131,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id) "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
+          + "JOIN Tx tx ON pu.registeredTx.id = tx.id AND (tx.deposit IS NULL OR tx.deposit = 0) "
           + "JOIN Block bk ON tx.block.id  = bk.id "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
           + "WHERE ph.view = :poolView ")
@@ -148,4 +148,20 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       + "AND (SELECT COALESCE(max(poolRetire.retiringEpoch), 0) + 2 "
       + "FROM PoolRetire poolRetire WHERE poolRetire.poolHash = poolHash) < poolUpdate.activeEpochNo")
   List<String> findPoolByRewardAccount(@Param("stakeAddress") StakeAddress stakeAddress);
+
+  @Query(value =
+      "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin "
+          + "FROM PoolHash ph "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "JOIN Tx tx ON pu.registeredTx.id  = tx.id AND tx.deposit IS NOT NULL AND tx.deposit > 0 "
+          + "JOIN Block bk ON tx.blockId = bk.id "
+          + "WHERE ph.view = :poolView "
+          + "AND (:txHash IS NULL OR tx.hash = :txHash) "
+          + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
+          + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
+  Page<PoolUpdateProjection> findPoolRegistrationByPool(@Param("poolView") String poolView,
+      @Param("txHash") String txHash,
+      @Param("fromDate") Timestamp fromDate,
+      @Param("toDate") Timestamp toDate,
+      Pageable pageable);
 }

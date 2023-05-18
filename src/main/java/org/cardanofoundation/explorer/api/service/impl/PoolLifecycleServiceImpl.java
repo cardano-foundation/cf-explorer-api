@@ -1,5 +1,18 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
@@ -26,19 +39,6 @@ import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -76,7 +76,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   public BaseFilterResponse<PoolUpdateResponse> registration(String poolView, String txHash,
       Date fromDate, Date toDate,
       Pageable pageable) {
-    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable);
+    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable, 0);
   }
 
   @Override
@@ -100,7 +100,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   public BaseFilterResponse<PoolUpdateResponse> poolUpdate(String poolView, String txHash,
       Date fromDate, Date toDate,
       Pageable pageable) {
-    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable);
+    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable, 1);
   }
 
   @Override
@@ -271,7 +271,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   private BaseFilterResponse<PoolUpdateResponse> getDataForPoolUpdate(String poolView,
       String txHash,
       Date fromDate, Date toDate,
-      Pageable pageable) {
+      Pageable pageable, Integer type) {
     BaseFilterResponse<PoolUpdateResponse> res = new BaseFilterResponse<>();
     Timestamp fromTimestamp = null;
     Timestamp toTimestamp = null;
@@ -284,8 +284,14 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     if (Objects.nonNull(txHash) && txHash.isBlank()) {
       txHash = null;
     }
-    Page<PoolUpdateProjection> projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
-        txHash, fromTimestamp, toTimestamp, pageable);
+    Page<PoolUpdateProjection> projection = null;
+    if (type == 0) {
+      projection = poolUpdateRepository.findPoolRegistrationByPool(poolView,
+          txHash, fromTimestamp, toTimestamp, pageable);
+    } else {
+      projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
+          txHash, fromTimestamp, toTimestamp, pageable);
+    }
     List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();
     if (Objects.nonNull(projection)) {
       projection.stream().forEach(poolUpdate -> {
