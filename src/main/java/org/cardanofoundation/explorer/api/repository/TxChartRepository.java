@@ -18,7 +18,7 @@ public interface TxChartRepository extends JpaRepository<TxChart, Long> {
       + "tx.hour AS time FROM TxChart tx "
       + "WHERE tx.hour in :hours "
       + "GROUP BY tx.hour "
-      + "ORDER BY tx.hour DESC")
+      + "ORDER BY tx.hour ASC ")
   List<TxGraphProjection> getTransactionGraphByHour(@Param("hours") List<BigInteger> hours);
 
   @Query("SELECT SUM(tx.txSimple) AS simpleTransactions,"
@@ -27,7 +27,7 @@ public interface TxChartRepository extends JpaRepository<TxChart, Long> {
       + "tx.day AS time FROM TxChart tx "
       + "WHERE tx.day in :day "
       + "GROUP BY tx.day "
-      + "ORDER BY tx.day DESC")
+      + "ORDER BY tx.day ASC ")
   List<TxGraphProjection> getTransactionGraphByDay(@Param("day") List<BigInteger> hours);
 
 
@@ -37,6 +37,6 @@ public interface TxChartRepository extends JpaRepository<TxChart, Long> {
       + "tx.day AS time FROM TxChart tx "
       + "WHERE tx.day >= :day "
       + "GROUP BY tx.day "
-      + "ORDER BY tx.day DESC")
+      + "ORDER BY tx.day ASC")
   List<TxGraphProjection> getTransactionGraphDayGreaterThan(@Param("day") BigInteger date);
 }

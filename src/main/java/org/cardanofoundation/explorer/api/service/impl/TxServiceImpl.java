@@ -1002,7 +1002,7 @@ public class TxServiceImpl implements TxService {
       return getTxGraphsByDayRange((int) day, txGraphs);
     }
 
-    txGraphs.add(txs.get(BigInteger.ZERO.intValue()));
+    txGraphs.add(txs.get(BigInteger.ONE.intValue()));
     txGraphs.addAll(txGraphsRedis.subList(BigInteger.ONE.intValue(),
         txGraphsRedis.size() - BigInteger.ONE.intValue()));
 
@@ -1014,7 +1014,11 @@ public class TxServiceImpl implements TxService {
       return txCharts;
     }
 
-    return txCharts.subList(BigInteger.ZERO.intValue(), day);
+    return txCharts
+        .subList(BigInteger.ZERO.intValue(), day)
+        .stream()
+        .sorted(Comparator.comparing(TxGraph::getDate))
+        .toList();
   }
 
   private List<TxGraph> getTransactionChartInOneDay() {
@@ -1037,7 +1041,9 @@ public class TxServiceImpl implements TxService {
       return Collections.emptyList();
     }
 
-    return toTxGraph(txs);
+    return toTxGraph(txs).stream()
+        .sorted(Comparator.comparing(TxGraph::getDate))
+        .toList();
   }
 
   private static List<TxGraph> toTxGraph(List<TxGraphProjection> txs) {
@@ -1050,7 +1056,6 @@ public class TxServiceImpl implements TxService {
             .smartContract(txChart.getSmartContract())
             .metadata(txChart.getMetadata())
             .build())
-        .sorted(Comparator.comparing(TxGraph::getDate).reversed())
         .toList();
   }
 
@@ -1065,7 +1070,7 @@ public class TxServiceImpl implements TxService {
 
     if (isEmpty) {
       txGraphs.forEach(txGraph ->
-          redisTemplate.opsForList().rightPush(key, txGraph));
+          redisTemplate.opsForList().leftPush(key, txGraph));
     }
   }
 
