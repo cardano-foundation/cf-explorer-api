@@ -30,6 +30,9 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -310,7 +313,7 @@ public class PoolReportServiceImpl implements PoolReportService {
         .status(ReportStatus.IN_PROGRESS)
         .type(ReportType.POOL_ID)
         .username(username)
-        .createdAt(new Timestamp(System.currentTimeMillis()))
+        .createdAt(Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)))
         .build();
   }
 
