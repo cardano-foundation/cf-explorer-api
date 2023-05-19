@@ -930,6 +930,12 @@ public class TxServiceImpl implements TxService {
     return stakeAddressTxInputList;
   }
 
+  /**
+   * get transaction graph in month with day unit
+   *
+   * @param day
+   * @return
+   */
   private List<TxGraph> getTransactionChartInRange(long day) {
     final String key = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
@@ -960,12 +966,6 @@ public class TxServiceImpl implements TxService {
       return getTxGraphsByDayRange((int) day, txCharts);
     }
 
-    // if day store in cache was larger than 32 day remove
-    if (keySize > DAYS_IN_MONTH) {
-      LongStream.range(BigInteger.ZERO.longValue(), keySize - DAYS_IN_MONTH)
-          .forEach(time -> redisTemplate.opsForList().rightPop(key));
-    }
-
     // txGraphsRedis will not empty
     List<TxGraph> txGraphsRedis = redisTemplate.opsForList()
         .range(key, BigInteger.ZERO.longValue(), DAYS_IN_MONTH);
@@ -975,15 +975,27 @@ public class TxServiceImpl implements TxService {
         .atZone(ZoneOffset.UTC)
         .toLocalDateTime();
 
+    while (ChronoUnit.DAYS.between(
+        LocalDateTime.ofInstant(txGraphsRedis.get(txGraphsRedis.size() - 1).getDate().toInstant(),
+            ZoneOffset.UTC), currentLocalDate) > DAYS_IN_MONTH) {
+      redisTemplate.opsForList().rightPop(key);
+      txGraphsRedis.remove(txGraphsRedis.size() - BigInteger.ONE.intValue());
+    }
+
     var distanceFromRealAndCache = ChronoUnit.DAYS.between(latestLocalDateTime, currentLocalDate);
 
-    if (distanceFromRealAndCache > BigInteger.TWO.longValue()) {
+    if (distanceFromRealAndCache >= BigInteger.TWO.longValue()) {
+      final long dayMissingData = day - distanceFromRealAndCache;
+      if( dayMissingData <= BigInteger.ZERO.longValue()){
+        return Collections.emptyList();
+      }
+
       List<TxGraph> txCharts = toTxGraph(txChartRepository
           .getTransactionGraphDayGreaterThan(previousMonthInSeconds));
       updateRedisTxGraph(txCharts, key, Boolean.TRUE);
-      return getTxGraphsByDayRange((int) day, txCharts);
+      return getTxGraphsByDayRange((int) (day - distanceFromRealAndCache), txCharts);
     }
-
+    // get 2 days: today and yesterday
     List<BigInteger> days = LongStream.range(BigInteger.ZERO.intValue(), BigInteger.TWO.longValue())
         .boxed()
         .map(dayMinus -> {
@@ -998,27 +1010,32 @@ public class TxServiceImpl implements TxService {
     }
 
     final var txGraphs = new ArrayList<TxGraph>();
+    // this mean that there are no transaction in latest day at time this api was call
+    if (txs.size() == BigInteger.ONE.intValue()) {
+      return getTxGraphsByDayRange((int) day, txGraphs);
+    }
+
+    var latestChart = txs.get(BigInteger.ONE.intValue());
+    var previousChart = txs.get(BigInteger.ZERO.intValue());
 
     if (distanceFromRealAndCache == BigInteger.ONE.longValue()
         && txs.size() == BigInteger.TWO.intValue()) {
-      var latestChart = txs.get(BigInteger.ONE.intValue());
-      var previousChart = txs.get(BigInteger.ZERO.intValue());
-
       redisTemplate.opsForList()
           .set(key, BigInteger.ZERO.intValue(), previousChart);
       redisTemplate.opsForList().leftPush(key, latestChart);
 
       txGraphs.add(latestChart);
       txGraphs.add(previousChart);
-      txGraphs.addAll(txGraphsRedis.subList(BigInteger.TWO.intValue(),
-          txGraphsRedis.size() - BigInteger.ONE.intValue()));
+      txGraphs.addAll(txGraphsRedis.subList(BigInteger.ONE.intValue(),
+          txGraphsRedis.size()));
 
       return getTxGraphsByDayRange((int) day, txGraphs);
     }
 
-    txGraphs.add(txs.get(BigInteger.ONE.intValue()));
-    txGraphs.addAll(txGraphsRedis.subList(BigInteger.ONE.intValue(),
-        txGraphsRedis.size() - BigInteger.ONE.intValue()));
+    txGraphs.add(latestChart);
+    txGraphs.add(previousChart);
+    txGraphs.addAll(txGraphsRedis.subList(BigInteger.TWO.intValue(),
+        txGraphsRedis.size()));
 
     return getTxGraphsByDayRange((int) day, txGraphs);
   }
@@ -1039,6 +1056,11 @@ public class TxServiceImpl implements TxService {
         .toList();
   }
 
+  /**
+   * sum transaction in 24 hours in order to draw graph
+   *
+   * @return
+   */
   private List<TxGraph> getTransactionChartInOneDay() {
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -1064,6 +1086,12 @@ public class TxServiceImpl implements TxService {
         .toList();
   }
 
+  /**
+   * Mapping projection to TxGraph
+   *
+   * @param txs
+   * @return
+   */
   private static List<TxGraph> toTxGraph(List<TxGraphProjection> txs) {
     return txs.stream()
         .map(txChart -> TxGraph.builder()
