@@ -22,7 +22,7 @@ import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
-import org.cardanofoundation.explorer.common.utils.DataUtil;
+import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 

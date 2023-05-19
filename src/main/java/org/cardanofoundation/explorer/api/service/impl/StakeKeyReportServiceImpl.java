@@ -19,8 +19,8 @@ import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryReposi
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
-import org.cardanofoundation.explorer.common.report.ExcelHelper;
-import org.cardanofoundation.explorer.common.report.ExportContent;
+import org.cardanofoundation.explorer.api.util.report.ExcelHelper;
+import org.cardanofoundation.explorer.api.util.report.ExportContent;
 import org.cardanofoundation.explorer.common.utils.DataUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
