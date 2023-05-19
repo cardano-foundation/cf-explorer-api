@@ -165,7 +165,7 @@ public class TxServiceImpl implements TxService {
   public static final long HOURS_IN_DAY = 24;
   public static final long DAY_IN_WEEK = 7;
   public static final long DAY_IN_TWO_WEEK = DAY_IN_WEEK * 2;
-  public static final long DAYS_IN_MONTH = 31;
+  public static final long DAYS_IN_MONTH = 32;
 
   private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
 
@@ -939,20 +939,34 @@ public class TxServiceImpl implements TxService {
             LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
             LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
 
-    final BigInteger previousMonth = BigInteger
-        .valueOf(currentLocalDate.minusMonths(BigInteger.ONE.longValue())
-            .toInstant(ZoneOffset.UTC).getEpochSecond());
+    final LocalDateTime previousMonth = currentLocalDate.minusMonths(BigInteger.ONE.longValue());
+
+    final BigInteger previousMonthInSeconds = BigInteger
+        .valueOf(previousMonth.toInstant(ZoneOffset.UTC).getEpochSecond());
+
+    long maxDay = ChronoUnit.DAYS.between(previousMonth, currentLocalDate);
+
+    if (maxDay < day) {
+      day = maxDay;
+    }
 
     var keySize = redisTemplate.opsForList().size(key);
-
+    // if key not exists or empty
     if (Objects.isNull(keySize) || keySize.equals(BigInteger.ZERO.longValue())) {
       List<TxGraph> txCharts = toTxGraph(txChartRepository
-          .getTransactionGraphDayGreaterThan(previousMonth));
+          .getTransactionGraphDayGreaterThan(previousMonthInSeconds));
       updateRedisTxGraph(txCharts, key, Boolean.TRUE);
 
       return getTxGraphsByDayRange((int) day, txCharts);
     }
 
+    // if day store in cache was larger than 32 day remove
+    if (keySize > DAYS_IN_MONTH) {
+      LongStream.range(BigInteger.ZERO.longValue(), keySize - DAYS_IN_MONTH)
+          .forEach(time -> redisTemplate.opsForList().rightPop(key));
+    }
+
+    // txGraphsRedis will not empty
     List<TxGraph> txGraphsRedis = redisTemplate.opsForList()
         .range(key, BigInteger.ZERO.longValue(), DAYS_IN_MONTH);
 
@@ -965,7 +979,7 @@ public class TxServiceImpl implements TxService {
 
     if (distanceFromRealAndCache > BigInteger.TWO.longValue()) {
       List<TxGraph> txCharts = toTxGraph(txChartRepository
-          .getTransactionGraphDayGreaterThan(previousMonth));
+          .getTransactionGraphDayGreaterThan(previousMonthInSeconds));
       updateRedisTxGraph(txCharts, key, Boolean.TRUE);
       return getTxGraphsByDayRange((int) day, txCharts);
     }
@@ -980,7 +994,7 @@ public class TxServiceImpl implements TxService {
     List<TxGraph> txs = toTxGraph(txChartRepository.getTransactionGraphByDay(days));
 
     if (ObjectUtils.isEmpty(txs)) {
-      return txGraphsRedis.subList(BigInteger.ZERO.intValue(), (int) day);
+      return getTxGraphsByDayRange((int) day, txGraphsRedis);
     }
 
     final var txGraphs = new ArrayList<TxGraph>();
@@ -1010,8 +1024,12 @@ public class TxServiceImpl implements TxService {
   }
 
   private static List<TxGraph> getTxGraphsByDayRange(int day, List<TxGraph> txCharts) {
+
     if (txCharts.size() < day) {
-      return txCharts;
+      return txCharts
+          .stream()
+          .sorted(Comparator.comparing(TxGraph::getDate))
+          .toList();
     }
 
     return txCharts
