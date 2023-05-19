@@ -6,11 +6,11 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
-import org.cardanofoundation.explorer.common.report.ColumnFieldEnum;
-import org.cardanofoundation.explorer.common.report.ColumnTitleEnum;
-import org.cardanofoundation.explorer.common.report.ExportColumn;
-import org.cardanofoundation.explorer.common.report.ExportColumn.Alignment;
-import org.cardanofoundation.explorer.common.utils.DataUtil;
+import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.api.util.report.ColumnFieldEnum;
+import org.cardanofoundation.explorer.api.util.report.ColumnTitleEnum;
+import org.cardanofoundation.explorer.api.util.report.ExportColumn;
+import org.cardanofoundation.explorer.api.util.report.ExportColumn.Alignment;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -70,8 +70,7 @@ public class PoolReportDetailResponse {
                              Alignment.RIGHT));
       }
       epochSizeColumns.add(
-          new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE,
-                           Alignment.RIGHT));
+          new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE, Alignment.RIGHT));
       return epochSizeColumns;
     }
   }
