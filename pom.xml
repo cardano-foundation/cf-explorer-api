@@ -75,7 +75,8 @@
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
         <sonar.cpd.exclusions>**/entity/*, **/model/*</sonar.cpd.exclusions>
-        <spring-cloud-aws.version>2.4.2</spring-cloud-aws.version>
+        <version.spring-cloud-aws>2.4.2</version.spring-cloud-aws>
+        <version.apache.poi>5.2.0</version.apache.poi>
     </properties>
 
     <repositories>
@@ -259,11 +260,6 @@
             <version>${version.google-gson}</version>
         </dependency>
         <dependency>
-            <groupId>io.awspring.cloud</groupId>
-            <artifactId>spring-cloud-aws-context</artifactId>
-            <version>${spring-cloud-aws.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.cardanofoundation.ledgersync</groupId>
             <artifactId>common</artifactId>
             <version>${version.ledgersync-common}</version>
@@ -277,6 +273,21 @@
             <groupId>org.cardanofoundation.explorer</groupId>
             <artifactId>consumer-common</artifactId>
             <version>${version.explorer-consumer-common}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-context</artifactId>
+            <version>${version.spring-cloud-aws}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${version.apache.poi}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${version.apache.poi}</version>
         </dependency>
     </dependencies>
 
