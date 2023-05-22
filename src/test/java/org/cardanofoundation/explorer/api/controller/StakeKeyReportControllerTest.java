@@ -16,9 +16,11 @@ import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
@@ -27,6 +29,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRe
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -70,6 +73,9 @@ class StakeKeyReportControllerTest {
 
   @MockBean
   private StakeKeyReportService stakeKeyReportService;
+
+  @MockBean
+  private ReportHistoryService reportHistoryService;
 
   @MockBean
   private AuthInterceptor authInterceptor;
@@ -223,6 +229,37 @@ class StakeKeyReportControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().string(
             containsString("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")))
+        .andDo(print());
+  }
+
+  @Test
+  void shouldGetReportHistoryDashBoard() throws Exception {
+    String username = "username";
+
+    ReportHistoryResponse response = ReportHistoryResponse.builder()
+        .reportName("report_name_123")
+        .stakeKeyReportId(1L)
+        .type(ReportType.STAKE_KEY)
+        .build();
+
+    List<ReportHistoryResponse> responseList = Collections.singletonList(response);
+
+    BDDMockito.given(
+            reportHistoryService.getReportHistory(any(ReportHistoryFilterRequest.class), anyString(),
+                any(Pageable.class)))
+        .willReturn(new BaseFilterResponse<>(responseList, 1, 1, 0));
+
+    mockMvc.perform(get(END_POINT + "/dashboard")
+            .param("page", "0")
+            .param("size", "1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .with(request -> {
+              request.setAttribute("username", username);
+              return request;
+            }))
+        .andExpect(status().isOk())
+        .andExpect(content().string(
+            containsString("report_name_123")))
         .andDo(print());
   }
 
