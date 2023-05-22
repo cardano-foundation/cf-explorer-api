@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import lombok.val;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -35,7 +38,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
+import org.cardanofoundation.explorer.api.config.redis.sentinel.RedisProperties.SentinelNode;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -47,7 +50,7 @@ import redis.clients.jedis.JedisPoolConfig;
 @EnableCaching
 @Profile("sentinel")
 @RequiredArgsConstructor
-public class RedisConfiguration extends CachingConfigurerSupport {
+public class RedisConfiguration implements CachingConfigurer {
 
   /**
    * Redis properties config
@@ -124,7 +127,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
   @Bean
   @Autowired
   RedisTemplate<String, ?> redisTemplate(//NOSONAR
-      final LettuceConnectionFactory lettuceConnectionFactory) {
+                                         final LettuceConnectionFactory lettuceConnectionFactory) {
     var redisTemplate = new RedisTemplate<String, Object>();
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
     redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -143,7 +146,8 @@ public class RedisConfiguration extends CachingConfigurerSupport {
    * @return bean hashOperations
    */
   @Bean
-  <HK, V> HashOperations<String, HK, V> hashOperations(final RedisTemplate<String, V> redisTemplate) { //NOSONAR
+  <HK, V> HashOperations<String, HK, V> hashOperations(
+      final RedisTemplate<String, V> redisTemplate) { //NOSONAR
     return redisTemplate.opsForHash();
   }
 
@@ -212,8 +216,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     };
   }
 
-  @Bean (name="cacheManager")
-  public RedisCacheManager cacheManager(@Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
+  @Bean(name = "cacheManager")
+  public RedisCacheManager cacheManager(
+      @Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
     RedisCacheConfiguration coinPriceConf = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofSeconds(apiMarketIntervalTime));
     Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
