@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.config.redis.sentinel;
 
-import org.cardanofoundation.explorer.api.config.redis.sentinel.RedisProperties.SentinelNode;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,7 +33,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -88,7 +89,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     return sentinelConfig;
   }
 
-  private static Function<SentinelNode, RedisNode> getSentinelNodeRedisNodeFunction() {
+  private static Function<RedisProperties.SentinelNode, RedisNode> getSentinelNodeRedisNodeFunction() {
     return sentinel -> new RedisNode(sentinel.getHost(), sentinel.getPort());
   }
 
@@ -126,7 +127,10 @@ public class RedisConfiguration extends CachingConfigurerSupport {
       final LettuceConnectionFactory lettuceConnectionFactory) {
     var redisTemplate = new RedisTemplate<String, Object>();
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
-    redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+    redisTemplate.setKeySerializer(new StringRedisSerializer());
+    redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
+    redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
     return redisTemplate;
   }
 
