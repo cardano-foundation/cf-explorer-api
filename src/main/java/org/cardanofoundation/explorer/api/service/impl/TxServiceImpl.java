@@ -9,6 +9,7 @@ import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.DelegationMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
+import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.mapper.TxMapper;
 import org.cardanofoundation.explorer.api.mapper.TxOutMapper;
@@ -44,6 +45,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
@@ -120,6 +122,9 @@ public class TxServiceImpl implements TxService {
   private final PoolUpdateRepository poolUpdateRepository;
   private final PoolRelayRepository poolRelayRepository;
   private final PoolRetireRepository poolRetireRepository;
+  private final ParamProposalRepository paramProposalRepository;
+  private final EpochParamRepository epochParamRepository;
+  private final ProtocolMapper protocolMapper;
   private final TxChartRepository txChartRepository;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
@@ -410,6 +415,7 @@ public class TxServiceImpl implements TxService {
     getMints(tx, txResponse);
     getStakeCertificates(tx, txResponse);
     getPoolCertificates(tx, txResponse);
+    getProtocols(tx, txResponse);
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -1047,5 +1053,36 @@ public class TxServiceImpl implements TxService {
    */
   private String getRedisKey(String rawKey) {
     return String.join("_", this.network, rawKey);
+  }
+
+  private void getProtocols(Tx tx, TxResponse txResponse) {
+
+
+    List<ParamProposal> paramProposals = paramProposalRepository
+        .getParamProposalByRegisteredTxId(tx.getId());
+
+    if (!ObjectUtils.isEmpty(paramProposals)) {
+      //find current change param
+      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
+      //get previous value
+      if (Objects.nonNull(txResponse.getProtocols())) {
+        Integer epochNo = tx.getBlock().getEpochNo();
+        List<ParamProposal> previousParam =
+            paramProposalRepository.getParamProposalBySmallerThanRegisteredTxId(tx.getId());
+
+        if (ObjectUtils.isEmpty(previousParam)) {
+          epochParamRepository.findEpochParamByEpochNo(epochNo)
+              .ifPresent(epochParam ->
+                  txResponse.setPreviousProtocols(
+                      protocolMapper.mapPreviousProtocolParamResponse(epochParam,
+                          txResponse.getProtocols()))
+              );
+        } else {
+          txResponse.setPreviousProtocols(
+              protocolMapper.mapPreviousProtocolParamResponse(previousParam
+                  , txResponse.getProtocols()));
+        }
+      }
+    }
   }
 }
