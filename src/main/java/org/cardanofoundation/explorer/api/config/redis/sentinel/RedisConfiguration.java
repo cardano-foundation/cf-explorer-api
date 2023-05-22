@@ -38,7 +38,6 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
 import org.cardanofoundation.explorer.api.config.redis.sentinel.RedisProperties.SentinelNode;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -93,7 +92,7 @@ public class RedisConfiguration implements CachingConfigurer {
     return sentinelConfig;
   }
 
-  private static Function<SentinelNode, RedisNode> getSentinelNodeRedisNodeFunction() {
+  private static Function<RedisProperties.SentinelNode, RedisNode> getSentinelNodeRedisNodeFunction() {
     return sentinel -> new RedisNode(sentinel.getHost(), sentinel.getPort());
   }
 

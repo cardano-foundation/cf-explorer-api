@@ -4,7 +4,7 @@
 
     <groupId>org.cardanofoundation.explorer</groupId>
     <artifactId>api</artifactId>
-    <version>0.3.7-SNAPSHOT</version>
+    <version>0.3.10-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>Explorer REST API exposing functions to the explorer web frontend.</description>
 
@@ -74,7 +74,8 @@
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
         <sonar.cpd.exclusions>**/entity/*, **/model/*</sonar.cpd.exclusions>
-        <spring-cloud-aws.version>2.4.2</spring-cloud-aws.version>
+        <version.spring-cloud-aws>2.4.2</version.spring-cloud-aws>
+        <version.apache.poi>5.2.0</version.apache.poi>
     </properties>
 
     <repositories>
@@ -275,7 +276,17 @@
         <dependency>
             <groupId>io.awspring.cloud</groupId>
             <artifactId>spring-cloud-aws-context</artifactId>
-            <version>${spring-cloud-aws.version}</version>
+            <version>${version.spring-cloud-aws}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${version.apache.poi}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${version.apache.poi}</version>
         </dependency>
     </dependencies>
 
