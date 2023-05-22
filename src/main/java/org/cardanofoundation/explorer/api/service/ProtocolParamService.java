@@ -1,18 +1,20 @@
 package org.cardanofoundation.explorer.api.service;
 
-import java.util.Set;
-
 import org.springframework.transaction.annotation.Transactional;
 
-import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
-import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
+import org.cardanofoundation.explorer.api.model.response.protocol.FixedProtocol;
+import org.cardanofoundation.explorer.api.model.response.protocol.HistoriesProtocol;
 import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 
 public interface ProtocolParamService {
 
   @Transactional(readOnly = true)
-  Set<ProtocolHistory> getProtocolHistory(ProtocolType protocolType);
+  HistoriesProtocol getHistoryProtocolParameters();
 
   @Transactional(readOnly = true)
-  Protocols getProtocolCurrentHistory();
+  Protocols getLatestChange();
+
+  @Transactional(readOnly = true)
+  FixedProtocol getFixedProtocols();
+
 }

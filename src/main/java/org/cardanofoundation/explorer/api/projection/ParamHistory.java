@@ -1,4 +1,4 @@
-package com.cardano.explorer.projection;
+package org.cardanofoundation.explorer.api.projection;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -62,9 +62,12 @@ public interface ParamHistory   {
   String getEntropy();
 
   Long getCostModel();
+
   Long getTx();
 
   Date getTime();
 
   String getHash();
+
+  Integer getEpochNo();
 }

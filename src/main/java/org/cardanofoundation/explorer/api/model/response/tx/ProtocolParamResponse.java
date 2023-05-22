@@ -1,11 +1,11 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
-import java.math.BigInteger;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 
 @Data
 @Builder
@@ -13,20 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProtocolParamResponse {
   Object minFeeA;
-
-  public static int hashCode(Object... a) {
-    if (a == null) {
-      return -BigInteger.ONE.intValue();
-    }
-
-    int result = BigInteger.ONE.intValue();
-
-    for (Object element : a) {
-      result = 31 * result + (element == null ? -BigInteger.ONE.intValue() : element.hashCode());
-    }
-
-    return result;
-  }
 
   Object minFeeB;
 
@@ -84,9 +70,10 @@ public class ProtocolParamResponse {
 
   Object costModel;
 
+
   @Override
   public int hashCode() {
-    return hashCode(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
+    return CommonConstant.hashCode(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
         poolDeposit,
         maxEpoch, optimalPoolCount, minUtxoValue, minPoolCost, maxTxExMem, maxTxExSteps,
         maxBlockExMem, maxBlockExSteps, maxValSize, coinsPerUtxoSize, influence, monetaryExpandRate,
