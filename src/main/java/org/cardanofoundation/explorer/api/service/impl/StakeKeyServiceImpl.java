@@ -18,9 +18,11 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
+import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -32,7 +34,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -65,6 +66,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
   private final EpochStakeRepository epochStakeRepository;
+  private final TopDelegatorCacheService topDelegatorCacheService;
 
   private static final int STAKE_ANALYTIC_NUMBER = 5;
 
@@ -195,23 +197,28 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    List<StakeAddressProjection> stakeList
-        = stakeAddressRepository.findStakeAddressOrderByBalance(pageable);
-    List<StakeFilterResponse> content = new ArrayList<>();
-    Set<String> stakeAddressList = stakeList.stream()
-        .map(StakeAddressProjection::getStakeAddress).collect(Collectors.toSet());
+    List<Long> topDelegatorStakeIdsCached = topDelegatorCacheService.getTopStakeDelegatorCache();
+
+    List<StakeAddressProjection> stakeList;
+    if (topDelegatorStakeIdsCached.isEmpty()) {
+      stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageable);
+    } else {
+      stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(topDelegatorStakeIdsCached, pageable);
+    }
+
+    Set<String> stakeAddressList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
     var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
-    var poolDataMap = poolData.stream().collect(Collectors.toMap(
-        StakeDelegationProjection::getStakeAddress, Function.identity()));
-    for(var stake : stakeList) {
-      StakeDelegationProjection delegation =  poolDataMap.get(stake.getStakeAddress());
-      StakeFilterResponse stakeResponse
-          = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
+    var mapPoolByStakeAddress = StreamUtil.toMap(poolData, StakeDelegationProjection::getStakeAddress);
+
+    List<StakeFilterResponse> content = new ArrayList<>();
+    for (var stake : stakeList) {
+      StakeDelegationProjection delegation = mapPoolByStakeAddress.get(stake.getStakeAddress());
+      StakeFilterResponse stakeResponse = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
       stakeResponse.setPoolName(getNameValueFromJson(delegation.getPoolData()));
       content.add(stakeResponse);
     }
-    Page<StakeFilterResponse> pageResponse
-        = new PageImpl<>(content, pageable, pageable.getPageSize());
+
+    Page<StakeFilterResponse> pageResponse = new PageImpl<>(content, pageable, pageable.getPageSize());
     return new BaseFilterResponse<>(pageResponse);
   }
 
