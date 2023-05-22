@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
@@ -15,7 +16,7 @@ public interface TxService {
   List<TxSummary> findLatestTxSummary();
 
   @Transactional(readOnly = true)
-  List<TxGraph> getTxsAfterTime();
+  List<TxGraph> getTransactionChartByRange(TxChartRange range);
 
   /**
    * Get list transaction with paging

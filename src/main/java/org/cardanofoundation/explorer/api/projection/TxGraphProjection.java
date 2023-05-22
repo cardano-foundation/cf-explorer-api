@@ -1,8 +1,14 @@
 package org.cardanofoundation.explorer.api.projection;
 
-import java.sql.Timestamp;
+import java.math.BigInteger;
 
 public interface TxGraphProjection {
-  Timestamp getTime();
-  Integer getTransactionNo();
+
+  BigInteger getTime();
+
+  BigInteger getSimpleTransactions();
+
+  BigInteger getSmartContract();
+
+  BigInteger getMetadata();
 }
