@@ -146,6 +146,9 @@ class PoolLifecycleServiceTest {
     when(poolUpdateRepository.findPoolUpdateByPool(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, null, null,
         pageable)).thenReturn(new PageImpl<>(List.of(projection)));
+    when(poolUpdateRepository.findPoolRegistrationByPool(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, null, null,
+        pageable)).thenReturn(new PageImpl<>(List.of(projection)));
     Assertions.assertEquals(1,
         poolLifecycleService.registration(
                 "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, null, null, pageable)
@@ -187,6 +190,10 @@ class PoolLifecycleServiceTest {
     when(projection.getTxHash()).thenReturn(
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
     when(poolUpdateRepository.findPoolUpdateByPool(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", null, null,
+        pageable)).thenReturn(new PageImpl<>(List.of(projection)));
+    when(poolUpdateRepository.findPoolRegistrationByPool(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", null, null,
         pageable)).thenReturn(new PageImpl<>(List.of(projection)));
@@ -239,6 +246,10 @@ class PoolLifecycleServiceTest {
         toDate,
         pageable)).thenReturn(
         new PageImpl<>(List.of(projection)));
+    when(poolUpdateRepository.findPoolRegistrationByPool(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, fromDate,
+        toDate,
+        pageable)).thenReturn(new PageImpl<>(List.of(projection)));
     Assertions.assertEquals(1, poolLifecycleService.registration(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, fromDate,
         toDate,
@@ -288,6 +299,11 @@ class PoolLifecycleServiceTest {
         toDate,
         pageable)).thenReturn(
         new PageImpl<>(List.of(projection)));
+    when(poolUpdateRepository.findPoolRegistrationByPool(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", fromDate,
+        toDate,
+        pageable)).thenReturn(new PageImpl<>(List.of(projection)));
     Assertions.assertEquals(1, poolLifecycleService.registration(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", fromDate,
