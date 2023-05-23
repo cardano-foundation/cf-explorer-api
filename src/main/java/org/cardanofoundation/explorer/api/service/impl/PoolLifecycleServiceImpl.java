@@ -51,7 +51,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   public BaseFilterResponse<PoolUpdateResponse> registration(String poolView, String txHash,
                                                              Date fromDate, Date toDate,
                                                              Pageable pageable) {
-    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable);
+    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable, 0);
   }
 
   @Override
@@ -75,7 +75,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   public BaseFilterResponse<PoolUpdateResponse> poolUpdate(String poolView, String txHash,
       Date fromDate, Date toDate,
       Pageable pageable) {
-    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable);
+    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable, 1);
   }
 
   @Override
@@ -243,7 +243,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   private BaseFilterResponse<PoolUpdateResponse> getDataForPoolUpdate(String poolView,
       String txHash,
       Date fromDate, Date toDate,
-      Pageable pageable) {
+      Pageable pageable, Integer type) {
     BaseFilterResponse<PoolUpdateResponse> res = new BaseFilterResponse<>();
     Timestamp fromTimestamp = null;
     Timestamp toTimestamp = null;
@@ -253,8 +253,14 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     if (Objects.nonNull(toDate)) {
       toTimestamp = new Timestamp(toDate.getTime());
     }
-    Page<PoolUpdateProjection> projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
-        txHash, fromTimestamp, toTimestamp, pageable);
+    Page<PoolUpdateProjection> projection = null;
+    if (type == 0) {
+      projection = poolUpdateRepository.findPoolRegistrationByPool(poolView,
+          txHash, fromTimestamp, toTimestamp, pageable);
+    } else {
+      projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
+          txHash, fromTimestamp, toTimestamp, pageable);
+    }
     List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();
     if (Objects.nonNull(projection)) {
       projection.stream().forEach(poolUpdate -> {
