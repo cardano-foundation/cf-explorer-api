@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -317,261 +318,289 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   private void mapProtocols(List<ParamHistory> paramProposals, Protocols protocols,
                             Map<Long, Tx> txs) {
-
     paramProposals
         .stream()
-        .takeWhile(paramProposal -> Objects.isNull(protocols.getMinFeeA()) &&
-            Objects.isNull(protocols.getMinFeeB()) &&
-            Objects.isNull(protocols.getMaxBlockSize()) &&
-            Objects.isNull(protocols.getMaxTxSize()) &&
-            Objects.isNull(protocols.getMaxBhSize()) &&
-            Objects.isNull(protocols.getKeyDeposit()) &&
-            Objects.isNull(protocols.getPoolDeposit()) &&
-            Objects.isNull(protocols.getMaxEpoch()) &&
-            Objects.isNull(protocols.getOptimalPoolCount()) &&
-            Objects.isNull(protocols.getMinUtxoValue()) &&
-            Objects.isNull(protocols.getMinPoolCost()) &&
-            Objects.isNull(protocols.getMaxTxExMem()) &&
-            Objects.isNull(protocols.getMaxTxExSteps()) &&
-            Objects.isNull(protocols.getMaxBlockExMem()) &&
-            Objects.isNull(protocols.getMaxBlockExSteps()) &&
-            Objects.isNull(protocols.getMaxValSize()) &&
-            Objects.isNull(protocols.getCoinsPerUtxoSize()) &&
-            Objects.isNull(protocols.getInfluence()) &&
-            Objects.isNull(protocols.getMonetaryExpandRate()) &&
-            Objects.isNull(protocols.getTreasuryGrowthRate()) &&
-            Objects.isNull(protocols.getDecentralisation()) &&
-            Objects.isNull(protocols.getPriceMem()) &&
-            Objects.isNull(protocols.getPriceStep()) &&
-            Objects.isNull(protocols.getProtocolMajor()) &&
-            Objects.isNull(protocols.getProtocolMinor()) &&
-            Objects.isNull(protocols.getCollateralPercent()) &&
-            Objects.isNull(protocols.getMaxCollateralInputs()) &&
-            Objects.isNull(protocols.getEntropy()) &&
-            Objects.isNull(protocols.getCostModel()))
+        .sorted(Comparator.comparing(ParamHistory::getEpochNo).reversed().thenComparing(ParamHistory::getTx))
         .forEach(paramProposal -> {
           AtomicReference<Date> timeChange = new AtomicReference<>(null);
-          if (Objects.isNull(protocols.getMinFeeA()) &&
-              Objects.nonNull(paramProposal.getMinFeeA())) {
-            protocols.setMinFeeA(getChangeProtocol(
-                paramProposal.getMinFeeA(),
-                txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMinFeeA())) {
+              if(protocols.getMinFeeA() == null || !protocols.getMinFeeA().getValue().equals(paramProposal.getMinFeeA())) {
+                  protocols.setMinFeeA(getChangeProtocol(
+                          paramProposal.getMinFeeA(),
+                          txs.get(paramProposal.getTx()), timeChange));
+              }
+
           }
 
-          if (Objects.isNull(protocols.getMinFeeB()) &&
-              Objects.nonNull(paramProposal.getMinFeeB())) {
-            protocols.setMinFeeB(
-                getChangeProtocol(
-                    paramProposal.getMinFeeB(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMinFeeB())) {
+              if(protocols.getMinFeeB() == null || !protocols.getMinFeeB().getValue().equals(paramProposal.getMinFeeB())) {
+                  protocols.setMinFeeB(
+                          getChangeProtocol(
+                                  paramProposal.getMinFeeB(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
+
           }
 
-          if (Objects.isNull(protocols.getMaxBlockSize()) &&
-              Objects.nonNull(paramProposal.getMaxBlockSize())) {
-            protocols.setMaxBlockSize(
-                getChangeProtocol(
-                    paramProposal.getMaxBlockSize(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxBlockSize())) {
+
+              if(Objects.isNull(protocols.getMaxBlockSize()) || !protocols.getMaxBlockSize().getValue().equals(paramProposal.getMaxBlockSize())) {
+                  protocols.setMaxBlockSize(
+                          getChangeProtocol(
+                                  paramProposal.getMaxBlockSize(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMaxTxSize()) &&
-              Objects.nonNull(paramProposal.getMaxTxSize())) {
-            protocols.setMaxTxSize(
-                getChangeProtocol(
-                    paramProposal.getMaxTxSize(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxTxSize())) {
+
+              if(Objects.isNull(protocols.getMaxTxSize()) || !protocols.getMaxTxSize().getValue().equals(paramProposal.getMaxTxSize())) {
+                  protocols.setMaxTxSize(
+                          getChangeProtocol(
+                                  paramProposal.getMaxTxSize(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMaxBhSize()) &&
-              Objects.nonNull(paramProposal.getMaxBhSize())) {
-            protocols.setMaxBhSize(
-                getChangeProtocol(
-                    paramProposal.getMaxBhSize(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxBhSize())) {
+
+              if(Objects.isNull(protocols.getMaxBhSize()) || !protocols.getMaxBhSize().getValue().equals(paramProposal.getMaxBhSize())) {
+                  protocols.setMaxBhSize(
+                          getChangeProtocol(
+                                  paramProposal.getMaxBhSize(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getKeyDeposit()) &&
-              Objects.nonNull(paramProposal.getKeyDeposit())) {
-            protocols.setKeyDeposit(
-                getChangeProtocol(
-                    paramProposal.getKeyDeposit(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getKeyDeposit())) {
+
+              if(Objects.isNull(protocols.getKeyDeposit()) || !protocols.getKeyDeposit().getValue().equals(paramProposal.getKeyDeposit())) {
+                  protocols.setKeyDeposit(
+                          getChangeProtocol(
+                                  paramProposal.getKeyDeposit(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getPoolDeposit()) &&
-              Objects.nonNull(paramProposal.getPoolDeposit())) {
-            protocols.setPoolDeposit(
-                getChangeProtocol(
-                    paramProposal.getPoolDeposit(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getPoolDeposit())) {
+
+              if(Objects.isNull(protocols.getPoolDeposit()) || !protocols.getPoolDeposit().getValue().equals(paramProposal.getPoolDeposit())) {
+                  protocols.setPoolDeposit(
+                          getChangeProtocol(
+                                  paramProposal.getPoolDeposit(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMaxEpoch()) &&
-              Objects.nonNull(paramProposal.getMaxEpoch())) {
-            protocols.setMaxEpoch(
-                getChangeProtocol(
-                    paramProposal.getMaxEpoch(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxEpoch())) {
+
+              if(Objects.isNull(protocols.getMaxEpoch()) || !protocols.getMaxEpoch().getValue().equals(paramProposal.getMaxEpoch())) {
+                  protocols.setMaxEpoch(
+                          getChangeProtocol(
+                                  paramProposal.getMaxEpoch(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getOptimalPoolCount()) &&
-              Objects.nonNull(paramProposal.getOptimalPoolCount())) {
-            protocols.setOptimalPoolCount(
-                getChangeProtocol(
-                    paramProposal.getOptimalPoolCount(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getOptimalPoolCount())) {
+
+              if(Objects.isNull(protocols.getOptimalPoolCount()) || !protocols.getOptimalPoolCount().getValue().equals(paramProposal.getOptimalPoolCount())) {
+                  protocols.setOptimalPoolCount(
+                          getChangeProtocol(
+                                  paramProposal.getOptimalPoolCount(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMinUtxoValue()) &&
-              Objects.nonNull(paramProposal.getMinUtxoValue())) {
-            protocols.setMinUtxoValue(
-                getChangeProtocol(
-                    paramProposal.getMinUtxoValue(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMinUtxoValue())) {
+
+              if(Objects.isNull(protocols.getMinUtxoValue()) || !protocols.getMinUtxoValue().getValue().equals(paramProposal.getMinUtxoValue())) {
+                  protocols.setMinUtxoValue(
+                          getChangeProtocol(
+                                  paramProposal.getMinUtxoValue(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMinPoolCost()) &&
-              Objects.nonNull(paramProposal.getMinPoolCost())) {
-            protocols.setMinPoolCost(
-                getChangeProtocol(
-                    paramProposal.getMinPoolCost(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMinPoolCost())) {
+
+              if(Objects.isNull(protocols.getMinPoolCost()) || !protocols.getMinPoolCost().getValue().equals(paramProposal.getMinPoolCost())) {
+                  protocols.setMinPoolCost(
+                          getChangeProtocol(
+                                  paramProposal.getMinPoolCost(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMaxTxExMem()) &&
-              Objects.nonNull(paramProposal.getMaxTxExMem())) {
-            protocols.setMaxTxExMem(
-                getChangeProtocol(
-                    paramProposal.getMaxTxExMem(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxTxExMem())) {
+
+              if(Objects.isNull(protocols.getMaxTxExMem()) || !protocols.getMaxTxExMem().getValue().equals(paramProposal.getMaxTxExMem())) {
+                  protocols.setMaxTxExMem(
+                          getChangeProtocol(
+                                  paramProposal.getMaxTxExMem(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
-          if (Objects.isNull(protocols.getMaxTxExSteps()) &&
-              Objects.nonNull(paramProposal.getMaxTxExSteps())) {
-            protocols.setMaxTxExSteps(
-                getChangeProtocol(
-                    paramProposal.getMaxTxExSteps(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxTxExSteps())) {
+
+              if(Objects.isNull(protocols.getMaxTxExSteps()) || !protocols.getMaxTxExSteps().getValue().equals(paramProposal.getMaxTxExSteps())) {
+                  protocols.setMaxTxExSteps(
+                          getChangeProtocol(
+                                  paramProposal.getMaxTxExSteps(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMaxBlockExMem()) &&
-              Objects.nonNull(paramProposal.getMaxBlockExMem())) {
-            protocols.setMaxBlockExMem(
-                getChangeProtocol(
-                    paramProposal.getMaxBlockExMem(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxBlockExMem())) {
+
+              if(Objects.isNull(protocols.getMaxBlockExMem()) || !protocols.getMaxBlockExMem().getValue().equals(paramProposal.getMaxBlockExMem())) {
+                  protocols.setMaxBlockExMem(
+                          getChangeProtocol(
+                                  paramProposal.getMaxBlockExMem(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMaxBlockExSteps()) &&
-              Objects.nonNull(paramProposal.getMaxBlockExSteps())) {
-            protocols.setMaxBlockExSteps(
-                getChangeProtocol(
-                    paramProposal.getMaxBlockExSteps(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxBlockExSteps())) {
+
+              if(Objects.isNull(protocols.getMaxBlockExSteps()) || !protocols.getMaxBlockExSteps().getValue().equals(paramProposal.getMaxBlockExSteps())) {
+                  protocols.setMaxBlockExSteps(
+                          getChangeProtocol(
+                                  paramProposal.getMaxBlockExSteps(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMaxValSize()) &&
-              Objects.nonNull(paramProposal.getMaxValSize())) {
-            protocols.setMaxValSize(
-                getChangeProtocol(
-                    paramProposal.getMaxValSize(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxValSize())) {
+
+              if(Objects.isNull(protocols.getMaxValSize()) || !protocols.getMaxValSize().getValue().equals(paramProposal.getMaxValSize())) {
+                  protocols.setMaxValSize(
+                          getChangeProtocol(
+                                  paramProposal.getMaxValSize(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getCoinsPerUtxoSize()) &&
-              Objects.nonNull(paramProposal.getCoinsPerUtxoSize())) {
-            protocols.setCoinsPerUtxoSize(
-                getChangeProtocol(
-                    paramProposal.getCoinsPerUtxoSize(),
-                    txs.get(paramProposal.getTx()), timeChange));
-          }
-          if (Objects.isNull(protocols.getInfluence()) &&
-              Objects.nonNull(paramProposal.getInfluence())) {
-            protocols.setInfluence(
-                getChangeProtocol(
-                    paramProposal.getInfluence(),
-                    txs.get(paramProposal.getTx()), timeChange));
-          }
+          if (Objects.nonNull(paramProposal.getCoinsPerUtxoSize())) {
 
-          if (Objects.isNull(protocols.getMonetaryExpandRate()) &&
-              Objects.nonNull(paramProposal.getMonetaryExpandRate())) {
-            protocols.setMonetaryExpandRate(getChangeProtocol(
-                paramProposal.getMonetaryExpandRate(),
-                txs.get(paramProposal.getTx()), timeChange));
+              if(Objects.isNull(protocols.getCoinsPerUtxoSize()) || !protocols.getCoinsPerUtxoSize().getValue().equals(paramProposal.getCoinsPerUtxoSize())) {
+                  protocols.setCoinsPerUtxoSize(
+                          getChangeProtocol(
+                                  paramProposal.getCoinsPerUtxoSize(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
+          }
+          if (Objects.nonNull(paramProposal.getInfluence())) {
+
+              if(Objects.isNull(protocols.getInfluence()) || !protocols.getInfluence().getValue().equals(paramProposal.getInfluence())) {
+                  protocols.setInfluence(
+                          getChangeProtocol(
+                                  paramProposal.getInfluence(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getTreasuryGrowthRate()) &&
-              Objects.nonNull(paramProposal.getTreasuryGrowthRate())) {
-            protocols.setTreasuryGrowthRate(getChangeProtocol(
-                paramProposal.getTreasuryGrowthRate(),
-                txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMonetaryExpandRate())) {
+
+              if(Objects.isNull(protocols.getMonetaryExpandRate()) || !protocols.getMonetaryExpandRate().getValue().equals(paramProposal.getMonetaryExpandRate())) {
+                  protocols.setMonetaryExpandRate(getChangeProtocol(
+                          paramProposal.getMonetaryExpandRate(),
+                          txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getDecentralisation()) &&
-              Objects.nonNull(paramProposal.getDecentralisation())) {
-            protocols.setDecentralisation(
-                getChangeProtocol(paramProposal.getDecentralisation(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getTreasuryGrowthRate())) {
+
+              if(Objects.isNull(protocols.getTreasuryGrowthRate()) || !protocols.getTreasuryGrowthRate().getValue().equals(paramProposal.getTreasuryGrowthRate())) {
+                  protocols.setTreasuryGrowthRate(getChangeProtocol(
+                          paramProposal.getTreasuryGrowthRate(),
+                          txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getPriceMem()) &&
-              Objects.nonNull(paramProposal.getPriceMem())) {
-            protocols.setPriceMem(
-                getChangeProtocol(paramProposal.getPriceMem(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getDecentralisation())) {
+              if(Objects.isNull(protocols.getDecentralisation()) || !protocols.getDecentralisation().getValue().equals(paramProposal.getDecentralisation())) {
+                  protocols.setDecentralisation(
+                          getChangeProtocol(paramProposal.getDecentralisation(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
+
           }
 
-          if (Objects.isNull(protocols.getPriceStep()) &&
-              Objects.nonNull(paramProposal.getPriceStep())) {
-            protocols.setPriceStep(
-                getChangeProtocol(paramProposal.getPriceStep(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getPriceMem())) {
+
+              if(Objects.isNull(protocols.getPriceMem()) || !protocols.getPriceMem().getValue().equals(paramProposal.getPriceMem())) {
+                  protocols.setPriceMem(
+                          getChangeProtocol(paramProposal.getPriceMem(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getProtocolMajor()) &&
-              Objects.nonNull(paramProposal.getProtocolMajor())) {
-            protocols.setProtocolMajor(
-                getChangeProtocol(paramProposal.getProtocolMajor(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getPriceStep())) {
+
+              if(Objects.isNull(protocols.getPriceStep()) || !protocols.getPriceStep().getValue().equals(paramProposal.getPriceStep())) {
+                  protocols.setPriceStep(
+                          getChangeProtocol(paramProposal.getPriceStep(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getProtocolMinor()) &&
-              Objects.nonNull(paramProposal.getProtocolMinor())) {
-            protocols.setProtocolMinor(
-                getChangeProtocol(paramProposal.getProtocolMinor(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getProtocolMajor())) {
+
+              if(Objects.isNull(protocols.getProtocolMajor()) || !protocols.getProtocolMajor().getValue().equals(paramProposal.getProtocolMajor())) {
+                  protocols.setProtocolMajor(
+                          getChangeProtocol(paramProposal.getProtocolMajor(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getCollateralPercent()) &&
-              Objects.nonNull(paramProposal.getCollateralPercent())) {
-            protocols.setCollateralPercent(
-                getChangeProtocol(paramProposal.getCollateralPercent(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getProtocolMinor())) {
+
+              if(Objects.isNull(protocols.getProtocolMinor()) || !protocols.getProtocolMinor().getValue().equals(paramProposal.getProtocolMinor())) {
+                  protocols.setProtocolMinor(
+                          getChangeProtocol(paramProposal.getProtocolMinor(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getMaxCollateralInputs()) &&
-              Objects.nonNull(paramProposal.getMaxCollateralInputs())) {
-            protocols.setMaxCollateralInputs(
-                getChangeProtocol(paramProposal.getMaxCollateralInputs(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getCollateralPercent())) {
+
+              if(Objects.isNull(protocols.getCollateralPercent()) || !protocols.getCollateralPercent().getValue().equals(paramProposal.getCollateralPercent())) {
+                  protocols.setCollateralPercent(
+                          getChangeProtocol(paramProposal.getCollateralPercent(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.isNull(protocols.getEntropy()) &&
-              Objects.nonNull(paramProposal.getEntropy())) {
-            protocols.setEntropy(
-                getChangeProtocol(paramProposal.getEntropy(),
-                    txs.get(paramProposal.getTx()), timeChange));
+          if (Objects.nonNull(paramProposal.getMaxCollateralInputs())) {
+
+              if(Objects.isNull(protocols.getMaxCollateralInputs()) || !protocols.getMaxCollateralInputs().getValue().equals(paramProposal.getMaxCollateralInputs())) {
+                  protocols.setMaxCollateralInputs(
+                          getChangeProtocol(paramProposal.getMaxCollateralInputs(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
-          if (Objects.nonNull(paramProposal.getCostModel()) &&
-              Objects.isNull(protocols.getCostModel())) {
+          if (Objects.nonNull(paramProposal.getEntropy())) {
 
-            protocols.setCostModel(
-                getChangeCostModelProtocol(paramProposal.getCostModel(),
-                    txs.get(paramProposal.getTx()), timeChange));
+              if(Objects.isNull(protocols.getEntropy()) || !protocols.getEntropy().getValue().equals(paramProposal.getEntropy())) {
+                  protocols.setEntropy(
+                          getChangeProtocol(paramProposal.getEntropy(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
+          }
+
+          if (Objects.nonNull(paramProposal.getCostModel())) {
+
+
+              if(Objects.isNull(protocols.getCostModel()) || !protocols.getCostModel().getValue().equals(paramProposal.getCostModel())) {
+                  protocols.setCostModel(
+                          getChangeCostModelProtocol(paramProposal.getCostModel(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+              }
           }
 
           if (Objects.nonNull(timeChange.get())) {
-
             if (Objects.isNull(protocols.getTimestamp())) {
               protocols.setTimestamp(timeChange.get());
               return;
