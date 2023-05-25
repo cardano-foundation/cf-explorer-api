@@ -94,4 +94,11 @@ public class ProtocolParamResponse {
         treasuryGrowthRate, decentralisation, priceMem, priceStep, protocolMajor, protocolMinor,
         collateralPercent, maxCollateralInputs, entropy, costModel);
   }
+
+  public boolean isNull() {
+    if(this.hashCode() == new ProtocolParamResponse().hashCode()) {
+      return true;
+    }
+    return false;
+  }
 }

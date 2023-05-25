@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -65,16 +66,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRel
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.CollateralResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.SummaryResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxMintingResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxOutResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxPoolCertificate;
-import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxStakeCertificate;
-import org.cardanofoundation.explorer.api.model.response.tx.UTxOResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.WithdrawalResponse;
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
@@ -1163,6 +1154,223 @@ public class TxServiceImpl implements TxService {
                   , txResponse.getProtocols()));
         }
       }
+
+      processCheckIfSameProtocol(txResponse);
+
+
     }
+  }
+
+  private void processCheckIfSameProtocol(TxResponse txResponse) {
+    ProtocolParamResponse currentProtocol = txResponse.getProtocols();
+    ProtocolParamResponse previousProtocol = txResponse.getPreviousProtocols();
+
+    if(Objects.nonNull(currentProtocol.getMinFeeA())
+      && Objects.hashCode(currentProtocol.getMinFeeA()) == Objects.hashCode(previousProtocol.getMinFeeA())
+    ) {
+      currentProtocol.setMinFeeA(null);
+      previousProtocol.setMinFeeA(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMinFeeB())
+            && Objects.hashCode(currentProtocol.getMinFeeB()) == Objects.hashCode(previousProtocol.getMinFeeB())
+    ) {
+      currentProtocol.setMinFeeB(null);
+      previousProtocol.setMinFeeB(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxBlockSize())
+            && Objects.hashCode(currentProtocol.getMaxBlockSize()) == Objects.hashCode(previousProtocol.getMaxBlockSize())
+    ) {
+      currentProtocol.setMaxBlockSize(null);
+      previousProtocol.setMaxBlockSize(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxTxSize())
+            && Objects.hashCode(currentProtocol.getMaxTxSize()) == Objects.hashCode(previousProtocol.getMaxTxSize())
+    ) {
+      currentProtocol.setMaxTxSize(null);
+      previousProtocol.setMaxTxSize(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxBhSize())
+            && Objects.hashCode(currentProtocol.getMaxBhSize()) == Objects.hashCode(previousProtocol.getMaxBhSize())
+    ) {
+      currentProtocol.setMaxBhSize(null);
+      previousProtocol.setMaxBhSize(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getKeyDeposit())
+            && Objects.hashCode(currentProtocol.getKeyDeposit()) == Objects.hashCode(previousProtocol.getKeyDeposit())
+    ) {
+      currentProtocol.setKeyDeposit(null);
+      previousProtocol.setKeyDeposit(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getPoolDeposit())
+            && Objects.hashCode(currentProtocol.getPoolDeposit()) == Objects.hashCode(previousProtocol.getPoolDeposit())
+    ) {
+      currentProtocol.setPoolDeposit(null);
+      previousProtocol.setPoolDeposit(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxEpoch())
+            && Objects.hashCode(currentProtocol.getMaxEpoch()) == Objects.hashCode(previousProtocol.getMaxEpoch())
+    ) {
+      currentProtocol.setMaxEpoch(null);
+      previousProtocol.setMaxEpoch(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getOptimalPoolCount())
+            && Objects.hashCode(currentProtocol.getOptimalPoolCount()) == Objects.hashCode(previousProtocol.getOptimalPoolCount())
+    ) {
+      currentProtocol.setOptimalPoolCount(null);
+      previousProtocol.setOptimalPoolCount(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMinUtxoValue())
+            && Objects.hashCode(currentProtocol.getMinUtxoValue()) == Objects.hashCode(previousProtocol.getMinUtxoValue())
+    ) {
+      currentProtocol.setMinUtxoValue(null);
+      previousProtocol.setMinUtxoValue(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMinPoolCost())
+            && Objects.hashCode(currentProtocol.getMinPoolCost()) == Objects.hashCode(previousProtocol.getMinPoolCost())
+    ) {
+      currentProtocol.setMinPoolCost(null);
+      previousProtocol.setMinPoolCost(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxTxExMem())
+            && Objects.hashCode(currentProtocol.getMaxTxExMem()) == Objects.hashCode(previousProtocol.getMaxTxExMem())
+    ) {
+      currentProtocol.setMaxTxExMem(null);
+      previousProtocol.setMaxTxExMem(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxTxExSteps())
+            && Objects.hashCode(currentProtocol.getMaxTxExSteps()) == Objects.hashCode(previousProtocol.getMaxTxExSteps())
+    ) {
+      currentProtocol.setMaxTxExSteps(null);
+      previousProtocol.setMaxTxExSteps(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxBlockExMem())
+            && Objects.hashCode(currentProtocol.getMaxBlockExMem()) == Objects.hashCode(previousProtocol.getMaxBlockExMem())
+    ) {
+      currentProtocol.setMaxBlockExMem(null);
+      previousProtocol.setMaxBlockExMem(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxBlockExSteps())
+            && Objects.hashCode(currentProtocol.getMaxBlockExSteps()) == Objects.hashCode(previousProtocol.getMaxBlockExSteps())
+    ) {
+      currentProtocol.setMaxBlockExSteps(null);
+      previousProtocol.setMaxBlockExSteps(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxValSize())
+            && Objects.hashCode(currentProtocol.getMaxValSize()) == Objects.hashCode(previousProtocol.getMaxValSize())
+    ) {
+      currentProtocol.setMaxValSize(null);
+      previousProtocol.setMaxValSize(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getCoinsPerUtxoSize())
+            && Objects.hashCode(currentProtocol.getCoinsPerUtxoSize()) == Objects.hashCode(previousProtocol.getCoinsPerUtxoSize())
+    ) {
+      currentProtocol.setCoinsPerUtxoSize(null);
+      previousProtocol.setCoinsPerUtxoSize(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getInfluence())
+            && Objects.hashCode(currentProtocol.getInfluence()) == Objects.hashCode(previousProtocol.getInfluence())
+    ) {
+      currentProtocol.setInfluence(null);
+      previousProtocol.setInfluence(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMonetaryExpandRate())
+            && Objects.hashCode(currentProtocol.getMonetaryExpandRate()) == Objects.hashCode(previousProtocol.getMonetaryExpandRate())
+    ) {
+      currentProtocol.setMonetaryExpandRate(null);
+      previousProtocol.setMonetaryExpandRate(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getTreasuryGrowthRate())
+            && Objects.hashCode(currentProtocol.getTreasuryGrowthRate()) == Objects.hashCode(previousProtocol.getTreasuryGrowthRate())
+    ) {
+      currentProtocol.setTreasuryGrowthRate(null);
+      previousProtocol.setTreasuryGrowthRate(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getDecentralisation())
+            && Objects.hashCode(currentProtocol.getDecentralisation()) == Objects.hashCode(previousProtocol.getDecentralisation())
+    ) {
+      currentProtocol.setDecentralisation(null);
+      previousProtocol.setDecentralisation(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getPriceMem())
+            && Objects.hashCode(currentProtocol.getPriceMem()) == Objects.hashCode(previousProtocol.getPriceMem())
+    ) {
+      currentProtocol.setPriceMem(null);
+      previousProtocol.setPriceMem(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getPriceStep())
+            && Objects.hashCode(currentProtocol.getPriceStep()) == Objects.hashCode(previousProtocol.getPriceStep())
+    ) {
+      currentProtocol.setPriceStep(null);
+      previousProtocol.setPriceStep(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getProtocolMajor())
+            && Objects.hashCode(currentProtocol.getProtocolMajor()) == Objects.hashCode(previousProtocol.getProtocolMajor())
+            && Objects.nonNull(currentProtocol.getProtocolMinor())
+            && Objects.hashCode(currentProtocol.getProtocolMinor()) == Objects.hashCode(previousProtocol.getProtocolMinor())
+    ) {
+      currentProtocol.setProtocolMajor(null);
+      previousProtocol.setProtocolMajor(null);
+      currentProtocol.setProtocolMinor(null);
+      previousProtocol.setProtocolMinor(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getCollateralPercent())
+            && Objects.hashCode(currentProtocol.getCollateralPercent()) == Objects.hashCode(previousProtocol.getCollateralPercent())
+    ) {
+      currentProtocol.setCollateralPercent(null);
+      previousProtocol.setCollateralPercent(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getMaxCollateralInputs())
+            && Objects.hashCode(currentProtocol.getMaxCollateralInputs()) == Objects.hashCode(previousProtocol.getMaxCollateralInputs())
+    ) {
+      currentProtocol.setMaxCollateralInputs(null);
+      previousProtocol.setMaxCollateralInputs(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getEntropy())
+            && Objects.hashCode(currentProtocol.getEntropy()) == Objects.hashCode(previousProtocol.getEntropy())
+    ) {
+      currentProtocol.setEntropy(null);
+      previousProtocol.setEntropy(null);
+    }
+
+    if(Objects.nonNull(currentProtocol.getCostModel())
+            && Objects.hashCode(currentProtocol.getCostModel()) == Objects.hashCode(previousProtocol.getCostModel())
+    ) {
+      currentProtocol.setCostModel(null);
+      previousProtocol.setCostModel(null);
+    }
+
+    if(currentProtocol.isNull() && previousProtocol.isNull()) {
+      currentProtocol = null;
+      previousProtocol = null;
+    }
+
+    txResponse.setProtocols(currentProtocol);
+    txResponse.setPreviousProtocols(previousProtocol);
   }
 }
