@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 
@@ -24,6 +25,8 @@ public class ProtocolHistory {
   String transactionHash;
   Object value;
   ProtocolStatus status;
+  @JsonIgnore
+  Long costModelId;
 
   @Override
   public boolean equals(Object o) {
@@ -45,7 +48,8 @@ public class ProtocolHistory {
     int result = BigInteger.ONE.intValue();
 
     for (Object element : a) {
-      result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue() : element.hashCode());
+      result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue()
+                                                       : element.hashCode());
     }
 
     return result;
