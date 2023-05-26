@@ -88,7 +88,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @return histories change
    */
   @Override
-  public HistoriesProtocol getHistoryProtocolParameters() {
+  public HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypes) {
     // find all param proposal change, and take the last change
     List<ParamHistory> historiesChange = paramProposalRepository.findProtocolsChange();
     // find all epoch param group there in to map of key:epoch value:epoch_param
@@ -118,7 +118,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           Protocols protocolsChange = getEpochProtocol(
               protocolHistories.get(BigInteger.ZERO.intValue()).getEpochNo()
                   + BigInteger.ONE.intValue());
-          getProtocolChangeInOneEpoch(protocolHistories, txs, protocolsChange);
+          getProtocolChangeInOneEpoch(protocolHistories, txs, protocolsChange, protocolTypes);
 
           if (Objects.equals(protocols, protocolsChange)) {
             return protocols;
@@ -218,7 +218,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
           Protocols epochChange = getEpochProtocol(
               paramHistories.get(BigInteger.ZERO.intValue()).getEpochNo());
-          getProtocolChangeInOneEpoch(paramHistories, txs, epochChange);
+          getProtocolChangeInOneEpoch(paramHistories, txs, epochChange, ProtocolType.getAll());
 
           epochChange.getEpochChange().setStartEpoch(epoch + BigInteger.ONE.intValue());
           fillMissingProtocolField(epochChange, epochParam);
@@ -333,12 +333,13 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   private void getProtocolChangeInOneEpoch(List<ParamHistory> paramHistories,
-                                           Map<Long, Tx> txs, Protocols protocols) {
-    mapProtocols(paramHistories, protocols, txs);
+                                           Map<Long, Tx> txs, Protocols protocols,
+                                           List<ProtocolType> protocolTypes) {
+    mapProtocols(paramHistories, protocols, txs, protocolTypes);
   }
 
   private void mapProtocols(List<ParamHistory> paramProposals, Protocols protocols,
-                            Map<Long, Tx> txs) {
+                            Map<Long, Tx> txs, List<ProtocolType> protocolTypes) {
 
     paramProposals
         .stream()
@@ -347,42 +348,44 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .forEach(paramProposal -> {
           AtomicReference<Date> timeChange = new AtomicReference<>(null);
           // set value for protocols field
-          paramHistoryMethods.forEach((key, value) -> {
-            try {
-              // get protocol
-              var protocolMethods = protocolsMethods.get(key);
-              var protocolSet = protocolMethods.getFirst();
-              var protocolGet = protocolMethods.getSecond();
-              var protocolValue = (ProtocolHistory) protocolGet.invoke(protocols);
+          paramHistoryMethods.entrySet().stream()
+              .filter(entry -> protocolTypes.contains(entry.getKey()))
+              .forEach(entry -> {
+                try {
+                  // get protocol
+                  var protocolMethods = protocolsMethods.get(entry.getKey());
+                  var protocolSet = protocolMethods.getFirst();
+                  var protocolGet = protocolMethods.getSecond();
+                  var protocolValue = (ProtocolHistory) protocolGet.invoke(protocols);
 
-              var paramProposalValue = value.invoke(paramProposal);
-              // if value proposal not null
-              if (Objects.nonNull(paramProposalValue)) {
-                // insert if protocols is null or value change
-                switch (key) {
-                  case COST_MODEL:
-                    if (Objects.isNull(protocolValue) || !protocolValue.getCostModelId()
-                        .equals(paramProposalValue)) {
-                      protocols.setCostModel(
-                          getChangeCostModelProtocol(paramProposal.getCostModel(),
+                  var paramProposalValue = entry.getValue().invoke(paramProposal);
+                  // if value proposal not null
+                  if (Objects.nonNull(paramProposalValue)) {
+                    // insert if protocols is null or value change
+                    switch (entry.getKey()) {
+                      case COST_MODEL:
+                        if (Objects.isNull(protocolValue) || !protocolValue.getCostModelId()
+                            .equals(paramProposalValue)) {
+                          protocols.setCostModel(
+                              getChangeCostModelProtocol(paramProposal.getCostModel(),
+                                  txs.get(paramProposal.getTx()), timeChange));
+                        }
+                        break;
+                      default:
+                        if (Objects.isNull(protocolValue) || !protocolValue.getValue()
+                            .equals(paramProposalValue)) {
+                          protocolSet.invoke(protocols, getChangeProtocol(
+                              paramProposalValue,
                               txs.get(paramProposal.getTx()), timeChange));
+                        }
+                        break;
                     }
-                    break;
-                  default:
-                    if (Objects.isNull(protocolValue) || !protocolValue.getValue()
-                        .equals(paramProposalValue)) {
-                      protocolSet.invoke(protocols, getChangeProtocol(
-                          paramProposalValue,
-                          txs.get(paramProposal.getTx()), timeChange));
-                    }
-                    break;
+                  }
+                } catch (Exception e) {
+                  log.error(e.getMessage());
+                  log.error(e.getLocalizedMessage());
                 }
-              }
-            } catch (Exception e) {
-              log.error(e.getMessage());
-              log.error(e.getLocalizedMessage());
-            }
-          });
+              });
 
           // update time change
           if (Objects.nonNull(timeChange.get())) {
@@ -485,7 +488,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
     ProtocolHistory lastProtocol = protocolHistories.get(size);
 
-    if(Objects.nonNull(lastProtocol)){
+    if (Objects.nonNull(lastProtocol)) {
       if (Objects.isNull(lastProtocol.getValue())) {
         lastProtocol.setStatus(ProtocolStatus.NOT_EXIST);
         return;
