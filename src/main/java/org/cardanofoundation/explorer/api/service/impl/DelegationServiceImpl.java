@@ -151,8 +151,7 @@ public class DelegationServiceImpl implements DelegationService {
     List<PoolDelegationSummaryProjection> pools = delegationRepository.findDelegationPoolsSummary(
         pageable);
     List<String> poolViews = pools.stream().map(PoolDelegationSummaryProjection::getPoolView)
-        .collect(
-            Collectors.toList());
+        .toList();
     List<PoolListProjection> dataRewards = poolHashRepository.findDataCalculateReward(poolViews);
     Map<String, PoolListProjection> dataRewardsMap = dataRewards.stream()
         .collect(Collectors.toMap(PoolListProjection::getPoolView, Function.identity()));
@@ -213,7 +212,7 @@ public class DelegationServiceImpl implements DelegationService {
     Page<PoolDetailEpochProjection> epochOfPoolPage = poolHashRepository.findEpochByPool(poolId,
         pageable);
     List<PoolDetailEpochResponse> epochOfPools = epochOfPoolPage.stream()
-        .map(PoolDetailEpochResponse::new).collect(Collectors.toList());
+        .map(PoolDetailEpochResponse::new).toList();
     Set<Integer> epochNoInt = epochOfPoolPage.stream().map(PoolDetailEpochProjection::getEpochNo)
         .collect(Collectors.toSet());
     Set<Long> epochNoLg = epochNoInt.stream().map(Long::valueOf).collect(Collectors.toSet());
@@ -260,7 +259,7 @@ public class DelegationServiceImpl implements DelegationService {
     List<EpochChartProjection> epochDataCharts = epochStakeRepository.getDataForEpochChart(poolId);
     if (!epochDataCharts.isEmpty()) {
       epochChart.setDataByDays(
-          epochDataCharts.stream().map(EpochChartList::new).collect(Collectors.toList()));
+          epochDataCharts.stream().map(EpochChartList::new).toList());
       Optional<EpochChartProjection> maxEpochOpt = epochDataCharts.stream()
           .max(Comparator.comparing(EpochChartProjection::getChartValue));
       epochChart.setHighest(maxEpochOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
@@ -273,7 +272,7 @@ public class DelegationServiceImpl implements DelegationService {
         poolId);
     if (!delegatorDataCharts.isEmpty()) {
       delegatorChart.setDataByDays(
-          delegatorDataCharts.stream().map(DelegatorChartList::new).collect(Collectors.toList()));
+          delegatorDataCharts.stream().map(DelegatorChartList::new).toList());
       Optional<DelegatorChartProjection> maxDelegatorOpt = delegatorDataCharts.stream()
           .max(Comparator.comparing(DelegatorChartProjection::getChartValue));
       delegatorChart.setHighest(
@@ -298,7 +297,7 @@ public class DelegationServiceImpl implements DelegationService {
         poolId, pageable);
     if (!delegatorPage.isEmpty()) {
       List<PoolDetailDelegatorResponse> delegatorList = delegatorPage.stream()
-          .map(PoolDetailDelegatorResponse::new).collect(Collectors.toList());
+          .map(PoolDetailDelegatorResponse::new).toList();
       Set<Long> stakeAddress = delegatorList.stream()
           .map(PoolDetailDelegatorResponse::getStakeAddressId).collect(Collectors.toSet());
       List<StakeAddressProjection> stakeAddressProjections = epochStakeRepository.totalStakeByAddressAndPool(

@@ -120,6 +120,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setPoolId(projection.getPoolId());
       res.setPoolName(projection.getPoolName());
       res.setPoolView(projection.getPoolView());
+      res.setRewardAccount(projection.getRewardAccount());
       res.setPoolSize(epochStakeRepository.activeStakeByPool(projection.getId()));
       res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
       res.setRewardAvailable(rewardRepository.getTotalRewardByPool(poolView));
@@ -148,6 +149,9 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     if (Objects.nonNull(toDate)) {
       toTimestamp = new Timestamp(toDate.getTime());
+    }
+    if (Objects.nonNull(txHash) && txHash.isBlank()) {
+      txHash = null;
     }
     Page<PoolDeRegistrationProjection> projections = poolRetireRepository.getPoolDeRegistration(
         poolView,
@@ -252,6 +256,9 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     if (Objects.nonNull(toDate)) {
       toTimestamp = new Timestamp(toDate.getTime());
+    }
+    if (Objects.nonNull(txHash) && txHash.isBlank()) {
+      txHash = null;
     }
     Page<PoolUpdateProjection> projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
         txHash, fromTimestamp, toTimestamp, pageable);
