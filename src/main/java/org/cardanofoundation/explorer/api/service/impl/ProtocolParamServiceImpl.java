@@ -11,15 +11,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,6 +30,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -64,6 +62,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   public static final String EPOCH_CHANGE_FIELD = "epochchanges";
   public static final String STATUS = "status";
+  public static final String SET = "set";
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
   final TxRepository txRepository;
@@ -73,8 +72,15 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   @Value("${application.network}")
   String network;
   public static final String GET = "get";
-  Map<ProtocolType, Method> paramProtocolMethods;
-  Map<String, Method> historyMethods;
+  // key::ProtocolType, value::getter>
+  Map<ProtocolType, Method> epochParamMethods;
+
+  // key::ProtocolType, value::Pair<setter,getter>
+  Map<ProtocolType, Pair<Method, Method>> protocolsMethods;
+  //key::String, value::getter
+  Map<String, Method> historyProtocolMethods;
+  //key::ProtocolType, value::getter
+  Map<ProtocolType, Method> paramHistoryMethods;
 
   /**
    * Find history change of protocol parameters
@@ -234,15 +240,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     return fixedProtocol;
   }
 
-  public static ProtocolHistory getChangeCostModelProtocol(String cost) {
-
-    return ProtocolHistory.builder()
-        .value(cost)
-        .time(null)
-        .transactionHash(null)
-        .build();
-  }
-
   public static ProtocolHistory getChangeProtocol(Object currentProtocol, Tx tx,
                                                   AtomicReference<Date> timeChange) {
     var utcOffsetDateTime = OffsetDateTime.ofInstant(tx.getBlock().getTime().toInstant(),
@@ -256,6 +253,12 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   public static ProtocolHistory getChangeProtocol(Object object) {
+
+    if (object instanceof CostModel) {
+      CostModel costModel = (CostModel) object;
+      object = costModel.getCosts();
+    }
+
     return ProtocolHistory.builder()
         .value(object)
         .time(null)
@@ -320,304 +323,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     return protocols;
   }
 
-  private void mapProtocols(List<ParamHistory> paramProposals, Protocols protocols,
-                            Map<Long, Tx> txs) {
-    paramProposals
-        .stream()
-        .sorted(Comparator.comparing(ParamHistory::getEpochNo).reversed().thenComparing(ParamHistory::getTx))
-        .forEach(paramProposal -> {
-          AtomicReference<Date> timeChange = new AtomicReference<>(null);
-          if (Objects.nonNull(paramProposal.getMinFeeA())) {
-              if(protocols.getMinFeeA() == null || !protocols.getMinFeeA().getValue().equals(paramProposal.getMinFeeA())) {
-                  protocols.setMinFeeA(getChangeProtocol(
-                          paramProposal.getMinFeeA(),
-                          txs.get(paramProposal.getTx()), timeChange));
-              }
-
-          }
-
-          if (Objects.nonNull(paramProposal.getMinFeeB())) {
-              if(protocols.getMinFeeB() == null || !protocols.getMinFeeB().getValue().equals(paramProposal.getMinFeeB())) {
-                  protocols.setMinFeeB(
-                          getChangeProtocol(
-                                  paramProposal.getMinFeeB(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxBlockSize())) {
-
-              if(Objects.isNull(protocols.getMaxBlockSize()) || !protocols.getMaxBlockSize().getValue().equals(paramProposal.getMaxBlockSize())) {
-                  protocols.setMaxBlockSize(
-                          getChangeProtocol(
-                                  paramProposal.getMaxBlockSize(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxTxSize())) {
-
-              if(Objects.isNull(protocols.getMaxTxSize()) || !protocols.getMaxTxSize().getValue().equals(paramProposal.getMaxTxSize())) {
-                  protocols.setMaxTxSize(
-                          getChangeProtocol(
-                                  paramProposal.getMaxTxSize(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxBhSize())) {
-
-              if(Objects.isNull(protocols.getMaxBhSize()) || !protocols.getMaxBhSize().getValue().equals(paramProposal.getMaxBhSize())) {
-                  protocols.setMaxBhSize(
-                          getChangeProtocol(
-                                  paramProposal.getMaxBhSize(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getKeyDeposit())) {
-
-              if(Objects.isNull(protocols.getKeyDeposit()) || !protocols.getKeyDeposit().getValue().equals(paramProposal.getKeyDeposit())) {
-                  protocols.setKeyDeposit(
-                          getChangeProtocol(
-                                  paramProposal.getKeyDeposit(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getPoolDeposit())) {
-
-              if(Objects.isNull(protocols.getPoolDeposit()) || !protocols.getPoolDeposit().getValue().equals(paramProposal.getPoolDeposit())) {
-                  protocols.setPoolDeposit(
-                          getChangeProtocol(
-                                  paramProposal.getPoolDeposit(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxEpoch())) {
-
-              if(Objects.isNull(protocols.getMaxEpoch()) || !protocols.getMaxEpoch().getValue().equals(paramProposal.getMaxEpoch())) {
-                  protocols.setMaxEpoch(
-                          getChangeProtocol(
-                                  paramProposal.getMaxEpoch(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getOptimalPoolCount())) {
-
-              if(Objects.isNull(protocols.getOptimalPoolCount()) || !protocols.getOptimalPoolCount().getValue().equals(paramProposal.getOptimalPoolCount())) {
-                  protocols.setOptimalPoolCount(
-                          getChangeProtocol(
-                                  paramProposal.getOptimalPoolCount(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMinUtxoValue())) {
-
-              if(Objects.isNull(protocols.getMinUtxoValue()) || !protocols.getMinUtxoValue().getValue().equals(paramProposal.getMinUtxoValue())) {
-                  protocols.setMinUtxoValue(
-                          getChangeProtocol(
-                                  paramProposal.getMinUtxoValue(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMinPoolCost())) {
-
-              if(Objects.isNull(protocols.getMinPoolCost()) || !protocols.getMinPoolCost().getValue().equals(paramProposal.getMinPoolCost())) {
-                  protocols.setMinPoolCost(
-                          getChangeProtocol(
-                                  paramProposal.getMinPoolCost(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxTxExMem())) {
-
-              if(Objects.isNull(protocols.getMaxTxExMem()) || !protocols.getMaxTxExMem().getValue().equals(paramProposal.getMaxTxExMem())) {
-                  protocols.setMaxTxExMem(
-                          getChangeProtocol(
-                                  paramProposal.getMaxTxExMem(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-          if (Objects.nonNull(paramProposal.getMaxTxExSteps())) {
-
-              if(Objects.isNull(protocols.getMaxTxExSteps()) || !protocols.getMaxTxExSteps().getValue().equals(paramProposal.getMaxTxExSteps())) {
-                  protocols.setMaxTxExSteps(
-                          getChangeProtocol(
-                                  paramProposal.getMaxTxExSteps(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxBlockExMem())) {
-
-              if(Objects.isNull(protocols.getMaxBlockExMem()) || !protocols.getMaxBlockExMem().getValue().equals(paramProposal.getMaxBlockExMem())) {
-                  protocols.setMaxBlockExMem(
-                          getChangeProtocol(
-                                  paramProposal.getMaxBlockExMem(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxBlockExSteps())) {
-
-              if(Objects.isNull(protocols.getMaxBlockExSteps()) || !protocols.getMaxBlockExSteps().getValue().equals(paramProposal.getMaxBlockExSteps())) {
-                  protocols.setMaxBlockExSteps(
-                          getChangeProtocol(
-                                  paramProposal.getMaxBlockExSteps(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxValSize())) {
-
-              if(Objects.isNull(protocols.getMaxValSize()) || !protocols.getMaxValSize().getValue().equals(paramProposal.getMaxValSize())) {
-                  protocols.setMaxValSize(
-                          getChangeProtocol(
-                                  paramProposal.getMaxValSize(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getCoinsPerUtxoSize())) {
-
-              if(Objects.isNull(protocols.getCoinsPerUtxoSize()) || !protocols.getCoinsPerUtxoSize().getValue().equals(paramProposal.getCoinsPerUtxoSize())) {
-                  protocols.setCoinsPerUtxoSize(
-                          getChangeProtocol(
-                                  paramProposal.getCoinsPerUtxoSize(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-          if (Objects.nonNull(paramProposal.getInfluence())) {
-
-              if(Objects.isNull(protocols.getInfluence()) || !protocols.getInfluence().getValue().equals(paramProposal.getInfluence())) {
-                  protocols.setInfluence(
-                          getChangeProtocol(
-                                  paramProposal.getInfluence(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMonetaryExpandRate())) {
-
-              if(Objects.isNull(protocols.getMonetaryExpandRate()) || !protocols.getMonetaryExpandRate().getValue().equals(paramProposal.getMonetaryExpandRate())) {
-                  protocols.setMonetaryExpandRate(getChangeProtocol(
-                          paramProposal.getMonetaryExpandRate(),
-                          txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getTreasuryGrowthRate())) {
-
-              if(Objects.isNull(protocols.getTreasuryGrowthRate()) || !protocols.getTreasuryGrowthRate().getValue().equals(paramProposal.getTreasuryGrowthRate())) {
-                  protocols.setTreasuryGrowthRate(getChangeProtocol(
-                          paramProposal.getTreasuryGrowthRate(),
-                          txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getDecentralisation())) {
-              if(Objects.isNull(protocols.getDecentralisation()) || !protocols.getDecentralisation().getValue().equals(paramProposal.getDecentralisation())) {
-                  protocols.setDecentralisation(
-                          getChangeProtocol(paramProposal.getDecentralisation(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-
-          }
-
-          if (Objects.nonNull(paramProposal.getPriceMem())) {
-
-              if(Objects.isNull(protocols.getPriceMem()) || !protocols.getPriceMem().getValue().equals(paramProposal.getPriceMem())) {
-                  protocols.setPriceMem(
-                          getChangeProtocol(paramProposal.getPriceMem(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getPriceStep())) {
-
-              if(Objects.isNull(protocols.getPriceStep()) || !protocols.getPriceStep().getValue().equals(paramProposal.getPriceStep())) {
-                  protocols.setPriceStep(
-                          getChangeProtocol(paramProposal.getPriceStep(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getProtocolMajor())) {
-
-              if(Objects.isNull(protocols.getProtocolMajor()) || !protocols.getProtocolMajor().getValue().equals(paramProposal.getProtocolMajor())) {
-                  protocols.setProtocolMajor(
-                          getChangeProtocol(paramProposal.getProtocolMajor(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getProtocolMinor())) {
-
-              if(Objects.isNull(protocols.getProtocolMinor()) || !protocols.getProtocolMinor().getValue().equals(paramProposal.getProtocolMinor())) {
-                  protocols.setProtocolMinor(
-                          getChangeProtocol(paramProposal.getProtocolMinor(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getCollateralPercent())) {
-
-              if(Objects.isNull(protocols.getCollateralPercent()) || !protocols.getCollateralPercent().getValue().equals(paramProposal.getCollateralPercent())) {
-                  protocols.setCollateralPercent(
-                          getChangeProtocol(paramProposal.getCollateralPercent(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getMaxCollateralInputs())) {
-
-              if(Objects.isNull(protocols.getMaxCollateralInputs()) || !protocols.getMaxCollateralInputs().getValue().equals(paramProposal.getMaxCollateralInputs())) {
-                  protocols.setMaxCollateralInputs(
-                          getChangeProtocol(paramProposal.getMaxCollateralInputs(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getEntropy())) {
-
-              if(Objects.isNull(protocols.getEntropy()) || !protocols.getEntropy().getValue().equals(paramProposal.getEntropy())) {
-                  protocols.setEntropy(
-                          getChangeProtocol(paramProposal.getEntropy(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(paramProposal.getCostModel())) {
-
-
-              if(Objects.isNull(protocols.getCostModel()) || !protocols.getCostModel().getValue().equals(paramProposal.getCostModel())) {
-                  protocols.setCostModel(
-                          getChangeCostModelProtocol(paramProposal.getCostModel(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-              }
-          }
-
-          if (Objects.nonNull(timeChange.get())) {
-            if (Objects.isNull(protocols.getTimestamp())) {
-              protocols.setTimestamp(timeChange.get());
-              return;
-            }
-
-            if (protocols.getTimestamp().compareTo(timeChange.get()) < BigInteger.TEN.intValue()) {
-              protocols.setTimestamp(timeChange.get());
-            }
-          }
-
-        });
-  }
-
   private Protocols getEpochProtocol(Integer epochNo) {
     return Protocols.builder()
         .epochChange(EpochChange.builder()
@@ -632,6 +337,66 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     mapProtocols(paramHistories, protocols, txs);
   }
 
+  private void mapProtocols(List<ParamHistory> paramProposals, Protocols protocols,
+                            Map<Long, Tx> txs) {
+
+    paramProposals
+        .stream()
+        .sorted(Comparator.comparing(ParamHistory::getEpochNo).reversed()
+            .thenComparing(ParamHistory::getTx))
+        .forEach(paramProposal -> {
+          AtomicReference<Date> timeChange = new AtomicReference<>(null);
+          // set value for protocols field
+          paramHistoryMethods.forEach((key, value) -> {
+            try {
+              // get protocol
+              var protocolMethods = protocolsMethods.get(key);
+              var protocolSet = protocolMethods.getFirst();
+              var protocolGet = protocolMethods.getSecond();
+              var protocolValue = (ProtocolHistory) protocolGet.invoke(protocols);
+
+              var paramProposalValue = value.invoke(paramProposal);
+              // if value proposal not null
+              if (Objects.nonNull(paramProposalValue)) {
+                // insert if protocols is null or value change
+                switch (key) {
+                  case COST_MODEL:
+                    if (Objects.isNull(protocolValue) || !protocolValue.getCostModelId()
+                        .equals(paramProposalValue)) {
+                      protocols.setCostModel(
+                          getChangeCostModelProtocol(paramProposal.getCostModel(),
+                              txs.get(paramProposal.getTx()), timeChange));
+                    }
+                    break;
+                  default:
+                    if (Objects.isNull(protocolValue) || !protocolValue.getValue()
+                        .equals(paramProposalValue)) {
+                      protocolSet.invoke(protocols, getChangeProtocol(
+                          paramProposalValue,
+                          txs.get(paramProposal.getTx()), timeChange));
+                    }
+                    break;
+                }
+              }
+            } catch (Exception e) {
+              log.error(e.getMessage());
+              log.error(e.getLocalizedMessage());
+            }
+          });
+
+          // update time change
+          if (Objects.nonNull(timeChange.get())) {
+            if (Objects.isNull(protocols.getTimestamp())) {
+              protocols.setTimestamp(timeChange.get());
+              return;
+            }
+            if (protocols.getTimestamp().compareTo(timeChange.get()) < BigInteger.ZERO.intValue()) {
+              protocols.setTimestamp(timeChange.get());
+            }
+          }
+        });
+  }
+
   private ProtocolHistory getChangeCostModelProtocol(Long costModelId,
                                                      Tx tx, AtomicReference<Date> timeChange) {
     Optional<CostModel> costModel = costModelRepository.findById(costModelId);
@@ -642,205 +407,28 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .value(model.getCosts())
         .time(tx.getBlock().getTime())
         .transactionHash(tx.getHash())
+        .costModelId(costModelId)
         .build()).orElse(null);
   }
 
   private void fillMissingProtocolField(Protocols protocols, EpochParam epochParam) {
-    if (Objects.isNull(protocols.getMinFeeA())) {
-      protocols.setMinFeeA(getChangeProtocol(
-          epochParam.getMinFeeA()));
-    }
 
-    if (Objects.isNull(protocols.getMinFeeB())) {
-      protocols.setMinFeeB(
-          getChangeProtocol(
-              epochParam.getMinFeeB()));
-    }
-
-    if (Objects.isNull(protocols.getMaxBlockSize())) {
-      protocols.setMaxBlockSize(
-          getChangeProtocol(
-              epochParam.getMaxBlockSize()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMaxTxSize())) {
-      protocols.setMaxTxSize(
-          getChangeProtocol(
-              epochParam.getMaxTxSize()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMaxBhSize())) {
-      protocols.setMaxBhSize(
-          getChangeProtocol(
-              epochParam.getMaxBhSize()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getKeyDeposit())) {
-      protocols.setKeyDeposit(
-          getChangeProtocol(
-              epochParam.getKeyDeposit()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getPoolDeposit())) {
-      protocols.setPoolDeposit(
-          getChangeProtocol(
-              epochParam.getPoolDeposit()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMaxEpoch())) {
-      protocols.setMaxEpoch(
-          getChangeProtocol(
-              epochParam.getMaxEpoch()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getOptimalPoolCount())) {
-      protocols.setOptimalPoolCount(
-          getChangeProtocol(
-              epochParam.getOptimalPoolCount()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMinUtxoValue())) {
-      protocols.setMinUtxoValue(
-          getChangeProtocol(
-              epochParam.getMinUtxoValue()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMinPoolCost())) {
-      protocols.setMinPoolCost(
-          getChangeProtocol(
-              epochParam.getMinPoolCost()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMaxTxExMem())) {
-      protocols.setMaxTxExMem(
-          getChangeProtocol(
-              epochParam.getMaxTxExMem()
-          ));
-    }
-    if (Objects.isNull(protocols.getMaxTxExSteps())) {
-      protocols.setMaxTxExSteps(
-          getChangeProtocol(
-              epochParam.getMaxTxExSteps()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMaxBlockExMem())) {
-      protocols.setMaxBlockExMem(
-          getChangeProtocol(
-              epochParam.getMaxBlockExMem()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMaxBlockExSteps())) {
-      protocols.setMaxBlockExSteps(
-          getChangeProtocol(
-              epochParam.getMaxBlockExSteps()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMaxValSize())) {
-      protocols.setMaxValSize(
-          getChangeProtocol(
-              epochParam.getMaxValSize()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getCoinsPerUtxoSize())) {
-      protocols.setCoinsPerUtxoSize(
-          getChangeProtocol(
-              epochParam.getCoinsPerUtxoSize()
-          ));
-    }
-    if (Objects.isNull(protocols.getInfluence())) {
-      protocols.setInfluence(
-          getChangeProtocol(
-              epochParam.getInfluence()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMonetaryExpandRate())) {
-      protocols.setMonetaryExpandRate(getChangeProtocol(
-          epochParam.getMonetaryExpandRate()
-      ));
-    }
-
-    if (Objects.isNull(protocols.getTreasuryGrowthRate())) {
-      protocols.setTreasuryGrowthRate(getChangeProtocol(
-          epochParam.getTreasuryGrowthRate()
-      ));
-    }
-
-    if (Objects.isNull(protocols.getDecentralisation())) {
-      protocols.setDecentralisation(
-          getChangeProtocol(epochParam.getDecentralisation()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getPriceMem())) {
-      protocols.setPriceMem(
-          getChangeProtocol(epochParam.getPriceMem()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getPriceStep())) {
-      protocols.setPriceStep(
-          getChangeProtocol(epochParam.getPriceStep()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getProtocolMajor())) {
-      protocols.setProtocolMajor(
-          getChangeProtocol(epochParam.getProtocolMajor()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getProtocolMinor())) {
-      protocols.setProtocolMinor(
-          getChangeProtocol(epochParam.getProtocolMinor()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getCollateralPercent())) {
-      protocols.setCollateralPercent(
-          getChangeProtocol(epochParam.getCollateralPercent()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getMaxCollateralInputs())) {
-      protocols.setMaxCollateralInputs(
-          getChangeProtocol(epochParam.getMaxCollateralInputs()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getEntropy())) {
-      protocols.setEntropy(
-          getChangeProtocol(epochParam.getExtraEntropy()
-          ));
-    }
-
-    if (Objects.isNull(protocols.getCostModel())) {
-      if (Objects.nonNull(epochParam.getCostModel())) {
-        protocols.setCostModel(
-            getChangeCostModelProtocol(epochParam.getCostModel().getCosts()));
-        return;
+    epochParamMethods.forEach((key, value) -> {
+      try {
+        var methods = protocolsMethods.get(key);
+        if (Objects.isNull(methods
+            .getSecond().invoke(protocols))) {
+          methods.getFirst().invoke(protocols, getChangeProtocol(value.invoke(epochParam)));
+        }
+      } catch (InvocationTargetException | IllegalAccessException e) {
+        log.error(e.getMessage());
+        log.error(e.getLocalizedMessage());
       }
-      protocols.setCostModel(
-          getChangeProtocol(epochParam.getCostModel()));
-
-    }
+    });
   }
 
   private void handleHistoriesChange(HistoriesProtocol historiesProtocol) {
-    historyMethods.values()
+    historyProtocolMethods.values()
         .parallelStream()
         .forEach(
             method -> {
@@ -856,6 +444,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   private void handleHistoryStatus(List<ProtocolHistory> protocolHistories) {
+
     int size = protocolHistories.size() - BigInteger.ONE.intValue();
 
     IntStream.range(BigInteger.ZERO.intValue(), size)
@@ -864,8 +453,12 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
               protocolHistories.get(index + BigInteger.ONE.intValue());
 
           final ProtocolHistory currentProtocolHistory = protocolHistories.get(index);
-          if (Objects.isNull(nextProtocolHistory)) {
 
+          if (Objects.isNull(currentProtocolHistory)) {
+            return;
+          }
+
+          if (Objects.isNull(nextProtocolHistory)) {
             if (Objects.nonNull(currentProtocolHistory.getValue())) {
               currentProtocolHistory.setStatus(ProtocolStatus.ADDED);
             }
@@ -891,15 +484,18 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         });
 
     ProtocolHistory lastProtocol = protocolHistories.get(size);
-    if (Objects.isNull(lastProtocol.getValue())) {
-      lastProtocol.setStatus(ProtocolStatus.NOT_EXIST);
-      return;
+
+    if(Objects.nonNull(lastProtocol)){
+      if (Objects.isNull(lastProtocol.getValue())) {
+        lastProtocol.setStatus(ProtocolStatus.NOT_EXIST);
+        return;
+      }
+      lastProtocol.setStatus(ProtocolStatus.ADDED);
     }
-    lastProtocol.setStatus(ProtocolStatus.ADDED);
   }
 
-  private void setMapParamProtocolMethods() {
-    paramProtocolMethods = new HashMap<>();
+  private void setMapEpochParamMethods() {
+    epochParamMethods = new HashMap<>();
     Field[] fields = EpochParam.class.getDeclaredFields();
     Method[] methods = EpochParam.class.getDeclaredMethods();
     List<String> fieldNames = Arrays.stream(ProtocolType.values())
@@ -916,13 +512,44 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           .orElse(null); // Method null is ok, because we not use it anyway
       if (Objects.nonNull(methodUsed) &&
           fieldNames.contains(field.getName())) {
-        paramProtocolMethods.put(ProtocolType.valueStringOf(field.getName()), methodUsed);
+        epochParamMethods.put(ProtocolType.valueStringOf(field.getName()), methodUsed);
       }
     }
   }
 
+  private void setProtocolMethodMap() {
+    this.protocolsMethods = new HashMap<>();
+    Method[] methods = Protocols.class.getDeclaredMethods();
+    List<String> fieldNames = Arrays.stream(ProtocolType.values())
+        .map(ProtocolType::getFieldName).toList();
+
+    for (String field : fieldNames) {
+
+      Method methodGet = Arrays.stream(methods)
+          .filter(method -> {
+            var methodLowerCase = method.getName().toLowerCase();
+            var fieldLowerCase = field.toLowerCase();
+            return methodLowerCase.contains(fieldLowerCase) && methodLowerCase.contains(GET);
+          }).findFirst()
+          .orElse(null);
+
+      Method methodSet = Arrays.stream(methods)
+          .filter(method -> {
+            var methodLowerCase = method.getName().toLowerCase();
+            var fieldLowerCase = field.toLowerCase();
+            return methodLowerCase.contains(fieldLowerCase) && methodLowerCase.contains(SET);
+          }).findFirst()
+          .orElse(null);
+
+      if (Objects.nonNull(methodGet) && Objects.nonNull(methodSet)) {
+        protocolsMethods.put(ProtocolType.valueStringOf(field), Pair.of(methodSet, methodGet));
+      }
+    }
+
+  }
+
   private void setMapParamHistory() {
-    historyMethods = new HashMap<>();
+    historyProtocolMethods = new HashMap<>();
     Field[] fields = HistoriesProtocol.class.getDeclaredFields();
     Method[] methods = HistoriesProtocol.class.getDeclaredMethods();
 
@@ -939,14 +566,39 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           .findFirst()
           .orElse(null); // Method null is ok, because we not use it anyway
       if (Objects.nonNull(methodUsed)) {
-        historyMethods.put(field.getName(), methodUsed);
+        historyProtocolMethods.put(field.getName(), methodUsed);
+      }
+    }
+  }
+
+  private void setParamHistoryMethods() {
+    paramHistoryMethods = new HashMap<>();
+    Method[] methods = ParamHistory.class.getDeclaredMethods();
+
+    List<String> fieldNames = Arrays.stream(ProtocolType.values())
+        .map(ProtocolType::getFieldName).toList();
+
+    for (String field : fieldNames) {
+
+      Method methodGet = Arrays.stream(methods)
+          .filter(method -> {
+            var methodLowerCase = method.getName().toLowerCase();
+            var fieldLowerCase = field.toLowerCase();
+            return methodLowerCase.contains(fieldLowerCase) && methodLowerCase.contains(GET);
+          }).findFirst()
+          .orElse(null);
+
+      if (Objects.nonNull(methodGet)) {
+        paramHistoryMethods.put(ProtocolType.valueStringOf(field), methodGet);
       }
     }
   }
 
   @PostConstruct
   public void setup() {
-    setMapParamProtocolMethods();
+    setProtocolMethodMap();
+    setMapEpochParamMethods();
     setMapParamHistory();
+    setParamHistoryMethods();
   }
 }

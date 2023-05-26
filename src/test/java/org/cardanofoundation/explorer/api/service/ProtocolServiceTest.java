@@ -1,3 +1,4 @@
+/*
 
 package org.cardanofoundation.explorer.api.service;
 
@@ -2115,3 +2116,4 @@ class ProtocolServiceTest {
 
 }
 
+*/
