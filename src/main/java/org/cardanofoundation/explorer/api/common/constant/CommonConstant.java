@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.common.constant;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -36,4 +38,21 @@ public class CommonConstant {
   public static final Integer COLUMN_WITH = 255;
 
   public static final String JWT = "jwt:blacklist:";
+
+  public static final int HASH_LENGTH = 31;
+
+
+  public static int hashCode(Object... a) {
+    if (a == null) {
+      return -BigInteger.ONE.intValue();
+    }
+
+    int result = BigInteger.ONE.intValue();
+
+    for (Object element : a) {
+      result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue() : element.hashCode());
+    }
+
+    return result;
+  }
 }

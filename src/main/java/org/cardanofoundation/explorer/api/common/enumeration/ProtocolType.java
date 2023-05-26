@@ -1,9 +1,12 @@
 package org.cardanofoundation.explorer.api.common.enumeration;
 
 
+import java.util.List;
+
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
+import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal_;
 
 public enum ProtocolType {
   MIN_FEE_A(EpochParam_.MIN_FEE_A),
@@ -33,7 +36,7 @@ public enum ProtocolType {
   PROTOCOL_MINOR(EpochParam_.PROTOCOL_MINOR),
   COLLATERAL_PERCENT(EpochParam_.COLLATERAL_PERCENT),
   MAX_COLLATERAL_INPUTS(EpochParam_.MAX_COLLATERAL_INPUTS),
-  ENTROPY(EpochParam_.EXTRA_ENTROPY),
+  ENTROPY(ParamProposal_.ENTROPY),
   COST_MODEL(EpochParam_.COST_MODEL);
 
   private final String fieldName;
@@ -46,17 +49,17 @@ public enum ProtocolType {
     return fieldName;
   }
 
-  public static ProtocolType valueStringOf(String fieldName){
-    switch (fieldName){
+  public static ProtocolType valueStringOf(String fieldName) {
+    switch (fieldName) {
       case EpochParam_.MIN_FEE_A:
-       return MIN_FEE_A;
-      case  EpochParam_.MIN_FEE_B:
+        return MIN_FEE_A;
+      case EpochParam_.MIN_FEE_B:
         return MIN_FEE_B;
-      case  EpochParam_.MAX_BLOCK_SIZE:
+      case EpochParam_.MAX_BLOCK_SIZE:
         return MAX_BLOCK_SIZE;
-      case   EpochParam_.MAX_TX_SIZE:
+      case EpochParam_.MAX_TX_SIZE:
         return MAX_TX_SIZE;
-      case  EpochParam_.MAX_BH_SIZE:
+      case EpochParam_.MAX_BH_SIZE:
         return MAX_BH_SIZE;
       case EpochParam_.KEY_DEPOSIT:
         return KEY_DEPOSIT;
@@ -97,17 +100,27 @@ public enum ProtocolType {
       case EpochParam_.PROTOCOL_MAJOR:
         return PROTOCOL_MAJOR;
       case EpochParam_.PROTOCOL_MINOR:
-      return  PROTOCOL_MINOR;
+        return PROTOCOL_MINOR;
       case EpochParam_.COLLATERAL_PERCENT:
         return COLLATERAL_PERCENT;
       case EpochParam_.MAX_COLLATERAL_INPUTS:
         return MAX_COLLATERAL_INPUTS;
+      case ParamProposal_.ENTROPY:
       case EpochParam_.EXTRA_ENTROPY:
         return ENTROPY;
-      case  EpochParam_.COST_MODEL:
+      case EpochParam_.COST_MODEL:
         return COST_MODEL;
       default:
         throw new BusinessException(BusinessCode.PROTOCOL_FIELD_NOT_FOUND);
     }
+  }
+
+  public static List<ProtocolType> getAll() {
+    return List.of(MIN_FEE_A, MIN_FEE_B, MAX_BLOCK_SIZE, MAX_TX_SIZE, MAX_BH_SIZE, KEY_DEPOSIT,
+        POOL_DEPOSIT, MAX_EPOCH, OPTIMAL_POOL_COUNT, MIN_UTXO_VALUE, MIN_POOL_COST, MAX_TX_EX_MEM,
+        MAX_TX_EX_STEPS, MAX_BLOCK_EX_MEM, MAX_BLOCK_EX_STEPS, MAX_VAL_SIZE, COINS_PER_UTXO_SIZE,
+        INFLUENCE, MONETARY_EXPAND_RATE, TREASURY_GROWTH_RATE, DECENTRALISATION, PRICE_MEM,
+        PRICE_STEP, PROTOCOL_MAJOR, PROTOCOL_MINOR, COLLATERAL_PERCENT, MAX_COLLATERAL_INPUTS,
+        ENTROPY, COST_MODEL);
   }
 }

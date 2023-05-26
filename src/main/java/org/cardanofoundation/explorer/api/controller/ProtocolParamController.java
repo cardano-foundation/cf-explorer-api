@@ -1,18 +1,24 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.protocol.FixedProtocol;
 import org.cardanofoundation.explorer.api.model.response.protocol.HistoriesProtocol;
 import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/protocols")
@@ -25,8 +31,17 @@ public class ProtocolParamController {
   @GetMapping("histories")
   @LogMessage
   @Operation(summary = "Get current protocol history change")
-  public HistoriesProtocol  getCurrentProtocol() {
-    return protocolParamService.getHistoryProtocolParameters();
+  public HistoriesProtocol getCurrentProtocol() {
+    return protocolParamService.getHistoryProtocolParameters(ProtocolType.getAll());
+  }
+
+  @GetMapping("histories/filter/{protocolsTypes}")
+  @LogMessage
+  @Operation(summary = "Get current protocol history change")
+  public HistoriesProtocol getCurrentProtocolWithFilter(@PathVariable("protocolsTypes")
+                                                        @Parameter(description = "protocol want to filter")
+                                                        List<ProtocolType> protocolTypes) {
+    return protocolParamService.getHistoryProtocolParameters(protocolTypes);
   }
 
   @GetMapping("latest")
