@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -12,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +51,7 @@ import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
+import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 
 @Service
@@ -77,10 +77,11 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   // key::ProtocolType, value::Pair<setter,getter>
   Map<ProtocolType, Pair<Method, Method>> protocolsMethods;
-  //key::String, value::getter
-  Map<String, Method> historyProtocolMethods;
   //key::ProtocolType, value::getter
   Map<ProtocolType, Method> paramHistoryMethods;
+  //key::ProtocolType, value::Pair<setter,getter>
+  Map<ProtocolType,  Pair<Method, Method>> historiesProtocolMethods;
+  //key::String, value::getter
 
   /**
    * Find history change of protocol parameters
@@ -159,26 +160,26 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             markProtocol.getEpochChange().setEndEpoch(epoch);
 
             if (min.equals(epoch)) {
-              fillMissingProtocolField(markProtocol, epochParams.get(epoch));
+              fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
               processProtocols.add(markProtocol);
             }
             return;
           }
 
-          fillMissingProtocolField(markProtocol, epochParams.get(epoch));
+          fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
 
           processProtocols.add(currentMarkProtocols.get());
           currentMarkProtocols.set(currentProtocol);
 
           if (min.equals(epoch)) {
-            fillMissingProtocolField(currentProtocol, epochParams.get(epoch));
+            fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
             processProtocols.add(currentMarkProtocols.get());
           }
         });
 
     HistoriesProtocol historiesProtocol = protocolMapper.mapProtocolsToHistoriesProtocol(
-        processProtocols);
-    handleHistoriesChange(historiesProtocol);
+        processProtocols, protocolsMethods , historiesProtocolMethods, protocolTypes);
+    handleHistoriesChange(historiesProtocol, protocolTypes);
     return historiesProtocol;
   }
 
@@ -221,7 +222,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           getProtocolChangeInOneEpoch(paramHistories, txs, epochChange, ProtocolType.getAll());
 
           epochChange.getEpochChange().setStartEpoch(epoch + BigInteger.ONE.intValue());
-          fillMissingProtocolField(epochChange, epochParam);
+          fillMissingProtocolField(epochChange, epochParam, ProtocolType.getAll());
           return epochChange;
         }).orElse(Protocols.builder().build());
   }
@@ -254,8 +255,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   public static ProtocolHistory getChangeProtocol(Object object) {
 
-    if (object instanceof CostModel) {
-      CostModel costModel = (CostModel) object;
+    if (object instanceof CostModel costModel) {
       object = costModel.getCosts();
     }
 
@@ -362,23 +362,20 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                   // if value proposal not null
                   if (Objects.nonNull(paramProposalValue)) {
                     // insert if protocols is null or value change
-                    switch (entry.getKey()) {
-                      case COST_MODEL:
-                        if (Objects.isNull(protocolValue) || !protocolValue.getCostModelId()
-                            .equals(paramProposalValue)) {
-                          protocols.setCostModel(
-                              getChangeCostModelProtocol(paramProposal.getCostModel(),
-                                  txs.get(paramProposal.getTx()), timeChange));
-                        }
-                        break;
-                      default:
-                        if (Objects.isNull(protocolValue) || !protocolValue.getValue()
-                            .equals(paramProposalValue)) {
-                          protocolSet.invoke(protocols, getChangeProtocol(
-                              paramProposalValue,
-                              txs.get(paramProposal.getTx()), timeChange));
-                        }
-                        break;
+                    if (Objects.requireNonNull(entry.getKey()) == ProtocolType.COST_MODEL) {
+                      if (Objects.isNull(protocolValue) || !protocolValue.getCostModelId()
+                          .equals(paramProposalValue)) {
+                        protocols.setCostModel(
+                            getChangeCostModelProtocol(paramProposal.getCostModel(),
+                                txs.get(paramProposal.getTx()), timeChange));
+                      }
+                    } else {
+                      if (Objects.isNull(protocolValue) || !protocolValue.getValue()
+                          .equals(paramProposalValue)) {
+                        protocolSet.invoke(protocols, getChangeProtocol(
+                            paramProposalValue,
+                            txs.get(paramProposal.getTx()), timeChange));
+                      }
                     }
                   }
                 } catch (Exception e) {
@@ -414,30 +411,35 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .build()).orElse(null);
   }
 
-  private void fillMissingProtocolField(Protocols protocols, EpochParam epochParam) {
-
-    epochParamMethods.forEach((key, value) -> {
-      try {
-        var methods = protocolsMethods.get(key);
-        if (Objects.isNull(methods
-            .getSecond().invoke(protocols))) {
-          methods.getFirst().invoke(protocols, getChangeProtocol(value.invoke(epochParam)));
-        }
-      } catch (InvocationTargetException | IllegalAccessException e) {
-        log.error(e.getMessage());
-        log.error(e.getLocalizedMessage());
-      }
-    });
+  private void fillMissingProtocolField(Protocols protocols, EpochParam epochParam,
+                                        List<ProtocolType> protocolTypes) {
+    protocolsMethods.entrySet()
+        .stream()
+        .filter(entry -> protocolTypes.contains(entry.getKey()))
+        .forEach(entry -> {
+          var methods = protocolsMethods.get(entry.getKey());
+          try {
+            if (Objects.isNull(entry.getValue().getSecond().invoke(protocols))) {
+              methods.getFirst()
+                  .invoke(protocols,
+                      getChangeProtocol(epochParamMethods.get(entry.getKey()).invoke(epochParam)));
+            }
+          } catch (Exception e) {
+            log.error(e.getMessage());
+            log.error(e.getLocalizedMessage());
+          }
+        });
   }
 
-  private void handleHistoriesChange(HistoriesProtocol historiesProtocol) {
-    historyProtocolMethods.values()
-        .parallelStream()
+  private void handleHistoriesChange(HistoriesProtocol historiesProtocol, List<ProtocolType> protocolTypes) {
+    historiesProtocolMethods.entrySet()
+        .stream().filter(entry -> protocolTypes.contains(entry.getKey()))
         .forEach(
             method -> {
               try {
-                log.debug("method {}", method.getName());
-                handleHistoryStatus((List<ProtocolHistory>) method.invoke(historiesProtocol));
+                var historyProtocolGet =  method.getValue().getSecond();
+                log.debug("method {}", method.getValue().getSecond().getName());
+                handleHistoryStatus((List<ProtocolHistory>) historyProtocolGet.invoke(historiesProtocol));
               } catch (Exception e) {
                 log.error(e.getMessage());
                 log.error(e.getLocalizedMessage());
@@ -498,7 +500,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   private void setMapEpochParamMethods() {
-    epochParamMethods = new HashMap<>();
+    epochParamMethods = new EnumMap<>(ProtocolType.class);
     Field[] fields = EpochParam.class.getDeclaredFields();
     Method[] methods = EpochParam.class.getDeclaredMethods();
     List<String> fieldNames = Arrays.stream(ProtocolType.values())
@@ -509,19 +511,23 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           .filter(method -> {
             var methodLowerCase = method.getName().toLowerCase();
             var fieldLowerCase = field.getName().toLowerCase();
-            return methodLowerCase.contains(fieldLowerCase) && methodLowerCase.contains(GET);
+            return methodLowerCase.contains(fieldLowerCase) &&
+                methodLowerCase.contains(GET);
           })
           .findFirst()
           .orElse(null); // Method null is ok, because we not use it anyway
+
       if (Objects.nonNull(methodUsed) &&
-          fieldNames.contains(field.getName())) {
+          (fieldNames.contains(field.getName()) ||
+              field.getName().equals(EpochParam_.EXTRA_ENTROPY)
+          )) {
         epochParamMethods.put(ProtocolType.valueStringOf(field.getName()), methodUsed);
       }
     }
   }
 
   private void setProtocolMethodMap() {
-    this.protocolsMethods = new HashMap<>();
+    this.protocolsMethods = new EnumMap<>(ProtocolType.class);
     Method[] methods = Protocols.class.getDeclaredMethods();
     List<String> fieldNames = Arrays.stream(ProtocolType.values())
         .map(ProtocolType::getFieldName).toList();
@@ -551,31 +557,41 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   }
 
-  private void setMapParamHistory() {
-    historyProtocolMethods = new HashMap<>();
-    Field[] fields = HistoriesProtocol.class.getDeclaredFields();
-    Method[] methods = HistoriesProtocol.class.getDeclaredMethods();
+  private void setHistoriesProtocolMethods() {
 
-    for (Field field : fields) {
-      Method methodUsed = Arrays.stream(methods)
+    this.historiesProtocolMethods = new EnumMap<>(ProtocolType.class);
+
+    Method[] methods = HistoriesProtocol.class.getDeclaredMethods();
+    List<String> fieldNames = Arrays.stream(ProtocolType.values())
+        .map(ProtocolType::getFieldName).toList();
+
+    for (String field : fieldNames) {
+
+      Method methodGet = Arrays.stream(methods)
           .filter(method -> {
             var methodLowerCase = method.getName().toLowerCase();
-            var fieldLowerCase = field.getName().toLowerCase();
-            return methodLowerCase.contains(fieldLowerCase) &&
-                methodLowerCase.contains(GET) &&
-                !methodLowerCase.contains(EPOCH_CHANGE_FIELD) &&
-                !methodLowerCase.contains(STATUS);
-          })
-          .findFirst()
-          .orElse(null); // Method null is ok, because we not use it anyway
-      if (Objects.nonNull(methodUsed)) {
-        historyProtocolMethods.put(field.getName(), methodUsed);
+            var fieldLowerCase = field.toLowerCase();
+            return methodLowerCase.contains(fieldLowerCase) && methodLowerCase.contains(GET);
+          }).findFirst()
+          .orElse(null);
+
+      Method methodSet = Arrays.stream(methods)
+          .filter(method -> {
+            var methodLowerCase = method.getName().toLowerCase();
+            var fieldLowerCase = field.toLowerCase();
+            return methodLowerCase.contains(fieldLowerCase) && methodLowerCase.contains(SET);
+          }).findFirst()
+          .orElse(null);
+
+      if (Objects.nonNull(methodGet) && Objects.nonNull(methodSet)) {
+        historiesProtocolMethods.put(ProtocolType.valueStringOf(field), Pair.of(methodSet, methodGet));
       }
     }
+
   }
 
   private void setParamHistoryMethods() {
-    paramHistoryMethods = new HashMap<>();
+    paramHistoryMethods = new EnumMap<>(ProtocolType.class);
     Method[] methods = ParamHistory.class.getDeclaredMethods();
 
     List<String> fieldNames = Arrays.stream(ProtocolType.values())
@@ -601,7 +617,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   public void setup() {
     setProtocolMethodMap();
     setMapEpochParamMethods();
-    setMapParamHistory();
     setParamHistoryMethods();
+    setHistoriesProtocolMethods();
   }
 }
