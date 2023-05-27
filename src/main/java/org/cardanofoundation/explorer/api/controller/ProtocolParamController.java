@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,19 +29,19 @@ public class ProtocolParamController {
 
   final ProtocolParamService protocolParamService;
 
-  @GetMapping("histories")
-  @LogMessage
-  @Operation(summary = "Get current protocol history change")
-  public HistoriesProtocol getCurrentProtocol() {
-    return protocolParamService.getHistoryProtocolParameters(ProtocolType.getAll());
-  }
-
   @GetMapping("histories/filter/{protocolsTypes}")
   @LogMessage
   @Operation(summary = "Get current protocol history change")
-  public HistoriesProtocol getCurrentProtocolWithFilter(@PathVariable("protocolsTypes")
-                                                        @Parameter(description = "protocol want to filter")
-                                                        List<ProtocolType> protocolTypes) {
+  public HistoriesProtocol getCurrentProtocolWithFilter(
+      @PathVariable(value = "protocolsTypes", required = false)
+      @Parameter(description = "protocol want to filter")
+      List<ProtocolType> protocolTypes) {
+    if (ObjectUtils.isEmpty(protocolTypes)) {
+      protocolTypes = ProtocolType.getAll();
+    } else if (protocolTypes.contains(ProtocolType.ALL)) {
+      protocolTypes = ProtocolType.getAll();
+    }
+
     return protocolParamService.getHistoryProtocolParameters(protocolTypes);
   }
 
