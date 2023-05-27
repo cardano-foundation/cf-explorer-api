@@ -7,10 +7,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(value = Include.NON_EMPTY)
 public class HistoriesProtocol {
    List<EpochChange> epochChanges;
    List<ProtocolHistory> minFeeA;

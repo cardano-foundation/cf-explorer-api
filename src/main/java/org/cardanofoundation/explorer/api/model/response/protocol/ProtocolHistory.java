@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 
@@ -19,6 +21,7 @@ import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(value = Include.NON_NULL)
 public class ProtocolHistory {
 
   Date time;

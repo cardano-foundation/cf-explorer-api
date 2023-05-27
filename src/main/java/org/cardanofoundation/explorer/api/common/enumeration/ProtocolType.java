@@ -37,7 +37,8 @@ public enum ProtocolType {
   COLLATERAL_PERCENT(EpochParam_.COLLATERAL_PERCENT),
   MAX_COLLATERAL_INPUTS(EpochParam_.MAX_COLLATERAL_INPUTS),
   ENTROPY(ParamProposal_.ENTROPY),
-  COST_MODEL(EpochParam_.COST_MODEL);
+  COST_MODEL(EpochParam_.COST_MODEL)
+  ,ALL("ALL");
 
   private final String fieldName;
 
