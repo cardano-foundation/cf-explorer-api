@@ -16,7 +16,8 @@ public enum BusinessCode implements ErrorCode {
   STAKE_REPORT_HISTORY_NOT_FOUND("404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found"),
   REPORT_IS_IN_PROGRESS("404-REPORT_IS_IN_PROGRESS", "Report is in progress"),
   EXPORT_TYPE_NOT_SUPPORTED("404-EXPORT_TYPE_NOT_SUPPORTED", "Export type not supported"),
-  PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support");
+  PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support"),
+  TIME_RANGE_ILLEGAL("400-TIME_RANGE_ILLEGAL", "Time range is illegal");
 
   private final String code;
   private final String desc;

@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -139,7 +138,7 @@ class ProtocolServiceTest {
         .thenReturn(List.of(tx));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
-        List.of(ProtocolType.MIN_FEE_A));
+        List.of(ProtocolType.MIN_FEE_A),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minFeeA(List.of(ProtocolHistory.builder().value(2).status(ProtocolStatus.UPDATED).build(),
@@ -191,7 +190,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_B));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_B),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minFeeB(List.of(ProtocolHistory.builder().value(2).status(ProtocolStatus.UPDATED).build(),
@@ -243,7 +242,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBlockSize(
@@ -296,7 +295,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxTxSize(
@@ -349,7 +348,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BH_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BH_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBhSize(
@@ -402,7 +401,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.KEY_DEPOSIT));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.KEY_DEPOSIT),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .keyDeposit(
@@ -455,7 +454,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.POOL_DEPOSIT));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.POOL_DEPOSIT),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .poolDeposit(
@@ -508,7 +507,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_EPOCH));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_EPOCH),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxEpoch(List.of(ProtocolHistory.builder().value(2).status(ProtocolStatus.UPDATED).build(),
@@ -560,7 +559,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.OPTIMAL_POOL_COUNT));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.OPTIMAL_POOL_COUNT),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .optimalPoolCount(
@@ -613,7 +612,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_MEM));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_MEM),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxTxExMem(
@@ -666,7 +665,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_STEPS));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_STEPS),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxTxExSteps(
@@ -719,7 +718,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.INFLUENCE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.INFLUENCE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .influence(
@@ -772,7 +771,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_MEM));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_MEM),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBlockExMem(
@@ -825,7 +824,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_STEPS));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_STEPS),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBlockExSteps(
@@ -878,7 +877,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_VAL_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_VAL_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxValSize(
@@ -931,7 +930,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COINS_PER_UTXO_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COINS_PER_UTXO_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .coinsPerUtxoSize(
@@ -984,7 +983,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MONETARY_EXPAND_RATE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MONETARY_EXPAND_RATE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .monetaryExpandRate(
@@ -1037,7 +1036,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.TREASURY_GROWTH_RATE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.TREASURY_GROWTH_RATE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .treasuryGrowthRate(
@@ -1090,7 +1089,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.DECENTRALISATION));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.DECENTRALISATION),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .decentralisation(
@@ -1143,7 +1142,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_MEM));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_MEM),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .priceMem(
@@ -1196,7 +1195,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_STEP));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_STEP),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .priceStep(
@@ -1249,7 +1248,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MAJOR));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MAJOR),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .protocolMajor(
@@ -1302,7 +1301,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MINOR));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MINOR),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .protocolMinor(
@@ -1355,7 +1354,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COLLATERAL_PERCENT));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COLLATERAL_PERCENT),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .collateralPercent(
@@ -1408,7 +1407,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_COLLATERAL_INPUTS));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_COLLATERAL_INPUTS),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxCollateralInputs(
@@ -1461,7 +1460,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.ENTROPY));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.ENTROPY),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .entropy(
@@ -1520,7 +1519,7 @@ class ProtocolServiceTest {
             .costs("2")
             .build()));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COST_MODEL));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COST_MODEL),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .costModel(
@@ -1573,7 +1572,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_UTXO_VALUE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_UTXO_VALUE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minUtxoValue(
@@ -1626,7 +1625,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(List.of(tx));
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_POOL_COST));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_POOL_COST),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minPoolCost(
@@ -1656,7 +1655,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minFeeA(List.of(ProtocolHistory.builder().value(1).status(ProtocolStatus.ADDED).build()))
@@ -1682,7 +1681,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_B));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_B),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minFeeB(List.of(ProtocolHistory.builder()
@@ -1711,7 +1710,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBlockSize(List.of(ProtocolHistory.builder()
@@ -1740,7 +1739,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxTxSize(List.of(ProtocolHistory.builder()
@@ -1769,7 +1768,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BH_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BH_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBhSize(List.of(ProtocolHistory.builder()
@@ -1798,7 +1797,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.KEY_DEPOSIT));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.KEY_DEPOSIT),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .keyDeposit(List.of(ProtocolHistory.builder()
@@ -1827,7 +1826,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.POOL_DEPOSIT));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.POOL_DEPOSIT),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .poolDeposit(List.of(ProtocolHistory.builder()
@@ -1856,7 +1855,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_EPOCH));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_EPOCH),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxEpoch(List.of(ProtocolHistory.builder()
@@ -1885,7 +1884,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.OPTIMAL_POOL_COUNT));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.OPTIMAL_POOL_COUNT),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .optimalPoolCount(List.of(ProtocolHistory.builder()
@@ -1914,7 +1913,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.INFLUENCE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.INFLUENCE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .influence(List.of(ProtocolHistory.builder()
@@ -1943,7 +1942,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MONETARY_EXPAND_RATE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MONETARY_EXPAND_RATE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .monetaryExpandRate(List.of(ProtocolHistory.builder()
@@ -1972,7 +1971,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.TREASURY_GROWTH_RATE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.TREASURY_GROWTH_RATE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .treasuryGrowthRate(List.of(ProtocolHistory.builder()
@@ -2001,7 +2000,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.DECENTRALISATION));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.DECENTRALISATION),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .decentralisation(List.of(ProtocolHistory.builder()
@@ -2030,7 +2029,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.ENTROPY));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.ENTROPY),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .entropy(List.of(ProtocolHistory.builder()
@@ -2059,7 +2058,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MAJOR));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MAJOR),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .protocolMajor(List.of(ProtocolHistory.builder()
@@ -2088,7 +2087,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MINOR));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MINOR),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .protocolMinor(List.of(ProtocolHistory.builder()
@@ -2117,7 +2116,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_UTXO_VALUE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_UTXO_VALUE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minUtxoValue(List.of(ProtocolHistory.builder()
@@ -2146,7 +2145,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_POOL_COST));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_POOL_COST),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minPoolCost(List.of(ProtocolHistory.builder()
@@ -2175,7 +2174,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COST_MODEL));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COST_MODEL),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .costModel(List.of(ProtocolHistory.builder()
@@ -2204,7 +2203,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_MEM));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_MEM),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .priceMem(List.of(ProtocolHistory.builder()
@@ -2233,7 +2232,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_STEP));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_STEP),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .priceStep(List.of(ProtocolHistory.builder()
@@ -2262,7 +2261,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_MEM));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_MEM),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxTxExMem(List.of(ProtocolHistory.builder()
@@ -2291,7 +2290,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_STEPS));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_STEPS),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxTxExSteps(List.of(ProtocolHistory.builder()
@@ -2320,7 +2319,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_MEM));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_MEM),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBlockExMem(List.of(ProtocolHistory.builder()
@@ -2349,7 +2348,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_STEPS));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_STEPS),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBlockExSteps(List.of(ProtocolHistory.builder()
@@ -2378,7 +2377,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_VAL_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_VAL_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxValSize(List.of(ProtocolHistory.builder()
@@ -2407,7 +2406,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COLLATERAL_PERCENT));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COLLATERAL_PERCENT),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .collateralPercent(List.of(ProtocolHistory.builder()
@@ -2435,7 +2434,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_COLLATERAL_INPUTS));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_COLLATERAL_INPUTS),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxCollateralInputs(List.of(ProtocolHistory.builder()
@@ -2464,7 +2463,7 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
         .thenReturn(Collections.emptyList());
 
-    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COINS_PER_UTXO_SIZE));
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COINS_PER_UTXO_SIZE),null , null );
 
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .coinsPerUtxoSize(List.of(ProtocolHistory.builder()
