@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.protocol;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 
@@ -24,7 +25,7 @@ import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.
 @JsonInclude(value = Include.NON_NULL)
 public class ProtocolHistory {
 
-  Date time;
+  LocalDateTime time;
   String transactionHash;
   Object value;
   ProtocolStatus status;

@@ -2538,7 +2538,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMinFeeA(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -2610,7 +2610,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMinFeeB(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -2681,7 +2681,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxBlockSize(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -2748,7 +2748,7 @@ class ProtocolServiceTest {
 
     Protocols expect = mapProtocols(epochParamThree);
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setEpochChange(EpochChange.builder()
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
@@ -2824,7 +2824,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxBhSize(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -2890,7 +2890,7 @@ class ProtocolServiceTest {
         .thenReturn(List.of(txOne, txTwo));
 
     Protocols expect = mapProtocols(epochParamThree);
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setEpochChange(EpochChange.builder()
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
@@ -2966,7 +2966,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setPoolDeposit(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -3037,7 +3037,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxEpoch(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -3108,7 +3108,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setOptimalPoolCount(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -3179,7 +3179,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setInfluence(getChangeProtocol(BigInteger.TWO.doubleValue(),
         txTwo, reference));
 
@@ -3250,7 +3250,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMonetaryExpandRate(getChangeProtocol(BigInteger.TWO.doubleValue(),
         txTwo, reference));
 
@@ -3321,7 +3321,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setTreasuryGrowthRate(getChangeProtocol(BigInteger.TWO.doubleValue(),
         txTwo, reference));
 
@@ -3392,7 +3392,7 @@ class ProtocolServiceTest {
         .startEpoch(BigInteger.ONE.intValue())
         .endEpoch(BigInteger.ONE.intValue())
         .build());
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setDecentralisation(getChangeProtocol(BigInteger.TWO.doubleValue(),
         txTwo, reference));
 
@@ -3464,7 +3464,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setEntropy(getChangeProtocol(BigInteger.TWO.toString(),
         txTwo, reference));
 
@@ -3536,7 +3536,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setProtocolMajor(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -3608,7 +3608,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setProtocolMinor(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -3680,7 +3680,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMinUtxoValue(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -3752,7 +3752,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMinPoolCost(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -3824,7 +3824,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setPriceMem(getChangeProtocol(BigInteger.TWO.doubleValue(),
         txTwo, reference));
 
@@ -3896,7 +3896,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setPriceStep(getChangeProtocol(BigInteger.TWO.doubleValue(),
         txTwo, reference));
 
@@ -3968,7 +3968,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxTxExMem(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -4040,7 +4040,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxTxExSteps(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -4112,7 +4112,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxBlockExMem(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -4184,7 +4184,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxBlockExSteps(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -4256,7 +4256,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxValSize(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -4328,7 +4328,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setCollateralPercent(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -4400,7 +4400,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setMaxCollateralInputs(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -4472,7 +4472,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setCoinsPerUtxoSize(getChangeProtocol(BigInteger.TWO.intValue(),
         txTwo, reference));
 
@@ -4553,7 +4553,7 @@ class ProtocolServiceTest {
         .endEpoch(BigInteger.ONE.intValue())
         .build());
 
-    AtomicReference<Date> reference = new AtomicReference<>(null);
+    AtomicReference<LocalDateTime> reference = new AtomicReference<>(null);
     expect.setCostModel(getChangeProtocol(BigInteger.TWO.toString(),
         txTwo, reference));
 
