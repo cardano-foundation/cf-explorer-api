@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   //key::ProtocolType, value::getter
   Map<ProtocolType, Method> paramHistoryMethods;
   //key::ProtocolType, value::Pair<setter,getter>
-  Map<ProtocolType,  Pair<Method, Method>> historiesProtocolMethods;
+  Map<ProtocolType, Pair<Method, Method>> historiesProtocolMethods;
   //key::String, value::getter
 
   /**
@@ -178,7 +179,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         });
 
     HistoriesProtocol historiesProtocol = protocolMapper.mapProtocolsToHistoriesProtocol(
-        processProtocols, protocolsMethods , historiesProtocolMethods, protocolTypes);
+        processProtocols, protocolsMethods, historiesProtocolMethods, protocolTypes);
     handleHistoriesChange(historiesProtocol, protocolTypes);
     return historiesProtocol;
   }
@@ -242,13 +243,12 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   public static ProtocolHistory getChangeProtocol(Object currentProtocol, Tx tx,
-                                                  AtomicReference<Date> timeChange) {
-    var utcOffsetDateTime = OffsetDateTime.ofInstant(tx.getBlock().getTime().toInstant(),
-        ZoneOffset.UTC);
-    timeChange.set(Timestamp.valueOf(utcOffsetDateTime.toLocalDateTime()));
+                                                  AtomicReference<LocalDateTime> timeChange) {
+
+    timeChange.set(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
     return ProtocolHistory.builder()
         .value(currentProtocol)
-        .time(tx.getBlock().getTime())
+        .time(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC))
         .transactionHash(tx.getHash())
         .build();
   }
@@ -346,7 +346,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .sorted(Comparator.comparing(ParamHistory::getEpochNo).reversed()
             .thenComparing(ParamHistory::getTx))
         .forEach(paramProposal -> {
-          AtomicReference<Date> timeChange = new AtomicReference<>(null);
+          AtomicReference<LocalDateTime> timeChange = new AtomicReference<>(null);
           // set value for protocols field
           paramHistoryMethods.entrySet().stream()
               .filter(entry -> protocolTypes.contains(entry.getKey()))
@@ -398,14 +398,14 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   private ProtocolHistory getChangeCostModelProtocol(Long costModelId,
-                                                     Tx tx, AtomicReference<Date> timeChange) {
+                                                     Tx tx,
+                                                     AtomicReference<LocalDateTime> timeChange) {
+
     Optional<CostModel> costModel = costModelRepository.findById(costModelId);
-    var utcOffsetDateTime = OffsetDateTime.ofInstant(tx.getBlock().getTime().toInstant(),
-        ZoneOffset.UTC);
-    timeChange.set(Timestamp.valueOf(utcOffsetDateTime.toLocalDateTime()));
+    timeChange.set(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
     return costModel.map(model -> ProtocolHistory.builder()
         .value(model.getCosts())
-        .time(tx.getBlock().getTime())
+        .time(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC))
         .transactionHash(tx.getHash())
         .costModelId(costModelId)
         .build()).orElse(null);
@@ -431,15 +431,17 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         });
   }
 
-  private void handleHistoriesChange(HistoriesProtocol historiesProtocol, List<ProtocolType> protocolTypes) {
+  private void handleHistoriesChange(HistoriesProtocol historiesProtocol,
+                                     List<ProtocolType> protocolTypes) {
     historiesProtocolMethods.entrySet()
         .stream().filter(entry -> protocolTypes.contains(entry.getKey()))
         .forEach(
             method -> {
               try {
-                var historyProtocolGet =  method.getValue().getSecond();
+                var historyProtocolGet = method.getValue().getSecond();
                 log.debug("method {}", method.getValue().getSecond().getName());
-                handleHistoryStatus((List<ProtocolHistory>) historyProtocolGet.invoke(historiesProtocol));
+                handleHistoryStatus(
+                    (List<ProtocolHistory>) historyProtocolGet.invoke(historiesProtocol));
               } catch (Exception e) {
                 log.error(e.getMessage());
                 log.error(e.getLocalizedMessage());
@@ -584,7 +586,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           .orElse(null);
 
       if (Objects.nonNull(methodGet) && Objects.nonNull(methodSet)) {
-        historiesProtocolMethods.put(ProtocolType.valueStringOf(field), Pair.of(methodSet, methodGet));
+        historiesProtocolMethods.put(ProtocolType.valueStringOf(field),
+            Pair.of(methodSet, methodGet));
       }
     }
 
