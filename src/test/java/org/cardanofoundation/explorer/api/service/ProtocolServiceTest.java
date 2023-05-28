@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.test.context.ContextConfiguration;
 
+import com.google.common.base.Objects;
+
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
@@ -4580,6 +4582,4218 @@ class ProtocolServiceTest {
     Protocols expect = new Protocols();
     Protocols actual = protocolParamService.getLatestChange();
     Assertions.assertEquals(expect.hashCode(), actual.hashCode());
+  }
+
+  @Test
+  void testChangedHistoriesMinFeeAThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .minFeeA(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .minFeeA(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .minFeeA(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .minFeeA(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .minFeeA(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .minFeeA(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMinFeeA(), actual.getMinFeeA());
+  }
+
+  @Test
+  void testChangedHistoriesMinFeeAThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .minFeeA(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .minFeeA(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .minFeeA(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .minFeeA(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .minFeeA(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .minFeeA(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMinFeeA(), actual.getMinFeeA());
+  }
+
+  @Test
+  void testChangedHistoriesMinFeeBThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .minFeeB(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .minFeeB(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .minFeeB(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .minFeeB(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .minFeeB(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_B),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .minFeeB(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMinFeeB(), actual.getMinFeeB());
+  }
+
+  @Test
+  void testChangedHistoriesMinFeeBThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .minFeeB(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .minFeeB(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .minFeeB(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .minFeeB(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .minFeeB(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_B),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .minFeeB(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMinFeeB(), actual.getMinFeeB());
+  }
+
+  @Test
+  void testChangedHistoriesMaxBlockSizeThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxBlockSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxBlockSize(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxBlockSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxBlockSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxBlockSize(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxBlockSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxBlockSize(), actual.getMaxBlockSize());
+  }
+
+  @Test
+  void testChangedHistoriesMaxBlockSizeThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxBlockSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxBlockSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxBlockSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxBlockSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxBlockSize(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxBlockSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxBlockSize(), actual.getMaxBlockSize());
+  }
+
+  @Test
+  void testChangedHistoriesMaxTxSizeThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxTxSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxTxSize(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxTxSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxTxSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxTxSize(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxTxSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxTxSize(), actual.getMaxTxSize());
+  }
+
+  @Test
+  void testChangedHistoriesMaxTxSizeThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxTxSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxTxSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxTxSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxTxSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxTxSize(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxTxSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxTxSize(), actual.getMaxTxSize());
+  }
+
+  @Test
+  void testChangedHistoriesMaxBhSizeThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxBhSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxBhSize(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxBhSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxBhSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxBhSize(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BH_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxBhSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxBhSize(), actual.getMaxBhSize());
+  }
+
+  @Test
+  void testChangedHistoriesMaxBhSizeThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxBhSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxBhSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxBhSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxBhSize(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxBhSize(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BH_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxBhSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxBhSize(), actual.getMaxBhSize());
+  }
+
+  @Test
+  void testChangedHistoriesKeyDepositThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .keyDeposit(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .keyDeposit(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .keyDeposit(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .keyDeposit(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .keyDeposit(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.KEY_DEPOSIT),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .keyDeposit(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getKeyDeposit(), actual.getKeyDeposit());
+  }
+
+  @Test
+  void testChangedHistoriesKeyDepositThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .keyDeposit(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .keyDeposit(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .keyDeposit(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .keyDeposit(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .keyDeposit(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.KEY_DEPOSIT),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .keyDeposit(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getKeyDeposit(), actual.getKeyDeposit());
+  }
+
+  @Test
+  void testChangedHistoriesPoolDepositThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .poolDeposit(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .poolDeposit(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .poolDeposit(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .poolDeposit(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .poolDeposit(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.POOL_DEPOSIT),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .poolDeposit(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getPoolDeposit(), actual.getPoolDeposit());
+  }
+
+  @Test
+  void testChangedHistoriesPoolDepositThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .poolDeposit(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .poolDeposit(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .poolDeposit(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .poolDeposit(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .poolDeposit(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.POOL_DEPOSIT),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .poolDeposit(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getPoolDeposit(), actual.getPoolDeposit());
+  }
+
+  @Test
+  void testChangedHistoriesMaxEpochThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxEpoch(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxEpoch(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxEpoch(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxEpoch(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxEpoch(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_EPOCH),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxEpoch(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxEpoch(), actual.getMaxEpoch());
+  }
+
+  @Test
+  void testChangedHistoriesMaxEpochThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxEpoch(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxEpoch(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxEpoch(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxEpoch(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxEpoch(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_EPOCH),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxEpoch(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxEpoch(), actual.getMaxEpoch());
+  }
+
+  @Test
+  void testChangedOptimalPoolCountThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .optimalPoolCount(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .optimalPoolCount(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .optimalPoolCount(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .optimalPoolCount(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .optimalPoolCount(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.OPTIMAL_POOL_COUNT),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .optimalPoolCount(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(2)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getOptimalPoolCount(), actual.getOptimalPoolCount());
+  }
+
+  @Test
+  void testChangedOptimalPoolCountThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .optimalPoolCount(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .optimalPoolCount(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .optimalPoolCount(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .optimalPoolCount(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .optimalPoolCount(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.OPTIMAL_POOL_COUNT),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .optimalPoolCount(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(1)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getOptimalPoolCount(), actual.getOptimalPoolCount());
+  }
+
+  @Test
+  void testChangedInfluenceThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .influence(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .influence(BigInteger.TWO.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .influence(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .influence(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .influence(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.INFLUENCE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .influence(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO.doubleValue())
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getInfluence(), actual.getInfluence());
+  }
+
+  @Test
+  void testChangedInfluenceThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .influence(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .influence(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .influence(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .influence(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .influence(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.INFLUENCE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .influence(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getInfluence(), actual.getInfluence());
+  }
+
+  @Test
+  void testChangedMonetaryExpandRateThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .monetaryExpandRate(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .monetaryExpandRate(BigInteger.TWO.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .monetaryExpandRate(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .monetaryExpandRate(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .monetaryExpandRate(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MONETARY_EXPAND_RATE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .monetaryExpandRate(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO.doubleValue())
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMonetaryExpandRate(), actual.getMonetaryExpandRate());
+  }
+
+  @Test
+  void testChangedMonetaryExpandRateThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .monetaryExpandRate(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .monetaryExpandRate(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .monetaryExpandRate(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .monetaryExpandRate(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .monetaryExpandRate(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MONETARY_EXPAND_RATE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .monetaryExpandRate(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMonetaryExpandRate(), actual.getMonetaryExpandRate());
+  }
+
+  @Test
+  void testChangedTreasuryGrowthRateThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .treasuryGrowthRate(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .treasuryGrowthRate(BigInteger.TWO.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .treasuryGrowthRate(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .treasuryGrowthRate(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .treasuryGrowthRate(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.TREASURY_GROWTH_RATE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .treasuryGrowthRate(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO.doubleValue())
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getTreasuryGrowthRate(), actual.getTreasuryGrowthRate());
+  }
+
+  @Test
+  void testChangedTreasuryGrowthRateThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .treasuryGrowthRate(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .treasuryGrowthRate(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .treasuryGrowthRate(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .treasuryGrowthRate(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .treasuryGrowthRate(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.TREASURY_GROWTH_RATE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .treasuryGrowthRate(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getTreasuryGrowthRate(), actual.getTreasuryGrowthRate());
+  }
+
+  @Test
+  void testChangedDecentralisationThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .decentralisation(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .decentralisation(BigInteger.TWO.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .decentralisation(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .decentralisation(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .decentralisation(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.DECENTRALISATION),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .decentralisation(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO.doubleValue())
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getDecentralisation(), actual.getDecentralisation());
+  }
+
+  @Test
+  void testChangedDecentralisationThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .decentralisation(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .decentralisation(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .decentralisation(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .decentralisation(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .decentralisation(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.DECENTRALISATION),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .decentralisation(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getDecentralisation(), actual.getDecentralisation());
+  }
+
+  @Test
+  void testChangedProtocolMajorThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .protocolMajor(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .protocolMajor(BigInteger.TWO.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .protocolMajor(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .protocolMajor(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .protocolMajor(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MAJOR),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .protocolMajor(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getProtocolMajor(), actual.getProtocolMajor());
+  }
+
+  @Test
+  void testChangedProtocolMajorThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .protocolMajor(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .protocolMajor(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .protocolMajor(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .protocolMajor(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .protocolMajor(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MAJOR),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .protocolMajor(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getProtocolMajor(), actual.getProtocolMajor());
+  }
+
+  @Test
+  void testChangedProtocolMinorThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .protocolMinor(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .protocolMinor(BigInteger.TWO.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .protocolMinor(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .protocolMinor(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .protocolMinor(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MINOR),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .protocolMinor(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getProtocolMinor(), actual.getProtocolMinor());
+  }
+
+  @Test
+  void testChangedProtocolMinorThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .protocolMinor(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .protocolMinor(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .protocolMinor(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .protocolMinor(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .protocolMinor(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PROTOCOL_MINOR),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .protocolMinor(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getProtocolMinor(), actual.getProtocolMinor());
+  }
+
+  @Test
+  void testChangedMinUtxoValueThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .minUtxoValue(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .minUtxoValue(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .minUtxoValue(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .minUtxoValue(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .minUtxoValue(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_UTXO_VALUE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .minUtxoValue(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMinUtxoValue(), actual.getMinUtxoValue());
+  }
+
+  @Test
+  void testChangedMinUtxoValueThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .minUtxoValue(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .minUtxoValue(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .minUtxoValue(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .minUtxoValue(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .minUtxoValue(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_UTXO_VALUE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .minUtxoValue(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMinUtxoValue(), actual.getMinUtxoValue());
+  }
+
+  @Test
+  void testChangedMinPoolCostThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .minPoolCost(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .minPoolCost(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .minPoolCost(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .minPoolCost(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .minPoolCost(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_POOL_COST),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .minPoolCost(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMinPoolCost(), actual.getMinPoolCost());
+  }
+
+  @Test
+  void testChangedMinPoolCostThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .minPoolCost(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .minPoolCost(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .minPoolCost(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .minPoolCost(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .minUtxoValue(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_POOL_COST),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .minPoolCost(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMinPoolCost(), actual.getMinPoolCost());
+  }
+
+  @Test
+  void testChangedCostModelThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .costModel(BigInteger.ONE.longValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .costModel(BigInteger.TWO.longValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .costModel(CostModel.builder().id(1L).costs(BigInteger.ONE.toString()).build())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .costModel(CostModel.builder().id(1L).costs(BigInteger.ONE.toString()).build())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .costModel(CostModel.builder().id(2L).costs(BigInteger.TWO.toString()).build())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+    when(costModelRepository.findById(any(Long.class)))
+            .thenReturn(Optional.of(CostModel.builder()
+                    .id(2L)
+                    .costs("2")
+                    .build()));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COST_MODEL),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .costModel(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value("2")
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value("1")
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(Objects.hashCode(expect.getCostModel()), Objects.hashCode(actual.getCostModel()));
+  }
+
+  @Test
+  void testChangedCostModelThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .costModel(BigInteger.ONE.longValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .costModel(BigInteger.ONE.longValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .costModel(CostModel.builder().id(1L).costs(BigInteger.ONE.toString()).build())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .costModel(CostModel.builder().id(1L).costs(BigInteger.ONE.toString()).build())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .costModel(CostModel.builder().id(2L).costs(BigInteger.TWO.toString()).build())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+    when(costModelRepository.findById(any(Long.class)))
+            .thenReturn(Optional.of(CostModel.builder()
+                    .id(1L)
+                    .costs("1")
+                    .build()));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COST_MODEL),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .costModel(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value("1")
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value("1")
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getCostModel(), actual.getCostModel());
+  }
+
+  @Test
+  void testChangedPriceMemThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .priceMem(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .priceMem(BigInteger.TWO.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .priceMem(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .priceMem(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .priceMem(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_MEM),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .priceMem(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO.doubleValue())
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getPriceMem(), actual.getPriceMem());
+  }
+
+  @Test
+  void testChangedPriceMemThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .priceMem(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .priceMem(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .priceMem(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .priceMem(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .priceMem(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_MEM),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .priceMem(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getPriceMem(), actual.getPriceMem());
+  }
+
+  @Test
+  void testChangedPriceStepThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .priceStep(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .priceStep(BigInteger.TWO.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .priceStep(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .priceStep(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .priceStep(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_STEP),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .priceStep(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO.doubleValue())
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getPriceStep(), actual.getPriceStep());
+  }
+
+  @Test
+  void testChangedPriceStepThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .priceStep(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .priceStep(BigInteger.ONE.doubleValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .priceStep(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .priceStep(BigInteger.ONE.doubleValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .priceStep(BigInteger.TWO.doubleValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.PRICE_STEP),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .priceStep(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.doubleValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getPriceStep(), actual.getPriceStep());
+  }
+
+  @Test
+  void testChangedMaxTxExMemThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxTxExMem(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxTxExMem(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxTxExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxTxExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxTxExMem(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_MEM),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxTxExMem(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxTxExMem(), actual.getMaxTxExMem());
+  }
+
+  @Test
+  void testChangedMaxTxExMemThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxTxExMem(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxTxExMem(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxTxExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxTxExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxTxExMem(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_MEM),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxTxExMem(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxTxExMem(), actual.getMaxTxExMem());
+  }
+
+  @Test
+  void testChangedMaxTxExStepsThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxTxExSteps(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxTxExSteps(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxTxExSteps(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxTxExSteps(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxTxExSteps(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_STEPS),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxTxExSteps(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxTxExSteps(), actual.getMaxTxExSteps());
+  }
+
+  @Test
+  void testChangedMaxTxExStepsThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxTxExSteps(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxTxExSteps(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxTxExSteps(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxTxExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxTxExSteps(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_TX_EX_STEPS),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxTxExSteps(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxTxExSteps(), actual.getMaxTxExSteps());
+  }
+
+  @Test
+  void testChangedMaxBlockExMemThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxBlockExMem(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxBlockExMem(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxBlockExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxBlockExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxBlockExMem(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_MEM),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxBlockExMem(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxBlockExMem(), actual.getMaxBlockExMem());
+  }
+
+  @Test
+  void testChangedMaxBlockExMemThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxBlockExMem(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxBlockExMem(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxBlockExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxBlockExMem(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxBlockExMem(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_MEM),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxBlockExMem(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxBlockExMem(), actual.getMaxBlockExMem());
+  }
+
+  @Test
+  void testChangedMaxBlockExStepshatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxBlockExSteps(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxBlockExSteps(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxBlockExSteps(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxBlockExSteps(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxBlockExSteps(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_STEPS),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxBlockExSteps(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxBlockExSteps(), actual.getMaxBlockExSteps());
+  }
+
+  @Test
+  void testChangedMaxBlockExStepsThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxBlockExSteps(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxBlockExSteps(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxBlockExSteps(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxBlockExSteps(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxBlockExSteps(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_BLOCK_EX_STEPS),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxBlockExSteps(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxBlockExSteps(), actual.getMaxBlockExSteps());
+  }
+
+  @Test
+  void testChangedMaxValSizethatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxValSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxValSize(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxValSize(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxValSize(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxValSize(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_VAL_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxValSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxValSize(), actual.getMaxValSize());
+  }
+
+  @Test
+  void testChangedMaxValSizeThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxValSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxValSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxValSize(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxValSize(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxValSize(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_VAL_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxValSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxValSize(), actual.getMaxValSize());
+  }
+
+  @Test
+  void testChangedCollateralPercentthatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .collateralPercent(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .collateralPercent(BigInteger.TWO.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .collateralPercent(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .collateralPercent(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .collateralPercent(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COLLATERAL_PERCENT),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .collateralPercent(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO.intValue())
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.intValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getCollateralPercent(), actual.getCollateralPercent());
+  }
+
+  @Test
+  void testChangedCollateralPercentThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .collateralPercent(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .collateralPercent(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .collateralPercent(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .collateralPercent(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .collateralPercent(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COLLATERAL_PERCENT),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .collateralPercent(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.intValue())
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.intValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getCollateralPercent(), actual.getCollateralPercent());
+  }
+
+  @Test
+  void testChangedMaxCollateralInputsThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxCollateralInputs(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxCollateralInputs(BigInteger.TWO.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxCollateralInputs(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxCollateralInputs(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxCollateralInputs(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_COLLATERAL_INPUTS),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxCollateralInputs(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO.intValue())
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.intValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxCollateralInputs(), actual.getMaxCollateralInputs());
+  }
+
+  @Test
+  void testChangedMaxCollateralInputsThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .maxCollateralInputs(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .maxCollateralInputs(BigInteger.ONE.intValue())
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .maxCollateralInputs(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .maxCollateralInputs(BigInteger.ONE.intValue())
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .maxCollateralInputs(BigInteger.TWO.intValue())
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MAX_COLLATERAL_INPUTS),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .maxCollateralInputs(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.intValue())
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE.intValue())
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getMaxCollateralInputs(), actual.getMaxCollateralInputs());
+  }
+
+  @Test
+  void testChangedCoinsPerUtxoSizeThatChooseThePerfectOne() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .coinsPerUtxoSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .coinsPerUtxoSize(BigInteger.TWO)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .coinsPerUtxoSize(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .coinsPerUtxoSize(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .coinsPerUtxoSize(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COINS_PER_UTXO_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .coinsPerUtxoSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.TWO)
+                                    .status(ProtocolStatus.UPDATED)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getCoinsPerUtxoSize(), actual.getCoinsPerUtxoSize());
+  }
+
+  @Test
+  void testChangedCoinsPerUtxoSizeThatShouldNotChooseTheLatest() {
+
+    ParamHistoryProjection protocolChangeEpochOne = ParamHistoryProjection.builder()
+            .coinsPerUtxoSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.ONE.longValue())
+            .build();
+    ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
+            .coinsPerUtxoSize(BigInteger.ONE)
+            .epochNo(BigInteger.TWO.intValue())
+            .tx(BigInteger.TWO.longValue())
+            .build();
+
+    when(paramProposalRepository.findProtocolsChange())
+            .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
+
+    EpochParam epochParamOne = EpochParam.builder()
+            .epochNo(1)
+            .coinsPerUtxoSize(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamTwo = EpochParam.builder()
+            .epochNo(2)
+            .coinsPerUtxoSize(BigInteger.ONE)
+            .build();
+
+    EpochParam epochParamThree = EpochParam.builder()
+            .epochNo(3)
+            .coinsPerUtxoSize(BigInteger.TWO)
+            .build();
+
+    //epoch
+    when(epochParamRepository.findAll())
+            .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
+
+    // tx
+    Tx txOne = Tx.builder()
+            .id(BigInteger.ONE.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+    Tx txTwo = Tx.builder()
+            .id(BigInteger.TWO.longValue())
+            .hash("12323")
+            .block(Block.builder()
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build())
+            .build();
+
+    when(txRepository.findByIdIn(anyList()))
+            .thenReturn(List.of(txOne, txTwo));
+
+
+    HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.COINS_PER_UTXO_SIZE),null , null );
+
+    HistoriesProtocol expect = HistoriesProtocol.builder()
+            .coinsPerUtxoSize(
+                    List.of(
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.NOT_CHANGE)
+                                    .build(),
+                            ProtocolHistory.builder()
+                                    .value(BigInteger.ONE)
+                                    .status(ProtocolStatus.ADDED)
+                                    .build()
+                    )
+            )
+            .build();
+    Assertions.assertEquals(expect.getCoinsPerUtxoSize(), actual.getCoinsPerUtxoSize());
   }
 
 }
