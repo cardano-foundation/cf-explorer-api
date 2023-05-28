@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.model.response.protocol;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 import lombok.AllArgsConstructor;
@@ -30,7 +31,6 @@ public class ProtocolHistory {
   ProtocolStatus status;
   @JsonIgnore
   Long costModelId;
-
 
   @Override
   public boolean equals(Object o) {
