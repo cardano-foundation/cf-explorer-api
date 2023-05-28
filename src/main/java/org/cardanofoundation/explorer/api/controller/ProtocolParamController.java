@@ -47,8 +47,10 @@ public class ProtocolParamController {
       @PathVariable(value = "protocolsTypes", required = false)
       @Parameter(description = "protocol want to filter")
       List<ProtocolType> protocolTypes,
-      @RequestParam(value = "startTime", required = false) @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss") Date startTime,
-      @RequestParam(value = "endTime", required = false) @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss") Date endTime) {
+      @RequestParam(value = "startTime", required = false)
+      BigInteger startTime,
+      @RequestParam(value = "endTime", required = false)
+      BigInteger endTime) {
 
     if (ObjectUtils.isEmpty(protocolTypes) || protocolTypes.contains(ProtocolType.ALL)) {
       protocolTypes = ProtocolType.getAll();
@@ -63,15 +65,19 @@ public class ProtocolParamController {
     Timestamp endTimeFilter = null;
 
     if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
-      if (startTime.getTime() - endTime.getTime() < BigInteger.ZERO.intValue()) {
+      if (endTime.subtract(startTime).compareTo(BigInteger.ZERO) < BigInteger.ZERO.intValue()) {
         throw new BusinessException(BusinessCode.TIME_RANGE_ILLEGAL);
       }
-      startTimeFilter =  Timestamp.valueOf(LocalDateTime.ofInstant(startTime.toInstant(), ZoneOffset.UTC));
-      endTimeFilter =Timestamp.valueOf(LocalDateTime.ofInstant(endTime.toInstant(), ZoneOffset.UTC));
+
+      startTimeFilter = Timestamp.valueOf(
+          LocalDateTime.ofEpochSecond(startTime.longValue(), BigInteger.ZERO.intValue(), ZoneOffset.UTC));
+      endTimeFilter = Timestamp.valueOf(
+          LocalDateTime.ofEpochSecond(endTime.longValue(), BigInteger.ZERO.intValue(), ZoneOffset.UTC));
     }
 
     return ResponseEntity.ok(
-        protocolParamService.getHistoryProtocolParameters(protocolTypes, startTimeFilter, endTimeFilter));
+        protocolParamService.getHistoryProtocolParameters(protocolTypes, startTimeFilter,
+            endTimeFilter));
   }
 
   @GetMapping("latest")
