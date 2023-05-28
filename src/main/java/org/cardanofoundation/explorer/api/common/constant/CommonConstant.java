@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.common.constant;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -28,7 +29,7 @@ public class CommonConstant {
   public static final String POOL_STATUS_ACTIVE = "ACTIVE";
 
   public static final String POOL_STATUS_RETIRING = "RETIRING";
-  
+
   public static final String MAINNET_ADDRESS_PREFIX = "addr";
 
   public static final String LOVELACE = "LOVELACE";
@@ -46,9 +47,23 @@ public class CommonConstant {
     int result = BigInteger.ONE.intValue();
 
     for (Object element : a) {
-      result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue() : element.hashCode());
+      result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue()
+                                                       : element.hashCode());
     }
 
     return result;
+  }
+
+  /**
+   *  check timestamp in range of startTime and  endTime or not
+   *  startTime < endTime
+   * @param timestamp
+   * @param startFilterTime
+   * @param endFilterTime
+   * @return
+   */
+  public static boolean isWithinRange(Timestamp timestamp,
+                               Timestamp startFilterTime, Timestamp endFilterTime) {
+    return !(timestamp.before(startFilterTime) || timestamp.after(endFilterTime));
   }
 }
