@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -13,13 +12,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -185,14 +182,14 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
               var inRange = isWithinRange(starTime, startFilterTime, endFilterTime)
                   || isWithinRange(endTime, startFilterTime, endFilterTime);
 
-              if(!inRange){
+              if (!inRange) {
                 return;
               }
               findMaxFilter.set(Boolean.TRUE);
             }
           }
           // fill markProtocol when it empties
-          if(Objects.isNull(currentMarkProtocols.get())){
+          if (Objects.isNull(currentMarkProtocols.get())) {
             currentMarkProtocols.set(unprocessedProtocols.get(epoch));
           }
 
@@ -207,21 +204,19 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             markProtocol.getEpochChange().setEndEpoch(epoch);
 
             if (min.equals(epoch)) {
-              fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes,
-                  epochTime);
+              fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
               processProtocols.add(markProtocol);
             }
             return;
           }
 
-          fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes, epochTime);
+          fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
 
           processProtocols.add(currentMarkProtocols.get());
           currentMarkProtocols.set(currentProtocol);
 
           if (min.equals(epoch)) {
-            fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes,
-                epochTime);
+            fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
             processProtocols.add(currentMarkProtocols.get());
           }
         });
@@ -231,7 +226,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     handleHistoriesChange(historiesProtocol, protocolTypes);
 
     if (!ObjectUtils.isEmpty(epochTime)) {
-      filterProtocolTime(startFilterTime, endFilterTime, historiesProtocol, protocolTypes);
+      filterProtocolTime(startFilterTime, endFilterTime, historiesProtocol, protocolTypes,
+          epochTime);
     }
 
     return historiesProtocol;
@@ -276,7 +272,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           getProtocolChangeInOneEpoch(paramHistories, txs, epochChange, ProtocolType.getAll());
 
           epochChange.getEpochChange().setStartEpoch(epoch + BigInteger.ONE.intValue());
-          fillMissingProtocolField(epochChange, epochParam, ProtocolType.getAll(), null);
+          fillMissingProtocolField(epochChange, epochParam, ProtocolType.getAll());
           return epochChange;
         }).orElse(Protocols.builder().build());
   }
@@ -316,22 +312,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .value(object)
         .time(null)
         .transactionHash(null)
-        .build();
-  }
-
-  public static ProtocolHistory getChangeProtocol(Object object,
-                                                  EpochTimeProjection epochTimeProjection) {
-
-    if (object instanceof CostModel costModel) {
-      object = costModel.getCosts();
-    }
-
-    return ProtocolHistory.builder()
-        .value(object)
-        .time(null)
-        .transactionHash(null)
-        .starTimestamp(epochTimeProjection.getStartTime())
-        .endTimestamp(epochTimeProjection.getEndTime())
         .build();
   }
 
@@ -482,48 +462,17 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   private void fillMissingProtocolField(Protocols protocols, EpochParam epochParam,
-                                        List<ProtocolType> protocolTypes,
-                                        Map<Integer, EpochTimeProjection> epochTimeProjections) {
+                                        List<ProtocolType> protocolTypes) {
     protocolsMethods.entrySet()
         .stream()
         .filter(entry -> protocolTypes.contains(entry.getKey()))
         .forEach(entry -> {
           var methods = protocolsMethods.get(entry.getKey());
-
           try {
-            ProtocolHistory protocolHistory = (ProtocolHistory) entry.getValue().getSecond()
-                .invoke(protocols);
-            if (Objects.nonNull(epochTimeProjections)) {
-              EpochTimeProjection epochTimeProjection =
-                  epochTimeProjections.get(epochParam.getEpochNo() + BigInteger.ONE.intValue());
-
-              if (Objects.isNull(protocolHistory)) {
-                if (Objects.nonNull(epochTimeProjection)) {
-                  methods.getFirst()
-                      .invoke(protocols,
-                          getChangeProtocol(
-                              epochParamMethods.get(entry.getKey()).invoke(epochParam),
-                              epochTimeProjection));
-                  return;
-                }
-                methods.getFirst()
-                    .invoke(protocols,
-                        getChangeProtocol(
-                            epochParamMethods.get(entry.getKey()).invoke(epochParam)));
-                return;
-              }
-
-              if (Objects.nonNull(epochTimeProjection)) {
-                protocolHistory.setEndTimestamp(epochTimeProjection.getEndTime());
-                protocolHistory.setStarTimestamp(epochTimeProjection.getStartTime());
-              }
-              return;
-            }
-            if (Objects.isNull(protocolHistory)) {
+            if (Objects.isNull(entry.getValue().getSecond().invoke(protocols))) {
               methods.getFirst()
                   .invoke(protocols,
-                      getChangeProtocol(
-                          epochParamMethods.get(entry.getKey()).invoke(epochParam)));
+                      getChangeProtocol(epochParamMethods.get(entry.getKey()).invoke(epochParam)));
             }
           } catch (Exception e) {
             log.error(e.getMessage());
@@ -720,9 +669,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   private void filterProtocolTime(Timestamp startFilterTime, Timestamp endFilterTime,
                                   HistoriesProtocol historiesProtocol,
-                                  List<ProtocolType> protocolTypes) {
-    //key:Index, value:time
-    Map<Integer, Integer> removeIndex = new HashMap<>();
+                                  List<ProtocolType> protocolTypes,
+                                  Map<Integer, EpochTimeProjection> epochTime) {
 
     List<Entry<ProtocolType, Pair<Method, Method>>> methods = historiesProtocolMethods
         .entrySet()
@@ -730,32 +678,11 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .filter(entry -> protocolTypes.contains(entry.getKey()))
         .toList();
 
-    methods
-        .forEach(entry -> {
-          var historyProtocolsGet = entry.getValue().getSecond();
-          try {
+    List<Integer> removeIndex = getOutRangeIndex(historiesProtocol.getEpochChanges(),
+        startFilterTime,
+        endFilterTime, epochTime);
 
-            Set<Integer> remove = getOutRangeIndex(
-                (List<ProtocolHistory>) historyProtocolsGet.invoke(historiesProtocol),
-                startFilterTime, endFilterTime);
-
-            remove.forEach(integer -> {
-              if (removeIndex.containsKey(integer)) {
-                removeIndex.put(integer, removeIndex.get(integer) + BigInteger.ONE.intValue());
-                return;
-              }
-              removeIndex.put(integer, BigInteger.ONE.intValue());
-            });
-
-          } catch (Exception e) {
-            log.error(e.getMessage());
-            log.error(e.getLocalizedMessage());
-          }
-        });
-
-    var removeIndexInOrder = removeIndex.entrySet().stream()
-        .filter(entry -> entry.getValue() == methods.size())
-        .map(Entry::getKey)
+    var removeIndexInOrder = removeIndex.stream()
         .sorted(Collections.reverseOrder()).toList();
 
     removeIndexInOrder
@@ -775,18 +702,39 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         });
   }
 
-  Set<Integer> getOutRangeIndex(List<ProtocolHistory> list,
-                                Timestamp startFilter,
-                                Timestamp endFilter) {
+  List<Integer> getOutRangeIndex(List<EpochChange> list,
+                                 Timestamp startFilter,
+                                 Timestamp endFilter,
+                                 Map<Integer, EpochTimeProjection> epochTime) {
 
     return IntStream.range(BigInteger.ZERO.intValue(), list.size())
         .boxed()
         .filter(index -> {
-          ProtocolHistory protocolHistory = list.get(index);
+          EpochChange epochChange = list.get(index);
+          var epochChangeStartTime = epochTime.get(epochChange.getEndEpoch()).getStartTime();
+          var epochChangeEndTime = epochTime.get(epochChange.getStartEpoch()).getEndTime();
 
-          return !(isWithinRange(protocolHistory.getStarTimestamp(), startFilter, endFilter)
-              || isWithinRange(protocolHistory.getEndTimestamp(), startFilter, endFilter));
-        }).collect(Collectors.toSet());
+          var inRange = isWithinRange(epochChangeStartTime, startFilter, endFilter)
+              || isWithinRange(epochChangeEndTime, startFilter, endFilter);
+
+          if (inRange && !epochChange.getEndEpoch().equals(epochChange.getStartEpoch())) {
+            IntStream.range(epochChange.getEndEpoch(),
+                    epochChange.getStartEpoch() + BigInteger.ONE.intValue())
+                .boxed()
+                .sorted(Collections.reverseOrder())
+                .forEach(epoch ->{
+                  var inEpochRange = isWithinRange(epochTime.get(epoch).getStartTime(), startFilter, endFilter)
+                      || isWithinRange(epochTime.get(epoch).getEndTime(), startFilter, endFilter);
+
+                  if(!inEpochRange){
+                    return;
+                  }
+                  epochChange.setEndEpoch(epoch);
+                });
+          }
+
+          return !inRange;
+        }).toList();
   }
 
 
