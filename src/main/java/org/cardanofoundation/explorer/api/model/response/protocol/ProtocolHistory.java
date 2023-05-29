@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.protocol;
 
 import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -31,10 +30,6 @@ public class ProtocolHistory {
   ProtocolStatus status;
   @JsonIgnore
   Long costModelId;
-  @JsonIgnore
-  Timestamp starTimestamp;
-  @JsonIgnore
-  Timestamp endTimestamp;
 
 
   @Override
