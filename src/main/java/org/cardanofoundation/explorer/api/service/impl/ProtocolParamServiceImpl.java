@@ -714,8 +714,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           var epochChangeStartTime = epochTime.get(epochChange.getEndEpoch()).getStartTime();
           var epochChangeEndTime = epochTime.get(epochChange.getStartEpoch()).getEndTime();
 
-          var inRange = isWithinRange(epochChangeStartTime, startFilter, endFilter)
-              || isWithinRange(epochChangeEndTime, startFilter, endFilter);
+          var inRange = isWithinRange(startFilter, epochChangeStartTime, epochChangeEndTime)
+              || isWithinRange(endFilter, epochChangeStartTime, epochChangeEndTime);
 
           if (inRange && !epochChange.getEndEpoch().equals(epochChange.getStartEpoch())) {
             IntStream.range(epochChange.getEndEpoch(),
