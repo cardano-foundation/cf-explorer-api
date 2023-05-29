@@ -713,20 +713,27 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           EpochChange epochChange = list.get(index);
           var epochChangeStartTime = epochTime.get(epochChange.getEndEpoch()).getStartTime();
           var epochChangeEndTime = epochTime.get(epochChange.getStartEpoch()).getEndTime();
-
+          // check if filter time range of epoch time or not
           var inRange = isWithinRange(startFilter, epochChangeStartTime, epochChangeEndTime)
               || isWithinRange(endFilter, epochChangeStartTime, epochChangeEndTime);
+          // check if epoch time in filter range
+          if (!inRange) {
+            inRange = isWithinRange(epochChangeStartTime, startFilter, endFilter)
+                || isWithinRange(epochChangeEndTime, startFilter, endFilter);
+          }
 
           if (inRange && !epochChange.getEndEpoch().equals(epochChange.getStartEpoch())) {
             IntStream.range(epochChange.getEndEpoch(),
                     epochChange.getStartEpoch() + BigInteger.ONE.intValue())
                 .boxed()
                 .sorted(Collections.reverseOrder())
-                .forEach(epoch ->{
-                  var inEpochRange = isWithinRange(epochTime.get(epoch).getStartTime(), startFilter, endFilter)
-                      || isWithinRange(epochTime.get(epoch).getEndTime(), startFilter, endFilter);
+                .forEach(epoch -> {
+                  var inEpochRange =
+                      isWithinRange(epochTime.get(epoch).getStartTime(), startFilter, endFilter)
+                          || isWithinRange(epochTime.get(epoch).getEndTime(), startFilter,
+                          endFilter);
 
-                  if(!inEpochRange){
+                  if (!inEpochRange) {
                     return;
                   }
                   epochChange.setEndEpoch(epoch);
