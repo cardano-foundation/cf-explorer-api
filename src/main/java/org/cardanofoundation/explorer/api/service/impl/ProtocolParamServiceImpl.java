@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -684,6 +685,26 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
     var removeIndexInOrder = removeIndex.stream()
         .sorted(Collections.reverseOrder()).toList();
+
+    if (historiesProtocol.getEpochChanges().size() == BigInteger.ONE.intValue()) {
+      var epochMin = epochTime.keySet().stream().min(Integer::compareTo).orElseThrow();
+      if(!epochMin.equals(historiesProtocol.getEpochChanges().get(BigInteger.ZERO.intValue()).getEndEpoch())){
+        protocolTypes.parallelStream()
+            .forEach(protocolType -> {
+              methods.forEach(entry -> {
+                var historyProtocolsGet = entry.getValue().getSecond();
+                try {
+                  ((List<ProtocolHistory>) historyProtocolsGet.invoke(historiesProtocol))
+                      .get(BigInteger.ZERO.intValue())
+                      .setStatus(ProtocolStatus.NOT_CHANGE);
+                } catch (Exception e) {
+                  log.error(e.getMessage());
+                }
+              });
+            });
+      }
+
+    }
 
     removeIndexInOrder
         .forEach(index -> {
