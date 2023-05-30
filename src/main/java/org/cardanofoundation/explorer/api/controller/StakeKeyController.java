@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -136,13 +137,13 @@ public class StakeKeyController {
     return ResponseEntity.ok(stakeService.getStakeAnalytics());
   }
 
-
   @GetMapping("/analytics-balance/{stakeKey}/{type}")
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
   public ResponseEntity<List<StakeAnalyticBalanceResponse>> getStakeBalanceAnalytics(
-          @PathVariable String stakeKey, @PathVariable
-  @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+      @PathVariable String stakeKey,
+      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type
+  ) throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
   }
 
@@ -150,7 +151,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
   public ResponseEntity<List<StakeAnalyticRewardResponse>> getStakeRewardAnalytics(
-          @PathVariable String stakeKey) {
+      @PathVariable String stakeKey) {
     return ResponseEntity.ok(stakeService.getStakeRewardAnalytics(stakeKey));
   }
 

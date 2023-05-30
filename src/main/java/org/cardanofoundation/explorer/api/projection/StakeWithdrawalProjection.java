@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 
 public interface StakeWithdrawalProjection {
+
   Long getTxId();
   String getTxHash();
   Timestamp getTime();

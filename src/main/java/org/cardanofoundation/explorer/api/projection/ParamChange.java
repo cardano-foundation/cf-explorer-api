@@ -1,4 +1,4 @@
-package com.cardano.explorer.projection;
+package org.cardanofoundation.explorer.api.projection;
 
 public interface ParamChange {
 

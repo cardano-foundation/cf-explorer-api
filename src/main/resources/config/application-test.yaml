@@ -3,15 +3,15 @@ spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${HOST}:${PORT_DB}/explorer_api?currentSchema=${SPRING_PROFILES_ACTIVE}
-    username: ${USERNAME_DB}
-    password: ${PASSWORD_DB}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?currentSchema=${DB_SCHEMA}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
       pool-name: explorer-api-pool
-      minimum-idle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: 10 #maximum pool size
+      minimum-idle: 10 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximum-pool-size: ${DB_MAXIUM_POOL_SIZE:10} #maximum pool size
       idle-timeout: 300000 #maximum idle time for connection
       max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
       connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
@@ -38,7 +38,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: ${SPRING_PROFILES_ACTIVE}
+        default_schema: ${DB_SCHEMA:dev}
         show_sql: false
         format_sql: true
   flyway:
@@ -47,51 +47,44 @@ spring:
     web:
       pageable:
         default-page-size: 20
-  jackson:
-    default-property-inclusion: NON_NULL
+        max-page-size: 100
 
-rsa:
-  key:
-    public-key-file: /key/public_key
+redis:
+  databaseIndex: 0
+  master: ${REDIS_SENTINEL_MASTER_NAME:mymaster}
+  password: ${REDIS_SENTINEL_PASSWORD:redis_sentinel_pass}
+  testOnBorrow: false
+  maxTotal: 10
+  maxIdle: 5
+  minIdle: 3
+  testOnReturn: false
+  testWhileIdle: false
+  sentinels:
+    - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
+      port: ${REDIS_SENTINEL_PORT:26379}
 
-authentication:
-  ignore-check: true #ignore authentication check
-
-springdoc:
-  api-docs.path: /apidocs
-  show-actuator: true
-
-server:
-  compression:
-    enabled: true
-    mime-types: text/html,text/plain,text/css,application/javascript,application/json
-    min-response-size: 1024
-
-management:
-  endpoints:
-    enabled-by-default: false
-    web:
-      exposure:
-        include: "health,prometheus"
-  endpoint:
-    health:
-      enabled: true
-    prometheus:
-      enabled: true
+application:
+  network: ${DB_SCHEMA:mainnet}
+  api.coin.gecko.market:
+    interval-time: 200
+    base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
+  api:
+    check-reward:
+      base-url: ${API_CHECK_REWARD_URL:http://10.4.10.112:8888/api/v1/rewards/fetch}
 
 cloud:
   aws:
     credentials:
-      access-key: ${S3_ACCESS_KEY}
-      secret-key: ${S3_SECRET_KEY}
+      access-key: ${S3_ACCESS_KEY:miniominio}
+      secret-key: ${S3_SECRET_KEY:sekritsekrit}
     region:
-      static: ${S3_REGION}
+      static: ${S3_REGION:null}
     s3:
       bucket:
-        name: ${S3_BUCKET_NAME}
+        name: ${S3_BUCKET_NAME:cardano-explorer-api-storage}
       path-style:
-        enabled: false
-      endpoint: ${STORAGE_ENDPOINT}
+        enabled: true
+      endpoint: ${STORAGE_ENDPOINT:http://172.16.1.230:9000}
 
 logging:
   level:
@@ -101,3 +94,17 @@ logging:
           InstanceMetadataServiceResourceFetcher: error
         util:
           EC2MetadataUtils: error
+
+rsa:
+  key:
+    path: /key/public_key
+
+management:
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus

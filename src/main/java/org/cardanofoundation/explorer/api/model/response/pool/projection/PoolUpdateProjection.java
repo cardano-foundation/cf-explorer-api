@@ -14,4 +14,6 @@ public interface PoolUpdateProjection {
    Timestamp getTime();
 
    Double getMargin();
+
+   BigInteger getDeposit();
 }

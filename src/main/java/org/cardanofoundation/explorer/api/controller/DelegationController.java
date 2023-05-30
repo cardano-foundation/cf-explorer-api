@@ -76,5 +76,4 @@ public class DelegationController {
     return ResponseEntity.ok(delegationService.findTopDelegationPool(
         PageRequest.of(BigInteger.ZERO.intValue(), pageable.getPageSize())));
   }
-
 }

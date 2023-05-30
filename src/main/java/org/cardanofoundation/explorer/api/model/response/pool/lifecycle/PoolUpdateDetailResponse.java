@@ -44,6 +44,8 @@ public class PoolUpdateDetailResponse implements Serializable {
 
   private BigInteger cost;
 
+  private BigInteger deposit;
+
   public PoolUpdateDetailResponse(PoolUpdateDetailProjection projection) {
     this.poolUpdateId = projection.getPoolUpdateId();
     this.poolId = projection.getPoolId();
@@ -57,5 +59,6 @@ public class PoolUpdateDetailResponse implements Serializable {
     this.pledge = projection.getPledge();
     this.margin = projection.getMargin();
     this.cost = projection.getCost();
+    this.deposit = projection.getDeposit();
   }
 }

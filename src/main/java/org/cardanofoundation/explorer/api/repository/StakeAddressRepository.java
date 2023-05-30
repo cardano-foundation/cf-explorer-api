@@ -20,6 +20,8 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + " FROM StakeAddress sa"
       + " LEFT JOIN Address addr ON addr.stakeAddress = sa"
       + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
+      + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = sa) >"
+      + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)"
       + " GROUP BY sa.id"
       + " HAVING sum(addr.balance) IS NOT NULL"
       + " ORDER BY totalStake DESC")

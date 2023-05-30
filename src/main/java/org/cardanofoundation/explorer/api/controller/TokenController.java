@@ -4,7 +4,11 @@ import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.*;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
@@ -12,6 +16,8 @@ import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +41,7 @@ public class TokenController {
   @Operation(summary = "Filter token")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
       @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY,
-          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) {
+          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.filterToken(pageable));
   }
 
@@ -75,8 +81,9 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
-      @PathVariable String tokenId, @PathVariable
-      @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+      @PathVariable String tokenId,
+      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type
+  ) throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
   }
 }

@@ -7,6 +7,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import java.util.Date;
 import org.springframework.data.domain.Pageable;
@@ -100,4 +101,11 @@ public interface PoolLifecycleService {
    */
   BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(String poolView, Pageable pageable);
 
+  /**
+   * Get status pool lifecycle
+   *
+   * @param
+   * @return SPOStatusResponse
+   */
+  SPOStatusResponse poolLifecycleStatus(String poolView);
 }

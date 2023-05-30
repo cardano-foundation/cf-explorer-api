@@ -1,11 +1,12 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.util.Set;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal_;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
+
   @EntityGraph(attributePaths = {Withdrawal_.ADDR})
   List<Withdrawal> findByTx(@Param("tx") Tx tx);
 
@@ -27,13 +29,19 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   Optional<BigInteger> getRewardWithdrawnByStakeAddress(@Param("stakeAddress") String stakeAddress);
 
   @Query("SELECT tx.hash as txHash,withdrawal.amount as amount, block.time as time, tx.fee as fee,"
-      + " block.epochNo as epochNo"
+      + " block.epochNo as epochNo, tx.id as txId"
       + " FROM Withdrawal withdrawal"
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"
       + " INNER JOIN Block block ON tx.block = block"
       + " WHERE withdrawal.addr = :stakeKey AND tx.hash = :hash")
-  Optional<StakeWithdrawalProjection> getWithdrawalByAddressAndTx(
-      @Param("stakeKey") StakeAddress stakeKey, @Param("hash") String hash);
+  Optional<StakeWithdrawalProjection> getWithdrawalByAddressAndTx(@Param("stakeKey") StakeAddress stakeKey,
+                                                                  @Param("hash") String hash);
+
+  @Query("SELECT withdrawal.tx.id"
+      + " FROM Withdrawal withdrawal"
+      + " WHERE withdrawal.addr = :stakeKey AND withdrawal.tx.id IN :txIds")
+  List<Long> getWithdrawalByAddressAndTxIn(@Param("stakeKey") StakeAddress stakeKey,
+                                           @Param("txIds") List<Long> txIds);
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"
@@ -43,11 +51,11 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " INNER JOIN StakeAddress stake ON withdrawal.addr = stake"
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
-  Page<StakeWithdrawalProjection> getWithdrawalByAddress(@Param("stakeKey") String stakeKey,
-                                                         Pageable pageable);
+  Page<StakeWithdrawalProjection> getWithdrawalByAddress(@Param("stakeKey") String stakeKey, Pageable pageable);
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
-      + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"
+      + " tx.fee as fee, block.blockNo as blockNo, block.epochNo as epochNo,"
+      + " withdrawal.amount as amount"
       + " FROM Withdrawal withdrawal"
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"
       + " INNER JOIN Block block ON tx.block = block"
@@ -58,8 +66,12 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   Page<StakeWithdrawalProjection> getWithdrawalByAddress(@Param("stakeKey") StakeAddress stakeKey,
                                                          @Param("txHash") String txHash,
                                                          @Param("fromTime") Timestamp fromTime,
-                                                         @Param("toTime") Timestamp toTime,
-                                                         Pageable pageable);
+                                                         @Param("toTime") Timestamp toTime, Pageable pageable);
+
+  @Query("SELECT sum(wd.amount) "
+      + "FROM Withdrawal wd "
+      + "WHERE wd.addr.id IN :addressIds")
+  BigInteger findWithdrawalStakeByAddress(@Param("addressIds") Set<Long> addressIds);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse("
       + "block.epochNo, epoch.endTime, sum(withdrawal.amount))"
@@ -73,7 +85,8 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
 
   @Query("SELECT sum(w.amount) FROM Withdrawal w"
       + " WHERE w.addr = :stakeAddress AND w.tx.id < :txId")
-  Optional<BigInteger> sumByAddrAndTx(@Param("stakeAddress") StakeAddress stakeAddress,
+  Optional<BigInteger> sumByAddrAndTx(@Param("stakeAddress")  StakeAddress stakeAddress,
                                       @Param("txId") Long txId);
 
+  Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
 }

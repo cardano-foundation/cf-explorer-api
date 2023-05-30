@@ -18,6 +18,7 @@ import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolLifecycleServiceImpl;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -26,8 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

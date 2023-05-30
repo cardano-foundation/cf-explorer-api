@@ -1,21 +1,8 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
-import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
-import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
-import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
-import org.cardanofoundation.explorer.api.service.TxService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-
-import org.springdoc.core.annotations.ParameterObject;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,6 +12,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
+import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
+import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
+import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
+import org.cardanofoundation.explorer.api.service.TxService;
+import org.springdoc.core.annotations.ParameterObject;
 
 @RestController
 @RequestMapping("/api/v1/txs")
@@ -64,4 +63,5 @@ public class TxController {
       @PathVariable("range") TxChartRange range) {
     return ResponseEntity.ok(txService.getTransactionChartByRange(range));
   }
+
 }

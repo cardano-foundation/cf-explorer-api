@@ -13,9 +13,17 @@ public class ExportColumn {
 
   // use for export excel
   private Alignment align;
+  private int columnWidth;
 
   public enum Alignment {
     LEFT, RIGHT, CENTER
+  }
+
+  public ExportColumn(ColumnFieldEnum column, ColumnTitleEnum title, Alignment align, int columnWidth) {
+    this.columnField = column;
+    this.columnTitle = title;
+    this.align = align;
+    this.columnWidth = columnWidth;
   }
 
   public ExportColumn(ColumnFieldEnum column, ColumnTitleEnum title, Alignment align) {

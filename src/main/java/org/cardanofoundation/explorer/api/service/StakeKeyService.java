@@ -13,10 +13,11 @@ import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.springframework.data.domain.Pageable;
-
 import java.math.BigInteger;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import org.springframework.data.domain.Pageable;
 
 public interface StakeKeyService {
 
@@ -113,7 +114,7 @@ public interface StakeKeyService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list balance value by stake
    */
-  List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type);
+  List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type) throws ExecutionException, InterruptedException;
 
   /**
    * Get stake reward analytics

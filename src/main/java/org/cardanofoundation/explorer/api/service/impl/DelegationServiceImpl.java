@@ -1,7 +1,27 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.model.request.pool.RewardParam;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;
@@ -16,12 +36,13 @@ import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAn
 import org.cardanofoundation.explorer.api.model.response.pool.projection.BasePoolChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochRewardProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolAmountProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailEpochProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.RewardEpochProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.repository.BlockRepository;
@@ -32,37 +53,16 @@ import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.common.utils.StringUtils;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -84,24 +84,33 @@ public class DelegationServiceImpl implements DelegationService {
 
   private final RewardRepository rewardRepository;
 
+  private final RedisTemplate<String, Object> redisTemplate;
+
+  public static final int MILLI = 1000;
+
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
 
+  @Value("${application.network}")
+  private String network;
 
   @Override
   public DelegationHeaderResponse getDataForDelegationHeader() {
     Epoch epoch = epochRepository.findByCurrentEpochNo()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Integer epochNo = epoch.getNo();
-    Timestamp endTime = epoch.getEndTime();
-    long countDownTime = endTime.getTime() - Timestamp.from(Instant.now()).getTime();
-    Integer currentSlot = blockRepository.findCurrentSlotByEpochNo(epochNo);
-    BigInteger totalStake = epochStakeRepository.totalStakeAllPoolByEpochNo(epochNo)
-        .orElse(BigInteger.ZERO);
+    Timestamp startTime = epoch.getStartTime();
+    Long slot = (Instant.now().toEpochMilli() - startTime.getTime()) / MILLI;
+    long countDownTime =
+        Timestamp.from(startTime.toInstant().plus(5, ChronoUnit.DAYS)).getTime() - Timestamp.from(
+            Instant.now()).getTime();
+    Object liveStake = redisTemplate.opsForValue()
+        .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
     Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
         Long.valueOf(epochNo));
-    return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(currentSlot)
-        .liveStake(totalStake).delegators(delegators)
+    return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
+        .liveStake(Objects.nonNull(liveStake) ? new BigInteger(String.valueOf(liveStake))
+            : BigInteger.ZERO).delegators(delegators)
         .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
         .build();
   }
@@ -109,33 +118,46 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
-    String poolName = null;
-    String poolView = null;
-    if (Boolean.TRUE.equals(StringUtils.isNotBlank(search))) {
-      poolView = search;
-      poolName = CommonConstant.PREFIX_POOL_NAME + search;
+    if (Objects.nonNull(search) && search.isBlank()) {
+      search = null;
     }
-    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(poolView,
-        poolName, pageable);
+    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search,
+        search, pageable);
     List<PoolResponse> poolList = new ArrayList<>();
-    List<String> poolViews = new ArrayList<>();
+    Set<Long> poolIds = new HashSet<>();
+    List<Object> poolViews = new ArrayList<>();
     poolIdPage.stream().forEach(pool -> {
-      poolList.add(PoolResponse.builder().poolId(pool.getPoolView())
-          .poolName(getNameValueFromJson(pool.getPoolName()))
-          .poolSize(Objects.isNull(pool.getPoolSize()) ? null : new BigDecimal(pool.getPoolSize()))
-          .pledge(Objects.isNull(pool.getPledge()) ? null : new BigDecimal(pool.getPledge()))
-          .feeAmount(Objects.isNull(pool.getFee()) ? null : new BigDecimal(pool.getFee()))
-          .feePercent(pool.getMargin())
-          .saturation(getSaturation(Objects.isNull(pool.getPoolSize()) ? null : new BigDecimal(pool.getPoolSize()),
-              getStakeLimit(Objects.isNull(pool.getUtxo()) ? null : new BigDecimal(pool.getUtxo()), pool.getParamK())).doubleValue())
-          .build());
       poolViews.add(pool.getPoolView());
+      poolList.add(PoolResponse.builder().poolId(pool.getPoolView())
+          .id(pool.getPoolId())
+          .poolName(pool.getPoolName())
+          .pledge(pool.getPledge())
+          .feeAmount(pool.getFee())
+          .feePercent(pool.getMargin())
+          .stakeLimit(getPoolSaturation(pool.getReserves(), pool.getParamK()))
+          .build());
+      poolIds.add(pool.getPoolId());
     });
-    List<PoolListProjection> dataRewards = poolHashRepository.findDataCalculateReward(poolViews);
-    Map<String, PoolListProjection> dataRewardsMap = dataRewards.stream()
-        .collect(Collectors.toMap(PoolListProjection::getPoolView, Function.identity()));
+    Integer currentEpoch = epochRepository.findCurrentEpochNo()
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    Map<String, BigInteger> liveStakeMap = getStakeFromCache(
+        CommonConstant.LIVE_STAKE, poolViews, null);
+    Map<String, BigInteger> activeStakeMap = getStakeFromCache(
+        CommonConstant.ACTIVATE_STAKE, poolViews, currentEpoch);
+    List<PoolAmountProjection> poolAmountProjections = rewardRepository.getPoolRewardByPoolList(
+        poolIds, currentEpoch);
+    Map<Long, BigInteger> rewardMap = poolAmountProjections.stream()
+        .collect(
+            Collectors.toMap(PoolAmountProjection::getPoolId, PoolAmountProjection::getAmount));
     poolList.forEach(
-        pool -> pool.setReward(getReward(new RewardParam(dataRewardsMap.get(pool.getPoolId())))));
+        pool -> {
+          pool.setPoolSize(activeStakeMap.get(pool.getPoolId()));
+          pool.setReward(getPoolRewardPercent(activeStakeMap.get(pool.getPoolId()),
+              rewardMap.get(pool.getId())));
+          pool.setSaturation(
+              getSaturation(liveStakeMap.get(pool.getPoolId()),
+                  pool.getStakeLimit()));
+        });
     response.setData(poolList);
     response.setTotalItems(poolIdPage.getTotalElements());
     return response;
@@ -143,59 +165,76 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public Set<PoolResponse> findTopDelegationPool(Pageable pageable) {
-
-    if (pageable.getPageSize() > defaultSize) {
-      pageable = PageRequest.of(0, defaultSize);
+    int size = defaultSize;
+    if (pageable.getPageSize() < defaultSize) {
+      size = pageable.getPageSize();
     }
-
+    List<Object> poolViews = poolHashRepository.findAllPoolView();
+    Integer currentEpoch = epochRepository.findCurrentEpochNo()
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    Map<String, BigInteger> activeStakeMap = getStakeFromCache(CommonConstant.ACTIVATE_STAKE,
+        poolViews,
+        currentEpoch);
+    Set<String> poolViewsTop = activeStakeMap.entrySet().stream()
+        .sorted(Map.Entry.<String, BigInteger>comparingByValue().reversed()).limit(size)
+        .map(Map.Entry::getKey).collect(Collectors.toSet());
+    List<Object> objList = new ArrayList<>(poolViewsTop);
+    Map<String, BigInteger> liveStakeMap = getStakeFromCache(
+        CommonConstant.LIVE_STAKE, objList, null);
+    Set<Long> poolIds = poolHashRepository.getListPoolIdIn(poolViewsTop);
     List<PoolDelegationSummaryProjection> pools = delegationRepository.findDelegationPoolsSummary(
-        pageable);
-    List<String> poolViews = pools.stream().map(PoolDelegationSummaryProjection::getPoolView)
-        .toList();
-    List<PoolListProjection> dataRewards = poolHashRepository.findDataCalculateReward(poolViews);
-    Map<String, PoolListProjection> dataRewardsMap = dataRewards.stream()
-        .collect(Collectors.toMap(PoolListProjection::getPoolView, Function.identity()));
+        poolIds);
+    List<PoolAmountProjection> poolAmountProjections = rewardRepository.getPoolRewardByPoolList(
+        poolIds, currentEpoch);
+    Map<Long, BigInteger> rewardMap = poolAmountProjections.stream()
+        .collect(
+            Collectors.toMap(PoolAmountProjection::getPoolId, PoolAmountProjection::getAmount));
     return pools.stream().map(pool -> {
-
-          String poolName = getNameValueFromJson(pool.getJson());
-          Integer parameterK = pool.getOptimalPoolCount();
-          BigDecimal totalAda = pool.getUtxo();
-          BigDecimal stakeLimit = getStakeLimit(totalAda, parameterK);
-          BigDecimal poolSize = pool.getPoolSize();
-          BigDecimal saturation = getSaturation(poolSize, stakeLimit);
-          return PoolResponse.builder().poolId(pool.getPoolView()).poolName(poolName)
-              .poolSize(pool.getPoolSize()).reward(BigInteger.ZERO.doubleValue())
-              .saturation(saturation.doubleValue()).feeAmount(pool.getFee())
+          Integer paramK = pool.getOptimalPoolCount();
+          Double saturation = getSaturation(liveStakeMap.get(pool.getPoolView()),
+              getPoolSaturation(pool.getReserves(), paramK));
+          return PoolResponse.builder().poolId(pool.getPoolView()).poolName(pool.getPoolName())
+              .poolSize(activeStakeMap.get(pool.getPoolView()))
+              .saturation(saturation).feeAmount(pool.getFee())
               .feePercent(pool.getMargin()).pledge(pool.getPledge())
-              .reward(getReward(new RewardParam(dataRewardsMap.get(pool.getPoolView())))).build();
+              .reward(getPoolRewardPercent(activeStakeMap.get(pool.getPoolView()),
+                  rewardMap.get(pool.getPoolId()))).build();
         }).sorted(((o1, o2) -> o2.getPoolSize().compareTo(o1.getPoolSize())))
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   @Override
   public PoolDetailHeaderResponse getDataForPoolDetail(String poolView) {
-    PoolDetailUpdateProjection poolDetailProjection = poolHashRepository.getDataForPoolDetail(
+    PoolDetailUpdateProjection projection = poolHashRepository.getDataForPoolDetail(
         poolView);
-    Long poolId = poolDetailProjection.getPoolId();
-    PoolDetailHeaderResponse poolDetailResponse = Stream.of(poolDetailProjection)
+    Long poolId = projection.getPoolId();
+    PoolDetailHeaderResponse poolDetailResponse = Stream.of(projection)
         .map(PoolDetailHeaderResponse::new).findFirst()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    poolDetailResponse.setPoolName(getNameValueFromJson(poolDetailResponse.getPoolName()));
+    Integer currentEpoch = epochRepository.findCurrentEpochNo()
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    List<Object> poolViews = new ArrayList<>();
+    poolViews.add(poolView);
+    Map<String, BigInteger> liveStakeMap = getStakeFromCache(
+        CommonConstant.LIVE_STAKE, poolViews, null);
+    Map<String, BigInteger> activeStakeMap = getStakeFromCache(
+        CommonConstant.ACTIVATE_STAKE, poolViews, currentEpoch);
+    poolDetailResponse.setPoolSize(activeStakeMap.get(poolView));
     poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
-    poolDetailResponse.setRewardAccounts(poolUpdateRepository.findRewardAccountByPool(poolId));
     List<String> ownerAddress = poolUpdateRepository.findOwnerAccountByPool(poolId);
     Collections.sort(ownerAddress);
     poolDetailResponse.setOwnerAccounts(ownerAddress);
     poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
-    poolDetailResponse.setReward(CommonConstant.ZERO.doubleValue());
-    poolDetailResponse.setStakeLimit(
-        getStakeLimit(poolDetailProjection.getUtxo(), poolDetailProjection.getParamK()));
-    poolDetailResponse.setSaturation(getSaturation(poolDetailProjection.getPoolSize(),
-        poolDetailResponse.getStakeLimit()).doubleValue());
-    PoolListProjection poolListProjection = poolHashRepository.findDataCalculateReward(poolView);
-    Double reward = getReward(new RewardParam(poolListProjection));
-    poolDetailResponse.setReward(reward);
-    poolDetailResponse.setRos(getPoolRos(reward, poolDetailProjection.getMargin()));
+    BigDecimal stakeLimit = getPoolSaturation(projection.getReserves(),
+        projection.getParamK());
+    poolDetailResponse.setSaturation(getSaturation(liveStakeMap.get(poolView), stakeLimit));
+    poolDetailResponse.setStakeLimit(stakeLimit);
+    BigInteger poolReward = rewardRepository.getPoolRewardByPool(poolId);
+    poolDetailResponse.setReward(
+        getPoolRewardPercent(activeStakeMap.get(poolView), poolReward));
+    poolDetailResponse.setRos(
+        getRos(poolReward, poolDetailResponse.getCost(), poolDetailResponse.getMargin(),
+            activeStakeMap.get(poolView)));
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
     return poolDetailResponse;
@@ -204,49 +243,47 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
       String poolView) {
+    BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
     PoolHash poolHash = poolHashRepository.findByView(poolView)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
-    PoolUpdate poolUpdate = poolUpdateRepository.findLastEpochByPool(poolId);
-    BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
-    Page<PoolDetailEpochProjection> epochOfPoolPage = poolHashRepository.findEpochByPool(poolId,
-        pageable);
-    List<PoolDetailEpochResponse> epochOfPools = epochOfPoolPage.stream()
+    Page<EpochStakeProjection> epochStakeProjections = epochStakeRepository.getDataForEpochList(
+        poolId, pageable);
+    List<PoolDetailEpochResponse> epochOfPools = epochStakeProjections.stream()
         .map(PoolDetailEpochResponse::new).toList();
-    Set<Integer> epochNoInt = epochOfPoolPage.stream().map(PoolDetailEpochProjection::getEpochNo)
+    Set<Integer> epochNos = epochStakeProjections.stream().map(EpochStakeProjection::getEpochNo)
         .collect(Collectors.toSet());
-    Set<Long> epochNoLg = epochNoInt.stream().map(Long::valueOf).collect(Collectors.toSet());
-    List<EpochStakeProjection> epochStakeProjections = epochStakeRepository.totalStakeByEpochNoAndPool(
-        epochNoInt, poolId);
-    Map<Integer, BigInteger> epochStakeProjectionMap = epochStakeProjections.stream().collect(
-        Collectors.toMap(EpochStakeProjection::getEpochNo, EpochStakeProjection::getTotalStake));
-    List<EpochStakeProjection> rewardStakeProjections = rewardRepository.totalRewardStakeByEpochNoAndPool(
-        epochNoLg, poolId);
-    Map<Integer, BigInteger> rewardStakeProjectionMap = rewardStakeProjections.stream().collect(
-        Collectors.toMap(EpochStakeProjection::getEpochNo, EpochStakeProjection::getTotalStake));
-    List<RewardEpochProjection> rewardEpochProjections = epochRepository.findParamRewardByEpoch(
-        epochNoInt);
-    Map<Integer, RewardEpochProjection> rewardEpochProjectionMap = rewardEpochProjections.stream()
-        .collect(Collectors.toMap(RewardEpochProjection::getEpochNo, Function.identity()));
+    List<PoolDetailEpochProjection> epochBlockProjections = poolHashRepository.findEpochByPool(
+        poolId,
+        epochNos);
+    Map<Integer, Long> epochBlockMap = epochBlockProjections.stream().collect(
+        Collectors.toMap(PoolDetailEpochProjection::getEpochNo,
+            PoolDetailEpochProjection::getCountBlock));
+    List<EpochRewardProjection> delegatorRewardProjections = rewardRepository.getDelegatorRewardByPool(
+        poolId, epochNos);
+    Map<Integer, BigInteger> delegatorRewardMap = delegatorRewardProjections.stream().collect(
+        Collectors.toMap(EpochRewardProjection::getEpochNo, EpochRewardProjection::getAmount));
+    List<EpochRewardProjection> poolRewardProjections = rewardRepository.getPoolRewardByPool(
+        poolId, epochNos);
+    Map<Integer, BigInteger> poolRewardMap = poolRewardProjections.stream().collect(
+        Collectors.toMap(EpochRewardProjection::getEpochNo, EpochRewardProjection::getAmount));
+    List<Epoch> epochs = epochRepository.findFeeByEpochNo(epochNos);
+    Map<Integer, BigInteger> epochFeeMap = epochs.stream().collect(
+        Collectors.toMap(Epoch::getNo, Epoch::getFees));
+    PoolUpdate poolUpdate = poolUpdateRepository.findLastUpdateByPool(poolId);
     epochOfPools.forEach(epochOfPool -> {
-      epochOfPool.setStakeAmount(epochStakeProjectionMap.get(epochOfPool.getEpoch()));
-      epochOfPool.setDelegators(rewardStakeProjectionMap.get(epochOfPool.getEpoch()));
-      RewardEpochProjection rewardEpochProjection = rewardEpochProjectionMap.get(
-          epochOfPool.getEpoch());
-      if (Objects.nonNull(rewardEpochProjection) && Objects.nonNull(poolUpdate)) {
-        RewardParam param = new RewardParam(rewardEpochProjection);
-        param.setMargin(poolUpdate.getMargin());
-        param.setPledge(poolUpdate.getPledge());
-        param.setFixedFee(poolUpdate.getFixedCost());
-        param.setPoolSize(poolHash.getPoolSize());
-        Double reward = getReward(param);
-        epochOfPool.setRos(getPoolRos(reward, poolUpdate.getMargin()));
-        epochOfPool.setFee(rewardEpochProjection.getFeePerEpoch());
+      epochOfPool.setBlock(epochBlockMap.get(epochOfPool.getEpoch()));
+      epochOfPool.setDelegators(delegatorRewardMap.get(epochOfPool.getEpoch()));
+      epochOfPool.setFee(epochFeeMap.get(epochOfPool.getEpoch()));
+      if (Objects.nonNull(poolUpdate)) {
+        epochOfPool.setRos(
+            getRos(poolRewardMap.get(epochOfPool.getEpoch()), poolUpdate.getFixedCost(),
+                poolUpdate.getMargin(),
+                epochOfPool.getStakeAmount()));
       }
     });
-
     epochRes.setData(epochOfPools);
-    epochRes.setTotalItems(epochOfPoolPage.getTotalElements());
+    epochRes.setTotalItems(epochStakeProjections.getTotalElements());
     return epochRes;
   }
 
@@ -313,177 +350,72 @@ public class DelegationServiceImpl implements DelegationService {
     return delegatorResponse;
   }
 
-  /**
-   * Get name value from json string pools
-   *
-   * @return String
-   */
-  private String getNameValueFromJson(String jsonName) {
-    try {
-      JsonObject jsonObject = new Gson().fromJson(jsonName, JsonObject.class);
-      return jsonObject.get("name").getAsString();
-    } catch (Exception ex) {
-      log.error("Error: when convert json string to json object");
-    }
-    return null;
-  }
-
-  /**
-   * get stake limit with k param
-   *
-   * @return BigDecimal
-   */
-  private BigDecimal getStakeLimit(BigDecimal totalAda, Integer k) {
-    if (Objects.isNull(k) || Objects.isNull(totalAda)) {
+  private BigDecimal getPoolSaturation(BigInteger reserves, Integer k) {
+    if (Objects.isNull(k) || Objects.isNull(reserves)) {
       return BigDecimal.ZERO;
     }
-    return totalAda.divide(new BigDecimal(k), CommonConstant.SCALE, RoundingMode.HALF_UP);
+    return (CommonConstant.TOTAL_ADA.subtract(new BigDecimal(reserves))).divide(new BigDecimal(k),
+        CommonConstant.SCALE, RoundingMode.HALF_UP);
   }
 
-  private static BigDecimal getSaturation(BigDecimal poolSize, BigDecimal stakeLimit) {
-    if (stakeLimit.equals(BigDecimal.ZERO) || Objects.isNull(poolSize)) {
-      return BigDecimal.ZERO;
-    }
-    return poolSize.divide(stakeLimit, CommonConstant.SCALE, RoundingMode.HALF_UP);
-  }
-
-  /**
-   * get ROS for pool
-   *
-   * @return Double
-   */
-  private Double getPoolRos(Double reward, Double margin) {
-    if (Objects.isNull(margin)) {
-      return CommonConstant.ZERO.doubleValue();
-    }
-    return BigDecimal.valueOf(reward)
-        .subtract(BigDecimal.valueOf(reward).multiply(BigDecimal.valueOf(margin))).doubleValue();
-  }
-
-  /**
-   * get totalADAInCirculation param
-   *
-   * @return BigDecimal
-   */
-  private BigDecimal getTotalADAInCirculation(BigInteger currentAda, Double expansionRate) {
-    if (Objects.isNull(currentAda) || Objects.isNull(expansionRate)) {
-      return BigDecimal.ZERO;
-    }
-    BigDecimal reserveOne = CommonConstant.TOTAL_ADA.subtract(new BigDecimal(currentAda));
-    return new BigDecimal(currentAda).add((reserveOne.multiply(BigDecimal.valueOf(expansionRate))));
-  }
-
-  /**
-   * get R param
-   *
-   * @return BigDecimal
-   */
-  private BigDecimal getParamR(BigInteger currentAda, Double expansionRate, BigInteger feePerEpoch,
-      Double treasuryRate) {
-    if (Objects.isNull(currentAda) || Objects.isNull(expansionRate) || Objects.isNull(
-        treasuryRate)) {
-      return BigDecimal.ZERO;
-    }
-    if (Objects.isNull(feePerEpoch) || feePerEpoch.compareTo(BigInteger.ZERO) < 0) {
-      feePerEpoch = BigInteger.ZERO;
-    }
-    BigDecimal reserveOne = CommonConstant.TOTAL_ADA.subtract(new BigDecimal(currentAda));
-    BigDecimal totalADAInCirculation = new BigDecimal(currentAda).add(
-        (reserveOne.multiply(BigDecimal.valueOf(expansionRate))));
-    BigDecimal reserveTwo = CommonConstant.TOTAL_ADA.subtract(totalADAInCirculation);
-    return ((reserveTwo.multiply(BigDecimal.valueOf(expansionRate))).add(
-        new BigDecimal(feePerEpoch))).multiply(
-        BigDecimal.ONE.subtract(BigDecimal.valueOf(treasuryRate)));
-  }
-
-  /**
-   * get gross reward for pool
-   *
-   * @return BigDecimal
-   */
-  private BigDecimal getGrossReward(Integer k, BigInteger currentAda,
-      BigDecimal totalADAInCirculation,
-      Double a0, BigDecimal poolSize, BigDecimal r) {
-    if (r.equals(BigDecimal.ZERO) || Objects.isNull(k) || Objects.isNull(
-        a0) || Objects.isNull(poolSize) || poolSize.equals(BigDecimal.ZERO)) {
-      return BigDecimal.ZERO;
-    }
-    BigDecimal z0 = BigDecimal.ONE.divide(BigDecimal.valueOf(k), CommonConstant.SCALE_10,
-        RoundingMode.HALF_DOWN);
-    BigDecimal poolSaturation = totalADAInCirculation.divide(BigDecimal.valueOf(k),
-        CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal s = (poolSize.min(poolSaturation)).divide(totalADAInCirculation,
-        CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal sigma = poolSize.divide(new BigDecimal(currentAda), CommonConstant.SCALE_10,
-        RoundingMode.HALF_DOWN);
-    BigDecimal sCapped = z0.min(s);
-    BigDecimal sigmaCapped = z0.min(sigma);
-    return (r.divide(BigDecimal.ONE.add(BigDecimal.valueOf(a0)), CommonConstant.SCALE,
-        RoundingMode.HALF_DOWN)).multiply(sigmaCapped.add(sCapped.multiply(BigDecimal.valueOf(a0))
-        .multiply(((sigmaCapped.subtract(sCapped)).multiply(
-            (z0.subtract(sigmaCapped)).divide(z0, CommonConstant.SCALE,
-                RoundingMode.HALF_DOWN))).divide(z0, CommonConstant.SCALE,
-            RoundingMode.HALF_DOWN))));
-  }
-
-  /**
-   * get net reward for pool
-   *
-   * @return BigDecimal
-   */
-  private BigDecimal getNetReward(BigDecimal grossReward, Integer blkCount, Integer maxBlockSize,
-      Double margin, BigDecimal fixedFee) {
-    if (grossReward.equals(BigDecimal.ZERO) || Objects.isNull(blkCount) || Objects.isNull(
-        maxBlockSize) || Objects.isNull(margin) || Objects.isNull(fixedFee)) {
-      return BigDecimal.ZERO;
-    }
-    BigDecimal stakePoolPerformance = BigDecimal.valueOf(blkCount)
-        .divide(BigDecimal.valueOf(maxBlockSize), CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal penalty = BigDecimal.ONE.subtract(stakePoolPerformance).multiply(grossReward);
-    grossReward = BigDecimal.ZERO.max(grossReward.subtract(penalty));
-    grossReward = BigDecimal.ZERO.max(grossReward.subtract(fixedFee));
-    BigDecimal marginAda = grossReward.multiply(BigDecimal.valueOf(margin));
-    return grossReward.subtract(marginAda);
-  }
-
-  /**
-   * get reward ada for pool calculate capped ada
-   *
-   * @return BigDecimal
-   */
-  private Double getReward(BigDecimal poolSize, BigDecimal pledge, Integer k, BigDecimal currentAda,
-      Double expansionRate, BigDecimal netReward) {
-    if (netReward.equals(BigDecimal.ZERO) || poolSize.compareTo(pledge) <= 0) {
+  private Double getSaturation(BigInteger liveStake, BigDecimal poolSaturation) {
+    if (poolSaturation.equals(BigDecimal.ZERO) || Objects.isNull(liveStake)) {
       return BigDecimal.ZERO.doubleValue();
     }
-    BigDecimal ada = poolSize.subtract(pledge);
-    BigDecimal reserveOne = CommonConstant.TOTAL_ADA.subtract(currentAda);
-    BigDecimal totalADAInCirculation = currentAda.add(
-        (reserveOne.multiply(BigDecimal.valueOf(expansionRate))));
-    BigDecimal poolSaturation = totalADAInCirculation.divide(BigDecimal.valueOf(k),
-        CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal sigma = poolSize.divide(currentAda, CommonConstant.SCALE_10, RoundingMode.HALF_DOWN);
-    BigDecimal control = sigma.multiply(totalADAInCirculation);
-    BigDecimal cappedAda = ada.min(
-        BigDecimal.ZERO.max(poolSaturation.min(control).subtract(poolSize)));
-    BigDecimal stakePoolControlADA = sigma.multiply(totalADAInCirculation);
-    BigDecimal rewardAda = ((netReward.multiply(cappedAda)).divide(stakePoolControlADA,
-        CommonConstant.SCALE_10, RoundingMode.HALF_DOWN)).multiply(CommonConstant.EPOCH_IN_YEARS);
-    return rewardAda.divide(ada, CommonConstant.SCALE_10, RoundingMode.HALF_DOWN).doubleValue();
+    return new BigDecimal(String.valueOf(liveStake)).divide(poolSaturation,
+        CommonConstant.SCALE, RoundingMode.HALF_UP).multiply(CommonConstant.PERCENT).doubleValue();
   }
 
-  private Double getReward(RewardParam param) {
-    BigDecimal totalADAInCirculation = getTotalADAInCirculation(param.getCurrentAda(),
-        param.getExpansionRate());
-    BigDecimal r = getParamR(param.getCurrentAda(), param.getExpansionRate(),
-        param.getFeePerEpoch(), param.getTreasuryRate());
-    BigDecimal grossReward = getGrossReward(param.getK(), param.getCurrentAda(),
-        totalADAInCirculation, param.getA0(),
-        Objects.isNull(param.getPoolSize()) ? null : new BigDecimal(param.getPoolSize()), r);
-    BigDecimal netReward = getNetReward(grossReward, param.getBlkCount(), param.getMaxBlockSize(),
-        param.getMargin(), Objects.isNull(param.getFixedFee()) ? null : new BigDecimal(param.getFixedFee()));
-    return getReward(Objects.isNull(param.getPoolSize()) ? null : new BigDecimal(param.getPoolSize()),
-        Objects.isNull(param.getPledge()) ? null : new BigDecimal(param.getPledge()),
-        param.getK(), Objects.isNull(param.getCurrentAda()) ? null : new BigDecimal(param.getCurrentAda()), param.getExpansionRate(), netReward);
+  private Double getPoolRewardPercent(BigInteger activeStake, BigInteger poolReward) {
+    if (Objects.isNull(activeStake) || Objects.isNull(poolReward) || BigInteger.ZERO.compareTo(activeStake) == 0) {
+      return BigInteger.ZERO.doubleValue();
+    }
+    return new BigDecimal(poolReward).divide(new BigDecimal(activeStake), CommonConstant.SCALE,
+            RoundingMode.HALF_UP).multiply(CommonConstant.EPOCH_IN_YEARS)
+        .multiply(CommonConstant.PERCENT).doubleValue();
+  }
+
+  private Double getRos(BigInteger poolReward, BigInteger fixedCost, Double margin,
+      BigInteger activeStake) {
+    if (Objects.isNull(poolReward) || Objects.isNull(fixedCost) || Objects.isNull(margin)
+        || Objects.isNull(activeStake)) {
+      return BigInteger.ZERO.doubleValue();
+    }
+    BigDecimal distributedReward = new BigDecimal(poolReward).subtract(new BigDecimal(fixedCost));
+    BigDecimal poolFee = distributedReward.multiply(BigDecimal.valueOf(margin));
+    distributedReward = distributedReward.subtract(poolFee);
+    return distributedReward.divide(new BigDecimal(activeStake), CommonConstant.SCALE,
+            RoundingMode.HALF_UP).multiply(CommonConstant.EPOCH_IN_YEARS)
+        .multiply(CommonConstant.PERCENT).doubleValue();
+  }
+
+  private Map<String, BigInteger> getStakeFromCache(String prefixKey, List<Object> poolIds,
+      Integer epochNo) {
+    Map<String, BigInteger> stakeFromCache = new HashMap<>();
+    if (Objects.isNull(poolIds)) {
+      return stakeFromCache;
+    }
+    String key = prefixKey + network  + (Objects.isNull(epochNo) ? "" : ("_" + epochNo)) ;
+    List<Object> objStakeList = null;
+    try {
+      objStakeList = redisTemplate.opsForHash().multiGet(key, poolIds);
+    } catch (Exception e) {
+      log.info("Error when get stake from cache with Key=" + key);
+      return stakeFromCache;
+    }
+    if (!objStakeList.isEmpty()) {
+      int i = 0;
+      for (Object poolId : poolIds) {
+        Object objStake = objStakeList.get(i);
+        if (Objects.nonNull(objStake)
+            && new BigInteger(String.valueOf(objStake)).compareTo(BigInteger.ZERO) > 0) {
+          stakeFromCache.put((String) poolId, (BigInteger) objStake);
+        } else {
+          stakeFromCache.put((String) poolId, BigInteger.ZERO);
+        }
+        i++;
+      }
+    }
+    return stakeFromCache;
   }
 }

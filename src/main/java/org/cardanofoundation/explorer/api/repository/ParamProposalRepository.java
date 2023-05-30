@@ -39,7 +39,7 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
       + "pp.maxBlockExMem AS maxBlockExMem, pp.maxBlockExSteps AS maxBlockExSteps, "
       + "pp.maxValSize AS maxValSize, pp.collateralPercent AS collateralPercent, "
       + "pp.maxCollateralInputs AS maxCollateralInputs, pp.coinsPerUtxoSize AS coinsPerUtxoSize,"
-      + "pp.costModelId AS costModel, pp.registeredTxId AS tx, pp.epochNo AS epochNo "
+      + "pp.costModel.id AS costModel, pp.registeredTx.id as tx, pp.epochNo AS epochNo "
       + "FROM ParamProposal  pp "
       + "GROUP BY pp.minFeeA, pp.minFeeB, pp.maxBlockSize, pp.maxTxSize,pp.maxBhSize,pp.keyDeposit, "
       + "pp.poolDeposit, pp.maxEpoch, pp.optimalPoolCount, "
@@ -61,7 +61,7 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
       + "pp.maxBlockExMem AS maxBlockExMem, pp.maxBlockExSteps AS maxBlockExSteps, "
       + "pp.maxValSize AS maxValSize, pp.collateralPercent AS collateralPercent, "
       + "pp.maxCollateralInputs AS maxCollateralInputs, pp.coinsPerUtxoSize AS coinsPerUtxoSize,"
-      + "pp.costModelId AS costModel, pp.registeredTxId as tx, pp.epochNo AS epochNo  "
+      + "pp.costModel.id AS costModel, pp.registeredTx.id as tx, pp.epochNo AS epochNo  "
       + "FROM ParamProposal  pp "
       + "WHERE pp.epochNo = :epochNo "
       + "GROUP BY pp.minFeeA, pp.minFeeB, pp.maxBlockSize, pp.maxTxSize,pp.maxBhSize,pp.keyDeposit, "
@@ -70,7 +70,7 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
       + "pp.treasuryGrowthRate, pp.decentralisation, pp.entropy, pp.protocolMajor, "
       + "pp.protocolMinor, pp.minUtxoValue, pp.minPoolCost, pp.priceMem, pp.priceStep, pp.maxTxExMem, "
       + "pp.maxTxExSteps, pp.maxBlockExMem, pp.maxBlockExSteps, pp.maxValSize, pp.collateralPercent, "
-      + "pp.maxCollateralInputs, pp.coinsPerUtxoSize, pp.costModelId, pp.registeredTxId, pp.epochNo")
+      + "pp.maxCollateralInputs, pp.coinsPerUtxoSize, pp.costModel.id, pp.registeredTx.id, pp.epochNo")
   List<ParamHistory> findEpochProtocolsChange(@Param("epochNo") Integer epochNo);
 
   @Query("SELECT MAX(pp.epochNo) FROM ParamProposal pp")
