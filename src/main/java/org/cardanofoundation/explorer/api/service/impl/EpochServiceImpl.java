@@ -110,7 +110,7 @@ public class EpochServiceImpl implements EpochService {
         .findCurrentEpochSummary()
         .map(epochSummaryProjection -> {
           var slot =
-              (Instant.now().toEpochMilli() - epochSummaryProjection.getStartTime().getTime())
+              (epochSummaryProjection.getEndTime().getTime() - epochSummaryProjection.getStartTime().getTime())
                   / MILLI;
 
           Long startFromId = BigInteger.ZERO.longValue();
