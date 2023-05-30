@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -18,7 +17,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -67,8 +65,6 @@ import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.
 @RequiredArgsConstructor
 public class ProtocolParamServiceImpl implements ProtocolParamService {
 
-  public static final String EPOCH_CHANGE_FIELD = "epochchanges";
-  public static final String STATUS = "status";
   public static final String SET = "set";
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
@@ -101,11 +97,18 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                                                         Timestamp startFilterTime,
                                                         Timestamp endFilterTime) {
     // find all param proposal change, and take the last change
-    List<ParamHistory> historiesChange = paramProposalRepository.findProtocolsChange();
-
+    List<ParamHistory> historiesChange;
     // find all epoch param group there in to map of key:epoch value:epoch_param
-    Map<Integer, EpochParam> epochParams = epochParamRepository.findAll().stream()
-        .collect(Collectors.toMap(EpochParam::getEpochNo, Function.identity(), (a, b) -> a));
+    Map<Integer, EpochParam> epochParams;
+    if (Objects.isNull(startFilterTime) && Objects.isNull(endFilterTime)) {
+      historiesChange = paramProposalRepository.findProtocolsChange();
+      epochParams = epochParamRepository.findAll().stream()
+          .collect(Collectors.toMap(EpochParam::getEpochNo, Function.identity(), (a, b) -> a));
+    } else {
+      historiesChange = paramProposalRepository.findProtocolsChange(endFilterTime);
+      epochParams = epochParamRepository.findEpochParamInTime(endFilterTime).stream()
+          .collect(Collectors.toMap(EpochParam::getEpochNo, Function.identity(), (a, b) -> a));
+    }
 
     // find all transaction update protocol param
     Map<Long, Tx> txs = txRepository.findByIdIn(
@@ -163,7 +166,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     }
 
     AtomicReference<Protocols> currentMarkProtocols = new AtomicReference<>();
-    AtomicBoolean findMaxFilter = new AtomicBoolean(Boolean.FALSE);
 
     // check unprocessedProtocols data
     IntStream.range(min, max)
@@ -171,24 +173,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .sorted(Collections.reverseOrder())
         .forEach(epoch -> {
 
-          if (!ObjectUtils.isEmpty(epochTime)) {
-            if (!findMaxFilter.get()) {
-              final EpochTimeProjection epochTimeProjection = epochTime.get(epoch);
-              if (Objects.isNull(epochTimeProjection)) {
-                return;
-              }
-
-              var starTime = epochTimeProjection.getStartTime();
-              var endTime = epochTimeProjection.getEndTime();
-              var inRange = isWithinRange(starTime, startFilterTime, endFilterTime)
-                  || isWithinRange(endTime, startFilterTime, endFilterTime);
-
-              if (!inRange) {
-                return;
-              }
-              findMaxFilter.set(Boolean.TRUE);
-            }
-          }
           // fill markProtocol when it empties
           if (Objects.isNull(currentMarkProtocols.get())) {
             currentMarkProtocols.set(unprocessedProtocols.get(epoch));
@@ -690,7 +674,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       var epochMin = epochTime.keySet().stream().min(Integer::compareTo).orElseThrow();
       if(!epochMin.equals(historiesProtocol.getEpochChanges().get(BigInteger.ZERO.intValue()).getEndEpoch())){
         protocolTypes.parallelStream()
-            .forEach(protocolType -> {
+            .forEach(protocolType ->
               methods.forEach(entry -> {
                 var historyProtocolsGet = entry.getValue().getSecond();
                 try {
@@ -700,10 +684,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                 } catch (Exception e) {
                   log.error(e.getMessage());
                 }
-              });
-            });
+              }));
       }
-
     }
 
     removeIndexInOrder
