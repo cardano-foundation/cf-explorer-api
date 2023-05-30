@@ -109,6 +109,7 @@ public class EpochServiceImpl implements EpochService {
     return epochRepository
         .findCurrentEpochSummary()
         .map(epochSummaryProjection -> {
+
           var slot =
               (epochSummaryProjection.getEndTime().getTime() - epochSummaryProjection.getStartTime().getTime())
                   / MILLI;
