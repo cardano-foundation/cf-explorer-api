@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.RewardEpochProjection;
 import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
+import org.cardanofoundation.explorer.api.projection.UniqueAddressProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import java.util.List;
 import java.util.Optional;
@@ -36,4 +37,18 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
           + "JOIN Epoch e ON e.no = ep.epochNo "
           + "WHERE e.no IN :epochNo")
   List<RewardEpochProjection> findParamRewardByEpoch(@Param("epochNo") Set<Integer> epochNo);
+
+  @Query(value = "SELECT  DISTINCT "
+      + "(CASE WHEN addr.stakeAddress.id IS NULL THEN addr.address   "
+      + "WHEN addr.stakeAddress.id IS NOT NULL THEN CAST(addr.stakeAddressId AS string) END) AS address,"
+      + "MAX(tx.id) as id "
+      + "FROM Block  b "
+      + "JOIN Tx tx ON tx.blockId  = b.id "
+      + "JOIN AddressTxBalance  atb ON atb.tx.id = tx.id "
+      + "JOIN Address addr ON addr.id = atb.address.id "
+      + "WHERE tx.id > :txId AND "
+      + "b.epochNo  = :epochNo "
+      + "GROUP BY addr.stakeAddressId, addr.address")
+  List<UniqueAddressProjection> getTotalAccountsAtEpoch(@Param("epochNo") Integer epochNo, @Param("txId") Long txId);
+
 }
