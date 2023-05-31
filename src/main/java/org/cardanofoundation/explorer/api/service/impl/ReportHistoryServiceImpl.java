@@ -1,28 +1,24 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
+import java.time.LocalDateTime;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
-import org.cardanofoundation.explorer.api.service.PoolReportService;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
-import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
-import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +28,6 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
   public static final String MIN_TIME = "1970-01-01 00:00:00";
 
   private final ReportHistoryRepository reportHistoryRepository;
-  private final StakeKeyReportHistoryRepository stakeKeyReportHistoryRepository;
-  private final StakeKeyReportService stakeKeyReportService;
-  private final PoolReportService poolReportService;
-  private final PoolReportRepository poolReportRepository;
 
   /**
    * Get report history
@@ -57,38 +49,26 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
     if (!DataUtil.isNullOrEmpty(filterRequest.getToDate())) {
       toDate = Timestamp.from(filterRequest.getToDate().toInstant());
     }
+
+    LocalDateTime timeAt7DayAgo = LocalDateTime.now().minus(Duration.ofDays(7));
+
     Page<ReportHistoryResponse> reportHistoryProjections = reportHistoryRepository.getRecordHistoryByFilter(
             reportName, fromDate, toDate, username, pageable)
-        .map(reportHistoryProjection -> ReportHistoryResponse.builder()
-            .stakeKeyReportId(reportHistoryProjection.getStakeKeyReportId())
-            .poolReportId(reportHistoryProjection.getPoolReportId())
-            .reportName(reportHistoryProjection.getReportName())
-            .status(reportHistoryProjection.getStatus())
-            .type(reportHistoryProjection.getType())
-            .createdAt(reportHistoryProjection.getCreatedAt())
-            .build());
+        .map(reportHistoryProjection -> {
+          ReportHistoryResponse response = ReportHistoryResponse.builder()
+              .stakeKeyReportId(reportHistoryProjection.getStakeKeyReportId())
+              .poolReportId(reportHistoryProjection.getPoolReportId())
+              .reportName(reportHistoryProjection.getReportName())
+              .status(reportHistoryProjection.getStatus())
+              .type(reportHistoryProjection.getType())
+              .createdAt(reportHistoryProjection.getCreatedAt())
+              .build();
+          if(response.getCreatedAt().isBefore(timeAt7DayAgo)) {
+            response.setStatus(ReportStatus.EXPIRED);
+          }
+          return response;
+        });
 
     return new BaseFilterResponse<>(reportHistoryProjections);
-  }
-
-  /**
-   * Get all report history that not yet persisted to storage, then persist to storage
-   * Now it will persist to storage every 3 seconds.
-   * Will create an queue-ing system to persist to storage later
-   */
-  @Scheduled(fixedDelay = 1000 * 3)
-  private void persistToStorage() {
-    // will be replaced by redis cache later
-    List<ReportHistory> reportHistoryList = reportHistoryRepository.findNotYetPersistToStorage();
-    reportHistoryList.forEach(reportHistory -> {
-      if (ReportType.STAKE_KEY.equals(reportHistory.getType())) {
-        stakeKeyReportService.exportStakeKeyReport(
-            stakeKeyReportHistoryRepository.findByReportHistoryId(reportHistory.getId()));
-      } else {
-        poolReportService.exportDirect(
-            poolReportRepository.findByReportHistoryId(reportHistory.getId())
-        );
-      }
-    });
   }
 }
