@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressAnalyticsResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
@@ -64,4 +65,21 @@ public interface AddressService {
    * @return list token by display name
    */
   BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable, String address, String displayName);
+
+
+  /**
+   * Verify native script
+   *
+   * @param scriptVerifyRequest script verify request
+   * @return true if script is valid
+   */
+  Boolean verifyNativeScript(ScriptVerifyRequest scriptVerifyRequest);
+
+  /**
+   * Get json script
+   *
+   * @param address wallet address
+   * @return json script
+   */
+  String getJsonNativeScript(String address);
 }

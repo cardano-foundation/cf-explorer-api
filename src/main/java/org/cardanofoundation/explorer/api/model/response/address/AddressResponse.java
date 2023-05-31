@@ -18,4 +18,5 @@ public class AddressResponse {
   private BigInteger balance;
   private String stakeAddress;
   private Boolean isContract;
+  private Boolean verifiedContract;
 }
