@@ -40,7 +40,7 @@ public class ProtocolParamController {
 
   final ProtocolParamService protocolParamService;
 
-  @GetMapping("histories/filter/{protocolsTypes}")
+  @GetMapping("/histories/filter/{protocolsTypes}")
   @LogMessage
   @Operation(summary = "Get current protocol history change")
   public ResponseEntity<HistoriesProtocol> getCurrentProtocolWithFilter(
@@ -80,16 +80,16 @@ public class ProtocolParamController {
             endTimeFilter));
   }
 
-  @GetMapping("latest")
+  @GetMapping("/latest")
   @LogMessage
-  @Operation(summary = "Get current protocol history change")
+  @Operation(summary = "Get current protocol latest change")
   public ResponseEntity<Protocols> getLatestChange() {
     return ResponseEntity.ok(protocolParamService.getLatestChange());
   }
 
-  @GetMapping("fixed")
+  @GetMapping("/fixed")
   @LogMessage
-  @Operation(summary = "Get current protocol history change")
+  @Operation(summary = "Get fixed protocols parameters ")
   public ResponseEntity<FixedProtocol> getFixedProtocols() {
     return ResponseEntity.ok(protocolParamService.getFixedProtocols());
   }
