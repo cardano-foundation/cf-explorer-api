@@ -4,8 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
@@ -14,8 +16,10 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRe
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,7 @@ import org.springframework.web.bind.annotation.*;
 public class StakeKeyReportController {
 
   private final StakeKeyReportService stakeKeyReportService;
+  private final ReportHistoryService reportHistoryService;
 
   @PostMapping(value = "/stake-key")
   @LogMessage
@@ -98,6 +103,19 @@ public class StakeKeyReportController {
       @ParameterObject Pageable pageable) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(username, pageable));
+  }
+
+  @GetMapping(value = "/dashboard")
+  @LogMessage
+  @Operation(summary = "Get report history of stake key and pool id")
+  public ResponseEntity<BaseFilterResponse<ReportHistoryResponse>> getReportHistory(
+      HttpServletRequest request,
+      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(
+        reportHistoryService.getReportHistory(filterRequest, username, pageable));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/registrations")
