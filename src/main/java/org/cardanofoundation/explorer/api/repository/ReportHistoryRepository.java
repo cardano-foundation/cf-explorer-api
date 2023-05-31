@@ -24,16 +24,12 @@ public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Lo
       + " AND (rh.username = :username)"
       + " AND (rh.createdAt >= :fromDate)"
       + " AND (rh.createdAt <= :toDate)"
-      + " AND :reportName IS NULL OR rh.reportName LIKE :reportName")
+      + " AND (rh.type = 'STAKE_KEY' OR rh.type = 'POOL_ID')"
+      + " AND (:reportName IS NULL OR rh.reportName LIKE :reportName)")
   Page<ReportHistoryProjection> getRecordHistoryByFilter(@Param("reportName") String reportName,
                                                          @Param("fromDate") Timestamp fromDate,
                                                          @Param("toDate") Timestamp toDate,
                                                          @Param("username") String username,
                                                          Pageable pageable);
 
-  @Query("SELECT rh FROM ReportHistory rh "
-      + " WHERE rh.status <> 'GENERATED'"
-      + " OR rh.storageKey IS NULL"
-      + " ORDER BY rh.createdAt ASC")
-  List<ReportHistory> findNotYetPersistToStorage();
 }

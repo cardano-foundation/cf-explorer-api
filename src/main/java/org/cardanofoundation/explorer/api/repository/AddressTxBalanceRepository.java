@@ -73,4 +73,16 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.address = :address")
   List<AddressTxBalance> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
                                                   @Param("address") String address);
+
+  @Query(value = "SELECT addrTxBalance.tx.id as txId, sum(addrTxBalance.balance) as amount,"
+      + " addrTxBalance.time as time"
+      + " FROM AddressTxBalance addrTxBalance"
+      + " WHERE addrTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress)"
+      + " AND addrTxBalance.time >= :fromDate AND addrTxBalance.time <= :toDate"
+      + " GROUP BY addrTxBalance.tx.id, addrTxBalance.time")
+  Page<StakeTxProjection> findTxAndAmountByStakeAndDateRange(@Param("stakeAddress") String stakeAddress,
+                                                             @Param("fromDate") Timestamp fromDate,
+                                                             @Param("toDate") Timestamp toDate,
+                                                             Pageable pageable);
 }
