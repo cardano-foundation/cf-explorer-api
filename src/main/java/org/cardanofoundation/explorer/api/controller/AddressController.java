@@ -15,18 +15,20 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.math.BigInteger;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.common.pagination.Pagination;
+import org.cardanofoundation.explorer.common.pagination.PaginationCondition;
+import org.cardanofoundation.explorer.common.pagination.PaginationDefault;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/addresses")
 @RequiredArgsConstructor
+@Validated
 public class AddressController {
 
   private final AddressService addressService;
@@ -45,8 +47,9 @@ public class AddressController {
   @LogMessage
   @Operation(summary = "Get top addresses")
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(addressService.getTopAddress(pageable));
+          @ParameterObject @PaginationCondition(shouldValidateSort = false) @PaginationDefault(size = 20, sort = {
+                  "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
+    return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
   }
 
   @GetMapping("/analytics/{address}/{type}")
