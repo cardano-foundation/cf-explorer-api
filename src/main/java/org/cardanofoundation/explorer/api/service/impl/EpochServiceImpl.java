@@ -112,7 +112,7 @@ public class EpochServiceImpl implements EpochService {
           var currentLocalDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
           var epochStartTime = LocalDateTime.ofInstant(
               epochSummaryProjection.getStartTime().toInstant(), ZoneOffset.UTC);
-          var slot = currentLocalDateTime.getSecond() - epochStartTime.getSecond();
+          var slot = currentLocalDateTime.toEpochSecond(ZoneOffset.UTC) - epochStartTime.toEpochSecond(ZoneOffset.UTC);
 
           Long startFromId = BigInteger.ZERO.longValue();
           final String redisKey = getRedisKey(UNIQUE_ACCOUNTS, epochSummaryProjection.getNo());
