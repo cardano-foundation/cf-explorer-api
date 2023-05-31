@@ -12,7 +12,12 @@ public enum BusinessCode implements ErrorCode {
   TOKEN_NOT_FOUND("404-TOKEN_NOT_FOUND", "Token not found"),
   POLICY_NOT_FOUND("404-POLICY_NOT_FOUND", "Policy not found"),
   STAKE_DELEGATION_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
-  STAKE_WITHDRAWAL_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found");
+  STAKE_WITHDRAWAL_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
+  STAKE_REPORT_HISTORY_NOT_FOUND("404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found"),
+  REPORT_IS_IN_PROGRESS("404-REPORT_IS_IN_PROGRESS", "Report is in progress"),
+  POOL_NOT_FOUND("404-POOL_NOT_FOUND", "PoolId not found"),
+  EXPORT_TYPE_NOT_SUPPORTED("404-EXPORT_TYPE_NOT_SUPPORTED", "Export type not supported"),
+  PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support");
 
   private final String code;
   private final String desc;

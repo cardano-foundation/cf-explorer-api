@@ -3,11 +3,13 @@ package org.cardanofoundation.explorer.api.service.impl;
 import com.bloxbean.cardano.client.util.AssetUtil;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
+import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.DelegationMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
+import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.mapper.TxMapper;
 import org.cardanofoundation.explorer.api.mapper.TxOutMapper;
@@ -29,7 +31,6 @@ import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import org.cardanofoundation.explorer.api.util.TimeUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,18 +45,24 @@ import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+
 import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,19 +70,25 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
 import org.apache.commons.lang3.StringUtils;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -109,8 +122,22 @@ public class TxServiceImpl implements TxService {
   private final PoolUpdateRepository poolUpdateRepository;
   private final PoolRelayRepository poolRelayRepository;
   private final PoolRetireRepository poolRetireRepository;
+  private final ParamProposalRepository paramProposalRepository;
+  private final EpochParamRepository epochParamRepository;
+  private final ProtocolMapper protocolMapper;
+  private final TxChartRepository txChartRepository;
+
+  private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
-  private static final long MINUS_DAYS = 15;
+  public static final long HOURS_IN_DAY = 24;
+  public static final long DAY_IN_WEEK = 7;
+  public static final long DAY_IN_TWO_WEEK = DAY_IN_WEEK * 2;
+  public static final long DAYS_IN_MONTH = 32;
+
+  private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
+
+  @Value("${application.network}")
+  private String network;
 
   @Override
   @Transactional(readOnly = true)
@@ -171,35 +198,19 @@ public class TxServiceImpl implements TxService {
     return summaries;
   }
 
-
   @Override
-  @Transactional(readOnly = true)
-  public List<TxGraph> getTxsAfterTime() {
-    LocalDate localDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(MINUS_DAYS);
-
-    List<TxGraphProjection> txs = txRepository.getTransactionsAfterTime(
-        Timestamp.valueOf(localDate.atStartOfDay()));
-
-    if (CollectionUtils.isEmpty(txs)) {
-      return Collections.emptyList();
+  public List<TxGraph> getTransactionChartByRange(TxChartRange range) {
+    if (range.equals(TxChartRange.ONE_DAY)) {
+      return getTransactionChartInOneDay();
     }
+    long day = DAY_IN_WEEK;
 
-    return txs.stream()
-        .collect(
-            Collectors.groupingByConcurrent(
-                tx ->
-                    TimeUtil.formatDate(tx.getTime()),
-                Collectors.summingInt(TxGraphProjection::getTransactionNo)
-            ))
-        .entrySet()
-        .stream()
-        .map(entry -> TxGraph.builder()
-            .date(entry.getKey())
-            .txs(entry.getValue())
-            .build())
-        .sorted(Comparator.comparing(TxGraph::getDate))
-        .collect(Collectors.toList());
-
+    if (range.equals(TxChartRange.TWO_WEEK)) {
+      day = DAY_IN_TWO_WEEK;
+    } else if (range.equals(TxChartRange.ONE_MONTH)) {
+      day = DAYS_IN_MONTH;
+    }
+    return getTransactionChartInRange(day);
   }
 
   @Override
@@ -213,7 +224,7 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByBlock(String blockId,
-      Pageable pageable) {
+                                                                     Pageable pageable) {
     Page<Tx> txPage;
     try {
       Long blockNo = Long.parseLong(blockId);
@@ -227,11 +238,12 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
-      Pageable pageable) {
+                                                                       Pageable pageable) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
     List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
+
     Page<Tx> txPage = new PageImpl<>(txList, pageable, addr.getTxCount());
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, address));
   }
@@ -239,10 +251,10 @@ public class TxServiceImpl implements TxService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId,
-      Pageable pageable) {
+                                                                     Pageable pageable) {
     BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
     Optional<MultiAsset> multiAsset = multiAssetRepository.findByFingerprint(tokenId);
-    if(multiAsset.isPresent()) {
+    if (multiAsset.isPresent()) {
       List<Long> txIds = addressTokenRepository.findTxsByMultiAsset(multiAsset.get(), pageable);
       List<Tx> txList = txRepository.findByIdIn(txIds);
       Page<Tx> txPage = new PageImpl<>(txList, pageable, multiAsset.get().getTxCount());
@@ -253,7 +265,8 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
-  public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable pageable) {
+  public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
+                                                                     Pageable pageable) {
     Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeKey, pageable);
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
@@ -265,7 +278,7 @@ public class TxServiceImpl implements TxService {
    * @return list tx response
    */
   private List<TxFilterResponse> mapDataFromTxListToResponseList(Page<Tx> txPage) {
-    if(CollectionUtils.isEmpty(txPage.getContent())) {
+    if (CollectionUtils.isEmpty(txPage.getContent())) {
       return new ArrayList<>();
     }
     Set<Long> blockIdList = txPage.getContent().stream().map(Tx::getBlockId)
@@ -289,7 +302,7 @@ public class TxServiceImpl implements TxService {
     List<TxFilterResponse> txFilterResponses = new ArrayList<>();
     for (Tx tx : txPage.getContent()) {
       Long txId = tx.getId();
-      if(blockMap.containsKey(tx.getBlockId())) {
+      if (blockMap.containsKey(tx.getBlockId())) {
         tx.setBlock(blockMap.get(tx.getBlockId()));
       }
       TxFilterResponse txResponse = txMapper.txToTxFilterResponse(tx);
@@ -382,13 +395,13 @@ public class TxServiceImpl implements TxService {
     );
     TxResponse txResponse = txMapper.txToTxResponse(tx);
 
-    if(Objects.nonNull(txResponse.getTx().getEpochNo())) {
+    if (Objects.nonNull(txResponse.getTx().getEpochNo())) {
       Epoch epoch = epochRepository.findFirstByNo(txResponse.getTx().getEpochNo()).orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
       );
       txResponse.getTx().setMaxEpochSlot(epoch.getMaxSlot());
     }
-    if(Objects.nonNull(txResponse.getTx().getBlockNo())) {
+    if (Objects.nonNull(txResponse.getTx().getBlockNo())) {
       txResponse.getTx().setConfirmation(currentBlockNo - txResponse.getTx().getBlockNo());
     } else {
       txResponse.getTx().setConfirmation(currentBlockNo);
@@ -403,11 +416,12 @@ public class TxServiceImpl implements TxService {
     getMints(tx, txResponse);
     getStakeCertificates(tx, txResponse);
     getPoolCertificates(tx, txResponse);
+    getProtocols(tx, txResponse);
     /*
-      * If the transaction is invalid, the collateral is the input and the output of the transaction.
-      * Otherwise, the collateral is the input and the output of the collateral.
+     * If the transaction is invalid, the collateral is the input and the output of the transaction.
+     * Otherwise, the collateral is the input and the output of the collateral.
      */
-    if(Boolean.TRUE.equals(tx.getValidContract())) {
+    if (Boolean.TRUE.equals(tx.getValidContract())) {
       txResponse.getTx().setStatus(TxStatus.SUCCESS);
     } else {
       txResponse.getTx().setStatus(TxStatus.FAIL);
@@ -658,14 +672,15 @@ public class TxServiceImpl implements TxService {
             item -> new TxStakeCertificate(item.getAddr().getView(),
                 CertificateType.STAKE_DEREGISTRATION)
         ).collect(Collectors.toList()));
-    if(!CollectionUtils.isEmpty(stakeCertificates)){
+    if (!CollectionUtils.isEmpty(stakeCertificates)) {
       txResponse.setStakeCertificates(stakeCertificates);
     }
   }
 
   /**
    * Get transaction pool certificates info
-   * @param tx transaction
+   *
+   * @param tx         transaction
    * @param txResponse response data of pool certificates
    */
   private void getPoolCertificates(Tx tx, TxResponse txResponse) {
@@ -688,7 +703,7 @@ public class TxServiceImpl implements TxService {
         .map(
             item -> {
               List<PoolRelayResponse> relays = null;
-              if(poolRelayMap.containsKey(item.getPoolUpdateId())) {
+              if (poolRelayMap.containsKey(item.getPoolUpdateId())) {
                 relays = poolRelayMap.get(item.getPoolUpdateId())
                     .stream().map(relay ->
                         PoolRelayResponse.builder()
@@ -700,7 +715,7 @@ public class TxServiceImpl implements TxService {
                             .build()).collect(Collectors.toList());
               }
               List<String> poolOwnersList = new ArrayList<>();
-              if(poolOwnerMap.containsKey(item.getPoolUpdateId())) {
+              if (poolOwnerMap.containsKey(item.getPoolUpdateId())) {
                 poolOwnersList = poolOwnerMap.get(item.getPoolUpdateId());
               }
               return TxPoolCertificate.builder()
@@ -729,7 +744,7 @@ public class TxServiceImpl implements TxService {
             .type(CertificateType.POOL_DEREGISTRATION)
             .build()
     ).collect(Collectors.toList()));
-    if(!CollectionUtils.isEmpty(poolCertificates)){
+    if (!CollectionUtils.isEmpty(poolCertificates)) {
       txResponse.setPoolCertificates(poolCertificates);
     }
   }
@@ -755,12 +770,12 @@ public class TxServiceImpl implements TxService {
   }
 
   /**
-   * If data from  collateral output, handle token in json string data
-   * Otherwise, not exist json string data
-   * Example of json string data:
+   * If data from  collateral output, handle token in json string data Otherwise, not exist json
+   * string data Example of json string data:
    * [{"unit":"LOVELACE","policyId":"","assetName":"TE9WRUxBQ0U=","quantity":2726335}]
+   *
    * @param addressInputOutputMap address projection map
-   * @param txOut list collateral output
+   * @param txOut                 list collateral output
    */
   private List<TxMintingResponse> getTokenInFailedTxOut(
       Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputOutputMap,
@@ -769,7 +784,7 @@ public class TxServiceImpl implements TxService {
     List<String> tokenStringList = addressInputOutputMap.get(txOut).stream().map(
         AddressInputOutputProjection::getAssetsJson).filter(
         StringUtils::isNotEmpty
-    ).collect(Collectors.toList());
+    ).toList();
     ObjectMapper objectMapper = new ObjectMapper();
     tokenStringList.forEach(tokenString -> {
           if (StringUtils.isNotEmpty(tokenString)) {
@@ -834,5 +849,481 @@ public class TxServiceImpl implements TxService {
             .build())
     );
     return stakeAddressTxInputList;
+  }
+
+  /**
+   * get transaction graph in month with day unit
+   *
+   * @param day
+   * @return
+   */
+  private List<TxGraph> getTransactionChartInRange(long day) {
+    final String key = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
+    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+
+    final LocalDateTime currentLocalDate =
+        LocalDateTime.of(
+            LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
+            LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
+
+    final LocalDateTime previousMonth = currentLocalDate.minusMonths(BigInteger.ONE.longValue());
+
+    final BigInteger previousMonthInSeconds = BigInteger
+        .valueOf(previousMonth.toInstant(ZoneOffset.UTC).getEpochSecond());
+
+    long maxDay = ChronoUnit.DAYS.between(previousMonth, currentLocalDate);
+
+    if (maxDay < day) {
+      day = maxDay;
+    }
+
+    var keySize = redisTemplate.opsForList().size(key);
+    // if key not exists or empty
+    if (Objects.isNull(keySize) || keySize.equals(BigInteger.ZERO.longValue())) {
+      List<TxGraph> txCharts = toTxGraph(txChartRepository
+          .getTransactionGraphDayGreaterThan(previousMonthInSeconds));
+      updateRedisTxGraph(txCharts, key, Boolean.TRUE);
+
+      return getTxGraphsByDayRange((int) day, txCharts.stream()
+          .sorted(Comparator.comparing(TxGraph::getDate)
+              .reversed()).toList());
+    }
+
+    // txGraphsRedis will not empty
+    List<TxGraph> txGraphsRedis = redisTemplate.opsForList()
+        .range(key, BigInteger.ZERO.longValue(), DAYS_IN_MONTH);
+
+    final var latestDay = txGraphsRedis.get(BigInteger.ZERO.intValue()).getDate();
+    final var latestLocalDateTime = Instant.ofEpochMilli(latestDay.getTime())
+        .atZone(ZoneOffset.UTC)
+        .toLocalDateTime();
+
+    while (ChronoUnit.DAYS.between(
+        LocalDateTime.ofInstant(txGraphsRedis.get(txGraphsRedis.size() - 1).getDate().toInstant(),
+            ZoneOffset.UTC), currentLocalDate) > DAYS_IN_MONTH) {
+      redisTemplate.opsForList().rightPop(key);
+      txGraphsRedis.remove(txGraphsRedis.size() - BigInteger.ONE.intValue());
+    }
+
+    var distanceFromRealAndCache = ChronoUnit.DAYS.between(latestLocalDateTime, currentLocalDate);
+
+    if (distanceFromRealAndCache >= BigInteger.TWO.longValue()) {
+      final long dayMissingData = day - distanceFromRealAndCache;
+      if (dayMissingData <= BigInteger.ZERO.longValue()) {
+        return Collections.emptyList();
+      }
+
+      List<TxGraph> txCharts = toTxGraph(txChartRepository
+          .getTransactionGraphDayGreaterThan(previousMonthInSeconds));
+      updateRedisTxGraph(txCharts, key, Boolean.TRUE);
+      return getTxGraphsByDayRange((int) (day - distanceFromRealAndCache),
+          txCharts.stream()
+              .sorted(Comparator.comparing(TxGraph::getDate).reversed())
+              .toList());
+    }
+    // get 2 days: today and yesterday
+    List<BigInteger> days = LongStream.range(BigInteger.ZERO.intValue(), BigInteger.TWO.longValue())
+        .boxed()
+        .map(dayMinus -> {
+          var markDay = currentLocalDate.minusDays(dayMinus);
+          return BigInteger.valueOf(markDay.toInstant(ZoneOffset.UTC).getEpochSecond());
+        }).toList();
+
+    List<TxGraph> txs = toTxGraph(txChartRepository.getTransactionGraphByDay(days));
+
+    if (ObjectUtils.isEmpty(txs)) {
+      return getTxGraphsByDayRange((int) day, txGraphsRedis);
+    }
+
+    final var txGraphs = new ArrayList<TxGraph>();
+    // this mean that there are no transaction in latest day at time this api was call
+    if (txs.size() == BigInteger.ONE.intValue()) {
+      return getTxGraphsByDayRange((int) day, txGraphsRedis);
+    }
+
+    var latestChart = txs.get(BigInteger.ONE.intValue());
+    var previousChart = txs.get(BigInteger.ZERO.intValue());
+
+    if (distanceFromRealAndCache == BigInteger.ONE.longValue()
+        && txs.size() == BigInteger.TWO.intValue()) {
+      redisTemplate.opsForList()
+          .set(key, BigInteger.ZERO.intValue(), previousChart);
+      redisTemplate.opsForList().leftPush(key, latestChart);
+
+      txGraphs.add(latestChart);
+      txGraphs.add(previousChart);
+      txGraphs.addAll(txGraphsRedis.subList(BigInteger.ONE.intValue(),
+          txGraphsRedis.size()));
+
+      return getTxGraphsByDayRange((int) day, txGraphs);
+    }
+
+    txGraphs.add(latestChart);
+    txGraphs.add(previousChart);
+    txGraphs.addAll(txGraphsRedis.subList(BigInteger.TWO.intValue(),
+        txGraphsRedis.size()));
+
+    return getTxGraphsByDayRange((int) day, txGraphs);
+  }
+
+  private static List<TxGraph> getTxGraphsByDayRange(int day, List<TxGraph> txCharts) {
+
+    if (txCharts.size() < day) {
+      return txCharts
+          .stream()
+          .sorted(Comparator.comparing(TxGraph::getDate))
+          .toList();
+    }
+
+    return txCharts
+        .subList(BigInteger.ZERO.intValue(), day)
+        .stream()
+        .sorted(Comparator.comparing(TxGraph::getDate))
+        .toList();
+  }
+
+  /**
+   * sum transaction in 24 hours in order to draw graph
+   *
+   * @return
+   */
+  private List<TxGraph> getTransactionChartInOneDay() {
+    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+
+    final LocalDateTime currentLoaLocalDateTime =
+        LocalDateTime.of(
+            LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
+            LocalTime.of(localDate.getHour(), BigInteger.ZERO.intValue()));
+
+    List<BigInteger> hours = LongStream.range(BigInteger.ZERO.intValue(), HOURS_IN_DAY)
+        .boxed()
+        .map(currentLoaLocalDateTime::minusHours)
+        .map(hour -> BigInteger.valueOf(hour.toInstant(ZoneOffset.UTC).getEpochSecond()))
+        .toList();
+
+    List<TxGraphProjection> txs = txChartRepository.getTransactionGraphByHour(hours);
+
+    if (CollectionUtils.isEmpty(txs)) {
+      return Collections.emptyList();
+    }
+
+    return toTxGraph(txs).stream()
+        .sorted(Comparator.comparing(TxGraph::getDate))
+        .toList();
+  }
+
+  /**
+   * Mapping projection to TxGraph
+   *
+   * @param txs
+   * @return
+   */
+  private static List<TxGraph> toTxGraph(List<TxGraphProjection> txs) {
+    return txs.stream()
+        .map(txChart -> TxGraph.builder()
+            .date(Date.from(
+                OffsetDateTime.ofInstant(Instant.ofEpochSecond(txChart.getTime().longValue()),
+                    ZoneOffset.UTC).toInstant()))
+            .simpleTransactions(txChart.getSimpleTransactions())
+            .smartContract(txChart.getSmartContract())
+            .metadata(txChart.getMetadata())
+            .build())
+        .toList();
+  }
+
+  /**
+   * Update redis index
+   *
+   * @param txGraphs
+   * @param key
+   * @param isEmpty
+   */
+  private void updateRedisTxGraph(List<TxGraph> txGraphs, String key, boolean isEmpty) {
+
+    if (isEmpty) {
+      txGraphs.forEach(txGraph ->
+          redisTemplate.opsForList().leftPush(key, txGraph));
+    }
+  }
+
+  /**
+   * create redis key
+   *
+   * @param rawKey
+   * @return
+   */
+  private String getRedisKey(String rawKey) {
+    return String.join("_", this.network, rawKey);
+  }
+
+  /**
+   * Get protocol params update in transaction
+   *
+   * @param tx         transaction
+   * @param txResponse response data of transaction
+   */
+  private void getProtocols(Tx tx, TxResponse txResponse) {
+
+    List<ParamProposal> paramProposals = paramProposalRepository
+        .getParamProposalByRegisteredTxId(tx.getId());
+
+    if (!ObjectUtils.isEmpty(paramProposals)) {
+      //find current change param
+      txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
+      //get previous value
+      if (Objects.nonNull(txResponse.getProtocols())) {
+        Integer epochNo = tx.getBlock().getEpochNo();
+
+        epochParamRepository.findEpochParamByEpochNo(epochNo)
+            .ifPresent(epochParam ->
+                txResponse.setPreviousProtocols(
+                    protocolMapper.mapPreviousProtocolParamResponse(epochParam,
+                        txResponse.getProtocols()))
+            );
+      }
+      processCheckIfSameProtocol(txResponse);
+    }
+  }
+
+  private void processCheckIfSameProtocol(TxResponse txResponse) {
+    ProtocolParamResponse currentProtocol = txResponse.getProtocols();
+    ProtocolParamResponse previousProtocol = txResponse.getPreviousProtocols();
+
+    if (Objects.nonNull(currentProtocol.getMinFeeA())
+        && Objects.hashCode(currentProtocol.getMinFeeA()) == Objects.hashCode(
+        previousProtocol.getMinFeeA())
+    ) {
+      currentProtocol.setMinFeeA(null);
+      previousProtocol.setMinFeeA(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMinFeeB())
+        && Objects.hashCode(currentProtocol.getMinFeeB()) == Objects.hashCode(
+        previousProtocol.getMinFeeB())
+    ) {
+      currentProtocol.setMinFeeB(null);
+      previousProtocol.setMinFeeB(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxBlockSize())
+        && Objects.hashCode(currentProtocol.getMaxBlockSize()) == Objects.hashCode(
+        previousProtocol.getMaxBlockSize())
+    ) {
+      currentProtocol.setMaxBlockSize(null);
+      previousProtocol.setMaxBlockSize(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxTxSize())
+        && Objects.hashCode(currentProtocol.getMaxTxSize()) == Objects.hashCode(
+        previousProtocol.getMaxTxSize())
+    ) {
+      currentProtocol.setMaxTxSize(null);
+      previousProtocol.setMaxTxSize(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxBhSize())
+        && Objects.hashCode(currentProtocol.getMaxBhSize()) == Objects.hashCode(
+        previousProtocol.getMaxBhSize())
+    ) {
+      currentProtocol.setMaxBhSize(null);
+      previousProtocol.setMaxBhSize(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getKeyDeposit())
+        && Objects.hashCode(currentProtocol.getKeyDeposit()) == Objects.hashCode(
+        previousProtocol.getKeyDeposit())
+    ) {
+      currentProtocol.setKeyDeposit(null);
+      previousProtocol.setKeyDeposit(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getPoolDeposit())
+        && Objects.hashCode(currentProtocol.getPoolDeposit()) == Objects.hashCode(
+        previousProtocol.getPoolDeposit())
+    ) {
+      currentProtocol.setPoolDeposit(null);
+      previousProtocol.setPoolDeposit(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxEpoch())
+        && Objects.hashCode(currentProtocol.getMaxEpoch()) == Objects.hashCode(
+        previousProtocol.getMaxEpoch())
+    ) {
+      currentProtocol.setMaxEpoch(null);
+      previousProtocol.setMaxEpoch(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getOptimalPoolCount())
+        && Objects.hashCode(currentProtocol.getOptimalPoolCount()) == Objects.hashCode(
+        previousProtocol.getOptimalPoolCount())
+    ) {
+      currentProtocol.setOptimalPoolCount(null);
+      previousProtocol.setOptimalPoolCount(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMinUtxoValue())
+        && Objects.hashCode(currentProtocol.getMinUtxoValue()) == Objects.hashCode(
+        previousProtocol.getMinUtxoValue())
+    ) {
+      currentProtocol.setMinUtxoValue(null);
+      previousProtocol.setMinUtxoValue(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMinPoolCost())
+        && Objects.hashCode(currentProtocol.getMinPoolCost()) == Objects.hashCode(
+        previousProtocol.getMinPoolCost())
+    ) {
+      currentProtocol.setMinPoolCost(null);
+      previousProtocol.setMinPoolCost(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxTxExMem())
+        && Objects.hashCode(currentProtocol.getMaxTxExMem()) == Objects.hashCode(
+        previousProtocol.getMaxTxExMem())
+    ) {
+      currentProtocol.setMaxTxExMem(null);
+      previousProtocol.setMaxTxExMem(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxTxExSteps())
+        && Objects.hashCode(currentProtocol.getMaxTxExSteps()) == Objects.hashCode(
+        previousProtocol.getMaxTxExSteps())
+    ) {
+      currentProtocol.setMaxTxExSteps(null);
+      previousProtocol.setMaxTxExSteps(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxBlockExMem())
+        && Objects.hashCode(currentProtocol.getMaxBlockExMem()) == Objects.hashCode(
+        previousProtocol.getMaxBlockExMem())
+    ) {
+      currentProtocol.setMaxBlockExMem(null);
+      previousProtocol.setMaxBlockExMem(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxBlockExSteps())
+        && Objects.hashCode(currentProtocol.getMaxBlockExSteps()) == Objects.hashCode(
+        previousProtocol.getMaxBlockExSteps())
+    ) {
+      currentProtocol.setMaxBlockExSteps(null);
+      previousProtocol.setMaxBlockExSteps(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxValSize())
+        && Objects.hashCode(currentProtocol.getMaxValSize()) == Objects.hashCode(
+        previousProtocol.getMaxValSize())
+    ) {
+      currentProtocol.setMaxValSize(null);
+      previousProtocol.setMaxValSize(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getCoinsPerUtxoSize())
+        && Objects.hashCode(currentProtocol.getCoinsPerUtxoSize()) == Objects.hashCode(
+        previousProtocol.getCoinsPerUtxoSize())
+    ) {
+      currentProtocol.setCoinsPerUtxoSize(null);
+      previousProtocol.setCoinsPerUtxoSize(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getInfluence())
+        && Objects.hashCode(currentProtocol.getInfluence()) == Objects.hashCode(
+        previousProtocol.getInfluence())
+    ) {
+      currentProtocol.setInfluence(null);
+      previousProtocol.setInfluence(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMonetaryExpandRate())
+        && Objects.hashCode(currentProtocol.getMonetaryExpandRate()) == Objects.hashCode(
+        previousProtocol.getMonetaryExpandRate())
+    ) {
+      currentProtocol.setMonetaryExpandRate(null);
+      previousProtocol.setMonetaryExpandRate(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getTreasuryGrowthRate())
+        && Objects.hashCode(currentProtocol.getTreasuryGrowthRate()) == Objects.hashCode(
+        previousProtocol.getTreasuryGrowthRate())
+    ) {
+      currentProtocol.setTreasuryGrowthRate(null);
+      previousProtocol.setTreasuryGrowthRate(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getDecentralisation())
+        && Objects.hashCode(currentProtocol.getDecentralisation()) == Objects.hashCode(
+        previousProtocol.getDecentralisation())
+    ) {
+      currentProtocol.setDecentralisation(null);
+      previousProtocol.setDecentralisation(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getPriceMem())
+        && Objects.hashCode(currentProtocol.getPriceMem()) == Objects.hashCode(
+        previousProtocol.getPriceMem())
+    ) {
+      currentProtocol.setPriceMem(null);
+      previousProtocol.setPriceMem(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getPriceStep())
+        && Objects.hashCode(currentProtocol.getPriceStep()) == Objects.hashCode(
+        previousProtocol.getPriceStep())
+    ) {
+      currentProtocol.setPriceStep(null);
+      previousProtocol.setPriceStep(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getProtocolMajor())
+        && Objects.hashCode(currentProtocol.getProtocolMajor()) == Objects.hashCode(
+        previousProtocol.getProtocolMajor())
+        && Objects.nonNull(currentProtocol.getProtocolMinor())
+        && Objects.hashCode(currentProtocol.getProtocolMinor()) == Objects.hashCode(
+        previousProtocol.getProtocolMinor())
+    ) {
+      currentProtocol.setProtocolMajor(null);
+      previousProtocol.setProtocolMajor(null);
+      currentProtocol.setProtocolMinor(null);
+      previousProtocol.setProtocolMinor(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getCollateralPercent())
+        && Objects.hashCode(currentProtocol.getCollateralPercent()) == Objects.hashCode(
+        previousProtocol.getCollateralPercent())
+    ) {
+      currentProtocol.setCollateralPercent(null);
+      previousProtocol.setCollateralPercent(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getMaxCollateralInputs())
+        && Objects.hashCode(currentProtocol.getMaxCollateralInputs()) == Objects.hashCode(
+        previousProtocol.getMaxCollateralInputs())
+    ) {
+      currentProtocol.setMaxCollateralInputs(null);
+      previousProtocol.setMaxCollateralInputs(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getEntropy())
+        && Objects.hashCode(currentProtocol.getEntropy()) == Objects.hashCode(
+        previousProtocol.getEntropy())
+    ) {
+      currentProtocol.setEntropy(null);
+      previousProtocol.setEntropy(null);
+    }
+
+    if (Objects.nonNull(currentProtocol.getCostModel())
+        && Objects.hashCode(currentProtocol.getCostModel()) == Objects.hashCode(
+        previousProtocol.getCostModel())
+    ) {
+      currentProtocol.setCostModel(null);
+      previousProtocol.setCostModel(null);
+    }
+
+    if (currentProtocol.isNull() && previousProtocol.isNull()) {
+      currentProtocol = null;
+      previousProtocol = null;
+    }
+
+    txResponse.setProtocols(currentProtocol);
+    txResponse.setPreviousProtocols(previousProtocol);
   }
 }
