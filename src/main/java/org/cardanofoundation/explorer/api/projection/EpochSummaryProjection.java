@@ -7,5 +7,4 @@ public interface EpochSummaryProjection {
   Integer getMaxSlot();
   Timestamp getStartTime();
 
-  Timestamp getEndTime();
 }

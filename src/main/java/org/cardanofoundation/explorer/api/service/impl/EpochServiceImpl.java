@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,7 +37,6 @@ import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 @RequiredArgsConstructor
 public class EpochServiceImpl implements EpochService {
 
-  public static final int MILLI = 1000;
   private final EpochRepository epochRepository;
   private final EpochMapper epochMapper;
   private final RedisTemplate<String, Object> redisTemplate;
@@ -97,7 +97,7 @@ public class EpochServiceImpl implements EpochService {
     } else {
       epoch.setStatus(EpochStatus.FINISHED);
     }
-    if(!EpochStatus.IN_PROGRESS.equals(epoch.getStatus()) && currentEpoch.equals(epoch.getNo())) {
+    if (!EpochStatus.IN_PROGRESS.equals(epoch.getStatus()) && currentEpoch.equals(epoch.getNo())) {
       epoch.setStatus(EpochStatus.SYNCING);
     }
   }
@@ -109,10 +109,10 @@ public class EpochServiceImpl implements EpochService {
     return epochRepository
         .findCurrentEpochSummary()
         .map(epochSummaryProjection -> {
-
-          var slot =
-              (epochSummaryProjection.getEndTime().getTime() - epochSummaryProjection.getStartTime().getTime())
-                  / MILLI;
+          var currentLocalDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+          var epochStartTime = LocalDateTime.ofInstant(
+              epochSummaryProjection.getStartTime().toInstant(), ZoneOffset.UTC);
+          var slot = currentLocalDateTime.getSecond() - epochStartTime.getSecond();
 
           Long startFromId = BigInteger.ZERO.longValue();
           final String redisKey = getRedisKey(UNIQUE_ACCOUNTS, epochSummaryProjection.getNo());
@@ -122,7 +122,7 @@ public class EpochServiceImpl implements EpochService {
             Object maxTransaction = redisTemplate.opsForHash()
                 .get(redisKey, MAX_TRANSACTION_ID);
 
-            if(Objects.isNull(maxTransaction)){
+            if (Objects.isNull(maxTransaction)) {
               maxTransaction = redisTemplate.opsForHash().values(redisKey)
                   .stream()
                   .filter(Objects::nonNull)
@@ -152,12 +152,14 @@ public class EpochServiceImpl implements EpochService {
 
           var expire = redisTemplate.getExpire(
               getRedisKey(UNIQUE_ACCOUNTS, epochSummaryProjection.getNo()));
+
           if (expire == NOT_EXPIRE) {
             redisTemplate.expire(redisKey, Duration.ofDays(ONE_EPOCH));
           }
 
           Integer account = redisTemplate.opsForHash().size(redisKey).intValue();
-          account = account > BigInteger.ONE.intValue() ? account - BigInteger.ONE.intValue() : account;
+          account =
+              account > BigInteger.ONE.intValue() ? account - BigInteger.ONE.intValue() : account;
 
           return EpochSummary.builder()
               .no(epochSummaryProjection.getNo())
@@ -185,7 +187,7 @@ public class EpochServiceImpl implements EpochService {
   }
 
   @PostConstruct
-  void setUp(){
+  void setUp() {
     getCurrentEpochSummary();
   }
 }
