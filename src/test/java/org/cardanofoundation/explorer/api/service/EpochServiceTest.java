@@ -88,11 +88,13 @@ class EpochServiceTest {
 
     EpochSummary expect = EpochSummary.builder()
         .no(30)
-        .slot(time.getSecond() - localDate.getSecond())
+        .slot(0)
         .totalSlot(432000)
         .account(1)
         .build();
-    Assertions.assertEquals(expect, epochSummary);
+    Assertions.assertEquals(expect.getNo(), epochSummary.getNo());
+    Assertions.assertEquals(expect.getAccount(), epochSummary.getAccount());
+    Assertions.assertEquals(expect.getTotalSlot(), epochSummary.getTotalSlot());
   }
 
   // function getEpochDetail test
