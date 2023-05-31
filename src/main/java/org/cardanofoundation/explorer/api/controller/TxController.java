@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
@@ -9,9 +10,13 @@ import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springdoc.core.annotations.ParameterObject;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -41,21 +46,22 @@ public class TxController {
   @LogMessage
   @Operation(summary = "Get transaction detail by hash")
   public ResponseEntity<TxResponse> getTransactionDetail(@PathVariable
-  @Parameter(description = "Hash value of transaction") String hash) {
+                                                         @Parameter(description = "Hash value of transaction") String hash) {
     return ResponseEntity.ok(txService.getTxDetailByHash(hash));
   }
 
   @GetMapping("/current")
   @LogMessage
   @Operation(summary = "Get current transactions")
-  public ResponseEntity<List<TxSummary>> findCurrentTransaction(){
+  public ResponseEntity<List<TxSummary>> findCurrentTransaction() {
     return ResponseEntity.ok(txService.findLatestTxSummary());
   }
 
-  @GetMapping("/graph")
+  @GetMapping("/graph/{range}")
   @LogMessage
-  @Operation(summary = "Get Number Transaction On Last 15 Days")
-  public ResponseEntity<List<TxGraph>> getNumberTransactionOnLast15Days() {
-    return ResponseEntity.ok(txService.getTxsAfterTime());
+  @Operation(summary = "Get transaction chart (1D , 1W, 2W, 1M)")
+  public ResponseEntity<List<TxGraph>> getTransactionChart(
+      @PathVariable("range") TxChartRange range) {
+    return ResponseEntity.ok(txService.getTransactionChartByRange(range));
   }
 }

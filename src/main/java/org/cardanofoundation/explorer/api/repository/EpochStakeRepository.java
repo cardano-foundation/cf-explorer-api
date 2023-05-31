@@ -2,12 +2,16 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochStake;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,4 +46,27 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
   List<StakeAddressProjection> totalStakeByAddressAndPool(
       @Param("stakeAddressIds") Set<Long> stakeAddressIds,
       @Param("poolId") Long poolId);
+
+  @Query(value =
+      "SELECT es.epochNo as epochNo, pu.fixedCost as fee, sum(es.amount) as size "
+          + "FROM EpochStake es "
+          + "LEFT JOIN PoolUpdate pu ON pu.poolHashId = es.pool.id "
+          + "where es.pool.view = :poolView "
+          + "and es.epochNo between :epochBegin and :epochEnd "
+          + "group by es.epochNo, pu.fixedCost")
+  Page<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView,
+                                                      @Param("epochBegin") int epochBegin,
+                                                      @Param("epochEnd") int epochEnd,
+                                                      Pageable pageable);
+
+  @Query(value =
+      "SELECT es.epochNo as epochNo, pu.fixedCost as fee, sum(es.amount) as size "
+          + "FROM EpochStake es "
+          + "LEFT JOIN PoolUpdate pu ON pu.poolHashId = es.pool.id "
+          + "where es.pool.view = :poolView "
+          + "and es.epochNo between :epochBegin and :epochEnd "
+          + "group by es.epochNo, pu.fixedCost")
+  List<PoolReportProjection> getEpochSizeByPoolReport(@Param("poolView") String poolView,
+                                                      @Param("epochBegin") int epochBegin,
+                                                      @Param("epochEnd") int epochEnd);
 }
