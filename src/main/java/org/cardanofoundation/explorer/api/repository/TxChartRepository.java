@@ -13,8 +13,8 @@ import org.cardanofoundation.explorer.consumercommon.entity.TxChart;
 public interface TxChartRepository extends JpaRepository<TxChart, Long> {
 
   @Query("SELECT SUM(tx.txSimple) AS simpleTransactions,"
-      + " SUM(tx.txWithMetadataWithoutSc) AS smartContract ,"
-      + "SUM(tx.txWithSc) AS metadata, "
+      + " SUM(tx.txWithMetadataWithoutSc) AS metadata,"
+      + "SUM(tx.txWithSc) AS smartContract, "
       + "tx.hour AS time FROM TxChart tx "
       + "WHERE tx.hour in :hours "
       + "GROUP BY tx.hour "
@@ -22,8 +22,8 @@ public interface TxChartRepository extends JpaRepository<TxChart, Long> {
   List<TxGraphProjection> getTransactionGraphByHour(@Param("hours") List<BigInteger> hours);
 
   @Query("SELECT SUM(tx.txSimple) AS simpleTransactions,"
-      + " SUM(tx.txWithMetadataWithoutSc) AS smartContract ,"
-      + "SUM(tx.txWithSc) AS metadata, "
+      + " SUM(tx.txWithMetadataWithoutSc) AS metadata ,"
+      + "SUM(tx.txWithSc) AS smartContract, "
       + "tx.day AS time FROM TxChart tx "
       + "WHERE tx.day in :day "
       + "GROUP BY tx.day "
@@ -32,8 +32,8 @@ public interface TxChartRepository extends JpaRepository<TxChart, Long> {
 
 
   @Query("SELECT SUM(tx.txSimple) AS simpleTransactions,"
-      + " SUM(tx.txWithMetadataWithoutSc) AS smartContract ,"
-      + "SUM(tx.txWithSc) AS metadata, "
+      + " SUM(tx.txWithMetadataWithoutSc) AS  metadata,"
+      + "SUM(tx.txWithSc) AS smartContract, "
       + "tx.day AS time FROM TxChart tx "
       + "WHERE tx.day >= :day "
       + "GROUP BY tx.day "
