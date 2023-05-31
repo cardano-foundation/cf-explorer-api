@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.3.10](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.9...v0.3.10) (2023-05-31)
+
+
+### Features
+
+* met-239 tx chart widget ([a035d54](https://github.com/cardano-foundation/cf-explorer-api/commit/a035d54682468d68212ae71a0690b10e9d7fe7c0))
+* met-697 get histories filter by protocol type ([ecc5934](https://github.com/cardano-foundation/cf-explorer-api/commit/ecc59347c5d31595932c46d86b5c67e916972f4e))
+* met-697 old protocol param ([24d05b7](https://github.com/cardano-foundation/cf-explorer-api/commit/24d05b745d91a0c0f4f64cd86deb90042dfc1fbe))
+* met-697 protocol parameters ([64388a3](https://github.com/cardano-foundation/cf-explorer-api/commit/64388a312cdc015843860a63d76ca5ecb81d7a47))
+* met-741 pool id report function ([f754951](https://github.com/cardano-foundation/cf-explorer-api/commit/f754951037bfbb87227d6bc1ef9713b9961735f9))
+* stake key report function ([627ef8c](https://github.com/cardano-foundation/cf-explorer-api/commit/627ef8c11f37e716a15ff5945c8cefce315df189))
+
+
+### Bug Fixes
+
+* fix conflict ([12076bd](https://github.com/cardano-foundation/cf-explorer-api/commit/12076bd1b330674db4dfb1372a1b68b68de7e4a0))
+* fix unit test after edit code ([9df28bb](https://github.com/cardano-foundation/cf-explorer-api/commit/9df28bb4f1176cc44ea33eeb0b4d260c3118bf4e))
+* MET-400 optimize query top ([1518892](https://github.com/cardano-foundation/cf-explorer-api/commit/1518892418600fae5318e9008dc48fd440ae9a6c))
+* not response epochNo ([9f9f3a4](https://github.com/cardano-foundation/cf-explorer-api/commit/9f9f3a4b4279389520710ecb443210a36ee94e9a))
+* not to choose lastest ([ef1e6c1](https://github.com/cardano-foundation/cf-explorer-api/commit/ef1e6c187a94f3f901b43073c56858035322de05))
+* show registration and pool update in SPO incorrect ([c03c834](https://github.com/cardano-foundation/cf-explorer-api/commit/c03c8344b0f69399e8d57108c35722cd73fa6340))
+* transaction hash filter not working ([db58fd1](https://github.com/cardano-foundation/cf-explorer-api/commit/db58fd16b93e12edb07bc41ce3a23487ed4b9735))
+
 ## [0.3.9](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.8...v0.3.9) (2023-05-16)
 
 
