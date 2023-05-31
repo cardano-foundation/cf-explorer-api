@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class DelegatorChartList {
 
-  private Long epochNo;
+  private Integer epochNo;
 
   private Long numberDelegator;
 
