@@ -16,8 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,13 +39,13 @@ public class ContractController {
   @PostMapping("/verify/native")
   @LogMessage
   @Operation(summary = "Verify native scrip contract")
-  public ResponseEntity<Boolean> verifyContract(@ParameterObject ScriptVerifyRequest scriptVerifyRequest) {
+  public ResponseEntity<Boolean> verifyContract(@RequestBody ScriptVerifyRequest scriptVerifyRequest) {
     return ResponseEntity.ok(addressService.verifyNativeScript(scriptVerifyRequest));
   }
 
   @GetMapping("/{address}/script")
   @LogMessage
-  @Operation(summary = "Verify native scrip contract")
+  @Operation(summary = "Get native script of contract")
   public ResponseEntity<String> getScriptOfContract(@PathVariable String address) {
     return ResponseEntity.ok(addressService.getJsonNativeScript(address));
   }
