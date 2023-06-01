@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "39f2651c-cfe0-473a-a54a-fef8022e5150",
+		"_postman_id": "295843b9-7180-4e90-8ba5-8e6e193c88df",
 		"name": "Cardano Explorer API",
 		"description": "Cardano Explorer API OpenAPI 3.0\n\nContact Support:\n Name: Cardano\n Email: info@cardano.com",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "14658212"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -18,6 +17,26 @@
 							"item": [
 								{
 									"name": "Filter transaction",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].hash).not.empty;",
+													"    pm.environment.set(\"hash\",jsonData.data[0].hash);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -39,13 +58,11 @@
 											"query": [
 												{
 													"key": "page",
-													"value": "0",
-													"description": "Zero-based page index (0..N)"
+													"value": "0"
 												},
 												{
 													"key": "size",
-													"value": "20",
-													"description": "The size of the page to be returned"
+													"value": "20"
 												}
 											]
 										}
@@ -101,6 +118,27 @@
 								},
 								{
 									"name": "Get transaction detail by hash",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"pm.test(\"txhash value exist\",function (){",
+													"    pm.expect(jsonData.tx.blockHash).not.empty;",
+													"    pm.environment.set(\"txhash\",jsonData.tx.blockHash);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -110,7 +148,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/txs/cdfcba04cecfbcb270d74732330edfe44993ed75f467db198c1e262d1ed0246f",
+											"raw": "{{baseUrl}}/api/v1/txs/{{hash}}",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -118,7 +156,7 @@
 												"api",
 												"v1",
 												"txs",
-												"cdfcba04cecfbcb270d74732330edfe44993ed75f467db198c1e262d1ed0246f"
+												"{{hash}}"
 											]
 										}
 									},
@@ -162,6 +200,19 @@
 								},
 								{
 									"name": "Get Number Transaction On Last 15 Days",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -171,7 +222,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/txs/graph",
+											"raw": "{{baseUrl}}/api/v1/txs/graph/TWO_WEEK",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -179,7 +230,8 @@
 												"api",
 												"v1",
 												"txs",
-												"graph"
+												"graph",
+												"TWO_WEEK"
 											]
 										}
 									},
@@ -218,6 +270,25 @@
 								},
 								{
 									"name": "Get current transactions",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"",
+													"pm.test(\"Hash Exist\",function(){",
+													"    pm.expect(jsonData[0].hash).to.equal(pm.environment.get(\"hash\"));",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -279,6 +350,27 @@
 							"item": [
 								{
 									"name": "Filter token",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].fingerprint).not.empty;",
+													"    pm.environment.set(\"tokenId\",jsonData.data[0].fingerprint);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -372,6 +464,28 @@
 								},
 								{
 									"name": "Filter transaction by token",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"pm.test(\"blockHash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].blockHash).not.empty;",
+													"    pm.environment.set(\"blockNo\",jsonData.data[0].blockHash);",
+													"    console.log(jsonData.data[0].blockHash);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -381,7 +495,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/txs?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/tokens/{{tokenId}}/txs?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -389,7 +503,7 @@
 												"api",
 												"v1",
 												"tokens",
-												":tokenId",
+												"{{tokenId}}",
 												"txs"
 											],
 											"query": [
@@ -402,14 +516,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "tokenId",
-													"value": "asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du",
-													"type": "string",
-													"description": "fingerprint"
 												}
 											]
 										}
@@ -472,6 +578,17 @@
 								},
 								{
 									"name": "Filter holders by token",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -481,7 +598,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/top_holders?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/tokens/{{tokenId}}/top_holders?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -489,27 +606,17 @@
 												"api",
 												"v1",
 												"tokens",
-												":tokenId",
+												"{{tokenId}}",
 												"top_holders"
 											],
 											"query": [
 												{
 													"key": "page",
-													"value": "0",
-													"description": "Zero-based page index (0..N)"
+													"value": "0"
 												},
 												{
 													"key": "size",
-													"value": "20",
-													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "tokenId",
-													"value": "asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du",
-													"type": "string",
-													"description": "fingerprint"
+													"value": "20"
 												}
 											]
 										}
@@ -572,6 +679,27 @@
 								},
 								{
 									"name": "Filter token mint transaction",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"pm.test(\"txHash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].txHash).not.empty;",
+													"    ",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -581,7 +709,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/tokens/:tokenId/mints?page=0&size=20&sort=id,DESC",
+											"raw": "{{baseUrl}}/api/v1/tokens/{{tokenId}}/mints?page=0&size=20&sort=id,DESC",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -589,7 +717,7 @@
 												"api",
 												"v1",
 												"tokens",
-												":tokenId",
+												"{{tokenId}}",
 												"mints"
 											],
 											"query": [
@@ -607,13 +735,6 @@
 													"key": "sort",
 													"value": "id,DESC",
 													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
-												}
-											],
-											"variable": [
-												{
-													"key": "tokenId",
-													"value": "asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du",
-													"description": "fingerprint"
 												}
 											]
 										}
@@ -676,6 +797,28 @@
 								},
 								{
 									"name": "Detail token",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"pm.test(\"blockHash value exist\",function (){",
+													"    pm.expect(jsonData.fingerprint).not.empty;",
+													"    pm.environment.set(\"fingerprint\",jsonData.fingerprint);",
+													"    ",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -685,7 +828,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/tokens/:tokenId",
+											"raw": "{{baseUrl}}/api/v1/tokens/{{tokenId}}",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -693,14 +836,7 @@
 												"api",
 												"v1",
 												"tokens",
-												":tokenId"
-											],
-											"variable": [
-												{
-													"key": "tokenId",
-													"value": "asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du",
-													"description": "fingerprint"
-												}
+												"{{tokenId}}"
 											]
 										}
 									},
@@ -2217,6 +2353,30 @@
 							"item": [
 								{
 									"name": "Get a epoch detail by its no",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    pm.expect(jsonData.status).equal(\"FINISHED\");",
+													"    pm.expect(jsonData.no).equal(200);",
+													"    pm.expect(jsonData.blkCount).equal(21600);",
+													"    pm.expect(jsonData.outSum).equal(29643885158522833);",
+													"    pm.expect(jsonData.maxSlot).equal(21600);",
+													"    //pm.environment.set(\"hash\",jsonData.data[0].hash);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2226,7 +2386,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/epochs/:no",
+											"raw": "{{baseUrl}}/api/v1/epochs/200",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -2234,14 +2394,7 @@
 												"api",
 												"v1",
 												"epochs",
-												":no"
-											],
-											"variable": [
-												{
-													"key": "no",
-													"value": "50",
-													"description": "epoch number"
-												}
+												"200"
 											]
 										}
 									},
@@ -2285,6 +2438,27 @@
 								},
 								{
 									"name": "Get current epoch",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    ",
+													"    pm.expect(jsonData.no).not.null;",
+													"    pm.environment.set(\"lastEpoch\",jsonData.no);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2341,6 +2515,27 @@
 								},
 								{
 									"name": "Get all epoch",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    ",
+													"        pm.expect(jsonData.data[0].no).to.equal(pm.environment.get(\"lastEpoch\"));",
+													"    //pm.environment.set(\"lastEpoch\",jsonData.no);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2429,6 +2624,32 @@
 								},
 								{
 									"name": "Get block list of epoch by its no",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    pm.expect(jsonData.data[0].blockNo).not.null;",
+													"    pm.expect(jsonData.data[0].slotNo).not.null;",
+													"    pm.expect(jsonData.data[0].epochNo).not.null;",
+													"    pm.expect(jsonData.data[0].epochSlotNo).not.null;",
+													"    pm.expect(jsonData.data[0].hash).not.null;",
+													"",
+													"    ",
+													"    //pm.environment.set(\"hash\",jsonData.data[0].hash);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2438,7 +2659,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/epochs/:no/blocks?page=0&size=10&sort=id,DESC",
+											"raw": "{{baseUrl}}/api/v1/epochs/{{lastEpoch}}/blocks?page=0&size=10&sort=id,DESC",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -2446,7 +2667,7 @@
 												"api",
 												"v1",
 												"epochs",
-												":no",
+												"{{lastEpoch}}",
 												"blocks"
 											],
 											"query": [
@@ -2464,13 +2685,6 @@
 													"key": "sort",
 													"value": "id,DESC",
 													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
-												}
-											],
-											"variable": [
-												{
-													"key": "no",
-													"value": "57",
-													"description": "epoch number"
 												}
 											]
 										}
