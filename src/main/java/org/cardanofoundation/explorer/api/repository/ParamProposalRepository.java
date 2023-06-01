@@ -62,9 +62,9 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
       + "pp.maxBlockExMem AS maxBlockExMem, pp.maxBlockExSteps AS maxBlockExSteps, "
       + "pp.maxValSize AS maxValSize, pp.collateralPercent AS collateralPercent, "
       + "pp.maxCollateralInputs AS maxCollateralInputs, pp.coinsPerUtxoSize AS coinsPerUtxoSize,"
-      + "pp.costModelId AS costModel, pp.registeredTxId AS tx, pp.epochNo AS epochNo "
+      + "pp.costModelId AS costModel, pp.registeredTxId AS tx, e.no  AS epochNo "
       + "FROM ParamProposal  pp "
-      + "JOIN Epoch e ON e.no = pp.epochNo "
+      + "RIGHT JOIN Epoch e ON e.no = pp.epochNo "
       + "WHERE e.startTime <= :epochTime "
       + "GROUP BY pp.minFeeA, pp.minFeeB, pp.maxBlockSize, pp.maxTxSize,pp.maxBhSize,pp.keyDeposit, "
       + "pp.poolDeposit, pp.maxEpoch, pp.optimalPoolCount, "
@@ -72,7 +72,7 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
       + "pp.treasuryGrowthRate, pp.decentralisation, pp.entropy, pp.protocolMajor, "
       + "pp.protocolMinor, pp.minUtxoValue, pp.minPoolCost, pp.priceMem, pp.priceStep, pp.maxTxExMem, "
       + "pp.maxTxExSteps, pp.maxBlockExMem, pp.maxBlockExSteps, pp.maxValSize, pp.collateralPercent, "
-      + "pp.maxCollateralInputs, pp.coinsPerUtxoSize, pp.costModel.id, pp.registeredTx.id, pp.epochNo")
+      + "pp.maxCollateralInputs, pp.coinsPerUtxoSize, pp.costModel.id, pp.registeredTx.id, e.no")
   List<ParamHistory> findProtocolsChange(@Param("epochTime") Timestamp epochTime);
 
   @Query("SELECT pp.minFeeA AS minFeeA , pp.minFeeB AS minFeeB, pp.maxBlockSize AS maxBlockSize ,"
