@@ -430,35 +430,6 @@ class StakeKeyReportControllerTest {
         .andDo(print());
   }
 
-  @Test
-  void shouldGetRewardActivity() throws Exception {
-    Long reportId = 1L;
-    String username = "username";
-    List<StakeRewardActivityResponse> list = new ArrayList<>();
-    StakeRewardActivityResponse response = StakeRewardActivityResponse.builder()
-        .epochNo(1)
-        .amount(BigInteger.valueOf(1000000))
-        .time(new Date())
-        .type(StakeRewardType.REWARD_WITHDRAWN)
-        .build();
-    list.add(response);
-    given(stakeKeyReportService.getRewardActivitiesByReportId(anyLong(), anyString(),
-        any(Pageable.class)))
-        .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));
-    mockMvc.perform(get(END_POINT + "/stake-key/{reportId}/reward-activity", reportId)
-            .param("page", "0")
-            .param("size", "1")
-            .contentType(MediaType.APPLICATION_JSON)
-            .with(request -> {
-              request.setAttribute("username", username);
-              return request;
-            }))
-        .andExpect(status().isOk())
-        .andExpect(content().string(
-            containsString("1000000")))
-        .andDo(print());
-  }
-
   private StakeKeyReportHistoryResponse getStakeKeyReportHistoryResponse(Long reportId,
       String username) {
     StakeKeyReportHistoryResponse stakeKeyReportHistoryResponse = StakeKeyReportHistoryResponse.builder()

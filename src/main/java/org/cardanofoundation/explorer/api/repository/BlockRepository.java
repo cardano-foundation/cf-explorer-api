@@ -17,10 +17,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BlockRepository extends JpaRepository<Block, Long>,
     JpaSpecificationExecutor<Block> {
-  @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
+  @EntityGraph(attributePaths = {Block_.SLOT_LEADER})
   Optional<Block> findFirstByBlockNo(@Param("no") Long no);
 
-  @EntityGraph(attributePaths = {Block_.SLOT_LEADER, Block_.TX_LIST})
+  @EntityGraph(attributePaths = {Block_.SLOT_LEADER})
   Optional<Block> findFirstByHash(@Param("hash") String hash);
 
   @Query(value = "SELECT b FROM Block b WHERE b.epochNo IS NOT NULL",

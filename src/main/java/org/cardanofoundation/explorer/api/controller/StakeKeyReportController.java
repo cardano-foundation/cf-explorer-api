@@ -12,7 +12,6 @@ import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyRe
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
@@ -194,18 +193,5 @@ public class StakeKeyReportController {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getWalletActivitiesByReportId(reportId, username, pageable));
-  }
-
-  @GetMapping(value = "/stake-key/{reportId}/reward-activity")
-  @LogMessage
-  @Operation(summary = "Get reward activity by report id")
-  public ResponseEntity<BaseFilterResponse<StakeRewardActivityResponse>> getRewardActivityByReportId(
-      HttpServletRequest request,
-      @PathVariable Long reportId,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    String username = request.getAttribute("username").toString();
-    return ResponseEntity.ok(
-        stakeKeyReportService.getRewardActivitiesByReportId(reportId, username, pageable));
   }
 }

@@ -1,11 +1,11 @@
 package org.cardanofoundation.explorer.api.util;
 
-import java.time.ZoneOffset;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
@@ -46,6 +46,14 @@ public class DataUtil {
     if (pattern != null) {
       DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
       return dtf.format(LocalDateTime.ofInstant(value, ZoneOffset.UTC));
+    }
+    return "";
+  }
+
+  public static String localDateTimeToString(LocalDateTime value, String pattern) {
+    if (pattern != null) {
+      DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
+      return dtf.format(value);
     }
     return "";
   }
