@@ -149,4 +149,5 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " GROUP BY sa.view )")
   List<StakeDelegationProjection> findPoolDataByAddressIn(@Param("addresses") Set<String> addresses);
 
+  Boolean existsByAddress(@Param("stakeAddress") StakeAddress stakeAddress);
 }

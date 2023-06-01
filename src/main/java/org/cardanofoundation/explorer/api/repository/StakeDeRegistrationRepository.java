@@ -71,4 +71,6 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
 
   @EntityGraph(attributePaths = {StakeRegistration_.ADDR})
   List<StakeDeregistration> findByTx(@Param("tx") Tx tx);
+
+  Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
 }

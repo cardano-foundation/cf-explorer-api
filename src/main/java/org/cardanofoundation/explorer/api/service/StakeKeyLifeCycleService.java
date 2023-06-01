@@ -2,17 +2,17 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.springframework.data.domain.Pageable;
 
 public interface StakeKeyLifeCycleService {
+
+  /**
+   * Check stake key has step in life cycle: registration, delegation, reward, withdrawal, de registration
+   * @param stakeKey stake address view
+   * @return stake key life cycle step check response
+   */
+  StakeLifecycleResponse getStakeLifeCycle(String stakeKey);
 
   /**
    * Get list registration in stake key life cycle
