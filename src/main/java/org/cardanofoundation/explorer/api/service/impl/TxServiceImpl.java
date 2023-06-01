@@ -1,7 +1,51 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import com.bloxbean.cardano.client.util.AssetUtil;
+import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+import org.cardanofoundation.explorer.api.model.response.tx.*;
+import org.cardanofoundation.explorer.api.projection.TxProjection;
+import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
+import com.bloxbean.cardano.client.util.AssetUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
@@ -17,29 +61,47 @@ import org.cardanofoundation.explorer.api.mapper.TxOutMapper;
 import org.cardanofoundation.explorer.api.mapper.WithdrawalMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
+import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolRelayResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRelayProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
-import org.cardanofoundation.explorer.api.model.response.tx.*;
-import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
-import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.projection.TxProjection;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.repository.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.DelegationRepository;
+import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
+import org.cardanofoundation.explorer.api.repository.EpochRepository;
+import org.cardanofoundation.explorer.api.repository.FailedTxOutRepository;
+import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
+import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
+import org.cardanofoundation.explorer.api.repository.PoolRelayRepository;
+import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
+import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
+import org.cardanofoundation.explorer.api.repository.RedeemerRepository;
+import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.TxChartRepository;
+import org.cardanofoundation.explorer.api.repository.TxOutRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.repository.UnconsumeTxInRepository;
+import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
@@ -52,47 +114,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-
-import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-
-import org.apache.commons.lang3.StringUtils;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -269,6 +291,7 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
                                                                      Pageable pageable) {
     Optional<StakeAddress> stakeAddress = stakeAddressRepository.findByView(stakeKey);
@@ -787,13 +810,13 @@ public class TxServiceImpl implements TxService {
 
             unionTokenByAsset.forEach(
                 (asset, tokens) -> {
-                  if (tokens.size() > 1) {
-                    BigInteger totalQuantity =
-                        tokens.get(0).getAssetQuantity().add(tokens.get(1).getAssetQuantity());
-                    tokens.get(0).setAssetQuantity(totalQuantity);
-                  }
+                  BigInteger totalQuantity =
+                      tokens.stream()
+                          .map(TxMintingResponse::getAssetQuantity)
+                          .reduce(BigInteger.ZERO, BigInteger::add);
 
-                  if (!BigInteger.ZERO.equals(tokens.get(0).getAssetQuantity())) {
+                  if (!BigInteger.ZERO.equals(totalQuantity)) {
+                    tokens.get(0).setAssetQuantity(totalQuantity);
                     tokenResponse.add(tokens.get(0));
                   }
                 });
@@ -804,7 +827,9 @@ public class TxServiceImpl implements TxService {
           summary.add(txs.get(0));
         });
 
-    return summary;
+    return summary.stream()
+        .sorted(Comparator.comparing(TxOutResponse::getValue))
+        .collect(Collectors.toList());
   }
 
   /**
