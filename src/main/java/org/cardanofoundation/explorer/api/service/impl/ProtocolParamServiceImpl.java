@@ -167,7 +167,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     IntStream.range(min, max)
         .boxed()
         .sorted(Collections.reverseOrder())
-        .filter(epoch -> epochParams.containsKey(epoch))
+        .filter(epochParams::containsKey)
         .forEach(epoch -> {
 
           // fill markProtocol when it empties
@@ -749,18 +749,16 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         !epochChanges.get(lastIndexOf).getEndEpoch()
             .equals(historiesProtocol.getEpochChanges().get(lastIndexOf).getEndEpoch())) {
 
-      protocolTypes.parallelStream()
-          .forEach(protocolType ->
-              methods.forEach(entry -> {
-                var historyProtocolsGet = entry.getValue().getSecond();
-                try {
-                  ((List<ProtocolHistory>) historyProtocolsGet.invoke(historiesProtocol))
-                      .get(lastIndexOf)
-                      .setStatus(ProtocolStatus.NOT_CHANGE);
-                } catch (Exception e) {
-                  log.error(e.getMessage());
-                }
-              }));
+      methods.parallelStream().forEach(entry -> {
+        var historyProtocolsGet = entry.getValue().getSecond();
+        try {
+          ((List<ProtocolHistory>) historyProtocolsGet.invoke(historiesProtocol))
+              .get(lastIndexOf)
+              .setStatus(ProtocolStatus.NOT_CHANGE);
+        } catch (Exception e) {
+          log.error(e.getMessage());
+        }
+      });
     }
 
     historiesProtocol.setEpochChanges(new ArrayList<>(epochChanges));
