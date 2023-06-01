@@ -14,8 +14,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 @Repository
 public interface EpochParamRepository extends JpaRepository<EpochParam, Long> {
 
-  Optional<EpochParam> findEpochParamByEpochNo(Integer epochNo);
-
+  Optional<EpochParam> findEpochParamByEpochNo(@Param("epochNo") Integer epochNo);
   @Query(value = "SELECT ep "
       + "FROM EpochParam ep "
       + "JOIN Epoch e ON e.no = ep.epochNo "
