@@ -97,4 +97,5 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "WHERE ph.view  = :poolView AND rw.type = 'leader' ")
   BigInteger getTotalRewardByPool(@Param("poolView") String poolView);
 
+  Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
 }
