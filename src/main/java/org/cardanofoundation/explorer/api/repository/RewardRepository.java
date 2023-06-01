@@ -6,6 +6,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRe
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Reward;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -98,4 +99,16 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   BigInteger getTotalRewardByPool(@Param("poolView") String poolView);
 
   Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
+
+  @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
+      + " FROM Reward rw"
+      + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
+      + " WHERE rw.addr.view = :stakeKey"
+      + " AND (epoch.startTime >= :fromDate )"
+      + " AND (epoch.startTime <= :toDate )")
+  Page<StakeRewardResponse> findRewardByStake(@Param("stakeKey") String stakeKey,
+                                              @Param("fromDate") Timestamp fromDate,
+                                              @Param("toDate") Timestamp toDate,
+                                              Pageable pageable);
 }

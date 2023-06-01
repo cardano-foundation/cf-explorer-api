@@ -95,4 +95,14 @@ public interface StakeKeyLifeCycleService {
    * @return list stake key reward activity
    */
   BaseFilterResponse<StakeRewardActivityResponse> getStakeRewardActivities(String stakeKey, Pageable pageable);
+
+  /**
+   * Get list activity in stake key life cycle filter by date range
+   *
+   * @param stakeKey stake address view
+   * @param pageable page information
+   * @return list stake key activity transaction
+   */
+  BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivitiesByDateRange(
+      String stakeKey, StakeLifeCycleFilterRequest condition, Pageable pageable);
 }

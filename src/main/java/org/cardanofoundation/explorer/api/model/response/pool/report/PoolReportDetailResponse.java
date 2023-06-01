@@ -7,16 +7,10 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardRe
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.api.util.report.ColumnFieldEnum;
-import org.cardanofoundation.explorer.api.util.report.ColumnTitleEnum;
-import org.cardanofoundation.explorer.api.util.report.ExportColumn;
-import org.cardanofoundation.explorer.api.util.report.ExportColumn.Alignment;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,20 +53,6 @@ public class PoolReportDetailResponse {
           .build();
     }
 
-    public static List<ExportColumn> designFile(Boolean isFeePaid) {
-      List<ExportColumn> epochSizeColumns = new ArrayList<>();
-      epochSizeColumns.add(
-          new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE,
-                           Alignment.RIGHT));
-      if (Boolean.TRUE.equals(isFeePaid)) {
-        epochSizeColumns.add(
-            new ExportColumn(ColumnFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE,
-                             Alignment.RIGHT));
-      }
-      epochSizeColumns.add(
-          new ExportColumn(ColumnFieldEnum.SIZE_COLUMN, ColumnTitleEnum.SIZE_TITLE, Alignment.RIGHT));
-      return epochSizeColumns;
-    }
   }
 
   @Data
@@ -101,29 +81,10 @@ public class PoolReportDetailResponse {
           .adaValueFee(new BigDecimal(response.getFee()))
           .owner(String.join("\n", response.getStakeKeys()))
           .build();
-      result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
+      result.setAdaValue(new BigDecimal(response.getTotalFee()));
       return result;
     }
 
-    public static List<ExportColumn> designFile() {
-      List<ExportColumn> poolRegistrationsColumns = new ArrayList<>();
-      poolRegistrationsColumns.add(
-          new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE,
-                           Alignment.LEFT));
-      poolRegistrationsColumns.add(
-          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE,
-                           Alignment.CENTER));
-      poolRegistrationsColumns.add(
-          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
-                           Alignment.RIGHT));
-      poolRegistrationsColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-                                                    ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
-                                                    Alignment.RIGHT));
-      poolRegistrationsColumns.add(
-          new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE,
-                           Alignment.LEFT));
-      return poolRegistrationsColumns;
-    }
   }
 
   @Data
@@ -153,21 +114,6 @@ public class PoolReportDetailResponse {
       return result;
     }
 
-    public static List<ExportColumn> designFile() {
-      List<ExportColumn> poolUpdateColumns = new ArrayList<>();
-      poolUpdateColumns.add(
-          new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
-      poolUpdateColumns.add(
-          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE,
-                           Alignment.CENTER));
-      poolUpdateColumns.add(
-          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
-                           Alignment.RIGHT));
-      poolUpdateColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-                                             ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
-                                             Alignment.RIGHT));
-      return poolUpdateColumns;
-    }
   }
 
   @Data
@@ -193,21 +139,6 @@ public class PoolReportDetailResponse {
           .build();
     }
 
-    public static List<ExportColumn> designFile() {
-      List<ExportColumn> rewardDistributionColumns = new ArrayList<>();
-      rewardDistributionColumns.add(
-          new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE,
-                           Alignment.RIGHT));
-      rewardDistributionColumns.add(
-          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE,
-                           Alignment.CENTER));
-      rewardDistributionColumns.add(new ExportColumn(ColumnFieldEnum.OPERATOR_REWARD_COLUMN,
-                                                     ColumnTitleEnum.OPERATOR_REWARD_TITLE,
-                                                     Alignment.RIGHT));
-      rewardDistributionColumns.add(new ExportColumn(ColumnFieldEnum.REWARD_ACCOUNT_COLUMN,
-                                                     ColumnTitleEnum.REWARD_ACCOUNT_TITLE));
-      return rewardDistributionColumns;
-    }
   }
 
   @Data
@@ -237,29 +168,11 @@ public class PoolReportDetailResponse {
           .adaValueFee(new BigDecimal(response.getFee()))
           .owner(String.join("\n", response.getStakeKeys()))
           .build();
-      result.setAdaValue(DataUtil.isNullOrEmpty(result.getAdaValueHold()) ? result.getAdaValueFee()
-                                                                          : result.getAdaValueHold()
-                             .subtract(result.getAdaValueFee()));
+
+      result.setAdaValue(new BigDecimal(response.getTotalFee()));
       return result;
     }
 
-    public static List<ExportColumn> designFile() {
-      List<ExportColumn> deregistrationColumns = new ArrayList<>();
-      deregistrationColumns.add(
-          new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE));
-      deregistrationColumns.add(
-          new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.DATE_TITLE,
-                           Alignment.CENTER));
-      deregistrationColumns.add(
-          new ExportColumn(ColumnFieldEnum.ADA_VALUE_COLUMN, ColumnTitleEnum.ADA_VALUE_TITLE,
-                           Alignment.RIGHT));
-      deregistrationColumns.add(new ExportColumn(ColumnFieldEnum.ADA_VALUE_FEE_COLUMN,
-                                                 ColumnTitleEnum.ADA_VALUE_FEE_TITLE,
-                                                 Alignment.RIGHT));
-      deregistrationColumns.add(
-          new ExportColumn(ColumnFieldEnum.OWNER_COLUMN, ColumnTitleEnum.OWNER_TITLE));
-      return deregistrationColumns;
-    }
   }
 
 }

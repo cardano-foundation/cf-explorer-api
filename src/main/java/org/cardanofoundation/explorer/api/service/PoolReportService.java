@@ -38,13 +38,6 @@ public interface PoolReportService {
   PoolReportExportResponse export(Long reportId, ExportType exportType, String username);
 
   /**
-   * Export the pool report directly
-   *
-   * @param poolReport PoolReportHistory
-   */
-  void exportDirect(PoolReportHistory poolReport);
-
-  /**
    * Get all pool report history by username
    *
    * @param pageable pageable
