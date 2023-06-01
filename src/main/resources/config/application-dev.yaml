@@ -50,6 +50,26 @@ spring:
         max-page-size: 100
   jackson:
     default-property-inclusion: NON_NULL
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:127.0.0.1:29092}
+    #client-id:  crawler
+    producer:
+      acks: all
+      retries: 3
+      retryBackoff: 1000
+      properties:
+        enable:
+          idempotence: true
+        max:
+          pool:
+            interval: 60000
+          in:
+            flight:
+              requests:
+                per:
+                  connection: 1
+    topics:
+      reports: ${KAFKA_REPORTS_TOPIC:dev.explorer.api.mainnet.reports}
 
 redis:
   databaseIndex: 0

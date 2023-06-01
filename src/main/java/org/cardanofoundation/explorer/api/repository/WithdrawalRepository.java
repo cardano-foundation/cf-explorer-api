@@ -32,8 +32,14 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"
       + " INNER JOIN Block block ON tx.block = block"
       + " WHERE withdrawal.addr = :stakeKey AND tx.hash = :hash")
-  Optional<StakeWithdrawalProjection> getWithdrawalByAddressAndTx(
-      @Param("stakeKey") StakeAddress stakeKey, @Param("hash") String hash);
+  Optional<StakeWithdrawalProjection> getWithdrawalByAddressAndTx(@Param("stakeKey") StakeAddress stakeKey,
+                                                                  @Param("hash") String hash);
+
+  @Query("SELECT withdrawal.tx.id"
+      + " FROM Withdrawal withdrawal"
+      + " WHERE withdrawal.addr = :stakeKey AND withdrawal.tx.id IN :txIds")
+  List<Long> getWithdrawalByAddressAndTxIn(@Param("stakeKey") StakeAddress stakeKey,
+                                           @Param("txIds") List<Long> txIds);
 
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"

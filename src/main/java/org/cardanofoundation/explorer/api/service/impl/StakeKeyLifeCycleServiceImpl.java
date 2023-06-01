@@ -27,6 +27,7 @@ import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -39,12 +40,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -245,37 +249,11 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   @Override
   public BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivities(String stakeKey,
       Pageable pageable) {
-    List<StakeWalletActivityResponse> response = new ArrayList<>();
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     var txAmountList = addressTxBalanceRepository.findTxAndAmountByStake(stakeAddress.getView(),
         pageable);
-    List<Long> txIds = txAmountList.getContent().stream().map(StakeTxProjection::getTxId)
-        .collect(Collectors.toList());
-    var txList = txRepository.findByIdIn(txIds);
-    var registrationList = stakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
-        stakeAddress, txIds);
-    var deregistrationList = stakeDeRegistrationRepository.getStakeDeRegistrationsByAddressAndTxIn(
-        stakeAddress, txIds);
-    var delegationList = delegationRepository.findDelegationByAddressAndTxIn(stakeAddress, txIds);
-    Map<Long, Tx> txMap = txList.stream().collect(Collectors.toMap(Tx::getId, Function.identity()));
-    txAmountList.getContent().forEach(
-        item -> {
-          StakeWalletActivityResponse stakeWalletActivity = new StakeWalletActivityResponse();
-          stakeWalletActivity.setTxHash(txMap.get(item.getTxId()).getHash());
-          stakeWalletActivity.setAmount(item.getAmount());
-          stakeWalletActivity.setTime(item.getTime().toLocalDateTime());
-          if (Boolean.TRUE.equals(txMap.get(item.getTxId()).getValidContract())) {
-            stakeWalletActivity.setStatus(TxStatus.SUCCESS);
-          } else {
-            stakeWalletActivity.setStatus(TxStatus.FAIL);
-          }
-
-          stakeWalletActivity.setType(getStakeTxType(stakeWalletActivity, txMap.get(item.getTxId()),
-              registrationList, deregistrationList, delegationList));
-          response.add(stakeWalletActivity);
-        }
-    );
+    List<StakeWalletActivityResponse> response = getStakeWalletActivitiesContent(stakeAddress, txAmountList);
     return new BaseFilterResponse<>(txAmountList, response);
   }
 
@@ -314,27 +292,96 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     return new BaseFilterResponse<>(page);
   }
 
+  @Override
+  public BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivitiesByDateRange(
+      String stakeKey, StakeLifeCycleFilterRequest condition, Pageable pageable) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+                                          .toInstant(ZoneOffset.UTC));
+    if (Objects.nonNull(condition.getFromDate())) {
+      fromDate = Timestamp.from(condition.getFromDate().toInstant());
+    }
+    if (Objects.nonNull(condition.getToDate())) {
+      toDate = Timestamp.from(condition.getToDate().toInstant());
+    }
+    var txAmountList = addressTxBalanceRepository.findTxAndAmountByStakeAndDateRange(stakeAddress.getView(),
+                                                                         fromDate, toDate, pageable);
+
+    List<StakeWalletActivityResponse> response = getStakeWalletActivitiesContent(stakeAddress, txAmountList);
+    return new BaseFilterResponse<>(txAmountList, response);
+  }
+
+
+  private List<StakeWalletActivityResponse> getStakeWalletActivitiesContent(StakeAddress stakeAddress,
+                                                                            Page<StakeTxProjection> txAmountList) {
+    List<StakeWalletActivityResponse> response = new ArrayList<>();
+    List<Long> txIds = txAmountList.getContent().stream().map(StakeTxProjection::getTxId)
+        .collect(Collectors.toList());
+    var txList = txRepository.findByIdIn(txIds);
+    var registrationList = stakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
+        stakeAddress, txIds);
+    var deregistrationList = stakeDeRegistrationRepository.getStakeDeRegistrationsByAddressAndTxIn(
+        stakeAddress, txIds);
+    var delegationList = delegationRepository.findDelegationByAddressAndTxIn(stakeAddress, txIds);
+    var withdrawList = withdrawalRepository.getWithdrawalByAddressAndTxIn(stakeAddress, txIds);
+    Map<Long, Tx> txMap = txList.stream().collect(Collectors.toMap(Tx::getId, Function.identity()));
+    txAmountList.getContent().forEach(
+        item -> {
+          StakeWalletActivityResponse stakeWalletActivity = new StakeWalletActivityResponse();
+          stakeWalletActivity.setTxHash(txMap.get(item.getTxId()).getHash());
+          stakeWalletActivity.setAmount(item.getAmount());
+          stakeWalletActivity.setTime(item.getTime().toLocalDateTime());
+          stakeWalletActivity.setFee(txMap.get(item.getTxId()).getFee());
+          if (Boolean.TRUE.equals(txMap.get(item.getTxId()).getValidContract())) {
+            stakeWalletActivity.setStatus(TxStatus.SUCCESS);
+          } else {
+            stakeWalletActivity.setStatus(TxStatus.FAIL);
+          }
+
+          stakeWalletActivity.setType(getStakeTxType(stakeWalletActivity, txMap.get(item.getTxId()),
+                                                     registrationList, deregistrationList, delegationList, withdrawList));
+          response.add(stakeWalletActivity);
+        }
+    );
+    return response;
+  }
+
   private StakeTxType getStakeTxType(StakeWalletActivityResponse stakeWalletActivity, Tx tx,
-      List<Long> registrationList, List<Long> deregistrationList, List<Long> delegationList) {
+      List<Long> registrationList, List<Long> deregistrationList, List<Long> delegationList, List<Long> withdrawList) {
     boolean isRegistration = registrationList.contains(tx.getId());
     boolean isDeRegistration = deregistrationList.contains(tx.getId());
     boolean isDelegation = delegationList.contains(tx.getId());
+    boolean isWithdraw = withdrawList.contains(tx.getId());
     BigInteger fee = tx.getFee();
     BigInteger amount = stakeWalletActivity.getAmount();
-    Long deposit = tx.getDeposit();
-    if(deposit != null && deposit != 0) {
-      return StakeTxType.CERTIFICATE_DEPOSIT_PAID;
-    } else if(fee != null && fee.abs().compareTo(stakeWalletActivity.getAmount().abs()) == 0) {
-      if (isRegistration || isDeRegistration || isDelegation) {
-        return StakeTxType.CERTIFICATE_FEE_PAID;
+    if (isWithdraw) {
+      if (isRegistration) {
+        return StakeTxType.REWARD_WITHDRAWN_AND_CERTIFICATE_HOLD_PAID;
+      } else if (isDeRegistration) {
+        return StakeTxType.REWARD_WITHDRAWN_AND_CERTIFICATE_HOLD_DEPOSIT_REFUNDED;
       } else {
-        return StakeTxType.FEE_PAID;
+        return StakeTxType.REWARD_WITHDRAWN;
       }
-    } else if(amount != null && amount.compareTo(BigInteger.ZERO) < 0) {
-      return StakeTxType.SENT;
     } else {
-      return StakeTxType.RECEIVED;
+      if(isRegistration) {
+        return StakeTxType.CERTIFICATE_HOLD_PAID;
+      }
+      else if(isDeRegistration) {
+        return StakeTxType.CERTIFICATE_HOLD_DEPOSIT_REFUNDED;
+      } else if (isDelegation) {
+        return StakeTxType.CERTIFICATE_FEE_PAID;
+      } else if (Objects.nonNull(fee) &&
+          fee.abs().compareTo(stakeWalletActivity.getAmount().abs()) == 0) {
+        return StakeTxType.FEE_PAID;
+      } else if (amount != null && amount.compareTo(BigInteger.ZERO) < 0) {
+        return StakeTxType.SENT;
+      } else  if (amount != null && amount.compareTo(BigInteger.ZERO) > 0) {
+        return StakeTxType.RECEIVED;
+      }
     }
+    return StakeTxType.UNKNOWN;
   }
 
   private String getNameValueFromJson(String json) {

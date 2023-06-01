@@ -36,6 +36,8 @@
 - `S3_REGION`: the AWS region
 - `S3_BUCKET_NAME`: the AWS bucket
 - `S3_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
+- `KAFKA_BOOTSTRAP_SERVER`: Kafka bootstrap server. Default is kafka:9092.
+- `KAFKA_REPORTS_TOPIC`: Kafka reports topic. Default is dev.explorer.api.mainnet.reports
 
 ### We have 3 options for redis cache:
 - `redis standalone`
