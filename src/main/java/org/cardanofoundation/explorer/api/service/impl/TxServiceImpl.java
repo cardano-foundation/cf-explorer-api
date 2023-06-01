@@ -294,15 +294,14 @@ public class TxServiceImpl implements TxService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
                                                                      Pageable pageable) {
-    Optional<StakeAddress> stakeAddress = stakeAddressRepository.findByView(stakeKey);
-    if (stakeAddress.isPresent()) {
-      Page<TxProjection> txPage =
-          addressTxBalanceRepository.findAllByStakeId(stakeAddress.get().getId(), pageable);
-      List<TxFilterResponse> data = mapDataFromTxByStakeListToResponseList(txPage);
-      return new BaseFilterResponse<>(txPage, data);
-    }
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND)
+    );
 
-    return new BaseFilterResponse<>();
+    Page<TxProjection> txPage =
+        addressTxBalanceRepository.findAllByStakeId(stakeAddress.getId(), pageable);
+    List<TxFilterResponse> data = mapDataFromTxByStakeListToResponseList(txPage);
+    return new BaseFilterResponse<>(txPage, data);
   }
 
   /**
