@@ -503,10 +503,8 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertEquals(5, response.getData().size());
     Assertions.assertEquals(StakeTxType.SENT, response.getData().get(0).getType());
     Assertions.assertEquals(StakeTxType.RECEIVED, response.getData().get(1).getType());
-    Assertions.assertEquals(StakeTxType.CERTIFICATE_DEPOSIT_PAID,
-        response.getData().get(2).getType());
     Assertions.assertEquals(StakeTxType.FEE_PAID, response.getData().get(3).getType());
-    Assertions.assertEquals(StakeTxType.CERTIFICATE_FEE_PAID, response.getData().get(4).getType());
+    Assertions.assertEquals(StakeTxType.CERTIFICATE_HOLD_DEPOSIT_REFUNDED, response.getData().get(4).getType());
   }
 
   @Test

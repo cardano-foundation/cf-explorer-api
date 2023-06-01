@@ -1,7 +1,12 @@
 package org.cardanofoundation.explorer.api.model.response.pool.report;
 
 
+import java.sql.Timestamp;
+
 import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +35,10 @@ public class PoolReportListResponse {
 
     private Boolean eventPoolUpdate;
 
+    private Timestamp createdAt;
+
+    private ReportStatus status;
+
     public static PoolReportListResponse toDomain(PoolReportHistory entity) {
         return PoolReportListResponse.builder()
                 .reportId(entity.getId())
@@ -41,6 +50,8 @@ public class PoolReportListResponse {
                 .eventDeregistration(entity.getEventDeregistration())
                 .eventReward(entity.getEventReward())
                 .eventPoolUpdate(entity.getEventPoolUpdate())
+                .createdAt(entity.getReportHistory().getCreatedAt())
+                .status(entity.getReportHistory().getStatus())
                 .build();
     }
 }

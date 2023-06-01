@@ -7,11 +7,9 @@ import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyRe
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
 
 import org.springframework.data.domain.Pageable;
 
@@ -64,14 +62,6 @@ public interface StakeKeyReportService {
    */
   StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username,
                                               ExportType exportType);
-
-
-  /**
-   * Generate csv and Excel file for stake key report, then push them to storage
-   *
-   * @param stakeKeyReportHistory stake key report history
-   */
-  void exportStakeKeyReport(StakeKeyReportHistory stakeKeyReportHistory);
 
   /**
    * Get stake key report history by report id
@@ -150,18 +140,6 @@ public interface StakeKeyReportService {
    * @return BaseFilterResponse<StakeWalletActivityResponse>
    */
   BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(Long reportId,
-                                                                                String username,
-                                                                                Pageable pageable);
-
-  /**
-   * Get stake reward activities by report id
-   *
-   * @param reportId report id
-   * @param username username
-   * @param pageable pageable
-   * @return BaseFilterResponse<StakeRewardActivityResponse>
-   */
-  BaseFilterResponse<StakeRewardActivityResponse> getRewardActivitiesByReportId(Long reportId,
                                                                                 String username,
                                                                                 Pageable pageable);
 }
