@@ -97,6 +97,14 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
                                                        @Param("time") Timestamp time);
 
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
+      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                       @Param("from") Timestamp from,
+                                                       @Param("to") Timestamp to);
+
   @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.address = :address")
   List<AddressTxBalance> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
