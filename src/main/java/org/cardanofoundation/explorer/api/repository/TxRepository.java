@@ -25,6 +25,8 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
 
   List<Tx> findByBlockIn(@Param("blocks") List<Block> blocks);
 
+  List<Tx> findAllByBlock(@Param("block") Block block);
+
   @Query("SELECT tx FROM Tx tx INNER JOIN Block b ON b.id = tx.blockId "
       + "WHERE b.blockNo = :blockNo")
   Page<Tx> findByBlockNo(@Param("blockNo") Long blockNo, Pageable pageable);
