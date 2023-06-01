@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.controller.advice;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.util.Strings;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.common.exceptions.*;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
@@ -97,7 +98,7 @@ public class GlobalRestControllerExceptionHandler {
   public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
     log.warn("constraint not valid: ", e);
 
-    String[] errors = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toArray(String[]::new);
+    String[] errors = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).filter(Strings::isNotBlank).toArray(String[]::new);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(

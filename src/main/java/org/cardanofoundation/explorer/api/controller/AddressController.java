@@ -47,7 +47,8 @@ public class AddressController {
   @LogMessage
   @Operation(summary = "Get top addresses")
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-          @ParameterObject @PaginationCondition(shouldValidateSort = false) @PaginationDefault(size = 20, sort = {
+          @ParameterObject @PaginationCondition(shouldValidateSort = true, sort={"id", "time", "index"})
+          @PaginationDefault(size = 20, sort = {
                   "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
   }
