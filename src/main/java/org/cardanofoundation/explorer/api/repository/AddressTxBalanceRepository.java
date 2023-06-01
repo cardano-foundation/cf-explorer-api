@@ -4,6 +4,7 @@ import java.util.Collection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
+import org.cardanofoundation.explorer.api.projection.TxProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
@@ -111,4 +112,21 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
                                                  @Param("fromDate") Timestamp fromDate,
                                                  @Param("toDate") Timestamp toDate,
                                                  Pageable pageable);
+
+
+  @Query(value = "SELECT DISTINCT "
+      + " tx.id as id, tx.blockId as blockId, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit,"
+      + " tx.hash as hash, tx.invalidBefore as invalidBefore, tx.invalidHereafter as invalidHereafter,"
+      + " tx.outSum as outSum, tx.scriptSize as scriptSize, tx.size as size, tx.validContract as validContract,"
+      + " addrTxBalance.addressId as addressId"
+      + " FROM AddressTxBalance addrTxBalance"
+      + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
+      + " WHERE addrTxBalance.addressId IN (SELECT addr.id FROM Address addr WHERE addr.stakeAddressId = :stakeAddressId) "
+      + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
+  Page<TxProjection> findAllByStakeId(@Param("stakeAddressId") Long stakeAddressId, Pageable pageable);
+
+  @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.addressId in :addressIds")
+  List<AddressTxBalance> findByTxIdInAndByAddressIdIn(@Param("ids") Collection<Long> ids,
+                                                      @Param("addressIds") Set<Long> addressIds);
 }

@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.mapper;
 
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
+import org.cardanofoundation.explorer.api.projection.TxProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -19,6 +20,9 @@ public interface TxMapper {
   @Mapping(target = "time", source = "block.time")
   @Mapping(target = "totalOutput", source = "outSum")
   TxFilterResponse txToTxFilterResponse(Tx tx);
+
+  @Mapping(target = "totalOutput", source = "outSum")
+  TxFilterResponse txProjectionToTxFilterResponse(TxProjection tx);
 
   @Mapping(target = "tx.hash", source = "hash")
   @Mapping(target = "tx.blockNo", source = "block.blockNo")

@@ -42,7 +42,7 @@ public interface TokenMapper {
   @Mapping(target = "policy", source = "multiAsset.policy")
   @Mapping(target = "fingerprint", source = "multiAsset.fingerprint")
   @Mapping(target = "quantity", source = "addressToken.balance")
-  @Mapping(target = "address", source = "addressToken.address.address")
+  @Mapping(target = "address", ignore = true)
   TokenAddressResponse fromMultiAssetAndAddressToken(MultiAsset multiAsset, AddressToken addressToken);
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
