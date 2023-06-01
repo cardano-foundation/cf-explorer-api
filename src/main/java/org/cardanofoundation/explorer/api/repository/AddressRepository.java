@@ -31,4 +31,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   Optional<BigInteger> findTotalBalanceByStakeAddress(@Param("stake") StakeAddress stake);
 
   List<Address> findAddressByIdIn(@Param("idList") Collection<Long> idList);
+
+  @Query("SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress")
+  List<Address> findByStakeAddress(@Param("stakeAddress") String stakeAddress);
 }

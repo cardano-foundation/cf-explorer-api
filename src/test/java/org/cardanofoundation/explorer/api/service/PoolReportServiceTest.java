@@ -59,6 +59,9 @@ public class PoolReportServiceTest {
   @InjectMocks
   PoolReportServiceImpl poolReportService;
 
+  @Mock
+  KafkaService kafkaService;
+
   @Test
   void create_shouldThrowExceptionWhenNotFoundStakeAdress() {
     PoolReportCreateRequest request = PoolReportCreateRequest.builder()
@@ -107,8 +110,8 @@ public class PoolReportServiceTest {
         .build();
 
     when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
-    when(poolReportRepository.save(any(PoolReportHistory.class))).thenReturn(saved);
-
+    when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
+    doNothing().when(kafkaService).sendReportHistory(any(ReportHistory.class));
     Assertions.assertTrue(poolReportService.create(request, username));
   }
 
@@ -158,80 +161,6 @@ public class PoolReportServiceTest {
     Assertions.assertEquals(expect.getFileName(), response.getFileName());
     Assertions.assertEquals(bytes.length, responseBytes.length);
     Assertions.assertEquals(bytes[0], responseBytes[0]);
-  }
-
-  @Test
-  void exportDirect_shouldThrowExceptionWhenPersistFileToStorageFail() {
-    String username = "username";
-    PoolReportHistory poolReport = PoolReportHistory.builder()
-        .isPoolSize(true)
-        .eventRegistration(true)
-        .eventDeregistration(true)
-        .eventReward(true)
-        .eventPoolUpdate(true)
-        .isFeesPaid(true)
-        .beginEpoch(300)
-        .endEpoch(410)
-        .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.POOL_ID)
-                           .build())
-        .build();
-    BaseFilterResponse defaultBaseFilterResponse = new BaseFilterResponse<>(
-        new PageImpl<>(List.of(), PageRequest.of(0, 1), 0));
-
-    when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt())).thenReturn(
-        new ArrayList<>());
-    when(poolLifecycleService.registrationList(anyString(), any())).thenReturn(
-        defaultBaseFilterResponse);
-    when(poolLifecycleService.poolUpdateList(anyString(), any())).thenReturn(
-        defaultBaseFilterResponse);
-    when(poolLifecycleService.listReward(anyString(), any())).thenReturn(
-        defaultBaseFilterResponse);
-    when(poolLifecycleService.deRegistration(anyString(), anyString(), any(Date.class),
-                                             any(Date.class), any(Pageable.class))).thenReturn(
-        defaultBaseFilterResponse);
-    doThrow(new RuntimeException()).when(storageService).uploadFile(any(), anyString());
-    poolReportService.exportDirect(poolReport);
-  }
-
-  @Test
-  void exportDirect_shouldSuccess() {
-    String username = "username";
-    PoolReportHistory poolReport = PoolReportHistory.builder()
-        .isPoolSize(true)
-        .poolView("pool1")
-        .eventRegistration(true)
-        .eventDeregistration(true)
-        .eventReward(true)
-        .eventPoolUpdate(true)
-        .isFeesPaid(true)
-        .beginEpoch(300)
-        .endEpoch(410)
-        .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.POOL_ID)
-                           .build())
-        .build();
-    BaseFilterResponse defaultBaseFilterResponse = new BaseFilterResponse<>(
-        new PageImpl<>(List.of(), PageRequest.of(0, 1), 0));
-    when(poolLifecycleService.registrationList(anyString(), any(Pageable.class))).thenReturn(
-        defaultBaseFilterResponse);
-    when(poolLifecycleService.poolUpdateList(anyString(), any(Pageable.class))).thenReturn(
-        defaultBaseFilterResponse);
-    when(poolLifecycleService.listReward(anyString(), any(Pageable.class))).thenReturn(
-        defaultBaseFilterResponse);
-    when(poolLifecycleService.deRegistration(any(), any(), any(),
-                                             any(), any())).thenReturn(
-        defaultBaseFilterResponse);
-    doNothing().when(storageService).uploadFile(any(), anyString());
-    Assertions.assertDoesNotThrow(() -> poolReportService.exportDirect(poolReport));
   }
 
   @Test
@@ -412,6 +341,7 @@ public class PoolReportServiceTest {
                            .storageKey("storageKey")
                            .reportName("reportName")
                            .status(ReportStatus.GENERATED)
+                           .createdAt(new Timestamp(System.currentTimeMillis()))
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();

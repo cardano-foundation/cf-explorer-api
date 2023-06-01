@@ -26,4 +26,5 @@ public class StakeKeyReportHistoryResponse {
   private Boolean eventDeregistration;
   private ReportStatus status;
   private ReportType type;
+  private Timestamp createdAt;
 }
