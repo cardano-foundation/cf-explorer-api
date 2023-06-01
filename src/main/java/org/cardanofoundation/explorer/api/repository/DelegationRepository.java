@@ -132,7 +132,9 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
       + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.pmrId ="
       + " (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
-      + " WHERE delegation.id = (SELECT max(id) FROM Delegation where address = :address )")
+      + " WHERE delegation.id = (SELECT max(d2.id) FROM Delegation d2 where d2.address = :address )"
+      + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = :address) >"
+      + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = :address)")
   Optional<StakeDelegationProjection> findPoolDataByAddress(@Param("address") StakeAddress address);
 
   @Query("SELECT poolHash.view as poolId, poolOfflineData.json as poolData,"
