@@ -87,4 +87,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value = "SELECT ph.view FROM PoolHash ph ")
   List<Object> findAllPoolView();
+
+  @Query(value = "SELECT ph.view FROM PoolHash ph ")
+  Set<String> findAllSetPoolView();
 }
