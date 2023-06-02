@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
@@ -22,6 +21,7 @@ import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.repository.aggregation.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
@@ -70,6 +70,7 @@ public class TokenServiceImpl implements TokenService {
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
+  private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
 
   @Qualifier("taskExecutor")
   private final TaskExecutor taskExecutor;
@@ -192,19 +193,21 @@ public class TokenServiceImpl implements TokenService {
   @Override
   @Transactional(readOnly = true)
   public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type)
-          throws ExecutionException, InterruptedException {
+      throws ExecutionException, InterruptedException {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
-            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     List<LocalDate> dates = getListDateAnalytic(type);
     List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
 
     ExecutorService fixedExecutor = Executors.newFixedThreadPool(TOKEN_VOLUME_ANALYTIC_NUMBER);
     for (int i = 0; i < dates.size() - 1; i++) {
-      int finalIdx = i;
-      futureTokenAnalytics.add(CompletableFuture.supplyAsync(()
-              -> getTokenVolumeAnalyticsResponse(multiAsset, dates.get(finalIdx), dates.get(finalIdx + 1)), fixedExecutor)
+      LocalDate startRange = dates.get(i);
+      LocalDate endRange = dates.get(i + 1);
+      futureTokenAnalytics.add(CompletableFuture.supplyAsync(
+          () -> getTokenVolumeAnalyticsResponse(multiAsset, startRange, endRange),
+          fixedExecutor)
       );
     }
 
@@ -217,21 +220,28 @@ public class TokenServiceImpl implements TokenService {
     return responses;
   }
 
+  /**
+   * if param `to` less than today: get data from table: `agg_address_token`
+   * else: get data from table `address_token` for today
+   * and get data in range: `from` - previous day of `to` from table: `agg_address_token`
+   * and then sum data of 2 queries
+   * **/
   private TokenVolumeAnalyticsResponse getTokenVolumeAnalyticsResponse(MultiAsset multiAsset,
                                                                        LocalDate from, LocalDate to) {
-    TokenVolumeAnalyticsResponse response = new TokenVolumeAnalyticsResponse();
-    var balance = addressTokenRepository.sumBalanceBetweenTx(
-            multiAsset,
-            Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-            Timestamp.valueOf(to.atTime(LocalTime.MAX))
-    );
-    if (Objects.isNull(balance)) {
-      response.setValue(BigInteger.ZERO);
+    BigInteger balance = BigInteger.ZERO;
+    if (LocalDate.now().isEqual(to)) {
+      BigInteger todayBalance = addressTokenRepository.sumBalanceBetweenTx(
+          multiAsset,
+          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
+      );
+      BigInteger rangeToYesterdayBalance = aggregateAddressTokenRepository
+          .sumBalanceInTimeRange(multiAsset.getId(), from, to.minusDays(1));
+      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
     } else {
-      response.setValue(balance);
+      balance = aggregateAddressTokenRepository
+          .sumBalanceInTimeRange(multiAsset.getId(), from, to);
     }
-    response.setDate(to);
-    return response;
+    return new TokenVolumeAnalyticsResponse(to, balance);
   }
 
   private List<LocalDate> getListDateAnalytic(AnalyticType analyticType) {
