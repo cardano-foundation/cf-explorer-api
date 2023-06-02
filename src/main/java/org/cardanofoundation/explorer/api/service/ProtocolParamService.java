@@ -12,10 +12,22 @@ import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 
 public interface ProtocolParamService {
 
+  /**
+   * Find history change of protocol parameters
+   * @param protocolTypes
+   * @param startTime
+   * @param endTime
+   * @return
+   */
   @Transactional(readOnly = true)
   HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypes,
                                                  Timestamp startTime, Timestamp endTime);
 
+  /**
+   * Find latest protocol param have changed
+   *
+   * @return
+   */
   @Transactional(readOnly = true)
   Protocols getLatestChange();
 
