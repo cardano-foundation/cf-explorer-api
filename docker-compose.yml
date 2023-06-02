@@ -6,22 +6,36 @@ networks:
 
 services:
   cardano-explorer-api:
-    image: cardano-explorer-api-${SCHEMA}
+    image: cardano-explorer-api
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - HOST=${HOST}
-      - PORT_DB=${PORT_DB}
-      - USERNAME_DB=${USERNAME_DB}
-      - PASSWORD_DB=${PASSWORD_DB}
-      - SCHEMA=${SCHEMA}
-      - DB=${DB}
 
-      - REDIS_MASTER_NAME=${REDIS_MASTER_NAME}
-      - REDIS_SENTINEL_PASS=${REDIS_SENTINEL_PASS}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_SCHEMA=${DB_SCHEMA}
+      - DB_MAXIUM_POOL_SIZE=${DB_MAXIUM_POOL_SIZE}
+
+      - REDIS_SENTINEL_MASTER_NAME=${REDIS_SENTINEL_MASTER_NAME}
+      - REDIS_SENTINEL_PASSWORD=${REDIS_SENTINEL_PASSWORD}
       - REDIS_SENTINEL_HOST=${REDIS_SENTINEL_HOST}
+      - REDIS_SENTINEL_PORT=${REDIS_SENTINEL_PORT}
+      - PORT=${PORT}
+
+      - KAFKA_BOOTSTRAP_SERVER=${KAFKA_BOOTSTRAP_SERVER}
+      - KAFKA_REPORTS_TOPIC=${KAFKA_REPORTS_TOPIC}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_REGION=${S3_REGION}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - S3_STORAGE_ENDPOINT=${S3_STORAGE_ENDPOINT}
+
     ports:
       - ${PORT}:8080
     healthcheck:
@@ -32,4 +46,3 @@ services:
       start_period: 40s
     volumes:
       - $PWD/cardano/volumes/logs/cardano-explorer-api:/cardano-explorer-api/logs/
-  
