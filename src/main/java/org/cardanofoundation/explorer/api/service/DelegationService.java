@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.List;
 import java.util.Set;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -68,5 +69,5 @@ public interface DelegationService {
    * @param pageable page information
    * @return
    */
-  Set<PoolResponse> findTopDelegationPool(Pageable pageable);
+  List<PoolResponse> findTopDelegationPool(Pageable pageable);
 }

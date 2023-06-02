@@ -70,13 +70,14 @@
         <version.lombok-mapstruct-binding>0.2.0</version.lombok-mapstruct-binding>
         <version.ledgersync-common>0.1.0-SNAPSHOT</version.ledgersync-common>
         <version.explorer-common>0.1.1-SNAPSHOT</version.explorer-common>
-        <version.explorer-consumer-common>0.1.4-SNAPSHOT-PR43</version.explorer-consumer-common>
+        <version.explorer-consumer-common>0.1.4-PR55</version.explorer-consumer-common>
         <sonar.coverage.jacoco.xmlReportPaths>../cardano-explorer-api/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
         <sonar.cpd.exclusions>**/entity/*, **/model/*</sonar.cpd.exclusions>
         <spring-cloud-aws.version>2.4.2</spring-cloud-aws.version>
         <version.apache.poi>5.2.0</version.apache.poi>
+        <version.apache.guava>31.1-jre</version.apache.guava>
     </properties>
 
     <repositories>
@@ -288,6 +289,11 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${version.apache.poi}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${version.apache.guava}</version>
         </dependency>
     </dependencies>
 
