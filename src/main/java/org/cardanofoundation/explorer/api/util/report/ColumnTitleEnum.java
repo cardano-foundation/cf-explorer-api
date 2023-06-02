@@ -20,16 +20,16 @@ public enum ColumnTitleEnum {
   AMOUNT_NET_TITLE("Net Amount"),
   AMOUNT_ADA_TITLE("Amount ADA"),
   DEPOSIT_TITLE("Hold"),
-  FEES_TITLE("Fees"),
+  FEES_TITLE("Fees Paid"),
   TX_TYPE_TITLE("Transaction Type"),
   TX_STATUS_TITLE("Transaction Status"),
   STATUS_TITLE("Status"),
-  SIZE_TITLE("Size"),
+  SIZE_TITLE("Pool Size"),
   ADA_VALUE_TITLE("Ada Value"),
   ADA_VALUE_FEE_TITLE("Ada Value Fee"),
   OWNER_TITLE("Owner"),
   DATE_TITLE("Date"),
-  OPERATOR_REWARD_TITLE("Operator Reward"),
+  OPERATOR_REWARD_TITLE("Operator Reward ADA"),
   REWARD_ACCOUNT_TITLE("Reward Account");
   private String value;
 }

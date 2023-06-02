@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.Date;
+import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolInfoResponse;
@@ -7,10 +9,9 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
-import java.util.Date;
-import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
@@ -41,7 +42,7 @@ public class PoolLifecycleController {
 
   @GetMapping(value = "/registration-detail")
   public ResponseEntity<RegistrationResponse> registrationDetail(@Param("poolView") String poolView,
-                                                                 @RequestParam("id") Long id) {
+      @RequestParam("id") Long id) {
     return ResponseEntity.ok(poolLifecycleService.registrationDetail(poolView, id));
   }
 
@@ -90,16 +91,23 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/registration-list")
-  public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> registrationList(@RequestParam("poolView") String poolView,
+  public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> registrationList(
+      @RequestParam("poolView") String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(
         poolLifecycleService.registrationList(poolView, pageable));
   }
 
   @GetMapping(value = "/pool-update-list")
-  public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> poolUpdate(@RequestParam("poolView") String poolView,
+  public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> poolUpdate(
+      @RequestParam("poolView") String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(
         poolLifecycleService.poolUpdateList(poolView, pageable));
+  }
+
+  @GetMapping(value = "/status")
+  public ResponseEntity<SPOStatusResponse> poolStatus(@RequestParam("poolView") String poolView) {
+    return ResponseEntity.ok(poolLifecycleService.poolLifecycleStatus(poolView));
   }
 }

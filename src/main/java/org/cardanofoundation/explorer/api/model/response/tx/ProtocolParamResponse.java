@@ -1,11 +1,11 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 
 @Data

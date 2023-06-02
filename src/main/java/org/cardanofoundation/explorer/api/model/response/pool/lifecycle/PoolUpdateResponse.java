@@ -21,11 +21,14 @@ public class PoolUpdateResponse implements Serializable {
 
   private Double margin;
 
+  private BigInteger poolHold;
+
   public PoolUpdateResponse(PoolUpdateProjection projection) {
     this.poolUpdateId = projection.getPoolUpdateId();
     this.txHash = projection.getTxHash();
     this.fee = projection.getFee();
     this.time = projection.getTime();
     this.margin = projection.getMargin();
+    this.poolHold = projection.getDeposit();
   }
 }

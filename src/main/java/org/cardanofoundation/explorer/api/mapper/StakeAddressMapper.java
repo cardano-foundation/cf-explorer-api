@@ -14,5 +14,5 @@ public interface StakeAddressMapper {
   @Mapping(target = "poolId", source = "delegation.poolId")
   @Mapping(target = "tickerName", source = "delegation.tickerName")
   StakeFilterResponse fromStakeAddressAndDelegationProjection(StakeAddressProjection stake,
-                                                              StakeDelegationProjection delegation);
+      StakeDelegationProjection delegation);
 }

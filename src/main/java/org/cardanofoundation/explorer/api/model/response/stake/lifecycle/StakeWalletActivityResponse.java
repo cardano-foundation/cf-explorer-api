@@ -27,16 +27,16 @@ public class StakeWalletActivityResponse implements Serializable {
 
   public static List<ExportColumn> buildStakeWalletActivityColumn(Boolean isFeePaid) {
     List<ExportColumn> columns = new ArrayList<>();
-    columns.add(new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE,
-        Alignment.LEFT));
-    columns.add(new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE,
-        Alignment.CENTER));
     columns.add(new ExportColumn(ColumnFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.AMOUNT_ADA_TITLE,
-        Alignment.RIGHT));
+                                 Alignment.RIGHT));
+    columns.add(new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE,
+                                 Alignment.CENTER));
     if (Boolean.TRUE.equals(isFeePaid)) {
       columns.add(new ExportColumn(ColumnFieldEnum.FEE_COLUMN, ColumnTitleEnum.FEES_TITLE,
-          Alignment.RIGHT));
+                                   Alignment.RIGHT));
     }
+    columns.add(new ExportColumn(ColumnFieldEnum.TX_HASH_COLUMN, ColumnTitleEnum.TX_HASH_TITLE,
+        Alignment.LEFT, 61 * 255));
     columns.add(new ExportColumn(ColumnFieldEnum.TYPE_COLUMN, ColumnTitleEnum.TX_TYPE_TITLE,
         Alignment.CENTER));
     columns.add(new ExportColumn(ColumnFieldEnum.STATUS_COLUMN, ColumnTitleEnum.STATUS_TITLE,

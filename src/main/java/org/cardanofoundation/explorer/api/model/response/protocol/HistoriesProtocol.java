@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.protocol;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;

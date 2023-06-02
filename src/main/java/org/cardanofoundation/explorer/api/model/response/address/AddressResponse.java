@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.address;
 
 import java.math.BigInteger;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,4 +19,5 @@ public class AddressResponse {
   private BigInteger balance;
   private String stakeAddress;
   private Boolean isContract;
+  private Boolean verifiedContract;
 }

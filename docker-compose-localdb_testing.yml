@@ -69,7 +69,7 @@ services:
         max-file: "100"
 
   api:
-    build: 
+    build:
       context: .
       dockerfile: ./Dockerfile.localdb_testing
     platform: linux/arm64

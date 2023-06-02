@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.projection.TxLimit;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx_;
@@ -24,6 +25,8 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   Page<Tx> findAllTx(Pageable pageable);
 
   List<Tx> findByBlockIn(@Param("blocks") List<Block> blocks);
+
+  List<Tx> findAllByBlock(@Param("block") Block block);
 
   @Query("SELECT tx FROM Tx tx INNER JOIN Block b ON b.id = tx.blockId "
       + "WHERE b.blockNo = :blockNo")
@@ -60,17 +63,36 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "ORDER BY b.blockNo DESC, tx.blockIndex DESC")
   List<TxIOProjection> findLatestTxIO(@Param("txIds") Collection<Long> txIds);
 
-  @Query(value = "SELECT b.time as time, b.txCount as transactionNo "
-      + "FROM Block b "
-      + "WHERE b.time >= :time "
-      + "ORDER BY b.time DESC")
-  List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
+  @Query(value =
+      "SELECT MAX(b.id) AS maxBlockId, MIN(b.id) AS minBlockId, SUM(b.txCount) as transactionNo "
+          + "FROM Block b "
+          + "WHERE b.time >= :endTime AND "
+          + "b.time < :startTime AND "
+          + "b.txCount IS NOT NULL AND "
+          + "b.txCount > 0 "
+          + "GROUP BY date(b.time) ")
+  TxGraphProjection getTransactionsAfterDate(@Param("startTime") Timestamp startTime,
+      @Param("endTime") Timestamp endTime);
 
-  @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
-  List<Tx> findByIdIn(@Param("ids") List<Long> ids);
+  @Query(value =
+      "SELECT MAX(b.id) AS maxBlockId, MIN(b.id) AS minBlockId, SUM(b.txCount) as transactionNo "
+          + "FROM Block b "
+          + "WHERE b.time >= :endTime AND "
+          + "b.time < :startTime AND "
+          + "b.txCount IS NOT NULL AND "
+          + "b.txCount > 0 "
+          + "GROUP BY  hour(b.time)  ")
+  TxGraphProjection getTransactionsAfterDateTime(@Param("startTime") Timestamp startTime,
+      @Param("endTime") Timestamp endTime);
 
   @Query("SELECT min(tx.id) FROM Tx tx "
       + " INNER JOIN Block b ON b.id = tx.blockId"
       + " WHERE b.time >= :time AND b.txCount > 0")
   Optional<Long> findMinTxByAfterTime(@Param("time") Timestamp time);
+
+  @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
+  List<Tx> findByIdIn(@Param("ids")  List<Long> ids);
+
+  @Query("SELECT MAX(tx.id) AS maxId, MIN(tx.id) AS minId FROM Tx tx WHERE tx.blockId IN :blockIds")
+  TxLimit findRangeTxIdsByBlockIds(@Param("blockIds") List<Long> blockIds);
 }

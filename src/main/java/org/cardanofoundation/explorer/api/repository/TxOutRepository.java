@@ -52,4 +52,15 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
       + " WHERE txIn.txInput = :tx")
   List<AddressInputOutputProjection> getTxAddressInputInfo(@Param("tx") Tx tx);
+
+
+  @Query("SELECT COUNT( DISTINCT(txo.tx.id)) "
+      + "FROM TxOut txo "
+      + "WHERE txo.tx.id >= :minTx AND "
+      + "txo.tx.id <= :maxTx AND "
+      + "(txo.addressHasScript = TRUE OR "
+      + "txo.tokenType != org.cardanofoundation.explorer.consumercommon.enumeration.TokenType.NATIVE_TOKEN )")
+  Integer getTotalTokenAndSmartContract(
+      @Param("minTx") Long minTx,
+      @Param("maxTx") Long maxTx);
 }

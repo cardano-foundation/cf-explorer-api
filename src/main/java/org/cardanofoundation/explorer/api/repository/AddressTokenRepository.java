@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -39,8 +39,8 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :to AND block.txCount > 0)"
       + "   )"
       + " AND addrToken.balance > 0")
-  BigInteger sumBalanceBetweenTx(@Param("multiAsset") MultiAsset multiAsset,
-                                 @Param("from") Timestamp from, @Param("to") Timestamp to);
+  BigInteger sumBalanceBetweenTx(@Param("multiAsset") MultiAsset multiAsset, @Param("from") Timestamp from,
+                                 @Param("to") Timestamp to);
 
   @Query(value = "SELECT addrToken.multiAsset.id AS ident, "
       + " COALESCE(SUM(addrToken.balance), 0) AS volume"
@@ -48,11 +48,16 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " WHERE addrToken.multiAsset IN :multiAsset "
       + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId"
       + " GROUP BY addrToken.multiAsset")
-  List<TokenVolumeProjection> sumBalanceAfterTx(
-      @Param("multiAsset") Collection<MultiAsset> multiAsset, @Param("txId") Long txId);
+  List<TokenVolumeProjection> sumBalanceAfterTx(@Param("multiAsset") Collection<MultiAsset> multiAsset,
+                                                @Param("txId") Long txId);
 
   @Query("SELECT addrToken FROM AddressToken addrToken"
       + " WHERE addrToken.tx.id in :ids and addrToken.address.address = :address")
   List<AddressToken> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
                                               @Param("address") String address);
+
+  @Query("SELECT addrToken FROM AddressToken addrToken"
+      + " WHERE addrToken.tx.id in :ids and addrToken.addressId in :addressIds")
+  List<AddressToken> findByTxIdInAndByAddressIn(@Param("ids") Collection<Long> ids,
+                                                @Param("addressIds") Set<Long> addressIds);
 }

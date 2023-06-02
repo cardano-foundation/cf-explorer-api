@@ -13,10 +13,15 @@ public enum BusinessCode implements ErrorCode {
   POLICY_NOT_FOUND("404-POLICY_NOT_FOUND", "Policy not found"),
   STAKE_DELEGATION_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
   STAKE_WITHDRAWAL_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
+  PROTOCOL_NOT_FOUND("404-PROTOCOL_NOT_FOUND", "Protocol not found"),
   STAKE_REPORT_HISTORY_NOT_FOUND("404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found"),
   REPORT_IS_IN_PROGRESS("404-REPORT_IS_IN_PROGRESS", "Report is in progress"),
+  POOL_NOT_FOUND("404-POOL_NOT_FOUND", "PoolId not found"),
+  PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support"),
   EXPORT_TYPE_NOT_SUPPORTED("404-EXPORT_TYPE_NOT_SUPPORTED", "Export type not supported"),
-  PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support");
+  FETCH_REWARD_ERROR("500-FETCH_REWARD_ERROR", "Fetch reward error"),
+  TIME_RANGE_ILLEGAL("400-TIME_RANGE_ILLEGAL", "Time range is illegal"),
+  SCRIPT_NOT_FOUND("404-SCRIPT_NOT_FOUND", "Script not found");
 
   private final String code;
   private final String desc;

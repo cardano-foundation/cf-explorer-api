@@ -24,12 +24,12 @@ public class StakeRewardResponse {
 
   public static List<ExportColumn> buildExportColumn() {
     List<ExportColumn> columns = new ArrayList<>();
-    columns.add(new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE,
-        Alignment.RIGHT));
+    columns.add(new ExportColumn(ColumnFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.REWARDS_PAID_TITLE,
+                                 Alignment.RIGHT));
     columns.add(new ExportColumn(ColumnFieldEnum.TIME_COLUMN, ColumnTitleEnum.TIMESTAMP_TITLE,
         Alignment.CENTER));
-    columns.add(new ExportColumn(ColumnFieldEnum.AMOUNT_COLUMN, ColumnTitleEnum.REWARDS_PAID_TITLE,
-        Alignment.RIGHT));
+    columns.add(new ExportColumn(ColumnFieldEnum.EPOCH_COLUMN, ColumnTitleEnum.EPOCH_TITLE,
+                                 Alignment.RIGHT));
     return columns;
   }
 

@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.List;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -72,9 +73,8 @@ public class DelegationController {
   @GetMapping("/top")
   @LogMessage
   @Operation(summary = "Find Top(default is 3) Delegation Pool order by pool size")
-  public ResponseEntity<Set<PoolResponse>> findTopDelegationPool(Pageable pageable) {
+  public ResponseEntity<List<PoolResponse>> findTopDelegationPool(Pageable pageable) {
     return ResponseEntity.ok(delegationService.findTopDelegationPool(
         PageRequest.of(BigInteger.ZERO.intValue(), pageable.getPageSize())));
   }
-
 }

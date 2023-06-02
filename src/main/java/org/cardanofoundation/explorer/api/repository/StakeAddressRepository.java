@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 
@@ -20,6 +21,8 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + " FROM StakeAddress sa"
       + " LEFT JOIN Address addr ON addr.stakeAddress = sa"
       + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
+      + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = sa) >"
+      + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)"
       + " GROUP BY sa.id"
       + " HAVING sum(addr.balance) IS NOT NULL"
       + " ORDER BY totalStake DESC")
@@ -42,4 +45,7 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
       + "WHERE sa.view = :stakeKey "
       + "GROUP BY ph.view ")
   Page<String> getPoolViewByStakeKey(@Param("stakeKey") String stakeKey, Pageable pageable);
+
+  @Query(value = "SELECT sa.view FROM StakeAddress sa WHERE sa.id IN :addressIds")
+  List<String> getViewByAddressId(@Param("addressIds") Set<Long> addressIds);
 }

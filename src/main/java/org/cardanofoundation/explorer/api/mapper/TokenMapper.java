@@ -9,7 +9,6 @@ import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

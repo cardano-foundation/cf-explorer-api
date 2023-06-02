@@ -4,14 +4,12 @@ import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStak
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeDeregistration;
-
+import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
-import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -39,15 +37,15 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
   Optional<Long> findMaxTxIdByStake(@Param("stake") StakeAddress stake);
 
 
-  @Query(value = "SELECT DISTINCT tx.hash as txHash, b.time as time,"
+  @Query(value = "SELECT tx.hash as txHash, b.time as time,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
-      + " 'De Registered' AS action, tx.blockIndex as blockIndex"
+      + " 'De Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
       + " FROM StakeDeregistration sd"
       + " JOIN Tx tx ON tx.id = sd.tx.id"
       + " JOIN Block b ON b.id = tx.blockId"
-      + " WHERE sd.addr.id = (SELECT sa.id FROM StakeAddress sa WHERE sa.view = :stakeKey)"
+      + " WHERE sd.addr = :stakeKey"
       + " ORDER BY b.blockNo DESC, tx.blockIndex DESC")
-  List<StakeHistoryProjection> getStakeDeRegistrationsByAddress(@Param("stakeKey") String stakeKey);
+  List<StakeHistoryProjection> getStakeDeRegistrationsByAddress(@Param("stakeKey") StakeAddress stakeKey);
 
   @Query(value = "SELECT sd.tx.id"
       + " FROM StakeDeregistration sd"
@@ -65,10 +63,14 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
       + " AND (b.time >= :fromTime ) "
       + " AND (b.time <= :toTime)"
       + " AND ( :txHash IS NULL OR tx.hash = :txHash)")
-  Page<StakeHistoryProjection> getStakeDeRegistrationsByAddress(
-      @Param("stakeKey") StakeAddress stakeKey, @Param("txHash") String txHash,
-      @Param("fromTime") Timestamp fromTime, @Param("toTime") Timestamp toTime, Pageable pageable);
+  Page<StakeHistoryProjection> getStakeDeRegistrationsByAddress(@Param("stakeKey") StakeAddress stakeKey,
+                                                                @Param("txHash") String txHash,
+                                                                @Param("fromTime") Timestamp fromTime,
+                                                                @Param("toTime") Timestamp toTime,
+                                                                Pageable pageable);
 
   @EntityGraph(attributePaths = {StakeRegistration_.ADDR})
   List<StakeDeregistration> findByTx(@Param("tx") Tx tx);
+
+  Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
 }

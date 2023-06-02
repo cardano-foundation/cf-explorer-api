@@ -26,5 +26,5 @@ public class PoolInfoResponse implements Serializable {
 
   private List<String> stakeKeys;
 
-  private String rewardAccount;
+  private List<String> rewardAccounts;
 }

@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.protocol;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 
@@ -45,7 +46,7 @@ public class Protocols {
   ProtocolHistory collateralPercent;
   ProtocolHistory maxCollateralInputs;
   ProtocolHistory coinsPerUtxoSize;
-  Date timestamp;
+  LocalDateTime timestamp;
 
   @Override
   public boolean equals(Object o) {
