@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,7 +69,6 @@ import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -482,7 +480,8 @@ public class DelegationServiceImpl implements DelegationService {
     Map<Integer, Long> epochBlockMap = epochBlockProjections.stream().collect(
         Collectors.toMap(PoolDetailEpochProjection::getEpochNo,
             PoolDetailEpochProjection::getCountBlock));
-    epochOfPools.forEach(epochOfPool -> epochOfPool.setBlock(epochBlockMap.get(epochOfPool.getEpoch())));
+    epochOfPools.forEach(
+        epochOfPool -> epochOfPool.setBlock(epochBlockMap.get(epochOfPool.getEpoch())));
     epochRes.setData(epochOfPools);
     epochRes.setTotalItems(totalElm);
     return epochRes;
@@ -560,15 +559,15 @@ public class DelegationServiceImpl implements DelegationService {
       boolean isCheck = true;
       if (Boolean.TRUE.equals(isKoiOs)) {
         List<String> addressViews = stakeAddressRepository.getViewByAddressId(addressIds);
-        Boolean isReward = fetchRewardDataService.checkRewardForPool(addressViews);
-        if (Boolean.FALSE.equals(isReward)) {
-          Boolean isFetch = addressViews.size() > 30 ? null
-              : fetchRewardDataService.fetchRewardForPool(addressViews);
+        Boolean isStake = fetchRewardDataService.checkEpochStakeForPool(addressViews);
+        if (Boolean.FALSE.equals(isStake)) {
+          Boolean isFetch = addressViews.size() > 25 ? null
+              : fetchRewardDataService.fetchEpochStakeForPool(addressViews);
           if (Objects.isNull(isFetch)) {
             List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>();
-            List<List<String>> subAddressList = Lists.partition(addressViews, 30);
+            List<List<String>> subAddressList = Lists.partition(addressViews, 25);
             subAddressList.forEach(
-                addressList -> completableFutures.add(fetchRewardKoiOs(addressList)));
+                addressList -> completableFutures.add(fetchEpochStakeKoiOs(addressList)));
             CompletableFuture<Void> combinedFuture
                 = CompletableFuture.allOf(
                 completableFutures.toArray(new CompletableFuture[0]));
@@ -625,7 +624,8 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   private Double getPoolRewardPercent(BigInteger activeStake, BigInteger poolReward) {
-    if (Objects.isNull(activeStake) || Objects.isNull(poolReward) || BigInteger.ZERO.compareTo(activeStake) == 0) {
+    if (Objects.isNull(activeStake) || Objects.isNull(poolReward)
+        || BigInteger.ZERO.compareTo(activeStake) == 0) {
       return BigInteger.ZERO.doubleValue();
     }
     return new BigDecimal(poolReward).divide(new BigDecimal(activeStake), CommonConstant.SCALE,
@@ -653,7 +653,7 @@ public class DelegationServiceImpl implements DelegationService {
     if (Objects.isNull(poolIds)) {
       return stakeFromCache;
     }
-    String key = prefixKey + network  + (Objects.isNull(epochNo) ? "" : ("_" + epochNo)) ;
+    String key = prefixKey + network + (Objects.isNull(epochNo) ? "" : ("_" + epochNo));
     List<Object> objStakeList = null;
     try {
       objStakeList = redisTemplate.opsForHash().multiGet(key, poolIds);
@@ -750,8 +750,8 @@ public class DelegationServiceImpl implements DelegationService {
     }
   }
 
-  private CompletableFuture<Boolean> fetchRewardKoiOs(List<String> addressIds) {
+  private CompletableFuture<Boolean> fetchEpochStakeKoiOs(List<String> addressIds) {
     return CompletableFuture.supplyAsync(
-        () -> fetchRewardDataService.fetchRewardForPool(addressIds));
+        () -> fetchRewardDataService.fetchEpochStakeForPool(addressIds));
   }
 }

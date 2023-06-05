@@ -55,6 +55,16 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
   }
 
   @Override
+  public Boolean checkEpochStakeForPool(List<String> rewardAccounts) {
+    return true;
+  }
+
+  @Override
+  public Boolean fetchEpochStakeForPool(List<String> rewardAccounts) {
+    return true;
+  }
+
+  @Override
   public Boolean isKoiOs() {
     return false;
   }
