@@ -178,27 +178,25 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           Protocols markProtocol = currentMarkProtocols.get();
           Protocols currentProtocol = unprocessedProtocols.get(epoch);
 
-          if (Objects.isNull(currentProtocol)) {
-            currentProtocol = mapProtocols(epochParams.get(epoch));
-          }
+          fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
 
-          if (Objects.equals(markProtocol, currentProtocol)) {
-            markProtocol.getEpochChange().setEndEpoch(epoch);
+          if (markProtocol.equals(currentProtocol, protocolsMethods, protocolTypes)) {
+            currentProtocol.getEpochChange().setStartEpoch(markProtocol.getEpochChange().getStartEpoch());
+            currentProtocol.getEpochChange().setEndEpoch(epoch);
+            currentMarkProtocols.set(currentProtocol);
 
             if (min.equals(epoch)) {
               fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
-              processProtocols.add(markProtocol);
             }
             return;
           }
 
           fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
 
-          processProtocols.add(currentMarkProtocols.get());
+          processProtocols.add(markProtocol);
           currentMarkProtocols.set(currentProtocol);
 
           if (min.equals(epoch)) {
-            fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
             processProtocols.add(currentMarkProtocols.get());
           }
         });
