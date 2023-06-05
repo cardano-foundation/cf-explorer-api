@@ -25,6 +25,16 @@ public interface EpochService {
    */
   BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable);
 
+
+  /**
+   * Get latest epoch synced from the consumer.
+   * Display basic epoch information (epoch no, used slot ,length, total unique account).
+   * <p>In first time this function will get total unique accounts (stake key, byron address) in database.
+   * Then insert unique accounts to cache and transaction id check point </p>
+   * After that this function will find in cache and update from the transaction check point
+   *
+   * @return epoch summary
+   */
   @Transactional(readOnly = true)
   EpochSummary getCurrentEpochSummary();
 }
