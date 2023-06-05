@@ -98,6 +98,8 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "WHERE ph.view  = :poolView AND rw.type = 'leader' ")
   BigInteger getTotalRewardByPool(@Param("poolView") String poolView);
 
+  Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
+
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
       + " FROM Reward rw"
@@ -109,5 +111,4 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
                                               @Param("fromDate") Timestamp fromDate,
                                               @Param("toDate") Timestamp toDate,
                                               Pageable pageable);
-
 }

@@ -148,9 +148,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey,
                                                                       Pageable pageable) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     List<StakeHistoryProjection> stakeHistoryList =
-        stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeKey);
-    stakeHistoryList.addAll(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeKey));
+        stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress);
+    stakeHistoryList.addAll(
+        stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress));
     stakeHistoryList.sort((o1, o2) -> {
       if (o1.getBlockNo().equals(o2.getBlockNo())) {
         return o2.getBlockIndex() - o1.getBlockIndex();
