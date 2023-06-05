@@ -64,6 +64,19 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final TxRepository txRepository;
 
   @Override
+  public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    return StakeLifecycleResponse.builder()
+        .hasRegistration(stakeRegistrationRepository.existsByAddr(stakeAddress))
+        .hasDeRegistration(stakeDeRegistrationRepository.existsByAddr(stakeAddress))
+        .hasDelegation(delegationRepository.existsByAddress(stakeAddress))
+        .hashRewards(rewardRepository.existsByAddr(stakeAddress))
+        .hasWithdrawal(withdrawalRepository.existsByAddr(stakeAddress))
+        .build();
+  }
+
+  @Override
   public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey,
       StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(

@@ -82,4 +82,5 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   Optional<BigInteger> sumByAddrAndTx(@Param("stakeAddress") StakeAddress stakeAddress,
                                       @Param("txId") Long txId);
 
+  Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
 }

@@ -3,14 +3,7 @@ package org.cardanofoundation.explorer.api.controller;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
@@ -34,6 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class StakeKeyLifeCycleController {
 
   private final StakeKeyLifeCycleService stakeKeyLifeCycleService;
+
+  @GetMapping("/{stakeKey}")
+  @LogMessage
+  public ResponseEntity<StakeLifecycleResponse> getStakeLifeCycle(
+      @PathVariable @Parameter(description = "Stake key") String stakeKey) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeLifeCycle(stakeKey));
+  }
 
   @GetMapping("/{stakeKey}/registrations")
   @LogMessage
