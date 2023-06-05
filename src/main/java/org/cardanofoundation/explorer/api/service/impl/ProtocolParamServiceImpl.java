@@ -179,14 +179,19 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           Protocols currentProtocol = unprocessedProtocols.get(epoch);
 
           fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
+          if (epoch == 290) {
+            System.out.printf("");
+          }
 
           if (markProtocol.equals(currentProtocol, protocolsMethods, protocolTypes)) {
-            currentProtocol.getEpochChange().setStartEpoch(markProtocol.getEpochChange().getStartEpoch());
+            currentProtocol.getEpochChange()
+                .setStartEpoch(markProtocol.getEpochChange().getStartEpoch());
             currentProtocol.getEpochChange().setEndEpoch(epoch);
             currentMarkProtocols.set(currentProtocol);
 
-            if (min.equals(epoch)) {
-              fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
+            if (min.equals(epoch) && currentProtocol.getEpochChange().getEndEpoch().equals(min)) {
+              fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
+              processProtocols.add(currentProtocol);
             }
             return;
           }
@@ -197,7 +202,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           currentMarkProtocols.set(currentProtocol);
 
           if (min.equals(epoch)) {
-            processProtocols.add(currentMarkProtocols.get());
+            fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
+            processProtocols.add(currentProtocol);
           }
         });
 
