@@ -6,14 +6,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
@@ -69,6 +62,19 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final WithdrawalRepository withdrawalRepository;
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final TxRepository txRepository;
+
+  @Override
+  public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    return StakeLifecycleResponse.builder()
+        .hasRegistration(stakeRegistrationRepository.existsByAddr(stakeAddress))
+        .hasDeRegistration(stakeDeRegistrationRepository.existsByAddr(stakeAddress))
+        .hasDelegation(delegationRepository.existsByAddress(stakeAddress))
+        .hashRewards(rewardRepository.existsByAddr(stakeAddress))
+        .hasWithdrawal(withdrawalRepository.existsByAddr(stakeAddress))
+        .build();
+  }
 
   @Override
   public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey,
