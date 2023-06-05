@@ -35,12 +35,12 @@ spring:
   jpa:
     open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: mainnet
-        show_sql: true
+        show_sql: false
         format_sql: true
   flyway:
     enabled: false
@@ -116,7 +116,7 @@ cloud:
         name: ${S3_BUCKET_NAME:cardano-explorer-api-storage}
       path-style:
         enabled: true
-      endpoint: ${STORAGE_ENDPOINT:http://localhost:9001}
+      endpoint: ${STORAGE_ENDPOINT:http://172.16.1.230:9000}
 
 logging:
   level:

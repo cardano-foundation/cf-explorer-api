@@ -174,6 +174,7 @@ public class DelegationServiceImpl implements DelegationService {
     Integer epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
+
       Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolIdList);
       if (Boolean.FALSE.equals(isInfo)) {
         Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
@@ -193,7 +194,9 @@ public class DelegationServiceImpl implements DelegationService {
         }
       } else {
         poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolIdList, epochNo - 2);
+
       }
+      //TODO:
       List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolIdList);
       Boolean isReward = fetchRewardDataService.checkRewardForPool(rewardAccounts);
       List<PoolAmountProjection> poolAmountProjections = new ArrayList<>();
