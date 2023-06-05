@@ -39,15 +39,15 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
   Optional<Long> findMaxTxIdByStake(@Param("stake") StakeAddress stake);
 
 
-  @Query(value = "SELECT DISTINCT tx.hash as txHash, b.time as time,"
+  @Query(value = "SELECT tx.hash as txHash, b.time as time,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
-      + " 'De Registered' AS action, tx.blockIndex as blockIndex"
+      + " 'De Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
       + " FROM StakeDeregistration sd"
       + " JOIN Tx tx ON tx.id = sd.tx.id"
       + " JOIN Block b ON b.id = tx.blockId"
-      + " WHERE sd.addr.id = (SELECT sa.id FROM StakeAddress sa WHERE sa.view = :stakeKey)"
+      + " WHERE sd.addr = :stakeKey"
       + " ORDER BY b.blockNo DESC, tx.blockIndex DESC")
-  List<StakeHistoryProjection> getStakeDeRegistrationsByAddress(@Param("stakeKey") String stakeKey);
+  List<StakeHistoryProjection> getStakeDeRegistrationsByAddress(@Param("stakeKey") StakeAddress stakeKey);
 
   @Query(value = "SELECT sd.tx.id"
       + " FROM StakeDeregistration sd"
