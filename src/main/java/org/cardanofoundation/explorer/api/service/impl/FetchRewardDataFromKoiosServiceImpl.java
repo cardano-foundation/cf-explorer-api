@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.api.repository.EpochStakeCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.PoolHistoryCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.PoolInfoCheckpointRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,12 +32,17 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Value("${application.api.check-pool-info.base-url}")
   private String apiCheckPoolInfoUrl;
 
+  @Value("${application.api.check-epoch-stake.base-url}")
+  private String apiCheckEpochStakeUrl;
+
   private final RestTemplate restTemplate;
   private final RewardCheckpointRepository rewardCheckpointRepository;
 
   private final PoolHistoryCheckpointRepository poolHistoryCheckpointRepository;
 
   private final PoolInfoCheckpointRepository poolInfoCheckpointRepository;
+
+  private final EpochStakeCheckpointRepository epochStakeCheckpointRepository;
 
   @Override
   public boolean checkRewardAvailable(String stakeKey) {
@@ -92,6 +98,20 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
       i++;
     }
     return isFetch;
+  }
+
+  @Override
+  public Boolean checkEpochStakeForPool(List<String> rewardAccounts) {
+    Integer countCheckPoint = epochStakeCheckpointRepository.checkEpochStakeByAccountsAndEpoch(
+        rewardAccounts);
+    Integer sizeCheck = rewardAccounts.size();
+    return Objects.equals(countCheckPoint, sizeCheck);
+  }
+
+  @Override
+  public Boolean fetchEpochStakeForPool(List<String> rewardAccounts) {
+    return restTemplate.postForObject(apiCheckEpochStakeUrl, rewardAccounts,
+        Boolean.class);
   }
 
   @Override
