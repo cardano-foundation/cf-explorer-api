@@ -205,6 +205,7 @@ class ProtocolServiceTest {
     costModels.add(costModelOne);
     costModels.add(costModelTwo);
 
+    // this will change epoch param at epoch 3
     ParamHistoryProjection protocolChangeEpochTwo = ParamHistoryProjection.builder()
         .minFeeA(BigInteger.ONE).tx(BigInteger.ONE.longValue()).minFeeB(BigInteger.ONE)
         .maxBlockSize(BigInteger.ONE).maxTxSize(BigInteger.ONE).maxBhSize(BigInteger.ONE)
@@ -223,7 +224,7 @@ class ProtocolServiceTest {
         .time(firstTransaction.getBlock().getTime())
         .minUtxoValue(BigInteger.ONE).minPoolCost(BigInteger.ONE).epochNo(2)
         .build();
-
+    // this will change epoch param at epoch 6
     ParamHistoryProjection protocolChangeEpochFive = ParamHistoryProjection.builder()
         .minFeeA(BigInteger.TWO).tx(BigInteger.TWO.longValue()).minFeeB(BigInteger.TWO)
         .maxBlockSize(BigInteger.TWO).maxTxSize(BigInteger.TWO).maxBhSize(BigInteger.TWO)
@@ -283,7 +284,7 @@ class ProtocolServiceTest {
         .costModel(genesisCostModel)
         .minUtxoValue(BigInteger.ZERO).minPoolCost(BigInteger.ZERO).epochNo(2)
         .build();
-
+    // change at epoch param
     EpochParam epochParam2 = EpochParam.builder()
         .minFeeA(BigInteger.ONE.intValue()).minFeeB(BigInteger.ONE.intValue())
         .maxBlockSize(BigInteger.ONE.intValue()).maxTxSize(BigInteger.ONE.intValue())
@@ -590,10 +591,6 @@ class ProtocolServiceTest {
     List<EpochChange> excpectEpochChanges = List.of(
         EpochChange.builder()
             .startEpoch(4)
-            .endEpoch(4)
-            .build(),
-        EpochChange.builder()
-            .startEpoch(3)
             .endEpoch(3)
             .build(),
         EpochChange.builder()
@@ -603,15 +600,9 @@ class ProtocolServiceTest {
 
     List<ProtocolHistory> histories = actual.getMinFeeA();
 
-    Assertions.assertEquals(3, actual.getMinFeeA().size());
+    Assertions.assertEquals(2, actual.getMinFeeA().size());
     Assertions.assertEquals(excpectEpochChanges, actual.getEpochChanges());
 
-
-    Assertions.assertEquals(ProtocolHistory
-        .builder()
-        .value(BigInteger.ONE)
-        .status(ProtocolStatus.NOT_CHANGE)
-        .build().hashCode(), histories.get(0).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
@@ -620,13 +611,13 @@ class ProtocolServiceTest {
         .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
             ZoneOffset.UTC)))
         .status(ProtocolStatus.UPDATED)
-        .build().hashCode(), histories.get(1).hashCode());
+        .build().hashCode(), histories.get(0).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
         .value(BigInteger.ZERO)
         .status(ProtocolStatus.NOT_CHANGE)
-        .build().hashCode(), histories.get(2).hashCode());
+        .build().hashCode(), histories.get(1).hashCode());
   }
 
   @Test
@@ -670,10 +661,6 @@ class ProtocolServiceTest {
     List<EpochChange> excpectEpochChanges = List.of(
         EpochChange.builder()
             .startEpoch(4)
-            .endEpoch(4)
-            .build(),
-        EpochChange.builder()
-            .startEpoch(3)
             .endEpoch(3)
             .build(),
         EpochChange.builder()
@@ -683,24 +670,18 @@ class ProtocolServiceTest {
 
     List<ProtocolHistory> histories = actual.getMinFeeA();
 
-    Assertions.assertEquals(3, actual.getMinFeeA().size());
+    Assertions.assertEquals(2, actual.getMinFeeA().size());
     Assertions.assertEquals(excpectEpochChanges, actual.getEpochChanges());
 
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
         .value(BigInteger.ONE)
-        .status(ProtocolStatus.NOT_CHANGE)
-        .build().hashCode(), histories.get(0).hashCode());
-
-    Assertions.assertEquals(ProtocolHistory
-        .builder()
-        .value(BigInteger.ONE)
         .transactionHash("1")
-        .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
+        .time((LocalDateTime.ofInstant(transaction.get(0).getBlock().getTime().toInstant(),
             ZoneOffset.UTC)))
         .status(ProtocolStatus.UPDATED)
-        .build().hashCode(), histories.get(1).hashCode());
+        .build().hashCode(), histories.get(0).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
@@ -708,7 +689,7 @@ class ProtocolServiceTest {
         .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
             ZoneOffset.UTC)))
         .status(ProtocolStatus.ADDED)
-        .build().hashCode(), histories.get(2).hashCode());
+        .build().hashCode(), histories.get(1).hashCode());
   }
 
   @Test
@@ -750,10 +731,6 @@ class ProtocolServiceTest {
     List<EpochChange> excpectEpochChanges = List.of(
         EpochChange.builder()
             .startEpoch(5)
-            .endEpoch(4)
-            .build(),
-        EpochChange.builder()
-            .startEpoch(3)
             .endEpoch(3)
             .build(),
         EpochChange.builder()
@@ -763,24 +740,17 @@ class ProtocolServiceTest {
 
     List<ProtocolHistory> histories = actual.getMinFeeA();
 
-    Assertions.assertEquals(3, actual.getMinFeeA().size());
+    Assertions.assertEquals(2, actual.getMinFeeA().size());
     Assertions.assertEquals(excpectEpochChanges, actual.getEpochChanges());
-
-
-    Assertions.assertEquals(ProtocolHistory
-        .builder()
-        .value(BigInteger.ONE)
-        .status(ProtocolStatus.NOT_CHANGE)
-        .build().hashCode(), histories.get(0).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
         .value(BigInteger.ONE)
         .transactionHash("1")
-        .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
+        .time((LocalDateTime.ofInstant(transaction.get(0).getBlock().getTime().toInstant(),
             ZoneOffset.UTC)))
         .status(ProtocolStatus.UPDATED)
-        .build().hashCode(), histories.get(1).hashCode());
+        .build().hashCode(), histories.get(0).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
@@ -788,7 +758,7 @@ class ProtocolServiceTest {
         .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
             ZoneOffset.UTC)))
         .status(ProtocolStatus.ADDED)
-        .build().hashCode(), histories.get(2).hashCode());
+        .build().hashCode(), histories.get(1).hashCode());
   }
 
   @Test
@@ -830,10 +800,6 @@ class ProtocolServiceTest {
             .build(),
         EpochChange.builder()
             .startEpoch(5)
-            .endEpoch(4)
-            .build(),
-        EpochChange.builder()
-            .startEpoch(3)
             .endEpoch(3)
             .build(),
         EpochChange.builder()
@@ -845,7 +811,7 @@ class ProtocolServiceTest {
 
     List<ProtocolHistory> histories = actual.getMinFeeA();
 
-    Assertions.assertEquals(4, actual.getMinFeeA().size());
+    Assertions.assertEquals(3, actual.getMinFeeA().size());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
@@ -859,17 +825,11 @@ class ProtocolServiceTest {
     Assertions.assertEquals(ProtocolHistory
         .builder()
         .value(BigInteger.ONE)
-        .status(ProtocolStatus.NOT_CHANGE)
-        .build().hashCode(), histories.get(1).hashCode());
-
-    Assertions.assertEquals(ProtocolHistory
-        .builder()
-        .value(BigInteger.ONE)
         .transactionHash("1")
         .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
             ZoneOffset.UTC)))
         .status(ProtocolStatus.UPDATED)
-        .build().hashCode(), histories.get(2).hashCode());
+        .build().hashCode(), histories.get(1).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
@@ -877,7 +837,7 @@ class ProtocolServiceTest {
         .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
             ZoneOffset.UTC)))
         .status(ProtocolStatus.ADDED)
-        .build().hashCode(), histories.get(3).hashCode());
+        .build().hashCode(), histories.get(2).hashCode());
   }
 
 
@@ -5565,10 +5525,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(1)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -5713,10 +5669,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minFeeB(
             List.of(
-                ProtocolHistory.builder()
-                    .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(1)
                     .status(ProtocolStatus.ADDED)
@@ -5865,10 +5817,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(1)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -6013,10 +5961,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxTxSize(
             List.of(
-                ProtocolHistory.builder()
-                    .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(1)
                     .status(ProtocolStatus.ADDED)
@@ -6165,10 +6109,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(1)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -6313,10 +6253,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .keyDeposit(
             List.of(
-                ProtocolHistory.builder()
-                    .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(1)
                     .status(ProtocolStatus.ADDED)
@@ -6465,10 +6401,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(1)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -6613,10 +6545,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxEpoch(
             List.of(
-                ProtocolHistory.builder()
-                    .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(1)
                     .status(ProtocolStatus.ADDED)
@@ -6765,10 +6693,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(1)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(1)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -6913,10 +6837,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .influence(
             List.of(
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE.doubleValue())
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE.doubleValue())
                     .status(ProtocolStatus.ADDED)
@@ -7065,10 +6985,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE.doubleValue())
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE.doubleValue())
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -7213,10 +7129,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .treasuryGrowthRate(
             List.of(
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE.doubleValue())
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE.doubleValue())
                     .status(ProtocolStatus.ADDED)
@@ -7365,10 +7277,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE.doubleValue())
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE.doubleValue())
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -7513,10 +7421,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .protocolMajor(
             List.of(
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
@@ -7665,10 +7569,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -7815,10 +7715,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -7963,10 +7859,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .minPoolCost(
             List.of(
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
@@ -8128,10 +8020,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value("1")
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value("1")
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -8276,10 +8164,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .priceMem(
             List.of(
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE.doubleValue())
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE.doubleValue())
                     .status(ProtocolStatus.ADDED)
@@ -8428,10 +8312,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE.doubleValue())
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE.doubleValue())
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -8578,10 +8458,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -8689,7 +8565,7 @@ class ProtocolServiceTest {
 
     EpochParam epochParamTwo = EpochParam.builder()
         .epochNo(2)
-        .maxTxExMem(BigInteger.ONE)
+        .maxTxExSteps(BigInteger.ONE)
         .build();
 
     EpochParam epochParamThree = EpochParam.builder()
@@ -8727,10 +8603,8 @@ class ProtocolServiceTest {
         .maxTxExSteps(
             List.of(
                 ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
+                    .transactionHash(txTwo.getHash())
+                    .time(txOne.getBlock().getTime().toLocalDateTime())
                     .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
                     .build()
@@ -8876,10 +8750,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxBlockExMem(
             List.of(
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
@@ -9028,10 +8898,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -9176,10 +9042,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .maxValSize(
             List.of(
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
@@ -9328,10 +9190,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE.intValue())
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE.intValue())
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -9478,10 +9336,6 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE.intValue())
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE.intValue())
                     .status(ProtocolStatus.ADDED)
                     .build()
             )
@@ -9626,10 +9480,6 @@ class ProtocolServiceTest {
     HistoriesProtocol expect = HistoriesProtocol.builder()
         .coinsPerUtxoSize(
             List.of(
-                ProtocolHistory.builder()
-                    .value(BigInteger.ONE)
-                    .status(ProtocolStatus.NOT_CHANGE)
-                    .build(),
                 ProtocolHistory.builder()
                     .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
