@@ -38,6 +38,7 @@ import org.springframework.util.ObjectUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
 import org.cardanofoundation.explorer.api.model.response.protocol.EpochChange;
 import org.cardanofoundation.explorer.api.model.response.protocol.FixedProtocol;
@@ -52,11 +53,11 @@ import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.ledgersync.common.common.constant.Constant;
 
 import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.isWithinRange;
 
@@ -91,9 +92,37 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
 
   @Override
-  public HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypes,
-                                                        Timestamp startFilterTime,
-                                                        Timestamp endFilterTime) {
+  public HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypesInput,
+                                                        BigInteger startTime,
+                                                        BigInteger endTime) {
+
+    if (ObjectUtils.isEmpty(protocolTypesInput) || protocolTypesInput.contains(ProtocolType.ALL)) {
+      protocolTypesInput = ProtocolType.getAll();
+    }
+
+    final List<ProtocolType> protocolTypes = protocolTypesInput;
+
+    if ((Objects.isNull(startTime) && Objects.nonNull(endTime)) ||
+        (Objects.isNull(endTime) && Objects.nonNull(startTime))) {
+      throw new BusinessException(BusinessCode.TIME_RANGE_ILLEGAL);
+    }
+
+    Timestamp startFilterTime = null;
+    Timestamp endFilterTime = null;
+
+    if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
+      if (endTime.subtract(startTime).compareTo(BigInteger.ZERO) < BigInteger.ZERO.intValue()) {
+        throw new BusinessException(BusinessCode.TIME_RANGE_ILLEGAL);
+      }
+
+      startFilterTime = Timestamp.valueOf(
+          LocalDateTime.ofEpochSecond(startTime.longValue(), BigInteger.ZERO.intValue(),
+              ZoneOffset.UTC));
+      endFilterTime = Timestamp.valueOf(
+          LocalDateTime.ofEpochSecond(endTime.longValue(), BigInteger.ZERO.intValue(),
+              ZoneOffset.UTC));
+    }
+
     // find all param proposal change, and take the last change
     List<ParamHistory> historiesChange;
     // find all epoch param group there in to map of key:epoch value:epoch_param
@@ -854,7 +883,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           return !inRange;
         }).toList();
   }
-
 
   @PostConstruct
   public void setup() {
