@@ -188,7 +188,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             currentProtocol.getEpochChange().setEndEpoch(epoch);
             currentMarkProtocols.set(currentProtocol);
 
-            if (min.equals(epoch) && currentProtocol.getEpochChange().getEndEpoch().equals(min)) {
+            if (min.equals(epoch)) {
               fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
               processProtocols.add(currentProtocol);
             }
@@ -570,7 +570,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           }
 
           if (currentProtocolHistory.getValue().hashCode() != nextProtocolHistory.getValue()
-              .hashCode() && Objects.nonNull(currentProtocolHistory.getTransactionHash())) {
+              .hashCode()) {
             currentProtocolHistory.setStatus(ProtocolStatus.UPDATED);
             return;
           }
@@ -762,7 +762,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                   historiesProtocol)).get(checkedIndex);
               if (protocolHistory.getStatus().equals(ProtocolStatus.ADDED) &&
                   !historiesEpochChange.getEndEpoch().equals(epochChange.getEndEpoch())) {
-                protocolHistory.setStatus(ProtocolStatus.UPDATED);
+                protocolHistory.setStatus(ProtocolStatus.NOT_CHANGE);
               }
             } catch (Exception e) {
               log.error(e.getMessage());
@@ -808,11 +808,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                                  Timestamp endFilter,
                                  Map<Integer, EpochTimeProjection> epochTime) {
 
-    int distanceBetweenFilter = (int) (startFilter.toLocalDateTime().toEpochSecond(ZoneOffset.UTC)
-        - endFilter.toLocalDateTime().toEpochSecond(ZoneOffset.UTC));
-
-    Boolean findInEpoch = distanceBetweenFilter < ONE_EPOCH;
-
     return IntStream.range(BigInteger.ZERO.intValue(), list.size())
         .boxed()
         .filter(index -> {
@@ -838,12 +833,10 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                   final var epochStartTime = epochTime.get(epoch).getStartTime();
                   final var epochEndTime = epochTime.get(epoch).getEndTime();
 
-                  Boolean inEpochRange;
+                  Boolean inEpochRange = isWithinRange(startFilter, epochStartTime, epochEndTime)
+                      || isWithinRange(endFilter, epochStartTime, epochEndTime);
 
-                  if (Boolean.TRUE.equals(findInEpoch)) {
-                    inEpochRange = isWithinRange(startFilter, epochStartTime, epochEndTime)
-                        || isWithinRange(endFilter, epochStartTime, epochEndTime);
-                  } else {
+                  if (Boolean.FALSE.equals(inEpochRange)) {
                     inEpochRange = isWithinRange(epochStartTime, startFilter, endFilter)
                         || isWithinRange(epochEndTime, startFilter, endFilter);
                   }
