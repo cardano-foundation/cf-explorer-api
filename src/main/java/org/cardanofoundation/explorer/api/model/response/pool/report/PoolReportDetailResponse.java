@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegist
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiOsProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 
