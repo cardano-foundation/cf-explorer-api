@@ -53,6 +53,14 @@ public class PoolReportDetailResponse {
           .size(new BigDecimal(projection.getSize()))
           .build();
     }
+
+    public static EpochSize toDomain(PoolHistoryKoiOsProjection projection) {
+      return EpochSize.builder()
+              .epoch(projection.getEpochNo().toString())
+              .size(new BigDecimal(projection.getActiveStake()))
+              .fee(projection.getPoolFees())
+              .build();
+    }
   }
 
   @Data
