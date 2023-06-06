@@ -188,7 +188,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
             currentProtocol.getEpochChange().setEndEpoch(epoch);
             currentMarkProtocols.set(currentProtocol);
 
-            if (min.equals(epoch) && currentProtocol.getEpochChange().getEndEpoch().equals(min)) {
+            if (min.equals(epoch)) {
               fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
               processProtocols.add(currentProtocol);
             }
@@ -570,7 +570,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           }
 
           if (currentProtocolHistory.getValue().hashCode() != nextProtocolHistory.getValue()
-              .hashCode() && Objects.nonNull(currentProtocolHistory.getTransactionHash())) {
+              .hashCode()) {
             currentProtocolHistory.setStatus(ProtocolStatus.UPDATED);
             return;
           }
