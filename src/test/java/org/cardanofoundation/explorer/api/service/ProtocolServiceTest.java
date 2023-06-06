@@ -383,8 +383,8 @@ class ProtocolServiceTest {
         epochs);
 
     var markTime = LocalDateTime.ofEpochSecond(baseTime, 0, ZoneOffset.UTC);
-    var startTime = Timestamp.valueOf(markTime.plusDays(0));
-    var endTime = Timestamp.valueOf(markTime.plusDays(2));
+    var startTime = BigInteger.valueOf(markTime.plusDays(0).toEpochSecond(ZoneOffset.UTC));
+    var endTime = BigInteger.valueOf(markTime.plusDays(2).toEpochSecond(ZoneOffset.UTC));
 
     epochParams.remove(5);
     epochs.remove(5);
@@ -445,8 +445,8 @@ class ProtocolServiceTest {
         epochs);
 
     var markTime = LocalDateTime.ofEpochSecond(baseTime, 0, ZoneOffset.UTC);
-    var startTime = Timestamp.valueOf(markTime.plusDays(6));
-    var endTime = Timestamp.valueOf(markTime.plusDays(14));
+    var startTime = BigInteger.valueOf(markTime.plusDays(6).toEpochSecond(ZoneOffset.UTC));
+    var endTime = BigInteger.valueOf(markTime.plusDays(14).toEpochSecond(ZoneOffset.UTC));
 
     epochParams.remove(5);
     epochs.remove(5);
@@ -505,8 +505,8 @@ class ProtocolServiceTest {
         epochs);
 
     var markTime = LocalDateTime.ofEpochSecond(baseTime, 0, ZoneOffset.UTC);
-    var startTime = Timestamp.valueOf(markTime.plusDays(11));
-    var endTime = Timestamp.valueOf(markTime.plusDays(14));
+    var startTime =BigInteger.valueOf( markTime.plusDays(11).toEpochSecond(ZoneOffset.UTC));
+    var endTime = BigInteger.valueOf(markTime.plusDays(14).toEpochSecond(ZoneOffset.UTC));
 
     epochParams.remove(5);
     epochs.remove(5);
@@ -564,8 +564,8 @@ class ProtocolServiceTest {
         epochs);
 
     var markTime = LocalDateTime.ofEpochSecond(baseTime, 0, ZoneOffset.UTC);
-    var startTime = Timestamp.valueOf(markTime.plusDays(6));
-    var endTime = Timestamp.valueOf(markTime.plusDays(19));
+    var startTime = BigInteger.valueOf(markTime.plusDays(6).toEpochSecond(ZoneOffset.UTC));
+    var endTime = BigInteger.valueOf(markTime.plusDays(19).toEpochSecond(ZoneOffset.UTC));
 
     epochParams.remove(5);
     epochs.remove(5);
@@ -634,8 +634,8 @@ class ProtocolServiceTest {
         epochs);
 
     var markTime = LocalDateTime.ofEpochSecond(baseTime, 0, ZoneOffset.UTC);
-    var startTime = Timestamp.valueOf(markTime);
-    var endTime = Timestamp.valueOf(markTime.plusDays(19));
+    var startTime = BigInteger.valueOf(markTime.toEpochSecond(ZoneOffset.UTC));
+    var endTime = BigInteger.valueOf(markTime.plusDays(19).toEpochSecond(ZoneOffset.UTC));
 
     epochParams.remove(5);
     epochs.remove(5);
@@ -706,8 +706,8 @@ class ProtocolServiceTest {
         epochs);
 
     var markTime = LocalDateTime.ofEpochSecond(baseTime, 0, ZoneOffset.UTC);
-    var startTime = Timestamp.valueOf(markTime);
-    var endTime = Timestamp.valueOf(markTime.plusDays(23));
+    var startTime = BigInteger.valueOf(markTime.toEpochSecond(ZoneOffset.UTC));
+    var endTime = BigInteger.valueOf(markTime.plusDays(23).toEpochSecond(ZoneOffset.UTC));
 
     epochParams.remove(5);
     epochs.remove(5);
@@ -775,8 +775,8 @@ class ProtocolServiceTest {
         epochs);
 
     var markTime = LocalDateTime.ofEpochSecond(baseTime, 0, ZoneOffset.UTC);
-    var startTime = Timestamp.valueOf(markTime);
-    var endTime = Timestamp.valueOf(markTime.plusDays(30));
+    var startTime = BigInteger.valueOf(markTime.toEpochSecond(ZoneOffset.UTC));
+    var endTime = BigInteger.valueOf(markTime.plusDays(30).toEpochSecond(ZoneOffset.UTC));
 
     when(paramProposalRepository.findProtocolsChange(any(Timestamp.class)))
         .thenReturn(protocolHistories);
