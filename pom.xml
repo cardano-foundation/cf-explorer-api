@@ -76,6 +76,7 @@
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
         <sonar.cpd.exclusions>**/entity/*, **/model/*</sonar.cpd.exclusions>
         <spring-cloud-aws.version>2.4.2</spring-cloud-aws.version>
+        <version.apache.guava>31.1-jre</version.apache.guava>
     </properties>
 
     <repositories>
