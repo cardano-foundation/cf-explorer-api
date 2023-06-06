@@ -56,6 +56,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.ledgersync.common.common.constant.Constant;
 
 import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.isWithinRange;
 
@@ -66,6 +67,7 @@ import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.
 public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   public static final String SET = "set";
+  public static final int ONE_EPOCH = 432000;
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
   final EpochRepository epochRepository;
@@ -178,28 +180,29 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           Protocols markProtocol = currentMarkProtocols.get();
           Protocols currentProtocol = unprocessedProtocols.get(epoch);
 
-          if (Objects.isNull(currentProtocol)) {
-            currentProtocol = mapProtocols(epochParams.get(epoch));
-          }
+          fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
 
-          if (Objects.equals(markProtocol, currentProtocol)) {
-            markProtocol.getEpochChange().setEndEpoch(epoch);
+          if (markProtocol.equals(currentProtocol, protocolsMethods, protocolTypes)) {
+            currentProtocol.getEpochChange()
+                .setStartEpoch(markProtocol.getEpochChange().getStartEpoch());
+            currentProtocol.getEpochChange().setEndEpoch(epoch);
+            currentMarkProtocols.set(currentProtocol);
 
             if (min.equals(epoch)) {
-              fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
-              processProtocols.add(markProtocol);
+              fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
+              processProtocols.add(currentProtocol);
             }
             return;
           }
 
           fillMissingProtocolField(markProtocol, epochParams.get(epoch), protocolTypes);
 
-          processProtocols.add(currentMarkProtocols.get());
+          processProtocols.add(markProtocol);
           currentMarkProtocols.set(currentProtocol);
 
           if (min.equals(epoch)) {
             fillMissingProtocolField(currentProtocol, epochParams.get(epoch), protocolTypes);
-            processProtocols.add(currentMarkProtocols.get());
+            processProtocols.add(currentProtocol);
           }
         });
 
@@ -567,7 +570,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
           }
 
           if (currentProtocolHistory.getValue().hashCode() != nextProtocolHistory.getValue()
-              .hashCode() && Objects.nonNull(currentProtocolHistory.getTransactionHash())) {
+              .hashCode()) {
             currentProtocolHistory.setStatus(ProtocolStatus.UPDATED);
             return;
           }
@@ -740,35 +743,43 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     List<Integer> removeIndex = getOutRangeIndex(epochChanges,
         startFilterTime,
         endFilterTime, epochTime);
-    final var lastIndexOf = epochChanges.size() - BigInteger.ONE.intValue();
-    // change protocol status from ADDED to NOT_CHANGE
-    if ((historiesProtocol.getEpochChanges().size() == BigInteger.ONE.intValue() ||
-        epochChanges.size() == historiesProtocol.getEpochChanges().size()) &&
-        epochChanges.get(lastIndexOf).getStartEpoch()
-            .equals(historiesProtocol.getEpochChanges().get(lastIndexOf).getStartEpoch()) &&
-        !epochChanges.get(lastIndexOf).getEndEpoch()
-            .equals(historiesProtocol.getEpochChanges().get(lastIndexOf).getEndEpoch())) {
 
-      methods.parallelStream().forEach(entry -> {
-        var historyProtocolsGet = entry.getValue().getSecond();
-        try {
-          ((List<ProtocolHistory>) historyProtocolsGet.invoke(historiesProtocol))
-              .get(lastIndexOf)
-              .setStatus(ProtocolStatus.NOT_CHANGE);
-        } catch (Exception e) {
-          log.error(e.getMessage());
-        }
-      });
+    // change protocol status from ADDED to NOT_CHANGE
+    for (int index = BigInteger.ZERO.intValue(); index < epochChanges.size(); index = index + 1) {
+      var historiesEpochChange = historiesProtocol.getEpochChanges().get(index);
+      var epochChange = epochChanges.get(index);
+      if (epochChange.equals(historiesEpochChange)) {
+        continue;
+      }
+
+      final var checkedIndex = index;
+      methods
+          .parallelStream()
+          .forEach(entry -> {
+            var historyProtocolsGet = entry.getValue().getSecond();
+            try {
+              ProtocolHistory protocolHistory = ((List<ProtocolHistory>) historyProtocolsGet.invoke(
+                  historiesProtocol)).get(checkedIndex);
+              if (protocolHistory.getStatus().equals(ProtocolStatus.ADDED) &&
+                  !historiesEpochChange.getEndEpoch().equals(epochChange.getEndEpoch())) {
+                protocolHistory.setStatus(ProtocolStatus.NOT_CHANGE);
+              }
+            } catch (Exception e) {
+              log.error(e.getMessage());
+              log.error(e.getLocalizedMessage());
+            }
+          });
     }
 
-    historiesProtocol.setEpochChanges(new ArrayList<>(epochChanges));
     var removeIndexInOrder = removeIndex.stream()
         .sorted(Collections.reverseOrder()).toList();
 
+    historiesProtocol.setEpochChanges(new ArrayList<>(epochChanges));
     removeIndexInOrder
         .forEach(index -> {
           historiesProtocol.getEpochChanges().remove(index.intValue());
           methods
+              .parallelStream()
               .forEach(entry -> {
                 var historyProtocolsGet = entry.getValue().getSecond();
                 try {
@@ -812,22 +823,32 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                 || isWithinRange(epochChangeEndTime, startFilter, endFilter);
           }
 
+          List<Integer> inRangeEpoch = new ArrayList<>();
           if (inRange && !epochChange.getEndEpoch().equals(epochChange.getStartEpoch())) {
             IntStream.range(epochChange.getEndEpoch(),
                     epochChange.getStartEpoch() + BigInteger.ONE.intValue())
                 .boxed()
                 .sorted(Collections.reverseOrder())
                 .forEach(epoch -> {
-                  var inEpochRange =
-                      isWithinRange(epochTime.get(epoch).getStartTime(), startFilter, endFilter)
-                          || isWithinRange(epochTime.get(epoch).getEndTime(), startFilter,
-                          endFilter);
+                  final var epochStartTime = epochTime.get(epoch).getStartTime();
+                  final var epochEndTime = epochTime.get(epoch).getEndTime();
 
-                  if (!inEpochRange) {
+                  Boolean inEpochRange = isWithinRange(startFilter, epochStartTime, epochEndTime)
+                      || isWithinRange(endFilter, epochStartTime, epochEndTime);
+
+                  if (Boolean.FALSE.equals(inEpochRange)) {
+                    inEpochRange = isWithinRange(epochStartTime, startFilter, endFilter)
+                        || isWithinRange(epochEndTime, startFilter, endFilter);
+                  }
+
+                  if (Boolean.FALSE.equals(inEpochRange)) {
                     return;
                   }
-                  epochChange.setEndEpoch(epoch);
+                  inRangeEpoch.add(epoch);
                 });
+            epochChange.setStartEpoch(inRangeEpoch.get(BigInteger.ZERO.intValue()));
+            epochChange.setEndEpoch(
+                inRangeEpoch.get(inRangeEpoch.size() - BigInteger.ONE.intValue()));
           }
 
           return !inRange;
