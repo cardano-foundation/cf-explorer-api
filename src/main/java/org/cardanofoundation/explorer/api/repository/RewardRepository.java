@@ -134,4 +134,12 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "GROUP BY rw.earnedEpoch")
   List<EpochRewardProjection> getPoolRewardByPool(@Param("poolId") Long poolId,
       @Param("epochNos") Set<Integer> epochNos);
+
+  @Query(value = "SELECT ph.view AS view, sum(rw.amount) AS amount "
+      + "FROM Reward rw "
+      + "JOIN PoolHash ph ON rw.pool.id = ph.id "
+      + "WHERE ph.view IN :poolViews AND rw.type = 'leader' AND rw.spendableEpoch = :epochNo "
+      + "GROUP BY ph.view")
+  List<PoolAmountProjection> getOperatorRewardByPoolList(@Param("poolViews") Set<String> poolViews,
+      @Param("epochNo") Integer epochNo);
 }
