@@ -61,9 +61,6 @@ public class PoolReportDetailResponse {
     }
 
     public static EpochSize toDomain(PoolHistoryKoiOsProjection projection) {
-      System.out.println(projection.getEpochNo());
-      System.out.println(projection.getActiveStake());
-      System.out.println(projection.getPoolFees());
       return EpochSize.builder()
           .epoch(projection.getEpochNo().toString())
           .size(new BigDecimal(projection.getActiveStake()))

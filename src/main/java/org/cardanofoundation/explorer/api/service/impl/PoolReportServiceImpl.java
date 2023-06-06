@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
@@ -32,8 +31,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -228,23 +229,23 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                             reportId);
 
     boolean isKoiOs = fetchRewardDataService.isKoiOs();
-    if (true) {
-      int epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
+    if (isKoiOs) {
       Set<String> poolReportSet = Set.of(poolReport.getPoolView());
       boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolReportSet);
       List<PoolHistoryKoiOsProjection> poolHistoryProjections = new ArrayList<>();
       if (!isHistory) {
         boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(Set.of(poolReport.getPoolView()));
         if (isFetch) {
-          poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolReportSet, epochNo - 2);
+          poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolReport.getPoolView());
         }
       } else {
-        poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolReportSet, epochNo - 2);
+        poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolReport.getPoolView());
       }
 
-      if(poolHistoryProjections.size() != 0) {
-        poolHistoryProjections.forEach(System.out::println);
-        List<PoolReportDetailResponse.EpochSize> epochSizeList = poolHistoryProjections.stream().map(PoolReportDetailResponse.EpochSize::toDomain).toList();
+      if(Objects.nonNull(poolHistoryProjections)) {
+        List<PoolReportDetailResponse.EpochSize> epochSizeList = poolHistoryProjections.stream().filter(t ->
+                ValueRange.of(poolReport.getBeginEpoch(), poolReport.getEndEpoch()).isValidIntValue(t.getEpochNo()))
+                .map(PoolReportDetailResponse.EpochSize::toDomain).toList();
         return new BaseFilterResponse<>(this.convertListToPage(epochSizeList, pageable));
       } else {
         return new BaseFilterResponse<>(null);
