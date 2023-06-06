@@ -31,6 +31,14 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
   Page<PoolHistoryKoiOsProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId, Pageable pageable);
 
   @Query(value =
+          "SELECT ph.epochNo AS epochNo, CAST(ph.delegRewards AS BigInteger) AS delegateReward, ph.epochRos AS ros, "
+                  + "CAST(ph.activeStake AS BigInteger) AS activeStake, CAST(ph.poolFees AS BigInteger) AS poolFees "
+                  + "FROM PoolHistory ph "
+                  + "WHERE ph.poolId = :poolId "
+                  + "ORDER BY ph.epochNo DESC")
+  List<PoolHistoryKoiOsProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId);
+
+  @Query(value =
       "SELECT ph.epochNo AS chartKey, CAST(ph.activeStake AS BigInteger) AS chartValue "
           + "FROM PoolHistory ph "
           + "WHERE ph.poolId = :poolId "

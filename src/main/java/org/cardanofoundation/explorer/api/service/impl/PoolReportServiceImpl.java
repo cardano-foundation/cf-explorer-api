@@ -8,17 +8,13 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegist
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiOsProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
-import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
-import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
-import org.cardanofoundation.explorer.api.service.KafkaService;
-import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
-import org.cardanofoundation.explorer.api.service.PoolReportService;
-import org.cardanofoundation.explorer.api.service.StorageService;
+import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.service.*;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.report.ExcelHelper;
 import org.cardanofoundation.explorer.api.util.report.ExportContent;
@@ -35,17 +31,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,7 +64,14 @@ public class PoolReportServiceImpl implements PoolReportService {
   private final PoolLifecycleService poolLifecycleService;
 
   private final PoolHashRepository poolHashRepository;
+
   private final KafkaService kafkaService;
+
+  private final FetchRewardDataService fetchRewardDataService;
+
+  private final PoolHistoryRepository poolHistoryRepository;
+
+  private final EpochRepository epochRepository;
 
   private final Pageable defaultPageable = PageRequest.of(0, 1000, Sort.by("id").descending());
 
@@ -224,12 +227,49 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                                String username) {
     PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
                                                                             reportId);
-    Page<PoolReportProjection> epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(
-        poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
-    List<PoolReportProjection> epochSizeProjections = epochSizeProjectionPage.getContent();
-    List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
-        .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
-    return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
+    boolean isKoiOs = fetchRewardDataService.isKoiOs();
+    if (isKoiOs) {
+      Set<String> poolReportSet = Set.of(poolReport.getPoolView());
+      boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolReportSet);
+      List<PoolHistoryKoiOsProjection> poolHistoryProjections = new ArrayList<>();
+      if (!isHistory) {
+        boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(Set.of(poolReport.getPoolView()));
+        if (isFetch) {
+          poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolReport.getPoolView());
+        }
+      } else {
+        poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolReport.getPoolView());
+      }
+
+      if(Objects.nonNull(poolHistoryProjections)) {
+        List<PoolReportDetailResponse.EpochSize> epochSizeList = poolHistoryProjections.stream().filter(t ->
+                        ValueRange.of(poolReport.getBeginEpoch(), poolReport.getEndEpoch()).isValidIntValue(t.getEpochNo()))
+                .map(PoolReportDetailResponse.EpochSize::toDomain).toList();
+        return new BaseFilterResponse<>(this.convertListToPage(epochSizeList, pageable));
+      } else {
+        return new BaseFilterResponse<>(null);
+      }
+
+    } else {
+      Page<PoolReportProjection> epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(
+              poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
+      List<PoolReportProjection> epochSizeProjections = epochSizeProjectionPage.getContent();
+      List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
+              .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
+      return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
+    }
+  }
+
+  private Page<PoolReportDetailResponse.EpochSize> convertListToPage(List<PoolReportDetailResponse.EpochSize> list, Pageable pageable) {
+    int startIndex = pageable.getPageNumber() * pageable.getPageSize();
+    int endIndex = Math.min(startIndex + pageable.getPageSize(), list.size());
+    try {
+      List<PoolReportDetailResponse.EpochSize> sublist = list.subList(startIndex, endIndex);
+      PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+      return new PageImpl<>(sublist, pageRequest, list.size());
+    } catch (Exception e) {
+      return new PageImpl<>(new ArrayList<>());
+    }
   }
 
   @Override
