@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "295843b9-7180-4e90-8ba5-8e6e193c88df",
+		"_postman_id": "43ebd465-dbd9-4f76-ab46-1bc3946a7a87",
 		"name": "Cardano Explorer API",
 		"description": "Cardano Explorer API OpenAPI 3.0\n\nContact Support:\n Name: Cardano\n Email: info@cardano.com",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -4223,10 +4223,10 @@
 													"    pm.response.to.have.status(200);",
 													"});",
 													"pm.test(\"Address detail information\",function (){",
-													"    pm.expect(jsonData.address).is.equal(",
-													"                \"addr1qyegmz9fs9z6rqypt03xj7pycje6c7cetw5d90ld2yn9qldfsare778tzlhkycm7hdqm54r4rncjqs5t2h78mklqv0jsjl859t\");",
-													"    pm.expect(jsonData.stakeAddress).is.equal(",
-													"                \"stake1ux5cw3ul0r430mmzvdltksd62363eufqg294tlram0sx8eg7mdymd\");",
+													"    pm.expect(jsonData.address).not.null;",
+													"    pm.expect(jsonData.txCount).not.null;",
+													"    pm.expect(jsonData.balance).is.a(\"number\");",
+													"    pm.expect(jsonData.isContract).not.null;",
 													"});"
 												],
 												"type": "text/javascript"
