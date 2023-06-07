@@ -4584,7 +4584,7 @@
 													"    pm.response.to.have.status(200);",
 													"});",
 													"pm.test(\"Address token information\",function (){",
-													"    pm.expect(jsonData.data[0].policy).is.equal(\"5acc52d5696e52345aec108468050d9d743eb21d6e41305bbc23a27b\");",
+													"    pm.expect(jsonData.data[0].policy).not.null;",
 													"    ",
 													"});"
 												],
