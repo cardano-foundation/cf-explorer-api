@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 
-@SpringBootTest
+@JdbcTest
 class ExplorerApiApplicationTests {
 
   @Test

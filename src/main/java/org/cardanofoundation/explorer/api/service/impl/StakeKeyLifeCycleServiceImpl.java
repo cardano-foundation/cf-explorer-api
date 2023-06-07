@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.Date;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
@@ -158,8 +159,8 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   }
 
   @Override
-  public BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey,
-      Pageable pageable) {
+  public BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey, Date fromDate,
+      Date toDate, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
@@ -168,8 +169,17 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
       }
     }
+    Timestamp fromTime = Timestamp.valueOf(MIN_TIME);
+    Timestamp toTime = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .toInstant(ZoneOffset.UTC));
+    if (Objects.nonNull(fromDate)) {
+      fromTime = Timestamp.from(fromDate.toInstant());
+    }
+    if (Objects.nonNull(toDate)) {
+      toTime = Timestamp.from(toDate.toInstant());
+    }
     var response
-        = rewardRepository.findRewardByStake(stakeAddress, pageable);
+        = rewardRepository.findRewardByStake(stakeAddress, fromTime, toTime, pageable);
     return new BaseFilterResponse<>(response);
   }
 
