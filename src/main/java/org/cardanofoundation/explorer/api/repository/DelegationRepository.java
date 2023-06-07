@@ -175,7 +175,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "LEFT JOIN AdaPots ad ON ad.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "WHERE pu.id = "
           + "(SELECT MAX(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) AND "
-          + "pod.id = (SELECT MAX(pod2.id) FROM PoolOfflineData pod2 WHERE pod2.pool.id = ph.id) AND "
+          + "pod.pmrId = (SELECT MAX(pod2.pmrId) FROM PoolOfflineData pod2 WHERE pod2.pool.id = ph.id) AND "
           + "ph.id IN :poolIds")
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(@Param("poolIds") Set<Long> poolIds);
 
