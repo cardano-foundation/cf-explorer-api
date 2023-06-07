@@ -17,10 +17,10 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
 
   @Query("SELECT COUNT(atb.addressId) FROM AddressTokenBalance atb "
       + "WHERE atb.multiAsset = :multiAsset "
-      + "AND atb.stakeAddressId IS NULL AND atb.balance > 0 ")
+      + "AND atb.stakeAddress.id IS NULL AND atb.balance > 0 ")
   Optional<Long> countAddressNotHaveStakeByMultiAsset(@Param("multiAsset") MultiAsset multiAsset);
 
-  @Query("SELECT COUNT(DISTINCT atb.stakeAddressId) FROM AddressTokenBalance atb "
+  @Query("SELECT COUNT(DISTINCT atb.stakeAddress.id) FROM AddressTokenBalance atb "
       + "WHERE atb.multiAsset = :multiAsset "
       + "AND atb.balance > 0 ")
   Optional<Long> countStakeByMultiAsset(@Param("multiAsset") MultiAsset multiAsset);
@@ -29,11 +29,11 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
   @Query("SELECT COUNT(atb.addressId) as numberOfHolders, atb.multiAssetId as ident "
       + "FROM AddressTokenBalance atb "
       + "WHERE atb.multiAssetId IN :multiAssets "
-      + "AND atb.stakeAddressId IS NULL AND atb.balance > 0 "
+      + "AND atb.stakeAddress.id IS NULL AND atb.balance > 0 "
       + "GROUP BY atb.multiAsset.id")
   List<TokenNumberHoldersProjection> countAddressNotHaveStakeByMultiAssetIn(@Param("multiAssets") List<Long> multiAssetIds);
 
-  @Query("SELECT COUNT(DISTINCT atb.stakeAddressId) as numberOfHolders, atb.multiAssetId as ident "
+  @Query("SELECT COUNT(DISTINCT atb.stakeAddress.id) as numberOfHolders, atb.multiAssetId as ident "
       + "FROM AddressTokenBalance atb "
       + "WHERE atb.multiAssetId IN :multiAssets "
       + "AND atb.balance > 0 "
