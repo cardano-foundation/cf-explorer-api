@@ -269,6 +269,82 @@
 									]
 								},
 								{
+									"name": "Get Number Transaction Fake Value",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(500);",
+													"});",
+													"",
+													"var jsonData = pm.response.json();",
+													"",
+													"pm.test(\"Hash Exist\",function(){",
+													"    pm.expect(jsonData.errorCode).to.equal(\"CC_1\");",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/txs/graph/fake",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"txs",
+												"graph",
+												"fake"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/txs/graph",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"txs",
+														"graph"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"date\": \"<dateTime>\",\n    \"txs\": \"<integer>\"\n  },\n  {\n    \"date\": \"<dateTime>\",\n    \"txs\": \"<integer>\"\n  }\n]"
+										}
+									]
+								},
+								{
 									"name": "Get current transactions",
 									"event": [
 										{
@@ -885,6 +961,28 @@
 							"item": [
 								{
 									"name": "Get withdrawal transaction of stake key",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].txHash).not.empty;",
+													"    pm.environment.set(\"txHash\",jsonData.data[0].txHash);",
+													"    pm.environment.set(\"blockNo\",jsonData.data[0].blockNo);",
+													"    pm.environment.set(\"epochNo\",jsonData.data[0].epochNo);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -894,7 +992,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/withdrawal-history?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/stakes/{{stakeKey}}/withdrawal-history?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -902,7 +1000,7 @@
 												"api",
 												"v1",
 												"stakes",
-												":stakeKey",
+												"{{stakeKey}}",
 												"withdrawal-history"
 											],
 											"query": [
@@ -915,13 +1013,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "stakeKey",
-													"value": "stake_test17p05drwxcurskuvge62nu7n8knlx8p6vyetqn9km6fef87qlada7n",
-													"description": "view of stake key"
 												}
 											]
 										}
@@ -984,6 +1075,25 @@
 								},
 								{
 									"name": "Get stake history of stake key",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].txHash).not.empty;",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -993,7 +1103,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/stake-history?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/stakes/{{stakeKey}}/stake-history?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1001,7 +1111,7 @@
 												"api",
 												"v1",
 												"stakes",
-												":stakeKey",
+												"{{stakeKey}}",
 												"stake-history"
 											],
 											"query": [
@@ -1014,13 +1124,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "stakeKey",
-													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
-													"description": "view of stake key"
 												}
 											]
 										}
@@ -1083,6 +1186,27 @@
 								},
 								{
 									"name": "Get all address of stake",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].address).not.empty;",
+													"        pm.environment.set(\"stakeAddress\",jsonData.data[0].address);",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1092,7 +1216,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/list-address?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/stakes/{{stakeKey}}/list-address?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1100,7 +1224,7 @@
 												"api",
 												"v1",
 												"stakes",
-												":stakeKey",
+												"{{stakeKey}}",
 												"list-address"
 											],
 											"query": [
@@ -1113,13 +1237,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "stakeKey",
-													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
-													"description": "view of stake key"
 												}
 											]
 										}
@@ -1182,6 +1299,23 @@
 								},
 								{
 									"name": "Get reward transaction of stake key",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1191,7 +1325,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/instantaneous-rewards?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/stakes/{{stakeKey}}/instantaneous-rewards?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1199,26 +1333,17 @@
 												"api",
 												"v1",
 												"stakes",
-												":stakeKey",
+												"{{stakeKey}}",
 												"instantaneous-rewards"
 											],
 											"query": [
 												{
 													"key": "page",
-													"value": "0",
-													"description": "Zero-based page index (0..N)"
+													"value": "0"
 												},
 												{
 													"key": "size",
-													"value": "20",
-													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "stakeKey",
-													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
-													"description": "view of stake key"
+													"value": "20"
 												}
 											]
 										}
@@ -1281,6 +1406,26 @@
 								},
 								{
 									"name": "Get delegation history of stake key",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].txHash).not.empty;",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1290,7 +1435,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey/delegation-history?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/stakes/{{stakeKey}}/delegation-history?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1298,7 +1443,7 @@
 												"api",
 												"v1",
 												"stakes",
-												":stakeKey",
+												"{{stakeKey}}",
 												"delegation-history"
 											],
 											"query": [
@@ -1311,13 +1456,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "stakeKey",
-													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
-													"description": "view of stake key"
 												}
 											]
 										}
@@ -1380,6 +1518,26 @@
 								},
 								{
 									"name": "Get a stake detail by stake key",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.status).not.empty;",
+													"    pm.expect(jsonData.stakeAddress).not.empty;",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1389,7 +1547,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/stakes/:stakeKey",
+											"raw": "{{baseUrl}}/api/v1/stakes/{{stakeKey}}",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1397,14 +1555,7 @@
 												"api",
 												"v1",
 												"stakes",
-												":stakeKey"
-											],
-											"variable": [
-												{
-													"key": "stakeKey",
-													"value": "stake_test1urxzevdat43p44llqk45mt4kfnr2j25p83nvq0ymxku4xdcaxnffm",
-													"description": "view of stake key"
-												}
+												"{{stakeKey}}"
 											]
 										}
 									},
@@ -1448,6 +1599,26 @@
 								},
 								{
 									"name": "Get top delegators",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].stakeKey).not.empty;",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1533,6 +1704,26 @@
 								},
 								{
 									"name": "get Data For Stake Registration",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].txHash).not.empty;",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1618,6 +1809,26 @@
 								},
 								{
 									"name": "get Data For Stake De Registration",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].txHash).not.empty;",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1703,6 +1914,19 @@
 								},
 								{
 									"name": "Get active stake, live stake and total stake",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1759,6 +1983,27 @@
 								},
 								{
 									"name": "Get a stake detail by stake key",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.status).not.empty;",
+													"    pm.expect(jsonData.stakeAddress).is.equal(\"stake1u88s35s8vm7e7rpt8dk22y5j5pl9er2xzdjtx4ywl3jut7s7cpagr\");",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1768,7 +2013,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/stakes/address/:address",
+											"raw": "{{baseUrl}}/api/v1/stakes/address/{{stakeAddress}}",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1777,14 +2022,7 @@
 												"v1",
 												"stakes",
 												"address",
-												":address"
-											],
-											"variable": [
-												{
-													"key": "address",
-													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6r44kgagw49zsln23lqjmtglv5n4tfjdlvnatvmk5whfrrqwxllu7",
-													"description": "address view"
-												}
+												"{{stakeAddress}}"
 											]
 										}
 									},
@@ -1834,6 +2072,9 @@
 							"item": [
 								{
 									"name": "get Data For Pool Registration",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
 									"request": {
 										"method": "GET",
 										"header": [
@@ -1842,6 +2083,15 @@
 												"value": "*/*"
 											}
 										],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
 										"url": {
 											"raw": "{{baseUrl}}/api/v1/pools/registration?page=0&size=10",
 											"host": [
@@ -2009,6 +2259,28 @@
 							"item": [
 								{
 									"name": "Get tokens by policy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"policy value exist\",function (){",
+													"    pm.expect(jsonData.data[0].id).not.null;",
+													"    pm.environment.set(\"policy\",jsonData.data[0].policy);",
+													"    pm.environment.set(\"fingerprint\",jsonData.data[0].fingerprint);",
+													"    pm.environment.set(\"id\",jsonData.data[0].id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2018,7 +2290,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/policies/:policyId/tokens?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/tokens?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -2026,7 +2298,7 @@
 												"api",
 												"v1",
 												"policies",
-												":policyId",
+												"{{policyId}}",
 												"tokens"
 											],
 											"query": [
@@ -2039,13 +2311,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "policyId",
-													"value": "e68f1cea19752d1292b4be71b7f5d2b3219a15859c028f7454f66cdf",
-													"description": "policy hash value"
 												}
 											]
 										}
@@ -2108,6 +2373,27 @@
 								},
 								{
 									"name": "Get holders by policy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].address).not.empty;",
+													"    pm.expect(pm.environment.get(\"fingerprint\")).is.equal(jsonData.data[0].fingerprint);",
+													"    ",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2117,7 +2403,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/policies/:policyId/holders?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/holders?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -2125,7 +2411,7 @@
 												"api",
 												"v1",
 												"policies",
-												":policyId",
+												"{{policyId}}",
 												"holders"
 											],
 											"query": [
@@ -2138,13 +2424,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "policyId",
-													"value": "e68f1cea19752d1292b4be71b7f5d2b3219a15859c028f7454f66cdf",
-													"description": "policy hash value"
 												}
 											]
 										}
@@ -2207,6 +2486,27 @@
 								},
 								{
 									"name": "Get a policy detail",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.policyId).not.empty;",
+													"    pm.expect(pm.environment.get(\"policyId\")).is.equal(jsonData.policyId);",
+													"    ",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2216,7 +2516,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/policies/:policyId",
+											"raw": "{{baseUrl}}/api/v1/policies/{{policyId}}",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -2224,14 +2524,7 @@
 												"api",
 												"v1",
 												"policies",
-												":policyId"
-											],
-											"variable": [
-												{
-													"key": "policyId",
-													"value": "e68f1cea19752d1292b4be71b7f5d2b3219a15859c028f7454f66cdf",
-													"description": "policy hash value"
-												}
+												"{{policyId}}"
 											]
 										}
 									},
@@ -2280,6 +2573,30 @@
 							"item": [
 								{
 									"name": "Get ada cardano price, market cap, volume, and market related data",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData[0].id).is.equal(\"cardano\");",
+													"    pm.expect(jsonData[0].symbol).is.equal(\"ada\");",
+													"    pm.expect(jsonData[0].current_price).not.null;",
+													"    pm.expect(jsonData[0].market_cap).not.null;",
+													"    pm.expect(jsonData[0].total_volume).not.null;",
+													"    pm.expect(jsonData[0].last_updated).not.null;",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2752,6 +3069,23 @@
 							"item": [
 								{
 									"name": "Find Top(default is 3) Delegation Pool order by pool size",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2837,6 +3171,22 @@
 								},
 								{
 									"name": "get Data For Pool Table",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -2953,8 +3303,7 @@
 											"variable": [
 												{
 													"key": "poolView",
-													"value": "pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx",
-													"description": "pool view value"
+													"value": ""
 												}
 											]
 										}
@@ -3321,6 +3670,26 @@
 							"item": [
 								{
 									"name": "Get list contract",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].address).not.null;",
+													"    pm.expect(jsonData.data[0].balance).not.null;",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -3409,6 +3778,27 @@
 							"item": [
 								{
 									"name": "Get tx list of block",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].hash).not.empty;",
+													"    pm.expect(jsonData.data[0].hash).is.equal(\"b7e3f01ee29a2410bca619d2418fb10271bdedf116b53352bf0a53b5280d0a15\");",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -3418,7 +3808,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/blocks/:blockId/txs?page=0&size=20&sort=blockId,DESC&sort=blockIndex,DESC",
+											"raw": "{{baseUrl}}/api/v1/blocks/{{blockNo}}/txs?page=0&size=20&sort=blockId,DESC&sort=blockIndex,DESC",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -3426,7 +3816,7 @@
 												"api",
 												"v1",
 												"blocks",
-												":blockId",
+												"{{blockNo}}",
 												"txs"
 											],
 											"query": [
@@ -3449,13 +3839,6 @@
 													"key": "sort",
 													"value": "blockIndex,DESC",
 													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
-												}
-											],
-											"variable": [
-												{
-													"key": "blockId",
-													"value": "e3b5cc8c5358fdc3a10cd01802423da3c9d95172aa68745cefb5913e0aae644a",
-													"description": "block hash value"
 												}
 											]
 										}
@@ -3518,6 +3901,27 @@
 								},
 								{
 									"name": "Get a block detail",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.hash).not.empty;",
+													"    pm.expect(jsonData.hash).is.equal(\"9dfd1ebe5b294d6eafdfa6d1061ad04a7b31f15ac64a9330d310ba710c3d45c2\");",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -3527,7 +3931,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/blocks/:blockId",
+											"raw": "{{baseUrl}}/api/v1/blocks/{{blockNo}}",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -3535,14 +3939,7 @@
 												"api",
 												"v1",
 												"blocks",
-												":blockId"
-											],
-											"variable": [
-												{
-													"key": "blockId",
-													"value": "e3b5cc8c5358fdc3a10cd01802423da3c9d95172aa68745cefb5913e0aae644a",
-													"description": "block hash value"
-												}
+												"{{blockNo}}"
 											]
 										}
 									},
@@ -3586,6 +3983,27 @@
 								},
 								{
 									"name": "Get all block",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Hash value exist\",function (){",
+													"    pm.expect(jsonData.data[0].hash).not.empty;",
+													"    pm.expect(jsonData.data[0].hash).contain(\"63e10dd9473e2c57e9165e5a8d5864f2ffa0398ecd6ef5301d6aedbf322a2404\");",
+													"",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -3679,6 +4097,34 @@
 							"item": [
 								{
 									"name": "Get list transaction of address",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    pm.expect(jsonData.data[0].hash).equal(\"79e7c6cf7eb5f27eb8d348e7f35f77333626969e871604a842e2ddf309367c0a\");",
+													"    pm.expect(jsonData.data[0].addressesInput).contain(",
+													"                \"addr1qxvhzl283dtmr6rmhdzesqj79hfa00zgd82geuwgwsx2mf4fsare778tzlhkycm7hdqm54r4rncjqs5t2h78mklqv0jsrdqcvp\");",
+													"    pm.expect(jsonData.data[0].addressesInput).contain(",
+													"                \"addr1qyegmz9fs9z6rqypt03xj7pycje6c7cetw5d90ld2yn9qldfsare778tzlhkycm7hdqm54r4rncjqs5t2h78mklqv0jsjl859t\");",
+													"    pm.expect(jsonData.data[0].addressesOutput).contain(",
+													"                \"addr1v877fwg9gx2nfyln2x92ca2z8ge98xwhkq82mzh3t9v7chgmeszg9\");",
+													"    pm.expect(jsonData.data[0].addressesOutput).contain(",
+													"                \"addr1q9j7twuz9qrzywalh3lt30ht93uelwxr0mul0lmmgg69064fsare778tzlhkycm7hdqm54r4rncjqs5t2h78mklqv0js2l87ee\");",
+													"    //pm.environment.set(\"hash\",jsonData.data[0].hash);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -3688,7 +4134,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/addresses/:address/txs?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/addresses/{{address}}/txs?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -3696,7 +4142,7 @@
 												"api",
 												"v1",
 												"addresses",
-												":address",
+												"{{address}}",
 												"txs"
 											],
 											"query": [
@@ -3709,13 +4155,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "address",
-													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6qtz2su6pacwwz6ktmr9q0ajyv6xucs0lddet0skdjp652s606tf3",
-													"description": "address view value"
 												}
 											]
 										}
@@ -3778,6 +4217,28 @@
 								},
 								{
 									"name": "Get a address detail",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    pm.expect(jsonData.address).is.equal(",
+													"                \"addr1qyegmz9fs9z6rqypt03xj7pycje6c7cetw5d90ld2yn9qldfsare778tzlhkycm7hdqm54r4rncjqs5t2h78mklqv0jsjl859t\");",
+													"    pm.expect(jsonData.stakeAddress).is.equal(",
+													"                \"stake1ux5cw3ul0r430mmzvdltksd62363eufqg294tlram0sx8eg7mdymd\");",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -3787,7 +4248,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/addresses/:address",
+											"raw": "{{baseUrl}}/api/v1/addresses/{{address}}",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -3795,14 +4256,7 @@
 												"api",
 												"v1",
 												"addresses",
-												":address"
-											],
-											"variable": [
-												{
-													"key": "address",
-													"value": "Ae2tdPwUPEYwFx4dmJheyNPPYXtvHbJLeCaA96o6Y2iiUL18cAt7AizN2zG",
-													"description": "address view value"
-												}
+												"{{address}}"
 											]
 										}
 									},
@@ -3846,6 +4300,26 @@
 								},
 								{
 									"name": "Get top addresses",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    pm.expect(jsonData.data).not.null;",
+													"    ",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -3931,6 +4405,27 @@
 								},
 								{
 									"name": "Get the highest and lowest balance address",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    pm.expect(jsonData[0]).to.be.a(\"number\");",
+													"    pm.expect(jsonData[1]).to.be.a(\"number\");",
+													"    ",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -3940,7 +4435,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/addresses/min-max-balance/:address",
+											"raw": "{{baseUrl}}/api/v1/addresses/min-max-balance/{{address}}",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -3949,14 +4444,7 @@
 												"v1",
 												"addresses",
 												"min-max-balance",
-												":address"
-											],
-											"variable": [
-												{
-													"key": "address",
-													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6qtz2su6pacwwz6ktmr9q0ajyv6xucs0lddet0skdjp652s606tf3",
-													"description": "address view value"
-												}
+												"{{address}}"
 											]
 										}
 									},
@@ -4001,6 +4489,27 @@
 								},
 								{
 									"name": "Get a address analytics",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    pm.expect(jsonData[0].date).to.be.a(\"string\");",
+													"    pm.expect(jsonData[0].value).to.be.a(\"number\");",
+													"    ",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -4010,7 +4519,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/addresses/analytics/:address/:type",
+											"raw": "{{baseUrl}}/api/v1/addresses/analytics/{{address}}/ONE_DAY",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -4019,20 +4528,8 @@
 												"v1",
 												"addresses",
 												"analytics",
-												":address",
-												":type"
-											],
-											"variable": [
-												{
-													"key": "address",
-													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6qtz2su6pacwwz6ktmr9q0ajyv6xucs0lddet0skdjp652s606tf3",
-													"description": "address view value"
-												},
-												{
-													"key": "type",
-													"value": "THREE_MONTH",
-													"description": "ONE_DAY, ONE_WEEK, ONE_MONTH, THREE_MONTH"
-												}
+												"{{address}}",
+												"ONE_DAY"
 											]
 										}
 									},
@@ -4081,6 +4578,26 @@
 								},
 								{
 									"name": "Get list token of address",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"",
+													"",
+													"pm.test(\"Status test\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"pm.test(\"Epoch information\",function (){",
+													"    pm.expect(jsonData.data[0].policy).is.equal(\"5acc52d5696e52345aec108468050d9d743eb21d6e41305bbc23a27b\");",
+													"    ",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [
@@ -4090,7 +4607,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/v1/addresses/:address/tokens?page=0&size=20",
+											"raw": "{{baseUrl}}/api/v1/addresses/{{address}}/tokens?page=0&size=20",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -4098,7 +4615,7 @@
 												"api",
 												"v1",
 												"addresses",
-												":address",
+												"{{address}}",
 												"tokens"
 											],
 											"query": [
@@ -4111,13 +4628,6 @@
 													"key": "size",
 													"value": "20",
 													"description": "The size of the page to be returned"
-												}
-											],
-											"variable": [
-												{
-													"key": "address",
-													"value": "addr_test1zqzc3jyfefuv4vj8zhk0vg78yxwjeuk4qdc68twua2gsr6qtz2su6pacwwz6ktmr9q0ajyv6xucs0lddet0skdjp652s606tf3",
-													"description": "address view value"
 												}
 											]
 										}
