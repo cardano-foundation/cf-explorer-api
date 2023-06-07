@@ -28,6 +28,13 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " AND addressTxBalance.time <= :time")
   BigInteger getBalanceByAddressAndTime(@Param("address") Address address, @Param("time") Timestamp time);
 
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address = :address"
+      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByAddressAndTime(@Param("address") Address address,
+                                                  @Param("from") Timestamp from,
+                                                  @Param("to") Timestamp to);
+
   @Query(value = "select min(calculated_balances.sum_of_no) as minVal, max(calculated_balances.sum_of_no) as maxVal " +
       "from (select list_balance.id, sum(list_balance.balance) OVER (order by list_balance.id) as sum_of_no " +
       "      from (select ROW_NUMBER() over (order by tx.block_id asc, tx.block_index asc) AS id, atb.balance " +
@@ -89,6 +96,14 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " AND addressTxBalance.time <= :time")
   Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
                                                        @Param("time") Timestamp time);
+
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
+      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                       @Param("from") Timestamp from,
+                                                       @Param("to") Timestamp to);
 
   @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.address = :address")
