@@ -1,15 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolOwnerProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
-import org.cardanofoundation.explorer.api.repository.PoolOwnerRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +8,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolOwnerProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
+import org.cardanofoundation.explorer.api.repository.PoolOwnerRepository;
+import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
+import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
+import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,7 +37,7 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
     Page<TxBlockEpochProjection> trxBlockEpochPage = poolUpdateRepository.getDataForPoolRegistration(
         pageable);
     List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new)
-        .collect(Collectors.toList());
+        .toList();
     setValueForPoolRegistration(poolTxRes);
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
@@ -52,7 +50,7 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
     Page<TxBlockEpochProjection> trxBlockEpochPage = poolRetireRepository.getDataForPoolDeRegistration(
         pageable);
     List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new)
-        .collect(Collectors.toList());
+        .toList();
     setValueForPoolRegistration(poolTxRes);
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
@@ -71,28 +69,11 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
         .collect(Collectors.groupingBy(PoolOwnerProjection::getPoolId));
     Map<Long, List<String>> stakeKeyStrMap = new HashMap<>();
     poolOwnerProjectionMap.forEach((k, v) -> stakeKeyStrMap.put(k,
-        v.stream().map(PoolOwnerProjection::getAddress).collect(Collectors.toList())));
+        v.stream().map(PoolOwnerProjection::getAddress).toList()));
     poolTxRes.forEach(pool -> {
-      pool.setPoolName(getNameValueFromJson(pool.getPoolName()));
       List<String> stakeKeys = stakeKeyStrMap.get(pool.getPoolId());
       Collections.sort(stakeKeys);
       pool.setStakeKey(stakeKeys);
     });
-  }
-
-
-  /**
-   * Get name value from json string pools
-   *
-   * @return String
-   */
-  private String getNameValueFromJson(String jsonName) {
-    try {
-      JsonObject jsonObject = new Gson().fromJson(jsonName, JsonObject.class);
-      return jsonObject.get("name").getAsString();
-    } catch (Exception ex) {
-      log.error("Error: when convert json string to json object");
-    }
-    return null;
   }
 }

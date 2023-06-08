@@ -149,7 +149,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         .fee(delegation.getFee())
         .outSum(delegation.getOutSum())
         .poolId(delegation.getPoolId())
-        .poolName(getNameValueFromJson(delegation.getPoolData()))
+        .poolName(delegation.getPoolData())
         .time(delegation.getTime().toLocalDateTime())
         .txHash(delegation.getTxHash())
         .blockNo(delegation.getBlockNo())
@@ -389,13 +389,4 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     }
     return StakeTxType.UNKNOWN;
   }
-
-  private String getNameValueFromJson(String json) {
-    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(json))) {
-      return null;
-    }
-    JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
-    return jsonObject.get("name").getAsString();
-  }
-
 }

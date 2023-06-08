@@ -42,7 +42,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "FROM PoolHash ph "
           + "JOIN Delegation dg ON dg.poolHash.id = ph.id "
           + "JOIN StakeAddress sa ON sa.id = dg.address.id "
-          + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr.id) FROM StakeRegistration sr WHERE sa.id = sr.addr.id) "
+          + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr2.id) FROM StakeRegistration sr2 WHERE sa.id = sr2.addr.id) "
+          + "LEFT JOIN StakeDeregistration sd ON sa.id = sd.addr.id AND sd.id IS NULL "
           + "JOIN Tx tx ON tx.id = sr.tx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
           + "WHERE ph.id = :poolId "
@@ -60,22 +61,19 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
    * @return list of pool delegation summary information
    */
   @Query(value =
-      "SELECT ph.view AS poolView, pod.json AS json, pu.pledge AS pledge, pu.fixedCost AS fee,"
-          + " ph.poolSize AS poolSize, ep.optimalPoolCount AS optimalPoolCount, "
-          + "ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, "
-          + "ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
+      "SELECT ph.id AS poolId, ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee,"
+          + "ep.optimalPoolCount AS optimalPoolCount, "
+          + "pu.margin AS margin, ad.reserves AS reserves "
           + "FROM PoolHash ph "
-          + "JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
-          + "JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
-          + "JOIN EpochParam ep ON ep.epochNo = ph.epochNo "
-          + "JOIN AdaPots ad ON ad.epochNo = ph.epochNo "
-          + "JOIN Epoch e ON e.no = ph.epochNo "
+          + "LEFT JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
+          + "LEFT JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
+          + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
+          + "LEFT JOIN AdaPots ad ON ad.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "WHERE pu.id = "
           + "(SELECT MAX(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) AND "
-          + "pod.pmrId = (SELECT MAX(pod.pmrId) FROM PoolOfflineData pod WHERE pod.pool.id = ph.id) AND "
-          + "ph.poolSize IS NOT NULL "
-          + "ORDER BY poolSize DESC ")
-  List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(Pageable pageable);
+          + "pod.pmrId = (SELECT MAX(pod2.pmrId) FROM PoolOfflineData pod2 WHERE pod2.pool.id = ph.id) AND "
+          + "ph.id IN :poolIds")
+  List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(@Param("poolIds") Set<Long> poolIds);
 
   @Query("SELECT delegation.tx.id"
       + " FROM Delegation delegation"
@@ -114,7 +112,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
                                                           Pageable pageable);
   @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, poolHash.view as poolId,"
-      + " poolOfflineData.json as poolData, poolOfflineData.tickerName as tickerName,"
+      + " poolOfflineData.poolName as poolData, poolOfflineData.tickerName as tickerName,"
       + " tx.fee as fee, tx.outSum as outSum"
       + " FROM Delegation delegation"
       + " INNER JOIN Tx tx ON delegation.tx = tx"
@@ -126,7 +124,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   Optional<StakeDelegationProjection> findDelegationByAddressAndTx(
       @Param("stakeKey") StakeAddress stakeKey, @Param("txHash") String txHash);
 
-  @Query("SELECT poolHash.view as poolId, poolOfflineData.json as poolData,"
+  @Query("SELECT poolHash.view as poolId, poolOfflineData.poolName as poolData,"
       + " poolOfflineData.tickerName as tickerName"
       + " FROM Delegation delegation"
       + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
@@ -137,7 +135,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = :address)")
   Optional<StakeDelegationProjection> findPoolDataByAddress(@Param("address") StakeAddress address);
 
-  @Query("SELECT poolHash.view as poolId, poolOfflineData.json as poolData,"
+  @Query("SELECT poolHash.view as poolId, poolOfflineData.poolName as poolData,"
       + " poolOfflineData.tickerName as tickerName, stake.view as stakeAddress"
       + " FROM Delegation delegation"
       + " INNER JOIN StakeAddress stake ON stake.id = delegation.address.id"

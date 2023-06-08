@@ -1,22 +1,50 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.*;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolInfoResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RegistrationResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochRewardProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
+import org.cardanofoundation.explorer.api.repository.EpochRepository;
+import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
+import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
+import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
+import org.cardanofoundation.explorer.api.repository.RewardRepository;
+import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +61,16 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
 
   private final PoolRetireRepository poolRetireRepository;
 
-  private final EpochStakeRepository epochStakeRepository;
-
   private final EpochRepository epochRepository;
+
+  private final FetchRewardDataService fetchRewardDataService;
+
+  private final PoolInfoRepository poolInfoRepository;
+
+  private final RedisTemplate<String, Object> redisTemplate;
+
+  @Value("${application.network}")
+  private String network;
 
   @Override
   public BaseFilterResponse<String> getPoolViewByStakeKey(String stakeKey, Pageable pageable) {
@@ -49,8 +84,8 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
 
   @Override
   public BaseFilterResponse<PoolUpdateResponse> registration(String poolView, String txHash,
-                                                             Date fromDate, Date toDate,
-                                                             Pageable pageable) {
+      Date fromDate, Date toDate,
+      Pageable pageable) {
     return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable, 0);
   }
 
@@ -98,6 +133,13 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   @Override
   public BaseFilterResponse<RewardResponse> listReward(String poolView, Pageable pageable) {
     BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
+    if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
+      List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
+      if (Boolean.FALSE.equals(fetchRewardDataService.checkRewardForPool(rewardAccounts))
+          && Boolean.FALSE.equals(fetchRewardDataService.fetchRewardForPool(rewardAccounts))) {
+        return res;
+      }
+    }
     List<RewardResponse> rewardRes = new ArrayList<>();
     Page<LifeCycleRewardProjection> projections = rewardRepository.getRewardInfoByPool(poolView,
         pageable);
@@ -120,8 +162,30 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setPoolId(projection.getPoolId());
       res.setPoolName(projection.getPoolName());
       res.setPoolView(projection.getPoolView());
-      res.setRewardAccount(projection.getRewardAccount());
-      res.setPoolSize(epochStakeRepository.activeStakeByPool(projection.getId()));
+      res.setRewardAccounts(poolUpdateRepository.findRewardAccountByPoolId(projection.getId()));
+      Integer epochNo = epochRepository.findCurrentEpochNo().orElse(null);
+      if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
+        Set<String> poolIdList = new HashSet<>();
+        poolIdList.add(poolView);
+        Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolIdList);
+        if (Boolean.FALSE.equals(isInfo)) {
+          Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
+          if (Boolean.TRUE.equals(isFetch)) {
+            res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
+          }
+        } else {
+          res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
+        }
+        Boolean isReward = fetchRewardDataService.checkRewardForPool(res.getRewardAccounts());
+        if (Boolean.FALSE.equals(isReward)) {
+          Boolean isFetch = fetchRewardDataService.fetchRewardForPool(res.getRewardAccounts());
+          if (Boolean.FALSE.equals(isFetch)) {
+            res.setRewardAvailable(BigInteger.ZERO);
+          }
+        }
+      } else {
+        res.setPoolSize(getStakeFromCache(poolView, epochNo));
+      }
       res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
       res.setRewardAvailable(rewardRepository.getTotalRewardByPool(poolView));
     }
@@ -209,7 +273,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
           .collect(Collectors.groupingBy(StakeKeyProjection::getPoolUpdateId));
       Map<Long, List<String>> stakeKeyStrMap = new HashMap<>();
       stakeKeyProjectionMap.forEach((k, v) -> stakeKeyStrMap.put(k,
-          v.stream().map(StakeKeyProjection::getView).collect(Collectors.toList())));
+          v.stream().map(StakeKeyProjection::getView).toList()));
       res.setTotalItems(projection.getTotalElements());
       tabularRegisList.forEach(tabularRegis -> tabularRegis.setStakeKeys(
           stakeKeyStrMap.get(tabularRegis.getPoolUpdateId())));
@@ -278,5 +342,28 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     res.setData(poolUpdateResList);
     return res;
+  }
+
+  private BigInteger getStakeFromCache(String poolView,
+      Integer epochNo) {
+    BigInteger stakeFromCache = BigInteger.ZERO;
+    if (Objects.isNull(poolView)) {
+      return stakeFromCache;
+    }
+    List<Object> poolIds = List.of(poolView);
+    String key = CommonConstant.ACTIVATE_STAKE + network + "_" + epochNo;
+    List<Object> objStakeList = null;
+    try {
+      objStakeList = redisTemplate.opsForHash().multiGet(key, poolIds);
+    } catch (Exception e) {
+      log.info("Error when get stake from cache with Key=" + key);
+      return stakeFromCache;
+    }
+    if (!objStakeList.isEmpty()) {
+      Object objStake = objStakeList.get(0);
+      stakeFromCache = (BigInteger) objStake;
+
+    }
+    return stakeFromCache;
   }
 }
