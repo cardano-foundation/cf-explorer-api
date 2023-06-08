@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.text.SimpleDateFormat;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -21,7 +22,6 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWi
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
 import java.math.BigInteger;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -154,15 +154,20 @@ class StakeKeyLifeCycleControllerTest {
   @Test
   void shouldGetRewards() throws Exception {
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    Date fromDate = sdf.parse("2023/01/01 00:00:00");
+    Date toDate = sdf.parse("2023/01/01 00:00:00");
     List<StakeRewardResponse> list = new ArrayList<>();
     list.add(new StakeRewardResponse(333,
-        Date.from(Instant.now()), BigInteger.valueOf(382916)));
-    given(stakeKeyLifeCycleService.getStakeRewards(stakeKey,
+        toDate, BigInteger.valueOf(382916)));
+    given(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate,
         PageRequest.of(0, 1, Sort.by("id").descending())))
         .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));
     mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}/rewards", stakeKey)
             .param("page", "0")
             .param("size", "1")
+            .param("fromDate", "2023/01/01 00:00:00")
+            .param("toDate", "2023/01/01 00:00:00")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().string(
