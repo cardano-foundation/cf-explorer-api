@@ -90,6 +90,15 @@ application:
   api.coin.gecko.market:
     interval-time: 120
     base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
+  api:
+    check-reward:
+      base-url: ${API_CHECK_REWARD_URL:http://10.4.10.231:8888/api/v1/rewards/fetch}
+    check-pool-history:
+      base-url: ${API_CHECK_POOL_HISTORY_URL:http://10.4.10.231:8888/api/v1/pool-history/fetch}
+    check-pool-info:
+      base-url: ${API_CHECK_POOL_INFO_URL:http://10.4.10.231:8888/api/v1/pool-info/fetch}
+    check-epoch-stake:
+      base-url: ${API_CHECK_EPOCH_STAKE_URL:http://10.4.10.231:8888/api/v1/epoch-stake/fetch}
 
 springdoc:
   api-docs.path: /apidocs

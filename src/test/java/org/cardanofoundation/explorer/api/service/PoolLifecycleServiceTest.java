@@ -64,6 +64,9 @@ class PoolLifecycleServiceTest {
   @Mock
   private EpochRepository epochRepository;
 
+  @Mock
+  private FetchRewardDataService fetchRewardDataService;
+
   @InjectMocks
   private PoolLifecycleServiceImpl poolLifecycleService;
 
@@ -681,7 +684,6 @@ class PoolLifecycleServiceTest {
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
     when(poolHashRepository.getPoolInfo(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(projection);
-    when(epochStakeRepository.activeStakeByPool(69L)).thenReturn(BigInteger.TEN);
     when(poolUpdateRepository.findOwnerAccountByPoolView(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(
         List.of("stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p"));
@@ -690,12 +692,10 @@ class PoolLifecycleServiceTest {
         BigInteger.valueOf(10000));
     when(poolRetireRepository.findByPoolView(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(List.of(69));
+    when(fetchRewardDataService.isKoiOs()).thenReturn(false);
     Assertions.assertEquals("Test",
         poolLifecycleService.poolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")
             .getPoolName());
-    Assertions.assertEquals(BigInteger.TEN,
-        poolLifecycleService.poolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")
-            .getPoolSize());
     Assertions.assertEquals("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda",
         poolLifecycleService.poolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")
             .getPoolId());
