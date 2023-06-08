@@ -50,4 +50,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Test
-        run: newman run src/test/Postman/Cardano-Explorer-API.postman_collection.json -e src/test/Postman/DevInt.postman_environment.json
+        run: newman run src/test/Postman/Cardano-Explorer-API.postman_collection.json -e src/test/Postman/DevInt.postman_environment.json -r htmlextra
