@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolActiveStakeProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochStake;
@@ -23,7 +23,7 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
   @Query(value = "SELECT es.epochNo AS epochNo, sum(es.amount) AS totalStake FROM EpochStake es "
       + "WHERE es.epochNo IN :epochNo AND es.pool.id = :poolId "
       + "GROUP BY es.epochNo")
-  List<EpochStakeProjection> totalStakeByEpochNoAndPool(@Param("epochNo") Set<Integer> epochNo,
+  List<PoolActiveStakeProjection> totalStakeByEpochNoAndPool(@Param("epochNo") Set<Integer> epochNo,
       @Param("poolId") Long poolId);
 
   @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.epochNo = :epochNo")
@@ -45,8 +45,7 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
           + "WHERE es.addr.id IN :stakeAddressIds AND es.pool.id = :poolId "
           + "AND es.epochNo = :epochNo")
   List<StakeAddressProjection> totalStakeByAddressAndPool(
-      @Param("stakeAddressIds") Set<Long> stakeAddressIds,
-      @Param("poolId") Long poolId, @Param("epochNo") Integer epochNo);
+      @Param("stakeAddressIds") Set<Long> stakeAddressIds, @Param("epochNo") Integer epochNo);
 
   @Query(value =
       "SELECT es.epochNo as epochNo, pu.fixedCost as fee, sum(es.amount) as size "
@@ -76,5 +75,5 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
           + "WHERE es.pool.id = :poolId "
           + "GROUP BY es.epochNo "
           + "ORDER BY es.epochNo DESC ")
-  Page<EpochStakeProjection> getDataForEpochList(@Param("poolId") Long poolId, Pageable pageable);
+  Page<PoolActiveStakeProjection> getDataForEpochList(@Param("poolId") Long poolId, Pageable pageable);
 }

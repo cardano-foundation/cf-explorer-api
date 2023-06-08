@@ -6,8 +6,8 @@ import java.math.BigInteger;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiOsProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolActiveStakeProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 
 @Getter
 @Setter
@@ -26,12 +26,12 @@ public class PoolDetailEpochResponse implements Serializable {
   @JsonSerialize(using = PercentSerializer.class)
   private Double ros;
 
-  public PoolDetailEpochResponse(EpochStakeProjection projection) {
+  public PoolDetailEpochResponse(PoolActiveStakeProjection projection) {
     this.epoch = projection.getEpochNo();
     this.stakeAmount = projection.getTotalStake();
   }
 
-  public PoolDetailEpochResponse(PoolHistoryKoiOsProjection projection) {
+  public PoolDetailEpochResponse(PoolHistoryKoiosProjection projection) {
     this.epoch = projection.getEpochNo();
     this.delegators = projection.getDelegateReward();
     this.fee = projection.getPoolFees();

@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.repository;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolActiveStakeProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Reward;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -31,7 +31,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   @Query(value = "SELECT rw.earnedEpoch AS epochNo, sum(rw.amount) AS totalStake FROM Reward rw "
       + "WHERE rw.pool.id = :poolId AND rw.earnedEpoch IN :epochNo "
       + "GROUP BY rw.earnedEpoch")
-  List<EpochStakeProjection> totalRewardStakeByEpochNoAndPool(@Param("epochNo") Set<Long> epochNo,
+  List<PoolActiveStakeProjection> totalRewardStakeByEpochNoAndPool(@Param("epochNo") Set<Long> epochNo,
       @Param("poolId") Long poolId);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse"
