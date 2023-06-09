@@ -173,15 +173,8 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
         Set<String> poolIdList = new HashSet<>();
         poolIdList.add(poolView);
-        Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolIdList);
-        if (Boolean.FALSE.equals(isInfo)) {
-          Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
-          if (Boolean.TRUE.equals(isFetch)) {
-            res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
-          }
-        } else {
-          res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
-        }
+        fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
+        res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
         Boolean isReward = fetchRewardDataService.checkRewardForPool(res.getRewardAccounts());
         if (Boolean.FALSE.equals(isReward)) {
           Boolean isFetch = fetchRewardDataService.fetchRewardForPool(res.getRewardAccounts());
