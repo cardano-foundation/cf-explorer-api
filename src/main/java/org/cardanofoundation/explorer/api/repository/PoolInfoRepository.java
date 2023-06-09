@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.repository;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiOsProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiosProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolInfo;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,14 +21,14 @@ public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {
       "SELECT pi.poolId AS view, CAST(pi.activeStake AS BigInteger) AS activeStake, pi.liveSaturation AS saturation "
           + "FROM PoolInfo pi "
           + "WHERE pi.poolId IN :poolIds AND pi.fetchedAtEpoch = :epochNo")
-  List<PoolInfoKoiOsProjection> getPoolInfoKoiOs(@Param("poolIds") Set<String> poolIds,
+  List<PoolInfoKoiosProjection> getPoolInfoKoiOs(@Param("poolIds") Set<String> poolIds,
       @Param("epochNo") Integer epochNo);
 
   @Query(value = "SELECT pi.poolId AS view, CAST(pi.activeStake AS BigInteger) AS activeStake "
       + "FROM PoolInfo pi "
       + "WHERE pi.fetchedAtEpoch = :epochNo AND pi.activeStake IS NOT NULL "
       + "ORDER BY CAST(pi.activeStake AS BigInteger) DESC")
-  List<PoolInfoKoiOsProjection> getTopPoolInfoKoiOs(@Param("epochNo") Integer epochNo,
+  List<PoolInfoKoiosProjection> getTopPoolInfoKoiOs(@Param("epochNo") Integer epochNo,
       Pageable pageable);
 
   @Query(value = "SELECT CAST(pi.activeStake AS BigInteger) FROM PoolInfo pi "

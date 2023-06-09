@@ -40,11 +40,10 @@ public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {
 
   @Query(value =
       "SELECT es.addr.id AS address, es.amount AS totalStake FROM EpochStake es "
-          + "WHERE es.addr.id IN :stakeAddressIds AND es.pool.id = :poolId "
+          + "WHERE es.addr.id IN :stakeAddressIds "
           + "AND es.epochNo = :epochNo")
   List<StakeAddressProjection> totalStakeByAddressAndPool(
-      @Param("stakeAddressIds") Set<Long> stakeAddressIds,
-      @Param("poolId") Long poolId, @Param("epochNo") Integer epochNo);
+      @Param("stakeAddressIds") Set<Long> stakeAddressIds, @Param("epochNo") Integer epochNo);
 
   @Query(value = "SELECT sum(es.amount) FROM EpochStake es WHERE es.pool.id = :poolId "
       + "AND es.epochNo = (SELECT max(e.no) FROM Epoch e)")

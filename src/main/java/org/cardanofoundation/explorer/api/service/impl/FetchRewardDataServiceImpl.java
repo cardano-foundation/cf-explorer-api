@@ -28,6 +28,11 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
   }
 
   @Override
+  public Boolean checkPoolInfoForPool(Set<String> poolIds) {
+    return true;
+  }
+
+  @Override
   public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
     return true;
   }
