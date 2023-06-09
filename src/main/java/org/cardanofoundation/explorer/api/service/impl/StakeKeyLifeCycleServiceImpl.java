@@ -1,9 +1,11 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.Date;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
@@ -17,6 +19,7 @@ import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationReposito
 import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -62,6 +65,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final WithdrawalRepository withdrawalRepository;
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final TxRepository txRepository;
+  private final FetchRewardDataService fetchRewardDataService;
 
   @Override
   public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
@@ -159,12 +163,27 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   }
 
   @Override
-  public BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey,
-      Pageable pageable) {
+  public BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey, Date fromDate,
+      Date toDate, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
+    Timestamp fromTime = Timestamp.valueOf(MIN_TIME);
+    Timestamp toTime = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+        .toInstant(ZoneOffset.UTC));
+    if (Objects.nonNull(fromDate)) {
+      fromTime = Timestamp.from(fromDate.toInstant());
+    }
+    if (Objects.nonNull(toDate)) {
+      toTime = Timestamp.from(toDate.toInstant());
+    }
     var response
-        = rewardRepository.findRewardByStake(stakeAddress, pageable);
+        = rewardRepository.findRewardByStake(stakeAddress, fromTime, toTime, pageable);
     return new BaseFilterResponse<>(response);
   }
 
@@ -203,6 +222,12 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
     var withdrawal = withdrawalRepository.getWithdrawalByAddressAndTx(stakeAddress, hash)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
     var totalBalance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(stakeAddress,
@@ -268,6 +293,12 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
       Pageable pageable) {
     var stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
     var withdrawList = withdrawalRepository.findEpochWithdrawalByStake(stakeAddress);
     List<StakeRewardActivityResponse> response = withdrawList.stream().map(
         item -> StakeRewardActivityResponse.builder()
@@ -389,4 +420,5 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     }
     return StakeTxType.UNKNOWN;
   }
+
 }
