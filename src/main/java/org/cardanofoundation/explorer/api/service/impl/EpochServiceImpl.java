@@ -165,6 +165,8 @@ public class EpochServiceImpl implements EpochService {
               .no(epochSummaryProjection.getNo())
               .slot((int) slot)
               .totalSlot(epochSummaryProjection.getMaxSlot())
+              .startTime(epochSummaryProjection.getStartTime().toLocalDateTime())
+              .endTime(epochSummaryProjection.getEndTime().toLocalDateTime())
               .account(account)
               .build();
         })
