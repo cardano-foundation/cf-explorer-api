@@ -228,8 +228,7 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     when(projection.getPoolId()).thenReturn(
         "pool1tay8z4sq4a4gmyhnygyt0t5j84z8epwjra06wq28jnnmschkkuu");
-    when(projection.getPoolData()).thenReturn(
-        "{\"name\":\"The HIGH Pool\",\"description\":\"Reliable Efficient Fast - Operated in Germany with german precision\",\"ticker\":\"HIGH\",\"homepage\":\"https://notyetdefined.com\"}");
+    when(projection.getPoolData()).thenReturn("The HIGH Pool");
     when(projection.getEpochNo()).thenReturn(369);
     when(projection.getBlockNo()).thenReturn(7895711L);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
