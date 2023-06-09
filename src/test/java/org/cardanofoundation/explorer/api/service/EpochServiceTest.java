@@ -64,6 +64,7 @@ class EpochServiceTest {
             .no(30)
             .maxSlot(432000)
             .statTime(Timestamp.valueOf(localDate))
+            .endTime(Timestamp.valueOf(localDate.plusDays(5)))
             .build()));
 
     when(epochRepository.getTotalAccountsAtEpoch(
