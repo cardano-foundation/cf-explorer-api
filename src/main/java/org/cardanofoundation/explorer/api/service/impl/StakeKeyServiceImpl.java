@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -17,6 +18,7 @@ import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
@@ -37,9 +39,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,7 +72,18 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final EpochStakeRepository epochStakeRepository;
   private final TopDelegatorCacheService topDelegatorCacheService;
 
+  private final PoolHashRepository poolHashRepository;
+
+  private final RedisTemplate<String, Object> redisTemplate;
+
+  private final PoolInfoRepository poolInfoRepository;
+
+  private final FetchRewardDataService fetchRewardDataService;
+
   private static final int STAKE_ANALYTIC_NUMBER = 5;
+
+  @Value("${application.network}")
+  private String network;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -117,7 +132,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     if (poolData != null) {
       DelegationPoolResponse poolResponse = DelegationPoolResponse.builder()
           .poolId(poolData.getPoolId())
-          .poolName(getNameValueFromJson(poolData.getPoolData()))
+          .poolName(poolData.getPoolData())
           .tickerName(poolData.getTickerName())
           .build();
       stakeAddressResponse.setPool(poolResponse);
@@ -217,7 +232,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     for (var stake : stakeList) {
       StakeDelegationProjection delegation = mapPoolByStakeAddress.get(stake.getStakeAddress());
       StakeFilterResponse stakeResponse = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
-      stakeResponse.setPoolName(getNameValueFromJson(delegation.getPoolData()));
+      stakeResponse.setPoolName(delegation.getPoolData());
       content.add(stakeResponse);
     }
 
@@ -236,12 +251,34 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public StakeAnalyticResponse getStakeAnalytics() {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
-    response.setLiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch).orElse(BigInteger.ZERO));
-    if(1 > currentEpoch) {
-      response.setActiveStake(BigInteger.ZERO);
+    Boolean isKoiOs = fetchRewardDataService.isKoiOs();
+    BigInteger activeStake = null;
+    BigInteger liveStake = null;
+    if (Boolean.TRUE.equals(isKoiOs)) {
+      Set<String> poolViews = poolHashRepository.findAllSetPoolView();
+      Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolViews);
+      if (Boolean.FALSE.equals(isInfo)) {
+        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolViews);
+        if (Boolean.TRUE.equals(isFetch)) {
+          activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
+          liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
+        }
+      } else {
+        activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
+        liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
+      }
     } else {
-      response.setActiveStake(epochStakeRepository.totalStakeAllPoolByEpochNo(currentEpoch - 1).orElse(BigInteger.ZERO));
+      Object activeStakeObj = redisTemplate.opsForValue()
+          .get(CommonConstant.REDIS_TOTAL_ACTIVATE_STAKE + network + "_" + currentEpoch);
+      activeStake = Objects.nonNull(activeStakeObj) ? new BigInteger(String.valueOf(activeStakeObj))
+          : BigInteger.ZERO;
+      Object liveStakeObj = redisTemplate.opsForValue()
+          .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
+      liveStake = Objects.nonNull(liveStakeObj) ? new BigInteger(String.valueOf(liveStakeObj))
+          : BigInteger.ZERO;
     }
+    response.setActiveStake(activeStake);
+    response.setLiveStake(liveStake);
     return response;
   }
 
@@ -329,14 +366,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       }
     }
     return Arrays.asList(minBalance, maxBalance);
-  }
-
-  private String getNameValueFromJson(String json) {
-    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(json))) {
-      return null;
-    }
-    JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
-    return jsonObject.get("name").getAsString();
   }
 
 }

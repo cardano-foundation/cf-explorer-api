@@ -1,34 +1,22 @@
 package org.cardanofoundation.explorer.api.projection;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface PoolDelegationSummaryProjection {
 
+  Long getPoolId();
+
   String getPoolView();
 
-  String getJson();
+  String getPoolName();
 
-  BigDecimal getPledge();
+  BigInteger getPledge();
 
-  BigDecimal getFee();
-
-  BigDecimal getPoolSize();
+  BigInteger getFee();
 
   Integer getOptimalPoolCount();
 
-  BigDecimal getUtxo();
-
   Double getMargin();
 
-  BigDecimal getFeePerEpoch();
-
-  Double getInfluence();
-
-  Double getExpansionRate();
-
-  Double getTreasuryRate();
-
-  Integer getBlkCount();
-
-  Integer getMaxBlockSize();
+  BigInteger getReserves();
 }

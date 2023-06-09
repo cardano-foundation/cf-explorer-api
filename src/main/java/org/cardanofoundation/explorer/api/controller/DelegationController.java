@@ -1,5 +1,9 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import java.math.BigInteger;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -9,10 +13,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderRe
 import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import org.cardanofoundation.explorer.api.service.DelegationService;
-import io.swagger.v3.oas.annotations.Operation;
-import java.math.BigInteger;
-import java.util.Set;
-import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -72,9 +72,8 @@ public class DelegationController {
   @GetMapping("/top")
   @LogMessage
   @Operation(summary = "Find Top(default is 3) Delegation Pool order by pool size")
-  public ResponseEntity<Set<PoolResponse>> findTopDelegationPool(Pageable pageable) {
+  public ResponseEntity<List<PoolResponse>> findTopDelegationPool(Pageable pageable) {
     return ResponseEntity.ok(delegationService.findTopDelegationPool(
         PageRequest.of(BigInteger.ZERO.intValue(), pageable.getPageSize())));
   }
-
 }
