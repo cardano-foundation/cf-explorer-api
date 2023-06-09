@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.repository;
 import java.util.List;
 import java.util.Set;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiOsProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHistory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +19,7 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
       "SELECT ph.poolId AS view, CAST(ph.delegRewards AS BigInteger) AS delegateReward, ph.epochRos AS ros "
           + "FROM PoolHistory ph "
           + "WHERE ph.poolId IN :poolIds AND ph.epochNo = :epochNo")
-  List<PoolHistoryKoiOsProjection> getPoolHistoryKoiOs(@Param("poolIds") Set<String> poolIds,
+  List<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolIds") Set<String> poolIds,
       @Param("epochNo") Integer epochNo);
 
   @Query(value =
@@ -28,7 +28,7 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
           + "FROM PoolHistory ph "
           + "WHERE ph.poolId = :poolId "
           + "ORDER BY ph.epochNo DESC")
-  Page<PoolHistoryKoiOsProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId, Pageable pageable);
+  Page<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId, Pageable pageable);
 
   @Query(value =
           "SELECT ph.epochNo AS epochNo, CAST(ph.delegRewards AS BigInteger) AS delegateReward, ph.epochRos AS ros, "
@@ -36,7 +36,7 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
                   + "FROM PoolHistory ph "
                   + "WHERE ph.poolId = :poolId "
                   + "ORDER BY ph.epochNo DESC")
-  List<PoolHistoryKoiOsProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId);
+  List<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId);
 
   @Query(value =
       "SELECT ph.epochNo AS chartKey, CAST(ph.activeStake AS BigInteger) AS chartValue "

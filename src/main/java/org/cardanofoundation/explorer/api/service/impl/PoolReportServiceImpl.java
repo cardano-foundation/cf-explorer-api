@@ -8,7 +8,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegist
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiOsProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
@@ -139,7 +139,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     if (isKoiOs) {
       Set<String> poolReportSet = Set.of(poolReport.getPoolView());
       boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolReportSet);
-      List<PoolHistoryKoiOsProjection> poolHistoryProjections = new ArrayList<>();
+      List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
       if (!isHistory) {
         boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(Set.of(poolReport.getPoolView()));
         if (isFetch) {

@@ -75,6 +75,14 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   }
 
   @Override
+  public Boolean checkPoolInfoForPool(Set<String> poolIds) {
+    Integer countCheckPoint = poolInfoCheckpointRepository.checkRewardByPoolViewAndEpoch(
+        poolIds);
+    Integer sizeCheck = poolIds.size();
+    return Objects.equals(countCheckPoint, sizeCheck);
+  }
+
+  @Override
   public Boolean fetchPoolInfoForPool(Set<String> poolIds) {
     int i = 0;
     boolean isFetch = false;

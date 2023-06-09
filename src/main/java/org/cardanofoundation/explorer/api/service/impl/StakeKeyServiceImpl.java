@@ -294,9 +294,18 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     BigInteger activeStake = null;
     BigInteger liveStake = null;
     if (Boolean.TRUE.equals(isKoiOs)) {
-      handleFetchPoolInfo(poolHashRepository.findAllSetPoolView());
-      activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
-      liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
+      Set<String> poolViews = poolHashRepository.findAllSetPoolView();
+      Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolViews);
+      if (Boolean.FALSE.equals(isInfo)) {
+        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolViews);
+        if (Boolean.TRUE.equals(isFetch)) {
+          activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
+          liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
+        }
+      } else {
+        activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
+        liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
+      }
     } else {
       Object activeStakeObj = redisTemplate.opsForValue()
           .get(CommonConstant.REDIS_TOTAL_ACTIVATE_STAKE + network + "_" + currentEpoch);
@@ -415,36 +424,5 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     }
     JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
     return jsonObject.get("name").getAsString();
-  }
-
-  private CompletableFuture<Boolean> fetchPoolInfoKoiOs(Set<String> poolIds) {
-    return CompletableFuture.supplyAsync(
-        () -> fetchRewardDataService.fetchPoolInfoForPool(poolIds));
-  }
-
-  private void handleFetchPoolInfo(Set<String> poolIds) {
-    List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>();
-    List<List<String>> subPoolIdList = Lists.partition(Lists.newArrayList(poolIds), 100);
-    subPoolIdList.forEach(
-        poolIdList -> completableFutures.add(fetchPoolInfoKoiOs(Sets.newHashSet(poolIdList))));
-    CompletableFuture<Void> combinedFuture
-        = CompletableFuture.allOf(
-        completableFutures.toArray(new CompletableFuture[0]));
-    CompletableFuture<List<Boolean>> allResultFuture = combinedFuture.thenApply(v ->
-        completableFutures.stream().map(CompletableFuture::join)
-            .toList()
-    );
-    CompletableFuture<Boolean> resultFetch = allResultFuture.thenApply(results ->
-        results.stream().allMatch(result -> result.equals(Boolean.TRUE))
-    ).exceptionally(ex -> {
-      log.error("Error: when fetch data from koios");
-      return false;
-    });
-    try {
-      resultFetch.get();
-    } catch (InterruptedException | ExecutionException e) {
-      log.error("Error: " + e);
-      Thread.currentThread().interrupt();
-    }
   }
 }
