@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.controller;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validate.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
@@ -58,7 +59,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get a stake detail by stake key")
   public ResponseEntity<StakeAddressResponse> getStakeDetailByAddress(
-      @PathVariable @Parameter(description = "Address") String address) {
+      @PathVariable @Parameter(description = "Address") @StakeKeyLengthValid String address) {
     return ResponseEntity.ok(stakeService.getStakeByAddress(address));
   }
 
@@ -66,7 +67,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get a stake detail by stake key")
   public ResponseEntity<StakeAddressResponse> getStakeDetail(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey) {
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey) {
     return ResponseEntity.ok(stakeService.getStake(stakeKey));
   }
 
@@ -74,7 +75,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get transactions of stake key")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey,
       @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pageable));
   }
@@ -83,7 +84,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get delegation history of stake key")
   public ResponseEntity<BaseFilterResponse<StakeDelegationProjection>> getDelegationHistories(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey,
       @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDelegationHistories(stakeKey, pageable));
   }
@@ -91,7 +92,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake history of stake key")
   public ResponseEntity<BaseFilterResponse<StakeHistoryProjection>> getStakeHistories(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey,
       @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getStakeHistories(stakeKey, pageable));
   }
@@ -100,7 +101,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get withdrawal transaction of stake key")
   public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey,
       @ParameterObject Pageable pageable) {
     return stakeService.getWithdrawalHistories(stakeKey, pageable);
   }
@@ -109,7 +110,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get reward transaction of stake key")
   public BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey,
       @ParameterObject Pageable pageable) {
     return stakeService.getInstantaneousRewards(stakeKey, pageable);
   }
@@ -125,7 +126,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get all address of stake")
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey,
       @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getAddresses(stakeKey,pageable));
   }
@@ -141,7 +142,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
   public ResponseEntity<List<StakeAnalyticBalanceResponse>> getStakeBalanceAnalytics(
-      @PathVariable String stakeKey,
+      @PathVariable @StakeKeyLengthValid String stakeKey,
       @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type
   ) throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
@@ -151,14 +152,15 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
   public ResponseEntity<List<StakeAnalyticRewardResponse>> getStakeRewardAnalytics(
-      @PathVariable String stakeKey) {
+      @PathVariable @StakeKeyLengthValid String stakeKey) {
     return ResponseEntity.ok(stakeService.getStakeRewardAnalytics(stakeKey));
   }
 
   @GetMapping("/min-max-balance/{stakeKey}")
   @LogMessage
   @Operation(summary = "Get the highest and lowest balance address")
-  public ResponseEntity<List<BigInteger>> getAddressMinMaxBalance(@PathVariable String stakeKey) {
+  public ResponseEntity<List<BigInteger>> getAddressMinMaxBalance(
+      @PathVariable @StakeKeyLengthValid String stakeKey) {
     return ResponseEntity.ok(stakeService.getAddressMinMaxBalance(stakeKey));
   }
 

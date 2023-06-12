@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -10,6 +11,7 @@ import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.validate.length.LengthValid;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import java.util.List;
@@ -45,7 +47,7 @@ public class TokenController {
   @GetMapping("/{tokenId}")
   @LogMessage
   @Operation(summary = "Detail token")
-  public ResponseEntity<TokenResponse> getTokenDetail(@PathVariable String tokenId) {
+  public ResponseEntity<TokenResponse> getTokenDetail(@PathVariable @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId) {
     return ResponseEntity.ok(tokenService.getTokenDetail(tokenId));
   }
 
@@ -53,7 +55,8 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token mint transaction")
   public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(
-      @PathVariable String tokenId, @ParameterObject @SortDefault(sort = {
+      @PathVariable @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
+      @ParameterObject @SortDefault(sort = {
       BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pageable));
   }
@@ -62,7 +65,8 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter holders by token")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
-      @PathVariable String tokenId, @ParameterObject Pageable pageable) {
+      @PathVariable @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
+      @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pageable));
   }
 
@@ -70,7 +74,8 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-      @PathVariable String tokenId, @ParameterObject Pageable pageable) {
+      @PathVariable @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
+      @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pageable));
   }
 
@@ -78,7 +83,7 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
-      @PathVariable String tokenId,
+      @PathVariable @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
       @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type
   ) throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));

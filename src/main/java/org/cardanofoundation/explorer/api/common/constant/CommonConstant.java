@@ -48,6 +48,18 @@ public class CommonConstant {
 
   public static final String REDIS_TOTAL_ACTIVATE_STAKE = "TOTAL_ACTIVATE_STAKE_";
 
+  public static final int TX_HASH_LENGTH = 64;
+
+  public static final int BLOCK_HASH_LENGTH = 64;
+
+  public static final int STAKE_KEY_LENGTH_MAINNET = 59;
+
+  public static final int STAKE_KEY_LENGTH_TESTNET = 64;
+
+  public static final int POOL_VIEW_LENGTH = 56;
+
+  public static final int TOKEN_FINGERPRINT_LENGTH = 44;
+
   public static int hashCode(Object... a) {
     if (a == null) {
       return -BigInteger.ONE.intValue();

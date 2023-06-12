@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.cardanofoundation.explorer.api.controller.validate.StakeKeyLengthValid;
 
 @Getter
 @Setter
@@ -15,6 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class StakeKeyReportRequest {
 
+  @StakeKeyLengthValid
   private String stakeKey;
   private String reportName;
   private Timestamp fromDate;

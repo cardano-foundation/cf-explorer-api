@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import java.util.List;
+
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -11,11 +13,9 @@ import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import io.swagger.v3.oas.annotations.Operation;
-import java.math.BigInteger;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.common.validate.length.LengthValid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -46,26 +46,26 @@ public class DelegationController {
 
   @GetMapping("/pool-detail-header/{poolView}")
   public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(
-      @PathVariable String poolView) {
+      @PathVariable @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {
     return ResponseEntity.ok(delegationService.getDataForPoolDetail(poolView));
   }
 
   @GetMapping("/pool-detail-analytics")
   public ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(
-      @RequestParam("poolView") String poolView) {
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {
     return ResponseEntity.ok(delegationService.getAnalyticsForPoolDetail(poolView));
   }
 
   @GetMapping("/pool-detail-epochs")
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
-      @RequestParam("poolView") String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(pageable, poolView));
   }
 
   @GetMapping("/pool-detail-delegators")
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
-      @RequestParam("poolView") String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(pageable, poolView));
   }

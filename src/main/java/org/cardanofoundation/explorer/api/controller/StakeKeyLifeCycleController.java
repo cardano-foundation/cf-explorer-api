@@ -1,13 +1,15 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import java.util.Date;
+
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.controller.test.HashValid;
+import org.cardanofoundation.explorer.api.controller.validate.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
-import org.cardanofoundation.explorer.common.validate.hash.HashValid;
+import org.cardanofoundation.explorer.common.validate.length.LengthValid;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
@@ -35,14 +37,14 @@ public class StakeKeyLifeCycleController {
   @GetMapping("/{stakeKey}")
   @LogMessage
   public ResponseEntity<StakeLifecycleResponse> getStakeLifeCycle(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey) {
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeLifeCycle(stakeKey));
   }
 
   @GetMapping("/{stakeKey}/registrations")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeRegistrations(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
@@ -53,7 +55,7 @@ public class StakeKeyLifeCycleController {
   @GetMapping("/{stakeKey}/de-registrations")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeDeRegistrations(
-      @PathVariable @Parameter(description = "Stake key") String stakeKey,
+      @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
@@ -64,7 +66,7 @@ public class StakeKeyLifeCycleController {
   @GetMapping("/{stakeKey}/delegations")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeDelegationFilterResponse>> getDelegations(
-      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @PathVariable @Parameter(description = "stake address view") @StakeKeyLengthValid String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           Delegation_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
@@ -75,15 +77,15 @@ public class StakeKeyLifeCycleController {
   @GetMapping("/{stakeKey}/delegations/{hash}")
   @LogMessage
   public ResponseEntity<StakeDelegationDetailResponse> getDelegationDetail(
-      @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @PathVariable @Parameter(description = "tx hash") @HashValid String hash) {
+      @PathVariable @Parameter(description = "stake address view") @StakeKeyLengthValid String stakeKey,
+      @PathVariable @Parameter(description = "tx hash") @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDelegationDetail(stakeKey, hash));
   }
 
   @GetMapping("/{stakeKey}/rewards")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRewardResponse>> getRewards(
-      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @PathVariable @Parameter(description = "stake address view") @StakeKeyLengthValid String stakeKey,
       @RequestParam(value = "fromDate", required = false) Date fromDate,
       @RequestParam(value = "toDate", required = false) Date toDate,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
@@ -94,9 +96,8 @@ public class StakeKeyLifeCycleController {
   @GetMapping("/{stakeKey}/withdrawals")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeWithdrawalFilterResponse>> getWithdrawals(
-      @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @ParameterObject @Parameter(description = "filter condition")
-      StakeLifeCycleFilterRequest condition,
+      @PathVariable @Parameter(description = "stake address view") @StakeKeyLengthValid String stakeKey,
+      @ParameterObject @Parameter(description = "filter condition") StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(
@@ -106,15 +107,15 @@ public class StakeKeyLifeCycleController {
   @GetMapping("/{stakeKey}/withdrawals/{hash}")
   @LogMessage
   public ResponseEntity<StakeWithdrawalDetailResponse> getDetailWithdrawal(
-      @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @PathVariable @Parameter(description = "tx hash") String hash) {
+      @PathVariable @Parameter(description = "stake address view") @StakeKeyLengthValid String stakeKey,
+      @PathVariable @Parameter(description = "tx hash") @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWithdrawalDetail(stakeKey, hash));
   }
 
   @GetMapping("/{stakeKey}/wallet-activity")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>> getWalletActivities(
-      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @PathVariable @Parameter(description = "stake address view") @StakeKeyLengthValid String stakeKey,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           AddressTxBalance_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pageable));
@@ -123,7 +124,7 @@ public class StakeKeyLifeCycleController {
   @GetMapping("/{stakeKey}/reward-activity")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRewardActivityResponse>> getRewardActivities(
-      @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @PathVariable @Parameter(description = "stake address view") @StakeKeyLengthValid String stakeKey,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pageable));

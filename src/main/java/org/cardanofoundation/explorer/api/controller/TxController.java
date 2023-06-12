@@ -4,6 +4,8 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.common.validate.length.LengthValid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -45,7 +47,7 @@ public class TxController {
   @LogMessage
   @Operation(summary = "Get transaction detail by hash")
   public ResponseEntity<TxResponse> getTransactionDetail(@PathVariable
-                                                         @Parameter(description = "Hash value of transaction") String hash) {
+      @Parameter(description = "Hash value of transaction") @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash) {
     return ResponseEntity.ok(txService.getTxDetailByHash(hash));
   }
 

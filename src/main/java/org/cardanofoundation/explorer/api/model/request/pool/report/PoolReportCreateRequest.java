@@ -2,6 +2,8 @@ package org.cardanofoundation.explorer.api.model.request.pool.report;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.common.validate.length.LengthValid;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
 import lombok.Builder;
@@ -15,6 +17,7 @@ public class PoolReportCreateRequest {
 
   private String reportName;
 
+  @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
   private String poolId;
 
   private Boolean isPoolSize;

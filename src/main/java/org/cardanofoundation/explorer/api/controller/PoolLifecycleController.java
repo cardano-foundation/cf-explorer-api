@@ -2,6 +2,8 @@ package org.cardanofoundation.explorer.api.controller;
 
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.controller.validate.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolInfoResponse;
@@ -12,6 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardRe
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
+import org.cardanofoundation.explorer.common.validate.length.LengthValid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
@@ -33,7 +36,8 @@ public class PoolLifecycleController {
   @GetMapping(value = "/registration")
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> registration(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
-      @Param("poolView") String poolView, @Param("txHash") String txHash,
+      @Param("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
+      @Param("txHash") @LengthValid(CommonConstant.TX_HASH_LENGTH) String txHash,
       @Param("fromDate") Date fromDate,
       @Param("toDate") Date toDate) {
     return ResponseEntity.ok(
@@ -41,7 +45,8 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/registration-detail")
-  public ResponseEntity<RegistrationResponse> registrationDetail(@Param("poolView") String poolView,
+  public ResponseEntity<RegistrationResponse> registrationDetail(
+      @Param("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
       @RequestParam("id") Long id) {
     return ResponseEntity.ok(poolLifecycleService.registrationDetail(poolView, id));
   }
@@ -49,7 +54,8 @@ public class PoolLifecycleController {
   @GetMapping(value = "/pool-update")
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> poolUpdate(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
-      @Param("poolView") String poolView, @Param("txHash") String txHash,
+      @Param("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
+      @Param("txHash") @LengthValid(CommonConstant.TX_HASH_LENGTH) String txHash,
       @Param("fromDate") Date fromDate,
       @Param("toDate") Date toDate) {
     return ResponseEntity.ok(
@@ -63,7 +69,7 @@ public class PoolLifecycleController {
 
   @GetMapping(value = "/reward")
   public ResponseEntity<BaseFilterResponse<RewardResponse>> reward(
-      @RequestParam("poolView") String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(poolLifecycleService.listReward(poolView, pageable));
   }
@@ -71,7 +77,8 @@ public class PoolLifecycleController {
   @GetMapping(value = "/de-registration")
   public ResponseEntity<BaseFilterResponse<DeRegistrationResponse>> deRegistration(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
-      @Param("poolView") String poolView, @Param("txHash") String txHash,
+      @Param("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
+      @Param("txHash") @LengthValid(CommonConstant.TX_HASH_LENGTH) String txHash,
       @Param("fromDate") Date fromDate,
       @Param("toDate") Date toDate) {
     return ResponseEntity.ok(
@@ -80,19 +87,21 @@ public class PoolLifecycleController {
 
   @GetMapping(value = "/owner")
   public ResponseEntity<BaseFilterResponse<String>> poolOwner(
-      @RequestParam("stakeKey") String stakeKey,
+      @RequestParam("stakeKey") @StakeKeyLengthValid String stakeKey,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+
     return ResponseEntity.ok(poolLifecycleService.getPoolViewByStakeKey(stakeKey, pageable));
   }
 
   @GetMapping(value = "/pool-info")
-  public ResponseEntity<PoolInfoResponse> poolInfo(@RequestParam("poolView") String poolView) {
+  public ResponseEntity<PoolInfoResponse> poolInfo(
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {
     return ResponseEntity.ok(poolLifecycleService.poolInfo(poolView));
   }
 
   @GetMapping(value = "/registration-list")
   public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> registrationList(
-      @RequestParam("poolView") String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(
         poolLifecycleService.registrationList(poolView, pageable));
@@ -100,14 +109,15 @@ public class PoolLifecycleController {
 
   @GetMapping(value = "/pool-update-list")
   public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> poolUpdate(
-      @RequestParam("poolView") String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(
         poolLifecycleService.poolUpdateList(poolView, pageable));
   }
 
   @GetMapping(value = "/status")
-  public ResponseEntity<SPOStatusResponse> poolStatus(@RequestParam("poolView") String poolView) {
+  public ResponseEntity<SPOStatusResponse> poolStatus(
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {
     return ResponseEntity.ok(poolLifecycleService.poolLifecycleStatus(poolView));
   }
 }
