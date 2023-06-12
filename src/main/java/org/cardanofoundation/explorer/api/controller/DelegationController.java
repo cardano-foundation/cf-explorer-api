@@ -74,7 +74,6 @@ public class DelegationController {
   @LogMessage
   @Operation(summary = "Find Top(default is 3) Delegation Pool order by pool size")
   public ResponseEntity<List<PoolResponse>> findTopDelegationPool(Pageable pageable) {
-    return ResponseEntity.ok(delegationService.findTopDelegationPool(
-        PageRequest.of(BigInteger.ZERO.intValue(), pageable.getPageSize())));
+    return ResponseEntity.ok(delegationService.findTopDelegationPool(pageable));
   }
 }
