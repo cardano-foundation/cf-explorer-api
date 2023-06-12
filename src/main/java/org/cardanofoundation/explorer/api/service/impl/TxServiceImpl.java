@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.api.model.response.tx.*;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -74,29 +74,6 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.FailedTxOutRepository;
-import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRelayRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.repository.UnconsumeTxInRepository;
-import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -150,6 +127,8 @@ public class TxServiceImpl implements TxService {
   private final ParamProposalRepository paramProposalRepository;
   private final EpochParamRepository epochParamRepository;
   private final TxChartRepository txChartRepository;
+  private final TreasuryRepository treasuryRepository;
+  private final ReserveRepository reserveRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final ProtocolMapper protocolMapper;
 
@@ -534,6 +513,7 @@ public class TxServiceImpl implements TxService {
     getStakeCertificates(tx, txResponse);
     getPoolCertificates(tx, txResponse);
     getProtocols(tx, txResponse);
+    getInstantaneousRewards(tx, txResponse);
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -555,6 +535,20 @@ public class TxServiceImpl implements TxService {
     }
 
     return txResponse;
+  }
+
+  /**
+   * Get transaction reserve and treasury
+   *
+   * @param tx         transaction
+   * @param txResponse response data of transaction
+   */
+  private void getInstantaneousRewards(Tx tx, TxResponse txResponse) {
+    var instantaneousRewards = reserveRepository.findByTx(tx);
+    instantaneousRewards.addAll(treasuryRepository.findByTx(tx));
+    if(!CollectionUtils.isEmpty(instantaneousRewards)) {
+      txResponse.setInstantaneousRewards(instantaneousRewards);
+    }
   }
 
   /**

@@ -1,8 +1,11 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
+import org.cardanofoundation.explorer.api.projection.TxInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Reserve;
 import java.util.List;
+
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +22,12 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
       + " WHERE stake.view = :stakeKey"
       + " ORDER BY block.blockNo DESC, tx.blockIndex DESC")
   List<StakeInstantaneousRewardsProjection> getReserveByAddress(@Param("stakeKey") String stakeKey);
+
+
+  @Query("SELECT stake.view as stakeAddress, reserve.amount as amount"
+          + " FROM Reserve reserve"
+          + " INNER JOIN StakeAddress stake ON reserve.addr = stake"
+          + " WHERE reserve.tx = :tx"
+          + " ORDER BY reserve.amount DESC")
+  List<TxInstantaneousRewardsProjection> findByTx(@Param("tx") Tx tx);
 }
