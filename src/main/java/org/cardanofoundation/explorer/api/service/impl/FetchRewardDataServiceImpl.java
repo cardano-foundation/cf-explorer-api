@@ -1,13 +1,12 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-
-import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 
 @Profile("!koios")
 @Service
@@ -30,12 +29,17 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
   }
 
   @Override
-  public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
+  public Boolean checkPoolInfoForPool(Set<String> poolIds) {
     return true;
   }
 
   @Override
-  public Boolean checkPoolInfoForPool(Set<String> poolIds) {
+  public Set<String> checkAllPoolInfoForPool() {
+    return new HashSet<>();
+  }
+
+  @Override
+  public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
     return true;
   }
 

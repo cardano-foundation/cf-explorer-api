@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.pool;
 
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiOsProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.api.serialize.PercentSerializer;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochStakeProjection;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -31,7 +31,7 @@ public class PoolDetailEpochResponse implements Serializable {
     this.stakeAmount = projection.getTotalStake();
   }
 
-  public PoolDetailEpochResponse(PoolHistoryKoiOsProjection projection) {
+  public PoolDetailEpochResponse(PoolHistoryKoiosProjection projection) {
     this.epoch = projection.getEpochNo();
     this.delegators = projection.getDelegateReward();
     this.fee = projection.getPoolFees();

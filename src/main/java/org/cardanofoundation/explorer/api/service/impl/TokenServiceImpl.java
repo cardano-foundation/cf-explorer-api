@@ -1,7 +1,8 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
+import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
@@ -22,6 +23,7 @@ import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.repository.aggregation.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
@@ -70,6 +72,7 @@ public class TokenServiceImpl implements TokenService {
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
+  private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
 
   @Qualifier("taskExecutor")
   private final TaskExecutor taskExecutor;
@@ -77,9 +80,11 @@ public class TokenServiceImpl implements TokenService {
   static final Integer TOKEN_VOLUME_ANALYTIC_NUMBER = 5;
 
 
+  @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 200)
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable) throws ExecutionException, InterruptedException {
+  public BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable)
+      throws ExecutionException, InterruptedException {
     Page<MultiAsset> multiAssets = multiAssetRepository.findAll(pageable);
     Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(), ma -> ma.getPolicy() + ma.getName());
 
@@ -87,30 +92,33 @@ public class TokenServiceImpl implements TokenService {
     Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList, AssetMetadata::getSubject);
 
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
-
     Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
     Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
     List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(multiAssets.getContent(), txId);
 
+    List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(), MultiAsset::getId);
     var numberOfHoldersWithStakeKeyAsync = CompletableFuture.supplyAsync(
-            () -> addressTokenBalanceRepository.countByMultiAssetIn(multiAssets.getContent()), taskExecutor);
+            () -> addressTokenBalanceRepository.countByMultiAssetIn(multiAssetIds), taskExecutor);
 
     var numberOfHoldersWithAddressNotHaveStakeKeyAsync = CompletableFuture.supplyAsync(
-            () -> addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(multiAssets.getContent()),
-            taskExecutor);
+        () -> addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(multiAssetIds),
+        taskExecutor);
 
     CompletableFuture.allOf(numberOfHoldersWithStakeKeyAsync, numberOfHoldersWithAddressNotHaveStakeKeyAsync).join();
-    Map<Long, Long> numberHoldersStakeKeyMap = numberOfHoldersWithStakeKeyAsync.get()
-            .stream()
-            .collect(Collectors.toMap(TokenNumberHoldersProjection::getIdent, TokenNumberHoldersProjection::getNumberOfHolders));
+    Map<Long, Long> numberHoldersStakeKeyMap = StreamUtil.toMap(
+        numberOfHoldersWithStakeKeyAsync.get(),
+        TokenNumberHoldersProjection::getIdent,
+        TokenNumberHoldersProjection::getNumberOfHolders
+    );
 
-    Map<Long, Long> numberHoldersAddressNotHaveStakeKeyMap = numberOfHoldersWithAddressNotHaveStakeKeyAsync.get()
-            .stream()
-            .collect(Collectors.toMap(TokenNumberHoldersProjection::getIdent, TokenNumberHoldersProjection::getNumberOfHolders));
+    Map<Long, Long> numberHoldersAddressNotHaveStakeKeyMap = StreamUtil.toMap(
+        numberOfHoldersWithAddressNotHaveStakeKeyAsync.get(),
+        TokenNumberHoldersProjection::getIdent,
+        TokenNumberHoldersProjection::getNumberOfHolders
+    );
 
-    Map<Long, BigInteger> tokenVolumeMap = volumes
-            .stream()
-            .collect(Collectors.toMap(TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume));
+    Map<Long, BigInteger> tokenVolumeMap = StreamUtil
+        .toMap(volumes, TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume);
 
     multiAssetResponsesList.forEach(
         ma -> {
@@ -133,6 +141,7 @@ public class TokenServiceImpl implements TokenService {
 
 
   @Override
+  @SingletonCall(typeToken = TypeTokenGson.TOKEN_DETAIL, expireAfterSeconds = 100)
   @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
@@ -143,9 +152,14 @@ public class TokenServiceImpl implements TokenService {
     Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
     var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, txId);
 
-    var numberOfHolders = addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(multiAsset).orElse(0L)
-            + addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset).orElse(0L);
-    tokenResponse.setNumberOfHolders(numberOfHolders);
+    var numberOfHoldersHaveStakeKey = addressTokenBalanceRepository
+        .countAddressNotHaveStakeByMultiAsset(multiAsset)
+        .orElse(0L);
+    var numberOfHoldersNotHaveStakeKe =  addressTokenBalanceRepository
+        .countStakeByMultiAsset(multiAsset)
+        .orElse(0L);
+
+    tokenResponse.setNumberOfHolders(numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe);
     if (Objects.isNull(volume)) {
       tokenResponse.setVolumeIn24h(String.valueOf(0));
     } else {
@@ -192,19 +206,21 @@ public class TokenServiceImpl implements TokenService {
   @Override
   @Transactional(readOnly = true)
   public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type)
-          throws ExecutionException, InterruptedException {
+      throws ExecutionException, InterruptedException {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
-            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     List<LocalDate> dates = getListDateAnalytic(type);
     List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
 
     ExecutorService fixedExecutor = Executors.newFixedThreadPool(TOKEN_VOLUME_ANALYTIC_NUMBER);
     for (int i = 0; i < dates.size() - 1; i++) {
-      int finalIdx = i;
-      futureTokenAnalytics.add(CompletableFuture.supplyAsync(()
-              -> getTokenVolumeAnalyticsResponse(multiAsset, dates.get(finalIdx), dates.get(finalIdx + 1)), fixedExecutor)
+      LocalDate startRange = dates.get(i);
+      LocalDate endRange = dates.get(i + 1);
+      futureTokenAnalytics.add(CompletableFuture.supplyAsync(
+          () -> getTokenVolumeAnalyticsResponse(multiAsset, startRange, endRange),
+          fixedExecutor)
       );
     }
 
@@ -217,21 +233,29 @@ public class TokenServiceImpl implements TokenService {
     return responses;
   }
 
+  /**
+   * if param `to` less than today: get data from table: `agg_address_token`
+   * else: get data from table `address_token` for today
+   * and get data in range: `from` - previous day of `to` from table: `agg_address_token`
+   * and then sum data of 2 queries
+   * **/
   private TokenVolumeAnalyticsResponse getTokenVolumeAnalyticsResponse(MultiAsset multiAsset,
                                                                        LocalDate from, LocalDate to) {
-    TokenVolumeAnalyticsResponse response = new TokenVolumeAnalyticsResponse();
-    var balance = addressTokenRepository.sumBalanceBetweenTx(
-            multiAsset,
-            Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-            Timestamp.valueOf(to.atTime(LocalTime.MAX))
-    );
-    if (Objects.isNull(balance)) {
-      response.setValue(BigInteger.ZERO);
+    BigInteger balance = BigInteger.ZERO;
+    if (LocalDate.now().isEqual(to)) {
+      BigInteger todayBalance = addressTokenRepository.sumBalanceBetweenTx(
+          multiAsset,
+          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
+      );
+      BigInteger rangeToYesterdayBalance = aggregateAddressTokenRepository
+          .sumBalanceInTimeRange(multiAsset.getId(), from, to.minusDays(1));
+      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
     } else {
-      response.setValue(balance);
+      balance = aggregateAddressTokenRepository
+          .sumBalanceInTimeRange(multiAsset.getId(), from, to);
     }
-    response.setDate(to);
-    return response;
+    
+    return new TokenVolumeAnalyticsResponse(to, balance);
   }
 
   private List<LocalDate> getListDateAnalytic(AnalyticType analyticType) {

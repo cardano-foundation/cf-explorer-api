@@ -38,12 +38,6 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + "       order by atb.tx_id) as calculated_balances", nativeQuery = true)
   MinMaxProjection findMinMaxBalanceByAddress(@Param("addressId") Long addressId);
 
-  @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
-      + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
-      + " WHERE addrTxBalance.address = :address"
-      + " ORDER BY addrTxBalance.tx.blockId ASC, addrTxBalance.tx.blockIndex ASC")
-  List<BigInteger> findAllByAddress(@Param("address") Address address);
-
   @Query(value = "SELECT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.address = :address"
@@ -59,12 +53,6 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + "       where atb.stake_address_id = :stakeAddressId"
       + "       order by atb.tx_id) as calculated_balances", nativeQuery = true)
   MinMaxProjection findMinMaxBalanceByStakeAddress(@Param("stakeAddressId") Long stakeAddressId);
-
-  @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
-      + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
-      + " WHERE addrTxBalance.stakeAddress.id = :stakeAddressId "
-      + " ORDER BY tx.blockId, tx.blockIndex")
-  List<BigInteger> findAllByStakeAddress(@Param("stakeAddressId") Long stakeAddressId);
 
   @Query(value = "SELECT DISTINCT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
@@ -86,6 +74,14 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " AND addressTxBalance.time <= :time")
   Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
                                                        @Param("time") Timestamp time);
+
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
+      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                       @Param("from") Timestamp from,
+                                                       @Param("to") Timestamp to);
 
   @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.address = :address")

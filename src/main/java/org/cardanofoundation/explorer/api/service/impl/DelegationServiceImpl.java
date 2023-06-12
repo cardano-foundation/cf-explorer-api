@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -45,8 +46,8 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolAmo
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailEpochProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiOsProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiOsProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
@@ -69,6 +70,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -119,18 +121,15 @@ public class DelegationServiceImpl implements DelegationService {
     long countDownTime =
         Timestamp.from(startTime.toInstant().plus(5, ChronoUnit.DAYS)).getTime() - Timestamp.from(
             Instant.now()).getTime();
-    BigInteger liveStake = null;
+    BigInteger liveStake;
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
       log.info("using koiOs flow...");
-      Set<String> poolIds = poolHashRepository.findAllSetPoolView();
-      if (Boolean.FALSE.equals(fetchRewardDataService.checkPoolInfoForPool(poolIds))) {
-        if (Boolean.TRUE.equals(fetchRewardDataService.fetchPoolInfoForPool(poolIds))) {
-          liveStake = poolInfoRepository.getTotalLiveStake(epochNo);
-        }
-      } else {
-        liveStake = poolInfoRepository.getTotalLiveStake(epochNo);
+      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
+      if (!poolIds.isEmpty()) {
+        fetchRewardDataService.fetchPoolInfoForPool(poolIds);
       }
+      liveStake = poolInfoRepository.getTotalLiveStake(epochNo);
     } else {
       log.info("using base flow...");
       Object liveStakeObj = redisTemplate.opsForValue()
@@ -174,17 +173,10 @@ public class DelegationServiceImpl implements DelegationService {
     Integer epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolIdList);
-      if (Boolean.FALSE.equals(isInfo)) {
-        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
-        if (Boolean.TRUE.equals(isFetch)) {
-          setPoolInfoKoiOs(poolList, epochNo, poolIdList);
-        }
-      } else {
-        setPoolInfoKoiOs(poolList, epochNo, poolIdList);
-      }
+      handleFetchPoolInfo(poolIdList);
+      setPoolInfoKoiOs(poolList, epochNo, poolIdList);
       Boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolIdList);
-      List<PoolHistoryKoiOsProjection> poolHistoryProjections = new ArrayList<>();
+      List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
       if (Boolean.FALSE.equals(isHistory)) {
         Boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(poolIdList);
         if (Boolean.TRUE.equals(isFetch)) {
@@ -235,34 +227,28 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public List<PoolResponse> findTopDelegationPool(Pageable pageable) {
-    int size = defaultSize;
-    if (pageable.getPageSize() < defaultSize) {
-      size = pageable.getPageSize();
+    int size = pageable.getPageSize();
+    if (size > defaultSize) {
+      size = defaultSize;
+      pageable = PageRequest.of(pageable.getPageNumber(), defaultSize);
     }
-    List<PoolResponse> response = new ArrayList<>();
+    List<PoolResponse> response;
     Integer currentEpoch = epochRepository.findCurrentEpochNo()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Set<String> poolViewsTop;
-    List<PoolHistoryKoiOsProjection> poolHistoryProjections = new ArrayList<>();
+    List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
     List<PoolAmountProjection> poolAmountProjections = new ArrayList<>();
     Map<String, BigInteger> liveStakeMap = new HashMap<>();
     Map<String, BigInteger> activeStakeMap = new HashMap<>();
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Set<String> poolViews = poolHashRepository.findAllSetPoolView();
-      List<PoolInfoKoiOsProjection> poolInfoProjections;
-      Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolViews);
-      if (Boolean.FALSE.equals(isInfo)) {
-        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolViews);
-        if (Boolean.TRUE.equals(isFetch)) {
-          poolInfoProjections = poolInfoRepository.getTopPoolInfoKoiOs(currentEpoch, pageable);
-        } else {
-          return response;
-        }
-      } else {
-        poolInfoProjections = poolInfoRepository.getTopPoolInfoKoiOs(currentEpoch, pageable);
+      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
+      if (!poolIds.isEmpty()) {
+        fetchRewardDataService.fetchPoolInfoForPool(poolIds);
       }
-      poolViewsTop = poolInfoProjections.stream().map(PoolInfoKoiOsProjection::getView).collect(
+      List<PoolInfoKoiosProjection> poolInfoProjections = poolInfoRepository.getTopPoolInfoKoiOs(
+          currentEpoch, pageable);
+      poolViewsTop = poolInfoProjections.stream().map(PoolInfoKoiosProjection::getView).collect(
           Collectors.toSet());
       Boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolViewsTop);
       if (Boolean.FALSE.equals(isHistory)) {
@@ -312,6 +298,7 @@ public class DelegationServiceImpl implements DelegationService {
             .build()
     ).toList();
     if (Boolean.TRUE.equals(isKoiOs)) {
+      fetchRewardDataService.fetchPoolInfoForPool(poolViewsTop);
       setPoolInfoKoiOs(response, currentEpoch, poolViewsTop);
       setRewardKoiOs(poolHistoryProjections, poolAmountProjections, response);
     } else {
@@ -349,19 +336,11 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setStakeLimit(stakeLimit);
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Set<String> poolIdList = new HashSet<>();
-      poolIdList.add(poolView);
-      Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolIdList);
-      if (Boolean.FALSE.equals(isInfo)) {
-        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
-        if (Boolean.TRUE.equals(isFetch)) {
-          setPoolInfoKoiOs(poolDetailResponse, currentEpoch, poolIdList);
-        }
-      } else {
-        setPoolInfoKoiOs(poolDetailResponse, currentEpoch, poolIdList);
-      }
+      Set<String> poolIdList = new HashSet<>(Collections.singletonList(poolView));
+      fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
+      setPoolInfoKoiOs(poolDetailResponse, currentEpoch, poolIdList);
       Boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolIdList);
-      List<PoolHistoryKoiOsProjection> poolHistoryProjections = new ArrayList<>();
+      List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
       if (Boolean.FALSE.equals(isHistory)) {
         Boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(poolIdList);
         if (Boolean.TRUE.equals(isFetch)) {
@@ -425,7 +404,7 @@ public class DelegationServiceImpl implements DelegationService {
     Set<Integer> epochNos;
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Page<PoolHistoryKoiOsProjection> poolHistoryKoiOsProjections = Page.empty();
+      Page<PoolHistoryKoiosProjection> poolHistoryKoiOsProjections = Page.empty();
       Boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(
           Collections.singleton(poolView));
       if (Boolean.FALSE.equals(isHistory)) {
@@ -441,7 +420,7 @@ public class DelegationServiceImpl implements DelegationService {
       epochOfPools = poolHistoryKoiOsProjections.stream().map(PoolDetailEpochResponse::new)
           .toList();
       totalElm = poolHistoryKoiOsProjections.getTotalElements();
-      epochNos = poolHistoryKoiOsProjections.stream().map(PoolHistoryKoiOsProjection::getEpochNo)
+      epochNos = poolHistoryKoiOsProjections.stream().map(PoolHistoryKoiosProjection::getEpochNo)
           .collect(
               Collectors.toSet());
     } else {
@@ -544,10 +523,9 @@ public class DelegationServiceImpl implements DelegationService {
       Pageable pageable, String poolView) {
     PoolHash poolHash = poolHashRepository.findByView(poolView)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    Long poolId = poolHash.getId();
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
     Page<PoolDetailDelegatorProjection> delegatorPage = delegationRepository.getAllDelegatorByPool(
-        poolId, pageable);
+        poolHash.getId(), pageable);
     if (!delegatorPage.isEmpty()) {
       Integer currentEpoch = epochRepository.findCurrentEpochNo()
           .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
@@ -594,7 +572,7 @@ public class DelegationServiceImpl implements DelegationService {
       }
       if (isCheck) {
         List<StakeAddressProjection> stakeAddressProjections = epochStakeRepository.totalStakeByAddressAndPool(
-            addressIds, poolId, currentEpoch);
+            addressIds, currentEpoch);
         Map<Long, BigInteger> stakeAddressProjectionMap = stakeAddressProjections.stream().collect(
             Collectors.toMap(StakeAddressProjection::getAddress,
                 StakeAddressProjection::getTotalStake));
@@ -636,7 +614,7 @@ public class DelegationServiceImpl implements DelegationService {
   private Double getRos(BigInteger poolReward, BigInteger fixedCost, Double margin,
       BigInteger activeStake) {
     if (Objects.isNull(poolReward) || Objects.isNull(fixedCost) || Objects.isNull(margin)
-        || Objects.isNull(activeStake)) {
+        || Objects.isNull(activeStake) || activeStake.compareTo(BigInteger.ZERO) == 0) {
       return BigInteger.ZERO.doubleValue();
     }
     BigDecimal distributedReward = new BigDecimal(poolReward).subtract(new BigDecimal(fixedCost));
@@ -654,7 +632,7 @@ public class DelegationServiceImpl implements DelegationService {
       return stakeFromCache;
     }
     String key = prefixKey + network + (Objects.isNull(epochNo) ? "" : ("_" + epochNo));
-    List<Object> objStakeList = null;
+    List<Object> objStakeList;
     try {
       objStakeList = redisTemplate.opsForHash().multiGet(key, poolIds);
     } catch (Exception e) {
@@ -678,12 +656,12 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   private void setPoolInfoKoiOs(List<PoolResponse> poolList, Integer epochNo, Set<String> poolIds) {
-    List<PoolInfoKoiOsProjection> poolInfoProjections = poolInfoRepository.getPoolInfoKoiOs(
+    List<PoolInfoKoiosProjection> poolInfoProjections = poolInfoRepository.getPoolInfoKoiOs(
         poolIds, epochNo);
-    Map<String, PoolInfoKoiOsProjection> poolInfoMap = poolInfoProjections.stream()
-        .collect(Collectors.toMap(PoolInfoKoiOsProjection::getView, Function.identity()));
+    Map<String, PoolInfoKoiosProjection> poolInfoMap = poolInfoProjections.stream()
+        .collect(Collectors.toMap(PoolInfoKoiosProjection::getView, Function.identity()));
     poolList.forEach(pool -> {
-      PoolInfoKoiOsProjection projection = poolInfoMap.get(pool.getPoolId());
+      PoolInfoKoiosProjection projection = poolInfoMap.get(pool.getPoolId());
       if (Objects.nonNull(projection)) {
         pool.setPoolSize(projection.getActiveStake());
         pool.setSaturation(projection.getSaturation());
@@ -693,9 +671,9 @@ public class DelegationServiceImpl implements DelegationService {
 
   private void setPoolInfoKoiOs(PoolDetailHeaderResponse poolDetailHeader, Integer epochNo,
       Set<String> poolIds) {
-    List<PoolInfoKoiOsProjection> poolInfoProjections = poolInfoRepository.getPoolInfoKoiOs(
+    List<PoolInfoKoiosProjection> poolInfoProjections = poolInfoRepository.getPoolInfoKoiOs(
         poolIds, epochNo);
-    PoolInfoKoiOsProjection projection =
+    PoolInfoKoiosProjection projection =
         poolInfoProjections.isEmpty() ? null : poolInfoProjections.get(CommonConstant.ZERO);
     if (Objects.nonNull(projection)) {
       poolDetailHeader.setPoolSize(projection.getActiveStake());
@@ -703,14 +681,14 @@ public class DelegationServiceImpl implements DelegationService {
     }
   }
 
-  private void setRewardKoiOs(List<PoolHistoryKoiOsProjection> poolHistoryProjections,
+  private void setRewardKoiOs(List<PoolHistoryKoiosProjection> poolHistoryProjections,
       List<PoolAmountProjection> poolAmountProjections, List<PoolResponse> poolList) {
-    Map<String, PoolHistoryKoiOsProjection> poolHistoryMap = poolHistoryProjections.stream()
-        .collect(Collectors.toMap(PoolHistoryKoiOsProjection::getView, Function.identity()));
+    Map<String, PoolHistoryKoiosProjection> poolHistoryMap = poolHistoryProjections.stream()
+        .collect(Collectors.toMap(PoolHistoryKoiosProjection::getView, Function.identity()));
     Map<String, PoolAmountProjection> operatorRewardMap = poolAmountProjections.stream()
         .collect(Collectors.toMap(PoolAmountProjection::getView, Function.identity()));
     poolList.forEach(pool -> {
-      PoolHistoryKoiOsProjection delegateRewardProjection = poolHistoryMap.get(pool.getPoolId());
+      PoolHistoryKoiosProjection delegateRewardProjection = poolHistoryMap.get(pool.getPoolId());
       BigInteger delegateReward = BigInteger.ZERO;
       if (Objects.nonNull(delegateRewardProjection) && Objects.nonNull(
           delegateRewardProjection.getDelegateReward())) {
@@ -727,9 +705,9 @@ public class DelegationServiceImpl implements DelegationService {
     });
   }
 
-  private void setRewardKoiOs(List<PoolHistoryKoiOsProjection> poolHistoryProjections,
+  private void setRewardKoiOs(List<PoolHistoryKoiosProjection> poolHistoryProjections,
       List<PoolAmountProjection> poolAmountProjections, PoolDetailHeaderResponse poolDetailHeader) {
-    PoolHistoryKoiOsProjection poolHistoryKoiOsProjection =
+    PoolHistoryKoiosProjection poolHistoryKoiOsProjection =
         poolHistoryProjections.isEmpty() ? null : poolHistoryProjections.get(CommonConstant.ZERO);
     PoolAmountProjection poolAmountProjection =
         poolAmountProjections.isEmpty() ? null : poolAmountProjections.get(CommonConstant.ZERO);
@@ -753,5 +731,36 @@ public class DelegationServiceImpl implements DelegationService {
   private CompletableFuture<Boolean> fetchEpochStakeKoiOs(List<String> addressIds) {
     return CompletableFuture.supplyAsync(
         () -> fetchRewardDataService.fetchEpochStakeForPool(addressIds));
+  }
+
+  private CompletableFuture<Boolean> fetchPoolInfoKoiOs(Set<String> poolIds) {
+    return CompletableFuture.supplyAsync(
+        () -> fetchRewardDataService.fetchPoolInfoForPool(poolIds));
+  }
+
+  private void handleFetchPoolInfo(Set<String> poolIds) {
+    List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>();
+    List<List<String>> subPoolIdList = Lists.partition(Lists.newArrayList(poolIds), 25);
+    subPoolIdList.forEach(
+        poolIdList -> completableFutures.add(fetchPoolInfoKoiOs(Sets.newHashSet(poolIdList))));
+    CompletableFuture<Void> combinedFuture
+        = CompletableFuture.allOf(
+        completableFutures.toArray(new CompletableFuture[0]));
+    CompletableFuture<List<Boolean>> allResultFuture = combinedFuture.thenApply(v ->
+        completableFutures.stream().map(CompletableFuture::join)
+            .toList()
+    );
+    CompletableFuture<Boolean> resultFetch = allResultFuture.thenApply(results ->
+        results.stream().allMatch(result -> result.equals(Boolean.TRUE))
+    ).exceptionally(ex -> {
+      log.error("Error: when fetch data from koios");
+      return false;
+    });
+    try {
+      resultFetch.get();
+    } catch (InterruptedException | ExecutionException e) {
+      log.error("Error: " + e);
+      Thread.currentThread().interrupt();
+    }
   }
 }

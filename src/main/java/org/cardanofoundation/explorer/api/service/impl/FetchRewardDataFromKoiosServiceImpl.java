@@ -1,22 +1,19 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.util.Collections;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-
 import org.cardanofoundation.explorer.api.repository.EpochStakeCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.PoolHistoryCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.PoolInfoCheckpointRepository;
+import org.cardanofoundation.explorer.api.repository.RewardCheckpointRepository;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import org.cardanofoundation.explorer.api.repository.RewardCheckpointRepository;
-import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 
 @Profile("koios")
 @Service
@@ -51,7 +48,8 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(String stakeKey) {
-    return restTemplate.postForObject(apiCheckRewardUrl, Collections.singleton(stakeKey), Boolean.class);
+    return restTemplate.postForObject(apiCheckRewardUrl, Collections.singleton(stakeKey),
+        Boolean.class);
   }
 
   @Override
@@ -83,6 +81,11 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
         poolIds);
     Integer sizeCheck = poolIds.size();
     return Objects.equals(countCheckPoint, sizeCheck);
+  }
+
+  @Override
+  public Set<String> checkAllPoolInfoForPool() {
+    return poolInfoCheckpointRepository.checkPoolInfoByPoolViewAndEpoch();
   }
 
   @Override
