@@ -2,10 +2,12 @@ package org.cardanofoundation.explorer.api.controller;
 
 import java.util.Date;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.test.HashValid;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
+import org.cardanofoundation.explorer.common.validate.hash.HashValid;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
@@ -74,7 +76,7 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<StakeDelegationDetailResponse> getDelegationDetail(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @PathVariable @Parameter(description = "tx hash") String hash) {
+      @PathVariable @Parameter(description = "tx hash") @HashValid String hash) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDelegationDetail(stakeKey, hash));
   }
 
