@@ -241,6 +241,7 @@ public class TokenServiceImpl implements TokenService {
       balance = aggregateAddressTokenRepository
           .sumBalanceInTimeRange(multiAsset.getId(), from, to);
     }
+    
     return new TokenVolumeAnalyticsResponse(to, balance);
   }
 
