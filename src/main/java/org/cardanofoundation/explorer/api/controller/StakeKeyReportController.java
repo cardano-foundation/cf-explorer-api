@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
@@ -24,6 +25,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.common.validate.prefixed.PrefixedValid;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.springframework.core.io.InputStreamResource;
@@ -77,7 +79,7 @@ public class StakeKeyReportController {
   @Operation(summary = "Get stake key report history by stake key")
   public ResponseEntity<BaseFilterResponse<StakeKeyReportHistoryResponse>> getStakeReportHistoryByStakeKey(
       HttpServletRequest request,
-      @PathVariable String stakeKey,
+      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) String stakeKey,
       @ParameterObject Pageable pageable) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(

@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.controller.test.PrefixedValid;
 
 @Getter
 @Setter
@@ -14,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StakeKeyReportRequest {
-
+  @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
   private String stakeKey;
   private String reportName;
   private Timestamp fromDate;
