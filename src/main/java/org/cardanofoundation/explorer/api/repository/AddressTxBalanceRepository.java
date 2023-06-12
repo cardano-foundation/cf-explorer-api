@@ -52,8 +52,7 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
 
   @Query(value = "SELECT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
-      + " WHERE addrTxBalance.address = :address"
-      + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
+      + " WHERE addrTxBalance.address = :address")
   List<Tx> findAllByAddress(@Param("address") Address address, Pageable pageable);
 
   @Query(value = "select min(calculated_balances.sum_of_no) as minVal, max(calculated_balances.sum_of_no) as maxVal " +
