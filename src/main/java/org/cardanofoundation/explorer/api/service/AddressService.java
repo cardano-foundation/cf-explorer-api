@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -29,7 +30,8 @@ public interface AddressService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list value balance
    */
-  List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type);
+  List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type)
+      throws ExecutionException, InterruptedException;
 
   /**
    * Get the highest and lowest balance by address
