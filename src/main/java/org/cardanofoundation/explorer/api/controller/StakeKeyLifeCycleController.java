@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilt
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
+import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/stake-lifecycle")
 @RequiredArgsConstructor
+@Validated
 public class StakeKeyLifeCycleController {
 
   private final StakeKeyLifeCycleService stakeKeyLifeCycleService;
@@ -39,7 +42,7 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeRegistrations(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject StakeLifeCycleFilterRequest condition,
+      @ParameterObject @DateValid StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(
@@ -50,7 +53,7 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeDeRegistrations(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject StakeLifeCycleFilterRequest condition,
+      @ParameterObject @DateValid StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(
@@ -61,7 +64,7 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeDelegationFilterResponse>> getDelegations(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @ParameterObject StakeLifeCycleFilterRequest condition,
+      @ParameterObject @DateValid StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           Delegation_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(
@@ -89,7 +92,7 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeWithdrawalFilterResponse>> getWithdrawals(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @ParameterObject @Parameter(description = "filter condition")
+      @ParameterObject @Parameter(description = "filter condition") @DateValid
       StakeLifeCycleFilterRequest condition,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {

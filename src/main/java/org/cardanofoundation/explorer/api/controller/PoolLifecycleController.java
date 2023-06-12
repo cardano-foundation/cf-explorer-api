@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import java.util.Date;
+
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
@@ -12,11 +13,14 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardRe
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
+import org.cardanofoundation.explorer.common.validation.date.DatePattern;
+import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,17 +29,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/pool-lifecycle")
 @RequiredArgsConstructor
+@Validated
 public class PoolLifecycleController {
 
   private final PoolLifecycleService poolLifecycleService;
 
 
-  @GetMapping(value = "/registration")
+    @GetMapping(value = "/registration")
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> registration(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
-      @Param("poolView") String poolView, @Param("txHash") String txHash,
-      @Param("fromDate") Date fromDate,
-      @Param("toDate") Date toDate) {
+          @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+          @Param("poolView") String poolView, @Param("txHash") String txHash,
+          @Param("fromDate") @DateValid(pattern = DatePattern.YYYY_MM_DD) Date fromDate,
+          @Param("toDate") @DateValid(pattern = DatePattern.YYYY_MM_DD) Date toDate) {
+
     return ResponseEntity.ok(
         poolLifecycleService.registration(poolView, txHash, fromDate, toDate, pageable));
   }
@@ -50,8 +56,8 @@ public class PoolLifecycleController {
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> poolUpdate(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
       @Param("poolView") String poolView, @Param("txHash") String txHash,
-      @Param("fromDate") Date fromDate,
-      @Param("toDate") Date toDate) {
+      @Param("fromDate") @DateValid Date fromDate,
+      @Param("toDate") @DateValid Date toDate) {
     return ResponseEntity.ok(
         poolLifecycleService.poolUpdate(poolView, txHash, fromDate, toDate, pageable));
   }
@@ -72,8 +78,8 @@ public class PoolLifecycleController {
   public ResponseEntity<BaseFilterResponse<DeRegistrationResponse>> deRegistration(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
       @Param("poolView") String poolView, @Param("txHash") String txHash,
-      @Param("fromDate") Date fromDate,
-      @Param("toDate") Date toDate) {
+      @Param("fromDate") @DateValid Date fromDate,
+      @Param("toDate") @DateValid Date toDate) {
     return ResponseEntity.ok(
         poolLifecycleService.deRegistration(poolView, txHash, fromDate, toDate, pageable));
   }

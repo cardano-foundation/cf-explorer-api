@@ -12,7 +12,6 @@ import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyRe
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
@@ -24,6 +23,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.springframework.core.io.InputStreamResource;
@@ -34,11 +34,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/staking-lifecycle/report")
 @RequiredArgsConstructor
+@Validated
 public class StakeKeyReportController {
 
   private final StakeKeyReportService stakeKeyReportService;
@@ -110,7 +112,7 @@ public class StakeKeyReportController {
   @Operation(summary = "Get report history of stake key and pool id")
   public ResponseEntity<BaseFilterResponse<ReportHistoryResponse>> getReportHistory(
       HttpServletRequest request,
-      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
+      @ParameterObject @Parameter(description = "filter condition") @DateValid ReportHistoryFilterRequest filterRequest,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
     String username = request.getAttribute("username").toString();
