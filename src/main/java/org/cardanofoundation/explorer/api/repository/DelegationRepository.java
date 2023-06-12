@@ -169,14 +169,11 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "ep.optimalPoolCount AS optimalPoolCount, "
           + "pu.margin AS margin, ad.reserves AS reserves "
           + "FROM PoolHash ph "
-          + "LEFT JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
-          + "LEFT JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
+          + "LEFT JOIN PoolOfflineData pod ON pod.pool.id = ph.id AND pod.pmrId = (SELECT MAX(pod2.pmrId) FROM PoolOfflineData pod2 WHERE pod2.pool.id = ph.id) "
+          + "LEFT JOIN PoolUpdate pu ON pu.poolHash.id = ph.id AND pu.id = (SELECT MAX(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
           + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "LEFT JOIN AdaPots ad ON ad.epochNo = (SELECT max(e.no) FROM Epoch e) "
-          + "WHERE pu.id = "
-          + "(SELECT MAX(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) AND "
-          + "pod.pmrId = (SELECT MAX(pod2.pmrId) FROM PoolOfflineData pod2 WHERE pod2.pool.id = ph.id) AND "
-          + "ph.id IN :poolIds")
+          + "WHERE ph.id IN :poolIds")
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(@Param("poolIds") Set<Long> poolIds);
 
   Boolean existsByAddress(@Param("stakeAddress") StakeAddress stakeAddress);
