@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.Date;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
@@ -48,7 +49,8 @@ public interface StakeKeyLifeCycleService {
    * @param pageable page information
    * @return list stake key reward
    */
-  BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey, Pageable pageable);
+  BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey, Date fromDate,
+      Date toDate, Pageable pageable);
 
   /**
    * Get list withdrawal in stake key life cycle

@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.time.temporal.ChronoUnit;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
@@ -66,6 +67,8 @@ class StakeKeyLifeCycleServiceTest {
   @Mock
   private TxRepository txRepository;
 
+  @Mock FetchRewardDataService fetchRewardDataService;
+
   @InjectMocks
   private StakeKeyLifeCycleServiceImpl stakeKeyLifeCycleService;
 
@@ -80,6 +83,8 @@ class StakeKeyLifeCycleServiceTest {
     StakeLifeCycleFilterRequest request = new StakeLifeCycleFilterRequest();
     StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
     Pageable pageable = PageRequest.of(0, 1);
+    Date fromDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+    Date toDate = Date.from(Instant.now());
     when(stakeAddressRepository.findByView("stake1notfound")).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeRegistrations("stake1notfound", condition,
@@ -93,7 +98,7 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegations("stake1notfound", request, pageable));
     Assertions.assertThrows(BusinessException.class,
-        () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", pageable));
+        () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", fromDate, toDate , pageable));
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawals("stake1notfound", request, pageable));
     Assertions.assertThrows(BusinessException.class,
@@ -263,11 +268,15 @@ class StakeKeyLifeCycleServiceTest {
     Pageable pageable = PageRequest.of(0, 1);
     StakeRewardResponse rewardResponse = new StakeRewardResponse(333,
         Date.from(Instant.now()), BigInteger.valueOf(382916));
+    Date fromDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+    Date toDate = Date.from(Instant.now());
     Page<StakeRewardResponse> page = new PageImpl<>(List.of(rewardResponse), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
-    when(rewardRepository.findRewardByStake(stakeAddress, pageable)).thenReturn(page);
+    when(rewardRepository.findRewardByStake(stakeAddress, Timestamp.from(fromDate.toInstant()),
+        Timestamp.from(toDate.toInstant()), pageable)).thenReturn(page);
+    when(fetchRewardDataService.checkRewardAvailable(any())).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeRewards(
-        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", pageable);
+        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", fromDate, toDate , pageable);
     Assertions.assertEquals(1, response.getTotalPages());
     Assertions.assertEquals(1, response.getTotalItems());
     Assertions.assertEquals(0, response.getCurrentPage());
@@ -345,6 +354,7 @@ class StakeKeyLifeCycleServiceTest {
         .thenReturn(Optional.of(BigInteger.valueOf(102569063)));
     when(rewardRepository.getAvailableRewardByStakeAddressAndEpoch(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(4846486)));
+    when(fetchRewardDataService.checkRewardAvailable(any())).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeWithdrawalDetail(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna",
         "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
@@ -362,6 +372,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.getWithdrawalByAddressAndTx(any(), any()))
         .thenReturn(Optional.empty());
+    when(fetchRewardDataService.checkRewardAvailable(any())).thenReturn(true);
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawalDetail("stake1notfound",
             "txHashNotFound"));
@@ -529,6 +540,7 @@ class StakeKeyLifeCycleServiceTest {
         List.of(stakeWithdrawnResponse));
     when(rewardRepository.findRewardByStake(stakeAddress)).thenReturn(
         List.of(stakeRewardResponse));
+    when(fetchRewardDataService.checkRewardAvailable(any())).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeRewardActivities(stakeAddress.getView(),
         pageable);
     Assertions.assertEquals(1, response.getTotalPages());
