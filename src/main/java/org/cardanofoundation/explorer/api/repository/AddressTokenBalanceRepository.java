@@ -16,33 +16,29 @@ import org.springframework.data.repository.query.Param;
 public interface AddressTokenBalanceRepository extends JpaRepository<AddressTokenBalance, Long> {
 
   @Query("SELECT COUNT(atb.addressId) FROM AddressTokenBalance atb "
-      + "INNER JOIN Address addr ON addr.id = atb.addressId "
       + "WHERE atb.multiAsset = :multiAsset "
-      + "AND addr.stakeAddressId IS NULL AND atb.balance > 0 ")
+      + "AND atb.stakeAddress.id IS NULL AND atb.balance > 0 ")
   Optional<Long> countAddressNotHaveStakeByMultiAsset(@Param("multiAsset") MultiAsset multiAsset);
 
-  @Query("SELECT COUNT(DISTINCT addr.stakeAddressId) FROM AddressTokenBalance atb "
-      + "INNER JOIN Address addr ON addr.id = atb.addressId "
+  @Query("SELECT COUNT(DISTINCT atb.stakeAddress.id) FROM AddressTokenBalance atb "
       + "WHERE atb.multiAsset = :multiAsset "
       + "AND atb.balance > 0 ")
   Optional<Long> countStakeByMultiAsset(@Param("multiAsset") MultiAsset multiAsset);
 
 
-  @Query("SELECT COUNT(atb.addressId) as numberOfHolders, atb.multiAsset.id as ident "
+  @Query("SELECT COUNT(atb.addressId) as numberOfHolders, atb.multiAssetId as ident "
       + "FROM AddressTokenBalance atb "
-      + "INNER JOIN Address addr ON addr.id = atb.addressId "
-      + "WHERE atb.multiAsset IN :multiAssets "
-      + "AND addr.stakeAddressId IS NULL AND atb.balance > 0 "
+      + "WHERE atb.multiAssetId IN :multiAssets "
+      + "AND atb.stakeAddress.id IS NULL AND atb.balance > 0 "
       + "GROUP BY atb.multiAsset.id")
-  List<TokenNumberHoldersProjection> countAddressNotHaveStakeByMultiAssetIn(@Param("multiAssets") List<MultiAsset> multiAssets);
+  List<TokenNumberHoldersProjection> countAddressNotHaveStakeByMultiAssetIn(@Param("multiAssets") List<Long> multiAssetIds);
 
-  @Query("SELECT COUNT(DISTINCT addr.stakeAddressId) as numberOfHolders, atb.multiAsset.id as ident "
+  @Query("SELECT COUNT(DISTINCT atb.stakeAddress.id) as numberOfHolders, atb.multiAssetId as ident "
       + "FROM AddressTokenBalance atb "
-      + "INNER JOIN Address addr ON addr.id = atb.addressId "
-      + "WHERE atb.multiAsset IN :multiAssets "
+      + "WHERE atb.multiAssetId IN :multiAssets "
       + "AND atb.balance > 0 "
       + "GROUP BY atb.multiAsset.id")
-  List<TokenNumberHoldersProjection> countByMultiAssetIn(@Param("multiAssets") List<MultiAsset> multiAssets);
+  List<TokenNumberHoldersProjection> countByMultiAssetIn(@Param("multiAssets") List<Long> multiAssetIds);
 
   @Query("SELECT atb.addressId as addressId, atb.balance as quantity"
       + " FROM AddressTokenBalance atb "
