@@ -24,9 +24,11 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   Long countByAddress(@Param("address") Address address);
 
   @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
-      + " WHERE addressTxBalance.address = :address"
-      + " AND addressTxBalance.time <= :time")
-  BigInteger getBalanceByAddressAndTime(@Param("address") Address address, @Param("time") Timestamp time);
+          + " WHERE addressTxBalance.address = :address"
+          + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByAddressAndTime(@Param("address") Address address,
+                                                  @Param("from") Timestamp from,
+                                                  @Param("to") Timestamp to);
 
   @Query(value = "select min(calculated_balances.sum_balance) as minVal, "
       + "                max(calculated_balances.sum_balance) as maxVal, "
