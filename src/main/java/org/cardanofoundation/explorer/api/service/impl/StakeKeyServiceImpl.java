@@ -404,41 +404,17 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     return responses;
   }
 
-//  @Override
-//  public List<BigInteger> getAddressMinMaxBalance(String stakeKey) {
-//    StakeAddress stake = stakeAddressRepository.findByView(stakeKey)
-//        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-//
-//    MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByStakeAddress(
-//        stake.getId());
-//    if (balanceList == null) {
-//      return Collections.emptyList();
-//    }
-//    return List.of(balanceList.getMinVal(), balanceList.getMaxVal());
-//  }
-
   @Override
   public List<BigInteger> getAddressMinMaxBalance(String stakeKey) {
-    StakeAddress stake = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    List<BigInteger> balanceList = addressTxBalanceRepository.findAllByStakeAddress(stake.getId());
-    if(balanceList.isEmpty()) {
-      return new ArrayList<>();
+    StakeAddress stake = stakeAddressRepository.findByView(stakeKey)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+
+    MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByStakeAddress(
+        stake.getId());
+    if (balanceList == null) {
+      return Collections.emptyList();
     }
-    BigInteger maxBalance = balanceList.get(0);
-    BigInteger minBalance = balanceList.get(0);
-    BigInteger sumBalance = balanceList.get(0);
-    balanceList.remove(0);
-    for(BigInteger balance : balanceList) {
-      sumBalance = sumBalance.add(balance);
-      if(sumBalance.compareTo(maxBalance) > 0) {
-        maxBalance = sumBalance;
-      }
-      if(sumBalance.compareTo(minBalance) < 0) {
-        minBalance = sumBalance;
-      }
-    }
-    return Arrays.asList(minBalance, maxBalance);
+    return List.of(balanceList.getMinVal(), balanceList.getMaxVal());
   }
 
   private String getNameValueFromJson(String json) {

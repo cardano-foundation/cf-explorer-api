@@ -63,7 +63,7 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.stakeAddress.id = :stakeAddressId "
-      + " ORDER BY addrTxBalance.txId")
+      + " ORDER BY tx.blockId, tx.blockIndex")
   List<BigInteger> findAllByStakeAddress(@Param("stakeAddressId") Long stakeAddressId);
 
   @Query(value = "SELECT DISTINCT tx FROM AddressTxBalance addrTxBalance"
