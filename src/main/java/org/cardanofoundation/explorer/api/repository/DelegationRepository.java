@@ -27,7 +27,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
   @Query("SELECT count(de.id) FROM Delegation de "
       + "LEFT JOIN StakeDeregistration sd ON de.address.id = sd.addr.id AND sd.id IS NULL "
-      + "WHERE de.poolHash.id = :poolId")
+      + "WHERE de.poolHash.id = :poolId AND de.id = "
+      + "(SELECT max(de2.id) FROM Delegation de2 WHERE de.address.id = de2.address.id AND de2.poolHash.id = :poolId)")
   Integer numberDelegatorsByPool(@Param("poolId") Long poolId);
 
   @EntityGraph(attributePaths = {Delegation_.POOL_HASH, Delegation_.ADDRESS})
@@ -44,14 +45,13 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   @Query(value =
       "SELECT sa.id AS stakeAddressId, sa.view AS view , bk.time AS time, tx.fee AS fee "
           + "FROM PoolHash ph "
-          + "JOIN Delegation dg ON dg.poolHash.id = ph.id "
+          + "JOIN Delegation dg ON dg.poolHash.id = ph.id AND dg.id = (SELECT max(dg2.id) FROM Delegation dg2 WHERE dg.address.id = dg2.address.id AND dg2.poolHash.id = ph.id) "
           + "JOIN StakeAddress sa ON sa.id = dg.address.id "
           + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr2.id) FROM StakeRegistration sr2 WHERE sa.id = sr2.addr.id) "
           + "LEFT JOIN StakeDeregistration sd ON sa.id = sd.addr.id AND sd.id IS NULL "
           + "JOIN Tx tx ON tx.id = sr.tx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
           + "WHERE ph.id = :poolId "
-          + "GROUP BY sa.id, sa.view, bk.time, tx.fee "
           + "ORDER BY bk.time DESC")
   Page<PoolDetailDelegatorProjection> getAllDelegatorByPool(@Param("poolId") Long poolId,
       Pageable pageable);
