@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.util.Optional;
 import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
@@ -50,8 +51,8 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :from AND block.txCount > 0)"
       + "   )"
       + " AND addrToken.balance > 0")
-  BigInteger sumBalanceBetweenTx(@Param("multiAsset") MultiAsset multiAsset,
-                                 @Param("from") Timestamp from);
+  Optional<BigInteger> sumBalanceBetweenTx(@Param("multiAsset") MultiAsset multiAsset,
+                                           @Param("from") Timestamp from);
 
   @Query(value = "SELECT addrToken.multiAsset.id AS ident, "
       + " COALESCE(SUM(addrToken.balance), 0) AS volume"
