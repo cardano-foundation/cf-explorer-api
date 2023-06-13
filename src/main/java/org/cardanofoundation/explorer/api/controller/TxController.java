@@ -4,9 +4,10 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.Pageable;
+import org.cardanofoundation.explorer.common.validate.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationValid;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,9 +37,9 @@ public class TxController {
   @LogMessage
   @Operation(summary = "Filter transaction")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> filter(
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(txService.getAll(pageable));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
+    return ResponseEntity.ok(txService.getAll(pagination.toPageable()));
   }
 
   @GetMapping("/{hash}")

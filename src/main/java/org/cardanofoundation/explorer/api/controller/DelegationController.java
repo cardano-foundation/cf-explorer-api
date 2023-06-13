@@ -11,11 +11,11 @@ import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import io.swagger.v3.oas.annotations.Operation;
-import java.math.BigInteger;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.common.validate.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationValid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +39,9 @@ public class DelegationController {
 
   @GetMapping("/pool-list")
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       @RequestParam("search") String search) {
-    return ResponseEntity.ok(delegationService.getDataForPoolTable(pageable, search));
+    return ResponseEntity.ok(delegationService.getDataForPoolTable(pagination.toPageable(), search));
   }
 
   @GetMapping("/pool-detail-header/{poolView}")
@@ -59,21 +59,21 @@ public class DelegationController {
   @GetMapping("/pool-detail-epochs")
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
       @RequestParam("poolView") String poolView,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(pageable, poolView));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
+    return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(pagination.toPageable(), poolView));
   }
 
   @GetMapping("/pool-detail-delegators")
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
       @RequestParam("poolView") String poolView,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(pageable, poolView));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
+    return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(pagination.toPageable(), poolView));
   }
 
   @GetMapping("/top")
   @LogMessage
   @Operation(summary = "Find Top(default is 3) Delegation Pool order by pool size")
-  public ResponseEntity<List<PoolResponse>> findTopDelegationPool(Pageable pageable) {
-    return ResponseEntity.ok(delegationService.findTopDelegationPool(pageable));
+  public ResponseEntity<List<PoolResponse>> findTopDelegationPool(@PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(delegationService.findTopDelegationPool(pagination.toPageable()));
   }
 }

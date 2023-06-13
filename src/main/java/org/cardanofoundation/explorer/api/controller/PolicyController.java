@@ -9,8 +9,9 @@ import org.cardanofoundation.explorer.api.service.PolicyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.common.validate.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationValid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,9 +37,9 @@ public class PolicyController {
   @LogMessage
   @Operation(summary = "Get tokens by policy")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> getTokens(
-      @PathVariable @Parameter(description = "Policy hash") String policyId,
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(policyService.getTokens(policyId, pageable));
+          @PathVariable @Parameter(description = "Policy hash") String policyId,
+          @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(policyService.getTokens(policyId, pagination.toPageable()));
   }
 
   @GetMapping("/{policyId}/holders")
@@ -46,8 +47,8 @@ public class PolicyController {
   @Operation(summary = "Get holders by policy")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
       @PathVariable @Parameter(description = "Policy hash") String policyId,
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(policyService.getHolders(policyId, pageable));
+      @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(policyService.getHolders(policyId, pagination.toPageable()));
   }
 
 }

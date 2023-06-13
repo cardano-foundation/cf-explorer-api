@@ -24,8 +24,9 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.common.validate.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationValid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,15 +45,15 @@ public class StakeKeyController {
   @GetMapping("/registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-          @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pageable));
+          @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pagination.toPageable()));
   }
 
   @GetMapping("/de-registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-          @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pageable));
+          @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pagination.toPageable()));
   }
   @GetMapping("/address/{address}")
   @LogMessage
@@ -75,8 +76,8 @@ public class StakeKeyController {
   @Operation(summary = "Get transactions of stake key")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pageable));
+      @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/delegation-history")
@@ -84,16 +85,16 @@ public class StakeKeyController {
   @Operation(summary = "Get delegation history of stake key")
   public ResponseEntity<BaseFilterResponse<StakeDelegationProjection>> getDelegationHistories(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getDelegationHistories(stakeKey, pageable));
+      @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(stakeService.getDelegationHistories(stakeKey, pagination.toPageable()));
   }
   @GetMapping("/{stakeKey}/stake-history")
   @LogMessage
   @Operation(summary = "Get stake history of stake key")
   public ResponseEntity<BaseFilterResponse<StakeHistoryProjection>> getStakeHistories(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getStakeHistories(stakeKey, pageable));
+      @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(stakeService.getStakeHistories(stakeKey, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/withdrawal-history")
@@ -101,8 +102,8 @@ public class StakeKeyController {
   @Operation(summary = "Get withdrawal transaction of stake key")
   public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject Pageable pageable) {
-    return stakeService.getWithdrawalHistories(stakeKey, pageable);
+      @ParameterObject @PaginationValid Pagination pagination) {
+    return stakeService.getWithdrawalHistories(stakeKey, pagination.toPageable());
   }
 
   @GetMapping("/{stakeKey}/instantaneous-rewards")
@@ -110,15 +111,15 @@ public class StakeKeyController {
   @Operation(summary = "Get reward transaction of stake key")
   public BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject Pageable pageable) {
-    return stakeService.getInstantaneousRewards(stakeKey, pageable);
+      @ParameterObject @PaginationValid Pagination pagination) {
+    return stakeService.getInstantaneousRewards(stakeKey, pagination.toPageable());
   }
 
   @GetMapping("/top-delegators")
   @LogMessage
   @Operation(summary = "Get top delegators")
-  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(@ParameterObject Pageable pageable) {
-    return stakeService.getTopDelegators(pageable);
+  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(@ParameterObject @PaginationValid Pagination pagination) {
+    return stakeService.getTopDelegators(pagination.toPageable());
   }
 
   @GetMapping("/{stakeKey}/list-address")
@@ -126,8 +127,8 @@ public class StakeKeyController {
   @Operation(summary = "Get all address of stake")
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(stakeService.getAddresses(stakeKey,pageable));
+      @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(stakeService.getAddresses(stakeKey,pagination.toPageable()));
   }
 
   @GetMapping("/analytics")

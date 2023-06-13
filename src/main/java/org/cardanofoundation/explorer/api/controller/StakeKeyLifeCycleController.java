@@ -6,6 +6,9 @@ import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilt
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
+import org.cardanofoundation.explorer.common.validate.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationValid;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
@@ -13,9 +16,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,10 +43,10 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeRegistrations(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, condition, pageable));
+        stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/de-registrations")
@@ -53,10 +54,10 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeDeRegistrations(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, condition, pageable));
+        stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/delegations")
@@ -64,10 +65,10 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeDelegationFilterResponse>> getDelegations(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          Delegation_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          Delegation_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pageable));
+        stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/delegations/{hash}")
@@ -84,9 +85,9 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
       @RequestParam(value = "fromDate", required = false) Date fromDate,
       @RequestParam(value = "toDate", required = false) Date toDate,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, pageable));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/withdrawals")
@@ -95,10 +96,10 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
       @ParameterObject @Parameter(description = "filter condition")
       StakeLifeCycleFilterRequest condition,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pageable));
+        stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/withdrawals/{hash}")
@@ -113,18 +114,18 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>> getWalletActivities(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          AddressTxBalance_.TX}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pageable));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          AddressTxBalance_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/reward-activity")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRewardActivityResponse>> getRewardActivities(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pageable));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pagination.toPageable()));
   }
 
 }

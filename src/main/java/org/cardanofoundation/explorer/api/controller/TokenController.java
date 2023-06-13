@@ -10,15 +10,16 @@ import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.validate.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationValid;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,10 +37,10 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
-      @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY,
-          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable)
+      @ParameterObject @PaginationValid @PaginationDefault(sort = {MultiAsset_.SUPPLY,
+          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pagination pagination)
       throws ExecutionException, InterruptedException {
-    return ResponseEntity.ok(tokenService.filterToken(pageable));
+    return ResponseEntity.ok(tokenService.filterToken(pagination.toPageable()));
   }
 
   @GetMapping("/{tokenId}")
@@ -53,25 +54,25 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token mint transaction")
   public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(
-      @PathVariable String tokenId, @ParameterObject @SortDefault(sort = {
-      BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pageable));
+      @PathVariable String tokenId, @ParameterObject @PaginationValid @PaginationDefault(sort = {
+      BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
+    return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pagination.toPageable()));
   }
 
   @GetMapping("/{tokenId}/top_holders")
   @LogMessage
   @Operation(summary = "Filter holders by token")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
-      @PathVariable String tokenId, @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pageable));
+      @PathVariable String tokenId, @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pagination.toPageable()));
   }
 
   @GetMapping("/{tokenId}/txs")
   @LogMessage
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-      @PathVariable String tokenId, @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pageable));
+      @PathVariable String tokenId, @ParameterObject @PaginationValid Pagination pagination) {
+    return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pagination.toPageable()));
   }
 
   @GetMapping("/analytics/{tokenId}/{type}")

@@ -12,10 +12,11 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardRe
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
+import org.cardanofoundation.explorer.common.validate.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validate.pagination.PaginationValid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,12 +33,12 @@ public class PoolLifecycleController {
 
   @GetMapping(value = "/registration")
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> registration(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       @Param("poolView") String poolView, @Param("txHash") String txHash,
       @Param("fromDate") Date fromDate,
       @Param("toDate") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.registration(poolView, txHash, fromDate, toDate, pageable));
+        poolLifecycleService.registration(poolView, txHash, fromDate, toDate, pagination.toPageable()));
   }
 
   @GetMapping(value = "/registration-detail")
@@ -48,12 +49,12 @@ public class PoolLifecycleController {
 
   @GetMapping(value = "/pool-update")
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> poolUpdate(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       @Param("poolView") String poolView, @Param("txHash") String txHash,
       @Param("fromDate") Date fromDate,
       @Param("toDate") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.poolUpdate(poolView, txHash, fromDate, toDate, pageable));
+        poolLifecycleService.poolUpdate(poolView, txHash, fromDate, toDate, pagination.toPageable()));
   }
 
   @GetMapping(value = "/pool-update-detail")
@@ -64,25 +65,25 @@ public class PoolLifecycleController {
   @GetMapping(value = "/reward")
   public ResponseEntity<BaseFilterResponse<RewardResponse>> reward(
       @RequestParam("poolView") String poolView,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolLifecycleService.listReward(poolView, pageable));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
+    return ResponseEntity.ok(poolLifecycleService.listReward(poolView, pagination.toPageable()));
   }
 
   @GetMapping(value = "/de-registration")
   public ResponseEntity<BaseFilterResponse<DeRegistrationResponse>> deRegistration(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       @Param("poolView") String poolView, @Param("txHash") String txHash,
       @Param("fromDate") Date fromDate,
       @Param("toDate") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.deRegistration(poolView, txHash, fromDate, toDate, pageable));
+        poolLifecycleService.deRegistration(poolView, txHash, fromDate, toDate, pagination.toPageable()));
   }
 
   @GetMapping(value = "/owner")
   public ResponseEntity<BaseFilterResponse<String>> poolOwner(
       @RequestParam("stakeKey") String stakeKey,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
-    return ResponseEntity.ok(poolLifecycleService.getPoolViewByStakeKey(stakeKey, pageable));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
+    return ResponseEntity.ok(poolLifecycleService.getPoolViewByStakeKey(stakeKey, pagination.toPageable()));
   }
 
   @GetMapping(value = "/pool-info")
@@ -93,17 +94,17 @@ public class PoolLifecycleController {
   @GetMapping(value = "/registration-list")
   public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> registrationList(
       @RequestParam("poolView") String poolView,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
     return ResponseEntity.ok(
-        poolLifecycleService.registrationList(poolView, pageable));
+        poolLifecycleService.registrationList(poolView, pagination.toPageable()));
   }
 
   @GetMapping(value = "/pool-update-list")
   public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> poolUpdate(
       @RequestParam("poolView") String poolView,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
     return ResponseEntity.ok(
-        poolLifecycleService.poolUpdateList(poolView, pageable));
+        poolLifecycleService.poolUpdateList(poolView, pagination.toPageable()));
   }
 
   @GetMapping(value = "/status")
