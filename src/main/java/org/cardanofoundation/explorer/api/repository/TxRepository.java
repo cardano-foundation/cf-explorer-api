@@ -43,7 +43,8 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   List<Long> findLatestTxId(Pageable pageable);
 
 
-  @Query(value = "SELECT tx.hash as hash, "
+  @Query(value = "SELECT tx.id as id, "
+      + "tx.hash as hash, "
       + "b.blockNo as blockNo, "
       + "outp.address as toAddress, "
       + "inp.address as fromAddress, "
