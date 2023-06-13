@@ -61,6 +61,11 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   }
 
   @Override
+  public Set<String> checkAllPoolHistoryForPool(Set<String> poolIds) {
+    return poolHistoryCheckpointRepository.checkPoolHistoryByPoolViewAndEpoch(poolIds);
+  }
+
+  @Override
   public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
     int i = 0;
     boolean isFetch = false;

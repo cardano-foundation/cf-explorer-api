@@ -16,32 +16,32 @@ import org.springframework.stereotype.Repository;
 public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> {
 
   @Query(value =
-      "SELECT ph.poolId AS view, CAST(ph.delegRewards AS BigInteger) AS delegateReward, ph.epochRos AS ros "
+      "SELECT ph.pool.view AS view, ph.delegatorRewards AS delegateReward, ph.epochRos AS ros "
           + "FROM PoolHistory ph "
-          + "WHERE ph.poolId IN :poolIds AND ph.epochNo = :epochNo")
+          + "WHERE ph.pool.view IN :poolIds AND ph.epochNo = :epochNo")
   List<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolIds") Set<String> poolIds,
       @Param("epochNo") Integer epochNo);
 
   @Query(value =
-      "SELECT ph.epochNo AS epochNo, CAST(ph.delegRewards AS BigInteger) AS delegateReward, ph.epochRos AS ros, "
-          + "CAST(ph.activeStake AS BigInteger) AS activeStake, CAST(ph.poolFees AS BigInteger) AS poolFees "
+      "SELECT ph.epochNo AS epochNo, ph.delegatorRewards AS delegateReward, ph.epochRos AS ros, "
+          + "ph.activeStake AS activeStake, ph.poolFees AS poolFees "
           + "FROM PoolHistory ph "
-          + "WHERE ph.poolId = :poolId "
+          + "WHERE ph.pool.view = :poolId "
           + "ORDER BY ph.epochNo DESC")
   Page<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId, Pageable pageable);
 
   @Query(value =
-          "SELECT ph.epochNo AS epochNo, CAST(ph.delegRewards AS BigInteger) AS delegateReward, ph.epochRos AS ros, "
-                  + "CAST(ph.activeStake AS BigInteger) AS activeStake, CAST(ph.poolFees AS BigInteger) AS poolFees "
+          "SELECT ph.epochNo AS epochNo, ph.delegatorRewards AS delegateReward, ph.epochRos AS ros, "
+                  + "ph.activeStake AS activeStake, ph.poolFees AS poolFees "
                   + "FROM PoolHistory ph "
-                  + "WHERE ph.poolId = :poolId "
+                  + "WHERE ph.pool.view = :poolId "
                   + "ORDER BY ph.epochNo DESC")
   List<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId);
 
   @Query(value =
-      "SELECT ph.epochNo AS chartKey, CAST(ph.activeStake AS BigInteger) AS chartValue "
+      "SELECT ph.epochNo AS chartKey, ph.activeStake AS chartValue "
           + "FROM PoolHistory ph "
-          + "WHERE ph.poolId = :poolId "
+          + "WHERE ph.pool.view = :poolId "
           + "ORDER BY ph.epochNo ASC")
   List<EpochChartProjection> getPoolHistoryKoiOsForEpochChart(@Param("poolId") String poolId);
 }

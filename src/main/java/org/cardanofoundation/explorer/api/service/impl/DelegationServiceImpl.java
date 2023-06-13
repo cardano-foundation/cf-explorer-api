@@ -151,8 +151,7 @@ public class DelegationServiceImpl implements DelegationService {
     if (Objects.nonNull(search) && search.isBlank()) {
       search = null;
     }
-    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search,
-        search, pageable);
+    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
     List<PoolResponse> poolList = new ArrayList<>();
     Set<Long> poolIds = new HashSet<>();
     List<Object> poolViews = new ArrayList<>();
