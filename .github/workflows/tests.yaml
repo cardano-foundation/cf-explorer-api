@@ -41,3 +41,13 @@ jobs:
       - name: Test
         run: |
           mvn --batch-mode --update-snapshots test
+  end2end:
+    needs: test
+    runs-on: ubuntu-latest
+    container:
+      image: postman/newman
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Test
+        run: newman run src/test/Postman/Cardano-Explorer-API.postman_collection.json -e src/test/Postman/DevInt.postman_environment.json

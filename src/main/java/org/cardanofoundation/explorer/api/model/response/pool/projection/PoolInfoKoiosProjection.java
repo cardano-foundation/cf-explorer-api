@@ -2,11 +2,11 @@ package org.cardanofoundation.explorer.api.model.response.pool.projection;
 
 import java.math.BigInteger;
 
-public interface PoolAmountProjection {
-
-  Long getPoolId();
+public interface PoolInfoKoiosProjection {
 
   String getView();
 
-  BigInteger getAmount();
+  BigInteger getActiveStake();
+
+  Double getSaturation();
 }

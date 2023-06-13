@@ -1,15 +1,18 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import org.cardanofoundation.explorer.api.model.response.pool.projection.RewardEpochProjection;
-import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
-import org.cardanofoundation.explorer.api.projection.UniqueAddressProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import org.cardanofoundation.explorer.api.model.response.pool.projection.RewardEpochProjection;
+import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
+import org.cardanofoundation.explorer.api.projection.EpochTimeProjection;
+import org.cardanofoundation.explorer.api.projection.UniqueAddressProjection;
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 
 public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
@@ -52,4 +55,9 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
       + "GROUP BY addr.stakeAddressId, addr.address")
   List<UniqueAddressProjection> getTotalAccountsAtEpoch(@Param("epochNo") Integer epochNo, @Param("txId") Long txId);
 
+
+  @Query(value = "SELECT  e.no AS epochNo , e.startTime AS startTime , e.endTime AS endTime "
+      + "FROM Epoch e "
+      + "WHERE e.no BETWEEN :min AND :max")
+  List<EpochTimeProjection> findEpochTime(@Param("min") Integer min, @Param("max") Integer max);
 }
