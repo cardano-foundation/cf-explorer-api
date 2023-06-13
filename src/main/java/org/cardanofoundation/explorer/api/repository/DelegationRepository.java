@@ -44,17 +44,12 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
   @Query(value =
       "SELECT sa.id AS stakeAddressId, sa.view AS view , bk.time AS time, tx.fee AS fee "
-          + "FROM PoolHash ph "
-          + "JOIN Delegation dg ON dg.poolHash.id = ph.id AND dg.id = (SELECT max(dg2.id) FROM Delegation dg2 WHERE dg.address.id = dg2.address.id AND dg2.poolHash.id = ph.id) "
-          + "JOIN StakeAddress sa ON sa.id = dg.address.id "
+          + "FROM StakeAddress sa "
           + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr2.id) FROM StakeRegistration sr2 WHERE sa.id = sr2.addr.id) "
-          + "LEFT JOIN StakeDeregistration sd ON sa.id = sd.addr.id AND sd.id IS NULL "
-          + "JOIN Tx tx ON tx.id = sr.tx.id "
-          + "JOIN Block bk ON bk.id = tx.block.id "
-          + "WHERE ph.id = :poolId "
-          + "ORDER BY bk.time DESC")
-  Page<PoolDetailDelegatorProjection> getAllDelegatorByPool(@Param("poolId") Long poolId,
-      Pageable pageable);
+          + "JOIN Tx tx ON sr.tx.id  = tx.id "
+          + "JOIN Block bk ON tx.block.id = bk.id "
+          + "WHERE sa.id IN :addressIds")
+  List<PoolDetailDelegatorProjection> getDelegatorsByAddress(@Param("addressIds") Set<Long> addressIds);
 
   @Query("SELECT count(de.id) FROM Delegation de "
       + "LEFT JOIN StakeDeregistration sd ON de.address.id = sd.addr.id AND sd.id IS NULL "
@@ -177,4 +172,38 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(@Param("poolIds") Set<Long> poolIds);
 
   Boolean existsByAddress(@Param("stakeAddress") StakeAddress stakeAddress);
+
+  @Query(value =
+      "SELECT count(dg1.address.id) "
+          + "FROM Delegation dg1 "
+          + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
+          + "WHERE ph.view = :poolView "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM Delegation dg2 "
+          + "WHERE dg2.address.id = dg1.address.id "
+          + "AND dg2.tx.id > dg1.tx.id) "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM StakeDeregistration sd "
+          + "WHERE sd.addr.id = dg1.address.id "
+          + "AND sd.tx.id > dg1.tx.id)")
+  Integer liveDelegatorsCount(@Param("poolView") String poolView);
+
+  @Query(value =
+      "SELECT dg1.address.id "
+          + "FROM Delegation dg1 "
+          + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
+          + "WHERE ph.view = :poolView "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM Delegation dg2 "
+          + "WHERE dg2.address.id = dg1.address.id "
+          + "AND dg2.tx.id > dg1.tx.id) "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM StakeDeregistration sd "
+          + "WHERE sd.addr.id = dg1.address.id "
+          + "AND sd.tx.id > dg1.tx.id)")
+  Page<Long> liveDelegatorsList(@Param("poolView") String poolView, Pageable pageable);
 }

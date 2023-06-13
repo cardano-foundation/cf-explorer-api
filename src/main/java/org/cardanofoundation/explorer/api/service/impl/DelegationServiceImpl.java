@@ -151,7 +151,8 @@ public class DelegationServiceImpl implements DelegationService {
     if (Objects.nonNull(search) && search.isBlank()) {
       search = null;
     }
-    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
+    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search,
+        pageable);
     List<PoolResponse> poolList = new ArrayList<>();
     Set<Long> poolIds = new HashSet<>();
     List<Object> poolViews = new ArrayList<>();
@@ -385,7 +386,7 @@ public class DelegationServiceImpl implements DelegationService {
     List<String> ownerAddress = poolUpdateRepository.findOwnerAccountByPool(poolId);
     Collections.sort(ownerAddress);
     poolDetailResponse.setOwnerAccounts(ownerAddress);
-    poolDetailResponse.setDelegators(delegationRepository.numberDelegatorsByPool(poolId));
+    poolDetailResponse.setDelegators(delegationRepository.liveDelegatorsCount(poolView));
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
     return poolDetailResponse;
@@ -520,25 +521,23 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(
       Pageable pageable, String poolView) {
-    PoolHash poolHash = poolHashRepository.findByView(poolView)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
-    Page<PoolDetailDelegatorProjection> delegatorPage = delegationRepository.getAllDelegatorByPool(
-        poolHash.getId(), pageable);
-    if (!delegatorPage.isEmpty()) {
+    Page<Long> addressIdPage = delegationRepository.liveDelegatorsList(poolView, pageable);
+    if (!addressIdPage.isEmpty()) {
+      Set<Long> addressIds = addressIdPage.stream().collect(Collectors.toSet());
       Integer currentEpoch = epochRepository.findCurrentEpochNo()
           .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+      List<PoolDetailDelegatorProjection> delegatorPage = delegationRepository.getDelegatorsByAddress(
+          addressIds);
       List<PoolDetailDelegatorResponse> delegatorList = delegatorPage.stream()
           .map(PoolDetailDelegatorResponse::new).toList();
-      Set<Long> addressIds = delegatorList.stream()
-          .map(PoolDetailDelegatorResponse::getStakeAddressId).collect(Collectors.toSet());
       Boolean isKoiOs = fetchRewardDataService.isKoiOs();
       boolean isCheck = true;
       if (Boolean.TRUE.equals(isKoiOs)) {
         List<String> addressViews = stakeAddressRepository.getViewByAddressId(addressIds);
         Boolean isStake = fetchRewardDataService.checkEpochStakeForPool(addressViews);
         if (Boolean.FALSE.equals(isStake)) {
-          Boolean isFetch = addressViews.size() > 25 ? null
+          Boolean isFetch = addressViews.size() > 40 ? null
               : fetchRewardDataService.fetchEpochStakeForPool(addressViews);
           if (Objects.isNull(isFetch)) {
             List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>();
@@ -578,7 +577,7 @@ public class DelegationServiceImpl implements DelegationService {
         delegatorList.forEach(delegator -> delegator.setTotalStake(
             stakeAddressProjectionMap.get(delegator.getStakeAddressId())));
       }
-      delegatorResponse.setTotalItems(delegatorPage.getTotalElements());
+      delegatorResponse.setTotalItems(addressIdPage.getTotalElements());
       delegatorResponse.setData(delegatorList);
     }
     return delegatorResponse;
