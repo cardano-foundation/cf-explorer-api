@@ -233,13 +233,16 @@ public class TokenServiceImpl implements TokenService {
       BigInteger todayBalance = addressTokenRepository.sumBalanceBetweenTx(
           multiAsset,
           Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
-      );
+      ).orElse(BigInteger.ZERO);
+
       BigInteger rangeToYesterdayBalance = aggregateAddressTokenRepository
-          .sumBalanceInTimeRange(multiAsset.getId(), from, to.minusDays(1));
+          .sumBalanceInTimeRange(multiAsset.getId(), from, to.minusDays(1))
+          .orElse(BigInteger.ZERO);
+
       balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
     } else {
       balance = aggregateAddressTokenRepository
-          .sumBalanceInTimeRange(multiAsset.getId(), from, to);
+          .sumBalanceInTimeRange(multiAsset.getId(), from, to).orElse(BigInteger.ZERO);
     }
     
     return new TokenVolumeAnalyticsResponse(to, balance);
