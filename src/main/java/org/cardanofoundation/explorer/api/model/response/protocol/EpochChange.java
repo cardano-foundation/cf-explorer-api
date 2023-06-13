@@ -5,7 +5,16 @@ import lombok.Data;
 
 @Builder
 @Data
-public class EpochChange {
+public class EpochChange implements Cloneable {
+
   Integer startEpoch;
   Integer endEpoch;
+
+  @Override
+  public EpochChange clone() {
+      return EpochChange.builder()
+          .startEpoch(this.startEpoch)
+          .endEpoch(this.endEpoch)
+          .build();
+  }
 }
