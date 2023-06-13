@@ -55,8 +55,13 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
-      + " WHERE rw.addr = :stakeAddress")
-  Page<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress, Pageable pageable);
+      + " WHERE rw.addr = :stakeAddress"
+      + " AND (epoch.startTime >= :fromDate )"
+      + " AND (epoch.startTime <= :toDate )")
+  Page<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress,
+                                              @Param("fromDate") Timestamp fromDate,
+                                              @Param("toDate") Timestamp toDate,
+                                              Pageable pageable);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
       + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
@@ -134,4 +139,12 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "GROUP BY rw.earnedEpoch")
   List<EpochRewardProjection> getPoolRewardByPool(@Param("poolId") Long poolId,
       @Param("epochNos") Set<Integer> epochNos);
+
+  @Query(value = "SELECT ph.view AS view, sum(rw.amount) AS amount "
+      + "FROM Reward rw "
+      + "JOIN PoolHash ph ON rw.pool.id = ph.id "
+      + "WHERE ph.view IN :poolViews AND rw.type = 'leader' AND rw.spendableEpoch = :epochNo "
+      + "GROUP BY ph.view")
+  List<PoolAmountProjection> getOperatorRewardByPoolList(@Param("poolViews") Set<String> poolViews,
+      @Param("epochNo") Integer epochNo);
 }

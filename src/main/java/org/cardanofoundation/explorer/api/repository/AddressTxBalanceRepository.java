@@ -2,7 +2,6 @@ package org.cardanofoundation.explorer.api.repository;
 
 import java.util.Collection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
-import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
@@ -27,6 +26,13 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " WHERE addressTxBalance.address = :address"
       + " AND addressTxBalance.time <= :time")
   BigInteger getBalanceByAddressAndTime(@Param("address") Address address, @Param("time") Timestamp time);
+
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address = :address"
+      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByAddressAndTime(@Param("address") Address address,
+                                                  @Param("from") Timestamp from,
+                                                  @Param("to") Timestamp to);
 
   @Query(value = "select min(calculated_balances.sum_of_no) as minVal, max(calculated_balances.sum_of_no) as maxVal " +
       "from (select list_balance.id, sum(list_balance.balance) OVER (order by list_balance.id) as sum_of_no " +
@@ -70,10 +76,9 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
 
   @Query(value = "SELECT DISTINCT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
-      + " WHERE addrTxBalance.address IN "
-      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress.view = :stakeAddress)"
-      + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
-  Page<Tx> findAllByStake(@Param("stakeAddress") String stakeAddress, Pageable pageable);
+      + " WHERE addrTxBalance.stakeAddress.id = :stakeAddressId "
+      + " ORDER BY tx.id DESC")
+  Page<Tx> findAllByStake(@Param("stakeAddressId") Long stakeAddressId, Pageable pageable);
 
   @Query(value = "SELECT addrTxBalance.tx.id as txId, sum(addrTxBalance.balance) as amount,"
       + " addrTxBalance.time as time"
@@ -90,15 +95,23 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
                                                        @Param("time") Timestamp time);
 
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
+      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                       @Param("from") Timestamp from,
+                                                       @Param("to") Timestamp to);
+
   @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.address = :address")
   List<AddressTxBalance> findByTxIdInAndByAddress(@Param("ids") Collection<Long> ids,
                                                   @Param("address") String address);
 
   @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
-      + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.addressId in :addressIds")
-  List<AddressTxBalance> findByTxIdInAndByAddressIn(@Param("ids") Collection<Long> ids,
-                                                    @Param("addressIds") Set<Long> addressIds);
+      + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.stakeAddress.id = :stakeId")
+  List<AddressTxBalance> findByTxIdInAndStakeId(@Param("ids") Collection<Long> ids,
+                                                @Param("stakeId") Long stakeId);
 
   @Query(value = "SELECT addrTxBalance.tx.id as txId, sum(addrTxBalance.balance) as amount,"
       + " addrTxBalance.time as time"

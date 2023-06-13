@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.api.model.response.tx.*;
+import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +36,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -70,29 +74,6 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.FailedTxOutRepository;
-import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRelayRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.repository.UnconsumeTxInRepository;
-import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -146,6 +127,9 @@ public class TxServiceImpl implements TxService {
   private final ParamProposalRepository paramProposalRepository;
   private final EpochParamRepository epochParamRepository;
   private final TxChartRepository txChartRepository;
+  private final TreasuryRepository treasuryRepository;
+  private final ReserveRepository reserveRepository;
+  private final StakeAddressRepository stakeAddressRepository;
   private final ProtocolMapper protocolMapper;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
@@ -268,7 +252,7 @@ public class TxServiceImpl implements TxService {
     List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
 
     Page<Tx> txPage = new PageImpl<>(txList, pageable, addr.getTxCount());
-    return new BaseFilterResponse<>(txPage, mapDataFromTxByAddressListToResponses(txPage, address));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxByAddressListToResponses(txPage, addr));
   }
 
   @Override
@@ -291,8 +275,12 @@ public class TxServiceImpl implements TxService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
                                                                      Pageable pageable) {
-    Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeKey, pageable);
-    List<TxFilterResponse> data = mapDataFromTxByStakeListToResponseList(txPage, stakeKey);
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND)
+    );
+
+    Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeAddress.getId(), pageable);
+    List<TxFilterResponse> data = mapDataFromTxByStakeListToResponseList(txPage, stakeAddress.getId());
     return new BaseFilterResponse<>(txPage, data);
   }
 
@@ -351,77 +339,110 @@ public class TxServiceImpl implements TxService {
   }
 
   private List<TxFilterResponse> mapDataFromTxByAddressListToResponses(Page<Tx> txPage,
-                                                                       String address) {
+                                                                       Address address) {
     List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
 
     Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
 
     // get address tx balance
     List<AddressTxBalance> addressTxBalances =
-        addressTxBalanceRepository.findByTxIdInAndByAddress(txIdList, address);
+        addressTxBalanceRepository.findByTxIdInAndByAddress(txIdList, address.getAddress());
     Map<Long, List<AddressTxBalance>> addressTxBalanceMap =
         addressTxBalances.stream().collect(Collectors.groupingBy(AddressTxBalance::getTxId));
 
     // get address token
     List<AddressToken> addressTokens =
-        addressTokenRepository.findByTxIdInAndByAddress(txIdList, address);
+        addressTokenRepository.findByTxIdInAndByAddress(txIdList, address.getAddress());
     Map<Long, List<AddressToken>> addressTokenMap =
         addressTokens.stream()
             .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
             .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
 
+    // get metadata and multi asset
+    Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
+        getMapMetadataAndMapAsset(addressTokens);
+    Map<Long, Address> addressMap = new HashMap<>() {{
+      put(address.getId(), address);
+    }};
+
     txFilterResponses.forEach(
         tx ->
             setAdditionalData(
-                addressTxBalanceMap, addressTokenMap, getMetadata(addressTokens), tx));
+                addressTxBalanceMap,
+                addressTokenMap,
+                getMapMetadataAndMapAsset.getFirst(),
+                getMapMetadataAndMapAsset.getSecond(),
+                addressMap,
+                tx));
     return txFilterResponses;
   }
 
-  private List<TxFilterResponse> mapDataFromTxByStakeListToResponseList(
-      Page<Tx> txPage, String stake) {
+  private List<TxFilterResponse> mapDataFromTxByStakeListToResponseList(Page<Tx> txPage,
+                                                                        Long stakeId) {
     List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
     Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
 
-    Set<Long> addressIds = addressRepository.findByStakeAddress(stake).stream().map(Address::getId)
-        .collect(
-            Collectors.toSet());
-
     // get address tx balance
     List<AddressTxBalance> addressTxBalances =
-        addressTxBalanceRepository.findByTxIdInAndByAddressIn(txIdList, addressIds);
+        addressTxBalanceRepository.findByTxIdInAndStakeId(txIdList, stakeId);
 
     Map<Long, List<AddressTxBalance>> addressTxBalanceMap =
         addressTxBalances.stream().collect(Collectors.groupingBy(AddressTxBalance::getTxId));
 
     List<AddressToken> addressTokens =
-        addressTokenRepository.findByTxIdInAndByAddressIn(txIdList, addressIds);
+        addressTokenRepository.findByTxIdInAndStakeId(txIdList, stakeId);
     Map<Long, List<AddressToken>> addressTokenMap =
         addressTokens.stream()
             .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
             .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
 
+    // get metadata and multi asset
+    Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
+        getMapMetadataAndMapAsset(addressTokens);
+
+    // get address
+    Set<Long> addressIdList = addressTokens.stream().map(AddressToken::getAddressId).collect(
+        Collectors.toSet());
+    List<Address> addresses = addressRepository.findAddressByIdIn(addressIdList);
+    Map<Long, Address> addressMap =
+        addresses.stream().collect(Collectors.toMap(Address::getId, Function.identity()));
+
     txFilterResponses.forEach(
         tx ->
             setAdditionalData(
-                addressTxBalanceMap, addressTokenMap, getMetadata(addressTokens), tx));
+                addressTxBalanceMap,
+                addressTokenMap,
+                getMapMetadataAndMapAsset.getFirst(),
+                getMapMetadataAndMapAsset.getSecond(),
+                addressMap,
+                tx));
     return txFilterResponses;
   }
 
-  private Map<String, AssetMetadata> getMetadata(List<AddressToken> addressTokens) {
+  private Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset(
+      List<AddressToken> addressTokens) {
     List<Long> multiAssetIdList =
         addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
     List<MultiAsset> multiAssets = multiAssetRepository.findAllByIdIn(multiAssetIdList);
     Set<String> subjects =
         multiAssets.stream().map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    return assetMetadataList.stream()
-        .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+    Map<String, AssetMetadata> assetMetadataMap =
+        assetMetadataList.stream()
+            .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+
+    Map<Long, MultiAsset> multiAssetMap =
+        multiAssets.stream().collect(Collectors.toMap(MultiAsset::getId, Function.identity()));
+
+    return Pair.of(assetMetadataMap, multiAssetMap);
   }
 
   private void setAdditionalData(
       Map<Long, List<AddressTxBalance>> addressTxBalanceMap,
       Map<Long, List<AddressToken>> addressTokenMap,
       Map<String, AssetMetadata> assetMetadataMap,
+      Map<Long, MultiAsset> multiAssetMap,
+      Map<Long, Address> addressMap,
       TxFilterResponse tx) {
 
     if (addressTxBalanceMap.containsKey(tx.getId())) {
@@ -437,12 +458,21 @@ public class TxServiceImpl implements TxService {
           addressTokenMap.get(tx.getId()).stream()
               .map(
                   addressToken -> {
-                    MultiAsset multiAsset = addressToken.getMultiAsset();
-                    TokenAddressResponse taResponse =
-                        tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressToken);
-                    String subject = multiAsset.getPolicy() + multiAsset.getName();
-                    taResponse.setMetadata(
-                        assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
+                    MultiAsset multiAsset = multiAssetMap.get(addressToken.getMultiAssetId());
+                    TokenAddressResponse taResponse = new TokenAddressResponse();
+                    if (!Objects.isNull(multiAsset)) {
+                      taResponse =
+                          tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressToken);
+                      String subject = multiAsset.getPolicy() + multiAsset.getName();
+                      taResponse.setMetadata(
+                          assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
+                    }
+
+                    Address address = addressMap.get(addressToken.getAddressId());
+                    if (!Objects.isNull(address)) {
+                      taResponse.setAddress(address.getAddress());
+                    }
+
                     return taResponse;
                   })
               .toList();
@@ -483,6 +513,7 @@ public class TxServiceImpl implements TxService {
     getStakeCertificates(tx, txResponse);
     getPoolCertificates(tx, txResponse);
     getProtocols(tx, txResponse);
+    getInstantaneousRewards(tx, txResponse);
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -504,6 +535,20 @@ public class TxServiceImpl implements TxService {
     }
 
     return txResponse;
+  }
+
+  /**
+   * Get transaction reserve and treasury
+   *
+   * @param tx         transaction
+   * @param txResponse response data of transaction
+   */
+  private void getInstantaneousRewards(Tx tx, TxResponse txResponse) {
+    var instantaneousRewards = reserveRepository.findByTx(tx);
+    instantaneousRewards.addAll(treasuryRepository.findByTx(tx));
+    if(!CollectionUtils.isEmpty(instantaneousRewards)) {
+      txResponse.setInstantaneousRewards(instantaneousRewards);
+    }
   }
 
   /**

@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.math.BigInteger;
@@ -46,9 +48,12 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ReserveRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
@@ -79,6 +84,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class StakeKeyServiceImpl implements StakeKeyService {
 
+  private final PoolHashRepository poolHashRepository;
+
   private final AddressRepository addressRepository;
   private final DelegationRepository delegationRepository;
   private final StakeRegistrationRepository stakeRegistrationRepository;
@@ -97,6 +104,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final RedisTemplate<String, Object> redisTemplate;
   private final TopDelegatorCacheService topDelegatorCacheService;
   private final FetchRewardDataService fetchRewardDataService;
+  private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
+
+  private final PoolInfoRepository poolInfoRepository;
   private static final int STAKE_ANALYTIC_NUMBER = 5;
 
   @Value("${application.network}")
@@ -282,21 +292,39 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public StakeAnalyticResponse getStakeAnalytics() {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
-    Object activeStake = redisTemplate.opsForValue()
-        .get(CommonConstant.REDIS_TOTAL_ACTIVATE_STAKE + network + "_" + currentEpoch);
-    response.setActiveStake(
-        Objects.nonNull(activeStake) ? new BigInteger(String.valueOf(activeStake))
-            : BigInteger.ZERO);
-    Object liveStake = redisTemplate.opsForValue()
-        .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
-    response.setLiveStake(
-        Objects.nonNull(liveStake) ? new BigInteger(String.valueOf(liveStake)) : BigInteger.ZERO);
+    Boolean isKoiOs = fetchRewardDataService.isKoiOs();
+    BigInteger activeStake = null;
+    BigInteger liveStake = null;
+    if (Boolean.TRUE.equals(isKoiOs)) {
+      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
+      if (!poolIds.isEmpty()) {
+        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIds);
+        if (Boolean.TRUE.equals(isFetch)) {
+          activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
+          liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
+        }
+      } else {
+        activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
+        liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
+      }
+    } else {
+      Object activeStakeObj = redisTemplate.opsForValue()
+          .get(CommonConstant.REDIS_TOTAL_ACTIVATE_STAKE + network + "_" + currentEpoch);
+      activeStake = Objects.nonNull(activeStakeObj) ? new BigInteger(String.valueOf(activeStakeObj))
+          : BigInteger.ZERO;
+      Object liveStakeObj = redisTemplate.opsForValue()
+          .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
+      liveStake = Objects.nonNull(liveStakeObj) ? new BigInteger(String.valueOf(liveStakeObj))
+          : BigInteger.ZERO;
+    }
+    response.setActiveStake(activeStake);
+    response.setLiveStake(liveStake);
     return response;
   }
 
   @Override
   public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey,
-      AnalyticType type)
+                                                                     AnalyticType type)
       throws ExecutionException, InterruptedException {
 
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey)
@@ -307,13 +335,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     ExecutorService fixedExecutor = Executors.newFixedThreadPool(STAKE_ANALYTIC_NUMBER);
 
     dates.forEach(dateItem -> futureStakeAnalytics.add(
-        CompletableFuture.supplyAsync(() -> {
-          var balance = addressTxBalanceRepository
-              .getBalanceByStakeAddressAndTime(stakeAddress,
-                  Timestamp.valueOf(dateItem.atTime(LocalTime.MAX)))
-              .orElse(BigInteger.ZERO);
-          return new StakeAnalyticBalanceResponse(dateItem, balance);
-        }, fixedExecutor))
+        CompletableFuture.supplyAsync(() -> getBalanceOfStake(stakeAddress, dateItem),
+            fixedExecutor))
     );
 
     CompletableFuture.allOf(futureStakeAnalytics.toArray(new CompletableFuture[0])).join();
@@ -323,6 +346,30 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       responses.add(fRes.get());
     }
     return responses;
+  }
+
+  private StakeAnalyticBalanceResponse getBalanceOfStake(StakeAddress stakeAddress, LocalDate to) {
+    BigInteger balance = BigInteger.ZERO;
+    if (LocalDate.now().isEqual(to)) {
+      BigInteger todayBalance = addressTxBalanceRepository
+          .getBalanceByStakeAddressAndTime(
+              stakeAddress,
+              Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
+              Timestamp.valueOf(to.atTime(LocalTime.MAX))
+          )
+          .orElse(BigInteger.ZERO);
+
+      BigInteger rangeToYesterdayBalance = aggregateAddressTxBalanceRepository
+          .sumBalanceByStakeAddressId(stakeAddress.getId(), to.minusDays(1))
+          .orElse(BigInteger.ZERO);
+
+      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
+    } else {
+      balance = aggregateAddressTxBalanceRepository
+          .sumBalanceByStakeAddressId(stakeAddress.getId(), to)
+          .orElse(BigInteger.ZERO);
+    }
+    return new StakeAnalyticBalanceResponse(to, balance);
   }
 
   private List<LocalDate> getListDateAnalytic(AnalyticType type) {
@@ -398,5 +445,4 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
     return jsonObject.get("name").getAsString();
   }
-
 }

@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -58,7 +59,8 @@ public class AddressController {
   @Operation(summary = "Get a address analytics")
   public ResponseEntity<List<AddressAnalyticsResponse>> getAddressAnalytics(
       @PathVariable @Parameter(description = "Address") String address,
-      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type)
+      throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(addressService.getAddressAnalytics(address, type));
   }
 

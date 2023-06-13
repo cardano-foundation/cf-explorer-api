@@ -40,4 +40,8 @@ public class PoolResponse implements Serializable {
   private Double saturation;
 
   private BigDecimal stakeLimit;
+
+  private Integer kParam;
+
+  private BigInteger reserves;
 }

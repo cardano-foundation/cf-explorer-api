@@ -1,24 +1,20 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
+import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,7 +37,8 @@ public class TokenController {
   @Operation(summary = "Filter token")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
       @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY,
-          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) throws ExecutionException, InterruptedException {
+          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable)
+      throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.filterToken(pageable));
   }
 
