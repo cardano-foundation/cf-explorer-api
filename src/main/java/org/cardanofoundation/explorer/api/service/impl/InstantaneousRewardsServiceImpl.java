@@ -29,6 +29,9 @@ public class InstantaneousRewardsServiceImpl implements InstantaneousRewardsServ
   private final ReserveRepository reserveRepository;
   private final TreasuryRepository treasuryRepository;
   private final TxRepository txRepository;
+  private static final String TX_ID = "txId";
+  private static final String NUMBER_OF_STAKES = "numberOfStakes";
+  private static final String REWARDS = "rewards";
 
   @Override
   public BaseFilterResponse<InstantaneousRewardsResponse> getAll(Pageable pageable) {
@@ -41,7 +44,7 @@ public class InstantaneousRewardsServiceImpl implements InstantaneousRewardsServ
     instantaneousRewards = instantaneousRewards.subList(start, end);
     Set<Long> txIds = instantaneousRewards.stream().map(InstantaneousRewardsProjection::getTxId).collect(
         Collectors.toSet());
-    List<TxIOProjection> txs = txRepository.findLatestTxIO(txIds);
+    List<TxIOProjection> txs = txRepository.findTxIn(txIds);
     Map<Long, TxIOProjection> txMap
         = txs.stream().collect(Collectors.toMap(TxIOProjection::getId, Function.identity()));
     List<InstantaneousRewardsResponse> response = instantaneousRewards.stream().map(
@@ -65,21 +68,28 @@ public class InstantaneousRewardsServiceImpl implements InstantaneousRewardsServ
    * @param sortable the sortable parameter
    * @param instantaneousRewards the list of instantaneous rewards
    */
-  private static void sortInstantaneousRewards(Sort sortable, List<InstantaneousRewardsProjection> instantaneousRewards) {
-    if(sortable.equals(Sort.by(Sort.Direction.ASC, "tx_id"))) {
-      instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getTxId));
-    } else if (sortable.equals(Sort.by(Sort.Direction.DESC, "tx_id"))) {
-      instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getTxId).reversed());
-    }
-    if(sortable.equals(Sort.by(Sort.Direction.ASC, "numberOfStakes"))) {
-      instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getNumberOfStakes));
-    } else if (sortable.equals(Sort.by(Sort.Direction.DESC, "numberOfStakes"))) {
-      instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getNumberOfStakes).reversed());
-    }
-    if(sortable.equals(Sort.by(Sort.Direction.ASC, "rewards"))) {
-      instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getRewards));
-    } else if (sortable.equals(Sort.by(Sort.Direction.DESC, "rewards"))) {
-      instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getRewards).reversed());
+  private void sortInstantaneousRewards(Sort sortable, List<InstantaneousRewardsProjection> instantaneousRewards) {
+    String sortField = sortable.stream().findFirst().map(Sort.Order::getProperty).orElse(TX_ID);
+    String sortOrder = sortable.stream().findFirst().map(Sort.Order::getDirection).map(Enum::name).orElse(Sort.Direction.DESC.name());
+    switch (sortField) {
+      case NUMBER_OF_STAKES -> {
+        if (sortOrder.equals(Sort.Direction.ASC.name()))
+          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getNumberOfStakes));
+        else
+          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getNumberOfStakes).reversed());
+      }
+      case REWARDS -> {
+        if (sortOrder.equals(Sort.Direction.ASC.name()))
+          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getRewards));
+        else
+          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getRewards).reversed());
+      }
+      default -> {
+        if (sortOrder.equals(Sort.Direction.ASC.name()))
+          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getTxId));
+        else
+          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getTxId).reversed());
+      }
     }
   }
 }
