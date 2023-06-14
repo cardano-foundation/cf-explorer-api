@@ -206,4 +206,14 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "WHERE sd.addr.id = dg1.address.id "
           + "AND sd.tx.id > dg1.tx.id)")
   Page<Long> liveDelegatorsList(@Param("poolView") String poolView, Pageable pageable);
+
+  @Query(value = "SELECT DISTINCT delegation.txId FROM Delegation delegation",
+      countQuery = "SELECT COUNT(DISTINCT delegation.txId) FROM Delegation delegation")
+  Page<Long> findAllDelegations(Pageable pageable);
+
+  @EntityGraph(attributePaths = {Delegation_.ADDRESS, Delegation_.POOL_HASH})
+  @Query(value = "SELECT delegation"
+      + " FROM Delegation delegation"
+      + " WHERE delegation.txId IN :txIds")
+  List<Delegation> findDelegationByTxIdIn(@Param("txIds") List<Long> txIds);
 }
