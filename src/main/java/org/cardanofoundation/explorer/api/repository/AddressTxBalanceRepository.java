@@ -59,7 +59,7 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   @Query(value = "SELECT DISTINCT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.stakeAddress.id = :stakeAddressId "
-      + " ORDER BY addrTxBalance.txId DESC")
+      + " ORDER BY tx.id DESC")
   Page<Tx> findAllByStake(@Param("stakeAddressId") Long stakeAddressId, Pageable pageable);
 
   @Query(value = "SELECT addrTxBalance.tx.id as txId, sum(addrTxBalance.balance) as amount,"
