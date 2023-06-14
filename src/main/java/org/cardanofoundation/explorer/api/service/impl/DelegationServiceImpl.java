@@ -164,8 +164,7 @@ public class DelegationServiceImpl implements DelegationService {
       liveStake = Objects.nonNull(liveStakeObj) ? new BigInteger(String.valueOf(liveStakeObj))
           : BigInteger.ZERO;
     }
-    Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
-        Long.valueOf(epochNo));
+    Integer delegators = delegationRepository.totalLiveDelegatorsCount();
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
         .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
