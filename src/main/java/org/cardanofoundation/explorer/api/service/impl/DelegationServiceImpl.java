@@ -116,6 +116,9 @@ public class DelegationServiceImpl implements DelegationService {
     Epoch epoch = epochRepository.findByCurrentEpochNo()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Integer epochNo = epoch.getNo();
+    if (!fetchRewardDataService.checkAdaPots(epochNo)) {
+      fetchRewardDataService.fetchAdaPots(List.of(epochNo));
+    }
     Timestamp startTime = epoch.getStartTime();
     Long slot = (Instant.now().toEpochMilli() - startTime.getTime()) / MILLI;
     long countDownTime =
@@ -323,13 +326,16 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public PoolDetailHeaderResponse getDataForPoolDetail(String poolView) {
+    Integer currentEpoch = epochRepository.findCurrentEpochNo()
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    if (!fetchRewardDataService.checkAdaPots(currentEpoch)) {
+      fetchRewardDataService.fetchAdaPots(List.of(currentEpoch));
+    }
     PoolDetailUpdateProjection projection = poolHashRepository.getDataForPoolDetail(
         poolView);
     Long poolId = projection.getPoolId();
     PoolDetailHeaderResponse poolDetailResponse = Stream.of(projection)
         .map(PoolDetailHeaderResponse::new).findFirst()
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    Integer currentEpoch = epochRepository.findCurrentEpochNo()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     BigDecimal stakeLimit = getPoolSaturation(projection.getReserves(),
         projection.getParamK());
