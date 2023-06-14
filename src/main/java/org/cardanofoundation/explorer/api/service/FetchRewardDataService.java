@@ -29,5 +29,9 @@ public interface FetchRewardDataService {
 
   Boolean fetchEpochStakeForPool(List<String> rewardAccounts);
 
+  Boolean checkAdaPots(Integer epochNo);
+
+  Boolean fetchAdaPots(List<Integer> epochNo);
+
   Boolean isKoiOs();
 }
