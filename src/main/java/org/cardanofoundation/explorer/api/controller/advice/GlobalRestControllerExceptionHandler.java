@@ -24,13 +24,10 @@ public class GlobalRestControllerExceptionHandler {
   }
 
   @ExceptionHandler({NoContentException.class})
-  public ResponseEntity<ErrorResponse> handleNoContent(NoContentException e) {
+  public ResponseEntity<Object> handleNoContent(NoContentException e) {
     log.warn("No content");
-    return ResponseEntity.status(HttpStatus.OK)
-            .body(ErrorResponse.builder()
-                    .errorCode(HttpStatus.NO_CONTENT.toString())
-                    .errorMessage(e.getErrorMsg())
-                    .build());
+    return ResponseEntity.status(HttpStatus.NO_CONTENT)
+            .body(null);
   }
 
   @ExceptionHandler({FetchRewardException.class})
