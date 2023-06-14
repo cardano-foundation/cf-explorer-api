@@ -1,0 +1,8 @@
+{
+  "mainnet": {
+    "API": "http://mainnet-automation-test.sotatek.works/api/v1/"
+  },
+  "preprod": {
+    "API": "http://preprod-automation-test.sotatek.works/api/v1/"
+  }
+}

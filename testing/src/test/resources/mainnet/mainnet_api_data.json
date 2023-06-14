@@ -1,0 +1,204 @@
+{
+  "first_transaction": {},
+
+  "random_transaction": {},
+
+  "transaction_have_30000000000_ada": {},
+
+  "transaction_have_29999998493561943_ada": {},
+
+  "transaction_byron_era": {
+    "tx": {
+      "hash": "dbc87d198fc9f6067c8e65f89da60a944e1ef52f0c539d980ebbc95f3dc71b65",
+      "blockNo": "6316",
+      "blockHash": "81e389d83e437012789f6410669a404f1e4ebfa7a46a979f094335e2e78dfd8d",
+      "maxEpochSlot": "21600",
+      "epochNo": "0"
+  }
+  },
+
+  "transaction_shelly_era": {
+    "tx": {
+      "hash": "5b9a884a4cd8292688ee91d84d191442f2e832068762f9eb25708d00061d9b69",
+      "blockNo": "4612067",
+      "blockHash": "4815c7f4897be0422f54de108c1fe4c2a7b4c8c3b3411b8195c71b1fea5eafb4",
+      "maxEpochSlot": "432000",
+      "epochNo": "213"
+    }
+  },
+
+  "transaction_allegra_era": {
+    "tx": {
+      "hash": "a90771abcc59719517bf29b16494a0508cbd09a86f03f9b627ab4e2d4c983b9f",
+      "blockNo": "5096526",
+      "blockHash": "31a34a3e35f7e05322676c07f6962d1fe0993039bb2635e026660e947f14b414",
+      "maxEpochSlot": "432000",
+      "epochNo": "236"
+    }
+  },
+
+  "transaction_mary_era": {
+    "tx" : {
+      "hash": "07a008e4b7b42e5764eeee2b7b251abb7e343eaf164e21ffdeb7fb6b94183680",
+      "blockNo": "5408747",
+      "blockHash": "8d04e6b85da5d03f31d1b84a7d6697f207543bf58fe0faa36f6c39590fe084ca",
+      "maxEpochSlot": "432000",
+      "epochNo": "251"
+    }
+  },
+
+  "transaction_alozo_era": {
+    "tx": {
+      "hash": "295500d9cd3287781095b48af6fa707c16cf68fd3c7990ac5134cc3e8e288f02",
+      "blockNo": "6236061",
+      "blockHash": "2374b501869a846a8ec394a3bfc7a6336d453764cd1864c4ccd80bfc8daae01c",
+      "maxEpochSlot": "432000",
+      "epochNo": "290"
+    }
+  },
+
+  "transaction_babbage_era": {
+    "hash": "a396d095c18ca09f96db55eceaf92e823bea8197ffdd1d0d936ff58fd1c33ac1",
+    "blockNo": "7891699",
+    "blockHash": "ab7dbf41a20786262fda01f19e37319c3e5af29099fd7a82a64e101b5e8da120",
+    "maxEpochSlot": "432000",
+    "epochNo": "369"
+  },
+
+  "first_epoch": {},
+
+  "epoch_byron_era": {
+    "no": 0,
+    "status": "FINISHED",
+    "blkCount": 21587,
+    "outSum": 10378568796482912,
+    "txCount": 33,
+    "startTime": "2017/09/24 16:09:11",
+    "endTime": "2017/09/28 21:26:11",
+    "maxSlot": 21600,
+    "rewardsDistributed": 0},
+
+  "epoch_shelly_era": {
+    "no": 213,
+    "status": "FINISHED",
+    "blkCount": 21442,
+    "outSum": 28704281756588121,
+    "txCount": 29348,
+    "startTime": "2020/08/23 21:44:51",
+    "endTime": "2020/08/28 21:44:25",
+    "maxSlot": 432000,
+    "rewardsDistributed": 7235489131814
+  },
+
+  "epoch_allegra_era": {
+    "no": 236,
+    "status": "FINISHED",
+    "blkCount": 20915,
+    "outSum": 17576846558243105,
+    "txCount": 32737,
+    "startTime": "2020/12/16 21:44:51",
+    "endTime": "2020/12/21 21:44:06",
+    "maxSlot": 432000,
+    "rewardsDistributed": 11702878395016
+  },
+
+  "epoch_mary_era": {
+    "no": 251,
+    "status": "FINISHED",
+    "blkCount": 21324,
+    "outSum": 26435938740910931,
+    "txCount": 157658,
+    "startTime": "2021/03/01 21:44:51",
+    "endTime": "2021/03/06 21:44:46",
+    "maxSlot": 432000,
+    "rewardsDistributed": 16439766158316
+  },
+
+  "epoch_alozo_era": {
+    "no": 290,
+    "status": "FINISHED",
+    "blkCount": 21320,
+    "outSum": 28653067841498377,
+    "txCount": 423156,
+    "startTime": "2021/09/12 21:47:46",
+    "endTime": "2021/09/17 21:44:49",
+    "maxSlot": 432000,
+    "rewardsDistributed": 15158500376475
+  },
+
+  "epoch_babbage_era": {
+    "no": 369,
+    "status": "FINISHED",
+    "blkCount": 21048,
+    "outSum": 53997777806675189,
+    "txCount": 385470,
+    "startTime": "2022/10/12 21:45:08",
+    "endTime": "2022/10/17 21:44:34",
+    "maxSlot": 432000,
+    "rewardsDistributed": 13020545368953
+  },
+
+  "policy_detail": {},
+
+  "tx" : {
+    "hash": "a396d095c18ca09f96db55eceaf92e823bea8197ffdd1d0d936ff58fd1c33ac1",
+    "blockNo": "7891699",
+    "blockHash": "ab7dbf41a20786262fda01f19e37319c3e5af29099fd7a82a64e101b5e8da120",
+    "maxEpochSlot": "432000",
+    "epochNo": "369"
+  },
+  "first_block": {},
+
+  "block_many_txns": {},
+
+  "block_a_txn": {},
+
+  "block_byron_era": {
+    "hash": "81e389d83e437012789f6410669a404f1e4ebfa7a46a979f094335e2e78dfd8d",
+    "time": "2017/09/25 08:49:51",
+    "txCount": 1,
+    "totalFees": 0,
+    "totalOutput": 1000000
+  },
+
+  "block_shelly_era": {
+    "hash": "4815c7f4897be0422f54de108c1fe4c2a7b4c8c3b3411b8195c71b1fea5eafb4",
+    "time": "2020/08/27 05:44:25",
+    "txCount": 3,
+    "totalFees": 549262,
+    "totalOutput": 14427940402
+  },
+
+  "block_allegra_era": {
+    "hash": "31a34a3e35f7e05322676c07f6962d1fe0993039bb2635e026660e947f14b414",
+    "time": "2020/12/19 07:47:34",
+    "txCount": 2,
+    "totalFees": 509289,
+    "totalOutput": 5482904176698
+  },
+
+  "block_mary_era": {
+    "hash": "8d04e6b85da5d03f31d1b84a7d6697f207543bf58fe0faa36f6c39590fe084ca",
+    "time": "2021/03/02 09:11:21",
+    "txCount": 5,
+    "totalFees": 1307005,
+    "totalOutput": 34546577012
+  },
+
+  "block_alozo_era": {
+    "hash": "2374b501869a846a8ec394a3bfc7a6336d453764cd1864c4ccd80bfc8daae01c",
+    "time": "2021/09/12 21:50:07",
+    "txCount": 91,
+    "totalFees": 17095928,
+    "totalOutput": 410328535245
+  },
+
+  "block_babbage_era": {
+    "hash": "ab7dbf41a20786262fda01f19e37319c3e5af29099fd7a82a64e101b5e8da120",
+    "time": "2022/10/16 16:31:47",
+    "txCount": 35,
+    "totalFees": 10300759,
+    "totalOutput": 15145621401279
+  }
+
+}
