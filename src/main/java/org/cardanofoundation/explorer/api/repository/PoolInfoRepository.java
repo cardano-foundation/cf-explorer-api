@@ -14,28 +14,29 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {
 
-  @Query(value = "SELECT SUM(CAST(pi.liveStake AS BigInteger)) FROM PoolInfo pi WHERE pi.fetchedAtEpoch = :epochNo")
+  @Query(value = "SELECT SUM(pi.liveStake) FROM PoolInfo pi WHERE pi.fetchedAtEpoch = :epochNo")
   BigInteger getTotalLiveStake(@Param("epochNo") Integer epochNo);
 
   @Query(value =
-      "SELECT pi.poolId AS view, CAST(pi.activeStake AS BigInteger) AS activeStake, pi.liveSaturation AS saturation "
+      "SELECT pi.pool.view AS view, pi.activeStake AS activeStake, pi.liveSaturation AS saturation "
           + "FROM PoolInfo pi "
-          + "WHERE pi.poolId IN :poolIds AND pi.fetchedAtEpoch = :epochNo")
+          + "WHERE pi.pool.view IN :poolIds AND pi.fetchedAtEpoch = :epochNo")
   List<PoolInfoKoiosProjection> getPoolInfoKoiOs(@Param("poolIds") Set<String> poolIds,
       @Param("epochNo") Integer epochNo);
 
-  @Query(value = "SELECT pi.poolId AS view, CAST(pi.activeStake AS BigInteger) AS activeStake "
-      + "FROM PoolInfo pi "
-      + "WHERE pi.fetchedAtEpoch = :epochNo AND pi.activeStake IS NOT NULL "
-      + "ORDER BY CAST(pi.activeStake AS BigInteger) DESC")
+  @Query(value =
+      "SELECT pi.pool.view AS view, pi.activeStake AS activeStake "
+          + "FROM PoolInfo pi "
+          + "WHERE pi.fetchedAtEpoch = :epochNo AND pi.activeStake IS NOT NULL "
+          + "ORDER BY pi.activeStake DESC")
   List<PoolInfoKoiosProjection> getTopPoolInfoKoiOs(@Param("epochNo") Integer epochNo,
       Pageable pageable);
 
-  @Query(value = "SELECT CAST(pi.activeStake AS BigInteger) FROM PoolInfo pi "
-      + "WHERE pi.poolId = :poolId AND pi.fetchedAtEpoch = :epochNo")
+  @Query(value = "SELECT pi.activeStake FROM PoolInfo pi "
+      + "WHERE pi.pool.view = :poolId AND pi.fetchedAtEpoch = :epochNo")
   BigInteger getActiveStakeByPoolAndEpoch(@Param("poolId") String poolId,
       @Param("epochNo") Integer epochNo);
 
-  @Query(value = "SELECT SUM(CAST(pi.activeStake AS BigInteger)) FROM PoolInfo pi WHERE pi.fetchedAtEpoch = :epochNo")
+  @Query(value = "SELECT SUM(pi.activeStake) FROM PoolInfo pi WHERE pi.fetchedAtEpoch = :epochNo")
   BigInteger getTotalActiveStake(@Param("epochNo") Integer epochNo);
 }
