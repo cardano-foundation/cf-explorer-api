@@ -14,6 +14,7 @@ import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,15 +56,15 @@ public class EpochServiceImpl implements EpochService {
     try {
       Integer epochNo = Integer.parseInt(no);
       Epoch epoch = epochRepository.findFirstByNo(epochNo).orElseThrow(
-          () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
+          () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND)
       );
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
       var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
-          () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+          () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
       checkEpochStatus(response, currentEpoch);
       return response;
     } catch (NumberFormatException e) {
-      throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
+      throw new NoContentException(BusinessCode.EPOCH_NOT_FOUND);
     }
   }
 
@@ -73,7 +74,7 @@ public class EpochServiceImpl implements EpochService {
     Page<Epoch> epochs = epochRepository.findAll(pageable);
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
     var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
-        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
     pageResponse.getContent().forEach(epoch -> checkEpochStatus(epoch, currentEpoch));
     return new BaseFilterResponse<>(pageResponse);
   }

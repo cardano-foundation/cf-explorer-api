@@ -19,6 +19,7 @@ import org.cardanofoundation.explorer.api.service.PolicyService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
@@ -50,7 +51,7 @@ public class PolicyServiceImpl implements PolicyService {
   public PolicyResponse getPolicyDetail(String policyId) {
     Integer tokenCount = multiAssetRepository.countByPolicy(policyId);
     if (Integer.valueOf(0).equals(tokenCount)) {
-      throw new BusinessException(BusinessCode.POLICY_NOT_FOUND);
+      throw new NoContentException(BusinessCode.POLICY_NOT_FOUND);
     }
     var policyResponse = PolicyResponse.builder()
         .policyId(policyId)

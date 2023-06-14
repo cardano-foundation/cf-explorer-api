@@ -17,6 +17,7 @@ import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.*;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
@@ -75,7 +76,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   @Transactional
   public PoolReportHistory saveToDb(PoolReportCreateRequest poolReportCreateRequest, String username) {
     poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
-        .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.POOL_NOT_FOUND));
 
     ReportHistory reportHistory = initReportHistory(poolReportCreateRequest, username);
     return poolReportRepository.saveAndFlush(poolReportCreateRequest.toEntity(reportHistory));

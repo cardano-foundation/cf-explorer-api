@@ -23,6 +23,16 @@ public class GlobalRestControllerExceptionHandler {
                 .build());
   }
 
+  @ExceptionHandler({NoContentException.class})
+  public ResponseEntity<ErrorResponse> handleNoContent(NoContentException e) {
+    log.warn("No content");
+    return ResponseEntity.status(HttpStatus.OK)
+            .body(ErrorResponse.builder()
+                    .errorCode(HttpStatus.NO_CONTENT.toString())
+                    .errorMessage(e.getErrorMsg())
+                    .build());
+  }
+
   @ExceptionHandler({FetchRewardException.class})
   public ResponseEntity<ErrorResponse> handleException(FetchRewardException e) {
     log.warn("Business logic exception: {}, stack trace: {}", e.getMessage(), e.getErrorMsg());

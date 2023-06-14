@@ -23,6 +23,7 @@ import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -66,7 +67,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Transactional
   public StakeKeyReportHistory save(StakeKeyReportRequest stakeKeyReportRequest, String username){
     stakeAddressRepository.findByView(stakeKeyReportRequest.getStakeKey())
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
         stakeKeyReportRequest);
@@ -144,11 +145,11 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   private StakeKeyReportHistory getStakeKeyReportHistory(Long reportId, String username) {
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
 
     if (DataUtil.isNullOrEmpty(username) || !username.equals(
         stakeKeyReportHistory.getReportHistory().getUsername())) {
-      throw new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND);
+      throw new NoContentException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND);
     }
     return stakeKeyReportHistory;
   }
@@ -245,7 +246,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   private void fetchReward(String stakeKey) {
     stakeAddressRepository.findByView(stakeKey)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
       if (!fetchRewardResponse) {

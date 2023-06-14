@@ -9,6 +9,7 @@ import org.cardanofoundation.explorer.api.repository.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.SlotLeaderRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.BlockService;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.explorer.consumercommon.entity.SlotLeader;
@@ -44,13 +45,13 @@ public class BlockServiceImpl implements BlockService {
     try {
       Long blockNo = Long.parseLong(blockId);
       Block block = blockRepository.findFirstByBlockNo(blockNo).orElseThrow(
-          () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+          () -> new NoContentException(BusinessCode.BLOCK_NOT_FOUND)
       );
 
       return getBlockResponse(block);
     } catch (NumberFormatException e) {
       Block block = blockRepository.findFirstByHash(blockId).orElseThrow(
-          () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+          () -> new NoContentException(BusinessCode.BLOCK_NOT_FOUND)
       );
       return getBlockResponse(block);
     }
@@ -69,7 +70,7 @@ public class BlockServiceImpl implements BlockService {
     blockResponse.setTotalFees(
         txList.stream().map(Tx::getFee).reduce(BigInteger.ZERO, BigInteger::add));
     Integer currentBlockNo = blockRepository.findCurrentBlock().orElseThrow(
-        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.BLOCK_NOT_FOUND)
     );
     if(Objects.nonNull(block.getBlockNo())) {
       blockResponse.setConfirmation(currentBlockNo - block.getBlockNo().intValue());
@@ -92,7 +93,7 @@ public class BlockServiceImpl implements BlockService {
       Page<Block> blocks = blockRepository.findBlockByEpochNo(epochNo, pageable);
       return mapperBlockToBlockFilterResponse(blocks);
     } catch (NumberFormatException e) {
-      throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
+      throw new NoContentException(BusinessCode.EPOCH_NOT_FOUND);
     }
   }
 
