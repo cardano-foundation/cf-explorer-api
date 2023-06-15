@@ -63,8 +63,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN PoolHash ph ON pu.poolHash.id = ph.id "
           + "JOIN Tx tx ON tx.id = pu.registeredTx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
-          + "LEFT JOIN PoolOfflineData po on pu.poolHash.id = po.pool.id AND (po.id is NULL OR po.pmrId = (SELECT max(po2.pmrId) FROM PoolOfflineData po2 WHERE po2.pool.id  = pu.poolHash.id)) "
-          + "ORDER BY bk.time DESC")
+          + "LEFT JOIN PoolOfflineData po on pu.poolHash.id = po.pool.id AND (po.id is NULL OR po.pmrId = (SELECT max(po2.pmrId) FROM PoolOfflineData po2 WHERE po2.pool.id  = pu.poolHash.id)) ")
   Page<TxBlockEpochProjection> getDataForPoolRegistration(Pageable pageable);
 
   @Query(value = "SELECT bk.time FROM PoolUpdate pu "
