@@ -53,7 +53,17 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolLis
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.repository.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.DelegationRepository;
+import org.cardanofoundation.explorer.api.repository.EpochRepository;
+import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.PoolHistoryRepository;
+import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
+import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
+import org.cardanofoundation.explorer.api.repository.RewardRepository;
+import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -738,21 +748,19 @@ public class DelegationServiceImpl implements DelegationService {
         poolHistoryProjections.isEmpty() ? null : poolHistoryProjections.get(CommonConstant.ZERO);
     PoolAmountProjection poolAmountProjection =
         poolAmountProjections.isEmpty() ? null : poolAmountProjections.get(CommonConstant.ZERO);
-    if (Objects.nonNull(poolHistoryKoiOsProjection) && Objects.nonNull(poolAmountProjection)) {
-      BigInteger delegateReward = BigInteger.ZERO;
+    BigInteger delegateReward = BigInteger.ZERO;
+    if (Objects.nonNull(poolHistoryKoiOsProjection) && Objects.nonNull(
+        poolHistoryKoiOsProjection.getDelegateReward())) {
       poolDetailHeader.setRos(poolHistoryKoiOsProjection.getRos());
-      if (Objects.nonNull(
-          poolHistoryKoiOsProjection.getDelegateReward())) {
-        delegateReward = poolHistoryKoiOsProjection.getDelegateReward();
-      }
-      BigInteger operatorReward = BigInteger.ZERO;
-      if (Objects.nonNull(
-          poolAmountProjection.getAmount())) {
-        operatorReward = poolAmountProjection.getAmount();
-      }
-      BigInteger poolReward = delegateReward.add(operatorReward);
-      poolDetailHeader.setReward(getPoolRewardPercent(poolDetailHeader.getPoolSize(), poolReward));
+      delegateReward = poolHistoryKoiOsProjection.getDelegateReward();
     }
+    BigInteger operatorReward = BigInteger.ZERO;
+    if (Objects.nonNull(poolAmountProjection) && Objects.nonNull(
+        poolAmountProjection.getAmount())) {
+      operatorReward = poolAmountProjection.getAmount();
+    }
+    BigInteger poolReward = delegateReward.add(operatorReward);
+    poolDetailHeader.setReward(getPoolRewardPercent(poolDetailHeader.getPoolSize(), poolReward));
   }
 
   private CompletableFuture<Boolean> fetchEpochStakeKoiOs(List<String> addressIds) {
