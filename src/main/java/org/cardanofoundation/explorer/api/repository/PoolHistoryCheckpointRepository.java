@@ -11,8 +11,16 @@ import org.springframework.stereotype.Repository;
 public interface PoolHistoryCheckpointRepository extends
     JpaRepository<PoolHistoryCheckpoint, Long> {
 
-  @Query("SELECT COUNT(cp.id) FROM PoolHistoryCheckpoint cp "
-      + "WHERE cp.view IN :poolViews AND cp.epochCheckpoint = "
-      + "(SELECT max(e.no) - 1 FROM Epoch e) AND cp.earnedReward = TRUE")
+  @Query(value =
+      "SELECT COUNT(cp.id) FROM PoolHistoryCheckpoint cp "
+          + "WHERE cp.view IN :poolViews AND cp.epochCheckpoint = "
+          + "(SELECT max(e.no) - 1 FROM Epoch e) AND cp.isSpendableReward = TRUE")
   Integer checkRewardByPoolViewAndEpoch(@Param("poolViews") Set<String> poolViews);
+
+  @Query(value =
+      "SELECT ph.view FROM PoolHash ph WHERE ph.view NOT IN ( "
+          + "SELECT pc.view FROM PoolHistoryCheckpoint pc "
+          + "WHERE pc.epochCheckpoint = (SELECT max(e.no) - 1 FROM Epoch e) AND pc.isSpendableReward = TRUE AND pc.view IN :poolViews ) "
+          + "AND ph.view IN :poolViews ")
+  Set<String> checkPoolHistoryByPoolViewAndEpoch(@Param("poolViews") Set<String> poolViews);
 }

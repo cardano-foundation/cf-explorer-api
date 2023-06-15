@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +29,22 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
   }
 
   @Override
-  public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
-    return true;
+  public Set<String> checkAllPoolHistoryForPool(Set<String> poolIds) {
+    return new HashSet<>();
   }
 
   @Override
   public Boolean checkPoolInfoForPool(Set<String> poolIds) {
+    return true;
+  }
+
+  @Override
+  public Set<String> checkAllPoolInfoForPool() {
+    return new HashSet<>();
+  }
+
+  @Override
+  public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
     return true;
   }
 

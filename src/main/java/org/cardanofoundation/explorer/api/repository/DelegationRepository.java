@@ -39,18 +39,12 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
   @Query(value =
       "SELECT sa.id AS stakeAddressId, sa.view AS view , bk.time AS time, tx.fee AS fee "
-          + "FROM PoolHash ph "
-          + "JOIN Delegation dg ON dg.poolHash.id = ph.id "
-          + "JOIN StakeAddress sa ON sa.id = dg.address.id "
+          + "FROM StakeAddress sa "
           + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr2.id) FROM StakeRegistration sr2 WHERE sa.id = sr2.addr.id) "
-          + "LEFT JOIN StakeDeregistration sd ON sa.id = sd.addr.id AND sd.id IS NULL "
-          + "JOIN Tx tx ON tx.id = sr.tx.id "
-          + "JOIN Block bk ON bk.id = tx.block.id "
-          + "WHERE ph.id = :poolId "
-          + "GROUP BY sa.id, sa.view, bk.time, tx.fee "
-          + "ORDER BY bk.time DESC")
-  Page<PoolDetailDelegatorProjection> getAllDelegatorByPool(@Param("poolId") Long poolId,
-      Pageable pageable);
+          + "JOIN Tx tx ON sr.tx.id  = tx.id "
+          + "JOIN Block bk ON tx.block.id = bk.id "
+          + "WHERE sa.id IN :addressIds")
+  List<PoolDetailDelegatorProjection> getDelegatorsByAddress(@Param("addressIds") Set<Long> addressIds);
 
   @Query("SELECT count(de.id) FROM Delegation de WHERE de.activeEpochNo = :epochNo")
   Integer numberDelegatorsAllPoolByEpochNo(@Param("epochNo") Long epochNo);
@@ -65,14 +59,11 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "ep.optimalPoolCount AS optimalPoolCount, "
           + "pu.margin AS margin, ad.reserves AS reserves "
           + "FROM PoolHash ph "
-          + "LEFT JOIN PoolOfflineData pod ON pod.pool.id = ph.id "
-          + "LEFT JOIN PoolUpdate pu ON pu.poolHash.id = ph.id "
+          + "LEFT JOIN PoolOfflineData pod ON pod.pool.id = ph.id AND pod.pmrId = (SELECT MAX(pod2.pmrId) FROM PoolOfflineData pod2 WHERE pod2.pool.id = ph.id) "
+          + "LEFT JOIN PoolUpdate pu ON pu.poolHash.id = ph.id AND pu.id = (SELECT MAX(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
           + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "LEFT JOIN AdaPots ad ON ad.epochNo = (SELECT max(e.no) FROM Epoch e) "
-          + "WHERE pu.id = "
-          + "(SELECT MAX(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) AND "
-          + "pod.pmrId = (SELECT MAX(pod2.pmrId) FROM PoolOfflineData pod2 WHERE pod2.pool.id = ph.id) AND "
-          + "ph.id IN :poolIds")
+          + "WHERE ph.id IN :poolIds")
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(@Param("poolIds") Set<Long> poolIds);
 
   @Query("SELECT delegation.tx.id"
@@ -150,4 +141,38 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   List<StakeDelegationProjection> findPoolDataByAddressIn(@Param("addresses") Set<String> addresses);
 
   Boolean existsByAddress(@Param("stakeAddress") StakeAddress stakeAddress);
+
+  @Query(value =
+      "SELECT count(dg1.address.id) "
+          + "FROM Delegation dg1 "
+          + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
+          + "WHERE ph.view = :poolView "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM Delegation dg2 "
+          + "WHERE dg2.address.id = dg1.address.id "
+          + "AND dg2.tx.id > dg1.tx.id) "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM StakeDeregistration sd "
+          + "WHERE sd.addr.id = dg1.address.id "
+          + "AND sd.tx.id > dg1.tx.id)")
+  Integer liveDelegatorsCount(@Param("poolView") String poolView);
+
+  @Query(value =
+      "SELECT dg1.address.id "
+          + "FROM Delegation dg1 "
+          + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
+          + "WHERE ph.view = :poolView "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM Delegation dg2 "
+          + "WHERE dg2.address.id = dg1.address.id "
+          + "AND dg2.tx.id > dg1.tx.id) "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM StakeDeregistration sd "
+          + "WHERE sd.addr.id = dg1.address.id "
+          + "AND sd.tx.id > dg1.tx.id)")
+  Page<Long> liveDelegatorsList(@Param("poolView") String poolView, Pageable pageable);
 }
