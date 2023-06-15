@@ -19,6 +19,7 @@ public enum BusinessCode implements ErrorCode {
   EXPORT_TYPE_NOT_SUPPORTED("404-EXPORT_TYPE_NOT_SUPPORTED", "Export type not supported"),
   PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support"),
   SCRIPT_NOT_FOUND("404-SCRIPT_NOT_FOUND", "Script not found"),
+  FETCH_REWARD_ERROR("500-FETCH_REWARD_ERROR", "Fetch reward error"),
   TIME_RANGE_ILLEGAL("400-TIME_RANGE_ILLEGAL", "Time range is illegal");
 
   private final String code;

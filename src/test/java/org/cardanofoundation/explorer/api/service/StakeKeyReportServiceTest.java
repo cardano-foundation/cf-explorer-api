@@ -77,6 +77,9 @@ public class StakeKeyReportServiceTest {
   KafkaService kafkaService;
 
   @Mock
+  FetchRewardDataService fetchRewardDataService;
+
+  @Mock
   RewardRepository rewardRepository;
 
   @Test
@@ -516,8 +519,18 @@ public class StakeKeyReportServiceTest {
         .time(Date.from(toDate.toInstant()))
         .build();
 
+    StakeAddress stakeAddress = StakeAddress.builder()
+        .view("test")
+        .build();
+
     when(rewardRepository.findRewardByStake(anyString(), any(Timestamp.class), any(Timestamp.class), any(Pageable.class)))
         .thenReturn( new PageImpl<>(List.of(expect), pageable, 1));
+
+    when(stakeAddressRepository.findByView(anyString()))
+        .thenReturn(Optional.of(stakeAddress));
+
+    when(fetchRewardDataService.fetchReward(anyString()))
+        .thenReturn(Boolean.TRUE);
 
     var response = stakeKeyReportService.getStakeRewardsByReportId(reportId, username,
         pageable);

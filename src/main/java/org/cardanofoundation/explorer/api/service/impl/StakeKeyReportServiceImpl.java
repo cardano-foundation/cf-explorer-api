@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.mapper.StakeKeyReportMapper;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
@@ -16,6 +17,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWi
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.KafkaService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
@@ -51,6 +53,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private final StakeAddressRepository stakeAddressRepository;
   private final StorageService storageService;
   private final KafkaService kafkaService;
+  private final FetchRewardDataService fetchRewardDataService;
 
   @Override
   public StakeKeyReportHistoryResponse generateStakeKeyReport(
@@ -82,7 +85,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Override
   public BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(String username,
                                                                                     Pageable pageable) {
-    Timestamp timeAt7DayAgo = new Timestamp(Instant.now().minus(Duration.ofDays(7)).toEpochMilli());
+    Timestamp timestamp = new Timestamp(Instant.now().minus(Duration.ofDays(7)).toEpochMilli());
 
     Page<StakeKeyReportHistoryResponse> stakeKeyReportHistoriesResponse =
         stakeKeyReportHistoryRepository.findByUsername(username, pageable)
@@ -90,7 +93,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
               StakeKeyReportHistoryResponse response = stakeKeyReportMapper
                   .toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
 
-              if(timeAt7DayAgo.after(response.getCreatedAt())) {
+              if(response.getCreatedAt().before(timestamp)) {
                 response.setStatus(ReportStatus.EXPIRED);
               }
               return response;
@@ -189,6 +192,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
                                                                            Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
+    fetchReward(stakeKey);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
         stakeKeyReportHistory);
 
@@ -239,4 +243,14 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         DataUtil.localDateTimeToString(stakeKeyReportHistory.getFromDate().toLocalDateTime(), dateTimePattern);
   }
 
+  private void fetchReward(String stakeKey) {
+    stakeAddressRepository.findByView(stakeKey)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
+  }
 }
