@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +37,7 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
     BaseFilterResponse<PoolTxResponse> response = new BaseFilterResponse<>();
     Page<TxBlockEpochProjection> trxBlockEpochPage = poolUpdateRepository.getDataForPoolRegistration(
         pageable);
-    List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new)
-        .toList();
+    List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new).toList();
     setValueForPoolRegistration(poolTxRes);
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
@@ -49,8 +49,7 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
     BaseFilterResponse<PoolTxResponse> response = new BaseFilterResponse<>();
     Page<TxBlockEpochProjection> trxBlockEpochPage = poolRetireRepository.getDataForPoolDeRegistration(
         pageable);
-    List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new)
-        .toList();
+    List<PoolTxResponse> poolTxRes = trxBlockEpochPage.stream().map(PoolTxResponse::new).toList();
     setValueForPoolRegistration(poolTxRes);
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
@@ -69,11 +68,13 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
         .collect(Collectors.groupingBy(PoolOwnerProjection::getPoolId));
     Map<Long, List<String>> stakeKeyStrMap = new HashMap<>();
     poolOwnerProjectionMap.forEach((k, v) -> stakeKeyStrMap.put(k,
-        v.stream().map(PoolOwnerProjection::getAddress).toList()));
+        v.stream().map(PoolOwnerProjection::getAddress).collect(Collectors.toList())));
     poolTxRes.forEach(pool -> {
       List<String> stakeKeys = stakeKeyStrMap.get(pool.getPoolId());
-      Collections.sort(stakeKeys);
-      pool.setStakeKey(stakeKeys);
+      if (Objects.nonNull(stakeKeys)) {
+        Collections.sort(stakeKeys);
+        pool.setStakeKey(stakeKeys);
+      }
     });
   }
 }
