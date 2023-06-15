@@ -262,10 +262,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     BigInteger activeStake = null;
     BigInteger liveStake = null;
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Set<String> poolViews = poolHashRepository.findAllSetPoolView();
-      Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolViews);
-      if (Boolean.FALSE.equals(isInfo)) {
-        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolViews);
+      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
+      if (!poolIds.isEmpty()) {
+        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIds);
         if (Boolean.TRUE.equals(isFetch)) {
           activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
           liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);

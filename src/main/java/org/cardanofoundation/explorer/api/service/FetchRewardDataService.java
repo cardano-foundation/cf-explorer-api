@@ -11,9 +11,13 @@ public interface FetchRewardDataService {
 
   Boolean checkPoolHistoryForPool(Set<String> poolIds);
 
+  Set<String> checkAllPoolHistoryForPool(Set<String> poolIds);
+
   Boolean fetchPoolHistoryForPool(Set<String> poolIds);
 
   Boolean checkPoolInfoForPool(Set<String> poolIds);
+
+  Set<String> checkAllPoolInfoForPool();
 
   Boolean fetchPoolInfoForPool(Set<String> poolIds);
 
