@@ -359,8 +359,11 @@ public class TxServiceImpl implements TxService {
             .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
 
     // get metadata and multi asset
+    List<Long> multiAssetIdList =
+        addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
+
     Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
-        getMapMetadataAndMapAsset(addressTokens);
+        getMapMetadataAndMapAsset(multiAssetIdList);
     Map<Long, Address> addressMap = new HashMap<>() {{
       put(address.getId(), address);
     }};
@@ -397,8 +400,11 @@ public class TxServiceImpl implements TxService {
             .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
 
     // get metadata and multi asset
+    List<Long> multiAssetIdList =
+        addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
+
     Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
-        getMapMetadataAndMapAsset(addressTokens);
+        getMapMetadataAndMapAsset(multiAssetIdList);
 
     // get address
     Set<Long> addressIdList = addressTokens.stream().map(AddressToken::getAddressId).collect(
@@ -420,9 +426,7 @@ public class TxServiceImpl implements TxService {
   }
 
   private Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset(
-      List<AddressToken> addressTokens) {
-    List<Long> multiAssetIdList =
-        addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
+      List<Long> multiAssetIdList) {
     List<MultiAsset> multiAssets = multiAssetRepository.findAllByIdIn(multiAssetIdList);
     Set<String> subjects =
         multiAssets.stream().map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
@@ -697,7 +701,20 @@ public class TxServiceImpl implements TxService {
     List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
     List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
 
-    List<TxOutResponse> stakeAddress = removeDuplicateTx(addressesInfoInput, addressesInfoOutput);
+    List<Long> multiAssetIdList = new ArrayList<>();
+    multiAssetIdList.addAll(
+        addressInputInfo.stream().map(AddressInputOutputProjection::getMultiAssetId)
+            .collect(Collectors.toSet()));
+    multiAssetIdList.addAll(
+        addressOutputInfo.stream().map(AddressInputOutputProjection::getMultiAssetId)
+            .collect(Collectors.toSet()));
+
+    Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
+        getMapMetadataAndMapAsset(multiAssetIdList);
+
+    List<TxOutResponse> stakeAddress =
+        removeDuplicateTx(addressesInfoInput, addressesInfoOutput,
+            getMapMetadataAndMapAsset.getFirst(), getMapMetadataAndMapAsset.getSecond());
 
     SummaryResponse summary =
         SummaryResponse.builder()
@@ -705,11 +722,12 @@ public class TxServiceImpl implements TxService {
             .build();
 
     txResponse.setSummary(summary);
-
   }
 
   private List<TxOutResponse> removeDuplicateTx(
-      List<TxOutResponse> addressesInputs, List<TxOutResponse> addressesOutputs) {
+          List<TxOutResponse> addressesInputs, List<TxOutResponse> addressesOutputs,
+          Map<String, AssetMetadata> assetMetadataMap, Map<Long, MultiAsset> multiAssetMap) {
+
     addressesInputs.forEach(
         txOutResponse -> {
           txOutResponse.setValue(txOutResponse.getValue().multiply(BigInteger.valueOf(-1)));
@@ -752,8 +770,16 @@ public class TxServiceImpl implements TxService {
                           .reduce(BigInteger.ZERO, BigInteger::add);
 
                   if (!BigInteger.ZERO.equals(totalQuantity)) {
-                    tokens.get(0).setAssetQuantity(totalQuantity);
-                    tokenResponse.add(tokens.get(0));
+                    TxMintingResponse token = tokens.get(0);
+                    MultiAsset multiAsset = multiAssetMap.get(token.getMultiAssetId());
+                    if (!Objects.isNull(multiAsset)) {
+                      String subject = multiAsset.getPolicy() + multiAsset.getName();
+                      AssetMetadata metadata = assetMetadataMap.get(subject);
+                      token.setMetadata(assetMetadataMapper.fromAssetMetadata(metadata));
+                    }
+
+                    token.setAssetQuantity(totalQuantity);
+                    tokenResponse.add(token);
                   }
                 });
 

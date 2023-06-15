@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -18,4 +19,6 @@ public class TxMintingResponse {
   private String assetId;
   private String policy;
   private TokenMetadataResponse metadata;
+  @JsonIgnore
+  private Long multiAssetId;
 }
