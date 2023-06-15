@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
@@ -13,6 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,5 +34,19 @@ public class ContractController {
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           Address_.BALANCE}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(addressService.getContracts(pageable));
+  }
+
+  @PostMapping("/verify/native")
+  @LogMessage
+  @Operation(summary = "Verify native scrip contract")
+  public ResponseEntity<Boolean> verifyContract(@RequestBody ScriptVerifyRequest scriptVerifyRequest) {
+    return ResponseEntity.ok(addressService.verifyNativeScript(scriptVerifyRequest));
+  }
+
+  @GetMapping("/{address}/script")
+  @LogMessage
+  @Operation(summary = "Get native script of contract")
+  public ResponseEntity<String> getScriptOfContract(@PathVariable String address) {
+    return ResponseEntity.ok(addressService.getJsonNativeScript(address));
   }
 }

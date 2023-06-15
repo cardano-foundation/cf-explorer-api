@@ -37,6 +37,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 @RequiredArgsConstructor
 public class EpochServiceImpl implements EpochService {
 
+  public static final int EPOCH_DAYS = 5;
   private final EpochRepository epochRepository;
   private final EpochMapper epochMapper;
   private final RedisTemplate<String, Object> redisTemplate;
@@ -88,10 +89,10 @@ public class EpochServiceImpl implements EpochService {
    */
   private void checkEpochStatus(EpochResponse epoch, Integer currentEpoch) {
     var rewardTime = LocalDateTime.now().minusDays(10);
-    if (epoch.getStartTime().plusDays(5).isAfter(LocalDateTime.now(ZoneId.of("UTC")))
+    if (epoch.getStartTime().plusDays(EPOCH_DAYS).isAfter(LocalDateTime.now(ZoneId.of("UTC")))
         && epoch.getStartTime().isBefore(LocalDateTime.now(ZoneId.of("UTC")))) {
       epoch.setStatus(EpochStatus.IN_PROGRESS);
-      epoch.setEndTime(epoch.getStartTime().plusDays(5));
+      epoch.setEndTime(epoch.getStartTime().plusDays(EPOCH_DAYS));
     } else if (rewardTime.isBefore(epoch.getEndTime())) {
       epoch.setStatus(EpochStatus.REWARDING);
     } else {
@@ -112,7 +113,9 @@ public class EpochServiceImpl implements EpochService {
           var currentLocalDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
           var epochStartTime = LocalDateTime.ofInstant(
               epochSummaryProjection.getStartTime().toInstant(), ZoneOffset.UTC);
-          var slot = currentLocalDateTime.toEpochSecond(ZoneOffset.UTC) - epochStartTime.toEpochSecond(ZoneOffset.UTC);
+          var slot =
+              currentLocalDateTime.toEpochSecond(ZoneOffset.UTC) - epochStartTime.toEpochSecond(
+                  ZoneOffset.UTC);
 
           Long startFromId = BigInteger.ZERO.longValue();
           final String redisKey = getRedisKey(UNIQUE_ACCOUNTS, epochSummaryProjection.getNo());
@@ -165,6 +168,8 @@ public class EpochServiceImpl implements EpochService {
               .no(epochSummaryProjection.getNo())
               .slot((int) slot)
               .totalSlot(epochSummaryProjection.getMaxSlot())
+              .startTime(epochSummaryProjection.getStartTime().toLocalDateTime())
+              .endTime(epochSummaryProjection.getStartTime().toLocalDateTime().plusDays(EPOCH_DAYS))
               .account(account)
               .build();
         })
