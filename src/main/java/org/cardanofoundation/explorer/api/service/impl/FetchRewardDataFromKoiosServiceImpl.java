@@ -33,7 +33,6 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   private String apiCheckEpochStakeUrl;
 
   private final RestTemplate restTemplate;
-
   private final RewardCheckpointRepository rewardCheckpointRepository;
 
   private final PoolHistoryCheckpointRepository poolHistoryCheckpointRepository;
@@ -49,7 +48,8 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(String stakeKey) {
-    return restTemplate.postForObject(apiCheckRewardUrl, Collections.singleton(stakeKey), Boolean.class);
+    return restTemplate.postForObject(apiCheckRewardUrl, Collections.singleton(stakeKey),
+        Boolean.class);
   }
 
   @Override
@@ -58,6 +58,11 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
         poolIds);
     Integer sizeCheck = poolIds.size();
     return Objects.equals(countCheckPoint, sizeCheck);
+  }
+
+  @Override
+  public Set<String> checkAllPoolHistoryForPool(Set<String> poolIds) {
+    return poolHistoryCheckpointRepository.checkPoolHistoryByPoolViewAndEpoch(poolIds);
   }
 
   @Override
@@ -81,6 +86,11 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
         poolIds);
     Integer sizeCheck = poolIds.size();
     return Objects.equals(countCheckPoint, sizeCheck);
+  }
+
+  @Override
+  public Set<String> checkAllPoolInfoForPool() {
+    return poolInfoCheckpointRepository.checkPoolInfoByPoolViewAndEpoch();
   }
 
   @Override

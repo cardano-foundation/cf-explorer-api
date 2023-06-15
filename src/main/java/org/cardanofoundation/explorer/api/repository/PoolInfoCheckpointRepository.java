@@ -14,4 +14,11 @@ public interface PoolInfoCheckpointRepository extends JpaRepository<PoolInfoChec
       + "WHERE cp.view IN :poolViews AND cp.epochCheckpoint = "
       + "(SELECT max(e.no) FROM Epoch e)")
   Integer checkRewardByPoolViewAndEpoch(@Param("poolViews") Set<String> poolViews);
+
+  @Query(value =
+      "SELECT ph.view FROM PoolHash ph WHERE ph.view NOT IN ("
+          + "SELECT pic.view FROM PoolInfoCheckpoint pic "
+          + "WHERE pic.epochCheckpoint = (SELECT max(e.no) FROM Epoch e) "
+          + ")")
+  Set<String> checkPoolInfoByPoolViewAndEpoch();
 }

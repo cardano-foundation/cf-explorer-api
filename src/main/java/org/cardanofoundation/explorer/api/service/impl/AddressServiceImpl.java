@@ -1,10 +1,14 @@
 package org.cardanofoundation.explorer.api.service.impl;
+
+import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
+import org.apache.commons.codec.binary.Hex;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AddressMapper;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
+import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressAnalyticsResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
@@ -17,6 +21,7 @@ import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.HexUtils;
@@ -42,6 +47,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -62,7 +70,11 @@ public class AddressServiceImpl implements AddressService {
   private final TokenMapper tokenMapper;
   private final AddressMapper addressMapper;
   private final AssetMetadataMapper assetMetadataMapper;
+  private final ScriptRepository scriptRepository;
+
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
+  static final String SCRIPT_NOT_VERIFIED = "Script not verified";
+
 
   @Value("${application.network}")
   private String network;
@@ -275,6 +287,50 @@ public class AddressServiceImpl implements AddressService {
     Page<TokenAddressResponse> pageResponse = new PageImpl<>(tokenListResponse.subList(start, end),
         pageable, addressTokenProjectionList.size());
     return new BaseFilterResponse<>(pageResponse);
+  }
+
+  @Override
+  public Boolean verifyNativeScript(ScriptVerifyRequest scriptVerifyRequest) {
+    try{
+      ShelleyAddress shelleyAddress = new ShelleyAddress(scriptVerifyRequest.getAddress());
+      String policyId = shelleyAddress.getHexPaymentPart();
+      String hash = Hex.encodeHexString(NativeScript.deserializeJson(scriptVerifyRequest.getScript())
+                                            .getScriptHash());
+      if(policyId.equals(hash)){
+        Address address = addressRepository.findFirstByAddress(scriptVerifyRequest.getAddress())
+            .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+        address.setVerifiedContract(Boolean.TRUE);
+        addressRepository.save(address);
+        return Boolean.TRUE;
+      } else{
+        return Boolean.FALSE;
+      }
+    } catch (Exception e) {
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+    }
+  }
+
+  @Override
+  public String getJsonNativeScript(String address) {
+    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+    );
+
+    if(Boolean.FALSE.equals(addr.getVerifiedContract())){
+      return SCRIPT_NOT_VERIFIED;
+    }
+
+    ShelleyAddress shelleyAddress = new ShelleyAddress(addr.getAddress());
+    String policyId = shelleyAddress.getHexPaymentPart();
+    Script script = scriptRepository.findByHash(policyId).orElseThrow(
+        () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
+    );
+
+    if(Objects.isNull(script.getJson())){
+      return SCRIPT_NOT_VERIFIED;
+    }
+
+    return script.getJson();
   }
 
   private void setMetadata(List<TokenAddressResponse> tokenListResponse) {

@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -165,17 +166,11 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setRewardAccounts(poolUpdateRepository.findRewardAccountByPoolId(projection.getId()));
       Integer epochNo = epochRepository.findCurrentEpochNo().orElse(null);
       if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
-        Set<String> poolIdList = new HashSet<>();
-        poolIdList.add(poolView);
-        Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolIdList);
-        if (Boolean.FALSE.equals(isInfo)) {
-          Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
-          if (Boolean.TRUE.equals(isFetch)) {
-            res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
-          }
-        } else {
-          res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
+        Set<String> poolIdList = new HashSet<>(Collections.singletonList(poolView));
+        if (Boolean.FALSE.equals(fetchRewardDataService.checkPoolInfoForPool(poolIdList))) {
+          fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
         }
+        res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
         Boolean isReward = fetchRewardDataService.checkRewardForPool(res.getRewardAccounts());
         if (Boolean.FALSE.equals(isReward)) {
           Boolean isFetch = fetchRewardDataService.fetchRewardForPool(res.getRewardAccounts());

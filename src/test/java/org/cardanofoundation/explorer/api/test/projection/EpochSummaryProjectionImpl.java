@@ -12,6 +12,7 @@ public class EpochSummaryProjectionImpl implements EpochSummaryProjection {
   private Integer no;
   private Integer maxSlot;
   private Timestamp statTime;
+  private Timestamp endTime;
 
   @Override
   public Integer getNo() {
@@ -26,5 +27,10 @@ public class EpochSummaryProjectionImpl implements EpochSummaryProjection {
   @Override
   public Timestamp getStartTime() {
     return statTime;
+  }
+
+  @Override
+  public Timestamp getEndTime() {
+    return endTime;
   }
 }

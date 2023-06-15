@@ -4,6 +4,7 @@ import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.mapper.AddressMapper;
 import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -116,6 +117,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     StakeAddress stakeAddress
         = stakeAddressRepository.findByView(stake).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    if (!fetchRewardDataService.checkRewardAvailable(stake)) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stake);
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
     stakeAddressResponse.setStakeAddress(stake);
     BigInteger stakeTotalBalance
         = addressRepository.findTotalBalanceByStakeAddress(stakeAddress).orElse(BigInteger.ZERO);
@@ -255,10 +262,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     BigInteger activeStake = null;
     BigInteger liveStake = null;
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Set<String> poolViews = poolHashRepository.findAllSetPoolView();
-      Boolean isInfo = fetchRewardDataService.checkPoolInfoForPool(poolViews);
-      if (Boolean.FALSE.equals(isInfo)) {
-        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolViews);
+      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
+      if (!poolIds.isEmpty()) {
+        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIds);
         if (Boolean.TRUE.equals(isFetch)) {
           activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
           liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
@@ -328,6 +334,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey) {
+    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
     List<StakeAnalyticRewardResponse> responses = rewardRepository.findRewardByStake(stakeKey);
     Map<Integer, BigInteger> rewardMap = responses.stream().collect(Collectors.toMap(
             StakeAnalyticRewardResponse::getEpoch, StakeAnalyticRewardResponse::getValue));
