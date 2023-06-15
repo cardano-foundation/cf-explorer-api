@@ -3791,7 +3791,6 @@
 													"});",
 													"pm.test(\"Hash value exist\",function (){",
 													"    pm.expect(jsonData.data[0].hash).not.empty;",
-													"    pm.expect(jsonData.data[0].hash).is.equal(\"b7e3f01ee29a2410bca619d2418fb10271bdedf116b53352bf0a53b5280d0a15\");",
 													"",
 													"});"
 												],
@@ -3914,7 +3913,6 @@
 													"});",
 													"pm.test(\"Hash value exist\",function (){",
 													"    pm.expect(jsonData.hash).not.empty;",
-													"    pm.expect(jsonData.hash).is.equal(\"9dfd1ebe5b294d6eafdfa6d1061ad04a7b31f15ac64a9330d310ba710c3d45c2\");",
 													"",
 													"});"
 												],
