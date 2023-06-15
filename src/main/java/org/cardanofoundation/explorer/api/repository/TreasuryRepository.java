@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import org.cardanofoundation.explorer.api.projection.InstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.TxInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Treasury;
@@ -29,4 +30,9 @@ public interface TreasuryRepository extends JpaRepository<Treasury, Long> {
       + " WHERE treasury.tx = :tx"
       + " ORDER BY treasury.amount DESC")
   List<TxInstantaneousRewardsProjection> findByTx(@Param("tx") Tx tx);
+
+  @Query("SELECT treasury.tx.id as txId, count(DISTINCT treasury.addr) as numberOfStakes, sum(treasury.amount) as rewards"
+      + " FROM Treasury treasury"
+      + " GROUP BY treasury.tx.id")
+  List<InstantaneousRewardsProjection> findAllTx();
 }

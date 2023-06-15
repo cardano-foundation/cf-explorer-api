@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochResponse;
@@ -51,6 +52,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInf
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
+import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.repository.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
@@ -61,10 +63,12 @@ import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
@@ -103,6 +107,8 @@ public class DelegationServiceImpl implements DelegationService {
   private final FetchRewardDataService fetchRewardDataService;
 
   private final StakeAddressRepository stakeAddressRepository;
+
+  private final TxRepository txRepository;
   public static final int MILLI = 1000;
 
   @Value("${spring.data.web.pageable.default-page-size}")
@@ -110,6 +116,34 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Value("${application.network}")
   private String network;
+
+  @Override
+  public BaseFilterResponse<DelegationResponse> getDelegations(Pageable pageable) {
+    Page<Long> txIdPage = delegationRepository.findAllDelegations(pageable);
+    List<TxIOProjection> txs = txRepository.findTxIn(txIdPage.getContent());
+    Map<Long, TxIOProjection> txMap
+        = txs.stream().collect(Collectors.toMap(TxIOProjection::getId, Function.identity()));
+    List<Delegation> delegations = delegationRepository.findDelegationByTxIdIn(txIdPage.getContent());
+    Map<Long, List<String>> delegationStakeKeyMap = delegations.stream()
+        .collect(Collectors.groupingBy(Delegation::getTxId,
+            Collectors.mapping(item -> item.getAddress().getView(), Collectors.toList())));
+    Map<Long, List<String>> delegationPoolMap = delegations.stream()
+        .collect(Collectors.groupingBy(Delegation::getTxId,
+            Collectors.mapping(item -> item.getPoolHash().getView(), Collectors.toList())));
+    List<DelegationResponse> responses = txIdPage.stream().map(
+        item -> DelegationResponse.builder()
+            .txHash(txMap.get(item).getHash())
+            .blockNo(txMap.get(item).getBlockNo())
+            .epochNo(txMap.get(item).getEpochNo())
+            .epochSlotNo(txMap.get(item).getEpochSlotNo())
+            .time(txMap.get(item).getTime())
+            .epochSlotNo(txMap.get(item).getEpochSlotNo())
+            .stakeKeys(delegationStakeKeyMap.get(item))
+            .pools(delegationPoolMap.get(item))
+            .build()
+    ).toList();
+    return new BaseFilterResponse<>(txIdPage ,responses);
+  }
 
   @Override
   public DelegationHeaderResponse getDataForDelegationHeader() {
@@ -140,8 +174,7 @@ public class DelegationServiceImpl implements DelegationService {
       liveStake = Objects.nonNull(liveStakeObj) ? new BigInteger(String.valueOf(liveStakeObj))
           : BigInteger.ZERO;
     }
-    Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
-        Long.valueOf(epochNo));
+    Integer delegators = delegationRepository.totalLiveDelegatorsCount();
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
         .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
@@ -715,21 +748,19 @@ public class DelegationServiceImpl implements DelegationService {
         poolHistoryProjections.isEmpty() ? null : poolHistoryProjections.get(CommonConstant.ZERO);
     PoolAmountProjection poolAmountProjection =
         poolAmountProjections.isEmpty() ? null : poolAmountProjections.get(CommonConstant.ZERO);
-    if (Objects.nonNull(poolHistoryKoiOsProjection) && Objects.nonNull(poolAmountProjection)) {
-      BigInteger delegateReward = BigInteger.ZERO;
+    BigInteger delegateReward = BigInteger.ZERO;
+    if (Objects.nonNull(poolHistoryKoiOsProjection) && Objects.nonNull(
+        poolHistoryKoiOsProjection.getDelegateReward())) {
       poolDetailHeader.setRos(poolHistoryKoiOsProjection.getRos());
-      if (Objects.nonNull(
-          poolHistoryKoiOsProjection.getDelegateReward())) {
-        delegateReward = poolHistoryKoiOsProjection.getDelegateReward();
-      }
-      BigInteger operatorReward = BigInteger.ZERO;
-      if (Objects.nonNull(
-          poolAmountProjection.getAmount())) {
-        operatorReward = poolAmountProjection.getAmount();
-      }
-      BigInteger poolReward = delegateReward.add(operatorReward);
-      poolDetailHeader.setReward(getPoolRewardPercent(poolDetailHeader.getPoolSize(), poolReward));
+      delegateReward = poolHistoryKoiOsProjection.getDelegateReward();
     }
+    BigInteger operatorReward = BigInteger.ZERO;
+    if (Objects.nonNull(poolAmountProjection) && Objects.nonNull(
+        poolAmountProjection.getAmount())) {
+      operatorReward = poolAmountProjection.getAmount();
+    }
+    BigInteger poolReward = delegateReward.add(operatorReward);
+    poolDetailHeader.setReward(getPoolRewardPercent(poolDetailHeader.getPoolSize(), poolReward));
   }
 
   private CompletableFuture<Boolean> fetchEpochStakeKoiOs(List<String> addressIds) {

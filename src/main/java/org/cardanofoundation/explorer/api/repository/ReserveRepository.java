@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import org.cardanofoundation.explorer.api.projection.InstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.TxInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Reserve;
@@ -30,4 +31,9 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
           + " WHERE reserve.tx = :tx"
           + " ORDER BY reserve.amount DESC")
   List<TxInstantaneousRewardsProjection> findByTx(@Param("tx") Tx tx);
+
+  @Query("SELECT reserve.tx.id as txId, count(DISTINCT reserve.addr) as numberOfStakes, sum(reserve.amount) as rewards"
+      + " FROM Reserve reserve"
+      + " GROUP BY reserve.tx.id")
+  List<InstantaneousRewardsProjection> findAllTx();
 }
