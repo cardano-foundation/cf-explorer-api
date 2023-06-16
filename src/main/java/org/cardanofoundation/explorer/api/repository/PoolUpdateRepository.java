@@ -185,4 +185,10 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE ph.id = :poolId "
           + "GROUP BY sa.view")
   List<String> findRewardAccountByPoolId(@Param("poolId") Long poolId);
+
+  @Query(value =
+      "SELECT COUNT(pu.id) FROM PoolUpdate pu "
+          + "JOIN PoolHash ph ON pu.poolHash.id = ph.id "
+          + "WHERE ph.view = :poolView ")
+  Integer countPoolUpdateByPool(@Param("poolView") String poolView);
 }
