@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -141,10 +142,12 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
   public ResponseEntity<List<StakeAnalyticBalanceResponse>> getStakeBalanceAnalytics(
-          @PathVariable String stakeKey, @PathVariable
-  @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+      @PathVariable String stakeKey,
+      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type
+  ) throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
   }
+
 
   @GetMapping("/analytics-reward/{stakeKey}")
   @LogMessage
