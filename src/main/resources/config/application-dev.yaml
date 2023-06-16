@@ -99,6 +99,8 @@ application:
       base-url: ${API_CHECK_POOL_INFO_URL:http://localhost:8888/api/v1/pool-info/fetch}
     check-epoch-stake:
       base-url: ${API_CHECK_EPOCH_STAKE_URL:http://localhost:8888/api/v1/epoch-stake/fetch}
+    check-ada-pots:
+      base-url: ${API_CHECK_ADA_POTS_URL:http://localhost:8888/api/v1/ada-pots/fetch}
 
 springdoc:
   api-docs.path: /apidocs
