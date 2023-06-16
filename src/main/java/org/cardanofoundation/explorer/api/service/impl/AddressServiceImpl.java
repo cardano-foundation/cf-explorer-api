@@ -1,6 +1,10 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.commons.codec.binary.Hex;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
@@ -19,6 +23,7 @@ import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ScriptRepository;
@@ -71,6 +76,7 @@ public class AddressServiceImpl implements AddressService {
   private final AddressMapper addressMapper;
   private final AssetMetadataMapper assetMetadataMapper;
   private final ScriptRepository scriptRepository;
+  private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
   static final String SCRIPT_NOT_VERIFIED = "Script not verified";
@@ -110,54 +116,83 @@ public class AddressServiceImpl implements AddressService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type) {
-    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
-    List<AddressAnalyticsResponse> responses = new ArrayList<>();
+  public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type)
+      throws ExecutionException, InterruptedException {
+    Address addr = addressRepository.findFirstByAddress(address)
+        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
     Long txCount = addressTxBalanceRepository.countByAddress(addr);
-    if(Long.valueOf(0).equals(txCount)) {
-      return responses;
+    if (Long.valueOf(0).equals(txCount)) {
+      return List.of();
     }
-    LocalDate currentDate =  LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+    List<LocalDate> dates = getAnalyticDates(type);
+    ExecutorService executorService = Executors.newFixedThreadPool(ADDRESS_ANALYTIC_BALANCE_NUMBER);
+
+    List<CompletableFuture<AddressAnalyticsResponse>> futureAddressAnalytics = new ArrayList<>();
+    dates.forEach(dateItem -> futureAddressAnalytics.add(
+        CompletableFuture.supplyAsync(() -> getBalanceOfAddress(addr, dateItem), executorService))
+    );
+
+    CompletableFuture.allOf(futureAddressAnalytics.toArray(new CompletableFuture[0])).join();
+    List<AddressAnalyticsResponse> responses = new ArrayList<>();
+
+    for (CompletableFuture<AddressAnalyticsResponse> addressAnalytic : futureAddressAnalytics) {
+      responses.add(addressAnalytic.get());
+    }
+
+    return responses;
+  }
+
+  private List<LocalDate> getAnalyticDates(AnalyticType type) {
+    LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
     List<LocalDate> dates = new ArrayList<>();
     switch (type) {
       case ONE_WEEK:
         var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
+        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >= 0; i--) {
           dates.add(currentWeek.minusWeeks(i));
         }
         break;
       case ONE_MONTH:
         var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
+        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >= 0; i--) {
           dates.add(currentMonth.minusMonths(i));
         }
         break;
       case THREE_MONTH:
-        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
+        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >= 0; i--) {
           dates.add(currentDate.minusMonths(i * 3L));
         }
         break;
       default:
-        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >=0 ; i--) {
+        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >= 0; i--) {
           dates.add(currentDate.minusDays(i));
         }
     }
-    dates.forEach(
-        item -> {
-          AddressAnalyticsResponse response = new AddressAnalyticsResponse();
-          var balance = addressTxBalanceRepository.getBalanceByAddressAndTime(addr,
-              Timestamp.valueOf(item.atTime(LocalTime.MAX)));
-          if(Objects.isNull(balance)) {
-            response.setValue(BigInteger.ZERO);
-          } else {
-            response.setValue(balance);
-          }
-          response.setDate(item);
-          responses.add(response);
-        }
-    );
-    return responses;
+    return dates;
+  }
+
+  private AddressAnalyticsResponse getBalanceOfAddress(Address addr, LocalDate to) {
+    BigInteger balance = BigInteger.ZERO;
+    if (LocalDate.now().isEqual(to)) {
+      BigInteger todayBalance = addressTxBalanceRepository
+          .getBalanceByAddressAndTime(
+              addr,
+              Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
+              Timestamp.valueOf(to.atTime(LocalTime.MAX))
+          )
+          .orElse(BigInteger.ZERO);
+
+      BigInteger rangeToYesterdayBalance = aggregateAddressTxBalanceRepository
+          .sumBalanceByAddressId(addr.getId(), to.minusDays(1))
+          .orElse(BigInteger.ZERO);
+
+      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
+    } else {
+      balance = aggregateAddressTxBalanceRepository
+          .sumBalanceByAddressId(addr.getId(), to)
+          .orElse(BigInteger.ZERO);
+    }
+    return new AddressAnalyticsResponse(to, balance);
   }
 
   @Override
