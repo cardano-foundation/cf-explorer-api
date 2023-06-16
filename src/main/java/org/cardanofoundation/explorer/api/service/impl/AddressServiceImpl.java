@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
+import java.util.Collections;
 import org.apache.commons.codec.binary.Hex;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
@@ -16,6 +17,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
@@ -163,28 +165,16 @@ public class AddressServiceImpl implements AddressService {
   @Override
   @Transactional(readOnly = true)
   public List<BigInteger> getAddressMinMaxBalance(String address) {
-    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
-    List<BigInteger> balanceList = addressTxBalanceRepository.findAllByAddress(addr);
-    if(balanceList.isEmpty()) {
-      return new ArrayList<>();
-    }
-    BigInteger maxBalance = balanceList.get(0);
-    BigInteger minBalance = balanceList.get(0);
-    BigInteger sumBalance = balanceList.get(0);
-    balanceList.remove(0);
-    for(BigInteger balance : balanceList) {
-      sumBalance = sumBalance.add(balance);
-      if(sumBalance.compareTo(maxBalance) > 0) {
-        maxBalance = sumBalance;
-      }
-      if(sumBalance.compareTo(minBalance) < 0) {
-        minBalance = sumBalance;
-      }
-    }
-    return Arrays.asList(minBalance, maxBalance);
-  }
+    Address addr = addressRepository.findFirstByAddress(address)
+        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
+    MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByAddress(
+        addr.getId());
+    if (balanceList == null) {
+      return Collections.emptyList();
+    }
+    return List.of(balanceList.getMinVal(), balanceList.getMaxVal());
+  }
 
   @Override
   @Transactional(readOnly = true)

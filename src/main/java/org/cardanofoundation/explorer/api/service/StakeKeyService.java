@@ -127,5 +127,5 @@ public interface StakeKeyService {
    * @param stakeKey stake address
    * @return min and max balance of stake address
    */
-  List<BigInteger> getAddressMinMaxBalance(String stakeKey);
+  List<BigInteger> getStakeMinMaxBalance(String stakeKey);
 }

@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository;
 
 import java.util.Collection;
 import java.util.Set;
+import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
@@ -28,11 +29,31 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   BigInteger getBalanceByAddressAndTime(
       @Param("address") Address address, @Param("time") Timestamp time);
 
+  @Query(value = "select min(calculated_balances.sum_balance) as minVal, "
+      + "                max(calculated_balances.sum_balance) as maxVal, "
+      + "                max(calculated_balances.txId) as maxTxId "
+      + " from (select sum(atb.balance) over (order by atb.tx_id rows unbounded PRECEDING) as sum_balance, "
+      + "              atb.tx_id as txId "
+      + "       from mainnet.address_tx_balance atb "
+      + "       where atb.address_id = :addressId"
+      + "       order by atb.tx_id) as calculated_balances", nativeQuery = true)
+  MinMaxProjection findMinMaxBalanceByAddress(@Param("addressId") Long addressId);
+
   @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
       + " WHERE addrTxBalance.address = :address"
       + " ORDER BY addrTxBalance.tx.blockId ASC, addrTxBalance.tx.blockIndex ASC")
   List<BigInteger> findAllByAddress(@Param("address") Address address);
+
+  @Query(value = "select min(calculated_balances.sum_balance) as minVal, "
+      + "                max(calculated_balances.sum_balance) as maxVal, "
+      + "                max(calculated_balances.txId) as maxTxId "
+      + " from (select sum(atb.balance) over (order by atb.tx_id rows unbounded PRECEDING) as sum_balance, "
+      + "              atb.tx_id as txId "
+      + "       from mainnet.address_tx_balance atb "
+      + "       where atb.stake_address_id = :stakeAddressId"
+      + "       order by atb.tx_id) as calculated_balances", nativeQuery = true)
+  MinMaxProjection findMinMaxBalanceByStakeAddress(@Param("stakeAddressId") Long stakeAddressId);
 
   @Query(value = "SELECT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
