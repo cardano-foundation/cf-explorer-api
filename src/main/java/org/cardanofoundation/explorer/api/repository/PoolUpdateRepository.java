@@ -92,8 +92,10 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
   Page<PoolUpdateProjection> findPoolUpdateByPool(@Param("poolView") String poolView,
-                                                  @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
-                                                  @Param("toDate") Timestamp toDate, Pageable pageable);
+      @Param("txHash") String txHash,
+      @Param("fromDate") Timestamp fromDate,
+      @Param("toDate") Timestamp toDate,
+      Pageable pageable);
 
 
   @Query(value =
@@ -142,7 +144,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   List<String> findPoolByRewardAccount(@Param("stakeAddress") StakeAddress stakeAddress);
 
   @Query(value =
-      "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin "
+      "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin, tx.deposit AS deposit "
           + "FROM PoolHash ph "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN Tx tx ON pu.registeredTx.id  = tx.id AND tx.deposit IS NOT NULL AND tx.deposit > 0 "
@@ -184,4 +186,10 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE ph.id = :poolId "
           + "GROUP BY sa.view")
   List<String> findRewardAccountByPoolId(@Param("poolId") Long poolId);
+
+  @Query(value =
+      "SELECT COUNT(pu.id) FROM PoolUpdate pu "
+          + "JOIN PoolHash ph ON pu.poolHash.id = ph.id "
+          + "WHERE ph.view = :poolView ")
+  Integer countPoolUpdateByPool(@Param("poolView") String poolView);
 }
