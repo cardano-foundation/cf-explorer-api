@@ -24,10 +24,10 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
   @Query(value = "SELECT no as no, maxSlot as maxSlot , startTime as startTime"
       + ",endTime as endTime "
       + "FROM Epoch "
-      + "WHERE no  = (SELECT MAX(no) FROM  Epoch)")
+      + "WHERE no  = (SELECT MAX(epoch.no) FROM Epoch epoch)")
   Optional<EpochSummaryProjection> findCurrentEpochSummary();
 
-  @Query(value = "SELECT ep FROM Epoch ep WHERE ep.no = (SELECT max(no) FROM Epoch)")
+  @Query(value = "SELECT ep FROM Epoch ep WHERE ep.no = (SELECT max(epoch.no) FROM Epoch epoch)")
   Optional<Epoch> findByCurrentEpochNo();
 
   @Query(value = "SELECT ep FROM Epoch ep WHERE ep.no IN :epochNo")
