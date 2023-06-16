@@ -1,5 +1,9 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
@@ -54,7 +58,7 @@ public class TokenServiceImpl implements TokenService {
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
-
+  private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
   static final Integer TOKEN_VOLUME_ANALYTIC_NUMBER = 5;
 
 
@@ -164,49 +168,89 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId,
-                                                                   AnalyticType type) {
-    MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
-        () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type)
+      throws ExecutionException, InterruptedException {
+
+    MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+
+    List<LocalDate> dates = getListDateAnalytic(type);
+    List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
+
+    ExecutorService fixedExecutor = Executors.newFixedThreadPool(TOKEN_VOLUME_ANALYTIC_NUMBER);
+    for (int i = 0; i < dates.size() - 1; i++) {
+      LocalDate startRange = dates.get(i);
+      LocalDate endRange = dates.get(i + 1);
+      futureTokenAnalytics.add(CompletableFuture.supplyAsync(
+          () -> getTokenVolumeAnalyticsResponse(multiAsset, startRange, endRange),
+          fixedExecutor)
+      );
+    }
+
+    CompletableFuture.allOf(futureTokenAnalytics.toArray(new CompletableFuture[0])).join();
     List<TokenVolumeAnalyticsResponse> responses = new ArrayList<>();
+
+    for (CompletableFuture<TokenVolumeAnalyticsResponse> fRes : futureTokenAnalytics) {
+      responses.add(fRes.get());
+    }
+    return responses;
+  }
+
+  /**
+   * if param `to` less than today: get data from table: `agg_address_token`
+   * else: get data from table `address_token` for today
+   * and get data in range: `from` - previous day of `to` from table: `agg_address_token`
+   * and then sum data of 2 queries
+   * **/
+  private TokenVolumeAnalyticsResponse getTokenVolumeAnalyticsResponse(MultiAsset multiAsset,
+      LocalDate from, LocalDate to) {
+    BigInteger balance = BigInteger.ZERO;
+    if (LocalDate.now().isEqual(to)) {
+      BigInteger todayBalance = addressTokenRepository.sumBalanceBetweenTx(
+          multiAsset,
+          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
+      ).orElse(BigInteger.ZERO);
+
+      BigInteger rangeToYesterdayBalance = aggregateAddressTokenRepository
+          .sumBalanceInTimeRange(multiAsset.getId(), from, to.minusDays(1))
+          .orElse(BigInteger.ZERO);
+
+      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
+    } else {
+      balance = aggregateAddressTokenRepository
+          .sumBalanceInTimeRange(multiAsset.getId(), from, to).orElse(BigInteger.ZERO);
+    }
+
+    return new TokenVolumeAnalyticsResponse(to, balance);
+  }
+
+  private List<LocalDate> getListDateAnalytic(AnalyticType analyticType) {
     LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
     List<LocalDate> dates = new ArrayList<>();
-    switch (type) {
-      case ONE_WEEK:
+    switch (analyticType) {
+      case ONE_WEEK -> {
         var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
         for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
           dates.add(currentWeek.minusWeeks(i));
         }
-        break;
-      case ONE_MONTH:
+      }
+      case ONE_MONTH -> {
         var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
         for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
           dates.add(currentMonth.minusMonths(i));
         }
-        break;
-      case THREE_MONTH:
+      }
+      case THREE_MONTH -> {
         for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
           dates.add(currentDate.minusMonths(i * 3L));
         }
-        break;
-      default:
+      }
+      default -> {
         for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
           dates.add(currentDate.minusDays(i));
         }
-    }
-    for (int i = 0; i < dates.size() - 1; i++) {
-      TokenVolumeAnalyticsResponse response = new TokenVolumeAnalyticsResponse();
-      var balance = addressTokenRepository.sumBalanceBetweenTx(multiAsset,
-          Timestamp.valueOf(dates.get(i).atTime(LocalTime.MAX)),
-          Timestamp.valueOf(dates.get(i + 1).atTime(LocalTime.MAX)));
-      if (Objects.isNull(balance)) {
-        response.setValue(BigInteger.ZERO);
-      } else {
-        response.setValue(balance);
       }
-      response.setDate(dates.get(i+1));
-      responses.add(response);
     }
-    return responses;
+    return dates;
   }
 }
