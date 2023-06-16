@@ -29,6 +29,7 @@ import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
+import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderResponse;
@@ -50,6 +51,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDet
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
+import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
@@ -68,7 +70,6 @@ import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
@@ -123,13 +124,18 @@ public class DelegationServiceImpl implements DelegationService {
     List<TxIOProjection> txs = txRepository.findTxIn(txIdPage.getContent());
     Map<Long, TxIOProjection> txMap
         = txs.stream().collect(Collectors.toMap(TxIOProjection::getId, Function.identity()));
-    List<Delegation> delegations = delegationRepository.findDelegationByTxIdIn(txIdPage.getContent());
+    List<DelegationProjection> delegations = delegationRepository.findDelegationByTxIdIn(txIdPage.getContent());
     Map<Long, List<String>> delegationStakeKeyMap = delegations.stream()
-        .collect(Collectors.groupingBy(Delegation::getTxId,
-            Collectors.mapping(item -> item.getAddress().getView(), Collectors.toList())));
-    Map<Long, List<String>> delegationPoolMap = delegations.stream()
-        .collect(Collectors.groupingBy(Delegation::getTxId,
-            Collectors.mapping(item -> item.getPoolHash().getView(), Collectors.toList())));
+        .collect(Collectors.groupingBy(DelegationProjection::getTxId,
+            Collectors.mapping(DelegationProjection::getStakeAddress, Collectors.toList())));
+    Map<Long, Set<DelegationPoolResponse>> delegationPoolMap = delegations.stream()
+        .collect(Collectors.groupingBy(DelegationProjection::getTxId,
+            Collectors.mapping(item ->
+                DelegationPoolResponse.builder()
+                .poolName(item.getPoolName())
+                .tickerName(item.getTickerName())
+                .poolId(item.getPoolView())
+                .build(), Collectors.toSet())));
     List<DelegationResponse> responses = txIdPage.stream().map(
         item -> DelegationResponse.builder()
             .txHash(txMap.get(item).getHash())
@@ -139,7 +145,7 @@ public class DelegationServiceImpl implements DelegationService {
             .time(txMap.get(item).getTime())
             .epochSlotNo(txMap.get(item).getEpochSlotNo())
             .stakeKeys(delegationStakeKeyMap.get(item))
-            .pools(delegationPoolMap.get(item))
+            .pools(delegationPoolMap.get(item).stream().toList())
             .build()
     ).toList();
     return new BaseFilterResponse<>(txIdPage ,responses);

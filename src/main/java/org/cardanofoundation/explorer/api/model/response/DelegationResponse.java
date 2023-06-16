@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response;
 
 import lombok.*;
-
+import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,5 +17,5 @@ public class DelegationResponse {
   private Integer epochNo;
   private Integer epochSlotNo;
   private List<String> stakeKeys;
-  private List<String> pools;
+  private List<DelegationPoolResponse> pools;
 }

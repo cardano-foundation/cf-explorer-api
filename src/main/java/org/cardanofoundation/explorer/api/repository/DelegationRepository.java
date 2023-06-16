@@ -2,12 +2,11 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
+import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -190,11 +189,15 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       countQuery = "SELECT COUNT(DISTINCT delegation.txId) FROM Delegation delegation")
   Page<Long> findAllDelegations(Pageable pageable);
 
-  @EntityGraph(attributePaths = {Delegation_.ADDRESS, Delegation_.POOL_HASH})
-  @Query(value = "SELECT delegation"
+  @Query(value = "SELECT delegation.address.view as stakeAddress, poolHash.view as poolView,"
+      + " po.tickerName as tickerName, po.poolName as poolName, delegation.txId as txId"
       + " FROM Delegation delegation"
+      + " INNER JOIN StakeAddress stake ON stake.id = delegation.stakeAddressId"
+      + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
+      + " LEFT JOIN PoolOfflineData po ON poolHash.id = po.pool.id "
+      + " AND (po.id IS NULL OR po.pmrId = (SELECT max(po2.pmrId) FROM PoolOfflineData po2 WHERE po2.pool.id = poolHash.id))"
       + " WHERE delegation.txId IN :txIds")
-  List<Delegation> findDelegationByTxIdIn(@Param("txIds") List<Long> txIds);
+  List<DelegationProjection> findDelegationByTxIdIn(@Param("txIds") List<Long> txIds);
 
   @Query(value =
       "SELECT count(dg1.address.id) "
