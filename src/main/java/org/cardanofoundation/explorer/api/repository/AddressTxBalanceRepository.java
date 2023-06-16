@@ -29,6 +29,13 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   BigInteger getBalanceByAddressAndTime(
       @Param("address") Address address, @Param("time") Timestamp time);
 
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address = :address"
+      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByAddressAndTime(@Param("address") Address address,
+      @Param("from") Timestamp from,
+      @Param("to") Timestamp to);
+
   @Query(value = "select min(calculated_balances.sum_balance) as minVal, "
       + "                max(calculated_balances.sum_balance) as maxVal, "
       + "                max(calculated_balances.txId) as maxTxId "
@@ -89,6 +96,14 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " AND addressTxBalance.time <= :time")
   Optional<BigInteger> getBalanceByStakeAddressAndTime(
       @Param("stakeAddress") StakeAddress stakeAddress, @Param("time") Timestamp time);
+
+  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
+      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+  Optional<BigInteger> getBalanceByStakeAddressAndTime(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                       @Param("from") Timestamp from,
+                                                       @Param("to") Timestamp to);
 
   @Query("SELECT addressTxBalance FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.tx.id in :ids and addressTxBalance.address.address = :address")
