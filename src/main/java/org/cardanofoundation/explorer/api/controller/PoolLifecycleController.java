@@ -7,6 +7,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import java.util.Date;
@@ -28,7 +29,6 @@ public class PoolLifecycleController {
 
   private final PoolLifecycleService poolLifecycleService;
 
-
   @GetMapping(value = "/registration")
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> registration(
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
@@ -41,7 +41,7 @@ public class PoolLifecycleController {
 
   @GetMapping(value = "/registration-detail")
   public ResponseEntity<RegistrationResponse> registrationDetail(@Param("poolView") String poolView,
-                                                                 @RequestParam("id") Long id) {
+      @RequestParam("id") Long id) {
     return ResponseEntity.ok(poolLifecycleService.registrationDetail(poolView, id));
   }
 
@@ -90,16 +90,23 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/registration-list")
-  public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> registrationList(@RequestParam("poolView") String poolView,
+  public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> registrationList(
+      @RequestParam("poolView") String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(
         poolLifecycleService.registrationList(poolView, pageable));
   }
 
   @GetMapping(value = "/pool-update-list")
-  public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> poolUpdate(@RequestParam("poolView") String poolView,
+  public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> poolUpdate(
+      @RequestParam("poolView") String poolView,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
     return ResponseEntity.ok(
         poolLifecycleService.poolUpdateList(poolView, pageable));
+  }
+
+  @GetMapping(value = "/status")
+  public ResponseEntity<SPOStatusResponse> poolStatus(@RequestParam("poolView") String poolView) {
+    return ResponseEntity.ok(poolLifecycleService.poolLifecycleStatus(poolView));
   }
 }

@@ -4,6 +4,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewa
 import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolActiveStakeProjection;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.Reward;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -12,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -143,4 +145,6 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "GROUP BY rw.earnedEpoch")
   List<EpochRewardProjection> getPoolRewardByPool(@Param("poolId") Long poolId,
       @Param("epochNos") Set<Integer> epochNos);
+
+  Boolean existsByPoolAndType(@Param("pool") PoolHash pool, @Param("type") RewardType type);
 }

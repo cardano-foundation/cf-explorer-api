@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
@@ -51,5 +52,6 @@ public interface TokenService {
    * @param type type of analytic
    * @return list analytic volume of token
    */
-  List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type);
+  List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type)
+      throws ExecutionException, InterruptedException;
 }
