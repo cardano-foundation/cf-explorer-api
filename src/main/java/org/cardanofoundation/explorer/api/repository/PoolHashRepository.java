@@ -89,11 +89,9 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "AND (ph.view = :poolView) ")
   PoolListProjection findDataCalculateReward(@Param("poolView") String poolView);
 
-  @Query(value = "SELECT ph.id AS id, pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView, sa.view AS rewardAccount "
+  @Query(value = "SELECT ph.id AS id, pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView "
       + "FROM PoolHash ph "
-      + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE ph.id = pu2.poolHash.id) "
-      + "LEFT JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.pmrId = (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id ) "
-      + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
+      + "LEFT JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.pmrId = (SELECT max(pod2.pmrId) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id ) "
       + "WHERE ph.view = :poolView")
   PoolInfoProjection getPoolInfo(@Param("poolView") String poolView);
 

@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolRetire;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.springframework.data.domain.Page;
@@ -56,4 +57,5 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
       + "ORDER BY pr.id DESC")
   List<Integer> findByPoolView(@Param("poolView") String poolView);
 
+  Boolean existsByPoolHash(@Param("poolHash") PoolHash poolHash);
 }

@@ -21,6 +21,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
@@ -371,5 +372,22 @@ class PoolLifecycleControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().string(
             containsString("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")));
+  }
+
+  @Test
+  void whenCallPoolStatus() throws Exception {
+    String poolView = "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s";
+    SPOStatusResponse res = new SPOStatusResponse();
+    res.setIsRegistration(true);
+    res.setIsUpdate(true);
+    res.setIsReward(true);
+    res.setIsDeRegistration(false);
+    given(poolLifecycleService.poolLifecycleStatus(poolView))
+        .willReturn(res);
+    mockMvc.perform(get("/api/v1/pool-lifecycle/status")
+            .param("poolView", poolView))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(content().json("{\"isRegistration\":true,\"isUpdate\":true,\"isReward\":true,\"isDeRegistration\":false}"));
   }
 }
