@@ -27,7 +27,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
+import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderResponse;
@@ -49,8 +51,10 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDet
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
+import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
+import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.repository.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
@@ -61,6 +65,7 @@ import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -103,6 +108,8 @@ public class DelegationServiceImpl implements DelegationService {
   private final FetchRewardDataService fetchRewardDataService;
 
   private final StakeAddressRepository stakeAddressRepository;
+
+  private final TxRepository txRepository;
   public static final int MILLI = 1000;
 
   @Value("${spring.data.web.pageable.default-page-size}")
@@ -110,6 +117,39 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Value("${application.network}")
   private String network;
+
+  @Override
+  public BaseFilterResponse<DelegationResponse> getDelegations(Pageable pageable) {
+    Page<Long> txIdPage = delegationRepository.findAllDelegations(pageable);
+    List<TxIOProjection> txs = txRepository.findTxIn(txIdPage.getContent());
+    Map<Long, TxIOProjection> txMap
+        = txs.stream().collect(Collectors.toMap(TxIOProjection::getId, Function.identity()));
+    List<DelegationProjection> delegations = delegationRepository.findDelegationByTxIdIn(txIdPage.getContent());
+    Map<Long, List<String>> delegationStakeKeyMap = delegations.stream()
+        .collect(Collectors.groupingBy(DelegationProjection::getTxId,
+            Collectors.mapping(DelegationProjection::getStakeAddress, Collectors.toList())));
+    Map<Long, Set<DelegationPoolResponse>> delegationPoolMap = delegations.stream()
+        .collect(Collectors.groupingBy(DelegationProjection::getTxId,
+            Collectors.mapping(item ->
+                DelegationPoolResponse.builder()
+                .poolName(item.getPoolName())
+                .tickerName(item.getTickerName())
+                .poolId(item.getPoolView())
+                .build(), Collectors.toSet())));
+    List<DelegationResponse> responses = txIdPage.stream().map(
+        item -> DelegationResponse.builder()
+            .txHash(txMap.get(item).getHash())
+            .blockNo(txMap.get(item).getBlockNo())
+            .epochNo(txMap.get(item).getEpochNo())
+            .epochSlotNo(txMap.get(item).getEpochSlotNo())
+            .time(txMap.get(item).getTime())
+            .epochSlotNo(txMap.get(item).getEpochSlotNo())
+            .stakeKeys(delegationStakeKeyMap.get(item))
+            .pools(delegationPoolMap.get(item).stream().toList())
+            .build()
+    ).toList();
+    return new BaseFilterResponse<>(txIdPage ,responses);
+  }
 
   @Override
   public DelegationHeaderResponse getDataForDelegationHeader() {
