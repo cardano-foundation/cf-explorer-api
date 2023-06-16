@@ -36,7 +36,8 @@ public class TokenController {
   @Operation(summary = "Filter token")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
       @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY,
-          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) {
+          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable)
+      throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.filterToken(pageable));
   }
 

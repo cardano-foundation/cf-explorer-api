@@ -5,6 +5,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
+import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
@@ -14,6 +16,7 @@ import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
+import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
@@ -37,6 +40,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -59,37 +64,53 @@ public class TokenServiceImpl implements TokenService {
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
+
+  @Qualifier("taskExecutor")
+  private final TaskExecutor taskExecutor;
+
   static final Integer TOKEN_VOLUME_ANALYTIC_NUMBER = 5;
 
 
+  @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 200)
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable) {
+  public BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable)
+      throws ExecutionException, InterruptedException {
     Page<MultiAsset> multiAssets = multiAssetRepository.findAll(pageable);
-    Set<String> subjects = multiAssets.stream().map(
-        ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
+    Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(), ma -> ma.getPolicy() + ma.getName());
+
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+    Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList, AssetMetadata::getSubject);
+
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
-    Timestamp yesterday = Timestamp.valueOf(
-        LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
+    Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
     Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
-    List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(
-        multiAssets.getContent(), txId);
-    var numberOfHoldersWithStakeKey
-        = addressTokenBalanceRepository.countByMultiAssetIn(multiAssets.getContent());
-    var numberOfHoldersWithAddressNotHaveStakeKey
-        = addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(multiAssets.getContent());
-    Map<Long, Long> numberHoldersStakeKeyMap = numberOfHoldersWithStakeKey.stream().collect(
-        Collectors.toMap(TokenNumberHoldersProjection::getIdent,
-            TokenNumberHoldersProjection::getNumberOfHolders));
-    Map<Long, Long> numberHoldersAddressNotHaveStakeKeyMap
-        = numberOfHoldersWithAddressNotHaveStakeKey.stream().collect(
-        Collectors.toMap(TokenNumberHoldersProjection::getIdent,
-            TokenNumberHoldersProjection::getNumberOfHolders));
-    Map<Long, BigInteger> tokenVolumeMap = volumes.stream().collect(
-        Collectors.toMap(TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume));
+    List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(multiAssets.getContent(), txId);
+
+    List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(), MultiAsset::getId);
+    var numberOfHoldersWithStakeKeyAsync = CompletableFuture.supplyAsync(
+        () -> addressTokenBalanceRepository.countByMultiAssetIn(multiAssetIds), taskExecutor);
+
+    var numberOfHoldersWithAddressNotHaveStakeKeyAsync = CompletableFuture.supplyAsync(
+        () -> addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(multiAssetIds),
+        taskExecutor);
+
+    CompletableFuture.allOf(numberOfHoldersWithStakeKeyAsync, numberOfHoldersWithAddressNotHaveStakeKeyAsync).join();
+    Map<Long, Long> numberHoldersStakeKeyMap = StreamUtil.toMap(
+        numberOfHoldersWithStakeKeyAsync.get(),
+        TokenNumberHoldersProjection::getIdent,
+        TokenNumberHoldersProjection::getNumberOfHolders
+    );
+
+    Map<Long, Long> numberHoldersAddressNotHaveStakeKeyMap = StreamUtil.toMap(
+        numberOfHoldersWithAddressNotHaveStakeKeyAsync.get(),
+        TokenNumberHoldersProjection::getIdent,
+        TokenNumberHoldersProjection::getNumberOfHolders
+    );
+
+    Map<Long, BigInteger> tokenVolumeMap = StreamUtil
+        .toMap(volumes, TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume);
+
     multiAssetResponsesList.forEach(
         ma -> {
           ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
@@ -109,29 +130,34 @@ public class TokenServiceImpl implements TokenService {
     return new BaseFilterResponse<>(multiAssetResponsesList);
   }
 
-
   @Override
   @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
-    MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
-        () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
-    );
+    MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-    Timestamp yesterday = Timestamp.valueOf(
-        LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
+    Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
     Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
     var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, txId);
-    var numberOfHolders =
-        addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(multiAsset).orElse(0L)
-        + addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset).orElse(0L);
-    tokenResponse.setNumberOfHolders(numberOfHolders);
-    if(Objects.isNull(volume)) {
+
+    var numberOfHoldersHaveStakeKey = addressTokenBalanceRepository
+        .countAddressNotHaveStakeByMultiAsset(multiAsset)
+        .orElse(0L);
+    var numberOfHoldersNotHaveStakeKe =  addressTokenBalanceRepository
+        .countStakeByMultiAsset(multiAsset)
+        .orElse(0L);
+
+    tokenResponse.setNumberOfHolders(numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe);
+    if (Objects.isNull(volume)) {
       tokenResponse.setVolumeIn24h(String.valueOf(0));
     } else {
       tokenResponse.setVolumeIn24h(volume.toString());
     }
-    AssetMetadata assetMetadata = assetMetadataRepository.findFirstBySubject(
-        multiAsset.getPolicy() + multiAsset.getName()).orElse(null);
+    AssetMetadata assetMetadata = assetMetadataRepository
+        .findFirstBySubject(multiAsset.getPolicy() + multiAsset.getName())
+        .orElse(null);
+
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
     return tokenResponse;
   }
