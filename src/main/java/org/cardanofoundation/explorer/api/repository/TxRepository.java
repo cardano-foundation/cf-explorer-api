@@ -71,6 +71,19 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   List<Tx> findByIdIn(@Param("ids") List<Long> ids);
 
+  @Query("SELECT tx.id as id, "
+      + "tx.hash as hash, "
+      + "b.blockNo as blockNo, "
+      + "b.time as time, "
+      + "b.epochNo as epochNo, "
+      + "b.epochSlotNo as epochSlotNo, "
+      + "b.slotNo as slot "
+      + "FROM Tx tx "
+      + "JOIN Block b ON b.id = tx.blockId "
+      + "WHERE tx.id IN :txIds "
+      + "ORDER BY b.blockNo DESC, tx.blockIndex DESC")
+  List<TxIOProjection> findTxIn(@Param("txIds") Collection<Long> txIds);
+
   @Query("SELECT min(tx.id) FROM Tx tx "
       + " INNER JOIN Block b ON b.id = tx.blockId"
       + " WHERE b.time >= :time AND b.txCount > 0")
