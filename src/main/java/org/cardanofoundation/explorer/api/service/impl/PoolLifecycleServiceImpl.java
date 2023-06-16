@@ -22,6 +22,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochRewardProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
@@ -40,7 +41,11 @@ import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -301,6 +306,27 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     res.setData(poolUpdateList);
     return res;
+  }
+
+  @Override
+  public SPOStatusResponse poolLifecycleStatus(String poolView) {
+    SPOStatusResponse response = new SPOStatusResponse();
+    Integer countPoolUpdate = poolUpdateRepository.countPoolUpdateByPool(poolView);
+    if (Objects.isNull(countPoolUpdate) || countPoolUpdate == 0) {
+      response.setIsRegistration(false);
+      response.setIsUpdate(false);
+    } else if (countPoolUpdate == 1) {
+      response.setIsRegistration(true);
+      response.setIsUpdate(false);
+    } else {
+      response.setIsRegistration(true);
+      response.setIsUpdate(true);
+    }
+    PoolHash pool = poolHashRepository.findByView(poolView).orElseThrow(() -> new BusinessException(
+        CommonErrorCode.UNKNOWN_ERROR));
+    response.setIsReward(rewardRepository.existsByPoolAndType(pool, RewardType.LEADER));
+    response.setIsDeRegistration(poolRetireRepository.existsByPoolHash(pool));
+    return response;
   }
 
   private BaseFilterResponse<PoolUpdateResponse> getDataForPoolUpdate(String poolView,
