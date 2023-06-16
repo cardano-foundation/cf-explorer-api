@@ -157,8 +157,8 @@ public class StakeKeyController {
   @GetMapping("/min-max-balance/{stakeKey}")
   @LogMessage
   @Operation(summary = "Get the highest and lowest balance address")
-  public ResponseEntity<List<BigInteger>> getAddressMinMaxBalance(@PathVariable String stakeKey) {
-    return ResponseEntity.ok(stakeService.getAddressMinMaxBalance(stakeKey));
+  public ResponseEntity<List<BigInteger>> getStakeMinMaxBalance(@PathVariable String stakeKey) {
+    return ResponseEntity.ok(stakeService.getStakeMinMaxBalance(stakeKey));
   }
 
 }
