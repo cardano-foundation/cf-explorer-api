@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.api.repository.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.EpochStakeCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.PoolHistoryCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.PoolInfoCheckpointRepository;
@@ -32,6 +33,9 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Value("${application.api.check-epoch-stake.base-url}")
   private String apiCheckEpochStakeUrl;
 
+  @Value("${application.api.check-ada-pots.base-url}")
+  private String apiCheckAdaPotsUrl;
+
   private final RestTemplate restTemplate;
   private final RewardCheckpointRepository rewardCheckpointRepository;
 
@@ -40,6 +44,8 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   private final PoolInfoCheckpointRepository poolInfoCheckpointRepository;
 
   private final EpochStakeCheckpointRepository epochStakeCheckpointRepository;
+
+  private final AdaPotsRepository adaPotsRepository;
 
   @Override
   public boolean checkRewardAvailable(String stakeKey) {
@@ -133,6 +139,17 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Override
   public Boolean fetchRewardForPool(List<String> rewardAccounts) {
     return restTemplate.postForObject(apiCheckRewardUrl, rewardAccounts,
+        Boolean.class);
+  }
+
+  @Override
+  public Boolean checkAdaPots(Integer epochNo) {
+    return adaPotsRepository.existsByEpochNo(epochNo);
+  }
+
+  @Override
+  public Boolean fetchAdaPots(List<Integer> epochNo) {
+    return restTemplate.postForObject(apiCheckAdaPotsUrl, epochNo,
         Boolean.class);
   }
 
