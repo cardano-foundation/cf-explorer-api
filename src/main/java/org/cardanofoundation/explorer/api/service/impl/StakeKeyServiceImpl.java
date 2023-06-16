@@ -1,5 +1,9 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
@@ -80,6 +84,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final PoolInfoRepository poolInfoRepository;
 
   private final FetchRewardDataService fetchRewardDataService;
+  private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   private static final int STAKE_ANALYTIC_NUMBER = 5;
 
@@ -290,46 +295,82 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey,
-                                                                     AnalyticType type) {
-    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-            () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+      AnalyticType type)
+      throws ExecutionException, InterruptedException {
+
+    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+
+    List<CompletableFuture<StakeAnalyticBalanceResponse>> futureStakeAnalytics = new ArrayList<>();
+    List<LocalDate> dates = getListDateAnalytic(type);
+    ExecutorService fixedExecutor = Executors.newFixedThreadPool(STAKE_ANALYTIC_NUMBER);
+
+    dates.forEach(dateItem -> futureStakeAnalytics.add(
+        CompletableFuture.supplyAsync(() -> getBalanceOfStake(stakeAddress, dateItem),
+            fixedExecutor))
+    );
+
+    CompletableFuture.allOf(futureStakeAnalytics.toArray(new CompletableFuture[0])).join();
     List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
+
+    for (CompletableFuture<StakeAnalyticBalanceResponse> fRes : futureStakeAnalytics) {
+      responses.add(fRes.get());
+    }
+    return responses;
+  }
+
+  private StakeAnalyticBalanceResponse getBalanceOfStake(StakeAddress stakeAddress, LocalDate to) {
+    BigInteger balance = BigInteger.ZERO;
+    if (LocalDate.now().isEqual(to)) {
+      BigInteger todayBalance = addressTxBalanceRepository
+          .getBalanceByStakeAddressAndTime(
+              stakeAddress,
+              Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
+              Timestamp.valueOf(to.atTime(LocalTime.MAX))
+          )
+          .orElse(BigInteger.ZERO);
+
+      BigInteger rangeToYesterdayBalance = aggregateAddressTxBalanceRepository
+          .sumBalanceByStakeAddressId(stakeAddress.getId(), to.minusDays(1))
+          .orElse(BigInteger.ZERO);
+
+      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
+    } else {
+      balance = aggregateAddressTxBalanceRepository
+          .sumBalanceByStakeAddressId(stakeAddress.getId(), to)
+          .orElse(BigInteger.ZERO);
+    }
+    return new StakeAnalyticBalanceResponse(to, balance);
+  }
+
+  private List<LocalDate> getListDateAnalytic(AnalyticType type) {
     LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
     List<LocalDate> dates = new ArrayList<>();
     switch (type) {
-      case ONE_WEEK:
+      case ONE_WEEK -> {
         var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
         for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
           dates.add(currentWeek.minusWeeks(i));
         }
-        break;
-      case ONE_MONTH:
+      }
+      case ONE_MONTH -> {
         var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
         for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
           dates.add(currentMonth.minusMonths(i));
         }
-        break;
-      case THREE_MONTH:
+      }
+      case THREE_MONTH -> {
         for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
           dates.add(currentDate.minusMonths(i * 3L));
         }
-        break;
-      default:
+      }
+      default -> {
         for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
           dates.add(currentDate.minusDays(i));
         }
+      }
     }
-    dates.forEach(
-            item -> {
-              StakeAnalyticBalanceResponse response = new StakeAnalyticBalanceResponse();
-              var balance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(stakeAddress,
-                      Timestamp.valueOf(item.atTime(LocalTime.MAX))).orElse(BigInteger.ZERO);
-              response.setValue(balance);
-              response.setDate(item);
-              responses.add(response);
-            }
-    );
-    return responses;
+    return dates;
   }
 
   @Override
