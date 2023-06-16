@@ -74,6 +74,16 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
   }
 
   @Override
+  public Boolean checkAdaPots(Integer epochNo) {
+    return true;
+  }
+
+  @Override
+  public Boolean fetchAdaPots(List<Integer> epochNo) {
+    return true;
+  }
+
+  @Override
   public Boolean isKoiOs() {
     return false;
   }
