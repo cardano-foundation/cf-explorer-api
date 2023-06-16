@@ -156,6 +156,9 @@ public class DelegationServiceImpl implements DelegationService {
     Epoch epoch = epochRepository.findByCurrentEpochNo()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Integer epochNo = epoch.getNo();
+    if (!fetchRewardDataService.checkAdaPots(epochNo)) {
+      fetchRewardDataService.fetchAdaPots(List.of(epochNo));
+    }
     Timestamp startTime = epoch.getStartTime();
     Long slot = (Instant.now().toEpochMilli() - startTime.getTime()) / MILLI;
     long countDownTime =
@@ -177,8 +180,7 @@ public class DelegationServiceImpl implements DelegationService {
       liveStake = Objects.nonNull(liveStakeObj) ? new BigInteger(String.valueOf(liveStakeObj))
           : BigInteger.ZERO;
     }
-    Integer delegators = delegationRepository.numberDelegatorsAllPoolByEpochNo(
-        Long.valueOf(epochNo));
+    Integer delegators = delegationRepository.totalLiveDelegatorsCount();
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
         .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
@@ -363,13 +365,16 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public PoolDetailHeaderResponse getDataForPoolDetail(String poolView) {
+    Integer currentEpoch = epochRepository.findCurrentEpochNo()
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    if (!fetchRewardDataService.checkAdaPots(currentEpoch)) {
+      fetchRewardDataService.fetchAdaPots(List.of(currentEpoch));
+    }
     PoolDetailUpdateProjection projection = poolHashRepository.getDataForPoolDetail(
         poolView);
     Long poolId = projection.getPoolId();
     PoolDetailHeaderResponse poolDetailResponse = Stream.of(projection)
         .map(PoolDetailHeaderResponse::new).findFirst()
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    Integer currentEpoch = epochRepository.findCurrentEpochNo()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     BigDecimal stakeLimit = getPoolSaturation(projection.getReserves(),
         projection.getParamK());
@@ -775,21 +780,19 @@ public class DelegationServiceImpl implements DelegationService {
         poolHistoryProjections.isEmpty() ? null : poolHistoryProjections.get(CommonConstant.ZERO);
     PoolAmountProjection poolAmountProjection =
         poolAmountProjections.isEmpty() ? null : poolAmountProjections.get(CommonConstant.ZERO);
-    if (Objects.nonNull(poolHistoryKoiOsProjection)) {
-      BigInteger delegateReward = BigInteger.ZERO;
+    BigInteger delegateReward = BigInteger.ZERO;
+    if (Objects.nonNull(poolHistoryKoiOsProjection) && Objects.nonNull(
+        poolHistoryKoiOsProjection.getDelegateReward())) {
       poolDetailHeader.setRos(poolHistoryKoiOsProjection.getRos());
-      if (Objects.nonNull(
-          poolHistoryKoiOsProjection.getDelegateReward())) {
-        delegateReward = poolHistoryKoiOsProjection.getDelegateReward();
-      }
-      BigInteger operatorReward = BigInteger.ZERO;
-      if (Objects.nonNull(poolAmountProjection) && Objects.nonNull(
-          poolAmountProjection.getAmount())) {
-        operatorReward = poolAmountProjection.getAmount();
-      }
-      BigInteger poolReward = delegateReward.add(operatorReward);
-      poolDetailHeader.setReward(getPoolRewardPercent(poolDetailHeader.getPoolSize(), poolReward));
+      delegateReward = poolHistoryKoiOsProjection.getDelegateReward();
     }
+    BigInteger operatorReward = BigInteger.ZERO;
+    if (Objects.nonNull(poolAmountProjection) && Objects.nonNull(
+        poolAmountProjection.getAmount())) {
+      operatorReward = poolAmountProjection.getAmount();
+    }
+    BigInteger poolReward = delegateReward.add(operatorReward);
+    poolDetailHeader.setReward(getPoolRewardPercent(poolDetailHeader.getPoolSize(), poolReward));
   }
 
   /**
