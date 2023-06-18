@@ -9,6 +9,7 @@ import org.cardanofoundation.explorer.api.repository.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.SlotLeaderRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.BlockService;
+import org.cardanofoundation.explorer.common.utils.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.explorer.consumercommon.entity.SlotLeader;
@@ -16,6 +17,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,6 +91,9 @@ public class BlockServiceImpl implements BlockService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<BlockFilterResponse> getBlockByEpoch(String no, Pageable pageable) {
     try {
+      if (Boolean.FALSE.equals(StringUtils.isNotBlank(no))) {
+        return new BaseFilterResponse<>(Collections.emptyList(), 0);
+      }
       Integer epochNo = Integer.parseInt(no);
       Page<Block> blocks = blockRepository.findBlockByEpochNo(epochNo, pageable);
       return mapperBlockToBlockFilterResponse(blocks);

@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validation.PageableTop;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -14,10 +15,12 @@ import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAn
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/delegations")
 @RequiredArgsConstructor
+@Validated
 public class DelegationController {
 
   private final DelegationService delegationService;
@@ -65,7 +69,7 @@ public class DelegationController {
   @GetMapping("/pool-detail-epochs")
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
       @RequestParam("poolView") String poolView,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20, page = 0) Pageable pageable) {
     return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(pageable, poolView));
   }
 
@@ -79,7 +83,8 @@ public class DelegationController {
   @GetMapping("/top")
   @LogMessage
   @Operation(summary = "Find Top(default is 3) Delegation Pool order by pool size")
-  public ResponseEntity<List<PoolResponse>> findTopDelegationPool(Pageable pageable) {
+  public ResponseEntity<List<PoolResponse>> findTopDelegationPool(@ParameterObject @PageableTop
+                                                                    Pageable pageable) {
     return ResponseEntity.ok(delegationService.findTopDelegationPool(pageable));
   }
 }

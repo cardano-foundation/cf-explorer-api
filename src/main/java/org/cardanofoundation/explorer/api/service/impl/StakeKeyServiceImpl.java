@@ -10,12 +10,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -213,6 +208,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), stakeHistoryList.size());
+    if (start >= stakeHistoryList.size()) {
+      Page<StakeHistoryProjection> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, stakeHistoryList.size());
+      return new BaseFilterResponse<>(emptyPage);
+    }
     Page<StakeHistoryProjection> page = new PageImpl<>(stakeHistoryList.subList(start, end),
         pageable, stakeHistoryList.size());
     return new BaseFilterResponse<>(page);
@@ -243,8 +242,14 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), instantaneousRewards.size());
+
+    if (start >= instantaneousRewards.size()) {
+      Page<StakeInstantaneousRewardsProjection> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, instantaneousRewards.size());
+      return new BaseFilterResponse<>(emptyPage);
+    }
+
     Page<StakeInstantaneousRewardsProjection> page = new PageImpl<>(
-        instantaneousRewards.subList(start, end), pageable, instantaneousRewards.size());
+              instantaneousRewards.subList(start, end), pageable, instantaneousRewards.size());
     return new BaseFilterResponse<>(page);
   }
 

@@ -335,6 +335,12 @@ public class TxServiceImpl implements TxService {
       }
       txFilterResponses.add(txResponse);
     }
+//    Sort sort = txPage.getPageable().getSort();
+//    List<Sort.Order> orders = sort.toList();
+//    for (Sort.Order order : orders) {
+//      String property = order.getProperty();
+//      Sort.Direction direction = order.getDirection();
+//    }
     return txFilterResponses;
   }
 

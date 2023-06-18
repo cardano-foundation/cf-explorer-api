@@ -10,6 +10,7 @@ import org.cardanofoundation.explorer.api.service.EpochService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.common.utils.StringUtils;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,7 +42,7 @@ public class EpochController {
   @LogMessage
   @Operation(summary = "Get block list of epoch by its no")
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getBlockList(
-      @PathVariable @Parameter(description = "Epoch Number") String no,
+      @PathVariable(required = false) @Parameter(description = "Epoch Number") String no,
       @ParameterObject @PageableDefault(sort = {"id"},
           direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(blockService.getBlockByEpoch(no, pageable));
@@ -51,8 +52,8 @@ public class EpochController {
   @LogMessage
   @Operation(summary = "Get all epoch")
   public ResponseEntity<BaseFilterResponse<EpochResponse>> filter(
-      @ParameterObject @PageableDefault(sort = {"id"},
-          direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20, sort = {"id"},
+          direction = Sort.Direction.DESC)  Pageable pageable) {
     return ResponseEntity.ok(epochService.getAllEpoch(pageable));
   }
   @GetMapping("/current")

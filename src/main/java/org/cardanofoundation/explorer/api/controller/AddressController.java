@@ -1,8 +1,25 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validation.PageableTop;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressAnalyticsResponse;
@@ -11,23 +28,12 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import java.math.BigInteger;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/addresses")
 @RequiredArgsConstructor
+@Validated
 public class AddressController {
 
   private final AddressService addressService;
@@ -45,9 +51,9 @@ public class AddressController {
   @GetMapping("/top-addresses")
   @LogMessage
   @Operation(summary = "Get top addresses")
-  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-      @ParameterObject Pageable pageable) {
-    return ResponseEntity.ok(addressService.getTopAddress(pageable));
+  public ResponseEntity<List<AddressFilterResponse>> getTopAddress(
+      @ParameterObject @PageableTop Pageable pageable) {
+    return ResponseEntity.ok(addressService.getTopAddress(pageable).getData());
   }
 
   @GetMapping("/analytics/{address}/{type}")

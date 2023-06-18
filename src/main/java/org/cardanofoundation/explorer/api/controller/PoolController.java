@@ -23,14 +23,14 @@ public class PoolController {
   @GetMapping("/registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
-      @ParameterObject @PageableDefault() Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
     return ResponseEntity.ok(poolRegistrationService.getDataForPoolRegistration(pageable));
   }
 
   @GetMapping("/de-registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
-      @ParameterObject @PageableDefault() Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
     return ResponseEntity.ok(poolRegistrationService.getDataForPoolDeRegistration(pageable));
   }
 }

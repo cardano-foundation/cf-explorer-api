@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.controller;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validation.PageableTop;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
@@ -21,20 +22,28 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+
+import jakarta.validation.constraints.Positive;
 
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/stakes")
 @RequiredArgsConstructor
+@Validated
 public class StakeKeyController {
 
   private final StakeKeyService stakeService;
@@ -117,8 +126,9 @@ public class StakeKeyController {
   @GetMapping("/top-delegators")
   @LogMessage
   @Operation(summary = "Get top delegators")
-  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(@ParameterObject Pageable pageable) {
-    return stakeService.getTopDelegators(pageable);
+  public ResponseEntity<List<StakeFilterResponse>> getTopDelegators(@ParameterObject @PageableTop Pageable pageable) {
+    return ResponseEntity.of(Optional.ofNullable(stakeService
+        .getTopDelegators(pageable).getData()));
   }
 
   @GetMapping("/{stakeKey}/list-address")
@@ -136,7 +146,6 @@ public class StakeKeyController {
   public ResponseEntity<StakeAnalyticResponse> getStakeAnalytics() {
     return ResponseEntity.ok(stakeService.getStakeAnalytics());
   }
-
   @GetMapping("/analytics-balance/{stakeKey}/{type}")
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
