@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 public interface TxIOProjection {
+  Long getId();
   Long getBlockNo();
   String getFromAddress();
   String getToAddress();

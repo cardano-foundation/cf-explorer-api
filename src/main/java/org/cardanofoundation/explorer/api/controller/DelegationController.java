@@ -3,8 +3,12 @@ package org.cardanofoundation.explorer.api.controller;
 import java.util.List;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochResponse;
@@ -12,8 +16,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderRe
 import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import org.cardanofoundation.explorer.api.service.DelegationService;
-import io.swagger.v3.oas.annotations.Operation;
-import lombok.RequiredArgsConstructor;
+
 import org.cardanofoundation.explorer.common.validation.length.LengthValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -28,6 +31,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+
 @RestController
 @RequestMapping("/api/v1/delegations")
 @RequiredArgsConstructor
@@ -35,6 +47,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class DelegationController {
 
   private final DelegationService delegationService;
+
+  @GetMapping
+  @LogMessage
+  @Operation(summary = "List delegations")
+  public ResponseEntity<BaseFilterResponse<DelegationResponse>> getDelegations(
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {Delegation_.TX_ID},
+          direction = Sort.Direction.DESC)  Pageable pageable) {
+    return ResponseEntity.ok(delegationService.getDelegations(pageable));
+  }
 
   @GetMapping("/header")
   public ResponseEntity<DelegationHeaderResponse> getDataForDelegationHeader() {

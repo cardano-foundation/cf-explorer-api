@@ -97,6 +97,8 @@ application:
       base-url: ${API_CHECK_POOL_INFO_URL:http://10.4.10.231:8888/api/v1/pool-info/fetch}
     check-epoch-stake:
       base-url: ${API_CHECK_EPOCH_STAKE_URL:http://10.4.10.231:8888/api/v1/epoch-stake/fetch}
+    check-ada-pots:
+      base-url: ${API_CHECK_ADA_POTS_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
 
 cloud:
   aws:
@@ -130,6 +132,15 @@ management:
     metrics:
       export:
         enabled: true
+
+  metrics:
+    distribution:
+      percentiles:
+        http.server.requests: 0.5, 0.9, 0.95, 0.99, 0.999
+      percentiles-histogram:
+        http.server.requests: true
+
+
   endpoints:
     web:
       exposure:

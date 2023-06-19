@@ -22,33 +22,23 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   @Query("SELECT count(addressTxBalance) FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.address = :address")
   Long countByAddress(@Param("address") Address address);
-  @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
-      + " WHERE addressTxBalance.address = :address"
-      + " AND addressTxBalance.time <= :time")
-  BigInteger getBalanceByAddressAndTime(@Param("address") Address address, @Param("time") Timestamp time);
 
   @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
-      + " WHERE addressTxBalance.address = :address"
-      + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
+          + " WHERE addressTxBalance.address = :address"
+          + " AND addressTxBalance.time > :from and addressTxBalance.time <= :to")
   Optional<BigInteger> getBalanceByAddressAndTime(@Param("address") Address address,
                                                   @Param("from") Timestamp from,
                                                   @Param("to") Timestamp to);
 
-  @Query(value = "select min(calculated_balances.sum_of_no) as minVal, max(calculated_balances.sum_of_no) as maxVal " +
-      "from (select list_balance.id, sum(list_balance.balance) OVER (order by list_balance.id) as sum_of_no " +
-      "      from (select ROW_NUMBER() over (order by tx.block_id asc, tx.block_index asc) AS id, atb.balance " +
-      "            from address_tx_balance atb " +
-      "            inner join tx tx on tx.id = atb.tx_id " +
-      "            where atb.address_id = :addressId " +
-      "            order by tx.block_id asc, tx.block_index asc) as list_balance" +
-      "    ) as calculated_balances", nativeQuery = true)
+  @Query(value = "select min(calculated_balances.sum_balance) as minVal, "
+      + "                max(calculated_balances.sum_balance) as maxVal, "
+      + "                max(calculated_balances.txId) as maxTxId "
+      + " from (select sum(atb.balance) over (order by atb.tx_id rows unbounded PRECEDING) as sum_balance, "
+      + "              atb.tx_id as txId "
+      + "       from mainnet.address_tx_balance atb "
+      + "       where atb.address_id = :addressId"
+      + "       order by atb.tx_id) as calculated_balances", nativeQuery = true)
   MinMaxProjection findMinMaxBalanceByAddress(@Param("addressId") Long addressId);
-
-  @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
-      + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
-      + " WHERE addrTxBalance.address = :address"
-      + " ORDER BY addrTxBalance.tx.blockId ASC, addrTxBalance.tx.blockIndex ASC")
-  List<BigInteger> findAllByAddress(@Param("address") Address address);
 
   @Query(value = "SELECT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
@@ -56,23 +46,15 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       + " ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   List<Tx> findAllByAddress(@Param("address") Address address, Pageable pageable);
 
-  @Query(value = "select min(calculated_balances.sum_of_no) as minVal, max(calculated_balances.sum_of_no) as maxVal " +
-      "from (select list_balance.id, sum(list_balance.balance) OVER (order by list_balance.id) as sum_of_no " +
-      "      from (select ROW_NUMBER() over (order by tx.block_id asc, tx.block_index asc) AS id, atb.balance " +
-      "            from address_tx_balance atb " +
-      "            inner join tx tx on tx.id = atb.tx_id " +
-      "            inner join address addr on atb.address_id = addr.id and addr.is_deleted = false " +
-      "                                              and addr.stake_address_id = :stakeAddressId " +
-      "            order by tx.block_id asc, tx.block_index asc) as list_balance" +
-      "    ) as calculated_balances", nativeQuery = true)
+  @Query(value = "select min(calculated_balances.sum_balance) as minVal, "
+      + "                max(calculated_balances.sum_balance) as maxVal, "
+      + "                max(calculated_balances.txId) as maxTxId "
+      + " from (select sum(atb.balance) over (order by atb.tx_id rows unbounded PRECEDING) as sum_balance, "
+      + "              atb.tx_id as txId "
+      + "       from mainnet.address_tx_balance atb "
+      + "       where atb.stake_address_id = :stakeAddressId"
+      + "       order by atb.tx_id) as calculated_balances", nativeQuery = true)
   MinMaxProjection findMinMaxBalanceByStakeAddress(@Param("stakeAddressId") Long stakeAddressId);
-
-  @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
-      + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
-      + " WHERE addrTxBalance.address IN "
-      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
-      + " ORDER BY addrTxBalance.tx.blockId ASC, addrTxBalance.tx.blockIndex ASC")
-  List<BigInteger> findAllByStakeAddress(@Param("stakeAddress") StakeAddress stakeAddress);
 
   @Query(value = "SELECT DISTINCT tx FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"

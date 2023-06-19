@@ -205,7 +205,6 @@ public class AddressServiceImpl implements AddressService {
     return List.of(balanceList.getMinVal(), balanceList.getMaxVal());
   }
 
-
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
