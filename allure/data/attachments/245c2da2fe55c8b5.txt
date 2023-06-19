@@ -1,0 +1,1 @@
+{"name":"425249434b53","displayName":"BRICKS","policy":"1f7a58a1aa1e6b047a42109ade331ce26c9c2cce027d043ff264fb1f","fingerprint":"asset1kmp6nmdx5ptmjnt30vq2m2606nz35ae4xfx588","txCount":34,"supply":"108000000000000069420","volumeIn24h":"0","totalVolume":"376213023705162210643","numberOfHolders":3,"createdOn":"2023/05/20 17:28:51"}
