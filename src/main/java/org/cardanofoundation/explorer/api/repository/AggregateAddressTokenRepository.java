@@ -17,4 +17,7 @@ public interface AggregateAddressTokenRepository extends JpaRepository<Aggregate
   Optional<BigInteger> sumBalanceInTimeRange(@Param("multiAsset") Long multiAssetId,
                                              @Param("from") LocalDate from,
                                              @Param("to") LocalDate to);
+
+  @Query("select max(a.day) from AggregateAddressToken a")
+  Optional<LocalDate> getMaxDay();
 }

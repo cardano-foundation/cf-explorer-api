@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -28,11 +29,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -178,11 +174,12 @@ public class TokenServiceImpl implements TokenService {
     List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
 
     ExecutorService fixedExecutor = Executors.newFixedThreadPool(TOKEN_VOLUME_ANALYTIC_NUMBER);
+    final Optional<LocalDate> maxDateAgg = aggregateAddressTokenRepository.getMaxDay();
     for (int i = 0; i < dates.size() - 1; i++) {
       LocalDate startRange = dates.get(i);
       LocalDate endRange = dates.get(i + 1);
       futureTokenAnalytics.add(CompletableFuture.supplyAsync(
-          () -> getTokenVolumeAnalyticsResponse(multiAsset, startRange, endRange),
+          () -> getTokenVolumeAnalyticsResponse(multiAsset, startRange, endRange, maxDateAgg),
           fixedExecutor)
       );
     }
@@ -202,26 +199,79 @@ public class TokenServiceImpl implements TokenService {
    * and get data in range: `from` - previous day of `to` from table: `agg_address_token`
    * and then sum data of 2 queries
    * **/
-  private TokenVolumeAnalyticsResponse getTokenVolumeAnalyticsResponse(MultiAsset multiAsset,
-      LocalDate from, LocalDate to) {
-    BigInteger balance = BigInteger.ZERO;
-    if (LocalDate.now().isEqual(to)) {
-      BigInteger todayBalance = addressTokenRepository.sumBalanceBetweenTx(
+  private TokenVolumeAnalyticsResponse getTokenVolumeAnalyticsResponse(
+      MultiAsset multiAsset,
+      LocalDate from, LocalDate to,
+      Optional<LocalDate> maxDateAgg) {
+
+    if (maxDateAgg.isEmpty() || !from.isBefore(maxDateAgg.get())) {
+      BigInteger balance = addressTokenRepository.sumBalanceBetweenTx(
           multiAsset,
+          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
+          Timestamp.valueOf(to.atTime(LocalTime.MAX))
+      ).orElse(BigInteger.ZERO);
+      return new TokenVolumeAnalyticsResponse(to, balance);
+    }
+
+    BigInteger balance;
+    if (LocalDate.now().isEqual(to)) {
+      balance = getBalanceInRangeHaveToday(multiAsset, from, to, maxDateAgg.get());
+    } else {
+      balance = getBalanceInRangePreviousToday(multiAsset, from, to, maxDateAgg.get());
+    }
+    return new TokenVolumeAnalyticsResponse(to, balance);
+  }
+
+  private BigInteger getBalanceInRangeHaveToday(MultiAsset multiAsset,
+                                                LocalDate from, LocalDate to,
+                                                LocalDate maxDateAgg) {
+    BigInteger todayBalance = addressTokenRepository.sumBalanceBetweenTx(
+        multiAsset,
+        Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
+    ).orElse(BigInteger.ZERO);
+
+    //case missing aggregation data
+    boolean isMissingAggregationData = to.minusDays(1).isAfter(maxDateAgg);
+    if (isMissingAggregationData) {
+      BigInteger balanceAgg = aggregateAddressTokenRepository
+          .sumBalanceInTimeRange(multiAsset.getId(), from, maxDateAgg)
+          .orElse(BigInteger.ZERO);
+
+      //get missing aggregation data
+      BigInteger balanceNotAgg = addressTokenRepository.sumBalanceBetweenTx(
+          multiAsset,
+          Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
           Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
       ).orElse(BigInteger.ZERO);
 
+      return todayBalance.add(balanceAgg).add(balanceNotAgg);
+    } else {
       BigInteger rangeToYesterdayBalance = aggregateAddressTokenRepository
           .sumBalanceInTimeRange(multiAsset.getId(), from, to.minusDays(1))
           .orElse(BigInteger.ZERO);
+      return todayBalance.add(rangeToYesterdayBalance);
+    }
+  }
 
-      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
-    } else {
-      balance = aggregateAddressTokenRepository
+  private BigInteger getBalanceInRangePreviousToday(MultiAsset multiAsset,
+                                                    LocalDate from, LocalDate to,
+                                                    LocalDate maxDateAgg) {
+    boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
+    if (isNotMissingAggregationData) {
+      return aggregateAddressTokenRepository
           .sumBalanceInTimeRange(multiAsset.getId(), from, to).orElse(BigInteger.ZERO);
     }
 
-    return new TokenVolumeAnalyticsResponse(to, balance);
+    BigInteger balanceAgg = aggregateAddressTokenRepository
+        .sumBalanceInTimeRange(multiAsset.getId(), from, maxDateAgg)
+        .orElse(BigInteger.ZERO);
+
+    BigInteger balanceNotAgg = addressTokenRepository.sumBalanceBetweenTx(
+        multiAsset,
+        Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
+        Timestamp.valueOf(to.atTime(LocalTime.MAX))
+    ).orElse(BigInteger.ZERO);
+    return balanceAgg.add(balanceNotAgg);
   }
 
   private List<LocalDate> getListDateAnalytic(AnalyticType analyticType) {
