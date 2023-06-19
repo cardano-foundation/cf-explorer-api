@@ -228,13 +228,23 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
         deRegistrations.add(deRegistrationRes);
         epochNos.add(projection.getRetiringEpoch());
       });
+      boolean isKoiOs = fetchRewardDataService.isKoiOs();
+      if (isKoiOs) {
+        List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolId(poolInfo.getId());
+        boolean isReward = fetchRewardDataService.checkRewardForPool(rewardAccounts);
+        if (!isReward) {
+          fetchRewardDataService.fetchRewardForPool(rewardAccounts);
+        }
+      }
       List<EpochRewardProjection> epochRewardProjections = rewardRepository.getRewardRefundByEpoch(
           poolView, epochNos);
       Map<Integer, BigInteger> refundAmountMap = new HashMap<>();
       epochRewardProjections.forEach(
           refund -> refundAmountMap.put(refund.getEpochNo(), refund.getAmount()));
       deRegistrations.forEach(deRegistration -> {
-        deRegistration.setPoolHold(refundAmountMap.get(deRegistration.getRetiringEpoch()));
+        if (deRegistration.isRefundFlag()) {
+          deRegistration.setPoolHold(refundAmountMap.get(deRegistration.getRetiringEpoch()));
+        }
         BigInteger totalFee = BigInteger.ZERO;
         if (Objects.nonNull(deRegistration.getPoolHold())) {
           totalFee = totalFee.add(deRegistration.getPoolHold());
