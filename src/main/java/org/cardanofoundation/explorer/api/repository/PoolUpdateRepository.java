@@ -28,7 +28,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
 
   @Query(value =
       "SELECT sa.view FROM PoolHash ph "
-          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
+          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE ph.id = pu2.poolHash.id) "
           + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
           + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
           + "WHERE ph.id  = :poolId ")
@@ -44,7 +44,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   List<String> findOwnerAccountByPoolView(@Param("poolView") String poolView);
 
   @Query(value = "SELECT pu FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId "
-      + "AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId)")
+      + "AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = :poolId)")
   PoolUpdate findLastEpochByPool(@Param("poolId") Long poolId);
 
   @Query("SELECT pu.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
@@ -69,7 +69,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   @Query(value = "SELECT bk.time FROM PoolUpdate pu "
       + "JOIN Tx t ON pu.registeredTx.id = t.id "
       + "JOIN Block bk ON t.block.id = bk.id "
-      + "WHERE pu.activeEpochNo = (SELECT min(pu.activeEpochNo) FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId) "
+      + "WHERE pu.id = (SELECT min(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = :poolId) "
       + "AND pu.poolHash.id = :poolId ")
   Timestamp getCreatedTimeOfPool(@Param("poolId") Long poolId);
 
@@ -103,8 +103,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
               "pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, " +
               "tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount, tx.deposit AS deposit "
           + "FROM PoolHash ph "
-          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.pmrId " +
-              "= (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
+          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.pmrId = (SELECT max(pod2.pmrId) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id) "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
           + "JOIN Block bk ON tx.block.id  = bk.id "
@@ -124,7 +123,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   @Query(value =
       "SELECT pu.id AS poolUpdateId, ph.id AS hashId, ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
           + "FROM PoolHash ph "
-          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.pmrId = (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
+          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.pmrId = (SELECT max(pod2.pmrId) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id) "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN Tx tx ON pu.registeredTx.id = tx.id AND (tx.deposit IS NULL OR tx.deposit = 0) "
           + "JOIN Block bk ON tx.block.id  = bk.id "
