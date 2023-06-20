@@ -4,7 +4,7 @@
 
     <groupId>org.cardanofoundation.explorer</groupId>
     <artifactId>api</artifactId>
-    <version>0.3.11-SNAPSHOT</version>
+    <version>0.3.11</version>
     <packaging>jar</packaging>
     <description>Explorer REST API exposing functions to the explorer web frontend.</description>
 
