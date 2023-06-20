@@ -26,7 +26,7 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"
       + " WHERE addressTxBalance.address = :address"
       + " AND addressTxBalance.time <= :time")
-  BigInteger getBalanceByAddressAndTime(
+  Optional<BigInteger> getBalanceByAddressAndTime(
       @Param("address") Address address, @Param("time") Timestamp time);
 
   @Query("SELECT sum(addressTxBalance.balance) FROM AddressTxBalance addressTxBalance"

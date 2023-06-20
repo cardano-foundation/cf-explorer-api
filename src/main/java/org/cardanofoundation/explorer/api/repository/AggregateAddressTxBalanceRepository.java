@@ -23,4 +23,7 @@ public interface AggregateAddressTxBalanceRepository extends JpaRepository<Aggre
       + "AND aatb.day <= :to")
   Optional<BigInteger> sumBalanceByAddressId(@Param("addressId") Long addressId,
                                              @Param("to") LocalDate to);
+
+  @Query("select max(a.day) from AggregateAddressTxBalance a")
+  Optional<LocalDate> getMaxDay();
 }
