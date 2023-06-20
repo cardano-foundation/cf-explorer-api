@@ -1,5 +1,53 @@
 # Changelog
 
+## [0.3.11](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.10...v0.3.11) (2023-06-20)
+
+
+### Features
+
+* [MET-1139] add logic optimize chart token ([b9a8ad3](https://github.com/cardano-foundation/cf-explorer-api/commit/b9a8ad39be257a24ad1c8b38f51f146db5057613))
+* [MET-1139] update logic query data token balance to handler case data interrupted when consumer stopped ([2e2cf08](https://github.com/cardano-foundation/cf-explorer-api/commit/2e2cf08202f9c8b98e7ff3fa391dd4e97d472fce))
+* [MET-1143] handle abnormal case for agg_address_tx_balance ([82e0da3](https://github.com/cardano-foundation/cf-explorer-api/commit/82e0da352b91b473870a7e6e775b098cc3950476))
+* [MET-1143] Optimize chart stake and balance ([1b95723](https://github.com/cardano-foundation/cf-explorer-api/commit/1b95723ceacd4a5307a642fe466d322a5d7b44e9))
+* [MET-1143] remove redundant condition ([8a833bc](https://github.com/cardano-foundation/cf-explorer-api/commit/8a833bc921ead41b9a1331ff58a05d2ceb76a132))
+* [MET-1143] update code ([0f96e13](https://github.com/cardano-foundation/cf-explorer-api/commit/0f96e13e37f3759e73f16f3fb0eeac18be8c6a9f))
+* [MET-1154] add thread pool config ([5e1ad11](https://github.com/cardano-foundation/cf-explorer-api/commit/5e1ad11aa5e819a5a1ea4e053a3d6e4a69870e48))
+* [MET-1154] optimize call token filter api ([4ef2fde](https://github.com/cardano-foundation/cf-explorer-api/commit/4ef2fde3c376018bee8d62629ae0b228b803a9fa))
+* [MET-1199] Optimize chart for stake/address balance ([0c08f91](https://github.com/cardano-foundation/cf-explorer-api/commit/0c08f91cc1a57e6ab4dfa5074395b31b01399c04))
+* [MET-1348] Move cron job top delegators to Schedule ([3a655b3](https://github.com/cardano-foundation/cf-explorer-api/commit/3a655b35e4fc820f47fd593c04c992648fd27fc6))
+* [MET-665] optimize transaction stake ([25d43ef](https://github.com/cardano-foundation/cf-explorer-api/commit/25d43effcee27b16ddf49675b648f5b60c9a4129))
+* add new logic to check reward data of stake key ([9987389](https://github.com/cardano-foundation/cf-explorer-api/commit/99873895b9e244fd017f81b317328fa9f1bfed3c))
+* make test coverage result public available ([c069dae](https://github.com/cardano-foundation/cf-explorer-api/commit/c069dae24408a589d7859f0161d550c93be11947))
+* met-239 current epoch time ([00ad9e5](https://github.com/cardano-foundation/cf-explorer-api/commit/00ad9e59169c78ceb0adb5a0072b923aa29ec387))
+* met-697 add filter ([48538ab](https://github.com/cardano-foundation/cf-explorer-api/commit/48538ab40ff7df9f3f25b2656cba608a2c159159))
+* met-697 add handle genesis when filter ([c1a5e24](https://github.com/cardano-foundation/cf-explorer-api/commit/c1a5e24db954ebeb9e634ca229584eb96f02de57))
+* met-697 change condition filter ([d251fb8](https://github.com/cardano-foundation/cf-explorer-api/commit/d251fb8dfb270fe96c3ec2525b07ca343a1990e1))
+* met-697 optimize filter by epoch process ([f63b8a6](https://github.com/cardano-foundation/cf-explorer-api/commit/f63b8a63cfad1f218b6f78a914de0fca20086e77))
+* MET-753 script verification function ([f003dda](https://github.com/cardano-foundation/cf-explorer-api/commit/f003dda3bb24072576b1b525f04ff301a3678002))
+* met-777 moving logic of export file to cardano-schedule ([9b47efb](https://github.com/cardano-foundation/cf-explorer-api/commit/9b47efbd18ba4e93f90bca99f90554c0b7ad236e))
+* update apis for pool lifecycle ([aa811a2](https://github.com/cardano-foundation/cf-explorer-api/commit/aa811a26687382e85d0bc99e00adb154a27cca35))
+
+
+### Bug Fixes
+
+* add check active lifecycle for stake key ([725852d](https://github.com/cardano-foundation/cf-explorer-api/commit/725852d655e526693b199963d4bd268a8d1a7985))
+* add code for pool-registration, pool-de-registration apis ([a6d59a5](https://github.com/cardano-foundation/cf-explorer-api/commit/a6d59a5f33973c5c21f67d439181dfc1c29f4434))
+* add hold for pool lifecycle registration ([f06622c](https://github.com/cardano-foundation/cf-explorer-api/commit/f06622c713f3119d62a341ef21412307190af7eb))
+* add logic fetch ada_pots from koios ([9aa3e99](https://github.com/cardano-foundation/cf-explorer-api/commit/9aa3e99dc1a47bcbdcda321aef806fc5ad32f937))
+* add logic koios for pool apis relate ([00166c0](https://github.com/cardano-foundation/cf-explorer-api/commit/00166c0141998074d1810ab89a32e0bd3201fa9a))
+* add pool-history fetching flow to pool-size pool-report ([20fea0c](https://github.com/cardano-foundation/cf-explorer-api/commit/20fea0c4d1ccb186683fca67c20050555e009316))
+* change logic stake registration, stake deregistration and pool delegation of stake key ([241a395](https://github.com/cardano-foundation/cf-explorer-api/commit/241a3951d9c1e15e5a471708fd120fdc32d6cab8))
+* change logic to fix incorrect total output and total fee of block ([474924c](https://github.com/cardano-foundation/cf-explorer-api/commit/474924cb1beee371dc2a1b4af9e3b40471e3257e))
+* change variable in SQL to different with others ([5eed8f1](https://github.com/cardano-foundation/cf-explorer-api/commit/5eed8f104921fbd19d17994434ea533432f4bcb1))
+* fix after review PR ([55b0830](https://github.com/cardano-foundation/cf-explorer-api/commit/55b08307f8e1f5db0443a5d11f1279d103a4abbc))
+* fix bugs relate koios flow ([4b4bb63](https://github.com/cardano-foundation/cf-explorer-api/commit/4b4bb6370dc3e1bc0198f7b724003b89455b10a0))
+* fix holder of token with quantity greater than 0 ([fb770fc](https://github.com/cardano-foundation/cf-explorer-api/commit/fb770fc87182235ef222c683193d80f3b39ffe66))
+* MET-1148 add instantaneous rewards to tx detail api ([8054678](https://github.com/cardano-foundation/cf-explorer-api/commit/8054678f80d263a522611314b1e53b0e5c8ac738))
+* MET-1238 add delegations list api ([057b4fc](https://github.com/cardano-foundation/cf-explorer-api/commit/057b4fc17921c78f9d99c6d961e66510a0ef9067))
+* MET-1238 add instantaneous rewards list api ([aac3bbe](https://github.com/cardano-foundation/cf-explorer-api/commit/aac3bbe4f9fd2c0f6cf165f388244536a296f0e0))
+* met-697 missing data when filter by time in preprod ([49aad83](https://github.com/cardano-foundation/cf-explorer-api/commit/49aad8307d822c1c2ff39dcaea95eca1b55bcd4c))
+* rename interface ([5a66c39](https://github.com/cardano-foundation/cf-explorer-api/commit/5a66c39b74b89a5e96b7a0dcfdb7af0e23fb7367))
+
 ## [0.3.10](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.9...v0.3.10) (2023-05-31)
 
 
