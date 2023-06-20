@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -35,7 +36,8 @@ public class TokenController {
   @Operation(summary = "Filter token")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
       @ParameterObject @SortDefault(sort = {MultiAsset_.SUPPLY,
-          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable) {
+          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pageable pageable)
+      throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.filterToken(pageable));
   }
 
@@ -76,7 +78,8 @@ public class TokenController {
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
       @PathVariable String tokenId, @PathVariable
-      @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+      @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type)
+      throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
   }
 }

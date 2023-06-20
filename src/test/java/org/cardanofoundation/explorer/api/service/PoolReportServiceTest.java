@@ -30,12 +30,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +53,9 @@ public class PoolReportServiceTest {
   PoolLifecycleService poolLifecycleService;
   @Mock
   PoolHashRepository poolHashRepository;
+
+  @Mock
+  FetchRewardDataService fetchRewardDataService;
   @InjectMocks
   PoolReportServiceImpl poolReportService;
 
@@ -136,7 +136,6 @@ public class PoolReportServiceTest {
     Long reportId = 1L;
     String username = "username";
     ExportType exportType = ExportType.EXCEL;
-    String poolId = "pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj";
     byte[] bytes = new byte[1];
     PoolReportHistory poolReport = PoolReportHistory.builder()
         .reportHistory(ReportHistory.builder()
@@ -190,6 +189,7 @@ public class PoolReportServiceTest {
                                                                       PageRequest.of(0, 1), 0);
     when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(),
                                                        any())).thenReturn(poolReportProjections);
+    when(fetchRewardDataService.isKoiOs()).thenReturn(false);
     var expect = new BaseFilterResponse<>(poolReportProjections, List.of());
 
     var response = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 1), username);

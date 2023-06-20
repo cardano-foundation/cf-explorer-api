@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressAnalyticsResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
@@ -28,7 +30,8 @@ public interface AddressService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list value balance
    */
-  List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type);
+  List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type)
+      throws ExecutionException, InterruptedException;
 
   /**
    * Get the highest and lowest balance by address
@@ -64,4 +67,21 @@ public interface AddressService {
    * @return list token by display name
    */
   BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable, String address, String displayName);
+
+
+  /**
+   * Verify native script
+   *
+   * @param scriptVerifyRequest script verify request
+   * @return true if script is valid
+   */
+  Boolean verifyNativeScript(ScriptVerifyRequest scriptVerifyRequest);
+
+  /**
+   * Get json script
+   *
+   * @param address wallet address
+   * @return json script
+   */
+  String getJsonNativeScript(String address);
 }

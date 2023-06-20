@@ -14,7 +14,8 @@ public interface PoolOwnerRepository extends JpaRepository<PoolOwner, Long> {
 
   @Query(value = "SELECT ph.id AS poolId, sa.view AS address "
       + "FROM PoolHash ph "
-      + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE ph.id = pu.poolHash.id) "
+      + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = "
+      + "(SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE ph.id = pu2.poolHash.id) "
       + "JOIN PoolOwner po ON po.poolUpdate.id  = pu.id  "
       + "JOIN StakeAddress sa ON sa.id = po.stakeAddress.id "
       + "WHERE ph.id IN :poolIds "

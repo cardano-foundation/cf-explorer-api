@@ -2,10 +2,15 @@
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/tests.yaml/badge.svg" />
+<img alt="Coverage" src="https://github.com/cardano-foundation/cf-explorer-api/blob/gh-pages/badges/jacoco.svg?raw=true" />
 <img alt="Release" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/release.yaml/badge.svg?branch=main" />
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
+### Reports
+[Api-test html](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
+[Api-test allure](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+ 
 ## Getting Started
 
 ### Prerequisites
@@ -24,7 +29,7 @@
 
 ### Environment variables
 
-- `SPRING_PROFILES_ACTIVE` : Spring profiles (dev, prod, test, local), plus Redis Profiles. See Below. Default is dev. In your case, you should use local
+- `SPRING_PROFILES_ACTIVE` : Spring profiles (dev, prod, test, local), plus Redis Profiles, plus Koios service, See Below. Default is dev. In your case, you should use local
 - `HOST` : Database host (default is 172.16.1.230). In your case, you should use `db.cardano.sotatek.works`
 - `PORT_DB` : Database port (default is my postgres port: 54321)
 - `USERNAME_DB`: Database username (in your case, do not fill this field because local profile is using a read-only user)
@@ -53,6 +58,16 @@
 - `redis-cluster`
     -  `NODE_ADDRESSES`: List of redis cluster nodes host and port.
     -  `REDIS_CLUSTER_PASSWORD`: Password of redis cluster.
+
+### We have 2 options for get data reward, epoch_stake, ada_pot, pool_info, pool_history:
+- `koios`: We will use koios service to get data.
+    - `API_CHECK_REWARD_URL`: URL for get reward data from koios service. Default is `http://localhost:8888/api/v1/rewards/fetch`.
+    - `API_CHECK_POOL_HISTORY_URL`: URL for get pool history data from koios service. Default is `http://localhost:8888/api/v1/pool-history/fetch`.
+    - `API_CHECK_POOL_INFO_URL`: URL for get pool info data from koios service. Default is `http://localhost:8888/api/v1/pool-info/fetch`.
+    - `API_CHECK_EPOCH_STAKE_URL`: URL for get epoch stake data from koios service. Default is `http://localhost:8888/api/v1/epoch-stake/fetch`.
+
+- without `koios`: We will use database to get data.
+
 
 
 
