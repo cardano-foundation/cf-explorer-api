@@ -60,6 +60,7 @@ jobs:
           else
             # Make sure develop branch artifacts include SNAPSHOT
             BRANCH=${GITHUB_REF##*/}
+            echo "BRANCH=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
             CURRENT_VERSION=$(xq -r .project.version pom.xml)
             if [[ "${BRANCH}" == "develop" ]] && [[ "${CURRENT_VERSION}" =~ .*-SNAPSHOT$ ]]
             then
@@ -75,7 +76,7 @@ jobs:
       - name: Docker Login
         uses: docker/login-action@v2
         if: |
-          github.ref == 'refs/head/main' ||
+          github.head_ref == 'refs/head/main' ||
           steps.metadata.outputs.DEVELOP_SNAPSHOT_OK == 'true'
         with:
           registry: ${{ env.PRIVATE_DOCKER_REGISTRY_URL }}
@@ -85,7 +86,7 @@ jobs:
       - name: Build and Push docker image
         uses: docker/build-push-action@v4
         if: |
-          github.ref == 'refs/head/main' ||
+          steps.metadata.outputs.BRANCH == 'main' ||
           steps.metadata.outputs.DEVELOP_SNAPSHOT_OK == 'true'
         with:
           file: ./Dockerfile.local
