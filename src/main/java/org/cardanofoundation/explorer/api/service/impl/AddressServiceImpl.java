@@ -220,7 +220,7 @@ public class AddressServiceImpl implements AddressService {
       BigInteger balanceNotAgg = addressTxBalanceRepository.getBalanceByAddressAndTime(
           address,
           Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX))
+          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
       ).orElse(BigInteger.ZERO);
       return todayBalance.add(balanceAgg).add(balanceNotAgg);
     }
