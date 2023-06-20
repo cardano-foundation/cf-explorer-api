@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
@@ -113,7 +114,8 @@ public interface StakeKeyService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list balance value by stake
    */
-  List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type);
+  List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type)
+      throws ExecutionException, InterruptedException;
 
   /**
    * Get stake reward analytics
@@ -127,5 +129,5 @@ public interface StakeKeyService {
    * @param stakeKey stake address
    * @return min and max balance of stake address
    */
-  List<BigInteger> getAddressMinMaxBalance(String stakeKey);
+  List<BigInteger> getStakeMinMaxBalance(String stakeKey);
 }

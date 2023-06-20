@@ -1,15 +1,17 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import org.springframework.util.ObjectUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,33 +31,33 @@ public class ProtocolParamController {
 
   final ProtocolParamService protocolParamService;
 
-  @GetMapping("histories/filter/{protocolsTypes}")
+  @GetMapping("/histories/filter/{protocolsTypes}")
   @LogMessage
   @Operation(summary = "Get current protocol history change")
-  public HistoriesProtocol getCurrentProtocolWithFilter(
+  public ResponseEntity<HistoriesProtocol> getCurrentProtocolWithFilter(
       @PathVariable(value = "protocolsTypes", required = false)
       @Parameter(description = "protocol want to filter")
-      List<ProtocolType> protocolTypes) {
-    if (ObjectUtils.isEmpty(protocolTypes)) {
-      protocolTypes = ProtocolType.getAll();
-    } else if (protocolTypes.contains(ProtocolType.ALL)) {
-      protocolTypes = ProtocolType.getAll();
-    }
+      List<ProtocolType> protocolTypes,
+      @RequestParam(value = "startTime", required = false)
+      BigInteger startTime,
+      @RequestParam(value = "endTime", required = false)
+      BigInteger endTime) {
 
-    return protocolParamService.getHistoryProtocolParameters(protocolTypes);
+    return ResponseEntity
+        .ok(protocolParamService.getHistoryProtocolParameters(protocolTypes, startTime, endTime));
   }
 
-  @GetMapping("latest")
+  @GetMapping("/latest")
   @LogMessage
-  @Operation(summary = "Get current protocol history change")
-  public Protocols getLatestChange() {
-    return protocolParamService.getLatestChange();
+  @Operation(summary = "Get current protocol latest change")
+  public ResponseEntity<Protocols> getLatestChange() {
+    return ResponseEntity.ok(protocolParamService.getLatestChange());
   }
 
-  @GetMapping("fixed")
+  @GetMapping("/fixed")
   @LogMessage
-  @Operation(summary = "Get current protocol history change")
-  public FixedProtocol getFixedProtocols() {
-    return protocolParamService.getFixedProtocols();
+  @Operation(summary = "Get fixed protocols parameters ")
+  public ResponseEntity<FixedProtocol> getFixedProtocols() {
+    return ResponseEntity.ok(protocolParamService.getFixedProtocols());
   }
 }

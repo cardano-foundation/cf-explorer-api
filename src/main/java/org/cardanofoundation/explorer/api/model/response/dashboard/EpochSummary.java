@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.dashboard;
 
+import java.time.LocalDateTime;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,4 +12,6 @@ public class EpochSummary {
   private Integer slot;
   private Integer totalSlot;
   private Integer account;
+  private LocalDateTime startTime;
+  private LocalDateTime endTime;
 }

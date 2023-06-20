@@ -1,16 +1,26 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.List;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;
-import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
 public interface DelegationService {
+
+
+  /**
+   * Get list of delegations
+   *
+   * @param pageable page, size and sort parameters
+   * @return list delegation transaction information
+   */
+  BaseFilterResponse<DelegationResponse> getDelegations(Pageable pageable);
 
   /**
    * Get data pool for header delegate pools
@@ -68,5 +78,5 @@ public interface DelegationService {
    * @param pageable page information
    * @return
    */
-  Set<PoolResponse> findTopDelegationPool(Pageable pageable);
+  List<PoolResponse> findTopDelegationPool(Pageable pageable);
 }

@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.Date;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -80,9 +82,11 @@ public class StakeKeyLifeCycleController {
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeRewardResponse>> getRewards(
       @PathVariable @Parameter(description = "stake address view") String stakeKey,
+      @RequestParam(value = "fromDate", required = false) Date fromDate,
+      @RequestParam(value = "toDate", required = false) Date toDate,
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
-    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, pageable));
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, pageable));
   }
 
   @GetMapping("/{stakeKey}/withdrawals")

@@ -69,12 +69,13 @@
         <version.lombok-mapstruct-binding>0.2.0</version.lombok-mapstruct-binding>
         <version.ledgersync-common>0.1.0</version.ledgersync-common>
         <version.explorer-common>0.1.1-SNAPSHOT</version.explorer-common>
-        <version.explorer-consumer-common>0.1.4-SNAPSHOT</version.explorer-consumer-common>
+        <version.explorer-consumer-common>0.1.5-SNAPSHOT</version.explorer-consumer-common>
         <sonar.coverage.jacoco.xmlReportPaths>../cardano-explorer-api/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
         <sonar.cpd.exclusions>**/entity/*, **/model/*</sonar.cpd.exclusions>
         <version.spring-cloud-aws>2.4.2</version.spring-cloud-aws>
+        <version.apache.guava>31.1-jre</version.apache.guava>
     </properties>
 
     <repositories>
@@ -276,6 +277,11 @@
             <groupId>io.awspring.cloud</groupId>
             <artifactId>spring-cloud-aws-context</artifactId>
             <version>${version.spring-cloud-aws}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${version.apache.guava}</version>
         </dependency>
     </dependencies>
 

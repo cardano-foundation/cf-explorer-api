@@ -6,5 +6,7 @@ public interface PoolAmountProjection {
 
   Long getPoolId();
 
+  String getView();
+
   BigInteger getAmount();
 }

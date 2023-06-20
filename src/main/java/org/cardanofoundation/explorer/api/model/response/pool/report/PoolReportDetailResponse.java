@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegist
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 
@@ -53,6 +54,13 @@ public class PoolReportDetailResponse {
           .build();
     }
 
+    public static EpochSize toDomain(PoolHistoryKoiosProjection projection) {
+      return EpochSize.builder()
+              .epoch(projection.getEpochNo().toString())
+              .size(new BigDecimal(projection.getActiveStake()))
+              .fee(projection.getPoolFees())
+              .build();
+    }
   }
 
   @Data
