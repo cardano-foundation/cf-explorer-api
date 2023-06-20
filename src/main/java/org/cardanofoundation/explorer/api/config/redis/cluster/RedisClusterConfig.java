@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -28,9 +29,10 @@ public class RedisClusterConfig {
     @Bean(name = "lettuceConnectionFactory")
     @Autowired
     LettuceConnectionFactory lettuceConnectionFactory() {
+        LettuceClientConfiguration lettuceClientConfiguration = LettuceClientConfiguration.builder().useSsl().build();
         RedisClusterConfiguration redisClusterConfiguration = new RedisClusterConfiguration(nodes);
         redisClusterConfiguration.setPassword(password);
-        return new LettuceConnectionFactory(redisClusterConfiguration);
+        return new LettuceConnectionFactory(redisClusterConfiguration, lettuceClientConfiguration);
     }
 
     @Bean
