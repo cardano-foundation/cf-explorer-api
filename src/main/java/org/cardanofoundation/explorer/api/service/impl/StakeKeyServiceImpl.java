@@ -322,7 +322,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   private StakeAnalyticBalanceResponse getBalanceOfStake(
       StakeAddress stakeAddress,LocalDate to, Optional<LocalDate> maxDateAgg) {
-    if (maxDateAgg.isEmpty() || to.isAfter(maxDateAgg.get())) {
+    if (maxDateAgg.isEmpty()) {
       BigInteger balance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
           stakeAddress,
           Timestamp.valueOf(to.atTime(LocalTime.MAX))

@@ -180,7 +180,7 @@ public class AddressServiceImpl implements AddressService {
 
   private AddressAnalyticsResponse getBalanceOfAddress(
       Address address,LocalDate to, Optional<LocalDate> maxDateAgg) {
-    if (maxDateAgg.isEmpty() || to.isAfter(maxDateAgg.get())) {
+    if (maxDateAgg.isEmpty()) {
       BigInteger balance = addressTxBalanceRepository.getBalanceByAddressAndTime(
           address,
           Timestamp.valueOf(to.atTime(LocalTime.MAX))
