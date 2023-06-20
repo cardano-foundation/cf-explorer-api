@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +20,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressAnalytic
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
@@ -55,6 +57,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -129,9 +132,11 @@ public class AddressServiceImpl implements AddressService {
     List<LocalDate> dates = getAnalyticDates(type);
     ExecutorService executorService = Executors.newFixedThreadPool(ADDRESS_ANALYTIC_BALANCE_NUMBER);
 
+    final Optional<LocalDate> maxDateAgg = aggregateAddressTxBalanceRepository.getMaxDay();
     List<CompletableFuture<AddressAnalyticsResponse>> futureAddressAnalytics = new ArrayList<>();
     dates.forEach(dateItem -> futureAddressAnalytics.add(
-        CompletableFuture.supplyAsync(() -> getBalanceOfAddress(addr, dateItem), executorService))
+        CompletableFuture.supplyAsync(() ->
+            getBalanceOfAddress(addr, dateItem, maxDateAgg), executorService))
     );
 
     CompletableFuture.allOf(futureAddressAnalytics.toArray(new CompletableFuture[0])).join();
@@ -173,28 +178,73 @@ public class AddressServiceImpl implements AddressService {
     return dates;
   }
 
-  private AddressAnalyticsResponse getBalanceOfAddress(Address addr, LocalDate to) {
-    BigInteger balance = BigInteger.ZERO;
+  private AddressAnalyticsResponse getBalanceOfAddress(
+      Address address,LocalDate to, Optional<LocalDate> maxDateAgg) {
+    if (maxDateAgg.isEmpty()) {
+      BigInteger balance = addressTxBalanceRepository.getBalanceByAddressAndTime(
+          address,
+          Timestamp.valueOf(to.atTime(LocalTime.MAX))
+      ).orElse(BigInteger.ZERO);
+      return new AddressAnalyticsResponse(to, balance);
+    }
+
+    BigInteger balance;
     if (LocalDate.now().isEqual(to)) {
-      BigInteger todayBalance = addressTxBalanceRepository
-          .getBalanceByAddressAndTime(
-              addr,
-              Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
-              Timestamp.valueOf(to.atTime(LocalTime.MAX))
-          )
-          .orElse(BigInteger.ZERO);
-
-      BigInteger rangeToYesterdayBalance = aggregateAddressTxBalanceRepository
-          .sumBalanceByAddressId(addr.getId(), to.minusDays(1))
-          .orElse(BigInteger.ZERO);
-
-      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
+      balance = getBalanceInRangeHaveToday(address, to, maxDateAgg.get());
     } else {
-      balance = aggregateAddressTxBalanceRepository
-          .sumBalanceByAddressId(addr.getId(), to)
-          .orElse(BigInteger.ZERO);
+      balance = getBalanceInRangePreviousToday(address, to, maxDateAgg.get());
     }
     return new AddressAnalyticsResponse(to, balance);
+  }
+
+  private BigInteger getBalanceInRangeHaveToday(
+      Address address, LocalDate to, LocalDate maxDateAgg) {
+    BigInteger todayBalance = addressTxBalanceRepository.getBalanceByAddressAndTime(
+            address,
+            Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
+            Timestamp.valueOf(to.atTime(LocalTime.MAX))
+        )
+        .orElse(BigInteger.ZERO);
+
+    boolean isNotMissingAggregationData = !to.minusDays(1).isAfter(maxDateAgg);
+    if (isNotMissingAggregationData) {
+      BigInteger rangeToYesterdayBalance = aggregateAddressTxBalanceRepository
+          .sumBalanceByAddressId(address.getId(), to.minusDays(1))
+          .orElse(BigInteger.ZERO);
+      return todayBalance.add(rangeToYesterdayBalance);
+    } else {
+      BigInteger balanceAgg = aggregateAddressTxBalanceRepository
+          .sumBalanceByAddressId(address.getId(), maxDateAgg)
+          .orElse(BigInteger.ZERO);
+
+      BigInteger balanceNotAgg = addressTxBalanceRepository.getBalanceByAddressAndTime(
+          address,
+          Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
+          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
+      ).orElse(BigInteger.ZERO);
+      return todayBalance.add(balanceAgg).add(balanceNotAgg);
+    }
+  }
+
+  private BigInteger getBalanceInRangePreviousToday(
+      Address address, LocalDate to, LocalDate maxDateAgg) {
+    boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
+    if (isNotMissingAggregationData) {
+      return aggregateAddressTxBalanceRepository
+          .sumBalanceByAddressId(address.getId(), to)
+          .orElse(BigInteger.ZERO);
+    }
+
+    BigInteger balanceAgg = aggregateAddressTxBalanceRepository
+        .sumBalanceByAddressId(address.getId(), maxDateAgg)
+        .orElse(BigInteger.ZERO);
+
+    BigInteger balanceNotAgg = addressTxBalanceRepository.getBalanceByAddressAndTime(
+        address,
+        Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
+        Timestamp.valueOf(to.atTime(LocalTime.MAX))
+    ).orElse(BigInteger.ZERO);
+    return balanceAgg.add(balanceNotAgg);
   }
 
   @Override

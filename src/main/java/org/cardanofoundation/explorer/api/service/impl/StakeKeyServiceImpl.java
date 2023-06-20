@@ -305,9 +305,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     List<CompletableFuture<StakeAnalyticBalanceResponse>> futureStakeAnalytics = new ArrayList<>();
     List<LocalDate> dates = getListDateAnalytic(type);
     ExecutorService fixedExecutor = Executors.newFixedThreadPool(STAKE_ANALYTIC_NUMBER);
-
+    final Optional<LocalDate> maxDateAgg = aggregateAddressTxBalanceRepository.getMaxDay();
     dates.forEach(dateItem -> futureStakeAnalytics.add(
-        CompletableFuture.supplyAsync(() -> getBalanceOfStake(stakeAddress, dateItem),
+        CompletableFuture.supplyAsync(() -> getBalanceOfStake(stakeAddress, dateItem, maxDateAgg),
             fixedExecutor))
     );
 
@@ -320,28 +320,75 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     return responses;
   }
 
-  private StakeAnalyticBalanceResponse getBalanceOfStake(StakeAddress stakeAddress, LocalDate to) {
-    BigInteger balance = BigInteger.ZERO;
-    if (LocalDate.now().isEqual(to)) {
-      BigInteger todayBalance = addressTxBalanceRepository
-          .getBalanceByStakeAddressAndTime(
-              stakeAddress,
-              Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
-              Timestamp.valueOf(to.atTime(LocalTime.MAX))
-          )
-          .orElse(BigInteger.ZERO);
+  private StakeAnalyticBalanceResponse getBalanceOfStake(
+      StakeAddress stakeAddress,LocalDate to, Optional<LocalDate> maxDateAgg) {
+    if (maxDateAgg.isEmpty()) {
+      BigInteger balance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
+          stakeAddress,
+          Timestamp.valueOf(to.atTime(LocalTime.MAX))
+      ).orElse(BigInteger.ZERO);
+      return new StakeAnalyticBalanceResponse(to, balance);
+    }
 
+    BigInteger balance;
+    if (LocalDate.now().isEqual(to)) {
+      balance = getBalanceInRangeHaveToday(stakeAddress, to, maxDateAgg.get());
+    } else {
+      balance = getBalanceInRangePreviousToday(stakeAddress, to, maxDateAgg.get());
+    }
+    return new StakeAnalyticBalanceResponse(to, balance);
+  }
+
+  private BigInteger getBalanceInRangeHaveToday(
+      StakeAddress stakeAddress, LocalDate to, LocalDate maxDateAgg) {
+
+    BigInteger todayBalance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
+            stakeAddress,
+            Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
+            Timestamp.valueOf(to.atTime(LocalTime.MAX))
+        )
+        .orElse(BigInteger.ZERO);
+
+    boolean isNotMissingAggregationData = !to.minusDays(1).isAfter(maxDateAgg);
+    if (isNotMissingAggregationData) {
       BigInteger rangeToYesterdayBalance = aggregateAddressTxBalanceRepository
           .sumBalanceByStakeAddressId(stakeAddress.getId(), to.minusDays(1))
           .orElse(BigInteger.ZERO);
+      return todayBalance.add(rangeToYesterdayBalance);
 
-      balance = balance.add(todayBalance).add(rangeToYesterdayBalance);
     } else {
-      balance = aggregateAddressTxBalanceRepository
+      BigInteger balanceAgg = aggregateAddressTxBalanceRepository
+          .sumBalanceByStakeAddressId(stakeAddress.getId(), maxDateAgg)
+          .orElse(BigInteger.ZERO);
+
+      BigInteger balanceNotAgg = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
+          stakeAddress,
+          Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
+          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
+      ).orElse(BigInteger.ZERO);
+      return todayBalance.add(balanceAgg).add(balanceNotAgg);
+    }
+  }
+
+  private BigInteger getBalanceInRangePreviousToday(
+      StakeAddress stakeAddress, LocalDate to, LocalDate maxDateAgg) {
+    boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
+    if (isNotMissingAggregationData) {
+      return aggregateAddressTxBalanceRepository
           .sumBalanceByStakeAddressId(stakeAddress.getId(), to)
           .orElse(BigInteger.ZERO);
     }
-    return new StakeAnalyticBalanceResponse(to, balance);
+
+    BigInteger balanceAgg = aggregateAddressTxBalanceRepository
+        .sumBalanceByStakeAddressId(stakeAddress.getId(), maxDateAgg)
+        .orElse(BigInteger.ZERO);
+
+    BigInteger balanceNotAgg = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
+        stakeAddress,
+        Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
+        Timestamp.valueOf(to.atTime(LocalTime.MAX))
+    ).orElse(BigInteger.ZERO);
+    return balanceAgg.add(balanceNotAgg);
   }
 
   private List<LocalDate> getListDateAnalytic(AnalyticType type) {
