@@ -1,35 +1,49 @@
 version: '3.9'
-networks:
-  default:
-    name: infrastructure-net
-    external: true
-
 services:
   cardano-explorer-api:
-    image: cardano-explorer-api-${SCHEMA}
+    image: cardano-explorer-api
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - PRIVATE_MVN_REGISTRY_URL=${PRIVATE_MVN_REGISTRY_URL}
+        - PRIVATE_MVN_REGISTRY_USER=${PRIVATE_MVN_REGISTRY_USER}
+        - PRIVATE_MVN_REGISTRY_PASS=${PRIVATE_MVN_REGISTRY_PASS}
+        - SETTINGS_XML_TPL=${SETTINGS_XML_TPL}
+
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - HOST=${HOST}
-      - PORT_DB=${PORT_DB}
-      - USERNAME_DB=${USERNAME_DB}
-      - PASSWORD_DB=${PASSWORD_DB}
-      - SCHEMA=${SCHEMA}
-      - DB=${DB}
 
-      - REDIS_MASTER_NAME=${REDIS_MASTER_NAME}
-      - REDIS_SENTINEL_PASS=${REDIS_SENTINEL_PASS}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_SCHEMA=${DB_SCHEMA}
+      - DB_MAXIUM_POOL_SIZE=${DB_MAXIUM_POOL_SIZE}
+
+      - REDIS_SENTINEL_MASTER_NAME=${REDIS_SENTINEL_MASTER_NAME}
+      - REDIS_SENTINEL_PASSWORD=${REDIS_SENTINEL_PASSWORD}
       - REDIS_SENTINEL_HOST=${REDIS_SENTINEL_HOST}
+      - REDIS_SENTINEL_PORT=${REDIS_SENTINEL_PORT}
+      - PORT=${PORT}
+
+      - KAFKA_BOOTSTRAP_SERVER=${KAFKA_BOOTSTRAP_SERVER}
+      - KAFKA_REPORTS_TOPIC=${KAFKA_REPORTS_TOPIC}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_REGION=${S3_REGION}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - S3_STORAGE_ENDPOINT=${S3_STORAGE_ENDPOINT}
+
+      - API_CHECK_REWARD_URL=${API_CHECK_REWARD_URL}
+      - API_CHECK_POOL_HISTORY_URL=${API_CHECK_POOL_HISTORY_URL}
+      - API_CHECK_POOL_INFO_URL=${API_CHECK_POOL_INFO_URL}
+      - API_CHECK_EPOCH_STAKE_URL=${API_CHECK_EPOCH_STAKE_URL}
+      - API_CHECK_ADA_POTS_URL=${API_CHECK_ADA_POTS_URL}
+
     ports:
       - ${PORT}:8080
-    healthcheck:
-      test: "curl --fail --silent 172.16.1.230:${PORT}/actuator/health | grep UP || exit 1"
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
     volumes:
-      - $PWD/cardano/volumes/logs/cardano-explorer-api:/cardano-explorer-api/logs/
-  
+      - ${LOG_PATH}:/cardano-explorer-api/logs/
