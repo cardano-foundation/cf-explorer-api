@@ -1,0 +1,1 @@
+{"policyId":"e68f1cea19752d1292b4be71b7f5d2b3219a15859c028f7454f66cdf","totalToken":1,"policyScript":"{\"type\":\"sig\",\"keyHash\":\"58238f20a3a75864774c105bf4ae47869f4a03a5f3f82bffb7700a23\"}"}
