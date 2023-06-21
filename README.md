@@ -56,6 +56,11 @@
 - `PRIVATE_MVN_REGISTRY_PASS`: the password of private maven registry
 - `SETTINGS_XML_TPL`: the template of settings.xml file
 
+- `API_NEWS_URL`: URL for get news data. Default is `http://dev.cf-explorer-monolith-mainnet.metadata.dev.cf-deployments.org:8085/?amount=%d`
+- `API_NEWS_CACHE_TIME`: Cache time for news data. Default is 120s.
+- `API_MARKET_URL`: URL for get market data. Default is `https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s`
+- `API_MARKET_CACHE_TIME` : Cache time for market data. Default is 120s.
+
 ### We have 3 options for redis cache:
 - `redis standalone`
     - `REDIS_STANDALONE_HOST` : Redis hostname eg. `127.0.0.1`.
