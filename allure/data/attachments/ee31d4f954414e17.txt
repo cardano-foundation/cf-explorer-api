@@ -1,1 +1,0 @@
-{"name":"43554259","displayName":"CUBY","policy":"14696a4676909f4e3cb1f2e60e2e08e5abed70caf5c02699be971139","fingerprint":"asset1s7nlt45cc82upqewvjtgu7g97l7eg483c6wu75","txCount":462,"supply":"43252003274489855996","volumeIn24h":"0","totalVolume":"356898716527552233434","numberOfHolders":43,"createdOn":"2022/01/19 02:33:50"}
