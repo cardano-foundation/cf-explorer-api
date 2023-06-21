@@ -41,8 +41,8 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :to AND block.txCount > 0)"
       + "   )"
       + " AND addrToken.balance > 0")
-  BigInteger sumBalanceBetweenTx(@Param("multiAsset") MultiAsset multiAsset,
-                                 @Param("from") Timestamp from, @Param("to") Timestamp to);
+  Optional<BigInteger> sumBalanceBetweenTx(@Param("multiAsset") MultiAsset multiAsset,
+                                           @Param("from") Timestamp from, @Param("to") Timestamp to);
 
   @Query(value = "SELECT COALESCE(SUM(addrToken.balance), 0)"
       + " FROM AddressToken addrToken"
