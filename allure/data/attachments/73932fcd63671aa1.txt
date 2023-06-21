@@ -1,0 +1,1 @@
+{"data":[{"poolId":"pool1xyau0kf0d632lal3m0dnud0mu8l99t5fqs20tvn0xxuv6d4949c","poolSize":0,"reward":0.000000,"feePercent":0.030000,"feeAmount":340000000,"pledge":50000000,"saturation":0.000000}],"totalItems":1,"totalPages":0,"currentPage":0}
