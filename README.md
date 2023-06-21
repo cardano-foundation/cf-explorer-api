@@ -2,10 +2,15 @@
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/tests.yaml/badge.svg" />
+<img alt="Coverage" src="https://github.com/cardano-foundation/cf-explorer-api/blob/gh-pages/badges/jacoco.svg?raw=true" />
 <img alt="Release" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/release.yaml/badge.svg?branch=main" />
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
+### Reports
+[Api-test html](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
+[Api-test allure](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+ 
 ## Getting Started
 
 ### Prerequisites

@@ -16,7 +16,8 @@ public interface TokenService {
    * @param pageable page information
    * @return list tokens information in this page
    */
-  BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable);
+  BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable)
+      throws ExecutionException, InterruptedException;
 
   /**
    * Get token detail by token id (fingerprint)
