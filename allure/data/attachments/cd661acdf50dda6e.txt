@@ -1,0 +1,1 @@
+{"data":[{"id":11349,"name":"4154484f4d","displayName":"ATHOM","policy":"5acc52d5696e52345aec108468050d9d743eb21d6e41305bbc23a27b","fingerprint":"asset1cw6a0zyc97cy94qgt0u4t2hz54c6rdtcrzc2ta","txCount":10263,"supply":"9223372036854775807","totalVolume":"1450752969583667487861","createdOn":"2021/03/29 23:30:45"}],"totalItems":1,"totalPages":1,"currentPage":0}
