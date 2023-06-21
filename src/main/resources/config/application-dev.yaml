@@ -88,8 +88,11 @@ redis:
 application:
   network: ${SCHEMA:mainnet}
   api.coin.gecko.market:
-    interval-time: 120
-    base-url: https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s
+    interval-time: ${API_MARKET_CACHE_TIME:120}
+    base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
+  api.news:
+    interval-time: ${API_NEWS_CACHE_TIME:120}
+    base-url: ${API_NEWS_URL:http://dev.cf-explorer-monolith-mainnet.metadata.dev.cf-deployments.org:8085/?amount=%d}
   api:
     check-reward:
       base-url: ${API_CHECK_REWARD_URL:http://localhost:8888/api/v1/rewards/fetch}
