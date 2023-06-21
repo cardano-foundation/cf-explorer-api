@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 
 public interface PoolDeRegistrationProjection {
 
+  Boolean getRefundFlag();
+
   BigInteger getFee();
 
   String getTxHash();

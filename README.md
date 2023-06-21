@@ -7,6 +7,10 @@
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
+### Reports
+[Api-test html](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
+[Api-test allure](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+ 
 ## Getting Started
 
 ### Prerequisites
