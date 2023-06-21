@@ -63,7 +63,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN PoolHash ph ON pu.poolHash.id = ph.id "
           + "JOIN Tx tx ON tx.id = pu.registeredTx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
-          + "LEFT JOIN PoolOfflineData po on pu.poolHash.id = po.pool.id AND (po.id is NULL OR po.pmrId = (SELECT max(po2.pmrId) FROM PoolOfflineData po2 WHERE po2.pool.id  = pu.poolHash.id)) ")
+          + "LEFT JOIN PoolOfflineData po on pu.poolHash.id = po.pool.id AND (po.id is NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id  = pu.poolHash.id)) ")
   Page<TxBlockEpochProjection> getDataForPoolRegistration(Pageable pageable);
 
   @Query(value = "SELECT bk.time FROM PoolUpdate pu "
@@ -103,8 +103,8 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
               "pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, " +
               "tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount, tx.deposit AS deposit "
           + "FROM PoolHash ph "
-          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.pmrId " +
-              "= (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
+          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id " +
+              "= (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
           + "JOIN Block bk ON tx.block.id  = bk.id "
@@ -124,7 +124,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   @Query(value =
       "SELECT pu.id AS poolUpdateId, ph.id AS hashId, ph.hashRaw AS poolId , ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, tx.hash AS txHash, bk.time AS time, tx.fee AS fee, sa.view AS rewardAccount "
           + "FROM PoolHash ph "
-          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.pmrId = (SELECT max(pod.pmrId) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
+          + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod.id) FROM PoolOfflineData pod WHERE ph.id = pod.pool.id) "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN Tx tx ON pu.registeredTx.id = tx.id AND (tx.deposit IS NULL OR tx.deposit = 0) "
           + "JOIN Block bk ON tx.block.id  = bk.id "
