@@ -241,6 +241,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       Map<Integer, BigInteger> refundAmountMap = new HashMap<>();
       epochRewardProjections.forEach(
           refund -> refundAmountMap.put(refund.getEpochNo(), refund.getAmount()));
+      List<String> stakeKeys = poolUpdateRepository.findOwnerAccountByPoolView(poolView);
       deRegistrations.forEach(deRegistration -> {
         if (deRegistration.isRefundFlag()) {
           deRegistration.setPoolHold(refundAmountMap.get(deRegistration.getRetiringEpoch()));
@@ -256,9 +257,11 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
         deRegistration.setPoolId(poolInfo.getPoolId());
         deRegistration.setPoolName(poolInfo.getPoolName());
         deRegistration.setPoolView(poolInfo.getPoolView());
-        deRegistration.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
+        deRegistration.setStakeKeys(stakeKeys);
       });
       res.setTotalItems(projections.getTotalElements());
+      res.setCurrentPage(projections.getNumber());
+      res.setTotalPages(projections.getTotalPages());
     }
     res.setData(deRegistrations);
     return res;
