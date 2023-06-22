@@ -16,8 +16,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.math.BigInteger;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.consumercommon.entity.AddressTokenBalance_;
+import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,8 +74,9 @@ public class AddressController {
   @GetMapping("/{address}/txs")
   @LogMessage
   @Operation(summary = "Get the highest and lowest balance address")
-  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(@PathVariable String address,
-      @ParameterObject Pageable pageable) {
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
+          @PathVariable String address, @ParameterObject @PageableDefault(size = 20, value = 20,
+          sort = {AddressTxBalance_.TX_ID}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(txService.getTransactionsByAddress(address, pageable));
   }
 
@@ -79,9 +84,9 @@ public class AddressController {
   @LogMessage
   @Operation(summary = "Get list token by address")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTokenByAddress(
-      @PathVariable String address,
-      @RequestParam(required = false) String displayName,
-      @ParameterObject Pageable pageable) {
+      @PathVariable String address, @RequestParam(required = false) String displayName,
+      @ParameterObject @PageableDefault(size = 20, value = 20,
+          sort = {AddressTokenBalance_.BALANCE}, direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(addressService.getTokenByDisplayName(pageable, address, displayName));
   }
 }

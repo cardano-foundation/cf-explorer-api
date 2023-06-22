@@ -43,8 +43,7 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
   @Query("SELECT atb.addressId as addressId, atb.balance as quantity"
       + " FROM AddressTokenBalance atb "
       + " WHERE atb.multiAsset = :multiAsset"
-      + " AND atb.balance > 0"
-      + " ORDER BY atb.balance DESC")
+      + " AND atb.balance > 0")
   Page<AddressTokenProjection> findAddressAndBalanceByMultiAsset(@Param("multiAsset") MultiAsset multiAsset,
       Pageable pageable);
 
@@ -54,8 +53,7 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
       + " atb.balance as quantity"
       + " FROM AddressTokenBalance atb "
       + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
-      + " WHERE atb.address = :address"
-      + " ORDER BY atb.balance DESC")
+      + " WHERE atb.address = :address")
   List<AddressTokenProjection> findAddressAndBalanceByAddress(@Param("address") Address address);
 
   @Query("SELECT ma.fingerprint as fingerprint, ma.id as multiAssetId,"
@@ -64,8 +62,7 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
       + " atb.balance as quantity"
       + " FROM AddressTokenBalance atb "
       + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
-      + " WHERE atb.address = :address"
-      + " ORDER BY atb.balance DESC")
+      + " WHERE atb.address = :address")
   Page<AddressTokenProjection> findAddressAndBalanceByAddress(@Param("address") Address address, Pageable pageable);
 
   @Query("SELECT ma.name as tokenName, ma.fingerprint as fingerprint,"
@@ -73,8 +70,7 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
       + " FROM AddressTokenBalance atb "
       + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
       + " WHERE ma.policy = :policy"
-      + " AND atb.balance > 0"
-      + " ORDER BY atb.balance DESC")
+      + " AND atb.balance > 0")
   Page<AddressTokenProjection> findAddressAndBalanceByMultiAssetIn(@Param("policy") String policy,
       Pageable pageable);
 
