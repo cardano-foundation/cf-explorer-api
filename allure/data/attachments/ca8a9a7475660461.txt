@@ -1,1 +1,0 @@
-{"name":"74544555524f","displayName":"tTEURO","policy":"e68f1cea19752d1292b4be71b7f5d2b3219a15859c028f7454f66cdf","fingerprint":"asset1azw6h7l3zmwrpmuhuny0u3k70hk3qxyjkcq4du","txCount":11081,"supply":"99687000000000000000000","volumeIn24h":"0","totalVolume":"100413000000001000000000","numberOfHolders":1,"createdOn":"2022/12/06 17:30:03"}

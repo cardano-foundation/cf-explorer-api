@@ -1,1 +1,0 @@
-{"data":[{"time":"2022/10/25 12:22:04","txHash":"0d0eb21f196dd79ff4a3d2b357855736f40b1f46d0e4e6e31d1273577e17513b","blockIndex":1,"epochNo":29,"blockNo":194797,"epochSlotNo":130924,"fee":829857,"deposit":80000000,"action":"Registered"}],"totalItems":1,"totalPages":1,"currentPage":0}
