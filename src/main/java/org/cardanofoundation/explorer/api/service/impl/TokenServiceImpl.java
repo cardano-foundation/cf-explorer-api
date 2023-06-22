@@ -245,16 +245,6 @@ public class TokenServiceImpl implements TokenService {
     } else {
       balance = getBalanceInRangePreviousToday(multiAsset, from, to, maxDateAgg.get());
     }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTokenRepository.countRecord(
-          multiAsset,
-          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX)));
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
-    }
-
     return new TokenVolumeAnalyticsResponse(to, balance);
   }
 
