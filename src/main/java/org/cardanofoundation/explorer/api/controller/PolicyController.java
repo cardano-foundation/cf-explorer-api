@@ -9,12 +9,8 @@ import org.cardanofoundation.explorer.api.service.PolicyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressTokenBalance_;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,8 +37,7 @@ public class PolicyController {
   @Operation(summary = "Get tokens by policy")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> getTokens(
       @PathVariable @Parameter(description = "Policy hash") String policyId,
-      @ParameterObject @PageableDefault(size = 20, value = 20,
-          sort = {MultiAsset_.ID}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(policyService.getTokens(policyId, pageable));
   }
 
@@ -51,8 +46,7 @@ public class PolicyController {
   @Operation(summary = "Get holders by policy")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
       @PathVariable @Parameter(description = "Policy hash") String policyId,
-      @ParameterObject @PageableDefault(size = 20, value = 20,
-          sort = {AddressTokenBalance_.BALANCE}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(policyService.getHolders(policyId, pageable));
   }
 

@@ -24,11 +24,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,16 +44,14 @@ public class StakeKeyController {
   @GetMapping("/registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-      @ParameterObject @PageableDefault(size = 20, value = 20,
-          sort = {StakeRegistration_.TX_ID}, direction = Sort.Direction.DESC) Pageable pageable) {
+          @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pageable));
   }
 
   @GetMapping("/de-registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-      @ParameterObject @PageableDefault(size = 20, value = 20,
-          sort = {StakeDeregistration_.TX_ID}, direction = Sort.Direction.DESC) Pageable pageable) {
+          @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pageable));
   }
   @GetMapping("/address/{address}")
@@ -131,8 +126,7 @@ public class StakeKeyController {
   @Operation(summary = "Get all address of stake")
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
       @PathVariable @Parameter(description = "Stake key") String stakeKey,
-      @ParameterObject @PageableDefault(size = 20, value = 20,
-          sort = {Address_.BALANCE}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject Pageable pageable) {
     return ResponseEntity.ok(stakeService.getAddresses(stakeKey,pageable));
   }
 

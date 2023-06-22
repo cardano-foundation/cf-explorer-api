@@ -26,7 +26,8 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
           + "bk.slotNo as slotNo, bk.epochSlotNo as epochSlotNo, sr.addr.view as stakeKey "
           + "FROM StakeRegistration sr "
           + "JOIN Tx tx ON tx.id = sr.tx.id "
-          + "JOIN Block bk ON bk.id = tx.block.id ",
+          + "JOIN Block bk ON bk.id = tx.block.id "
+          + "ORDER BY tx.blockId DESC, tx.blockIndex DESC",
       countQuery = "SELECT count(id) FROM StakeRegistration")
   Page<TrxBlockEpochStake> getDataForStakeRegistration(Pageable pageable);
 
