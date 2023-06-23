@@ -1,1 +1,0 @@
-{"status":"ACTIVE","stakeAddress":"stake1u88s35s8vm7e7rpt8dk22y5j5pl9er2xzdjtx4ywl3jut7s7cpagr","totalStake":3267006523547,"rewardAvailable":-2364657997519,"rewardWithdrawn":2364657997519,"pool":{"tickerName":"STKD","poolName":"Staked","poolId":"pool1rj8zkzk3dm0lmnjtafczqfp8sshmang8gg85eypjeh2e6cve0vl"},"rewardPools":[]}
