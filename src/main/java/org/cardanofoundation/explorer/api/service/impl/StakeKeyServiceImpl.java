@@ -147,6 +147,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
           .poolId(poolData.getPoolId())
           .poolName(poolData.getPoolData())
           .tickerName(poolData.getTickerName())
+          .logoUrl(poolData.getLogoUrl())
+          .iconUrl(poolData.getIconUrl())
           .build();
       stakeAddressResponse.setPool(poolResponse);
     }
