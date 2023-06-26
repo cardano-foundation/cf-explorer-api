@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.sql.Timestamp;
+
 import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
 
 import org.springframework.data.domain.Page;
@@ -21,9 +23,15 @@ public interface StakeKeyReportHistoryRepository extends
 
   @Query("SELECT srh FROM StakeKeyReportHistory srh"
       + " LEFT JOIN ReportHistory rh ON srh.reportHistory.id = rh.id"
-      + " WHERE rh.username = :username")
-  Page<StakeKeyReportHistory> findByUsername(@Param("username") String username,
-                                             Pageable pageable);
+      + " WHERE (rh.username = :username)"
+      + " AND (rh.createdAt >= :fromDate)"
+      + " AND (rh.createdAt <= :toDate)"
+      + " AND (:reportName IS NULL OR rh.reportName LIKE :reportName)")
+  Page<StakeKeyReportHistory> getStakeKeyReportHistoryByFilter(@Param("reportName") String reportName,
+                                                       @Param("fromDate") Timestamp fromDate,
+                                                       @Param("toDate") Timestamp toDate,
+                                                       @Param("username") String username,
+                                                       Pageable pageable);
 
   StakeKeyReportHistory findByReportHistoryId(@Param("reportHistoryId") Long reportHistoryId);
 }
