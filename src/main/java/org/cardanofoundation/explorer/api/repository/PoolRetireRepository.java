@@ -31,12 +31,16 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
           + "JOIN PoolHash ph ON pr.poolHash.id = ph.id "
           + "JOIN Tx tx ON tx.id = pr.announcedTx.id "
           + "JOIN Block bk ON bk.id = tx.block.id "
-          + "LEFT JOIN PoolOfflineData po ON pr.poolHash.id  = po.pool.id AND  (po.id is NULL OR po.pmrId = (SELECT max(po2.pmrId) FROM PoolOfflineData po2 WHERE po2.pool.id  = pr.poolHash.id)) "
+          + "LEFT JOIN PoolOfflineData po ON pr.poolHash.id  = po.pool.id AND  (po.id is NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id  = pr.poolHash.id)) "
           + "LEFT JOIN PoolUpdate pu ON pr.poolHash.id = pu.poolHash.id AND (pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pr.poolHash.id  = pu2.poolHash.id)) ")
   Page<TxBlockEpochProjection> getDataForPoolDeRegistration(Pageable pageable);
 
   @Query(value =
-      "SELECT tx.fee AS fee, pr.retiringEpoch AS retiringEpoch, tx.hash AS txHash, bk.time AS time "
+      "SELECT tx.fee AS fee, pr.retiringEpoch AS retiringEpoch, tx.hash AS txHash, bk.time AS time, "
+          + "CASE "
+              + "WHEN tx.id = (SELECT max(pr1.announcedTx.id) FROM PoolRetire pr1 WHERE pr1.poolHash.id = ph.id AND pr.retiringEpoch = pr1.retiringEpoch) THEN TRUE "
+              + "ELSE FALSE "
+          + "END AS refundFlag "
           + "FROM PoolRetire pr "
           + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
           + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
@@ -44,7 +48,16 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
           + "WHERE ph.view = :poolView "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
-          + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
+          + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ",
+      countQuery = "SELECT pr.id "
+          + "FROM PoolRetire pr "
+          + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
+          + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
+          + "JOIN Block bk ON tx.block.id = bk.id "
+          + "WHERE ph.view = :poolView "
+          + "AND (:txHash IS NULL OR tx.hash = :txHash) "
+          + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
+          + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate)")
   Page<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("poolView") String poolView,
                                                            @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
                                                            @Param("toDate") Timestamp toDate, Pageable pageable);
