@@ -2,8 +2,10 @@ package org.cardanofoundation.explorer.api.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -23,6 +25,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
+import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
+import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.springframework.core.io.InputStreamResource;
@@ -33,11 +40,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/staking-lifecycle/report")
 @RequiredArgsConstructor
+@Validated
 public class StakeKeyReportController {
 
   private final StakeKeyReportService stakeKeyReportService;
@@ -76,11 +85,11 @@ public class StakeKeyReportController {
   @Operation(summary = "Get stake key report history by stake key")
   public ResponseEntity<BaseFilterResponse<StakeKeyReportHistoryResponse>> getStakeReportHistoryByStakeKey(
       HttpServletRequest request,
-      @PathVariable String stakeKey,
-      @ParameterObject Pageable pageable) {
+      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
+      @ParameterObject @PaginationValid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeKeyReportHistoryByStakeKey(stakeKey, username, pageable));
+        stakeKeyReportService.getStakeKeyReportHistoryByStakeKey(stakeKey, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/detail")
@@ -100,10 +109,10 @@ public class StakeKeyReportController {
   public ResponseEntity<BaseFilterResponse<StakeKeyReportHistoryResponse>> getStakeReportHistory(
       HttpServletRequest request,
       @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
-    return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(username, filterRequest, pageable));
+    return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(username, filterRequest, pagination.toPageable()));
   }
 
   @GetMapping(value = "/dashboard")
@@ -111,12 +120,12 @@ public class StakeKeyReportController {
   @Operation(summary = "Get report history of stake key and pool id")
   public ResponseEntity<BaseFilterResponse<ReportHistoryResponse>> getReportHistory(
       HttpServletRequest request,
-      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @Parameter(description = "filter condition") @DateValid ReportHistoryFilterRequest filterRequest,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+              "createdAt"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        reportHistoryService.getReportHistory(filterRequest, username, pageable));
+        reportHistoryService.getReportHistory(filterRequest, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/registrations")
@@ -125,11 +134,11 @@ public class StakeKeyReportController {
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeKeyRegistrationsByReportId(
       HttpServletRequest request,
       @PathVariable Long reportId,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+              "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeRegistrationsByReportId(reportId, username, pageable));
+        stakeKeyReportService.getStakeRegistrationsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/de-registrations")
@@ -138,11 +147,11 @@ public class StakeKeyReportController {
   public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeKeyDeregistrationsByReportId(
       HttpServletRequest request,
       @PathVariable Long reportId,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+              "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeDeRegistrationsByReportId(reportId, username, pageable));
+        stakeKeyReportService.getStakeDeRegistrationsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/delegations")
@@ -151,11 +160,11 @@ public class StakeKeyReportController {
   public ResponseEntity<BaseFilterResponse<StakeDelegationFilterResponse>> getStakeKeyDelegationsByReportId(
       HttpServletRequest request,
       @PathVariable Long reportId,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+              "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeDelegationsByReportId(reportId, username, pageable));
+        stakeKeyReportService.getStakeDelegationsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/rewards")
@@ -164,11 +173,11 @@ public class StakeKeyReportController {
   public ResponseEntity<BaseFilterResponse<StakeRewardResponse>> getStakeKeyRewardsByReportId(
       HttpServletRequest request,
       @PathVariable Long reportId,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+              "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeRewardsByReportId(reportId, username, pageable));
+        stakeKeyReportService.getStakeRewardsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/withdrawals")
@@ -177,11 +186,11 @@ public class StakeKeyReportController {
   public ResponseEntity<BaseFilterResponse<StakeWithdrawalFilterResponse>> getStakeKeyWithdrawalsByReportId(
       HttpServletRequest request,
       @PathVariable Long reportId,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+              "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeWithdrawalsByReportId(reportId, username, pageable));
+        stakeKeyReportService.getStakeWithdrawalsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/wallet-activity")
@@ -190,10 +199,10 @@ public class StakeKeyReportController {
   public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>> getWalletActivityByReportId(
       HttpServletRequest request,
       @PathVariable Long reportId,
-      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+              "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getWalletActivitiesByReportId(reportId, username, pageable));
+        stakeKeyReportService.getWalletActivitiesByReportId(reportId, username, pagination.toPageable()));
   }
 }

@@ -1,6 +1,9 @@
 package org.cardanofoundation.explorer.api.controller.advice;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.util.Strings;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.common.exceptions.*;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
@@ -8,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Arrays;
 
 @Log4j2
 @RestControllerAdvice
@@ -87,5 +92,31 @@ public class GlobalRestControllerExceptionHandler {
                 .errorCode(e.getErrorCode().getServiceErrorCode())
                 .errorMessage(e.getErrorCode().getDesc())
                 .build());
+  }
+
+  @ExceptionHandler({ConstraintViolationException.class})
+  public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+    log.warn("constraint not valid: ", e);
+
+    String[] errors = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).filter(Strings::isNotBlank).toArray(String[]::new);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(
+                    ErrorResponse.builder()
+                            .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                            .errorMessage(Arrays.toString(errors))
+                            .build());
+  }
+
+  @ExceptionHandler({IllegalArgumentException.class})
+  public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+    log.warn("argument not valid: ", e);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(
+                    ErrorResponse.builder()
+                            .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                            .errorMessage(e.getMessage())
+                            .build());
   }
 }
