@@ -32,10 +32,13 @@ public class DeRegistrationResponse implements Serializable {
 
   private Integer retiringEpoch;
 
+  private boolean refundFlag;
+
   public DeRegistrationResponse(PoolDeRegistrationProjection projection) {
     this.txHash = projection.getTxHash();
     this.time = projection.getTime();
     this.fee = projection.getFee();
     this.retiringEpoch = projection.getRetiringEpoch();
+    this.refundFlag = projection.getRefundFlag();
   }
 }
