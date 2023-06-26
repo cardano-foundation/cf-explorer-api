@@ -1,0 +1,1 @@
+{"status":"ACTIVE","stakeAddress":"stake1u88s35s8vm7e7rpt8dk22y5j5pl9er2xzdjtx4ywl3jut7s7cpagr","totalStake":9249582345871,"rewardAvailable":0,"rewardWithdrawn":2587272839051,"pool":{"tickerName":"LGNS1","poolName":"Luganodes #1","poolId":"pool1qvudfuw9ar47up5fugs53s2g84q3c4v86z4es6uwsfzzs89rwha"},"rewardPools":[]}
