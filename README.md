@@ -59,14 +59,14 @@
     -  `NODE_ADDRESSES`: List of redis cluster nodes host and port.
     -  `REDIS_CLUSTER_PASSWORD`: Password of redis cluster.
 
-### We have 2 options for get data reward, epoch_stake, ada_pot, pool_info, pool_history:
-- `koios`: We will use koios service to get data.
+### There are two options to get the reward data, epoch_stake, ada_pot, pool_info and pool_history:
+- `koios`: The koios service will be used to collect the data
     - `API_CHECK_REWARD_URL`: URL for get reward data from koios service. Default is `http://localhost:8888/api/v1/rewards/fetch`.
     - `API_CHECK_POOL_HISTORY_URL`: URL for get pool history data from koios service. Default is `http://localhost:8888/api/v1/pool-history/fetch`.
     - `API_CHECK_POOL_INFO_URL`: URL for get pool info data from koios service. Default is `http://localhost:8888/api/v1/pool-info/fetch`.
     - `API_CHECK_EPOCH_STAKE_URL`: URL for get epoch stake data from koios service. Default is `http://localhost:8888/api/v1/epoch-stake/fetch`.
 
-- without `koios`: We will use database to get data.
+- default without `koios`: The database will be used to get the data
 
 
 
