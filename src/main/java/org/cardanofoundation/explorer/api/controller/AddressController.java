@@ -16,12 +16,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.math.BigInteger;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
-import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,10 +45,9 @@ public class AddressController {
   @GetMapping("/top-addresses")
   @LogMessage
   @Operation(summary = "Get top addresses")
-  @Validated
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-      @ParameterObject @PaginationValid Pagination pagination) {
-    return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(addressService.getTopAddress(pageable));
   }
 
   @GetMapping("/analytics/{address}/{type}")
@@ -75,8 +71,8 @@ public class AddressController {
   @LogMessage
   @Operation(summary = "Get the highest and lowest balance address")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(@PathVariable String address,
-      @ParameterObject @PaginationValid Pagination pagination) {
-    return ResponseEntity.ok(txService.getTransactionsByAddress(address, pagination.toPageable()));
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(txService.getTransactionsByAddress(address, pageable));
   }
 
   @GetMapping("/{address}/tokens")
@@ -85,7 +81,7 @@ public class AddressController {
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTokenByAddress(
       @PathVariable String address,
       @RequestParam(required = false) String displayName,
-      @ParameterObject @PaginationValid Pagination pagination) {
-    return ResponseEntity.ok(addressService.getTokenByDisplayName(pagination.toPageable(), address, displayName));
+      @ParameterObject Pageable pageable) {
+    return ResponseEntity.ok(addressService.getTokenByDisplayName(pageable, address, displayName));
   }
 }

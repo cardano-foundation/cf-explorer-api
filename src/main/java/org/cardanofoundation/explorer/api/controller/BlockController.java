@@ -10,21 +10,16 @@ import org.cardanofoundation.explorer.api.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
-import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
-import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/blocks")
 @RequiredArgsConstructor
-@Validated
 public class BlockController {
 
   private final BlockService blockService;
@@ -42,9 +37,9 @@ public class BlockController {
   @LogMessage
   @Operation(summary = "Get all block")
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getAll(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-              "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
-    return ResponseEntity.ok(blockService.filterBlock(pagination.toPageable()));
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(blockService.filterBlock(pageable));
   }
 
   @GetMapping("/{blockId}/txs")
@@ -52,9 +47,9 @@ public class BlockController {
   @Operation(summary = "Get tx list of block")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactionsByBlock(
       @PathVariable @Parameter(description = "Block number or block hash") String blockId,
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-              "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
-    return ResponseEntity.ok(txService.getTransactionsByBlock(blockId, pagination.toPageable()));
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(txService.getTransactionsByBlock(blockId, pageable));
   }
 
 }
