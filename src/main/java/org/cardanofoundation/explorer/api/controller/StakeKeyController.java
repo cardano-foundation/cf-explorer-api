@@ -52,21 +52,21 @@ public class StakeKeyController {
   @GetMapping("/registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-          @ParameterObject @PaginationValid Pagination pagination) {
+       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pagination.toPageable()));
   }
 
   @GetMapping("/de-registration")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-          @ParameterObject @PaginationValid Pagination pagination) {
+       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pagination.toPageable()));
   }
   @GetMapping("/address/{address}")
   @LogMessage
   @Operation(summary = "Get a stake detail by stake key")
   public ResponseEntity<StakeAddressResponse> getStakeDetailByAddress(
-          @PathVariable @Parameter(description = "Address") String address) {
+       @PathVariable @Parameter(description = "Address") String address) {
     return ResponseEntity.ok(stakeService.getStakeByAddress(address));
   }
 
@@ -74,7 +74,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get a stake detail by stake key")
   public ResponseEntity<StakeAddressResponse> getStakeDetail(
-          @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey) {
+       @PathVariable @Parameter(description = "Stake key") @StakeKeyLengthValid String stakeKey) {
     return ResponseEntity.ok(stakeService.getStake(stakeKey));
   }
 
@@ -82,8 +82,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get transactions of stake key")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-          @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+       @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pagination.toPageable()));
   }
 
@@ -91,16 +91,16 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get delegation history of stake key")
   public ResponseEntity<BaseFilterResponse<StakeDelegationProjection>> getDelegationHistories(
-          @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+       @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDelegationHistories(stakeKey, pagination.toPageable()));
   }
   @GetMapping("/{stakeKey}/stake-history")
   @LogMessage
   @Operation(summary = "Get stake history of stake key")
   public ResponseEntity<BaseFilterResponse<StakeHistoryProjection>> getStakeHistories(
-          @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+       @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getStakeHistories(stakeKey, pagination.toPageable()));
   }
 
@@ -108,8 +108,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get withdrawal transaction of stake key")
   public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(
-          @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+       @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
     return stakeService.getWithdrawalHistories(stakeKey, pagination.toPageable());
   }
 
@@ -117,8 +117,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get reward transaction of stake key")
   public BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
-          @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+       @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
     return stakeService.getInstantaneousRewards(stakeKey, pagination.toPageable());
   }
 
@@ -133,8 +133,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get all address of stake")
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
-          @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+       @StakeKeyLengthValid String stakeKey, @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
   }
 
@@ -150,8 +150,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
   public ResponseEntity<List<StakeAnalyticBalanceResponse>> getStakeBalanceAnalytics(
-          @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
-          @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type
+       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
+       @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type
   ) throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
   }
@@ -161,7 +161,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake balance analytics")
   public ResponseEntity<List<StakeAnalyticRewardResponse>> getStakeRewardAnalytics(
-          @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey) {
+       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey) {
     return ResponseEntity.ok(stakeService.getStakeRewardAnalytics(stakeKey));
   }
 

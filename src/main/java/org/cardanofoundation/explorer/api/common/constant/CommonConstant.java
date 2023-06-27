@@ -71,7 +71,7 @@ public class CommonConstant {
 
     for (Object element : a) {
       result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue()
-              : element.hashCode());
+          : element.hashCode());
     }
 
     return result;
@@ -86,7 +86,7 @@ public class CommonConstant {
    * @return
    */
   public static boolean isWithinRange(Timestamp timestamp,
-                                      Timestamp startFilterTime, Timestamp endFilterTime) {
+      Timestamp startFilterTime, Timestamp endFilterTime) {
     return !(timestamp.before(startFilterTime) || timestamp.after(endFilterTime));
   }
 }

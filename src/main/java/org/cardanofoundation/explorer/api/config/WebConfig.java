@@ -24,9 +24,9 @@ public class WebConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry
-            .addMapping("/**")
-            .allowedOrigins("*")
-            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD");
+        .addMapping("/**")
+        .allowedOrigins("*")
+        .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD");
   }
 
   @Bean
@@ -38,7 +38,7 @@ public class WebConfig implements WebMvcConfigurer {
   public void addInterceptors(InterceptorRegistry registry) {
     log.info("Authentication interceptor is adding to the service");
     registry.addInterceptor(authInterceptor)
-            .addPathPatterns("/api/v1/pool-report/**", "/api/v1/staking-lifecycle/report/**");
+        .addPathPatterns("/api/v1/pool-report/**", "/api/v1/staking-lifecycle/report/**");
   }
 
   @Bean

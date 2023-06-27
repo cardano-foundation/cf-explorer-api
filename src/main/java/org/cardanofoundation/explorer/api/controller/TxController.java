@@ -44,8 +44,8 @@ public class TxController {
   @LogMessage
   @Operation(summary = "Filter transaction")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> filter(
-          @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-                  "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(txService.getAll(pagination.toPageable()));
   }
 

@@ -41,8 +41,8 @@ public class DelegationController {
   @LogMessage
   @Operation(summary = "List delegations")
   public ResponseEntity<BaseFilterResponse<DelegationResponse>> getDelegations(
-          @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {Delegation_.TX_ID},
-                  direction = Sort.Direction.DESC) Pagination pagination) {
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {Delegation_.TX_ID},
+          direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(delegationService.getDelegations(pagination.toPageable()));
   }
 
@@ -53,34 +53,34 @@ public class DelegationController {
 
   @GetMapping("/pool-list")
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
-          @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
-          @RequestParam("search") String search) {
+       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
+       @RequestParam("search") String search) {
     return ResponseEntity.ok(delegationService.getDataForPoolTable(pagination.toPageable(), search));
   }
 
   @GetMapping("/pool-detail-header/{poolView}")
   public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(
-          @PathVariable @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {
+       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {
     return ResponseEntity.ok(delegationService.getDataForPoolDetail(poolView));
   }
 
   @GetMapping("/pool-detail-analytics")
   public ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(
-          @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {
+       @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {
     return ResponseEntity.ok(delegationService.getAnalyticsForPoolDetail(poolView));
   }
 
   @GetMapping("/pool-detail-epochs")
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
-          @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
-          @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
+       @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
+       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
     return ResponseEntity.ok(delegationService.getEpochListForPoolDetail(pagination.toPageable(), poolView));
   }
 
   @GetMapping("/pool-detail-delegators")
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
-          @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
-          @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
+       @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
+       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
     return ResponseEntity.ok(delegationService.getDelegatorsForPoolDetail(pagination.toPageable(), poolView));
   }
 

@@ -34,7 +34,7 @@ public class BlockController {
   @LogMessage
   @Operation(summary = "Get a block detail")
   public ResponseEntity<BlockResponse> getBlockDetailByBlockId(
-          @PathVariable @Parameter(description = "Block number or block hash") String blockId) {
+      @PathVariable @Parameter(description = "Block number or block hash") String blockId) {
     return ResponseEntity.ok(blockService.getBlockDetailByBlockId(blockId));
   }
 
@@ -42,8 +42,8 @@ public class BlockController {
   @LogMessage
   @Operation(summary = "Get all block")
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getAll(
-          @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-                  "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(blockService.filterBlock(pagination.toPageable()));
   }
 
@@ -51,9 +51,9 @@ public class BlockController {
   @LogMessage
   @Operation(summary = "Get tx list of block")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactionsByBlock(
-          @PathVariable @Parameter(description = "Block number or block hash") String blockId,
-          @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-                  "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
+       @PathVariable @Parameter(description = "Block number or block hash") String blockId,
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByBlock(blockId, pagination.toPageable()));
   }
 
