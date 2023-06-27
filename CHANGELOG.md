@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.13](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.12...v0.3.13) (2023-06-26)
+
+
+### Bug Fixes
+
+* update README.md trigger release ([79afdeb](https://github.com/cardano-foundation/cf-explorer-api/commit/79afdebb9619c66372377fc579d93b10c93fdd1e))
+
+## [0.3.12](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.11...v0.3.12) (2023-06-22)
+
+
+### Bug Fixes
+
+* **gha:** fix condition for main branch workflow trigger ([3f271c4](https://github.com/cardano-foundation/cf-explorer-api/commit/3f271c41a0f3721a641baf3e1b5f2615531da28c))
+* **gha:** fix condition for main branch workflow trigger ([4570edf](https://github.com/cardano-foundation/cf-explorer-api/commit/4570edf402fc3f847a28308561933b070d3f1019))
+* **gha:** fix condition for main branch workflow trigger ([57c9ce2](https://github.com/cardano-foundation/cf-explorer-api/commit/57c9ce2fccfa1e353e348935c290ebdc2c852d18))
+* remove default sort in pool-reward query ([1d6f850](https://github.com/cardano-foundation/cf-explorer-api/commit/1d6f850d1a0a4a2517819488a10341566add2e6a))
+
 ## [0.3.11](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.10...v0.3.11) (2023-06-20)
 
 
