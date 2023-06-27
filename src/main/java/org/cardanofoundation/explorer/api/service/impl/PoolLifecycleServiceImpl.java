@@ -337,6 +337,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     PoolHash pool = poolHashRepository.findByView(poolView).orElseThrow(() -> new BusinessException(
         CommonErrorCode.UNKNOWN_ERROR));
+    if (fetchRewardDataService.isKoiOs()) {
+      List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
+      if (!fetchRewardDataService.checkRewardForPool(rewardAccounts)) {
+        fetchRewardDataService.fetchRewardForPool(rewardAccounts);
+      }
+    }
     response.setIsReward(rewardRepository.existsByPoolAndType(pool, RewardType.LEADER));
     response.setIsDeRegistration(poolRetireRepository.existsByPoolHash(pool));
     return response;
