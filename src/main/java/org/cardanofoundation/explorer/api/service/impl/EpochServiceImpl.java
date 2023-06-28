@@ -191,8 +191,8 @@ public class EpochServiceImpl implements EpochService {
     return String.join("_", this.network, rawKey, String.valueOf(epoch));
   }
 
-//  @PostConstruct
-//  void setUp() {
-//    getCurrentEpochSummary();
-//  }
+  @PostConstruct
+  void setUp() {
+    getCurrentEpochSummary();
+  }
 }
