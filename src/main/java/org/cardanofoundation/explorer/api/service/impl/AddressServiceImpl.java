@@ -20,7 +20,6 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressAnalytic
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
@@ -34,6 +33,7 @@ import org.cardanofoundation.explorer.api.repository.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.HexUtils;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
@@ -45,7 +45,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -98,7 +96,7 @@ public class AddressServiceImpl implements AddressService {
         Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
     );
     if(!checkNetworkAddress(address)) {
-      throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
+      throw new NoContentException(BusinessCode.ADDRESS_NOT_FOUND);
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
     addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
@@ -124,7 +122,7 @@ public class AddressServiceImpl implements AddressService {
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type)
       throws ExecutionException, InterruptedException {
     Address addr = addressRepository.findFirstByAddress(address)
-        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
     Long txCount = addressTxBalanceRepository.countByAddress(addr);
     if (Long.valueOf(0).equals(txCount)) {
       return List.of();
@@ -260,7 +258,7 @@ public class AddressServiceImpl implements AddressService {
   @Transactional(readOnly = true)
   public List<BigInteger> getAddressMinMaxBalance(String address) {
     Address addr = addressRepository.findFirstByAddress(address)
-        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
 
     MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByAddress(
         addr.getId());
@@ -301,7 +299,7 @@ public class AddressServiceImpl implements AddressService {
       String address) {
 
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     Page<AddressTokenProjection> addressTokenProjectionPage =
@@ -347,7 +345,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     List<AddressTokenProjection> addressTokenProjectionList =
@@ -382,7 +380,7 @@ public class AddressServiceImpl implements AddressService {
                                             .getScriptHash());
       if(policyId.equals(hash)){
         Address address = addressRepository.findFirstByAddress(scriptVerifyRequest.getAddress())
-            .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+            .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
         address.setVerifiedContract(Boolean.TRUE);
         addressRepository.save(address);
         return Boolean.TRUE;
@@ -397,7 +395,7 @@ public class AddressServiceImpl implements AddressService {
   @Override
   public String getJsonNativeScript(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     if(Boolean.FALSE.equals(addr.getVerifiedContract())){
@@ -407,7 +405,7 @@ public class AddressServiceImpl implements AddressService {
     ShelleyAddress shelleyAddress = new ShelleyAddress(addr.getAddress());
     String policyId = shelleyAddress.getHexPaymentPart();
     Script script = scriptRepository.findByHash(policyId).orElseThrow(
-        () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.SCRIPT_NOT_FOUND)
     );
 
     if(Objects.isNull(script.getJson())){
