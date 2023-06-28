@@ -20,6 +20,10 @@ public enum TypeTokenGson {
   TOKEN_DETAIL(
       () -> new TypeToken<TokenResponse>() {
       }.getType()
+  ),
+  NEWS(
+      () -> new TypeToken<>() {
+      }.getType()
   );
 
   private final Supplier<Type> type;
