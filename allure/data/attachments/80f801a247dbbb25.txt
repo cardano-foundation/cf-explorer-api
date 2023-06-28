@@ -1,1 +1,0 @@
-{"epochNo":377,"countDownEndTime":0,"epochSlotNo":18852979,"liveStake":20285368883271608,"delegators":1256602}
