@@ -22,6 +22,7 @@ import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -86,27 +87,27 @@ class StakeKeyLifeCycleServiceTest {
     Date fromDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
     Date toDate = Date.from(Instant.now());
     when(stakeAddressRepository.findByView("stake1notfound")).thenReturn(Optional.empty());
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeRegistrations("stake1notfound", condition,
             pageable));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeDeRegistrations("stake1notfound", condition,
             pageable));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegationDetail("stake1notfound",
             "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2"));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegations("stake1notfound", request, pageable));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", fromDate, toDate , pageable));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawals("stake1notfound", request, pageable));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawalDetail("stake1notfound",
             "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2"));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeWalletActivities("stake1notfound", pageable));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeRewardActivities("stake1notfound", pageable));
   }
 
@@ -258,7 +259,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(delegationRepository.findDelegationByAddressAndTx(any(), any()))
         .thenReturn(Optional.empty());
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegationDetail("stake1notfound",
             "txHashNotFound"));
   }
@@ -373,7 +374,7 @@ class StakeKeyLifeCycleServiceTest {
     when(withdrawalRepository.getWithdrawalByAddressAndTx(any(), any()))
         .thenReturn(Optional.empty());
     when(fetchRewardDataService.checkRewardAvailable(any())).thenReturn(true);
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawalDetail("stake1notfound",
             "txHashNotFound"));
   }

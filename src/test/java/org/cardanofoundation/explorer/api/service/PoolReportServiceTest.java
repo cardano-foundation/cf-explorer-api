@@ -16,6 +16,7 @@ import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -70,7 +71,7 @@ public class PoolReportServiceTest {
         .build();
     String username = "username";
     when(poolHashRepository.findByView(anyString())).thenReturn(Optional.empty());
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
                             () -> poolReportService.create(request, username));
   }
 
