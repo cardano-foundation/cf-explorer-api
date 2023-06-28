@@ -292,6 +292,8 @@ public class DelegationServiceImpl implements DelegationService {
     }
     response.setData(poolList);
     response.setTotalItems(poolIdPage.getTotalElements());
+    response.setTotalPages(poolIdPage.getTotalPages());
+    response.setCurrentPage(pageable.getPageNumber());
     return response;
   }
 
@@ -474,6 +476,7 @@ public class DelegationServiceImpl implements DelegationService {
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
     long totalElm;
+    int totalPage;
     Set<Integer> epochNos;
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
@@ -496,6 +499,7 @@ public class DelegationServiceImpl implements DelegationService {
       epochNos = poolHistoryKoiOsProjections.stream().map(PoolHistoryKoiosProjection::getEpochNo)
           .collect(
               Collectors.toSet());
+      totalPage = poolHistoryKoiOsProjections.getTotalPages();
     } else {
       Page<PoolActiveStakeProjection> epochStakeProjections = epochStakeRepository.getDataForEpochList(
           poolId, pageable);
@@ -503,6 +507,7 @@ public class DelegationServiceImpl implements DelegationService {
       totalElm = epochStakeProjections.getTotalElements();
       epochNos = epochStakeProjections.stream().map(PoolActiveStakeProjection::getEpochNo)
           .collect(Collectors.toSet());
+      totalPage = epochStakeProjections.getTotalPages();
       List<EpochRewardProjection> delegatorRewardProjections = rewardRepository.getDelegatorRewardByPool(
           poolId, epochNos);
       Map<Integer, BigInteger> delegatorRewardMap = delegatorRewardProjections.stream().collect(
@@ -536,6 +541,8 @@ public class DelegationServiceImpl implements DelegationService {
         epochOfPool -> epochOfPool.setBlock(epochBlockMap.get(epochOfPool.getEpoch())));
     epochRes.setData(epochOfPools);
     epochRes.setTotalItems(totalElm);
+    epochRes.setTotalPages(totalPage);
+    epochRes.setCurrentPage(pageable.getPageNumber());
     return epochRes;
   }
 
@@ -652,6 +659,10 @@ public class DelegationServiceImpl implements DelegationService {
       }
       delegatorResponse.setTotalItems(addressIdPage.getTotalElements());
       delegatorResponse.setData(delegatorList);
+      delegatorResponse.setTotalPages(addressIdPage.getTotalPages());
+      delegatorResponse.setCurrentPage(pageable.getPageNumber());
+    } else {
+      delegatorResponse.setData(new ArrayList<>());
     }
     return delegatorResponse;
   }

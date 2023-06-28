@@ -193,6 +193,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), stakeHistoryList.size());
+    if (start >= stakeHistoryList.size()) {
+      return new BaseFilterResponse<>(new PageImpl<>(List.of()));
+    }
     Page<StakeHistoryProjection> page = new PageImpl<>(stakeHistoryList.subList(start, end),
         pageable, stakeHistoryList.size());
     return new BaseFilterResponse<>(page);
@@ -222,6 +225,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), instantaneousRewards.size());
+
+    if (start >= instantaneousRewards.size()) {
+      return new BaseFilterResponse<>(new PageImpl<>(List.of()));
+    }
+
     Page<StakeInstantaneousRewardsProjection> page = new PageImpl<>(
         instantaneousRewards.subList(start, end), pageable, instantaneousRewards.size());
     return new BaseFilterResponse<>(page);
