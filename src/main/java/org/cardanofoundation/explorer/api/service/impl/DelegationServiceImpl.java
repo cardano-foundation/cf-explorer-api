@@ -159,6 +159,10 @@ public class DelegationServiceImpl implements DelegationService {
     if (!fetchRewardDataService.checkAdaPots(epochNo)) {
       fetchRewardDataService.fetchAdaPots(List.of(epochNo));
     }
+    Object poolActiveObj = redisTemplate.opsForValue()
+        .get(CommonConstant.REDIS_POOL_ACTIVATE + network);
+    Object poolInActiveObj = redisTemplate.opsForValue()
+        .get(CommonConstant.REDIS_POOL_INACTIVATE + network);
     Timestamp startTime = epoch.getStartTime();
     Long slot = (Instant.now().toEpochMilli() - startTime.getTime()) / MILLI;
     long countDownTime =
@@ -183,6 +187,8 @@ public class DelegationServiceImpl implements DelegationService {
     Integer delegators = delegationRepository.totalLiveDelegatorsCount();
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
+        .activePools(Objects.nonNull(poolActiveObj) ? (Integer)poolActiveObj : CommonConstant.ZERO)
+        .retiredPools(Objects.nonNull(poolInActiveObj) ? (Integer)poolInActiveObj  : CommonConstant.ZERO)
         .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
         .build();
   }
