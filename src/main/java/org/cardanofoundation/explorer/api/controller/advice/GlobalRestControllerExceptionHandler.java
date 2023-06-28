@@ -21,77 +21,77 @@ public class GlobalRestControllerExceptionHandler {
   public ResponseEntity<ErrorResponse> handleException(BusinessException e) {
     log.warn("Business logic exception: {}, stack trace: {}", e.getMessage(), e.getErrorMsg());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(
-                    ErrorResponse.builder()
-                            .errorCode(e.getErrorCode())
-                            .errorMessage(e.getErrorMsg())
-                            .build());
+        .body(
+            ErrorResponse.builder()
+                .errorCode(e.getErrorCode())
+                .errorMessage(e.getErrorMsg())
+                .build());
   }
 
   @ExceptionHandler({FetchRewardException.class})
   public ResponseEntity<ErrorResponse> handleException(FetchRewardException e) {
     log.warn("Business logic exception: {}, stack trace: {}", e.getMessage(), e.getErrorMsg());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(
-                    ErrorResponse.builder()
-                            .errorCode(e.getErrorCode())
-                            .errorMessage(e.getErrorMsg())
-                            .build());
+        .body(
+            ErrorResponse.builder()
+                .errorCode(e.getErrorCode())
+                .errorMessage(e.getErrorMsg())
+                .build());
   }
 
   @ExceptionHandler({IgnoreRollbackException.class})
   public ResponseEntity<ErrorResponse> handleException(IgnoreRollbackException e) {
     log.warn("No rollback exception: {}, stack trace:", e.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(
-                    ErrorResponse.builder()
-                            .errorCode(e.getErrorCode())
-                            .errorMessage(e.getErrorMsg())
-                            .build());
+        .body(
+            ErrorResponse.builder()
+                .errorCode(e.getErrorCode())
+                .errorMessage(e.getErrorMsg())
+                .build());
   }
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity<ErrorResponse> handleException(Exception e) {
     log.warn("Unknown exception: {}, stack trace:", e.getMessage(), e);
     return new ResponseEntity<>(
-            ErrorResponse.builder()
-                    .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
-                    .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc())
-                    .build(),
-            HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorResponse.builder()
+            .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
+            .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc())
+            .build(),
+        HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   @ExceptionHandler({TokenRefreshException.class})
   public ResponseEntity<ErrorResponse> handleAuthException(TokenRefreshException e) {
     log.warn("Refresh token exception: {}, stack trace:", e.getMessage());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(
-                    ErrorResponse.builder()
-                            .errorCode(e.getErrorCode().getServiceErrorCode())
-                            .errorMessage(e.getErrorCode().getDesc())
-                            .build());
+        .body(
+            ErrorResponse.builder()
+                .errorCode(e.getErrorCode().getServiceErrorCode())
+                .errorMessage(e.getErrorCode().getDesc())
+                .build());
   }
 
   @ExceptionHandler({AccessTokenExpireException.class})
   public ResponseEntity<ErrorResponse> handleAuthException(AccessTokenExpireException e) {
     log.warn("Access token expired: {}, stack trace:", e.getMessage());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(
-                    ErrorResponse.builder()
-                            .errorCode(e.getErrorCode().getServiceErrorCode())
-                            .errorMessage(e.getErrorCode().getDesc())
-                            .build());
+        .body(
+            ErrorResponse.builder()
+                .errorCode(e.getErrorCode().getServiceErrorCode())
+                .errorMessage(e.getErrorCode().getDesc())
+                .build());
   }
 
   @ExceptionHandler({InvalidAccessTokenException.class})
   public ResponseEntity<ErrorResponse> handleAuthException(InvalidAccessTokenException e) {
     log.warn("Invalid access token: {}", e.getErrorCode());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(
-                    ErrorResponse.builder()
-                            .errorCode(e.getErrorCode().getServiceErrorCode())
-                            .errorMessage(e.getErrorCode().getDesc())
-                            .build());
+        .body(
+            ErrorResponse.builder()
+                .errorCode(e.getErrorCode().getServiceErrorCode())
+                .errorMessage(e.getErrorCode().getDesc())
+                .build());
   }
 
   @ExceptionHandler({ConstraintViolationException.class})
@@ -101,11 +101,11 @@ public class GlobalRestControllerExceptionHandler {
     String[] errors = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).filter(Strings::isNotBlank).toArray(String[]::new);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(
-                    ErrorResponse.builder()
-                            .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
-                            .errorMessage(Arrays.toString(errors))
-                            .build());
+        .body(
+            ErrorResponse.builder()
+                .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .errorMessage(Arrays.toString(errors))
+                .build());
   }
 
   @ExceptionHandler({IllegalArgumentException.class})
@@ -113,10 +113,10 @@ public class GlobalRestControllerExceptionHandler {
     log.warn("argument not valid: ", e);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(
-                    ErrorResponse.builder()
-                            .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
-                            .errorMessage(e.getMessage())
-                            .build());
+        .body(
+            ErrorResponse.builder()
+                .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .errorMessage(e.getMessage())
+                .build());
   }
 }

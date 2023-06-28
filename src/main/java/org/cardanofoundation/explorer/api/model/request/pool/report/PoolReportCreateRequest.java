@@ -38,16 +38,16 @@ public class PoolReportCreateRequest {
 
   public PoolReportHistory toEntity(ReportHistory reportHistory) {
     return PoolReportHistory.builder()
-            .poolView(this.poolId)
-            .isPoolSize(this.isPoolSize)
-            .isFeesPaid(this.isFeesPaid)
-            .beginEpoch(this.epochRanges[0])
-            .endEpoch(this.epochRanges[1])
-            .eventRegistration(this.eventRegistration)
-            .eventReward(this.eventReward)
-            .eventDeregistration(this.eventDeregistration)
-            .eventPoolUpdate(this.eventPoolUpdate)
-            .reportHistory(reportHistory)
-            .build();
+        .poolView(this.poolId)
+        .isPoolSize(this.isPoolSize)
+        .isFeesPaid(this.isFeesPaid)
+        .beginEpoch(this.epochRanges[0])
+        .endEpoch(this.epochRanges[1])
+        .eventRegistration(this.eventRegistration)
+        .eventReward(this.eventReward)
+        .eventDeregistration(this.eventDeregistration)
+        .eventPoolUpdate(this.eventPoolUpdate)
+        .reportHistory(reportHistory)
+        .build();
   }
 }
