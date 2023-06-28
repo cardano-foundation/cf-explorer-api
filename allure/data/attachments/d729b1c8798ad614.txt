@@ -1,1 +1,0 @@
-{"hash":"247e2dd521d3c0e9b766901a5187fb384a8ba345c096eda1a33b82db65dcaeae","time":"2022/10/09 15:37:52","txCount":28,"epochNo":368,"blockNo":7862040,"slotNo":73763581,"epochSlotNo":150781,"totalFees":11661305,"totalOutput":390419985455,"slotLeader":"03e5b1d3dc6da6101ed402d0ba310d900a110c59627472eb4e34ce24","confirmation":254934}
