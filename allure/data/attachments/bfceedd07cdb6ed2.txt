@@ -1,1 +1,0 @@
-{"data":[{"address":"addr1qxy4v4qufl44schr3yaqg5lcp4a9l34ph2szg9x5qm5ms0x0prfqwehanuxzkwmv55ff9gr7tjx5vymykd2galr9chaq8jayxh","txCount":2,"balance":0},{"address":"addr1qxrlkh6yh0km5m5n7923syel0yqqvc3pjrnqrzrz3gwpxd70prfqwehanuxzkwmv55ff9gr7tjx5vymykd2galr9chaqlwjwm9","txCount":3821,"balance":9249582345871}],"totalItems":2,"totalPages":1,"currentPage":0}
