@@ -1006,7 +1006,8 @@ public class TxServiceImpl implements TxService {
             LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
             LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
 
-    final LocalDateTime previousMonth = currentLocalDate.minusMonths(BigInteger.ONE.longValue());
+    final LocalDateTime previousMonth = currentLocalDate.minusMonths(BigInteger.ONE.longValue())
+        .minusDays(BigInteger.ONE.longValue());
 
     final BigInteger previousMonthInSeconds = BigInteger
         .valueOf(previousMonth.toInstant(ZoneOffset.UTC).getEpochSecond());

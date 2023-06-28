@@ -11,12 +11,14 @@ import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.cardanofoundation.ledgersync.common.util.JsonUtil;
 
+import static org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig.DATE_TIME_FORMAT;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TxGraph {
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private Date date;
   private BigInteger simpleTransactions;
   private BigInteger smartContract;

@@ -21,4 +21,7 @@ public interface EpochParamRepository extends JpaRepository<EpochParam, Long> {
       + "JOIN Epoch e ON e.no = ep.epochNo "
       + "WHERE e.startTime <=  :epochTime")
   List<EpochParam> findEpochParamInTime(@Param("epochTime") Timestamp epochTime);
+
+  @Query(value = "SELECT ep.optimalPoolCount FROM EpochParam ep WHERE ep.epochNo = :epochNo")
+  Integer getOptimalPoolCountByEpochNo(@Param("epochNo") Integer epochNo);
 }

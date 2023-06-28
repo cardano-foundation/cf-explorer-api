@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class JacksonMapperDateConfig {
 
   private static final String DATE_FORMAT = "yyyy/MM/dd";
-  private static final String DATE_TIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
+  public static final String DATE_TIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
 
   @Bean
   public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
