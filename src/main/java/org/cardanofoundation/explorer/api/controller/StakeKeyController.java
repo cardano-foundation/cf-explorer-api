@@ -1,10 +1,12 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validation.PageZeroValid;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
@@ -28,10 +30,12 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -125,7 +129,8 @@ public class StakeKeyController {
   @GetMapping("/top-delegators")
   @LogMessage
   @Operation(summary = "Get top delegators")
-  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(@ParameterObject @PaginationValid Pagination pagination) {
+  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(@ParameterObject @PaginationValid @PageZeroValid
+                                                                      Pagination pagination) {
     return stakeService.getTopDelegators(pagination.toPageable());
   }
 
