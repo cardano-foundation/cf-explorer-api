@@ -337,14 +337,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       balance = getBalanceInRangePreviousToday(stakeAddress, to, maxDateAgg.get());
     }
 
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTxBalanceRepository.countRecord(
-          stakeAddress, Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      );
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
-    }
-
     return new StakeAnalyticBalanceResponse(to, balance);
   }
 
