@@ -22,6 +22,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -100,11 +101,12 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeRewardResponse>> getRewards(
        @PathVariable @Parameter(description = "stake address view") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
        @StakeKeyLengthValid String stakeKey,
+       @RequestParam(value = "type", required = false) RewardType type,
        @RequestParam(value = "fromDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD) Date fromDate,
        @RequestParam(value = "toDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD) Date toDate,
        @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
-    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, pagination.toPageable()));
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, type, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/withdrawals")
