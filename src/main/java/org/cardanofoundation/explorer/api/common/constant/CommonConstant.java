@@ -61,6 +61,10 @@ public class CommonConstant {
 
   public static final String PREFIXED_TOKEN_FINGERPRINT = "asset";
 
+  public static final String REDIS_POOL_ACTIVATE = "POOL_ACTIVATE_";
+
+  public static final String REDIS_POOL_INACTIVATE = "POOL_INACTIVATE_";
+
 
   public static int hashCode(Object... a) {
     if (a == null) {

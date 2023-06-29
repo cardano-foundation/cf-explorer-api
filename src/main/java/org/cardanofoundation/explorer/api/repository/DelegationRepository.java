@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCountProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
@@ -63,14 +64,10 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
    * @return list of pool delegation summary information
    */
   @Query(value =
-      "SELECT ph.id AS poolId, ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee,"
-          + "ep.optimalPoolCount AS optimalPoolCount, "
-          + "pu.margin AS margin, ad.reserves AS reserves "
+      "SELECT ph.id AS poolId, ph.view AS poolView, pod.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, pu.margin AS margin "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData pod ON pod.pool.id = ph.id AND pod.id = (SELECT MAX(pod2.id) FROM PoolOfflineData pod2 WHERE pod2.pool.id = ph.id) "
           + "LEFT JOIN PoolUpdate pu ON pu.poolHash.id = ph.id AND pu.id = (SELECT MAX(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-          + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
-          + "LEFT JOIN AdaPots ad ON ad.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "WHERE ph.id IN :poolIds")
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(
       @Param("poolIds") Set<Long> poolIds);
@@ -216,4 +213,22 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "WHERE sd.addr.id = dg1.address.id "
           + "AND sd.tx.id > dg1.tx.id)")
   Integer totalLiveDelegatorsCount();
+
+  @Query(value =
+      "SELECT ph.id AS poolId, count(dg1.address.id) AS countValue "
+          + "FROM Delegation dg1 "
+          + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
+          + "WHERE ph.id IN :poolIds "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM Delegation dg2 "
+          + "WHERE dg2.address.id = dg1.address.id "
+          + "AND dg2.tx.id > dg1.tx.id) "
+          + "AND NOT EXISTS "
+          + "(SELECT TRUE "
+          + "FROM StakeDeregistration sd "
+          + "WHERE sd.addr.id = dg1.address.id "
+          + "AND sd.tx.id > dg1.tx.id) "
+          + "GROUP BY ph.id ")
+  List<PoolCountProjection> liveDelegatorsCountByPools(@Param("poolIds") Set<Long> poolIds);
 }

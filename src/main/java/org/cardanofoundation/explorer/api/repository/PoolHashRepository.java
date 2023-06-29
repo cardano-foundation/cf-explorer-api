@@ -24,13 +24,10 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   List<PoolDetailEpochProjection> findEpochByPool(@Param("poolId") Long poolId, @Param("epochNo") Set<Integer> epochNo);
 
   @Query(value =
-      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, ep.optimalPoolCount AS paramK, "
-          + "pu.margin AS margin, ad.reserves AS reserves "
+      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, pu.margin AS margin "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-          + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
-          + "LEFT JOIN AdaPots ad ON ad.epochNo = (SELECT max(e.no) FROM Epoch e) "
           + "WHERE :param IS NULL OR ph.view = :param OR po.poolName LIKE %:param% OR po.tickerName LIKE %:param% ")
   Page<PoolListProjection> findAllByPoolViewAndPoolName(@Param("param") String param, Pageable pageable);
 
@@ -47,10 +44,10 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id is NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id  = ph.id)) "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id  = ph.id) "
           + "LEFT JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-          + "LEFT JOIN EpochParam ep ON ep.epochNo = (SELECT max(e.no) FROM Epoch e) "
-          + "LEFT JOIN AdaPots ap ON ap.epochNo = (SELECT max(e.no) FROM Epoch e) "
+          + "LEFT JOIN EpochParam ep ON ep.epochNo = :epochNo "
+          + "LEFT JOIN AdaPots ap ON ap.epochNo = :epochNo "
           + "WHERE ph.view = :poolView")
-  PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolView") String poolView);
+  PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolView") String poolView, @Param("epochNo") Integer epochNo);
 
   @Query(value =
       "SELECT pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, tx.deposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "

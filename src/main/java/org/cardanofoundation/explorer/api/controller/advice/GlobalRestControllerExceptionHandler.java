@@ -5,12 +5,14 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.util.Strings;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.common.exceptions.*;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Arrays;
 
@@ -117,6 +119,26 @@ public class GlobalRestControllerExceptionHandler {
             ErrorResponse.builder()
                 .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
                 .errorMessage(e.getMessage())
+                .build());
+  }
+
+
+  @ExceptionHandler({NoContentException.class})
+  public ResponseEntity<BaseFilterResponse<?>> handleNoContent(NoContentException e) {
+    log.warn("No content");
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(new BaseFilterResponse<>());
+  }
+
+  @ExceptionHandler({MethodArgumentTypeMismatchException.class})
+  public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
+    log.warn("Argument type not valid: {}", e.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(
+            ErrorResponse.builder()
+                .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .errorMessage(e.getName() + " not valid")
                 .build());
   }
 }

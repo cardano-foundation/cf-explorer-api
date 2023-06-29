@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
 import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -20,11 +21,11 @@ import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
 
@@ -140,7 +141,7 @@ public class TokenServiceImpl implements TokenService {
   @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
-        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
     Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
@@ -165,6 +166,8 @@ public class TokenServiceImpl implements TokenService {
         .orElse(null);
 
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
+    tokenResponse.setTokenLastActivity(multiAssetRepository.getLastActivityTimeOfToken(multiAsset));
+    tokenResponse.setTokenType(getTokenType(multiAsset));
     return tokenResponse;
   }
 
@@ -179,7 +182,7 @@ public class TokenServiceImpl implements TokenService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
-        () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND)
     );
     Page<AddressTokenProjection> tokenAddresses
         = addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
@@ -204,7 +207,7 @@ public class TokenServiceImpl implements TokenService {
       throws ExecutionException, InterruptedException {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
-        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
 
     List<LocalDate> dates = getListDateAnalytic(type);
     List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
@@ -254,15 +257,6 @@ public class TokenServiceImpl implements TokenService {
       balance = getBalanceInRangeHaveToday(multiAsset, from, to, maxDateAgg.get());
     } else {
       balance = getBalanceInRangePreviousToday(multiAsset, from, to, maxDateAgg.get());
-    }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTokenRepository.countRecord(
-          multiAsset,
-          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX)));
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
     }
 
     return new TokenVolumeAnalyticsResponse(to, balance);
@@ -348,5 +342,22 @@ public class TokenServiceImpl implements TokenService {
       }
     }
     return dates;
+  }
+
+  private TokenType getTokenType(MultiAsset multiAsset) {
+    if(!multiAsset.getSupply().equals(BigInteger.ONE)){
+      return TokenType.FT;
+    } else{
+      String tsQuery = makeLikeQuery(multiAsset.getPolicy()) + " & " + makeLikeQuery(multiAsset.getNameView());
+      Long latestTxMinNFTToken = maTxMintRepository.getLatestTxMintNFTToken(tsQuery);
+      if (latestTxMinNFTToken == null || latestTxMinNFTToken == BigInteger.ZERO.longValue()) {
+        return TokenType.FT;
+      }
+      return TokenType.NFT;
+    }
+  }
+
+  private String makeLikeQuery(String value){
+    return "%\"" + value + "\"%";
   }
 }
