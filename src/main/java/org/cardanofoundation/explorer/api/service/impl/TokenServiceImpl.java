@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
 import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -165,6 +166,8 @@ public class TokenServiceImpl implements TokenService {
         .orElse(null);
 
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
+    tokenResponse.setTokenLastActivity(multiAssetRepository.getLastActivityTimeOfToken(multiAsset));
+    tokenResponse.setTokenType(getTokenType(multiAsset));
     return tokenResponse;
   }
 
@@ -339,5 +342,22 @@ public class TokenServiceImpl implements TokenService {
       }
     }
     return dates;
+  }
+
+  private TokenType getTokenType(MultiAsset multiAsset) {
+    if(!multiAsset.getSupply().equals(BigInteger.ONE)){
+      return TokenType.FT;
+    } else{
+      String tsQuery = makeLikeQuery(multiAsset.getPolicy()) + " & " + makeLikeQuery(multiAsset.getNameView());
+      Long latestTxMinNFTToken = maTxMintRepository.getLatestTxMintNFTToken(tsQuery);
+      if (latestTxMinNFTToken == null || latestTxMinNFTToken == BigInteger.ZERO.longValue()) {
+        return TokenType.FT;
+      }
+      return TokenType.NFT;
+    }
+  }
+
+  private String makeLikeQuery(String value){
+    return "%\"" + value + "\"%";
   }
 }
