@@ -1,4 +1,6 @@
-# CARDANO-EXPLORER-API
+# Iris API
+
+The Iris API provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the Iris frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/tests.yaml/badge.svg" />
@@ -7,9 +9,13 @@
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
-### Reports
-[Api-test html](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
-[Api-test allure](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+## 🧪 Test Reports
+
+To ensure the stability and reliability of this project, unit and mutation tests have been implemented. By clicking on the links below, you can access the detailed test reports and review the outcomes of the tests performed.
+
+📊 [Coverage Report](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
+
+📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/allure/)
  
 ## Getting Started
 
