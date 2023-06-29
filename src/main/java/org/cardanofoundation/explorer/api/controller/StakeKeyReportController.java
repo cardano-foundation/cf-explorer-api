@@ -99,9 +99,11 @@ public class StakeKeyReportController {
   @Operation(summary = "Get all stake key report history")
   public ResponseEntity<BaseFilterResponse<StakeKeyReportHistoryResponse>> getStakeReportHistory(
       HttpServletRequest request,
-      @ParameterObject Pageable pageable) {
+      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
     String username = request.getAttribute("username").toString();
-    return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(username, pageable));
+    return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(username, filterRequest, pageable));
   }
 
   @GetMapping(value = "/dashboard")

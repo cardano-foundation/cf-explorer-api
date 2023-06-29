@@ -15,7 +15,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 public class S3Configuration {
 
   @Bean
-  @Profile("!prod")
+  @Profile("minio")
   public AmazonS3 amazonS3Clone(
       @Value("${cloud.aws.s3.endpoint}") String serviceEndpoint,
       @Value("${cloud.aws.s3.path-style.enabled}") Boolean pathStyleAccessEnabled,
@@ -39,7 +39,7 @@ public class S3Configuration {
   }
 
   @Bean
-  @Profile("prod")
+  @Profile("s3")
   public AmazonS3 amazonS3(
       @Value("${cloud.aws.credentials.access-key}") String accessKey,
       @Value("${cloud.aws.credentials.secret-key}") String secretKey,
