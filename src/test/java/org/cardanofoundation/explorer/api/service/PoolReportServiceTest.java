@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
@@ -345,10 +346,11 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsername(any(), any())).thenReturn(
+    when(poolReportRepository.getPoolReportHistoryByFilter(any(), any(), any(), any(), any())).thenReturn(
         new PageImpl<>(List.of(poolReport)));
 
-    var response = poolReportService.list(PageRequest.of(0, 1), username);
+    var response = poolReportService
+        .list(PageRequest.of(0, 1), username, ReportHistoryFilterRequest.builder().build());
 
     Assertions.assertEquals(1, response.getTotalPages());
     Assertions.assertEquals(1, response.getTotalItems());
