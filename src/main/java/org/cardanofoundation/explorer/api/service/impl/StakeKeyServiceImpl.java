@@ -64,6 +64,19 @@ import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
@@ -133,7 +146,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       String stakeAddress = AddressUtils.checkStakeAddress(address);
       return getStake(stakeAddress);
     } catch (Exception e) {
-      throw new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND);
+      throw new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND);
     }
 
   }
@@ -144,7 +157,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     StakeAddressResponse stakeAddressResponse = new StakeAddressResponse();
     StakeAddress stakeAddress
         = stakeAddressRepository.findByView(stake).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     if (!fetchRewardDataService.checkRewardAvailable(stake)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stake);
       if (!fetchRewardResponse) {
@@ -201,7 +214,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey,
                                                                       Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     List<StakeHistoryProjection> stakeHistoryList =
         stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress);
     stakeHistoryList.addAll(
@@ -323,7 +336,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       throws ExecutionException, InterruptedException {
 
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     List<CompletableFuture<StakeAnalyticBalanceResponse>> futureStakeAnalytics = new ArrayList<>();
     List<LocalDate> dates = getListDateAnalytic(type);
@@ -472,7 +485,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   public List<BigInteger> getStakeMinMaxBalance(String stakeKey) {
     StakeAddress stake = stakeAddressRepository.findByView(stakeKey)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByStakeAddress(
         stake.getId());

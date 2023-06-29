@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.util.Strings;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.common.exceptions.*;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.http.HttpStatus;
@@ -119,6 +120,14 @@ public class GlobalRestControllerExceptionHandler {
                 .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
                 .errorMessage(e.getMessage())
                 .build());
+  }
+
+
+  @ExceptionHandler({NoContentException.class})
+  public ResponseEntity<BaseFilterResponse<?>> handleNoContent(NoContentException e) {
+    log.warn("No content");
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(new BaseFilterResponse<>());
   }
 
   @ExceptionHandler({MethodArgumentTypeMismatchException.class})

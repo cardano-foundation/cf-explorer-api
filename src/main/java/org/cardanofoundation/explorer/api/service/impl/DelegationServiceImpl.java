@@ -71,6 +71,7 @@ import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
@@ -467,7 +468,7 @@ public class DelegationServiceImpl implements DelegationService {
     BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
     List<PoolDetailEpochResponse> epochOfPools;
     PoolHash poolHash = poolHashRepository.findByView(poolView)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+        .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
     long totalElm;
     int totalPage;
@@ -543,7 +544,7 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String poolView) {
     PoolHash poolHash = poolHashRepository.findByView(poolView)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+        .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
     EpochChartResponse epochChart = new EpochChartResponse();
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
