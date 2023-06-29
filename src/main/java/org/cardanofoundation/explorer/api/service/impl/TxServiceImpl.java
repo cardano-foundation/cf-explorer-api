@@ -691,17 +691,8 @@ public class TxServiceImpl implements TxService {
         .collect(Collectors.groupingBy(
             txOutMapper::fromAddressInputOutput
         ));
-    List<TxOutResponse> uTxOOutputs = mappingProjectionToAddress(addressOutputMap);
-    List<TxOutResponse> uTxOInputs = mappingProjectionToAddress(addressInputMap);
-    UTxOResponse uTxOs = UTxOResponse.builder()
-        .inputs(uTxOInputs)
-        .outputs(uTxOOutputs)
-        .build();
-    txResponse.setUTxOs(uTxOs);
 
-    List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
-    List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
-
+    //Get metadata
     List<Long> multiAssetIdList = new ArrayList<>();
     multiAssetIdList.addAll(
         addressInputInfo.stream().map(AddressInputOutputProjection::getMultiAssetId)
@@ -712,6 +703,22 @@ public class TxServiceImpl implements TxService {
 
     Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
         getMapMetadataAndMapAsset(multiAssetIdList);
+
+    //uTxO
+    List<TxOutResponse> uTxOOutputs = mappingProjectionToAddressWithMetadata(addressOutputMap,
+        getMapMetadataAndMapAsset.getFirst(), getMapMetadataAndMapAsset.getSecond());
+    List<TxOutResponse> uTxOInputs = mappingProjectionToAddressWithMetadata(addressInputMap,
+        getMapMetadataAndMapAsset.getFirst(), getMapMetadataAndMapAsset.getSecond());
+
+    UTxOResponse uTxOs = UTxOResponse.builder()
+        .inputs(uTxOInputs)
+        .outputs(uTxOOutputs)
+        .build();
+    txResponse.setUTxOs(uTxOs);
+
+    //Summary
+    List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
+    List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
 
     List<TxOutResponse> stakeAddress =
         removeDuplicateTx(addressesInfoInput, addressesInfoOutput,
@@ -750,6 +757,11 @@ public class TxServiceImpl implements TxService {
 
     unionTxsByAddress.forEach(
         (address, txs) -> {
+          if (txs.size() == 1) {
+            txs.get(0).getTokens().forEach(token -> {
+              setMetadata(assetMetadataMap, multiAssetMap, token);
+            });
+          }
           if (txs.size() > 1) {
             BigInteger totalValue = txs.get(0).getValue().add(txs.get(1).getValue());
             txs.get(0).setValue(totalValue);
@@ -772,13 +784,7 @@ public class TxServiceImpl implements TxService {
 
                   if (!BigInteger.ZERO.equals(totalQuantity)) {
                     TxMintingResponse token = tokens.get(0);
-                    MultiAsset multiAsset = multiAssetMap.get(token.getMultiAssetId());
-                    if (!Objects.isNull(multiAsset)) {
-                      String subject = multiAsset.getPolicy() + multiAsset.getName();
-                      AssetMetadata metadata = assetMetadataMap.get(subject);
-                      token.setMetadata(assetMetadataMapper.fromAssetMetadata(metadata));
-                    }
-
+                    setMetadata(assetMetadataMap, multiAssetMap, token);
                     token.setAssetQuantity(totalQuantity);
                     tokenResponse.add(token);
                   }
@@ -793,6 +799,16 @@ public class TxServiceImpl implements TxService {
     return summary.stream()
         .sorted(Comparator.comparing(TxOutResponse::getValue))
         .collect(Collectors.toList());
+  }
+
+  private void setMetadata(Map<String, AssetMetadata> assetMetadataMap,
+      Map<Long, MultiAsset> multiAssetMap, TxMintingResponse token) {
+    MultiAsset multiAsset = multiAssetMap.get(token.getMultiAssetId());
+    if (!Objects.isNull(multiAsset)) {
+      String subject = multiAsset.getPolicy() + multiAsset.getName();
+      AssetMetadata metadata = assetMetadataMap.get(subject);
+      token.setMetadata(assetMetadataMapper.fromAssetMetadata(metadata));
+    }
   }
 
   /**
@@ -887,6 +903,28 @@ public class TxServiceImpl implements TxService {
     if (!CollectionUtils.isEmpty(poolCertificates)) {
       txResponse.setPoolCertificates(poolCertificates);
     }
+  }
+
+  /**
+   * Map data from AddressInputOutputProjection to TxOutResponse
+   *
+   * @param addressInputOutputMap address with metadata projection map
+   * @return address response
+   */
+  private List<TxOutResponse> mappingProjectionToAddressWithMetadata(
+      Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputOutputMap,
+      Map<String, AssetMetadata> assetMetadataMap, Map<Long, MultiAsset> multiAssetMap) {
+    List<TxOutResponse> uTxOs = new ArrayList<>(addressInputOutputMap.keySet());
+    for (TxOutResponse uTxO : uTxOs) {
+      List<TxMintingResponse> tokens = addressInputOutputMap.get(uTxO).stream().
+          filter(token -> Objects.nonNull(token.getAssetId())).map(
+              maTxMintMapper::fromAddressInputOutputProjection
+          ).collect(Collectors.toList());
+      tokens.addAll(getTokenInFailedTxOut(addressInputOutputMap, uTxO));
+      tokens.forEach(token -> setMetadata(assetMetadataMap, multiAssetMap, token));
+      uTxO.setTokens(tokens);
+    }
+    return uTxOs;
   }
 
   /**
@@ -1006,7 +1044,8 @@ public class TxServiceImpl implements TxService {
             LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
             LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
 
-    final LocalDateTime previousMonth = currentLocalDate.minusMonths(BigInteger.ONE.longValue());
+    final LocalDateTime previousMonth = currentLocalDate.minusMonths(BigInteger.ONE.longValue())
+        .minusDays(BigInteger.ONE.longValue());
 
     final BigInteger previousMonthInSeconds = BigInteger
         .valueOf(previousMonth.toInstant(ZoneOffset.UTC).getEpochSecond());

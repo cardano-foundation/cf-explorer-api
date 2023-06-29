@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
@@ -819,7 +820,7 @@ class PoolLifecycleServiceTest {
     String poolView = "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s";
     when(poolUpdateRepository.countPoolUpdateByPool(poolView)).thenReturn(0);
     when(poolHashRepository.findByView(poolView)).thenReturn(Optional.empty());
-    BusinessException exception = assertThrows(BusinessException.class, () -> {
+    NoContentException exception = assertThrows(NoContentException.class, () -> {
       poolLifecycleService.poolLifecycleStatus(poolView);
     });
     Assertions.assertEquals(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode(), exception.getErrorCode());

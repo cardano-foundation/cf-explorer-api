@@ -13,10 +13,12 @@ import java.util.Optional;
 
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -89,7 +91,7 @@ public class StakeKeyReportServiceTest {
         .build();
     String username = "username";
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.empty());
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyReportService.generateStakeKeyReport(request, username));
   }
 
@@ -181,12 +183,13 @@ public class StakeKeyReportServiceTest {
         .createdAt(new Timestamp(Instant.now().minus(Duration.ofDays(8)).toEpochMilli()))
         .build();
 
-    when(stakeKeyReportHistoryRepository.findByUsername(anyString(), any(Pageable.class)))
+    when(stakeKeyReportHistoryRepository.getStakeKeyReportHistoryByFilter(any(), any(), any(), any(), any()))
         .thenReturn(new PageImpl<>(List.of(stakeKeyReportHistory)));
     when(stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory))
         .thenReturn(stakeKeyReportHistoryResponse);
 
-    var response = stakeKeyReportService.getStakeKeyReportHistory(username, pageable);
+    var response = stakeKeyReportService
+        .getStakeKeyReportHistory(username, ReportHistoryFilterRequest.builder().build(), pageable);
     Assertions.assertEquals(1, response.getTotalPages());
     Assertions.assertEquals(1, response.getTotalItems());
     Assertions.assertEquals(0, response.getCurrentPage());
@@ -258,7 +261,7 @@ public class StakeKeyReportServiceTest {
     String username = "username";
     ExportType exportType = ExportType.EXCEL;
     when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyReportService.exportStakeKeyReport(reportId, username,
             exportType));
   }
@@ -274,7 +277,7 @@ public class StakeKeyReportServiceTest {
                 .username("otherUsername")
                 .build())
             .build()));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyReportService.exportStakeKeyReport(reportId, username,
             exportType));
   }

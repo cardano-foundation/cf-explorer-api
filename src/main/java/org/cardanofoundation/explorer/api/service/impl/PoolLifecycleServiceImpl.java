@@ -3,7 +3,6 @@ package org.cardanofoundation.explorer.api.service.impl;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +40,7 @@ import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
@@ -171,10 +170,6 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setRewardAccounts(poolUpdateRepository.findRewardAccountByPoolId(projection.getId()));
       Integer epochNo = epochRepository.findCurrentEpochNo().orElse(null);
       if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
-        Set<String> poolIdList = new HashSet<>(Collections.singletonList(poolView));
-        if (Boolean.FALSE.equals(fetchRewardDataService.checkPoolInfoForPool(poolIdList))) {
-          fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
-        }
         res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
         Boolean isReward = fetchRewardDataService.checkRewardForPool(res.getRewardAccounts());
         if (Boolean.FALSE.equals(isReward)) {
@@ -335,7 +330,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       response.setIsRegistration(true);
       response.setIsUpdate(true);
     }
-    PoolHash pool = poolHashRepository.findByView(poolView).orElseThrow(() -> new BusinessException(
+    PoolHash pool = poolHashRepository.findByView(poolView).orElseThrow(() -> new NoContentException(
         CommonErrorCode.UNKNOWN_ERROR));
     if (fetchRewardDataService.isKoiOs()) {
       List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);

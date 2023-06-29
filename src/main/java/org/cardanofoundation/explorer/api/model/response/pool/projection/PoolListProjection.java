@@ -15,9 +15,5 @@ public interface PoolListProjection {
 
   BigInteger getFee();
 
-  Integer getParamK();
-
   Double getMargin();
-
-  BigInteger getReserves();
 }
