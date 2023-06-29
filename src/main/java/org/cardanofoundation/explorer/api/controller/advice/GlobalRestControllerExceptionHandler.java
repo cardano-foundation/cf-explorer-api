@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Arrays;
 
@@ -121,10 +122,23 @@ public class GlobalRestControllerExceptionHandler {
                 .build());
   }
 
+
   @ExceptionHandler({NoContentException.class})
   public ResponseEntity<BaseFilterResponse<?>> handleNoContent(NoContentException e) {
     log.warn("No content");
     return ResponseEntity.status(HttpStatus.OK)
         .body(new BaseFilterResponse<>());
+  }
+
+  @ExceptionHandler({MethodArgumentTypeMismatchException.class})
+  public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
+    log.warn("Argument type not valid: {}", e.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(
+            ErrorResponse.builder()
+                .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .errorMessage(e.getName() + " not valid")
+                .build());
   }
 }

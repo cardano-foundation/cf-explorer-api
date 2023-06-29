@@ -38,10 +38,12 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -161,7 +163,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
 
   @Override
   public BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey, Date fromDate,
-      Date toDate, Pageable pageable) {
+                                                                 Date toDate, RewardType type, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
@@ -180,7 +182,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
       toTime = Timestamp.from(toDate.toInstant());
     }
     var response
-        = rewardRepository.findRewardByStake(stakeAddress, fromTime, toTime, pageable);
+        = rewardRepository.findRewardByStake(stakeAddress, fromTime, toTime, type, pageable);
     return new BaseFilterResponse<>(response);
   }
 

@@ -1,9 +1,25 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
@@ -16,14 +32,33 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.*;
+import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStake;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.repository.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.AggregateAddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.DelegationRepository;
+import org.cardanofoundation.explorer.api.repository.EpochRepository;
+import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
+import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
+import org.cardanofoundation.explorer.api.repository.ReserveRepository;
+import org.cardanofoundation.explorer.api.repository.RewardRepository;
+import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.TreasuryRepository;
+import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
@@ -42,6 +77,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -190,6 +228,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), stakeHistoryList.size());
+    if (start >= stakeHistoryList.size()) {
+      return new BaseFilterResponse<>(new PageImpl<>(List.of()));
+    }
     Page<StakeHistoryProjection> page = new PageImpl<>(stakeHistoryList.subList(start, end),
         pageable, stakeHistoryList.size());
     return new BaseFilterResponse<>(page);
@@ -219,6 +260,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), instantaneousRewards.size());
+
+    if (start >= instantaneousRewards.size()) {
+      return new BaseFilterResponse<>(new PageImpl<>(List.of()));
+    }
+
     Page<StakeInstantaneousRewardsProjection> page = new PageImpl<>(
         instantaneousRewards.subList(start, end), pageable, instantaneousRewards.size());
     return new BaseFilterResponse<>(page);
@@ -264,20 +310,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
-    BigInteger activeStake = null;
-    BigInteger liveStake = null;
+    BigInteger activeStake;
+    BigInteger liveStake;
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
-      if (!poolIds.isEmpty()) {
-        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIds);
-        if (Boolean.TRUE.equals(isFetch)) {
-          activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
-          liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
-        }
-      } else {
-        activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
-        liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
-      }
+      activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
+      liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
     } else {
       Object activeStakeObj = redisTemplate.opsForValue()
           .get(CommonConstant.REDIS_TOTAL_ACTIVATE_STAKE + network + "_" + currentEpoch);
@@ -334,14 +371,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       balance = getBalanceInRangeHaveToday(stakeAddress, to, maxDateAgg.get());
     } else {
       balance = getBalanceInRangePreviousToday(stakeAddress, to, maxDateAgg.get());
-    }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTxBalanceRepository.countRecord(
-          stakeAddress, Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      );
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
     }
 
     return new StakeAnalyticBalanceResponse(to, balance);

@@ -193,14 +193,6 @@ public class AddressServiceImpl implements AddressService {
       balance = getBalanceInRangePreviousToday(address, to, maxDateAgg.get());
     }
 
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTxBalanceRepository.countRecord(
-          address, Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      );
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
-    }
-
     return new AddressAnalyticsResponse(to, balance);
   }
 
