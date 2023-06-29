@@ -4,6 +4,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.mapper.StakeKeyReportMapper;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -46,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
+  public static final String MIN_TIME = "1970-01-01 00:00:00";
   private final StakeKeyLifeCycleService stakeKeyLifeCycleService;
   private final StakeKeyReportHistoryRepository stakeKeyReportHistoryRepository;
   private final RewardRepository rewardRepository;
@@ -64,7 +66,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Transactional
-  public StakeKeyReportHistory save(StakeKeyReportRequest stakeKeyReportRequest, String username){
+  public StakeKeyReportHistory save(StakeKeyReportRequest stakeKeyReportRequest, String username) {
     stakeAddressRepository.findByView(stakeKeyReportRequest.getStakeKey())
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
@@ -84,20 +86,30 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
   @Override
   public BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(String username,
+                                                                                    ReportHistoryFilterRequest filterRequest,
                                                                                     Pageable pageable) {
     Timestamp timestamp = new Timestamp(Instant.now().minus(Duration.ofDays(7)).toEpochMilli());
+    String reportName = DataUtil.makeLikeQuery(filterRequest.getReportName());
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+    Timestamp toDate = Timestamp.from(Instant.now());
+    if (!DataUtil.isNullOrEmpty(filterRequest.getFromDate())) {
+      fromDate = Timestamp.from(filterRequest.getFromDate().toInstant());
+    }
+    if (!DataUtil.isNullOrEmpty(filterRequest.getToDate())) {
+      toDate = Timestamp.from(filterRequest.getToDate().toInstant());
+    }
 
-    Page<StakeKeyReportHistoryResponse> stakeKeyReportHistoriesResponse =
-        stakeKeyReportHistoryRepository.findByUsername(username, pageable)
-            .map(stakeKeyReportHistory -> {
-              StakeKeyReportHistoryResponse response = stakeKeyReportMapper
-                  .toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
+    Page<StakeKeyReportHistoryResponse> stakeKeyReportHistoriesResponse = stakeKeyReportHistoryRepository
+        .getStakeKeyReportHistoryByFilter(reportName, fromDate, toDate, username, pageable)
+        .map(stakeKeyReportHistory -> {
+          StakeKeyReportHistoryResponse response = stakeKeyReportMapper
+              .toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
 
-              if(response.getCreatedAt().before(timestamp)) {
-                response.setStatus(ReportStatus.EXPIRED);
-              }
-              return response;
-            });
+          if (response.getCreatedAt().before(timestamp)) {
+            response.setStatus(ReportStatus.EXPIRED);
+          }
+          return response;
+        });
 
     return new BaseFilterResponse<>(stakeKeyReportHistoriesResponse);
   }
@@ -238,9 +250,11 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private String generateReportName(StakeKeyReportHistory stakeKeyReportHistory) {
     String dateTimePattern = "yyyyMMdd";
     return "report_stake_" + stakeKeyReportHistory.getStakeKey() + "_" +
-        DataUtil.localDateTimeToString(stakeKeyReportHistory.getFromDate().toLocalDateTime(), dateTimePattern)
+        DataUtil.localDateTimeToString(stakeKeyReportHistory.getFromDate().toLocalDateTime(),
+                                       dateTimePattern)
         + "_" +
-        DataUtil.localDateTimeToString(stakeKeyReportHistory.getFromDate().toLocalDateTime(), dateTimePattern);
+        DataUtil.localDateTimeToString(stakeKeyReportHistory.getFromDate().toLocalDateTime(),
+                                       dateTimePattern);
   }
 
   private void fetchReward(String stakeKey) {

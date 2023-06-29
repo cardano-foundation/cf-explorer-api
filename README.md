@@ -48,7 +48,8 @@
 - `S3_REGION`: the AWS region
 - `S3_BUCKET_NAME`: the AWS bucket
 - `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
-  
+- `PATH_STYLE_ENABLED`: 
+
 - `LOG_PATH`: the path to store log files
 
 - `PRIVATE_MVN_REGISTRY_URL`: the url of private maven registry
