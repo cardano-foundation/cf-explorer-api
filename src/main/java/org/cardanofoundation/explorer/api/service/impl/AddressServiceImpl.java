@@ -96,7 +96,7 @@ public class AddressServiceImpl implements AddressService {
         Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
     );
     if(!checkNetworkAddress(address)) {
-      throw new NoContentException(BusinessCode.ADDRESS_NOT_FOUND);
+      throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
     addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
@@ -372,7 +372,7 @@ public class AddressServiceImpl implements AddressService {
                                             .getScriptHash());
       if(policyId.equals(hash)){
         Address address = addressRepository.findFirstByAddress(scriptVerifyRequest.getAddress())
-            .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
         address.setVerifiedContract(Boolean.TRUE);
         addressRepository.save(address);
         return Boolean.TRUE;
@@ -387,7 +387,7 @@ public class AddressServiceImpl implements AddressService {
   @Override
   public String getJsonNativeScript(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     if(Boolean.FALSE.equals(addr.getVerifiedContract())){
@@ -397,7 +397,7 @@ public class AddressServiceImpl implements AddressService {
     ShelleyAddress shelleyAddress = new ShelleyAddress(addr.getAddress());
     String policyId = shelleyAddress.getHexPaymentPart();
     Script script = scriptRepository.findByHash(policyId).orElseThrow(
-        () -> new NoContentException(BusinessCode.SCRIPT_NOT_FOUND)
+        () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
     );
 
     if(Objects.isNull(script.getJson())){

@@ -91,7 +91,7 @@ public class StakeKeyReportServiceTest {
         .build();
     String username = "username";
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.empty());
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyReportService.generateStakeKeyReport(request, username));
   }
 
@@ -261,7 +261,7 @@ public class StakeKeyReportServiceTest {
     String username = "username";
     ExportType exportType = ExportType.EXCEL;
     when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyReportService.exportStakeKeyReport(reportId, username,
             exportType));
   }
@@ -277,7 +277,7 @@ public class StakeKeyReportServiceTest {
                 .username("otherUsername")
                 .build())
             .build()));
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyReportService.exportStakeKeyReport(reportId, username,
             exportType));
   }

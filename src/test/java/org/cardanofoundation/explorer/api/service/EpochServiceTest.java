@@ -283,7 +283,7 @@ class EpochServiceTest {
         .status(EpochStatus.IN_PROGRESS)
         .build();
 
-    Assertions.assertThrows(NoContentException.class, () ->
+    Assertions.assertThrows(BusinessException.class, () ->
         epochService.getEpochDetail(UUID.randomUUID().toString()));
   }
 
@@ -314,7 +314,7 @@ class EpochServiceTest {
         .status(EpochStatus.IN_PROGRESS)
         .build();
 
-    Assertions.assertThrows(NoContentException.class, () -> epochService.getEpochDetail("0"));
+    Assertions.assertThrows(BusinessException.class, () -> epochService.getEpochDetail("0"));
   }
 
 }

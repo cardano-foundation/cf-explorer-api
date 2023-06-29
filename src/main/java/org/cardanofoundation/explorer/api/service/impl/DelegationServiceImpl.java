@@ -544,7 +544,7 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String poolView) {
     PoolHash poolHash = poolHashRepository.findByView(poolView)
-        .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
     EpochChartResponse epochChart = new EpochChartResponse();
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();

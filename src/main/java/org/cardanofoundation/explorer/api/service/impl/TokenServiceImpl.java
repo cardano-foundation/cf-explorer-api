@@ -21,6 +21,7 @@ import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
@@ -141,7 +142,7 @@ public class TokenServiceImpl implements TokenService {
   @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
-        .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
+        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
     Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));

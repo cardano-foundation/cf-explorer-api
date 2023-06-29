@@ -71,7 +71,7 @@ public class PoolReportServiceTest {
         .build();
     String username = "username";
     when(poolHashRepository.findByView(anyString())).thenReturn(Optional.empty());
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
                             () -> poolReportService.create(request, username));
   }
 
