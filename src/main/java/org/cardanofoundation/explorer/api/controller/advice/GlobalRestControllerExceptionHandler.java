@@ -98,7 +98,7 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({ConstraintViolationException.class})
   public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
-    log.warn("constraint not valid: ", e);
+    log.warn("constraint not valid: {}", e.getMessage());
 
     String[] errors = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).filter(Strings::isNotBlank).toArray(String[]::new);
 
@@ -112,7 +112,7 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({IllegalArgumentException.class})
   public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-    log.warn("argument not valid: ", e);
+    log.warn("argument not valid: {}", e.getMessage());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
@@ -139,6 +139,6 @@ public class GlobalRestControllerExceptionHandler {
             ErrorResponse.builder()
                 .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
                 .errorMessage(e.getName() + " not valid")
-                .build());
+                 .build());
   }
 }
