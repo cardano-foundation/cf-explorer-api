@@ -157,7 +157,7 @@ public class TokenServiceImpl implements TokenService {
 
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
     tokenResponse.setTokenLastActivity(multiAssetRepository.getLastActivityTimeOfToken(multiAsset));
-    tokenResponse.setTokenType(getTokenType(multiAsset));
+    setTxMetadataJson(tokenResponse, multiAsset);
     return tokenResponse;
   }
 
@@ -343,20 +343,22 @@ public class TokenServiceImpl implements TokenService {
     return dates;
   }
 
-  private TokenType getTokenType(MultiAsset multiAsset) {
+  private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
     if(!multiAsset.getSupply().equals(BigInteger.ONE)){
-      return TokenType.FT;
+      tokenResponse.setTokenType(TokenType.FT);
     } else{
-      String tsQuery = makeLikeQuery(multiAsset.getPolicy()) + " & " + makeLikeQuery(multiAsset.getNameView());
-      Long latestTxMinNFTToken = maTxMintRepository.getLatestTxMintNFTToken(tsQuery);
-      if (latestTxMinNFTToken == null || latestTxMinNFTToken == BigInteger.ZERO.longValue()) {
-        return TokenType.FT;
+      String tsQuery = makeQuery(multiAsset.getPolicy()) + " & " + makeQuery(multiAsset.getNameView());
+      String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(tsQuery);
+      if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
+        tokenResponse.setTokenType(TokenType.FT);
+      } else{
+        tokenResponse.setTokenType(TokenType.NFT);
+        tokenResponse.setMetadataJson(txMetadataNFTToken);
       }
-      return TokenType.NFT;
     }
   }
 
-  private String makeLikeQuery(String value){
-    return "%\"" + value + "\"%";
+  private String makeQuery(String value){
+    return "\"" + value + "\"";
   }
 }
