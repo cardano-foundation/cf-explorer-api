@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -282,7 +283,7 @@ class EpochServiceTest {
         .status(EpochStatus.IN_PROGRESS)
         .build();
 
-    Assertions.assertThrows(BusinessException.class, () ->
+    Assertions.assertThrows(NoContentException.class, () ->
         epochService.getEpochDetail(UUID.randomUUID().toString()));
   }
 
@@ -313,7 +314,7 @@ class EpochServiceTest {
         .status(EpochStatus.IN_PROGRESS)
         .build();
 
-    Assertions.assertThrows(BusinessException.class, () -> epochService.getEpochDetail("0"));
+    Assertions.assertThrows(NoContentException.class, () -> epochService.getEpochDetail("0"));
   }
 
 }

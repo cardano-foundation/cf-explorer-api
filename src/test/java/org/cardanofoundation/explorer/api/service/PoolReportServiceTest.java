@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
@@ -15,6 +16,7 @@ import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -69,7 +71,7 @@ public class PoolReportServiceTest {
         .build();
     String username = "username";
     when(poolHashRepository.findByView(anyString())).thenReturn(Optional.empty());
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
                             () -> poolReportService.create(request, username));
   }
 
@@ -345,10 +347,11 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsername(any(), any())).thenReturn(
+    when(poolReportRepository.getPoolReportHistoryByFilter(any(), any(), any(), any(), any())).thenReturn(
         new PageImpl<>(List.of(poolReport)));
 
-    var response = poolReportService.list(PageRequest.of(0, 1), username);
+    var response = poolReportService
+        .list(PageRequest.of(0, 1), username, ReportHistoryFilterRequest.builder().build());
 
     Assertions.assertEquals(1, response.getTotalPages());
     Assertions.assertEquals(1, response.getTotalItems());

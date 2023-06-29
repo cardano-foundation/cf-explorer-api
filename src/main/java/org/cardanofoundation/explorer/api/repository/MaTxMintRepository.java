@@ -22,4 +22,10 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
   @EntityGraph(attributePaths = {MaTxMint_.TX, "tx.block"})
   Page<MaTxMint> findByIdent(@Param("tokenId") String tokenId, Pageable pageable);
 
+
+  @Query(value = "SELECT max(mtm.id) from tx_metadata tm "
+      + "left join ma_tx_mint mtm on mtm.tx_id = tm.tx_id "
+      + "WHERE tm.key = 721 "
+      + "AND tm.ts_json @@ to_tsquery(:tsQuery)", nativeQuery = true)
+  Long getLatestTxMintNFTToken(@Param("tsQuery") String tsQuery);
 }

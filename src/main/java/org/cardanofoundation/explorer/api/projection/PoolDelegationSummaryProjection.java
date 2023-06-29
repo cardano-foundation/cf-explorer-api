@@ -14,9 +14,5 @@ public interface PoolDelegationSummaryProjection {
 
   BigInteger getFee();
 
-  Integer getOptimalPoolCount();
-
   Double getMargin();
-
-  BigInteger getReserves();
 }

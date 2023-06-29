@@ -18,4 +18,6 @@ public interface StakeDelegationProjection {
   String getPoolId();
   String getTickerName();
   String getPoolData();
+  String getLogoUrl();
+  String getIconUrl();
 }

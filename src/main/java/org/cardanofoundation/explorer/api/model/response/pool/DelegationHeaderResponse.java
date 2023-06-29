@@ -20,4 +20,8 @@ public class DelegationHeaderResponse implements Serializable {
   private BigInteger liveStake;
 
   private Integer delegators;
+
+  private Integer activePools;
+
+  private Integer retiredPools;
 }

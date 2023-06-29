@@ -4,15 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
-import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
@@ -25,7 +22,6 @@ import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyRe
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
@@ -88,13 +84,13 @@ class StakeKeyReportControllerTest {
   @Test
   void shouldGenerateStakeKeyReport() throws Exception {
     String username = "username";
-    Timestamp fromDate = Timestamp.valueOf("2021-01-01 00:00:00");
-    Timestamp toDate = new Timestamp(System.currentTimeMillis());
+    Timestamp fromDateTimestamp = Timestamp.valueOf("2021-01-01 00:00:00");
+    Timestamp toDateTimestamp = Timestamp.valueOf("2021-02-01 00:00:00");
 
     StakeKeyReportHistoryResponse responseExpect = StakeKeyReportHistoryResponse.builder()
         .stakeKey("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")
-        .fromDate(fromDate)
-        .toDate(toDate)
+        .fromDate(fromDateTimestamp)
+        .toDate(toDateTimestamp)
         .isADATransfer(Boolean.TRUE)
         .eventRegistration(Boolean.TRUE)
         .status(ReportStatus.IN_PROGRESS)
@@ -107,10 +103,7 @@ class StakeKeyReportControllerTest {
 
     mockMvc.perform(post(END_POINT + "/stake-key")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(asJsonString(StakeKeyReportRequest.builder()
-                .fromDate(fromDate)
-                .toDate(toDate)
-                .build()))
+            .content(asJsonString(Map.of("fromDate", "2021/01/01 00:00:00", "toDate", "2021/02/01 00:00:00")))
             .with(request -> {
               request.setAttribute("username", username);
               return request;
@@ -208,19 +201,23 @@ class StakeKeyReportControllerTest {
   void shouldGetAllStakeKeyReportHistories() throws Exception {
     Long reportId = 1L;
     String username = "username";
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+
     StakeKeyReportHistoryResponse stakeKeyReportHistoryResponse = getStakeKeyReportHistoryResponse(
         reportId, username);
 
     List<StakeKeyReportHistoryResponse> responseList = Collections.singletonList(
         stakeKeyReportHistoryResponse);
 
-    BDDMockito.given(stakeKeyReportService.getStakeKeyReportHistory(username,
-            PageRequest.of(0, 1)))
+    given(stakeKeyReportService.getStakeKeyReportHistory(any(), any(), any()))
         .willReturn(new BaseFilterResponse<>(responseList, 1, 1, 0));
 
     mockMvc.perform(get(END_POINT + "/stake-key/history")
             .param("page", "0")
             .param("size", "1")
+            .param("fromDate", "2020/01/01")
+            .param("toDate", "2021/01/01")
+            .param("reportName", "")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
               request.setAttribute("username", username);
