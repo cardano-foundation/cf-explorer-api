@@ -43,6 +43,10 @@
 - `S3_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
 - `KAFKA_BOOTSTRAP_SERVER`: Kafka bootstrap server. Default is kafka:9092.
 - `KAFKA_REPORTS_TOPIC`: Kafka reports topic. Default is dev.explorer.api.mainnet.reports
+- `API_NEWS_URL`: URL for get news data.
+- `API_NEWS_CACHE_TIME`: Cache time for news data. Default is 120s.
+- `API_MARKET_URL`: URL for get market data. Default is `https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s`
+- `API_MARKET_CACHE_TIME` : Cache time for market data. Default is 120s.
 
 ### We have 3 options for redis cache:
 - `redis standalone`
