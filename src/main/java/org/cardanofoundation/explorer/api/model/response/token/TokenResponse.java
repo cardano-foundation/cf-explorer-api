@@ -24,4 +24,5 @@ public class TokenResponse {
   private TokenMetadataResponse metadata;
   private Timestamp tokenLastActivity;
   private TokenType tokenType;
+  private String metadataJson;
 }
