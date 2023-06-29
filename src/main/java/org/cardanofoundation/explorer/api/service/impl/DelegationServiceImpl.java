@@ -307,7 +307,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
     List<PoolResponse> response;
     Integer currentEpoch = epochRepository.findCurrentEpochNo()
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+        .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
     Set<String> poolViewsTop;
     List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
     List<PoolAmountProjection> poolAmountProjections = new ArrayList<>();
@@ -601,7 +601,7 @@ public class DelegationServiceImpl implements DelegationService {
     if (!addressIdPage.isEmpty()) {
       Set<Long> addressIds = addressIdPage.stream().collect(Collectors.toSet());
       Integer currentEpoch = epochRepository.findCurrentEpochNo()
-          .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+          .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
       List<PoolDetailDelegatorProjection> delegatorPage = delegationRepository.getDelegatorsByAddress(
           addressIds);
       List<PoolDetailDelegatorResponse> delegatorList = delegatorPage.stream()
