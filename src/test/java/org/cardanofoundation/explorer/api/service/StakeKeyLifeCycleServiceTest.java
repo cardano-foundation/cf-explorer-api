@@ -93,7 +93,7 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeDeRegistrations("stake1notfound", condition,
             pageable));
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegationDetail("stake1notfound",
             "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2"));
     Assertions.assertThrows(NoContentException.class,
@@ -102,7 +102,7 @@ class StakeKeyLifeCycleServiceTest {
         () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", fromDate, toDate, null , pageable));
     Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawals("stake1notfound", request, pageable));
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawalDetail("stake1notfound",
             "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2"));
     Assertions.assertThrows(NoContentException.class,
@@ -259,7 +259,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(delegationRepository.findDelegationByAddressAndTx(any(), any()))
         .thenReturn(Optional.empty());
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegationDetail("stake1notfound",
             "txHashNotFound"));
   }
@@ -374,7 +374,7 @@ class StakeKeyLifeCycleServiceTest {
     when(withdrawalRepository.getWithdrawalByAddressAndTx(any(), any()))
         .thenReturn(Optional.empty());
     when(fetchRewardDataService.checkRewardAvailable(any())).thenReturn(true);
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawalDetail("stake1notfound",
             "txHashNotFound"));
   }
