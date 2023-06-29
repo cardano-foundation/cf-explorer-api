@@ -2,8 +2,10 @@ package org.cardanofoundation.explorer.api.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
@@ -51,11 +53,12 @@ public class PoolReportController {
 
   @GetMapping("list")
   public ResponseEntity<BaseFilterResponse<PoolReportListResponse>> listPoolReport(
-      @ParameterObject @PageableDefault(size = 10, page = 0, sort = {"id"},
-          direction = Sort.Direction.DESC) Pageable pageable,
-      HttpServletRequest request) {
+      HttpServletRequest request,
+      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
+      @ParameterObject @PageableDefault(size = 20, value = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
     String username = request.getAttribute("username").toString();
-    return ResponseEntity.ok(poolReportService.list(pageable, username));
+    return ResponseEntity.ok(poolReportService.list(pageable, username, filterRequest));
   }
 
   @GetMapping("detail/{reportId}/epoch-size")
