@@ -30,10 +30,10 @@ public class AddressUtils {
           stakeAddress = stakeShelley.getAddress();
         }
       } else if(!AddressUtil.isValidAddress(address)) {
-        throw new NoContentException(BusinessCode.ADDRESS_NOT_FOUND);
+        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
       }
     } catch (Exception e) {
-      throw new NoContentException(BusinessCode.ADDRESS_NOT_FOUND);
+      throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
     }
     return stakeAddress;
   }

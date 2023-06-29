@@ -39,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
@@ -69,7 +70,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   @Override
   public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     return StakeLifecycleResponse.builder()
         .hasRegistration(stakeRegistrationRepository.existsByAddr(stakeAddress))
         .hasDeRegistration(stakeDeRegistrationRepository.existsByAddr(stakeAddress))
@@ -143,9 +144,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   @Override
   public StakeDelegationDetailResponse getStakeDelegationDetail(String stakeKey, String hash) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     var delegation = delegationRepository.findDelegationByAddressAndTx(stakeAddress, hash)
-        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_DELEGATION_NOT_FOUND));
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_DELEGATION_NOT_FOUND));
     var totalBalance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(stakeAddress,
         delegation.getTime()).orElse(BigInteger.ZERO);
     return StakeDelegationDetailResponse.builder()
@@ -220,7 +221,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   @Override
   public StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
       if (!fetchRewardResponse) {
@@ -228,7 +229,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
       }
     }
     var withdrawal = withdrawalRepository.getWithdrawalByAddressAndTx(stakeAddress, hash)
-        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
     var totalBalance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(stakeAddress,
         withdrawal.getTime()).orElse(BigInteger.ZERO);
     var totalReward = rewardRepository.getAvailableRewardByStakeAddressAndEpoch(stakeAddress,

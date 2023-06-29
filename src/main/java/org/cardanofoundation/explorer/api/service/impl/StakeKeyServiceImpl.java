@@ -146,7 +146,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       String stakeAddress = AddressUtils.checkStakeAddress(address);
       return getStake(stakeAddress);
     } catch (Exception e) {
-      throw new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND);
+      throw new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND);
     }
 
   }
@@ -157,7 +157,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     StakeAddressResponse stakeAddressResponse = new StakeAddressResponse();
     StakeAddress stakeAddress
         = stakeAddressRepository.findByView(stake).orElseThrow(
-        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     if (!fetchRewardDataService.checkRewardAvailable(stake)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stake);
       if (!fetchRewardResponse) {
