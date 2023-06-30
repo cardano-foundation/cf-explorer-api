@@ -1,1 +1,0 @@
-{"timestamp":"2023/06/30 07:11:50","status":404,"error":"Not Found","path":"/api/v1/delegations/pool-detail-header/"}
