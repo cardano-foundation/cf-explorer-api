@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
@@ -41,6 +42,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl.MIN_TIME;
 
 @Service
 @RequiredArgsConstructor
@@ -104,11 +107,21 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
-  public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username) {
+  public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username, ReportHistoryFilterRequest filterRequest) {
 
     Timestamp timeAt7DayAgo = new Timestamp(Instant.now().minus(Duration.ofDays(7)).toEpochMilli());
-    Page<PoolReportHistory> poolReportPage = poolReportRepository.findByUsername(username,
-                                                                                 pageable);
+    String reportName = DataUtil.makeLikeQuery(filterRequest.getReportName());
+    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+    Timestamp toDate = Timestamp.from(Instant.now());
+    if (!DataUtil.isNullOrEmpty(filterRequest.getFromDate())) {
+      fromDate = Timestamp.from(filterRequest.getFromDate().toInstant());
+    }
+    if (!DataUtil.isNullOrEmpty(filterRequest.getToDate())) {
+      toDate = Timestamp.from(filterRequest.getToDate().toInstant());
+    }
+
+    Page<PoolReportHistory> poolReportPage = poolReportRepository
+        .getPoolReportHistoryByFilter(reportName, fromDate, toDate, username, pageable);
     List<PoolReportHistory> poolReports = poolReportPage.getContent();
     List<PoolReportListResponse> poolReportListResponses = poolReports.stream()
         .map(poolReportHistory -> {
