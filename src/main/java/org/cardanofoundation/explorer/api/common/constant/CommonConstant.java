@@ -43,7 +43,12 @@ public class CommonConstant {
 
   public static final String REDIS_TOTAL_ACTIVATE_STAKE = "TOTAL_ACTIVATE_STAKE_";
 
+  public static final String REDIS_POOL_ACTIVATE = "POOL_ACTIVATE_";
+
+  public static final String REDIS_POOL_INACTIVATE = "POOL_INACTIVATE_";
+
   public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
+
 
 
   public static int hashCode(Object... a) {
