@@ -1,1 +1,0 @@
-{"timestamp":"2023/06/29 14:46:40","status":400,"error":"Bad Request","path":"/api/v1/tokens//txs"}
