@@ -123,7 +123,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       @Param("stakeKey") StakeAddress stakeKey, @Param("txHash") String txHash);
 
   @Query("SELECT poolHash.view as poolId, poolOfflineData.poolName as poolData,"
-      + " poolOfflineData.tickerName as tickerName"
+      + " poolOfflineData.tickerName as tickerName, poolOfflineData.logoUrl as logoUrl, poolOfflineData.iconUrl as iconUrl "
       + " FROM Delegation delegation"
       + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
       + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.id ="
