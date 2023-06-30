@@ -44,4 +44,13 @@ public class PoolResponse implements Serializable {
   private Integer kParam;
 
   private BigInteger reserves;
+
+  private Integer numberDelegators;
+
+  private Integer epochBlock;
+
+  private Integer lifetimeBlock;
+
+  @JsonSerialize(using = PercentSerializer.class)
+  private Double lifetimeRos;
 }
