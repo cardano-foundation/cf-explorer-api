@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -72,6 +71,7 @@ import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
@@ -167,6 +167,10 @@ public class DelegationServiceImpl implements DelegationService {
     if (!fetchRewardDataService.checkAdaPots(epochNo)) {
       fetchRewardDataService.fetchAdaPots(List.of(epochNo));
     }
+    Object poolActiveObj = redisTemplate.opsForValue()
+        .get(CommonConstant.REDIS_POOL_ACTIVATE + network);
+    Object poolInActiveObj = redisTemplate.opsForValue()
+        .get(CommonConstant.REDIS_POOL_INACTIVATE + network);
     Timestamp startTime = epoch.getStartTime();
     Long slot = (Instant.now().toEpochMilli() - startTime.getTime()) / MILLI;
     long countDownTime =
@@ -176,10 +180,6 @@ public class DelegationServiceImpl implements DelegationService {
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
       log.info("using koiOs flow...");
-      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
-      if (!poolIds.isEmpty()) {
-        fetchRewardDataService.fetchPoolInfoForPool(poolIds);
-      }
       liveStake = poolInfoRepository.getTotalLiveStake(epochNo);
     } else {
       log.info("using base flow...");
@@ -188,9 +188,13 @@ public class DelegationServiceImpl implements DelegationService {
       liveStake = Objects.nonNull(liveStakeObj) ? new BigInteger(String.valueOf(liveStakeObj))
           : BigInteger.ZERO;
     }
-    Integer delegators = delegationRepository.totalLiveDelegatorsCount();
+    Object delegatorCached = redisTemplate.opsForValue()
+        .get(CommonConstant.REDIS_TOTAL_DELEGATOR + network);
+    Integer delegators = Objects.nonNull(delegatorCached) ? Integer.parseInt(String.valueOf(delegatorCached)) : 0;
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
+        .activePools(Objects.nonNull(poolActiveObj) ? (Integer)poolActiveObj : CommonConstant.ZERO)
+        .retiredPools(Objects.nonNull(poolInActiveObj) ? (Integer)poolInActiveObj  : CommonConstant.ZERO)
         .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
         .build();
   }
@@ -240,7 +244,6 @@ public class DelegationServiceImpl implements DelegationService {
             PoolCountProjection::getCountValue));
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
-      handleFetchPoolInfo(poolIdList);
       setPoolInfoKoiOs(poolList, epochNo, poolIdList, numberDelegatorsMap, blockLifetimesMap,
           blockEpochsMap);
       Boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolIdList);
@@ -306,7 +309,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
     List<PoolResponse> response;
     Integer currentEpoch = epochRepository.findCurrentEpochNo()
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+        .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
     Set<String> poolViewsTop;
     List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
     List<PoolAmountProjection> poolAmountProjections = new ArrayList<>();
@@ -314,10 +317,6 @@ public class DelegationServiceImpl implements DelegationService {
     Map<String, BigInteger> activeStakeMap = new HashMap<>();
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
-      if (!poolIds.isEmpty()) {
-        fetchRewardDataService.fetchPoolInfoForPool(poolIds);
-      }
       List<PoolInfoKoiosProjection> poolInfoProjections = poolInfoRepository.getTopPoolInfoKoiOs(
           currentEpoch, pageable);
       poolViewsTop = poolInfoProjections.stream().map(PoolInfoKoiosProjection::getView).collect(
@@ -371,7 +370,6 @@ public class DelegationServiceImpl implements DelegationService {
             .build()
     ).toList();
     if (Boolean.TRUE.equals(isKoiOs)) {
-      fetchRewardDataService.fetchPoolInfoForPool(poolViewsTop);
       setPoolInfoKoiOs(response, currentEpoch, poolViewsTop, null, null, null);
       setRewardKoiOs(poolHistoryProjections, poolAmountProjections, response);
     } else {
@@ -412,7 +410,6 @@ public class DelegationServiceImpl implements DelegationService {
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
       Set<String> poolIdList = new HashSet<>(Collections.singletonList(poolView));
-      fetchRewardDataService.fetchPoolInfoForPool(poolIdList);
       setPoolInfoKoiOs(poolDetailResponse, currentEpoch, poolIdList);
       Boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolIdList);
       List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
@@ -473,7 +470,7 @@ public class DelegationServiceImpl implements DelegationService {
     BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
     List<PoolDetailEpochResponse> epochOfPools;
     PoolHash poolHash = poolHashRepository.findByView(poolView)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+        .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
     long totalElm;
     int totalPage;
@@ -606,7 +603,7 @@ public class DelegationServiceImpl implements DelegationService {
     if (!addressIdPage.isEmpty()) {
       Set<Long> addressIds = addressIdPage.stream().collect(Collectors.toSet());
       Integer currentEpoch = epochRepository.findCurrentEpochNo()
-          .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+          .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
       List<PoolDetailDelegatorProjection> delegatorPage = delegationRepository.getDelegatorsByAddress(
           addressIds);
       List<PoolDetailDelegatorResponse> delegatorList = delegatorPage.stream()
@@ -873,36 +870,5 @@ public class DelegationServiceImpl implements DelegationService {
   private CompletableFuture<Boolean> fetchEpochStakeKoiOs(List<String> addressIds) {
     return CompletableFuture.supplyAsync(
         () -> fetchRewardDataService.fetchEpochStakeForPool(addressIds));
-  }
-
-  private CompletableFuture<Boolean> fetchPoolInfoKoiOs(Set<String> poolIds) {
-    return CompletableFuture.supplyAsync(
-        () -> fetchRewardDataService.fetchPoolInfoForPool(poolIds));
-  }
-
-  private void handleFetchPoolInfo(Set<String> poolIds) {
-    List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>();
-    List<List<String>> subPoolIdList = Lists.partition(Lists.newArrayList(poolIds), 25);
-    subPoolIdList.forEach(
-        poolIdList -> completableFutures.add(fetchPoolInfoKoiOs(Sets.newHashSet(poolIdList))));
-    CompletableFuture<Void> combinedFuture
-        = CompletableFuture.allOf(
-        completableFutures.toArray(new CompletableFuture[0]));
-    CompletableFuture<List<Boolean>> allResultFuture = combinedFuture.thenApply(v ->
-        completableFutures.stream().map(CompletableFuture::join)
-            .toList()
-    );
-    CompletableFuture<Boolean> resultFetch = allResultFuture.thenApply(results ->
-        results.stream().allMatch(result -> result.equals(Boolean.TRUE))
-    ).exceptionally(ex -> {
-      log.error("Error: when fetch data from koios");
-      return false;
-    });
-    try {
-      resultFetch.get();
-    } catch (InterruptedException | ExecutionException e) {
-      log.error("Error: " + e);
-      Thread.currentThread().interrupt();
-    }
   }
 }
