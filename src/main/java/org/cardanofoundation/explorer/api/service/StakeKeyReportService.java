@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
@@ -43,13 +44,15 @@ public interface StakeKeyReportService {
 
 
   /**
-   * Get all stake key report history by username
+   * Get all stake key report history by username and filter by {@link ReportHistoryFilterRequest}
    *
    * @param username username
+   * @param filterRequest filter request
    * @param pageable pageable
    * @return BaseFilterResponse<StakeKeyReportHistoryResponse>
    */
   BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(String username,
+                                                                             ReportHistoryFilterRequest filterRequest,
                                                                              Pageable pageable);
 
   /**

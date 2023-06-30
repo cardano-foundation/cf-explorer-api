@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.14](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.13...v0.3.14) (2023-06-29)
+
+
+### Features
+
+* add code of conduct and contributing information (MET-1380) ([2183e6d](https://github.com/cardano-foundation/cf-explorer-api/commit/2183e6ddfe094d56921dd0f07795319c1523bfb2))
+
+
+### Bug Fixes
+
+* **gha:** fixed PR builds ([575c85b](https://github.com/cardano-foundation/cf-explorer-api/commit/575c85b6d292815e119d74430932b0c6c0c6358d))
+* remove default value ([91ae401](https://github.com/cardano-foundation/cf-explorer-api/commit/91ae40129390ce93e7c3040e48c528b268563f24))
+
 ## [0.3.13](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.12...v0.3.13) (2023-06-26)
 
 

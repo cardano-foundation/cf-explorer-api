@@ -184,7 +184,9 @@ public class DelegationServiceImpl implements DelegationService {
       liveStake = Objects.nonNull(liveStakeObj) ? new BigInteger(String.valueOf(liveStakeObj))
           : BigInteger.ZERO;
     }
-    Integer delegators = delegationRepository.totalLiveDelegatorsCount();
+    Object delegatorCached = redisTemplate.opsForValue()
+        .get(CommonConstant.REDIS_TOTAL_DELEGATOR + network);
+    Integer delegators = Objects.nonNull(delegatorCached) ? Integer.parseInt(String.valueOf(delegatorCached)) : 0;
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
         .activePools(Objects.nonNull(poolActiveObj) ? (Integer)poolActiveObj : CommonConstant.ZERO)
