@@ -11,5 +11,7 @@ public class DelegationPoolResponse {
   private String tickerName;
   private String poolName;
   private String poolId;
+  private String logoUrl;
+  private String iconUrl;
 
 }

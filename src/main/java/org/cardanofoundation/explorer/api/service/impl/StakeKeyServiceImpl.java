@@ -28,13 +28,10 @@ import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.utils.StringUtils;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -147,6 +144,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
           .poolId(poolData.getPoolId())
           .poolName(poolData.getPoolData())
           .tickerName(poolData.getTickerName())
+          .logoUrl(poolData.getLogoUrl())
+          .iconUrl(poolData.getIconUrl())
           .build();
       stakeAddressResponse.setPool(poolResponse);
     }
@@ -265,20 +264,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
-    BigInteger activeStake = null;
-    BigInteger liveStake = null;
+    BigInteger activeStake;
+    BigInteger liveStake;
     if (Boolean.TRUE.equals(isKoiOs)) {
-      Set<String> poolIds = fetchRewardDataService.checkAllPoolInfoForPool();
-      if (!poolIds.isEmpty()) {
-        Boolean isFetch = fetchRewardDataService.fetchPoolInfoForPool(poolIds);
-        if (Boolean.TRUE.equals(isFetch)) {
-          activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
-          liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
-        }
-      } else {
-        activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
-        liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
-      }
+      activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
+      liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
     } else {
       Object activeStakeObj = redisTemplate.opsForValue()
           .get(CommonConstant.REDIS_TOTAL_ACTIVATE_STAKE + network + "_" + currentEpoch);
