@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.15](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.14...v0.3.15) (2023-06-30)
+
+
+### Features
+
+* get total delegators from cache ([86f774a](https://github.com/cardano-foundation/cf-explorer-api/commit/86f774af4ba47a45ab5f626a37dc9b6f58f2a963))
+
+
+### Bug Fixes
+
+* upgrade cumsumer common version ([a174119](https://github.com/cardano-foundation/cf-explorer-api/commit/a174119e486bc6366c85d008ef834db20c35c56c))
+
 ## [0.3.14](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.13...v0.3.14) (2023-06-29)
 
 
