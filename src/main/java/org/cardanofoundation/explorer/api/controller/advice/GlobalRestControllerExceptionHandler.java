@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Log4j2
 @RestControllerAdvice
@@ -128,7 +127,7 @@ public class GlobalRestControllerExceptionHandler {
   public ResponseEntity<BaseFilterResponse<?>> handleNoContent(NoContentException e) {
     log.warn("No content");
     return ResponseEntity.status(HttpStatus.OK)
-        .body(new BaseFilterResponse<>(List.of(), 0));
+        .body(new BaseFilterResponse<>());
   }
 
   @ExceptionHandler({MethodArgumentTypeMismatchException.class})
