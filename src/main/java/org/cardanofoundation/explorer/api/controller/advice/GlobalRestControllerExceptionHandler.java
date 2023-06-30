@@ -10,6 +10,7 @@ import org.cardanofoundation.explorer.common.exceptions.*;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -140,5 +141,17 @@ public class GlobalRestControllerExceptionHandler {
                 .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
                 .errorMessage(e.getName() + " not valid")
                  .build());
+  }
+
+  @ExceptionHandler({MethodArgumentNotValidException.class})
+  public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    log.warn("Argument type not valid: {}", e.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(
+            ErrorResponse.builder()
+                .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .errorMessage(e.getObjectName() + " not valid")
+                .build());
   }
 }
