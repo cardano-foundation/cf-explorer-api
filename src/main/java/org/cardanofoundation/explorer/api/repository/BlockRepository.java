@@ -1,10 +1,12 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.Block_;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCountProjection;
+import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.consumercommon.entity.Block_;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BlockRepository extends JpaRepository<Block, Long>,
     JpaSpecificationExecutor<Block> {
+
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER})
   Optional<Block> findFirstByBlockNo(@Param("no") Long no);
 
@@ -49,4 +52,21 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
       + "JOIN Block bk ON bk.slotLeader.id = sl.id "
       + "WHERE ph.id = :poolId AND bk.epochNo = (SELECT max(ep.no) FROM Epoch ep)")
   Integer getCountBlockByPoolAndCurrentEpoch(@Param("poolId") Long poolId);
+
+  @Query(value = "SELECT ph.id AS poolId, count(bk.id) AS countValue "
+      + "FROM PoolHash ph "
+      + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
+      + "JOIN Block bk ON bk.slotLeader.id = sl.id "
+      + "WHERE ph.id IN :poolIds AND bk.epochNo = :epochNo "
+      + "GROUP BY ph.id")
+  List<PoolCountProjection> getCountBlockByPoolsAndCurrentEpoch(@Param("poolIds") Set<Long> poolIds,
+      @Param("epochNo") Integer epochNo);
+
+  @Query(value = "SELECT ph.id AS poolId, count(bk.id) AS countValue "
+      + "FROM PoolHash ph "
+      + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
+      + "JOIN Block bk ON bk.slotLeader.id = sl.id "
+      + "WHERE ph.id IN :poolIds "
+      + "GROUP BY ph.id")
+  List<PoolCountProjection> getCountBlockByPools(@Param("poolIds") Set<Long> poolIds);
 }
