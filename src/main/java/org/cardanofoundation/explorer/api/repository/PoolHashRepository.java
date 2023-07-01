@@ -1,10 +1,14 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import java.util.Set;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailEpochProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -92,7 +96,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       "SELECT pu.id AS poolUpdateId, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, tx.deposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
           + "FROM PoolHash ph "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "JOIN Tx tx ON pu.registeredTx.id = tx.id AND tx.deposit IS NOT NULL AND tx.deposit = 500000000 "
+          + "JOIN Tx tx ON pu.registeredTx.id = tx.id AND tx.deposit IS NOT NULL AND tx.deposit = (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = pu.activeEpochNo) "
           + "JOIN Block bk ON tx.block.id  = bk.id "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
           + "WHERE ph.view = :poolView")
