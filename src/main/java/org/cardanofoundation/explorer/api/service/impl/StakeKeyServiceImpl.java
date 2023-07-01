@@ -17,16 +17,10 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressFilterRe
 import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.*;
-import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
-import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
-import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
-import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
-import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
-import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
+import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
-import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
@@ -45,6 +39,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -72,10 +67,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
-  private final EpochStakeRepository epochStakeRepository;
-  private final TopDelegatorCacheService topDelegatorCacheService;
-
-  private final PoolHashRepository poolHashRepository;
 
   private final RedisTemplate<String, Object> redisTemplate;
 
@@ -127,15 +118,13 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       }
     }
     stakeAddressResponse.setStakeAddress(stake);
-    BigInteger stakeTotalBalance
-        = addressRepository.findTotalBalanceByStakeAddress(stakeAddress).orElse(BigInteger.ZERO);
     BigInteger stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
         stake).orElse(BigInteger.ZERO);
     BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
         stake).orElse(BigInteger.ZERO);
     stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
     stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
-    stakeAddressResponse.setTotalStake(stakeTotalBalance.add(stakeAvailableReward)
+    stakeAddressResponse.setTotalStake(stakeAddress.getBalance().add(stakeAvailableReward)
             .subtract(stakeRewardWithdrawn));
     StakeDelegationProjection poolData = delegationRepository.findPoolDataByAddress(stakeAddress)
         .orElse(null);
@@ -227,15 +216,15 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    List<Long> topDelegatorStakeIdsCached = topDelegatorCacheService.getTopStakeDelegatorCache();
-
-    List<StakeAddressProjection> stakeList;
-    if (topDelegatorStakeIdsCached.isEmpty()) {
-      stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageable);
-    } else {
-      stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(topDelegatorStakeIdsCached, pageable);
-    }
-
+    Pageable pageable1 = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+    var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageable1);
+    var stakeIdList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getId);
+    var stakeWithdrawals = withdrawalRepository.getRewardWithdrawnByAddrIn(stakeIdList);
+    var mapStakeWithdrawnByStakeId = StreamUtil
+        .toMap(stakeWithdrawals, StakeWithdrawalProjection::getStakeAddressId, StakeWithdrawalProjection::getAmount);
+    var stakeTotalRewards = rewardRepository.getTotalRewardByStakeAddressIn(stakeIdList);
+    var mapStakeAvailableRewardsByStakeId = StreamUtil
+        .toMap(stakeTotalRewards, StakeRewardProjection::getStakeAddressId, StakeRewardProjection::getAmount);
     Set<String> stakeAddressList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
     var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
     var mapPoolByStakeAddress = StreamUtil.toMap(poolData, StakeDelegationProjection::getStakeAddress);
@@ -245,9 +234,16 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       StakeDelegationProjection delegation = mapPoolByStakeAddress.get(stake.getStakeAddress());
       StakeFilterResponse stakeResponse = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
       stakeResponse.setPoolName(delegation.getPoolData());
+      var stakeWithdrawn = mapStakeWithdrawnByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
+      var stakeTotalReward = mapStakeAvailableRewardsByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
+      var availableReward = stakeTotalReward.subtract(stakeWithdrawn);
+      if(availableReward.compareTo(BigInteger.ZERO) < 0) {
+        availableReward = BigInteger.ZERO;
+      }
+      stakeResponse.setBalance(stake.getTotalStake().add(availableReward));
       content.add(stakeResponse);
     }
-
+    content.sort(Comparator.comparing(StakeFilterResponse::getBalance).reversed());
     Page<StakeFilterResponse> pageResponse = new PageImpl<>(content, pageable, pageable.getPageSize());
     return new BaseFilterResponse<>(pageResponse);
   }
