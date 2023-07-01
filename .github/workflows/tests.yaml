@@ -2,6 +2,8 @@ name: Run Tests
 
 on:
   push:
+  pull_request:
+    types: [ opened, synchronize ]
   workflow_dispatch:
 
 env:
@@ -94,6 +96,7 @@ jobs:
 
   pages:
     needs: end2end
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

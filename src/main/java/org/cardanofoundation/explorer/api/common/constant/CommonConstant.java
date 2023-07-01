@@ -67,7 +67,6 @@ public class CommonConstant {
 
   public static final String REDIS_POOL_INACTIVATE = "POOL_INACTIVATE_";
 
-
   public static int hashCode(Object... a) {
     if (a == null) {
       return -BigInteger.ONE.intValue();
