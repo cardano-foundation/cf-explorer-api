@@ -33,6 +33,7 @@ import org.cardanofoundation.explorer.api.repository.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.HexUtils;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
@@ -121,7 +122,7 @@ public class AddressServiceImpl implements AddressService {
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type)
       throws ExecutionException, InterruptedException {
     Address addr = addressRepository.findFirstByAddress(address)
-        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
     Long txCount = addressTxBalanceRepository.countByAddress(addr);
     if (Long.valueOf(0).equals(txCount)) {
       return List.of();
@@ -192,14 +193,6 @@ public class AddressServiceImpl implements AddressService {
       balance = getBalanceInRangePreviousToday(address, to, maxDateAgg.get());
     }
 
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTxBalanceRepository.countRecord(
-          address, Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      );
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
-    }
-
     return new AddressAnalyticsResponse(to, balance);
   }
 
@@ -257,7 +250,7 @@ public class AddressServiceImpl implements AddressService {
   @Transactional(readOnly = true)
   public List<BigInteger> getAddressMinMaxBalance(String address) {
     Address addr = addressRepository.findFirstByAddress(address)
-        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
 
     MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByAddress(
         addr.getId());
@@ -298,7 +291,7 @@ public class AddressServiceImpl implements AddressService {
       String address) {
 
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     Page<AddressTokenProjection> addressTokenProjectionPage =
@@ -344,7 +337,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     List<AddressTokenProjection> addressTokenProjectionList =

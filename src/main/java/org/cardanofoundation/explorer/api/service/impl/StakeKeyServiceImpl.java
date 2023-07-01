@@ -23,6 +23,7 @@ import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -165,7 +166,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey,
                                                                       Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     List<StakeHistoryProjection> stakeHistoryList =
         stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress);
     stakeHistoryList.addAll(
@@ -179,6 +180,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), stakeHistoryList.size());
+    if (start >= stakeHistoryList.size()) {
+      return new BaseFilterResponse<>(new PageImpl<>(List.of()));
+    }
     Page<StakeHistoryProjection> page = new PageImpl<>(stakeHistoryList.subList(start, end),
         pageable, stakeHistoryList.size());
     return new BaseFilterResponse<>(page);
@@ -208,6 +212,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), instantaneousRewards.size());
+
+    if (start >= instantaneousRewards.size()) {
+      return new BaseFilterResponse<>(new PageImpl<>(List.of()));
+    }
+
     Page<StakeInstantaneousRewardsProjection> page = new PageImpl<>(
         instantaneousRewards.subList(start, end), pageable, instantaneousRewards.size());
     return new BaseFilterResponse<>(page);
@@ -286,7 +295,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       throws ExecutionException, InterruptedException {
 
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     List<CompletableFuture<StakeAnalyticBalanceResponse>> futureStakeAnalytics = new ArrayList<>();
     List<LocalDate> dates = getListDateAnalytic(type);
@@ -321,14 +330,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       balance = getBalanceInRangeHaveToday(stakeAddress, to, maxDateAgg.get());
     } else {
       balance = getBalanceInRangePreviousToday(stakeAddress, to, maxDateAgg.get());
-    }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTxBalanceRepository.countRecord(
-          stakeAddress, Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      );
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
     }
 
     return new StakeAnalyticBalanceResponse(to, balance);
@@ -443,7 +444,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   public List<BigInteger> getStakeMinMaxBalance(String stakeKey) {
     StakeAddress stake = stakeAddressRepository.findByView(stakeKey)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByStakeAddress(
         stake.getId());
