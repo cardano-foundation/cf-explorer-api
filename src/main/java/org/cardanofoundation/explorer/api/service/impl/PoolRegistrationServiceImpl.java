@@ -41,6 +41,8 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
     setValueForPoolRegistration(poolTxRes);
     response.setData(poolTxRes);
     response.setTotalItems(trxBlockEpochPage.getTotalElements());
+    response.setCurrentPage(pageable.getPageNumber());
+    response.setTotalPages(trxBlockEpochPage.getTotalPages());
     return response;
   }
 
