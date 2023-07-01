@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
@@ -38,13 +39,14 @@ public interface PoolReportService {
   PoolReportExportResponse export(Long reportId, ExportType exportType, String username);
 
   /**
-   * Get all pool report history by username
+   * Get all pool report history by username and filter by {@link ReportHistoryFilterRequest}
    *
    * @param pageable pageable
    * @param username username
+   * @param filterRequest filter request
    * @return BaseFilterResponse<PoolReportListResponse>
    */
-  BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username);
+  BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username, ReportHistoryFilterRequest filterRequest);
 
   /**
    * Get pool report detail by report id
