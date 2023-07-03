@@ -1,8 +1,5 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.EpochTimeProjection;
 import org.cardanofoundation.explorer.api.projection.UniqueAddressProjection;
@@ -10,6 +7,10 @@ import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public interface EpochRepository extends JpaRepository<Epoch, Long> {
 

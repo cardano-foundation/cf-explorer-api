@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +34,10 @@ public interface FetchRewardDataService {
   Boolean checkAdaPots(Integer epochNo);
 
   Boolean fetchAdaPots(List<Integer> epochNo);
+
+  Boolean checkEpochRewardDistributed(Epoch epoch);
+
+  List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNo);
 
   Boolean isKoiOs();
 }

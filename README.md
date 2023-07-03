@@ -91,6 +91,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
     - `API_CHECK_POOL_INFO_URL`: URL for get pool info data from koios service. Default is `http://localhost:8888/api/v1/pool-info/fetch`.
     - `API_CHECK_EPOCH_STAKE_URL`: URL for get epoch stake data from koios service. Default is `http://localhost:8888/api/v1/epoch-stake/fetch`.
     - `API_CHECK_ADA_POTS_URL`: URL for get ada pots data from koios service. Default is `http://localhost:8888/api/v1/ada-pots/fetch`.
+    - `API_CHECK_EPOCH_URL`: URL for get epoch data from koios service. Default is `http://localhost:8888/api/v1/epochs/fetch`.
 - without `koios`: We will use database to get data.
 
 
