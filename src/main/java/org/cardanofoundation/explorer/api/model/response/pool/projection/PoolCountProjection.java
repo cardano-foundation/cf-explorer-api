@@ -4,5 +4,7 @@ public interface PoolCountProjection {
 
   Long getPoolId();
 
+  String getPoolView();
+
   Integer getCountValue();
 }
