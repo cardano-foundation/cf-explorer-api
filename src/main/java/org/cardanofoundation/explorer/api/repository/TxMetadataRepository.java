@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface TxMetadataRepository extends JpaRepository<TxMetadata, Long> {
 
-  List<TxMetadata> findAllByTx(Tx tx);
+  List<TxMetadata> findAllByTxOrderByKeyAsc(Tx tx);
 }

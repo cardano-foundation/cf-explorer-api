@@ -538,7 +538,7 @@ public class TxServiceImpl implements TxService {
    */
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
-        txMetadataRepository.findAllByTx(tx).stream().map(txMetadata ->
+        txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
             TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).build()).toList();
     if(!CollectionUtils.isEmpty(txMetadataList)) {
       txResponse.setMetadata(txMetadataList);
