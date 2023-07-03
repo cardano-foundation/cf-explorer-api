@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.16](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.15...v0.3.16) (2023-07-03)
+
+
+### Features
+
+* change logic find top delegation by epoch block ([c69eb89](https://github.com/cardano-foundation/cf-explorer-api/commit/c69eb89bb964a94d002809941edc7f79241c3524))
+
+
+### Bug Fixes
+
+* add default sort pool certificate ([f5ba9e5](https://github.com/cardano-foundation/cf-explorer-api/commit/f5ba9e57504e25d201ac77c043afde5459534dc6))
+* edit code logic pool deposit ([8acc448](https://github.com/cardano-foundation/cf-explorer-api/commit/8acc448822d57ca316bb184125bae203c7aa73f1))
+
 ## [0.3.15](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.14...v0.3.15) (2023-06-30)
 
 
