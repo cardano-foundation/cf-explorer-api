@@ -20,6 +20,8 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressAnalytic
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
+import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
@@ -45,6 +47,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -385,13 +389,13 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  public String getJsonNativeScript(String address) {
+  public ContractScript getJsonNativeScript(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     if(Boolean.FALSE.equals(addr.getVerifiedContract())){
-      return SCRIPT_NOT_VERIFIED;
+      return ContractScript.builder().isVerified(Boolean.FALSE).data(null).build();
     }
 
     ShelleyAddress shelleyAddress = new ShelleyAddress(addr.getAddress());
@@ -401,10 +405,10 @@ public class AddressServiceImpl implements AddressService {
     );
 
     if(Objects.isNull(script.getJson())){
-      return SCRIPT_NOT_VERIFIED;
+      return ContractScript.builder().isVerified(Boolean.FALSE).data(null).build();
     }
 
-    return script.getJson();
+    return ContractScript.builder().isVerified(Boolean.TRUE).data(script.getJson()).build();
   }
 
   private void setMetadata(List<TokenAddressResponse> tokenListResponse) {
