@@ -50,6 +50,9 @@ class EpochServiceTest {
   @Mock
   HashOperations hashOperations;
 
+  @Mock
+  FetchRewardDataService fetchRewardDataService;
+
   //TODO getAllEpoch
 
   //TODO getCurrentEpochSummary
@@ -132,7 +135,7 @@ class EpochServiceTest {
 
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.ofNullable(epoch.getNo()));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
-
+    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.IN_PROGRESS);
     Assertions.assertEquals(expect, actual);
@@ -168,7 +171,7 @@ class EpochServiceTest {
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
         .thenReturn(Optional.of(epoch));
-
+    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.ofNullable(epoch.getNo()));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
 
@@ -207,7 +210,7 @@ class EpochServiceTest {
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
         .thenReturn(Optional.of(epoch));
-
+    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(epoch.getNo() + 1));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
 
@@ -246,7 +249,7 @@ class EpochServiceTest {
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
         .thenReturn(Optional.of(epoch));
-
+    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(epoch.getNo() + 1));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
 
