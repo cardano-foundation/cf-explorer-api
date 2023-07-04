@@ -25,7 +25,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 
 ### Installing
 
-- Clone the repository
+- Clone this repository
 - Copy `./.m2/settings.default.xml` to `./.m2/settings.xml` 
 - Fill `{username_github}` and `{token_github}` in `./.m2/settings.xml` with your github username and token. Guide to generate a token with `read:packages` scope [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
 - Copy `.env.example`  to `.env`
