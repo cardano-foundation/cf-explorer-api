@@ -20,6 +20,7 @@ import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
@@ -179,7 +180,7 @@ public class TokenServiceImpl implements TokenService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
-        () -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND)
     );
     Page<AddressTokenProjection> tokenAddresses
         = addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
@@ -204,7 +205,7 @@ public class TokenServiceImpl implements TokenService {
       throws ExecutionException, InterruptedException {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
-        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
 
     List<LocalDate> dates = getListDateAnalytic(type);
     List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
