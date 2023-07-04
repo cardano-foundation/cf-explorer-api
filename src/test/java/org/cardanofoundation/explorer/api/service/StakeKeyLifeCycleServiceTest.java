@@ -98,9 +98,9 @@ class StakeKeyLifeCycleServiceTest {
             "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2"));
     Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegations("stake1notfound", request, pageable));
-    Assertions.assertThrows(NoContentException.class,
-        () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", fromDate, toDate , pageable));
-    Assertions.assertThrows(NoContentException.class,
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", fromDate, toDate ,null, pageable));
+    Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawals("stake1notfound", request, pageable));
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawalDetail("stake1notfound",
@@ -274,10 +274,10 @@ class StakeKeyLifeCycleServiceTest {
     Page<StakeRewardResponse> page = new PageImpl<>(List.of(rewardResponse), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(rewardRepository.findRewardByStake(stakeAddress, Timestamp.from(fromDate.toInstant()),
-        Timestamp.from(toDate.toInstant()), pageable)).thenReturn(page);
+        Timestamp.from(toDate.toInstant()), null, pageable)).thenReturn(page);
     when(fetchRewardDataService.checkRewardAvailable(any())).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeRewards(
-        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", fromDate, toDate , pageable);
+        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", fromDate, toDate,null,  pageable);
     Assertions.assertEquals(1, response.getTotalPages());
     Assertions.assertEquals(1, response.getTotalItems());
     Assertions.assertEquals(0, response.getCurrentPage());
