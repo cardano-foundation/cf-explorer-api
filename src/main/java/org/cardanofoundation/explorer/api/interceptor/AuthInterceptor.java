@@ -62,7 +62,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     if (isTokenBlacklisted(token)) {
       throw new InvalidAccessTokenException();
     }
-    String username = JwtUtils.getUserNameFromJwtToken(token, rsaConfig.getPublicKey());
+    String username = JwtUtils.getAccountIdFromJwtToken(token, rsaConfig.getPublicKey());
     httpServletRequest.setAttribute("username", username);
     return true;
   }
