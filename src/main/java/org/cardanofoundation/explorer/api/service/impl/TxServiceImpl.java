@@ -687,7 +687,9 @@ public class TxServiceImpl implements TxService {
    */
   private void getContracts(Tx tx, TxResponse txResponse) {
     List<ContractResponse> contractResponses = getContractResponses(tx);
-    txResponse.setContracts(contractResponses);
+    if(!CollectionUtils.isEmpty(contractResponses)) {
+      txResponse.setContracts(contractResponses);
+    }
   }
 
   private List<ContractResponse> getContractResponses(Tx tx) {
