@@ -31,6 +31,8 @@ import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -79,19 +81,6 @@ import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 
 @Service
 @RequiredArgsConstructor
@@ -132,6 +121,7 @@ public class TxServiceImpl implements TxService {
   private final TreasuryRepository treasuryRepository;
   private final ReserveRepository reserveRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final TxMetadataRepository txMetadataRepository;
   private final TxContractMapper txContractMapper;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
@@ -249,7 +239,7 @@ public class TxServiceImpl implements TxService {
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
                                                                        Pageable pageable) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
     List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
 
@@ -278,7 +268,7 @@ public class TxServiceImpl implements TxService {
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
                                                                      Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND)
     );
 
     Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeAddress.getId(), pageable);
@@ -538,6 +528,7 @@ public class TxServiceImpl implements TxService {
     getPoolCertificates(tx, txResponse);
     getProtocols(tx, txResponse);
     getInstantaneousRewards(tx, txResponse);
+    getMetadata(tx, txResponse);
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -559,6 +550,23 @@ public class TxServiceImpl implements TxService {
     }
 
     return txResponse;
+  }
+
+  /**
+   * Get transaction metadata
+   * @param tx transaction
+   * @param txResponse response data of transaction
+   */
+  private void getMetadata(Tx tx, TxResponse txResponse) {
+    List<TxMetadataResponse> txMetadataList =
+        txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
+            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).build()).toList();
+    if(!CollectionUtils.isEmpty(txMetadataList)) {
+      txResponse.setMetadata(txMetadataList);
+    }
+    if(Objects.nonNull(tx.getTxMetadataHash())) {
+      txResponse.setMetadataHash(tx.getTxMetadataHash().getHash());
+    }
   }
 
   /**
@@ -718,17 +726,8 @@ public class TxServiceImpl implements TxService {
         .collect(Collectors.groupingBy(
             txOutMapper::fromAddressInputOutput
         ));
-    List<TxOutResponse> uTxOOutputs = mappingProjectionToAddress(addressOutputMap);
-    List<TxOutResponse> uTxOInputs = mappingProjectionToAddress(addressInputMap);
-    UTxOResponse uTxOs = UTxOResponse.builder()
-        .inputs(uTxOInputs)
-        .outputs(uTxOOutputs)
-        .build();
-    txResponse.setUTxOs(uTxOs);
 
-    List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
-    List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
-
+    //Get metadata
     List<Long> multiAssetIdList = new ArrayList<>();
     multiAssetIdList.addAll(
         addressInputInfo.stream().map(AddressInputOutputProjection::getMultiAssetId)
@@ -739,6 +738,22 @@ public class TxServiceImpl implements TxService {
 
     Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
         getMapMetadataAndMapAsset(multiAssetIdList);
+
+    //uTxO
+    List<TxOutResponse> uTxOOutputs = mappingProjectionToAddressWithMetadata(addressOutputMap,
+        getMapMetadataAndMapAsset.getFirst(), getMapMetadataAndMapAsset.getSecond());
+    List<TxOutResponse> uTxOInputs = mappingProjectionToAddressWithMetadata(addressInputMap,
+        getMapMetadataAndMapAsset.getFirst(), getMapMetadataAndMapAsset.getSecond());
+
+    UTxOResponse uTxOs = UTxOResponse.builder()
+        .inputs(uTxOInputs)
+        .outputs(uTxOOutputs)
+        .build();
+    txResponse.setUTxOs(uTxOs);
+
+    //Summary
+    List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
+    List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
 
     List<TxOutResponse> stakeAddress =
         removeDuplicateTx(addressesInfoInput, addressesInfoOutput,
@@ -777,6 +792,11 @@ public class TxServiceImpl implements TxService {
 
     unionTxsByAddress.forEach(
         (address, txs) -> {
+          if (txs.size() == 1) {
+            txs.get(0).getTokens().forEach(token -> {
+              setMetadata(assetMetadataMap, multiAssetMap, token);
+            });
+          }
           if (txs.size() > 1) {
             BigInteger totalValue = txs.get(0).getValue().add(txs.get(1).getValue());
             txs.get(0).setValue(totalValue);
@@ -799,13 +819,7 @@ public class TxServiceImpl implements TxService {
 
                   if (!BigInteger.ZERO.equals(totalQuantity)) {
                     TxMintingResponse token = tokens.get(0);
-                    MultiAsset multiAsset = multiAssetMap.get(token.getMultiAssetId());
-                    if (!Objects.isNull(multiAsset)) {
-                      String subject = multiAsset.getPolicy() + multiAsset.getName();
-                      AssetMetadata metadata = assetMetadataMap.get(subject);
-                      token.setMetadata(assetMetadataMapper.fromAssetMetadata(metadata));
-                    }
-
+                    setMetadata(assetMetadataMap, multiAssetMap, token);
                     token.setAssetQuantity(totalQuantity);
                     tokenResponse.add(token);
                   }
@@ -820,6 +834,16 @@ public class TxServiceImpl implements TxService {
     return summary.stream()
         .sorted(Comparator.comparing(TxOutResponse::getValue))
         .collect(Collectors.toList());
+  }
+
+  private void setMetadata(Map<String, AssetMetadata> assetMetadataMap,
+      Map<Long, MultiAsset> multiAssetMap, TxMintingResponse token) {
+    MultiAsset multiAsset = multiAssetMap.get(token.getMultiAssetId());
+    if (!Objects.isNull(multiAsset)) {
+      String subject = multiAsset.getPolicy() + multiAsset.getName();
+      AssetMetadata metadata = assetMetadataMap.get(subject);
+      token.setMetadata(assetMetadataMapper.fromAssetMetadata(metadata));
+    }
   }
 
   /**
@@ -914,6 +938,28 @@ public class TxServiceImpl implements TxService {
     if (!CollectionUtils.isEmpty(poolCertificates)) {
       txResponse.setPoolCertificates(poolCertificates);
     }
+  }
+
+  /**
+   * Map data from AddressInputOutputProjection to TxOutResponse
+   *
+   * @param addressInputOutputMap address with metadata projection map
+   * @return address response
+   */
+  private List<TxOutResponse> mappingProjectionToAddressWithMetadata(
+      Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputOutputMap,
+      Map<String, AssetMetadata> assetMetadataMap, Map<Long, MultiAsset> multiAssetMap) {
+    List<TxOutResponse> uTxOs = new ArrayList<>(addressInputOutputMap.keySet());
+    for (TxOutResponse uTxO : uTxOs) {
+      List<TxMintingResponse> tokens = addressInputOutputMap.get(uTxO).stream().
+          filter(token -> Objects.nonNull(token.getAssetId())).map(
+              maTxMintMapper::fromAddressInputOutputProjection
+          ).collect(Collectors.toList());
+      tokens.addAll(getTokenInFailedTxOut(addressInputOutputMap, uTxO));
+      tokens.forEach(token -> setMetadata(assetMetadataMap, multiAssetMap, token));
+      uTxO.setTokens(tokens);
+    }
+    return uTxOs;
   }
 
   /**

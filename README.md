@@ -1,6 +1,4 @@
-# Iris API
-
-The Iris API provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the Iris frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
+# CARDANO-EXPLORER-API
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/tests.yaml/badge.svg" />
@@ -9,13 +7,9 @@ The Iris API provides access to blockchain data that is compatible with the Post
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
-## 🧪 Test Reports
-
-To ensure the stability and reliability of this project, unit and mutation tests have been implemented. By clicking on the links below, you can access the detailed test reports and review the outcomes of the tests performed.
-
-📊 [Coverage Report](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
-
-📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+### Reports
+[Api-test html](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
+[Api-test allure](https://cardano-foundation.github.io/cf-explorer-api/allure/)
  
 ## Getting Started
 
@@ -53,9 +47,9 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `S3_SECRET_KEY`: the AWS secret key
 - `S3_REGION`: the AWS region
 - `S3_BUCKET_NAME`: the AWS bucket
-- `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
-- `PATH_STYLE_ENABLED`: 
 
+- `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
+  
 - `LOG_PATH`: the path to store log files
 
 - `PRIVATE_MVN_REGISTRY_URL`: the url of private maven registry
@@ -63,7 +57,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `PRIVATE_MVN_REGISTRY_PASS`: the password of private maven registry
 - `SETTINGS_XML_TPL`: the template of settings.xml file
 
-- `API_NEWS_URL`: URL for get news data.
+- `API_NEWS_URL`: URL for get news data. Default is `http://dev.cf-explorer-monolith-mainnet.metadata.dev.cf-deployments.org:8085/?amount=%d`
 - `API_NEWS_CACHE_TIME`: Cache time for news data. Default is 120s.
 - `API_MARKET_URL`: URL for get market data. Default is `https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s`
 - `API_MARKET_CACHE_TIME` : Cache time for market data. Default is 120s.
@@ -84,8 +78,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
     -  `NODE_ADDRESSES`: List of redis cluster nodes host and port.
     -  `REDIS_CLUSTER_PASSWORD`: Password of redis cluster.
 
-### There are two options to get the reward data, epoch_stake, ada_pot, pool_info and pool_history:
-- `koios`: The koios service will be used to collect the data
+### We have 2 options for get data reward, epoch_stake, ada_pot, pool_info, pool_history:
+- `koios`: We will use koios service to get data.
     - `API_CHECK_REWARD_URL`: URL for get reward data from koios service. Default is `http://localhost:8888/api/v1/rewards/fetch`.
     - `API_CHECK_POOL_HISTORY_URL`: URL for get pool history data from koios service. Default is `http://localhost:8888/api/v1/pool-history/fetch`.
     - `API_CHECK_POOL_INFO_URL`: URL for get pool info data from koios service. Default is `http://localhost:8888/api/v1/pool-info/fetch`.

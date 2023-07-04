@@ -14,6 +14,8 @@ import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +32,6 @@ import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.projection.UniqueAddressProjection;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 
 @Service
@@ -73,7 +74,7 @@ public class EpochServiceImpl implements EpochService {
     Page<Epoch> epochs = epochRepository.findAll(pageable);
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
     var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
-        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
     pageResponse.getContent().forEach(epoch -> checkEpochStatus(epoch, currentEpoch));
     return new BaseFilterResponse<>(pageResponse);
   }
