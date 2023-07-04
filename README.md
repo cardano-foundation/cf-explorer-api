@@ -13,9 +13,11 @@ The Iris API provides access to blockchain data that is compatible with the Post
 
 To ensure the stability and reliability of this project, unit and mutation tests have been implemented. By clicking on the links below, you can access the detailed test reports and review the outcomes of the tests performed.
 
-📊 [Coverage Report](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
+📊 [Postman Report](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
 
-📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+📊 [Postman Report (allure format)](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+
+📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/mutation-report/)
  
 ## Getting Started
 
