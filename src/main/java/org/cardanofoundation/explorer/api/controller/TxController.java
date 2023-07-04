@@ -4,6 +4,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
@@ -24,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -63,5 +65,14 @@ public class TxController {
   public ResponseEntity<List<TxGraph>> getTransactionChart(
       @PathVariable("range") TxChartRange range) {
     return ResponseEntity.ok(txService.getTransactionChartByRange(range));
+  }
+
+  @GetMapping("/{hash}/contract")
+  @LogMessage
+  @Operation(summary = "Get tx contract detail by txHash and contract address(optional) ")
+  public ResponseEntity<List<ContractResponse>> getTxContractDetailByTxHash(
+      @PathVariable("hash") String hash,
+      @RequestParam(required = false) String address) {
+    return ResponseEntity.ok(txService.getTxContractDetail(hash, address));
   }
 }
