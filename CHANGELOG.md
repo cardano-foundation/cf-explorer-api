@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.17](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.16...v0.3.17) (2023-07-04)
+
+
+### Bug Fixes
+
+* update README.md trigger release ([5278c28](https://github.com/cardano-foundation/cf-explorer-api/commit/5278c28c5ed503146773e9845c06aeb1c0e977f9))
+
 ## [0.3.16](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.15...v0.3.16) (2023-07-03)
 
 
