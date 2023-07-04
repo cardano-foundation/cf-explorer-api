@@ -370,6 +370,7 @@ public class DelegationServiceImpl implements DelegationService {
         pool.setReward(reward);
       }
     }
+    System.out.println(response);
     return response.stream().sorted(Comparator.comparing(PoolResponse::getEpochBlock).reversed())
         .toList();
   }
