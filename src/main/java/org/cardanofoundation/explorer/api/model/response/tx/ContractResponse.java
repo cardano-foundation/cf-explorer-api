@@ -6,11 +6,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ContractResponse {
-  private String contract;
+  private String address;
+  private String scriptHash;
+  private ScriptPurposeType purpose;
+  private String redeemerBytes;
+  private Long redeemerMem;
+  private Long redeemerSteps;
+  private String datumHashIn;
+  private String datumBytesIn;
+  private String scriptBytes;
+  private String datumHashOut;
+  private String datumBytesOut;
 }
