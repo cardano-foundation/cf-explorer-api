@@ -1,12 +1,16 @@
 package org.cardanofoundation.explorer.api.model.response.token;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
+
 @Getter
 @Setter
 public class TokenResponse {
+
   private String name;
   private String displayName;
   private String policy;
@@ -18,4 +22,7 @@ public class TokenResponse {
   private Long numberOfHolders;
   private LocalDateTime createdOn;
   private TokenMetadataResponse metadata;
+  private Timestamp tokenLastActivity;
+  private TokenType tokenType;
+  private String metadataJson;
 }
