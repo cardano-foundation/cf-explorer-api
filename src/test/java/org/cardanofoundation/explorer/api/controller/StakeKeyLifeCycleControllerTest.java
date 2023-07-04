@@ -160,7 +160,7 @@ class StakeKeyLifeCycleControllerTest {
     List<StakeRewardResponse> list = new ArrayList<>();
     list.add(new StakeRewardResponse(333,
         toDate, BigInteger.valueOf(382916)));
-    given(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate,
+    given(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, null,
         PageRequest.of(0, 1, Sort.by("id").descending())))
         .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));
     mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}/rewards", stakeKey)
