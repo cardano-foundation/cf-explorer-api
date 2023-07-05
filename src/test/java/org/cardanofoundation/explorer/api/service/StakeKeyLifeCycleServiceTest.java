@@ -98,9 +98,9 @@ class StakeKeyLifeCycleServiceTest {
             "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2"));
     Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegations("stake1notfound", request, pageable));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", fromDate, toDate ,null, pageable));
-    Assertions.assertThrows(BusinessException.class,
+    Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawals("stake1notfound", request, pageable));
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawalDetail("stake1notfound",
