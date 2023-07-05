@@ -407,6 +407,7 @@ public class DelegationServiceImpl implements DelegationService {
       List<PoolAmountProjection> poolAmountProjections = rewardRepository.getOperatorRewardByPoolList(
           poolIdList, currentEpoch);
       setRewardKoiOs(poolHistoryProjections, poolAmountProjections, poolDetailResponse);
+
     } else {
       List<Object> poolViews = new ArrayList<>();
       poolViews.add(poolView);
@@ -422,6 +423,7 @@ public class DelegationServiceImpl implements DelegationService {
       poolDetailResponse.setRos(
           getRos(poolReward, poolDetailResponse.getCost(), poolDetailResponse.getMargin(),
               activeStakeMap.get(poolView)));
+      poolDetailResponse.setLifetimeLuck();
     }
     poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
     List<String> ownerAddress = poolUpdateRepository.findOwnerAccountByPool(poolId);
@@ -430,6 +432,7 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setDelegators(delegationRepository.liveDelegatorsCount(poolView));
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
+
     return poolDetailResponse;
   }
 

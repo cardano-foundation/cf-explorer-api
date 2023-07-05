@@ -54,6 +54,8 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
+  private Double lifetimeLuck;
+
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
