@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.controller.advice;
 
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.common.exceptions.*;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.http.HttpStatus;
@@ -87,5 +88,11 @@ public class GlobalRestControllerExceptionHandler {
                 .errorCode(e.getErrorCode().getServiceErrorCode())
                 .errorMessage(e.getErrorCode().getDesc())
                 .build());
+  }
+
+  @ExceptionHandler({NoContentException.class})
+  public ResponseEntity<BaseFilterResponse<?>> handleNoContent(NoContentException e) {
+    return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseFilterResponse<>());
   }
 }

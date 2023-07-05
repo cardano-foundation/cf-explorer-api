@@ -39,6 +39,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.common.utils.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 
@@ -82,7 +84,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey,
       StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
         .toInstant(ZoneOffset.UTC));
@@ -112,7 +114,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public BaseFilterResponse<StakeDelegationFilterResponse> getStakeDelegations(String stakeKey,
       StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
         .toInstant(ZoneOffset.UTC));
@@ -164,7 +166,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public BaseFilterResponse<StakeRewardResponse> getStakeRewards(String stakeKey, Date fromDate,
                                                                  Date toDate, RewardType type, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
       if (!fetchRewardResponse) {
@@ -189,7 +191,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawals(String stakeKey,
       StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
         .toInstant(ZoneOffset.UTC));
@@ -249,7 +251,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrations(String stakeKey,
       StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
         .toInstant(ZoneOffset.UTC));
@@ -279,7 +281,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivities(String stakeKey,
       Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     var txAmountList = addressTxBalanceRepository.findTxAndAmountByStake(stakeAddress.getView(),
         pageable);
     List<StakeWalletActivityResponse> response = getStakeWalletActivitiesContent(stakeAddress, txAmountList);
@@ -290,7 +292,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public BaseFilterResponse<StakeRewardActivityResponse> getStakeRewardActivities(String stakeKey,
       Pageable pageable) {
     var stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
       if (!fetchRewardResponse) {
@@ -331,7 +333,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivitiesByDateRange(
       String stakeKey, StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
                                           .toInstant(ZoneOffset.UTC));
