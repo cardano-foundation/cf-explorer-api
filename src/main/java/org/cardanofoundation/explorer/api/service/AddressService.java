@@ -8,6 +8,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressAnalytic
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import java.math.BigInteger;
 import java.util.List;
@@ -83,5 +84,5 @@ public interface AddressService {
    * @param address wallet address
    * @return json script
    */
-  String getJsonNativeScript(String address);
+  ContractScript getJsonNativeScript(String address);
 }

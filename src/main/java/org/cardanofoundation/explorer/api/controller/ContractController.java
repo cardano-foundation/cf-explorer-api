@@ -4,6 +4,7 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.consumercommon.entity.Address_;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +47,7 @@ public class ContractController {
   @GetMapping("/{address}/script")
   @LogMessage
   @Operation(summary = "Get native script of contract")
-  public ResponseEntity<String> getScriptOfContract(@PathVariable String address) {
+  public ResponseEntity<ContractScript> getScriptOfContract(@PathVariable String address) {
     return ResponseEntity.ok(addressService.getJsonNativeScript(address));
   }
 }

@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -78,19 +78,6 @@ import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 
 @Service
@@ -132,6 +119,7 @@ public class TxServiceImpl implements TxService {
   private final TreasuryRepository treasuryRepository;
   private final ReserveRepository reserveRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final TxMetadataRepository txMetadataRepository;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -520,6 +508,7 @@ public class TxServiceImpl implements TxService {
     getPoolCertificates(tx, txResponse);
     getProtocols(tx, txResponse);
     getInstantaneousRewards(tx, txResponse);
+    getMetadata(tx, txResponse);
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -541,6 +530,23 @@ public class TxServiceImpl implements TxService {
     }
 
     return txResponse;
+  }
+
+  /**
+   * Get transaction metadata
+   * @param tx transaction
+   * @param txResponse response data of transaction
+   */
+  private void getMetadata(Tx tx, TxResponse txResponse) {
+    List<TxMetadataResponse> txMetadataList =
+        txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
+            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).build()).toList();
+    if(!CollectionUtils.isEmpty(txMetadataList)) {
+      txResponse.setMetadata(txMetadataList);
+    }
+    if(Objects.nonNull(tx.getTxMetadataHash())) {
+      txResponse.setMetadataHash(tx.getTxMetadataHash().getHash());
+    }
   }
 
   /**
