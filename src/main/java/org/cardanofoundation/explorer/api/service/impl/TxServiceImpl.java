@@ -28,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -235,7 +236,7 @@ public class TxServiceImpl implements TxService {
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
                                                                        Pageable pageable) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
     List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
 
@@ -264,7 +265,7 @@ public class TxServiceImpl implements TxService {
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
                                                                      Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND)
     );
 
     Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeAddress.getId(), pageable);
