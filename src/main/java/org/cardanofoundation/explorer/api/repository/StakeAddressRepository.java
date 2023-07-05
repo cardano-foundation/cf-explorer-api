@@ -17,26 +17,14 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   Optional<StakeAddress> findByView(@Param("aLong") String aLong);
 
-  @Query(value = "SELECT sa.id as id, sa.view as stakeAddress, sum(addr.balance) as totalStake"
+  @Query(value = "SELECT sa.id as id, sa.view as stakeAddress, sa.balance as totalStake"
       + " FROM StakeAddress sa"
-      + " LEFT JOIN Address addr ON addr.stakeAddress = sa"
       + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
       + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = sa) >"
       + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)"
-      + " GROUP BY sa.id"
-      + " HAVING sum(addr.balance) IS NOT NULL"
+      + " AND sa.balance IS NOT NULL"
       + " ORDER BY totalStake DESC")
   List<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
-
-  @Query(value = "SELECT sa.view as stakeAddress, sum(addr.balance) as totalStake"
-      + " FROM StakeAddress sa"
-      + " LEFT JOIN Address addr ON addr.stakeAddress = sa"
-      + " WHERE sa.id in (:stakeKeyIds)"
-      + " GROUP BY sa.id"
-      + " HAVING sum(addr.balance) IS NOT NULL"
-      + " ORDER BY totalStake DESC")
-  List<StakeAddressProjection> findStakeAddressOrderByBalance(@Param("stakeKeyIds") Collection<Long> stakeKeyIds,
-                                                              Pageable pageable);
 
   @Query(value = "SELECT ph.view FROM StakeAddress sa "
       + "JOIN PoolOwner po ON sa.id  = po.stakeAddress.id "

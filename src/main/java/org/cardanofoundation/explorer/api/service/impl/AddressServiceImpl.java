@@ -299,7 +299,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     Page<AddressTokenProjection> addressTokenProjectionPage =
-        addressTokenBalanceRepository.findAddressAndBalanceByAddress(addr, pageable);
+        addressTokenBalanceRepository.findTokenAndBalanceByAddress(addr, pageable);
 
     List<AddressTokenProjection> addressTokenProjectionList = addressTokenProjectionPage.getContent();
     long totalElements = addressTokenProjectionPage.getTotalElements();
@@ -346,11 +346,11 @@ public class AddressServiceImpl implements AddressService {
 
     List<AddressTokenProjection> addressTokenProjectionList =
         addressTokenBalanceRepository.
-            findAddressAndBalanceByAddress(addr)
+            findTokenAndBalanceByAddress(addr)
         .stream()
         .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
             addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
-        .collect(Collectors.toList());
+        .toList();
     
     List<TokenAddressResponse> tokenListResponse = addressTokenProjectionList.stream()
         .map(tokenMapper::fromAddressTokenProjection)
