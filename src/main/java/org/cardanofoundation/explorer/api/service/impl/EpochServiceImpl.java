@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -9,7 +8,6 @@ import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
-import org.cardanofoundation.explorer.api.projection.UniqueAddressProjection;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
@@ -25,14 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigInteger;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -43,10 +38,8 @@ public class EpochServiceImpl implements EpochService {
   private final EpochMapper epochMapper;
   private final RedisTemplate<String, Object> redisTemplate;
   private final FetchRewardDataService fetchRewardDataService;
-  private static final String UNIQUE_ACCOUNTS = "UNIQUE_ACCOUNTS";
-  private static final String MAX_TRANSACTION_ID = "MAX_TRANSACTION_ID";
-  public static final long ONE_EPOCH = 5L;
-  public static final int NOT_EXPIRE = -1;
+  private static final String UNIQUE_ACCOUNTS_KEY = "UNIQUE_ACCOUNTS";
+  private static final String UNDERSCORE = "_";
 
   @Value("${application.network}")
   private String network;
@@ -70,7 +63,12 @@ public class EpochServiceImpl implements EpochService {
       var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
       checkEpochStatus(response, currentEpoch);
-
+      String uniqueAccountRedisKey = String.join(
+          UNDERSCORE,
+          getRedisKey(UNIQUE_ACCOUNTS_KEY),
+          epoch.getNo().toString());
+      Integer account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
+      response.setAccount(account);
       return response;
     } catch (NumberFormatException e) {
       throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
@@ -91,13 +89,24 @@ public class EpochServiceImpl implements EpochService {
       }
       Map<Integer, BigInteger> epochRewardMap
           = StreamUtil.toMap(fetchEpochList, Epoch::getNo, Epoch::getRewardsDistributed);
-      epochs.forEach(epoch -> epoch.setRewardsDistributed(epochRewardMap.get(epoch.getNo())));
+      epochs.forEach(epoch -> {
+        if(epochRewardMap.containsKey(epoch.getNo())) {
+          epoch.setRewardsDistributed(epochRewardMap.get(epoch.getNo()));
+        }
+      });
     }
 
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
     var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
         () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
-    pageResponse.getContent().forEach(epoch -> checkEpochStatus(epoch, currentEpoch));
+    pageResponse.getContent().forEach(epoch -> {
+      checkEpochStatus(epoch, currentEpoch);
+      String uniqueAccountRedisKey = String.join(
+          UNDERSCORE,
+          getRedisKey(UNIQUE_ACCOUNTS_KEY),
+          epoch.getNo().toString());
+      epoch.setAccount(redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue());
+    });
     return new BaseFilterResponse<>(pageResponse);
   }
 
@@ -136,53 +145,11 @@ public class EpochServiceImpl implements EpochService {
           var slot =
               currentLocalDateTime.toEpochSecond(ZoneOffset.UTC) - epochStartTime.toEpochSecond(
                   ZoneOffset.UTC);
-
-          Long startFromId = BigInteger.ZERO.longValue();
-          final String redisKey = getRedisKey(UNIQUE_ACCOUNTS, epochSummaryProjection.getNo());
-          final Long cacheSize = redisTemplate.opsForHash().size(redisKey);
-
-          if (cacheSize > BigInteger.ZERO.longValue()) {
-            Object maxTransaction = redisTemplate.opsForHash()
-                .get(redisKey, MAX_TRANSACTION_ID);
-
-            if (Objects.isNull(maxTransaction)) {
-              maxTransaction = redisTemplate.opsForHash().values(redisKey)
-                  .stream()
-                  .filter(Objects::nonNull)
-                  .map(Integer.class::cast)
-                  .max(Integer::compareTo)
-                  .orElse(BigInteger.ZERO.intValue());
-              redisTemplate.opsForHash().put(redisKey, MAX_TRANSACTION_ID, maxTransaction);
-            }
-
-            startFromId = Long.parseLong(Objects.requireNonNull(String.valueOf(maxTransaction)));
-          }
-
-          // TODO: handle rollback case
-
-          List<UniqueAddressProjection> uniqueAddress = epochRepository.getTotalAccountsAtEpoch(
-              epochSummaryProjection.getNo(), startFromId);
-
-          AtomicLong maxTxId = new AtomicLong(startFromId);
-
-          uniqueAddress.forEach(unique -> {
-            redisTemplate.opsForHash()
-                .put(redisKey, unique.getAddress(), unique.getId());
-            maxTxId.set(maxTxId.get() < unique.getId() ? unique.getId() : maxTxId.get());
-          });
-
-          redisTemplate.opsForHash().put(redisKey, MAX_TRANSACTION_ID, maxTxId.get());
-
-          var expire = redisTemplate.getExpire(
-              getRedisKey(UNIQUE_ACCOUNTS, epochSummaryProjection.getNo()));
-
-          if (expire == NOT_EXPIRE) {
-            redisTemplate.expire(redisKey, Duration.ofDays(ONE_EPOCH));
-          }
-
-          Integer account = redisTemplate.opsForHash().size(redisKey).intValue();
-          account =
-              account > BigInteger.ONE.intValue() ? account - BigInteger.ONE.intValue() : account;
+          String uniqueAccountRedisKey = String.join(
+              UNDERSCORE,
+              getRedisKey(UNIQUE_ACCOUNTS_KEY),
+              epochSummaryProjection.getNo().toString());
+          var account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
 
           return EpochSummary.builder()
               .no(epochSummaryProjection.getNo())
@@ -200,19 +167,7 @@ public class EpochServiceImpl implements EpochService {
             build());
   }
 
-
-  /**
-   * create redis key
-   *
-   * @param rawKey
-   * @return
-   */
-  private String getRedisKey(String rawKey, Integer epoch) {
-    return String.join("_", this.network, rawKey, String.valueOf(epoch));
-  }
-
-  @PostConstruct
-  void setUp() {
-    getCurrentEpochSummary();
+  private String getRedisKey(String key) {
+    return String.join(UNDERSCORE, network.toUpperCase(), key);
   }
 }
