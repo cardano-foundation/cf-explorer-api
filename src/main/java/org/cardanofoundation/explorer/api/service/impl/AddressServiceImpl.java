@@ -47,6 +47,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -193,14 +195,6 @@ public class AddressServiceImpl implements AddressService {
       balance = getBalanceInRangeHaveToday(address, to, maxDateAgg.get());
     } else {
       balance = getBalanceInRangePreviousToday(address, to, maxDateAgg.get());
-    }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTxBalanceRepository.countRecord(
-          address, Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      );
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
     }
 
     return new AddressAnalyticsResponse(to, balance);

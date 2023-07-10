@@ -26,8 +26,11 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,7 +81,6 @@ import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 
 @Service
 @RequiredArgsConstructor
@@ -120,6 +122,7 @@ public class TxServiceImpl implements TxService {
   private final ReserveRepository reserveRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final TxMetadataRepository txMetadataRepository;
+  private final TxContractMapper txContractMapper;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -272,6 +275,23 @@ public class TxServiceImpl implements TxService {
     List<TxFilterResponse> data = mapDataFromTxByStakeListToResponseList(txPage,
         stakeAddress.getId());
     return new BaseFilterResponse<>(txPage, data);
+  }
+
+  @Override
+  public List<ContractResponse> getTxContractDetail(String txHash, String address) {
+    Tx tx = txRepository.findByHash(txHash).orElseThrow(
+        () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)
+    );
+    List<ContractResponse> contractResponses = getContractResponses(tx);
+
+    // if contract address is not null, filter contract response by address
+    if(!DataUtil.isNullOrEmpty(address)) {
+      contractResponses = contractResponses.stream()
+          .filter(contractResponse -> address.equals(contractResponse.getAddress()) ||
+              address.equals(contractResponse.getScriptHash()))
+          .collect(Collectors.toList());
+    }
+    return contractResponses;
   }
 
   /**
@@ -666,17 +686,27 @@ public class TxServiceImpl implements TxService {
    * @param txResponse response data of transaction
    */
   private void getContracts(Tx tx, TxResponse txResponse) {
-    List<TxContractProjection> redeemers = redeemerRepository.findContractByTx(tx);
-    if (!CollectionUtils.isEmpty(redeemers)) {
-      List<ContractResponse> contractResponses = redeemers.stream().map(redeemer -> {
-        if (redeemer.getPurpose().equals(ScriptPurposeType.SPEND)) {
-          return new ContractResponse(redeemer.getAddress());
-        } else {
-          return new ContractResponse(redeemer.getScriptHash());
-        }
-      }).collect(Collectors.toList());
+    List<ContractResponse> contractResponses = getContractResponses(tx);
+    if(!CollectionUtils.isEmpty(contractResponses)) {
       txResponse.setContracts(contractResponses);
     }
+  }
+
+  private List<ContractResponse> getContractResponses(Tx tx) {
+    List<ContractResponse> contractResponses = redeemerRepository.findContractByTx(tx)
+        .stream().map(txContractMapper::fromTxContractProjectionToContractResponse).toList();
+    List<TxContractProjection> txContractProjections = txOutRepository.getContractDatumOutByTx(tx);
+    Map<String, TxContractProjection> txContractMap = txContractProjections.stream()
+        .collect(Collectors.toMap(TxContractProjection::getAddress, Function.identity()));
+    contractResponses.forEach(contractResponse -> {
+      TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
+      if (txContractProjection != null) {
+        contractResponse.setDatumBytesOut(
+            txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));
+        contractResponse.setDatumHashOut(txContractProjection.getDatumHashOut());
+      }
+    });
+    return contractResponses;
   }
 
   /**
@@ -698,17 +728,8 @@ public class TxServiceImpl implements TxService {
         .collect(Collectors.groupingBy(
             txOutMapper::fromAddressInputOutput
         ));
-    List<TxOutResponse> uTxOOutputs = mappingProjectionToAddress(addressOutputMap);
-    List<TxOutResponse> uTxOInputs = mappingProjectionToAddress(addressInputMap);
-    UTxOResponse uTxOs = UTxOResponse.builder()
-        .inputs(uTxOInputs)
-        .outputs(uTxOOutputs)
-        .build();
-    txResponse.setUTxOs(uTxOs);
 
-    List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
-    List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
-
+    //Get metadata
     List<Long> multiAssetIdList = new ArrayList<>();
     multiAssetIdList.addAll(
         addressInputInfo.stream().map(AddressInputOutputProjection::getMultiAssetId)
@@ -719,6 +740,22 @@ public class TxServiceImpl implements TxService {
 
     Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
         getMapMetadataAndMapAsset(multiAssetIdList);
+
+    //uTxO
+    List<TxOutResponse> uTxOOutputs = mappingProjectionToAddressWithMetadata(addressOutputMap,
+        getMapMetadataAndMapAsset.getFirst(), getMapMetadataAndMapAsset.getSecond());
+    List<TxOutResponse> uTxOInputs = mappingProjectionToAddressWithMetadata(addressInputMap,
+        getMapMetadataAndMapAsset.getFirst(), getMapMetadataAndMapAsset.getSecond());
+
+    UTxOResponse uTxOs = UTxOResponse.builder()
+        .inputs(uTxOInputs)
+        .outputs(uTxOOutputs)
+        .build();
+    txResponse.setUTxOs(uTxOs);
+
+    //Summary
+    List<TxOutResponse> addressesInfoInput = getStakeAddressInfo(addressInputInfo);
+    List<TxOutResponse> addressesInfoOutput = getStakeAddressInfo(addressOutputInfo);
 
     List<TxOutResponse> stakeAddress =
         removeDuplicateTx(addressesInfoInput, addressesInfoOutput,
@@ -757,6 +794,11 @@ public class TxServiceImpl implements TxService {
 
     unionTxsByAddress.forEach(
         (address, txs) -> {
+          if (txs.size() == 1) {
+            txs.get(0).getTokens().forEach(token -> {
+              setMetadata(assetMetadataMap, multiAssetMap, token);
+            });
+          }
           if (txs.size() > 1) {
             BigInteger totalValue = txs.get(0).getValue().add(txs.get(1).getValue());
             txs.get(0).setValue(totalValue);
@@ -779,13 +821,7 @@ public class TxServiceImpl implements TxService {
 
                   if (!BigInteger.ZERO.equals(totalQuantity)) {
                     TxMintingResponse token = tokens.get(0);
-                    MultiAsset multiAsset = multiAssetMap.get(token.getMultiAssetId());
-                    if (!Objects.isNull(multiAsset)) {
-                      String subject = multiAsset.getPolicy() + multiAsset.getName();
-                      AssetMetadata metadata = assetMetadataMap.get(subject);
-                      token.setMetadata(assetMetadataMapper.fromAssetMetadata(metadata));
-                    }
-
+                    setMetadata(assetMetadataMap, multiAssetMap, token);
                     token.setAssetQuantity(totalQuantity);
                     tokenResponse.add(token);
                   }
@@ -800,6 +836,16 @@ public class TxServiceImpl implements TxService {
     return summary.stream()
         .sorted(Comparator.comparing(TxOutResponse::getValue))
         .collect(Collectors.toList());
+  }
+
+  private void setMetadata(Map<String, AssetMetadata> assetMetadataMap,
+      Map<Long, MultiAsset> multiAssetMap, TxMintingResponse token) {
+    MultiAsset multiAsset = multiAssetMap.get(token.getMultiAssetId());
+    if (!Objects.isNull(multiAsset)) {
+      String subject = multiAsset.getPolicy() + multiAsset.getName();
+      AssetMetadata metadata = assetMetadataMap.get(subject);
+      token.setMetadata(assetMetadataMapper.fromAssetMetadata(metadata));
+    }
   }
 
   /**
@@ -894,6 +940,28 @@ public class TxServiceImpl implements TxService {
     if (!CollectionUtils.isEmpty(poolCertificates)) {
       txResponse.setPoolCertificates(poolCertificates);
     }
+  }
+
+  /**
+   * Map data from AddressInputOutputProjection to TxOutResponse
+   *
+   * @param addressInputOutputMap address with metadata projection map
+   * @return address response
+   */
+  private List<TxOutResponse> mappingProjectionToAddressWithMetadata(
+      Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputOutputMap,
+      Map<String, AssetMetadata> assetMetadataMap, Map<Long, MultiAsset> multiAssetMap) {
+    List<TxOutResponse> uTxOs = new ArrayList<>(addressInputOutputMap.keySet());
+    for (TxOutResponse uTxO : uTxOs) {
+      List<TxMintingResponse> tokens = addressInputOutputMap.get(uTxO).stream().
+          filter(token -> Objects.nonNull(token.getAssetId())).map(
+              maTxMintMapper::fromAddressInputOutputProjection
+          ).collect(Collectors.toList());
+      tokens.addAll(getTokenInFailedTxOut(addressInputOutputMap, uTxO));
+      tokens.forEach(token -> setMetadata(assetMetadataMap, multiAssetMap, token));
+      uTxO.setTokens(tokens);
+    }
+    return uTxOs;
   }
 
   /**
