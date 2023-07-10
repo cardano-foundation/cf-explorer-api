@@ -1,7 +1,5 @@
 # Iris API
 
-The Iris API provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the Iris frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
-
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/tests.yaml/badge.svg" />
 <img alt="Coverage" src="https://github.com/cardano-foundation/cf-explorer-api/blob/gh-pages/badges/jacoco.svg?raw=true" />
@@ -9,13 +7,19 @@ The Iris API provides access to blockchain data that is compatible with the Post
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
+The Iris API provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the Iris frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
+
+👉 Check the [Iris repository](https://github.com/cardano-foundation/cf-explorer) to understand how the microservices work together
+
 ## 🧪 Test Reports
 
 To ensure the stability and reliability of this project, unit and mutation tests have been implemented. By clicking on the links below, you can access the detailed test reports and review the outcomes of the tests performed.
 
-📊 [Coverage Report](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
+📊 [Postman Report](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
 
-📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+📊 [Postman Report (allure format)](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+
+📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/mutation-report/)
  
 ## Getting Started
 
@@ -25,7 +29,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 
 ### Installing
 
-- Clone the repository
+- Clone this repository
 - Copy `./.m2/settings.default.xml` to `./.m2/settings.xml` 
 - Fill `{username_github}` and `{token_github}` in `./.m2/settings.xml` with your github username and token. Guide to generate a token with `read:packages` scope [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
 - Copy `.env.example`  to `.env`

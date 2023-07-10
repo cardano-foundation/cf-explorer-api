@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.3.17](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.16...v0.3.17) (2023-07-04)
+
+
+### Bug Fixes
+
+* update README.md trigger release ([5278c28](https://github.com/cardano-foundation/cf-explorer-api/commit/5278c28c5ed503146773e9845c06aeb1c0e977f9))
+
+## [0.3.16](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.15...v0.3.16) (2023-07-03)
+
+
+### Features
+
+* change logic find top delegation by epoch block ([c69eb89](https://github.com/cardano-foundation/cf-explorer-api/commit/c69eb89bb964a94d002809941edc7f79241c3524))
+
+
+### Bug Fixes
+
+* add default sort pool certificate ([f5ba9e5](https://github.com/cardano-foundation/cf-explorer-api/commit/f5ba9e57504e25d201ac77c043afde5459534dc6))
+* edit code logic pool deposit ([8acc448](https://github.com/cardano-foundation/cf-explorer-api/commit/8acc448822d57ca316bb184125bae203c7aa73f1))
+
+## [0.3.15](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.14...v0.3.15) (2023-06-30)
+
+
+### Features
+
+* get total delegators from cache ([86f774a](https://github.com/cardano-foundation/cf-explorer-api/commit/86f774af4ba47a45ab5f626a37dc9b6f58f2a963))
+
+
+### Bug Fixes
+
+* upgrade cumsumer common version ([a174119](https://github.com/cardano-foundation/cf-explorer-api/commit/a174119e486bc6366c85d008ef834db20c35c56c))
+
 ## [0.3.14](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.13...v0.3.14) (2023-06-29)
 
 

@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.service;
 import java.util.Optional;
 
 import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
+import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
@@ -23,8 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(MockitoExtension.class)
-public class AddressServiceTest {
-  static final String SCRIPT_NOT_VERIFIED = "Script not verified";
+class AddressServiceTest {
 
   @Mock
   AddressRepository addressRepository;
@@ -76,7 +76,7 @@ public class AddressServiceTest {
   }
 
   @Test
-  void getJsonNativeScript_shouldReturnScripNotVerify_whenContractNotVerifyYet(){
+  void getJsonNativeScript_shouldReturnUnverifiedContractScript_whenContractNotVerifyYet(){
     Address address = Address.builder()
         .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
         .verifiedContract(false)
@@ -85,7 +85,10 @@ public class AddressServiceTest {
     when(addressRepository.findFirstByAddress(address.getAddress()))
         .thenReturn(Optional.of(address));
 
-    Assertions.assertEquals(addressService.getJsonNativeScript(address.getAddress()), SCRIPT_NOT_VERIFIED);
+    ContractScript contractScript = addressService.getJsonNativeScript(address.getAddress());
+
+    Assertions.assertFalse(contractScript.getIsVerified());
+    Assertions.assertNull(contractScript.getData());
   }
 
   @Test
@@ -107,12 +110,14 @@ public class AddressServiceTest {
     when(scriptRepository.findByHash(policyId))
         .thenReturn(Optional.of(script));
 
-    Assertions.assertEquals(addressService.getJsonNativeScript(address.getAddress()),
-                            script.getJson());
+    ContractScript contractScript = addressService.getJsonNativeScript(address.getAddress());
+
+    Assertions.assertTrue(contractScript.getIsVerified());
+    Assertions.assertEquals(script.getJson(), contractScript.getData());
   }
 
   @Test
-  void getJsonNativeScript_shouldReturnScripNotVerify_whenNativeScripJsonNull() {
+  void getJsonNativeScript_shouldReturnUnverifiedContractScript_whenNativeScripJsonNull() {
     Address address = Address.builder()
         .address(
             "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
@@ -129,7 +134,9 @@ public class AddressServiceTest {
     when(scriptRepository.findByHash(policyId))
         .thenReturn(Optional.of(script));
 
-    Assertions.assertEquals(addressService.getJsonNativeScript(address.getAddress()),
-                            SCRIPT_NOT_VERIFIED);
+    ContractScript contractScript = addressService.getJsonNativeScript(address.getAddress());
+
+    Assertions.assertFalse(contractScript.getIsVerified());
+    Assertions.assertNull(contractScript.getData());
   }
 }
