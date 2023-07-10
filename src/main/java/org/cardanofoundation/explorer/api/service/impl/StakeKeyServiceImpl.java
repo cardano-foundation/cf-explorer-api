@@ -225,8 +225,15 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    Pageable pageable1 = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-    var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageable1);
+    Pageable pageableDouble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+    var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageableDouble);
+    Set<String> stakeAddressList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
+    if (!fetchRewardDataService.checkRewardAvailable(stakeAddressList.stream().toList())) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeAddressList.stream().toList());
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
     var stakeIdList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getId);
     var stakeWithdrawals = withdrawalRepository.getRewardWithdrawnByAddrIn(stakeIdList);
     var mapStakeWithdrawnByStakeId = StreamUtil
@@ -234,7 +241,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     var stakeTotalRewards = rewardRepository.getTotalRewardByStakeAddressIn(stakeIdList);
     var mapStakeAvailableRewardsByStakeId = StreamUtil
         .toMap(stakeTotalRewards, StakeRewardProjection::getStakeAddressId, StakeRewardProjection::getAmount);
-    Set<String> stakeAddressList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
     var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
     var mapPoolByStakeAddress = StreamUtil.toMap(poolData, StakeDelegationProjection::getStakeAddress);
 

@@ -1,4 +1,4 @@
-# CARDANO-EXPLORER-API
+# Iris API
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/tests.yaml/badge.svg" />
@@ -7,9 +7,19 @@
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
-### Reports
-[Api-test html](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
-[Api-test allure](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+The Iris API provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the Iris frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
+
+👉 Check the [Iris repository](https://github.com/cardano-foundation/cf-explorer) to understand how the microservices work together
+
+## 🧪 Test Reports
+
+To ensure the stability and reliability of this project, unit and mutation tests have been implemented. By clicking on the links below, you can access the detailed test reports and review the outcomes of the tests performed.
+
+📊 [Postman Report](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
+
+📊 [Postman Report (allure format)](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+
+📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/mutation-report/)
  
 ## Getting Started
 
@@ -19,7 +29,7 @@
 
 ### Installing
 
-- Clone the repository
+- Clone this repository
 - Copy `./.m2/settings.default.xml` to `./.m2/settings.xml` 
 - Fill `{username_github}` and `{token_github}` in `./.m2/settings.xml` with your github username and token. Guide to generate a token with `read:packages` scope [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
 - Copy `.env.example`  to `.env`
@@ -57,7 +67,7 @@
 - `PRIVATE_MVN_REGISTRY_PASS`: the password of private maven registry
 - `SETTINGS_XML_TPL`: the template of settings.xml file
 
-- `API_NEWS_URL`: URL for get news data. Default is `http://dev.cf-explorer-monolith-mainnet.metadata.dev.cf-deployments.org:8085/?amount=%d`
+- `API_NEWS_URL`: URL for get news data.
 - `API_NEWS_CACHE_TIME`: Cache time for news data. Default is 120s.
 - `API_MARKET_URL`: URL for get market data. Default is `https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s`
 - `API_MARKET_CACHE_TIME` : Cache time for market data. Default is 120s.
@@ -78,8 +88,8 @@
     -  `NODE_ADDRESSES`: List of redis cluster nodes host and port.
     -  `REDIS_CLUSTER_PASSWORD`: Password of redis cluster.
 
-### We have 2 options for get data reward, epoch_stake, ada_pot, pool_info, pool_history:
-- `koios`: We will use koios service to get data.
+### There are two options to get the reward data, epoch_stake, ada_pot, pool_info and pool_history:
+- `koios`: The koios service will be used to collect the data
     - `API_CHECK_REWARD_URL`: URL for get reward data from koios service. Default is `http://localhost:8888/api/v1/rewards/fetch`.
     - `API_CHECK_POOL_HISTORY_URL`: URL for get pool history data from koios service. Default is `http://localhost:8888/api/v1/pool-history/fetch`.
     - `API_CHECK_POOL_INFO_URL`: URL for get pool info data from koios service. Default is `http://localhost:8888/api/v1/pool-info/fetch`.
