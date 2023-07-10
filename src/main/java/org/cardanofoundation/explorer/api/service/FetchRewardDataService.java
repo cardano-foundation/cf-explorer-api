@@ -9,6 +9,10 @@ public interface FetchRewardDataService {
 
   Boolean fetchReward(String stakeKey);
 
+  Boolean checkRewardAvailable(List<String> stakeAddressList);
+
+  Boolean fetchReward(List<String> stakeAddressList);
+
   Boolean checkPoolHistoryForPool(Set<String> poolIds);
 
   Set<String> checkAllPoolHistoryForPool(Set<String> poolIds);
