@@ -7,10 +7,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
@@ -87,13 +84,13 @@ class StakeKeyReportControllerTest {
   @Test
   void shouldGenerateStakeKeyReport() throws Exception {
     String username = "username";
-    Timestamp fromDate = Timestamp.valueOf("2021-01-01 00:00:00");
-    Timestamp toDate = new Timestamp(System.currentTimeMillis());
+    Timestamp fromDateTimestamp = Timestamp.valueOf("2021-01-01 00:00:00");
+    Timestamp toDateTimestamp = Timestamp.valueOf("2021-02-01 00:00:00");
 
     StakeKeyReportHistoryResponse responseExpect = StakeKeyReportHistoryResponse.builder()
         .stakeKey("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")
-        .fromDate(fromDate)
-        .toDate(toDate)
+        .fromDate(fromDateTimestamp)
+        .toDate(toDateTimestamp)
         .isADATransfer(Boolean.TRUE)
         .eventRegistration(Boolean.TRUE)
         .status(ReportStatus.IN_PROGRESS)
@@ -106,10 +103,7 @@ class StakeKeyReportControllerTest {
 
     mockMvc.perform(post(END_POINT + "/stake-key")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(asJsonString(StakeKeyReportRequest.builder()
-                .fromDate(fromDate)
-                .toDate(toDate)
-                .build()))
+            .content(asJsonString(Map.of("fromDate", "2021/01/01 00:00:00", "toDate", "2021/02/01 00:00:00")))
             .with(request -> {
               request.setAttribute("username", username);
               return request;
