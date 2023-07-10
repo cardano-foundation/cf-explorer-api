@@ -3,8 +3,10 @@ package org.cardanofoundation.explorer.api.service.impl;
 import com.google.common.collect.Lists;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -38,19 +41,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.chart.DelegatorCha
 import org.cardanofoundation.explorer.api.model.response.pool.chart.EpochChartList;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.EpochChartResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.BasePoolChartProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochRewardProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolActiveStakeProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolAmountProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCountProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailEpochProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiosProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
 import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
@@ -81,6 +72,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -389,6 +381,7 @@ public class DelegationServiceImpl implements DelegationService {
     BigDecimal stakeLimit = getPoolSaturation(projection.getReserves(),
         projection.getParamK());
     poolDetailResponse.setStakeLimit(stakeLimit);
+
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
       Set<String> poolIdList = new HashSet<>(Collections.singletonList(poolView));
@@ -407,7 +400,8 @@ public class DelegationServiceImpl implements DelegationService {
       List<PoolAmountProjection> poolAmountProjections = rewardRepository.getOperatorRewardByPoolList(
           poolIdList, currentEpoch);
       setRewardKoiOs(poolHistoryProjections, poolAmountProjections, poolDetailResponse);
-
+      // processing for lifetime luck
+      poolDetailResponse.setLifetimeLuck(this.getLifetimeLuck(poolHashRepository.findDataCalculateLifetimeLuck(poolView), poolHistoryRepository.getPoolHistoryKoiOs(poolView), currentEpoch));
     } else {
       List<Object> poolViews = new ArrayList<>();
       poolViews.add(poolView);
@@ -423,7 +417,6 @@ public class DelegationServiceImpl implements DelegationService {
       poolDetailResponse.setRos(
           getRos(poolReward, poolDetailResponse.getCost(), poolDetailResponse.getMargin(),
               activeStakeMap.get(poolView)));
-      poolDetailResponse.setLifetimeLuck();
     }
     poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
     List<String> ownerAddress = poolUpdateRepository.findOwnerAccountByPool(poolId);
@@ -433,6 +426,9 @@ public class DelegationServiceImpl implements DelegationService {
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
 
+
+    // block produced by single pool in specific epoch: blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId)
+    //
     return poolDetailResponse;
   }
 
@@ -843,4 +839,34 @@ public class DelegationServiceImpl implements DelegationService {
     return CompletableFuture.supplyAsync(
         () -> fetchRewardDataService.fetchEpochStakeForPool(addressIds));
   }
+
+  private Double getLifetimeLuck(List<PoolLifetimeLuckProjection> projections1, List<PoolHistoryKoiosProjection> projections2, Integer currentEpoch) {
+    return projections1.stream().filter(t -> !Objects.equals(t.getEpochNo(), currentEpoch)).limit(1100).mapToDouble(t -> this.calculateLifetimeLuck(t.getBlkProducedByPool(), t.getBlkProducedByAllPool(), t.getDecentralisation(), this.getActiveStakePct(t, projections2))).average().orElse(0);
+  }
+
+  private Boolean isSameEpoch(PoolLifetimeLuckProjection projection1, PoolHistoryKoiosProjection projection2) {
+    return Objects.equals(projection1.getEpochNo(), projection2.getEpochNo());
+  }
+
+  private BigDecimal getActiveStakePct(PoolLifetimeLuckProjection projection1, List<PoolHistoryKoiosProjection> projections2) {
+    PoolHistoryKoiosProjection projection = projections2.stream().filter(t -> this.isSameEpoch(projection1, t)).findFirst().orElse(null);
+    return Objects.isNull(projection) ? BigDecimal.ZERO : projection.getActiveStakePct();
+  }
+
+  private Integer calculateLifetimeLuck(BigInteger blkProducedByPool, BigInteger blkProducedByAllPool, BigDecimal decentralisation, BigDecimal activeStakePct) {
+    return round(new BigDecimal(blkProducedByPool).multiply(new BigDecimal(10000)).divide(new BigDecimal(21600).multiply(BigDecimal.ONE.subtract(decentralisation)).multiply(activeStakePct), 2, RoundingMode.HALF_UP));
+  }
+
+  private Integer round(BigDecimal number) {
+    if(number.subtract(new BigDecimal(number.intValue())).doubleValue() > 0.44)
+    {
+      return number.add(BigDecimal.ONE).intValue();
+    } else {
+      return number.intValue();
+    }
+  }
+
+//  private Double round(BigDecimal number) {
+//    return number.doubleValue();
+//  }
 }

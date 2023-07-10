@@ -24,4 +24,7 @@ public interface EpochParamRepository extends JpaRepository<EpochParam, Long> {
 
   @Query(value = "SELECT ep.optimalPoolCount FROM EpochParam ep WHERE ep.epochNo = :epochNo")
   Integer getOptimalPoolCountByEpochNo(@Param("epochNo") Integer epochNo);
+
+  @Query(value = "SELECT ep.decentralisation FROM EpochParam ep WHERE ep.epochNo = :epochNo")
+  Integer getDecentralisationByEpochNo(@Param("epochNo") Integer epochNo);
 }

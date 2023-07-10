@@ -32,7 +32,7 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
 
   @Query(value =
       "SELECT ph.epochNo AS epochNo, ph.delegatorRewards AS delegateReward, ph.epochRos AS ros, "
-          + "ph.activeStake AS activeStake, ph.poolFees AS poolFees "
+          + "ph.activeStake AS activeStake, ph.poolFees AS poolFees, ph.activeStakePct as activeStakePct "
           + "FROM PoolHistory ph "
           + "WHERE ph.pool.view = :poolId "
           + "ORDER BY ph.epochNo DESC")

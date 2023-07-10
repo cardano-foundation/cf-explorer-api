@@ -24,10 +24,4 @@ public interface PoolDetailUpdateProjection {
   BigInteger getReserves();
 
   String getRewardAddress();
-
-  Integer getBlkProduced();
-
-  Integer getBlkProducedInAllPool();
-
-  Integer getDecentralisation();
 }

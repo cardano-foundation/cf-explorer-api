@@ -3,11 +3,8 @@ package org.cardanofoundation.explorer.api.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailEpochProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
+
+import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -107,4 +104,16 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value = "SELECT ph.view FROM PoolHash ph ")
   List<Object> findAllPoolView();
+
+  @Query(value = """
+         select bk.epochNo as epochNo, count(bk.id) as blkProducedByPool, e.blkCount as blkProducedByAllPool, ep.decentralisation as decentralisation 
+         FROM PoolHash ph
+         JOIN SlotLeader sl ON sl.poolHashId = ph.id
+         JOIN Block bk ON bk.slotLeaderId  = sl.id
+         join Epoch e on e.no = bk.epochNo
+         join EpochParam ep on ep.epochNo = bk.epochNo
+         WHERE ph.view = :poolView group by e.blkCount, ep.decentralisation, bk.epochNo order by bk.epochNo desc
+  """)
+  List<PoolLifetimeLuckProjection> findDataCalculateLifetimeLuck(@Param("poolView") String poolView);
+
 }
