@@ -1,25 +1,9 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
@@ -32,45 +16,31 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStake;
-import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
-import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
-import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
-import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
-import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
-import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
-import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
-import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.model.response.stake.*;
+import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
-import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -98,10 +68,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
-  private final EpochStakeRepository epochStakeRepository;
-  private final TopDelegatorCacheService topDelegatorCacheService;
-
-  private final PoolHashRepository poolHashRepository;
 
   private final RedisTemplate<String, Object> redisTemplate;
 
@@ -153,15 +119,13 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       }
     }
     stakeAddressResponse.setStakeAddress(stake);
-    BigInteger stakeTotalBalance
-        = addressRepository.findTotalBalanceByStakeAddress(stakeAddress).orElse(BigInteger.ZERO);
     BigInteger stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
         stake).orElse(BigInteger.ZERO);
     BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
         stake).orElse(BigInteger.ZERO);
     stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
     stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
-    stakeAddressResponse.setTotalStake(stakeTotalBalance.add(stakeAvailableReward)
+    stakeAddressResponse.setTotalStake(stakeAddress.getBalance().add(stakeAvailableReward)
             .subtract(stakeRewardWithdrawn));
     StakeDelegationProjection poolData = delegationRepository.findPoolDataByAddress(stakeAddress)
         .orElse(null);
@@ -261,15 +225,15 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    List<Long> topDelegatorStakeIdsCached = topDelegatorCacheService.getTopStakeDelegatorCache();
-
-    List<StakeAddressProjection> stakeList;
-    if (topDelegatorStakeIdsCached.isEmpty()) {
-      stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageable);
-    } else {
-      stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(topDelegatorStakeIdsCached, pageable);
-    }
-
+    Pageable pageable1 = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+    var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageable1);
+    var stakeIdList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getId);
+    var stakeWithdrawals = withdrawalRepository.getRewardWithdrawnByAddrIn(stakeIdList);
+    var mapStakeWithdrawnByStakeId = StreamUtil
+        .toMap(stakeWithdrawals, StakeWithdrawalProjection::getStakeAddressId, StakeWithdrawalProjection::getAmount);
+    var stakeTotalRewards = rewardRepository.getTotalRewardByStakeAddressIn(stakeIdList);
+    var mapStakeAvailableRewardsByStakeId = StreamUtil
+        .toMap(stakeTotalRewards, StakeRewardProjection::getStakeAddressId, StakeRewardProjection::getAmount);
     Set<String> stakeAddressList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
     var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
     var mapPoolByStakeAddress = StreamUtil.toMap(poolData, StakeDelegationProjection::getStakeAddress);
@@ -279,9 +243,16 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       StakeDelegationProjection delegation = mapPoolByStakeAddress.get(stake.getStakeAddress());
       StakeFilterResponse stakeResponse = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
       stakeResponse.setPoolName(delegation.getPoolData());
+      var stakeWithdrawn = mapStakeWithdrawnByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
+      var stakeTotalReward = mapStakeAvailableRewardsByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
+      var availableReward = stakeTotalReward.subtract(stakeWithdrawn);
+      if(availableReward.compareTo(BigInteger.ZERO) < 0) {
+        availableReward = BigInteger.ZERO;
+      }
+      stakeResponse.setBalance(stake.getTotalStake().add(availableReward));
       content.add(stakeResponse);
     }
-
+    content.sort(Comparator.comparing(StakeFilterResponse::getBalance).reversed());
     Page<StakeFilterResponse> pageResponse = new PageImpl<>(content, pageable, pageable.getPageSize());
     return new BaseFilterResponse<>(pageResponse);
   }
