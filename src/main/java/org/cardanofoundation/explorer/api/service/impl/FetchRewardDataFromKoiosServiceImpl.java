@@ -61,6 +61,20 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   }
 
   @Override
+  public Boolean checkRewardAvailable(List<String> stakeAddressList) {
+    Integer countCheckPoint = rewardCheckpointRepository.checkRewardByRewardAccountsAndEpoch(
+        stakeAddressList);
+    Integer sizeCheck = stakeAddressList.size();
+    return Objects.equals(countCheckPoint, sizeCheck);
+  }
+
+  @Override
+  public Boolean fetchReward(List<String> stakeAddressList) {
+    return restTemplate.postForObject(apiCheckRewardUrl, stakeAddressList,
+        Boolean.class);
+  }
+
+  @Override
   public Boolean checkPoolHistoryForPool(Set<String> poolIds) {
     Integer countCheckPoint = poolHistoryCheckpointRepository.checkRewardByPoolViewAndEpoch(
         poolIds);
