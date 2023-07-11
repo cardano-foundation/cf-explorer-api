@@ -136,7 +136,7 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
       + " CASE WHEN pp.coinsPerUtxoSize IS NOT NULL THEN pp.coinsPerUtxoSize ELSE ep.coinsPerUtxoSize END  AS coinsPerUtxoSize,  "
       + " CASE WHEN pp.costModelId IS NOT NULL THEN pp.costModelId "
       + "      ELSE ep.costModel.id "
-      + " END AS costModelId,  "// check Change
+      + " END AS costModel,  "// check Change
       + " CASE WHEN pp.minFeeA IS NOT NULL THEN TRUE ELSE FALSE END  AS minFeeAProposal, "
       + " CASE WHEN pp.minFeeB IS NOT NULL THEN TRUE ELSE FALSE END  AS minFeeBProposal,  "
       + " CASE WHEN pp.maxBlockSize IS NOT NULL THEN TRUE ELSE FALSE END  AS maxBlockSizeProposal,  "

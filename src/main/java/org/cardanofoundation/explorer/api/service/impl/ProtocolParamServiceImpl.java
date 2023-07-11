@@ -264,6 +264,9 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
     List<LatestParamHistory> changeHistories = getParamHistories();
     final Protocols protocols = new Protocols();
+    Map<Long, String> costModelMap = costModelRepository.findAll()
+            .stream()
+                .collect(Collectors.toMap(CostModel::getId, CostModel::getCosts));
 
     changeHistories
         .stream()
@@ -288,6 +291,11 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                         ((boolean) latestParamHistoryMethods.get(protocolType).getSecond()
                             .invoke(changeHistory)) ? changeHistory.getHash()
                                                     : null;
+
+                    if(protocolType.equals(ProtocolType.COST_MODEL)){
+                      changeValue = costModelMap.get(changeValue);
+                    }
+
                     if (Objects.isNull(oldValue)) {
                       ProtocolHistory protocolHistory = ProtocolHistory.builder()
                           .transactionHash(transactionHash)
