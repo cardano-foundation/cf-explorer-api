@@ -20,6 +20,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressAnalytic
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
@@ -34,6 +35,7 @@ import org.cardanofoundation.explorer.api.repository.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.HexUtils;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
@@ -124,7 +126,7 @@ public class AddressServiceImpl implements AddressService {
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type)
       throws ExecutionException, InterruptedException {
     Address addr = addressRepository.findFirstByAddress(address)
-        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
     Long txCount = addressTxBalanceRepository.countByAddress(addr);
     if (Long.valueOf(0).equals(txCount)) {
       return List.of();
@@ -260,7 +262,7 @@ public class AddressServiceImpl implements AddressService {
   @Transactional(readOnly = true)
   public List<BigInteger> getAddressMinMaxBalance(String address) {
     Address addr = addressRepository.findFirstByAddress(address)
-        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
 
     MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByAddress(
         addr.getId());
@@ -301,7 +303,7 @@ public class AddressServiceImpl implements AddressService {
       String address) {
 
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     Page<AddressTokenProjection> addressTokenProjectionPage =
@@ -347,7 +349,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
+        () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     List<AddressTokenProjection> addressTokenProjectionList =
@@ -395,13 +397,13 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  public String getJsonNativeScript(String address) {
+  public ContractScript getJsonNativeScript(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
     if(Boolean.FALSE.equals(addr.getVerifiedContract())){
-      return SCRIPT_NOT_VERIFIED;
+      return ContractScript.builder().isVerified(Boolean.FALSE).data(null).build();
     }
 
     ShelleyAddress shelleyAddress = new ShelleyAddress(addr.getAddress());
@@ -411,10 +413,10 @@ public class AddressServiceImpl implements AddressService {
     );
 
     if(Objects.isNull(script.getJson())){
-      return SCRIPT_NOT_VERIFIED;
+      return ContractScript.builder().isVerified(Boolean.FALSE).data(null).build();
     }
 
-    return script.getJson();
+    return ContractScript.builder().isVerified(Boolean.TRUE).data(script.getJson()).build();
   }
 
   private void setMetadata(List<TokenAddressResponse> tokenListResponse) {

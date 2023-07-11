@@ -1,6 +1,15 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
+
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
@@ -98,7 +107,7 @@ public class EpochServiceImpl implements EpochService {
 
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
     var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
-        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
     pageResponse.getContent().forEach(epoch -> {
       checkEpochStatus(epoch, currentEpoch);
       String uniqueAccountRedisKey = String.join(
