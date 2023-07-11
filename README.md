@@ -57,9 +57,9 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `S3_SECRET_KEY`: the AWS secret key
 - `S3_REGION`: the AWS region
 - `S3_BUCKET_NAME`: the AWS bucket
-- `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
-- `PATH_STYLE_ENABLED`: 
 
+- `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
+  
 - `LOG_PATH`: the path to store log files
 
 - `PRIVATE_MVN_REGISTRY_URL`: the url of private maven registry
