@@ -61,7 +61,9 @@ public class EpochServiceImpl implements EpochService {
       Epoch epoch = epochRepository.findFirstByNo(epochNo).orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
       );
-      if (!fetchRewardDataService.checkEpochRewardDistributed(epoch)) {
+      var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
+          () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+      if (!fetchRewardDataService.checkEpochRewardDistributed(epoch) && epoch.getNo() < currentEpoch - 1 ) {
         List<Epoch> fetchEpochResponse = fetchRewardDataService.fetchEpochRewardDistributed(List.of(epochNo));
         if (CollectionUtils.isEmpty(fetchEpochResponse)) {
           throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
@@ -69,8 +71,6 @@ public class EpochServiceImpl implements EpochService {
         epoch.setRewardsDistributed(fetchEpochResponse.get(0).getRewardsDistributed());
       }
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
-      var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
-          () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
       checkEpochStatus(response, currentEpoch);
       String uniqueAccountRedisKey = String.join(
           UNDERSCORE,
