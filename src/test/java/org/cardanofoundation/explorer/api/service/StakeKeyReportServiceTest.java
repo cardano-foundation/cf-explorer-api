@@ -83,6 +83,9 @@ public class StakeKeyReportServiceTest {
   @Mock
   RewardRepository rewardRepository;
 
+  @Mock
+  ReportHistoryService reportHistoryService;
+
   @Test
   void generateStakeKeyReport_shouldThrowExceptionWhenNotFoundStakeAdress() {
     StakeKeyReportRequest request = StakeKeyReportRequest.builder()
@@ -132,7 +135,7 @@ public class StakeKeyReportServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(
         Optional.of(StakeAddress.builder().build()));
 
-    when(stakeKeyReportHistoryRepository.saveAndFlush(any(StakeKeyReportHistory.class))).thenReturn(expect);
+    when(reportHistoryService.saveStakeKeyReportHistory(any(StakeKeyReportHistory.class))).thenReturn(expect);
     when(stakeKeyReportMapper.toStakeKeyReportHistory(any(StakeKeyReportRequest.class))).thenReturn(
         expect);
 
@@ -255,43 +258,16 @@ public class StakeKeyReportServiceTest {
   }
 
   @Test
-  void exportStakeKeyReport_shouldThrowExceptionWhenReportHistoryNotFound() {
-    Long reportId = 1L;
-    String username = "username";
-    ExportType exportType = ExportType.EXCEL;
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-    Assertions.assertThrows(BusinessException.class,
-        () -> stakeKeyReportService.exportStakeKeyReport(reportId, username,
-            exportType));
-  }
-
-  @Test
-  void exportStakeKeyReport_shouldThrowExceptionWhenUsernameDoNotHavePermission() {
-    Long reportId = 1L;
-    String username = "username";
-    ExportType exportType = ExportType.EXCEL;
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
-            .reportHistory(ReportHistory.builder()
-                .username("otherUsername")
-                .build())
-            .build()));
-    Assertions.assertThrows(BusinessException.class,
-        () -> stakeKeyReportService.exportStakeKeyReport(reportId, username,
-            exportType));
-  }
-
-  @Test
   void exportStakeKeyReport_shouldThrowExceptionWhenReportNotYetPersistToStorage() {
     Long reportId = 1L;
     String username = "username";
     ExportType exportType = ExportType.EXCEL;
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(
+        StakeKeyReportHistory.builder()
             .reportHistory(ReportHistory.builder()
-                .username(username)
-                .build())
-            .build()));
+                               .username(username)
+                               .build())
+            .build());
 
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyReportService.exportStakeKeyReport(reportId, username,
@@ -321,8 +297,7 @@ public class StakeKeyReportServiceTest {
             .type(ReportType.STAKE_KEY)
             .build())
         .build();
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(stakeKeyReportHistory));
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(stakeKeyReportHistory);
 
     StakeKeyReportResponse expect = StakeKeyReportResponse.builder()
         .fileName("reportName" + exportType.getValue())
@@ -371,8 +346,8 @@ public class StakeKeyReportServiceTest {
         .type(ReportType.STAKE_KEY)
         .build();
 
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(stakeKeyReportHistory));
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(stakeKeyReportHistory);
+
     when(stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory))
         .thenReturn(expect);
 
@@ -388,15 +363,15 @@ public class StakeKeyReportServiceTest {
     Timestamp toDate = new Timestamp(System.currentTimeMillis());
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
     Pageable pageable = PageRequest.of(0, 1);
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(
+        StakeKeyReportHistory.builder()
             .reportHistory(ReportHistory.builder()
-                .username(username)
-                .build())
+                               .username(username)
+                               .build())
             .fromDate(fromDate)
             .stakeKey(stakeKey)
             .toDate(toDate)
-            .build()));
+            .build());
 
     LocalDateTime curTime = LocalDateTime.now();
     StakeRegistrationLifeCycle expect = StakeRegistrationLifeCycle.builder()
@@ -427,15 +402,15 @@ public class StakeKeyReportServiceTest {
     Timestamp toDate = new Timestamp(System.currentTimeMillis());
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
     Pageable pageable = PageRequest.of(0, 1);
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(
+        StakeKeyReportHistory.builder()
             .reportHistory(ReportHistory.builder()
-                .username(username)
-                .build())
+                               .username(username)
+                               .build())
             .fromDate(fromDate)
             .stakeKey(stakeKey)
             .toDate(toDate)
-            .build()));
+            .build());
 
     LocalDateTime curTime = LocalDateTime.now();
     StakeRegistrationLifeCycle expect = StakeRegistrationLifeCycle.builder()
@@ -466,15 +441,15 @@ public class StakeKeyReportServiceTest {
     Timestamp toDate = new Timestamp(System.currentTimeMillis());
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
     Pageable pageable = PageRequest.of(0, 1);
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(
+        StakeKeyReportHistory.builder()
             .reportHistory(ReportHistory.builder()
-                .username(username)
-                .build())
+                               .username(username)
+                               .build())
             .fromDate(fromDate)
             .stakeKey(stakeKey)
             .toDate(toDate)
-            .build()));
+            .build());
 
     LocalDateTime curTime = LocalDateTime.now();
     StakeDelegationFilterResponse expect = StakeDelegationFilterResponse.builder()
@@ -505,15 +480,15 @@ public class StakeKeyReportServiceTest {
     Timestamp toDate = new Timestamp(System.currentTimeMillis());
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
     Pageable pageable = PageRequest.of(0, 1);
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(
+        StakeKeyReportHistory.builder()
             .reportHistory(ReportHistory.builder()
                 .username(username)
                 .build())
             .fromDate(fromDate)
             .stakeKey(stakeKey)
             .toDate(toDate)
-            .build()));
+            .build());
 
     StakeRewardResponse expect = StakeRewardResponse.builder()
         .epoch(1)
@@ -551,15 +526,15 @@ public class StakeKeyReportServiceTest {
     Timestamp toDate = new Timestamp(System.currentTimeMillis());
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
     Pageable pageable = PageRequest.of(0, 1);
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(
+        StakeKeyReportHistory.builder()
             .reportHistory(ReportHistory.builder()
-                .username(username)
-                .build())
+                               .username(username)
+                               .build())
             .fromDate(fromDate)
             .stakeKey(stakeKey)
             .toDate(toDate)
-            .build()));
+            .build());
 
     LocalDateTime curTime = LocalDateTime.now();
     StakeWithdrawalFilterResponse expect = StakeWithdrawalFilterResponse.builder()
@@ -590,15 +565,15 @@ public class StakeKeyReportServiceTest {
     Timestamp toDate = new Timestamp(System.currentTimeMillis());
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
     Pageable pageable = PageRequest.of(0, 1);
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
+    when(reportHistoryService.getStakeKeyReportHistory(reportId, username)).thenReturn(
+        StakeKeyReportHistory.builder()
             .reportHistory(ReportHistory.builder()
-                .username(username)
-                .build())
+                               .username(username)
+                               .build())
             .fromDate(fromDate)
             .stakeKey(stakeKey)
             .toDate(toDate)
-            .build()));
+            .build());
 
     StakeWalletActivityResponse expect = new StakeWalletActivityResponse();
     expect.setFee(BigInteger.TWO);
