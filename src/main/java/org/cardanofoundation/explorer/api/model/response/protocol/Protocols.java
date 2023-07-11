@@ -27,7 +27,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 @AllArgsConstructor
 @Log4j2
 public class Protocols {
-
+  @JsonIgnore
   EpochChange epochChange;
   ProtocolHistory minFeeA;
   ProtocolHistory minFeeB;
