@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -18,9 +19,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/delegations")
@@ -34,7 +37,7 @@ public class DelegationController {
   @Operation(summary = "List delegations")
   public ResponseEntity<BaseFilterResponse<DelegationResponse>> getDelegations(
       @ParameterObject @PageableDefault(size = 20, value = 20, sort = {Delegation_.TX_ID},
-          direction = Sort.Direction.DESC)  Pageable pageable) {
+          direction = Sort.Direction.DESC) Pageable pageable) {
     return ResponseEntity.ok(delegationService.getDelegations(pageable));
   }
 
@@ -45,7 +48,8 @@ public class DelegationController {
 
   @GetMapping("/pool-list")
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @ParameterObject @PageableDefault(size = 10, page = 0, sort = {
+          "pu.pledge"}, direction = Sort.Direction.DESC) Pageable pageable,
       @RequestParam("search") String search) {
     return ResponseEntity.ok(delegationService.getDataForPoolTable(pageable, search));
   }
