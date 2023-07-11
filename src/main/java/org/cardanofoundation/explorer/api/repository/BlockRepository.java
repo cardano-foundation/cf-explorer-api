@@ -69,4 +69,13 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
       + "WHERE ph.id IN :poolIds "
       + "GROUP BY ph.id")
   List<PoolCountProjection> getCountBlockByPools(@Param("poolIds") Set<Long> poolIds);
+
+  @Query(value = "SELECT ph.id AS poolId, ph.view AS poolView, count(bk.id) AS countValue "
+      + "FROM PoolHash ph "
+      + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
+      + "JOIN Block bk ON bk.slotLeader.id = sl.id "
+      + "WHERE bk.epochNo = :epochNo "
+      + "GROUP BY ph.id, ph.view "
+      + "ORDER BY countValue DESC")
+  List<PoolCountProjection> findTopDelegationByEpochBlock(@Param("epochNo") Integer epochNo, Pageable pageable);
 }
