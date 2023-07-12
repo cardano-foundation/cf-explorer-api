@@ -54,7 +54,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " WHERE txIn.txInput = :tx")
   List<AddressInputOutputProjection> getTxAddressInputInfo(@Param("tx") Tx tx);
 
-  @Query("SELECT txOut.address as address, d.hash as datumHashOut, d.bytes as datumBytesOut"
+  @Query("SELECT txOut.id as txOutId, txOut.address as address, d.hash as datumHashOut, d.bytes as datumBytesOut"
       + " FROM TxOut txOut"
       + " JOIN Datum d ON txOut.inlineDatum = d"
       + " WHERE txOut.tx = :tx")
