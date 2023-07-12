@@ -23,4 +23,6 @@ public class TxResponse {
   private ProtocolParamResponse protocols;
   private ProtocolParamResponse previousProtocols;
   private List<TxInstantaneousRewardsProjection> instantaneousRewards;
+  private String metadataHash;
+  private List<TxMetadataResponse> metadata;
 }
