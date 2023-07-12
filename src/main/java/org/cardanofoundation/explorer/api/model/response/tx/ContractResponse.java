@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 
 @Getter
@@ -25,4 +26,6 @@ public class ContractResponse {
   private String scriptBytes;
   private String datumHashOut;
   private String datumBytesOut;
+  @JsonIgnore
+  private Long txOutId;
 }
