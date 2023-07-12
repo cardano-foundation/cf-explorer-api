@@ -12,7 +12,7 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
 
   @Query("SELECT re.scriptHash AS scriptHash, txOut.address AS address, re.purpose as purpose,"
       + " rd.bytes as redeemerBytes, re.unitMem as redeemerMem, re.unitSteps as redeemerSteps,"
-      + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes"
+      + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes, txOut.id as txOutId"
       + " FROM Redeemer re"
       + " INNER JOIN Tx tx ON re.tx = tx"
       + " LEFT JOIN RedeemerData rd ON re.redeemerData = rd"

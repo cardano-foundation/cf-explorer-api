@@ -16,4 +16,5 @@ public interface TxContractProjection {
   byte[] getScriptBytes();
   String getDatumHashOut();
   byte[] getDatumBytesOut();
+  Long getTxOutId();
 }
