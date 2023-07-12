@@ -9,6 +9,7 @@ import org.cardanofoundation.explorer.api.repository.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.SlotLeaderRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.BlockService;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.explorer.consumercommon.entity.SlotLeader;
@@ -93,7 +94,7 @@ public class BlockServiceImpl implements BlockService {
       Page<Block> blocks = blockRepository.findBlockByEpochNo(epochNo, pageable);
       return mapperBlockToBlockFilterResponse(blocks);
     } catch (NumberFormatException e) {
-      throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
+      throw new NoContentException(BusinessCode.EPOCH_NOT_FOUND);
     }
   }
 

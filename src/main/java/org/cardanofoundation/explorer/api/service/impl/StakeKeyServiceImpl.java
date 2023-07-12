@@ -29,6 +29,7 @@ import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -176,7 +177,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey,
                                                                       Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
-        () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     List<StakeHistoryProjection> stakeHistoryList =
         stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress);
     stakeHistoryList.addAll(
@@ -290,7 +291,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       throws ExecutionException, InterruptedException {
 
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     List<CompletableFuture<StakeAnalyticBalanceResponse>> futureStakeAnalytics = new ArrayList<>();
     List<LocalDate> dates = getListDateAnalytic(type);
@@ -447,7 +448,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   public List<BigInteger> getStakeMinMaxBalance(String stakeKey) {
     StakeAddress stake = stakeAddressRepository.findByView(stakeKey)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByStakeAddress(
         stake.getId());
