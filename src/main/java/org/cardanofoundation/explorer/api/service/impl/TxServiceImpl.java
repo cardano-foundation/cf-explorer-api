@@ -695,10 +695,12 @@ public class TxServiceImpl implements TxService {
     List<ContractResponse> contractResponses = redeemerRepository.findContractByTx(tx)
         .stream().map(txContractMapper::fromTxContractProjectionToContractResponse).toList();
     List<TxContractProjection> txContractProjections = txOutRepository.getContractDatumOutByTx(tx);
-    Map<Long, TxContractProjection> txContractMap = txContractProjections.stream()
-        .collect(Collectors.toMap(TxContractProjection::getTxOutId, Function.identity()));
+    Map<String, TxContractProjection> txContractMap = txContractProjections.stream()
+            .collect(Collectors.groupingBy(TxContractProjection::getAddress,
+                    Collectors.collectingAndThen(Collectors.toList(), list -> list.get(0))));
+
     contractResponses.forEach(contractResponse -> {
-      TxContractProjection txContractProjection = txContractMap.get(contractResponse.getTxOutId());
+      TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
       if (txContractProjection != null) {
         contractResponse.setDatumBytesOut(
             txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));
