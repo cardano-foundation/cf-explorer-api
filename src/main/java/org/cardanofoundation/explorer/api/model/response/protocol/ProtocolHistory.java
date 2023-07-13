@@ -27,6 +27,7 @@ public class ProtocolHistory {
   ProtocolStatus status;
   @JsonIgnore
   Long costModelId;
+  Integer epochNo;
 
 
   @Override
