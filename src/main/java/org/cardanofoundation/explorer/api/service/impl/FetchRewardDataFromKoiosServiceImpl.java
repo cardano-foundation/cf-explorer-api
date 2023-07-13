@@ -1,9 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.repository.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.EpochStakeCheckpointRepository;
@@ -11,6 +9,7 @@ import org.cardanofoundation.explorer.api.repository.PoolHistoryCheckpointReposi
 import org.cardanofoundation.explorer.api.repository.PoolInfoCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -36,6 +35,9 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Value("${application.api.check-ada-pots.base-url}")
   private String apiCheckAdaPotsUrl;
 
+  @Value("${application.api.check-epoch.base-url}")
+  private String apiCheckEpochUrl;
+
   private final RestTemplate restTemplate;
   private final RewardCheckpointRepository rewardCheckpointRepository;
 
@@ -55,6 +57,20 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Override
   public Boolean fetchReward(String stakeKey) {
     return restTemplate.postForObject(apiCheckRewardUrl, Collections.singleton(stakeKey),
+        Boolean.class);
+  }
+
+  @Override
+  public Boolean checkRewardAvailable(List<String> stakeAddressList) {
+    Integer countCheckPoint = rewardCheckpointRepository.checkRewardByRewardAccountsAndEpoch(
+        stakeAddressList);
+    Integer sizeCheck = stakeAddressList.size();
+    return Objects.equals(countCheckPoint, sizeCheck);
+  }
+
+  @Override
+  public Boolean fetchReward(List<String> stakeAddressList) {
+    return restTemplate.postForObject(apiCheckRewardUrl, stakeAddressList,
         Boolean.class);
   }
 
@@ -151,6 +167,21 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   public Boolean fetchAdaPots(List<Integer> epochNo) {
     return restTemplate.postForObject(apiCheckAdaPotsUrl, epochNo,
         Boolean.class);
+  }
+
+  @Override
+  public Boolean checkEpochRewardDistributed(Epoch epoch) {
+    return Objects.nonNull(epoch.getRewardsDistributed());
+  }
+
+  @Override
+  public List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNoList) {
+    Epoch[] epoch = restTemplate.postForObject(apiCheckEpochUrl, epochNoList,
+        Epoch[].class);
+    if (Objects.nonNull(epoch)) {
+      return Arrays.asList(epoch);
+    }
+    return Collections.emptyList();
   }
 
   @Override

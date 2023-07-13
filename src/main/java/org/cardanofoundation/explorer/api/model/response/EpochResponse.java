@@ -29,4 +29,6 @@ public class EpochResponse {
   private Integer maxSlot;
 
   private BigInteger rewardsDistributed;
+
+  private Integer account;
 }
