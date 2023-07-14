@@ -1,10 +1,36 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.util.*;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
@@ -15,39 +41,34 @@ import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.*;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
+import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
+import org.cardanofoundation.explorer.api.repository.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.AggregateAddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
+import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.repository.jooq.JOOQMultiAssetRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
+import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
-import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
-
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.cardanofoundation.ledgersync.common.util.HexUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +88,11 @@ public class TokenServiceImpl implements TokenService {
   private final AssetMetadataMapper assetMetadataMapper;
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
   private final TokenPageCacheService tokenPageCacheService;
+  private final AggregatedDataCacheService aggregatedDataCacheService;
+  private final JOOQMultiAssetRepository jooqMultiAssetRepository;
+
+  @Value("${application.network}")
+  private String network;
 
   @Qualifier("taskExecutor")
   private final TaskExecutor taskExecutor;
@@ -80,11 +106,22 @@ public class TokenServiceImpl implements TokenService {
       throws ExecutionException, InterruptedException {
     Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
         tokenPageCacheService.getTokePageCache(pageable);
+
     if (cacheResp.isPresent()){
       return cacheResp.get();
     }
+    int tokenCount = aggregatedDataCacheService.getTokenCount();
 
-    Page<MultiAsset> multiAssets = multiAssetRepository.findAll(pageable);
+    if (tokenCount == 0) {
+      tokenCount = (int) multiAssetRepository.count();
+    }
+
+    var dataContent = StreamUtil.mapApply(jooqMultiAssetRepository.getMultiAsset(pageable), multiAsset -> {
+      multiAsset.setName(HexUtil.encodeHexString(multiAsset.getName().getBytes()));
+      return multiAsset;
+    });
+    Page<MultiAsset> multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
+
     Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(), ma -> ma.getPolicy() + ma.getName());
 
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
@@ -258,15 +295,6 @@ public class TokenServiceImpl implements TokenService {
       balance = getBalanceInRangeHaveToday(multiAsset, from, to, maxDateAgg.get());
     } else {
       balance = getBalanceInRangePreviousToday(multiAsset, from, to, maxDateAgg.get());
-    }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTokenRepository.countRecord(
-          multiAsset,
-          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX)));
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
     }
 
     return new TokenVolumeAnalyticsResponse(to, balance);

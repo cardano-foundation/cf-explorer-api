@@ -17,6 +17,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.util.Pair;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 
 
@@ -26,7 +27,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 @AllArgsConstructor
 @Log4j2
 public class Protocols {
-
+  @JsonIgnore
   EpochChange epochChange;
   ProtocolHistory minFeeA;
   ProtocolHistory minFeeB;
@@ -95,6 +96,7 @@ public class Protocols {
         maxCollateralInputs, coinsPerUtxoSize);
   }
 
+  @JsonIgnore
   public boolean isEmpty() {
     return Objects.isNull(minFeeA) &&
         Objects.isNull(minFeeB) &&
