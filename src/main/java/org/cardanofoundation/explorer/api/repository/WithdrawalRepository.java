@@ -8,6 +8,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal_;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -84,4 +85,10 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
                                       @Param("txId") Long txId);
 
   Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
+
+  @Query("SELECT w.stakeAddressId as stakeAddressId, SUM(w.amount) as amount" +
+      " FROM Withdrawal w" +
+      " WHERE w.stakeAddressId IN :stakeIds" +
+      " GROUP BY w.stakeAddressId")
+  List<StakeWithdrawalProjection> getRewardWithdrawnByAddrIn(@Param("stakeIds") Collection<Long> stakeIds);
 }
