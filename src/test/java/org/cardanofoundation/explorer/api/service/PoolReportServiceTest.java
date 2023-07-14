@@ -16,6 +16,7 @@ import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -62,6 +63,9 @@ public class PoolReportServiceTest {
 
   @Mock
   KafkaService kafkaService;
+
+  @Mock
+  ReportHistoryService reportHistoryService;
 
   @Test
   void create_shouldThrowExceptionWhenNotFoundStakeAdress() {
@@ -111,7 +115,7 @@ public class PoolReportServiceTest {
         .build();
 
     when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
-    when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
+    when(reportHistoryService.savePoolReportHistory(any(PoolReportHistory.class))).thenReturn(saved);
     doNothing().when(kafkaService).sendReportHistory(any(ReportHistory.class));
     Assertions.assertTrue(poolReportService.create(request, username));
   }
@@ -121,7 +125,7 @@ public class PoolReportServiceTest {
     Long reportId = 1L;
     String username = "username";
     ExportType exportType = ExportType.EXCEL;
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(
+    when(reportHistoryService.getPoolReportHistory(any(), any())).thenReturn(
         PoolReportHistory.builder()
             .reportHistory(ReportHistory.builder()
                                .username(username)
@@ -147,7 +151,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(reportHistoryService.getPoolReportHistory(any(), any())).thenReturn(poolReport);
 
     PoolReportExportResponse expect = PoolReportExportResponse.builder()
         .fileName("reportName" + exportType.getValue())
@@ -185,7 +189,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(reportHistoryService.getPoolReportHistory(any(), any())).thenReturn(poolReport);
     Page<PoolReportProjection> poolReportProjections = new PageImpl<>(List.of(),
                                                                       PageRequest.of(0, 1), 0);
     when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(),
@@ -223,7 +227,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(reportHistoryService.getPoolReportHistory(any(), any())).thenReturn(poolReport);
     BaseFilterResponse<TabularRegisResponse> tabularRegisResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.registrationList(any(), any())).thenReturn(tabularRegisResponse);
 
@@ -254,7 +258,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(reportHistoryService.getPoolReportHistory(any(), any())).thenReturn(poolReport);
     BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateDetailResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.poolUpdateList(any(), any())).thenReturn(poolUpdateDetailResponse);
 
@@ -284,7 +288,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(reportHistoryService.getPoolReportHistory(any(), any())).thenReturn(poolReport);
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.listRewardFilter(any(), any(), any(), any())).thenReturn(rewardResponse);
 
@@ -315,7 +319,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(reportHistoryService.getPoolReportHistory(any(), any())).thenReturn(poolReport);
     BaseFilterResponse<DeRegistrationResponse> deRegistrationResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.deRegistration(any(), any(), any(), any(), any())).thenReturn(
         deRegistrationResponse);
