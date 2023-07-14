@@ -176,7 +176,7 @@ public class TxServiceImpl implements TxService {
             .epochSlotNo(tx.getEpochSlotNo())
             .slot(tx.getSlot())
             .time(tx.getTime())
-            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAIL)
+            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAILED)
             .build();
         summaries.add(summary);
         return;
@@ -535,7 +535,7 @@ public class TxServiceImpl implements TxService {
     if (Boolean.TRUE.equals(tx.getValidContract())) {
       txResponse.getTx().setStatus(TxStatus.SUCCESS);
     } else {
-      txResponse.getTx().setStatus(TxStatus.FAIL);
+      txResponse.getTx().setStatus(TxStatus.FAILED);
       CollateralResponse collateralResponse = txResponse.getCollaterals();
       List<TxOutResponse> collateralInputs = collateralResponse.getCollateralInputResponses();
       List<TxOutResponse> collateralOutputs = collateralResponse.getCollateralOutputResponses();
