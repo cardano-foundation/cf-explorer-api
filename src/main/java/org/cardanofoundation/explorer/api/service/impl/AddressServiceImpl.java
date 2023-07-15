@@ -49,7 +49,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +97,8 @@ public class AddressServiceImpl implements AddressService {
     Address addr = addressRepository.findFirstByAddress(address).orElse(
         Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
     );
-    if(!checkNetworkAddress(address)) {
+    final int ADDRESS_MIN_LENGTH = 56;
+    if(!checkNetworkAddress(address) || address.length() < ADDRESS_MIN_LENGTH) {
       throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
@@ -113,10 +113,10 @@ public class AddressServiceImpl implements AddressService {
    * @return true if valid and false if not
    */
   private boolean checkNetworkAddress(String address) {
-    if (network.equals(CommonConstant.MAINNET_NETWORK)) {
-      return !address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX);
+    if(address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
+      return !network.equals(CommonConstant.MAINNET_NETWORK);
     } else {
-      return address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX);
+      return network.equals(CommonConstant.MAINNET_NETWORK);
     }
   }
 
@@ -264,7 +264,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     Page<AddressTokenProjection> addressTokenProjectionPage =
-        addressTokenBalanceRepository.findAddressAndBalanceByAddress(addr, pageable);
+        addressTokenBalanceRepository.findTokenAndBalanceByAddress(addr, pageable);
 
     List<AddressTokenProjection> addressTokenProjectionList = addressTokenProjectionPage.getContent();
     long totalElements = addressTokenProjectionPage.getTotalElements();
@@ -311,12 +311,11 @@ public class AddressServiceImpl implements AddressService {
 
     List<AddressTokenProjection> addressTokenProjectionList =
         addressTokenBalanceRepository.
-            findAddressAndBalanceByAddress(addr)
+            findTokenAndBalanceByAddress(addr)
         .stream()
         .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
             addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
         .collect(Collectors.toList());
-
     List<TokenAddressResponse> tokenListResponse = addressTokenProjectionList.stream()
         .map(tokenMapper::fromAddressTokenProjection)
         .sorted(Comparator.comparing(TokenAddressResponse::getQuantity).reversed()

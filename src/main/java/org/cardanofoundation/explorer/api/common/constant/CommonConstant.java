@@ -25,13 +25,27 @@ public class CommonConstant {
 
   public static final String POOL_STATUS_RETIRING = "RETIRING";
 
-  public static final String MAINNET_ADDRESS_PREFIX = "addr";
+  public static final String ADDRESS_PREFIX = "addr";
+
+  public static final String STAKE_ADDRESS_PREFIX = "stake";
 
   public static final String LOVELACE = "LOVELACE";
 
   public static final BigDecimal PERCENT = new BigDecimal(100);
 
   public static final String REDIS_TOTAL_LIVE_STAKE = "TOTAL_LIVE_STAKE_";
+
+  public static final int TX_HASH_LENGTH = 64;
+
+  public static final int BLOCK_HASH_LENGTH = 64;
+
+  public static final int STAKE_KEY_LENGTH_MAINNET = 59;
+
+  public static final int STAKE_KEY_LENGTH_TESTNET = 64;
+
+  public static final int POOL_VIEW_LENGTH = 56;
+
+  public static final int TOKEN_FINGERPRINT_LENGTH = 44;
 
   public static final String JWT = "jwt:blacklist:";
 
@@ -42,6 +56,12 @@ public class CommonConstant {
   public static final String LIVE_STAKE = "LIVE_STAKE_";
 
   public static final String REDIS_TOTAL_ACTIVATE_STAKE = "TOTAL_ACTIVATE_STAKE_";
+
+  public static final String PREFIXED_STAKE_KEY = "stake";
+
+  public static final String PREFIXED_POOL_VIEW = "pool";
+
+  public static final String PREFIXED_TOKEN_FINGERPRINT = "asset";
 
   public static final String REDIS_POOL_ACTIVATE = "POOL_ACTIVATE_";
 
