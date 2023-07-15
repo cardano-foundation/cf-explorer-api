@@ -25,10 +25,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/tokens")
@@ -42,10 +39,11 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
-       @ParameterObject @PaginationValid @PaginationDefault(sort = {MultiAsset_.SUPPLY,
-          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pagination pagination)
-          throws ExecutionException, InterruptedException {
-    return ResponseEntity.ok(tokenService.filterToken(pagination.toPageable()));
+      @ParameterObject @PaginationValid @PaginationDefault(sort = {MultiAsset_.SUPPLY,
+          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) Pagination pagination,
+      @Parameter(description = "Token name") @RequestParam(required = false) String query)
+      throws ExecutionException, InterruptedException {
+    return ResponseEntity.ok(tokenService.filterToken(query, pagination.toPageable()));
   }
 
   @GetMapping("/{tokenId}")

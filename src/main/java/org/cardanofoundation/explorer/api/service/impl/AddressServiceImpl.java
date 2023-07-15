@@ -21,7 +21,6 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressFilterRe
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
@@ -47,7 +46,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +57,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -99,7 +96,8 @@ public class AddressServiceImpl implements AddressService {
     Address addr = addressRepository.findFirstByAddress(address).orElse(
         Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
     );
-    if(!checkNetworkAddress(address)) {
+    final int ADDRESS_MIN_LENGTH = 56;
+    if(!checkNetworkAddress(address) || address.length() < ADDRESS_MIN_LENGTH) {
       throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
@@ -114,10 +112,10 @@ public class AddressServiceImpl implements AddressService {
    * @return true if valid and false if not
    */
   private boolean checkNetworkAddress(String address) {
-    if (network.equals(CommonConstant.MAINNET_NETWORK)) {
-      return !address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX);
+    if(address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
+      return !network.equals(CommonConstant.MAINNET_NETWORK);
     } else {
-      return address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX);
+      return network.equals(CommonConstant.MAINNET_NETWORK);
     }
   }
 
