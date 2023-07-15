@@ -16,7 +16,7 @@ public interface TokenService {
    * @param pageable page information
    * @return list tokens information in this page
    */
-  BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable)
+  BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable)
       throws ExecutionException, InterruptedException;
 
   /**
