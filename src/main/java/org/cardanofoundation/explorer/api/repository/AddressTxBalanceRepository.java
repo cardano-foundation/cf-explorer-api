@@ -132,4 +132,15 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
   List<AddressTxBalance> findByTxIdInAndStakeId(@Param("ids") Collection<Long> ids,
                                                 @Param("stakeId") Long stakeId);
 
+  @Query("SELECT count(addressTxBalance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address = :address"
+      + " AND addressTxBalance.time <= :time")
+  Long countRecord(@Param("address") Address address, @Param("time") Timestamp time);
+
+  @Query("SELECT count(addressTxBalance) FROM AddressTxBalance addressTxBalance"
+      + " WHERE addressTxBalance.address IN "
+      + " (SELECT addr FROM Address addr WHERE addr.stakeAddress = :stakeAddress)"
+      + " AND addressTxBalance.time <= :time")
+  Long countRecord(@Param("stakeAddress") StakeAddress stakeAddress, @Param("time") Timestamp time);
+
 }
