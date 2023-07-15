@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.service;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
@@ -67,4 +68,12 @@ public interface TxService {
    * @return list transaction of stake in this page
    */
   BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable pageable);
+
+  /**
+   * Get TxContractDetail by txHash and contract address
+   * @param txHash hash value of transaction
+   * @param address wallet address (optional)
+   * @return list transaction information
+   */
+  List<ContractResponse> getTxContractDetail(String txHash, String address);
 }
