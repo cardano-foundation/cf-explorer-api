@@ -49,7 +49,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -264,7 +263,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     Page<AddressTokenProjection> addressTokenProjectionPage =
-        addressTokenBalanceRepository.findAddressAndBalanceByAddress(addr, pageable);
+        addressTokenBalanceRepository.findTokenAndBalanceByAddress(addr, pageable);
 
     List<AddressTokenProjection> addressTokenProjectionList = addressTokenProjectionPage.getContent();
     long totalElements = addressTokenProjectionPage.getTotalElements();
@@ -311,12 +310,11 @@ public class AddressServiceImpl implements AddressService {
 
     List<AddressTokenProjection> addressTokenProjectionList =
         addressTokenBalanceRepository.
-            findAddressAndBalanceByAddress(addr)
+            findTokenAndBalanceByAddress(addr)
         .stream()
         .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
             addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
         .collect(Collectors.toList());
-
     List<TokenAddressResponse> tokenListResponse = addressTokenProjectionList.stream()
         .map(tokenMapper::fromAddressTokenProjection)
         .sorted(Comparator.comparing(TokenAddressResponse::getQuantity).reversed()
