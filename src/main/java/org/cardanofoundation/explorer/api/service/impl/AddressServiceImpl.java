@@ -21,7 +21,6 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressFilterRe
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
@@ -97,7 +96,8 @@ public class AddressServiceImpl implements AddressService {
     Address addr = addressRepository.findFirstByAddress(address).orElse(
         Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
     );
-    if(!checkNetworkAddress(address)) {
+    final int ADDRESS_MIN_LENGTH = 56;
+    if(!checkNetworkAddress(address) || address.length() < ADDRESS_MIN_LENGTH) {
       throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
@@ -112,10 +112,10 @@ public class AddressServiceImpl implements AddressService {
    * @return true if valid and false if not
    */
   private boolean checkNetworkAddress(String address) {
-    if (network.equals(CommonConstant.MAINNET_NETWORK)) {
-      return !address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX);
+    if(address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
+      return !network.equals(CommonConstant.MAINNET_NETWORK);
     } else {
-      return address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX);
+      return network.equals(CommonConstant.MAINNET_NETWORK);
     }
   }
 
