@@ -62,30 +62,6 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "WHERE pu.id = :id")
   PoolRegistrationProjection getPoolRegistration(@Param("id") Long id);
 
-  @Query(value =
-      "SELECT ph.view AS poolView, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
-          + ", ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
-          + "FROM PoolHash ph "
-          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
-          + "LEFT JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
-          + "LEFT JOIN Epoch e ON e.no = pu.activeEpochNo "
-          + "WHERE (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
-          + "AND (ph.view IN :poolViews) ")
-  List<PoolListProjection> findDataCalculateReward(@Param("poolViews") List<String> poolViews);
-
-  @Query(value =
-      "SELECT ph.view AS poolView, pu.pledge AS pledge, pu.fixedCost AS fee, ph.poolSize AS poolSize, ep.optimalPoolCount AS paramK, e.blkCount AS blkCount, ep.maxBlockSize AS maxBlockSize "
-          + ", ad.utxo AS utxo, pu.margin AS margin, e.fees AS feePerEpoch, ep.influence AS influence, ep.monetaryExpandRate AS expansionRate, ep.treasuryGrowthRate AS treasuryRate "
-          + "FROM PoolHash ph "
-          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "LEFT JOIN EpochParam ep ON pu.activeEpochNo = ep.epochNo "
-          + "LEFT JOIN AdaPots ad ON ad.epochNo = pu.activeEpochNo "
-          + "LEFT JOIN Epoch e ON e.no = pu.activeEpochNo "
-          + "WHERE (pu.id = (SELECT max(pu.id) FROM PoolUpdate pu WHERE pu.poolHash.id = ph.id)) "
-          + "AND (ph.view = :poolView) ")
-  PoolListProjection findDataCalculateReward(@Param("poolView") String poolView);
-
   @Query(value = "SELECT ph.id AS id, pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView, pod.iconUrl as icon "
       + "FROM PoolHash ph "
       + "LEFT JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.id = (SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id ) "
@@ -93,10 +69,11 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   PoolInfoProjection getPoolInfo(@Param("poolView") String poolView);
 
   @Query(value =
-      "SELECT pu.id AS poolUpdateId, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, tx.deposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
+      "SELECT pu.id AS poolUpdateId, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, ep.poolDeposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
           + "FROM PoolHash ph "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "JOIN Tx tx ON pu.registeredTx.id = tx.id AND tx.deposit IS NOT NULL AND tx.deposit = (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = pu.activeEpochNo) "
+          + "JOIN EpochParam ep ON ep.epochNo = pu.activeEpochNo "
+          + "JOIN Tx tx ON pu.registeredTx.id = tx.id AND tx.deposit IS NOT NULL AND tx.deposit >= ep.poolDeposit "
           + "JOIN Block bk ON tx.block.id  = bk.id "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
           + "WHERE ph.view = :poolView")
@@ -108,5 +85,4 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       + "(SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id ) "
       + "WHERE LOWER(pod.poolName) LIKE CONCAT('%', :query, '%')")
   List<PoolInfoProjection> findByPoolNameLike(@Param("query") String query, Pageable pageable);
-
 }

@@ -38,9 +38,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.common.utils.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 
@@ -374,7 +374,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
           if (Boolean.TRUE.equals(txMap.get(item.getTxId()).getValidContract())) {
             stakeWalletActivity.setStatus(TxStatus.SUCCESS);
           } else {
-            stakeWalletActivity.setStatus(TxStatus.FAIL);
+            stakeWalletActivity.setStatus(TxStatus.FAILED);
           }
 
           stakeWalletActivity.setType(getStakeTxType(stakeWalletActivity, txMap.get(item.getTxId()),

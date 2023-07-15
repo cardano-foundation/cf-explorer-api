@@ -57,17 +57,17 @@ public class CommonConstant {
 
   public static final String REDIS_TOTAL_ACTIVATE_STAKE = "TOTAL_ACTIVATE_STAKE_";
 
-  public static final String REDIS_POOL_ACTIVATE = "POOL_ACTIVATE_";
-
-  public static final String REDIS_POOL_INACTIVATE = "POOL_INACTIVATE_";
-
-  public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
-
   public static final String PREFIXED_STAKE_KEY = "stake";
 
   public static final String PREFIXED_POOL_VIEW = "pool";
 
   public static final String PREFIXED_TOKEN_FINGERPRINT = "asset";
+
+  public static final String REDIS_POOL_ACTIVATE = "POOL_ACTIVATE_";
+
+  public static final String REDIS_POOL_INACTIVATE = "POOL_INACTIVATE_";
+
+  public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
 
 
 

@@ -22,12 +22,12 @@ import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
 
@@ -266,15 +266,6 @@ public class TokenServiceImpl implements TokenService {
       balance = getBalanceInRangeHaveToday(multiAsset, from, to, maxDateAgg.get());
     } else {
       balance = getBalanceInRangePreviousToday(multiAsset, from, to, maxDateAgg.get());
-    }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTokenRepository.countRecord(
-          multiAsset,
-          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX)));
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
     }
 
     return new TokenVolumeAnalyticsResponse(to, balance);
