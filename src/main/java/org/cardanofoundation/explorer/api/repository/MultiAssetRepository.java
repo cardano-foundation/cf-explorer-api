@@ -15,6 +15,9 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   Page<MultiAsset> findAll(Pageable pageable);
 
+  @Query("select multiAsset from MultiAsset multiAsset")
+  List<MultiAsset> findMultiAssets(Pageable pageable);
+
   Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
 
   Integer countByPolicy(@Param("policy") String policy);
