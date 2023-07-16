@@ -44,7 +44,7 @@ public class TxController {
   @LogMessage
   @Operation(summary = "Filter transaction")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> filter(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(txService.getAll(pagination.toPageable()));
   }
@@ -68,7 +68,7 @@ public class TxController {
   @LogMessage
   @Operation(summary = "Get transaction chart (1D , 1W, 2W, 1M)")
   public ResponseEntity<List<TxGraph>> getTransactionChart(
-      @PathVariable("range") TxChartRange range) {
+          @PathVariable("range") TxChartRange range) {
     return ResponseEntity.ok(txService.getTransactionChartByRange(range));
   }
 
