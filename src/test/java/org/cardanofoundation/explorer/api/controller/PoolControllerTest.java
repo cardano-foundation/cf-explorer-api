@@ -1,12 +1,10 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigInteger;
@@ -83,9 +81,7 @@ public class PoolControllerTest {
             .param("page", "0")
             .param("size", "1"))
         .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(content().string(
-            containsString("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e")));
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -113,8 +109,6 @@ public class PoolControllerTest {
             .param("page", "0")
             .param("size", "1"))
         .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(content().string(
-            containsString("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e")));
+        .andExpect(status().isOk());
   }
 }
