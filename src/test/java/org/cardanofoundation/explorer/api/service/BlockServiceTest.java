@@ -11,12 +11,15 @@ import org.cardanofoundation.explorer.api.service.impl.BlockServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.*;
+
+import java.math.BigInteger;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -111,16 +114,37 @@ public class BlockServiceTest {
     }
 
     @Test
+    public void testGetBlockDetailByBlockId_ThrowCurrentBlock() {
+        // Mock input
+        String blockId = "hash123";
+        Block block = new Block();
+        BlockResponse expectedResponse = new BlockResponse();
+
+        // Mock repository method
+        when(blockRepository.findFirstByHash("hash123")).thenReturn(Optional.of(block));
+        when(blockMapper.blockToBlockResponse(block)).thenReturn(expectedResponse);
+        when(txRepository.findAllByBlock(block)).thenReturn(new ArrayList<>());
+        when(blockRepository.findCurrentBlock()).thenReturn(Optional.empty());
+
+        // Verify the repository method was called and the response is correct
+        assertThrows(BusinessException.class, () -> blockService.getBlockDetailByBlockId(blockId));
+    }
+
+    @Test
     public void testFilterBlock() {
         // Mock input and expected output
         Pageable pageable = PageRequest.of(0, 10);
         Page<Block> blockPage = new PageImpl<>(Collections.singletonList(new Block()));
+        List<Tx> txList = List.of(
+                Tx.builder().block(Block.builder().id(1L).build()).id(1L).outSum(BigInteger.ONE).fee(BigInteger.ONE).build(),
+                Tx.builder().block(Block.builder().id(2L).build()).id(2L).outSum(BigInteger.TWO).fee(BigInteger.TWO).build()
+        );
 
         // Mock repository method
         when(blockRepository.findAllBlock(any())).thenReturn(blockPage);
         when(blockMapper.blockToBlockFilterResponse(any(Block.class))).thenReturn(new BlockFilterResponse());
         when(slotLeaderRepository.findByIdIn(anyList())).thenReturn(Collections.emptyList());
-        when(txRepository.findByBlockIn(anyList())).thenReturn(Collections.emptyList());
+        when(txRepository.findByBlockIn(anyList())).thenReturn(txList);
 
         // Call the service method
         BaseFilterResponse<BlockFilterResponse> response = blockService.filterBlock(pageable);
