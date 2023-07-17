@@ -208,7 +208,10 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                      Pageable pageable,
                                                                      String username) {
     PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
-    return poolLifecycleService.listReward(poolReport.getPoolView(), pageable);
+
+    return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
+                                                 poolReport.getBeginEpoch(),
+                                                 poolReport.getEndEpoch(), pageable);
   }
 
   @Override

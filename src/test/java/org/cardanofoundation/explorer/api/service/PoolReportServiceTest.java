@@ -289,7 +289,7 @@ public class PoolReportServiceTest {
         .build();
     when(reportHistoryService.getPoolReportHistory(any(), any())).thenReturn(poolReport);
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
-    when(poolLifecycleService.listReward(any(), any())).thenReturn(rewardResponse);
+    when(poolLifecycleService.listRewardFilter(any(), any(), any(), any())).thenReturn(rewardResponse);
 
     var response = poolReportService.fetchRewardsDistribution(reportId, PageRequest.of(0, 1),
                                                               username);
