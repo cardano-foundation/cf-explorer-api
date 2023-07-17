@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.19](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.18...v0.3.19) (2023-07-17)
+
+
+### Bug Fixes
+
+* added redis cache TTL config for ada price ([26bb5ba](https://github.com/cardano-foundation/cf-explorer-api/commit/26bb5ba1c66ba68dc5f5ac1e8a8d36e6632faa9a))
+
 ## [0.3.18](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.17...v0.3.18) (2023-07-17)
 
 
