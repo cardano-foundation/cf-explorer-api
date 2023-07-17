@@ -30,7 +30,6 @@ import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -121,8 +120,8 @@ public class TxServiceImpl implements TxService {
   private final TreasuryRepository treasuryRepository;
   private final ReserveRepository reserveRepository;
   private final StakeAddressRepository stakeAddressRepository;
-  private final TxMetadataRepository txMetadataRepository;
   private final TxContractMapper txContractMapper;
+  private final TxMetadataRepository txMetadataRepository;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -177,7 +176,7 @@ public class TxServiceImpl implements TxService {
             .epochSlotNo(tx.getEpochSlotNo())
             .slot(tx.getSlot())
             .time(tx.getTime())
-            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAIL)
+            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAILED)
             .build();
         summaries.add(summary);
         return;
@@ -536,7 +535,7 @@ public class TxServiceImpl implements TxService {
     if (Boolean.TRUE.equals(tx.getValidContract())) {
       txResponse.getTx().setStatus(TxStatus.SUCCESS);
     } else {
-      txResponse.getTx().setStatus(TxStatus.FAIL);
+      txResponse.getTx().setStatus(TxStatus.FAILED);
       CollateralResponse collateralResponse = txResponse.getCollaterals();
       List<TxOutResponse> collateralInputs = collateralResponse.getCollateralInputResponses();
       List<TxOutResponse> collateralOutputs = collateralResponse.getCollateralOutputResponses();
@@ -696,10 +695,12 @@ public class TxServiceImpl implements TxService {
     List<ContractResponse> contractResponses = redeemerRepository.findContractByTx(tx)
         .stream().map(txContractMapper::fromTxContractProjectionToContractResponse).toList();
     List<TxContractProjection> txContractProjections = txOutRepository.getContractDatumOutByTx(tx);
-    Map<Long, TxContractProjection> txContractMap = txContractProjections.stream()
-        .collect(Collectors.toMap(TxContractProjection::getTxOutId, Function.identity()));
+    Map<String, TxContractProjection> txContractMap = txContractProjections.stream()
+            .collect(Collectors.groupingBy(TxContractProjection::getAddress,
+                    Collectors.collectingAndThen(Collectors.toList(), list -> list.get(0))));
+
     contractResponses.forEach(contractResponse -> {
-      TxContractProjection txContractProjection = txContractMap.get(contractResponse.getTxOutId());
+      TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
       if (txContractProjection != null) {
         contractResponse.setDatumBytesOut(
             txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));

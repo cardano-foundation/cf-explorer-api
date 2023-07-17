@@ -374,7 +374,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
           if (Boolean.TRUE.equals(txMap.get(item.getTxId()).getValidContract())) {
             stakeWalletActivity.setStatus(TxStatus.SUCCESS);
           } else {
-            stakeWalletActivity.setStatus(TxStatus.FAIL);
+            stakeWalletActivity.setStatus(TxStatus.FAILED);
           }
 
           stakeWalletActivity.setType(getStakeTxType(stakeWalletActivity, txMap.get(item.getTxId()),
