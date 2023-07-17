@@ -108,4 +108,16 @@ public interface PoolLifecycleService {
    * @return SPOStatusResponse
    */
   SPOStatusResponse poolLifecycleStatus(String poolView);
+
+  /**
+   * Get pool lifecycle pool reward filer by epoch range
+   *
+   * @param poolView
+   * @param beginEpoch
+   * @param endEpoch
+   * @param pageable
+   * @return BaseFilterResponse<RewardResponse>
+   */
+  BaseFilterResponse<RewardResponse> listRewardFilter(String poolView, Integer beginEpoch,
+                                                Integer endEpoch, Pageable pageable);
 }
