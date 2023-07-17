@@ -18,15 +18,12 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationVal
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

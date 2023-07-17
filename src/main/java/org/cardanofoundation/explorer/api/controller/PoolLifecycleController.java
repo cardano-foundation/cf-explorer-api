@@ -21,9 +21,7 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationDef
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

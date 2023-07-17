@@ -162,7 +162,7 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .map(PoolReportDetailResponse.EpochSize::toDomain).toList();
         return new BaseFilterResponse<>(this.convertListToPage(epochSizeList, pageable));
       } else {
-        return new BaseFilterResponse<>(null);
+        return new BaseFilterResponse<>();
       }
 
     } else {
@@ -208,7 +208,9 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                      Pageable pageable,
                                                                      String username) {
     PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
-    return poolLifecycleService.listReward(poolReport.getPoolView(), pageable);
+    return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
+                                                 poolReport.getBeginEpoch(),
+                                                 poolReport.getEndEpoch(), pageable);
   }
 
   @Override

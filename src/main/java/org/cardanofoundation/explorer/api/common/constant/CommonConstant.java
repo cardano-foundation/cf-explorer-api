@@ -25,7 +25,9 @@ public class CommonConstant {
 
   public static final String POOL_STATUS_RETIRING = "RETIRING";
 
-  public static final String MAINNET_ADDRESS_PREFIX = "addr";
+  public static final String ADDRESS_PREFIX = "addr";
+
+  public static final String STAKE_ADDRESS_PREFIX = "stake";
 
   public static final String LOVELACE = "LOVELACE";
 
@@ -55,8 +57,6 @@ public class CommonConstant {
 
   public static final String REDIS_TOTAL_ACTIVATE_STAKE = "TOTAL_ACTIVATE_STAKE_";
 
-  public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
-
   public static final String PREFIXED_STAKE_KEY = "stake";
 
   public static final String PREFIXED_POOL_VIEW = "pool";
@@ -66,6 +66,10 @@ public class CommonConstant {
   public static final String REDIS_POOL_ACTIVATE = "POOL_ACTIVATE_";
 
   public static final String REDIS_POOL_INACTIVATE = "POOL_INACTIVATE_";
+
+  public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
+
+
 
   public static int hashCode(Object... a) {
     if (a == null) {
