@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class EpochServiceTest {
@@ -50,6 +51,9 @@ class EpochServiceTest {
   @Mock
   HashOperations hashOperations;
 
+  @Mock
+  FetchRewardDataService fetchRewardDataService;
+
   //TODO getAllEpoch
 
   //TODO getCurrentEpochSummary
@@ -58,20 +62,13 @@ class EpochServiceTest {
 
     var currentLocalDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     var localDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0));
-
+    ReflectionTestUtils.setField(epochService, "network", "mainnet");
     when(epochRepository.findCurrentEpochSummary())
         .thenReturn(Optional.of(EpochSummaryProjectionImpl.builder()
             .no(30)
             .maxSlot(432000)
             .statTime(Timestamp.valueOf(localDate))
                 .endTime(Timestamp.valueOf(localDate.plusDays(5)))
-            .build()));
-
-    when(epochRepository.getTotalAccountsAtEpoch(
-        any(), any()))
-        .thenReturn(List.of(UniqueAccountProjectionImpl.builder()
-            .id(1L)
-            .address("1")
             .build()));
 
     when(redisTemplate.opsForHash())
@@ -101,6 +98,8 @@ class EpochServiceTest {
   // function getEpochDetail test
   @Test
   void testGetEpochDetailInProgress() {
+
+    ReflectionTestUtils.setField(epochService, "network", "mainnet");
     Epoch epoch = Epoch.builder()
         .era(EraType.ALONZO)
         .id(1L)
@@ -129,10 +128,17 @@ class EpochServiceTest {
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
         .thenReturn(Optional.of(epoch));
+    when(redisTemplate.opsForHash())
+        .thenReturn(hashOperations);
 
+    when(hashOperations.size(any()))
+        .thenReturn(0l);
+
+    when(hashOperations.size(any()))
+        .thenReturn(1L);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.ofNullable(epoch.getNo()));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
-
+    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.IN_PROGRESS);
     Assertions.assertEquals(expect, actual);
@@ -140,6 +146,8 @@ class EpochServiceTest {
 
   @Test
   void testGetEpochDetailSync() {
+
+    ReflectionTestUtils.setField(epochService, "network", "mainnet");
     Epoch epoch = Epoch.builder()
         .era(EraType.ALONZO)
         .id(1L)
@@ -168,9 +176,17 @@ class EpochServiceTest {
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
         .thenReturn(Optional.of(epoch));
-
+    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.ofNullable(epoch.getNo()));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
+    when(redisTemplate.opsForHash())
+        .thenReturn(hashOperations);
+
+    when(hashOperations.size(any()))
+        .thenReturn(0l);
+
+    when(hashOperations.size(any()))
+        .thenReturn(1L);
 
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.SYNCING);
@@ -179,6 +195,7 @@ class EpochServiceTest {
 
   @Test
   void testGetEpochDetailDone() {
+    ReflectionTestUtils.setField(epochService, "network", "mainnet");
     Epoch epoch = Epoch.builder()
         .era(EraType.ALONZO)
         .id(1L)
@@ -207,9 +224,17 @@ class EpochServiceTest {
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
         .thenReturn(Optional.of(epoch));
-
+    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(epoch.getNo() + 1));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
+    when(redisTemplate.opsForHash())
+        .thenReturn(hashOperations);
+
+    when(hashOperations.size(any()))
+        .thenReturn(0l);
+
+    when(hashOperations.size(any()))
+        .thenReturn(1L);
 
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.FINISHED);
@@ -218,6 +243,7 @@ class EpochServiceTest {
 
   @Test
   void testGetEpochDetailReward() {
+    ReflectionTestUtils.setField(epochService, "network", "mainnet");
     Epoch epoch = Epoch.builder()
         .era(EraType.ALONZO)
         .id(1L)
@@ -246,9 +272,17 @@ class EpochServiceTest {
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
         .thenReturn(Optional.of(epoch));
-
+    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(epoch.getNo() + 1));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
+    when(redisTemplate.opsForHash())
+        .thenReturn(hashOperations);
+
+    when(hashOperations.size(any()))
+        .thenReturn(0l);
+
+    when(hashOperations.size(any()))
+        .thenReturn(1L);
 
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.REWARDING);
