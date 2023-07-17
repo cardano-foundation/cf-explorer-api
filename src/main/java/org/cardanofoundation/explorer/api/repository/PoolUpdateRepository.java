@@ -52,7 +52,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "pmr.url AS metadataUrl, pmr.hash as metadataHash "
           + "FROM PoolUpdate pu "
           + "INNER JOIN PoolHash ph ON pu.poolHash.id = ph.id "
-          + "INNER JOIN PoolMetadataRef pmr ON pu.meta = pmr "
+          + "LEFT JOIN PoolMetadataRef pmr ON pu.meta = pmr "
           + "INNER JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
           + "WHERE pu.registeredTx = :tx")
   List<PoolUpdateDetailProjection> findByTx(@Param("tx") Tx tx);

@@ -26,9 +26,7 @@ import org.springdoc.core.annotations.ParameterObject;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -77,16 +75,16 @@ public class PoolReportController {
 
   @GetMapping("detail/{reportId}/export")
   public ResponseEntity<Resource> export(@PathVariable Long reportId,
-       @RequestParam(required = false) ExportType exportType,
-       HttpServletRequest request) {
+                                         @RequestParam(required = false) ExportType exportType,
+                                         HttpServletRequest request) {
     String username = request.getAttribute("username").toString();
     PoolReportExportResponse response = poolReportService.export(reportId, exportType, username);
     return ResponseEntity.ok()
-            .contentLength(response.getByteArrayInputStream().available())
-            .header(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + response.getFileName() + "\"")
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(new InputStreamResource(response.getByteArrayInputStream()));
+        .contentLength(response.getByteArrayInputStream().available())
+        .header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + response.getFileName() + "\"")
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .body(new InputStreamResource(response.getByteArrayInputStream()));
   }
 
   @GetMapping(value = "detail/{reportId}/pool-registration")
