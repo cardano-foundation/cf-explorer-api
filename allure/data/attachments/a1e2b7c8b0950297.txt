@@ -1,1 +1,0 @@
-{"data":[{"address":"addr1qya3dks3dyt4mtxaqgnyny58uf36ptr94hkec9da99hss9vjlh34veqa5x8hz5nkrxavkgrjqvp27vtxcdqs5ectuf3qtsnevf","quantity":99000000000000069420},{"address":"addr1q9fgeh8zzjwv98scpt2khz6fvyq492gmmp67pqx5fk3qn904zgj9azhd74xwwa7mj84nrdvplt6hd0hftaq60przpm2qstnmz4","quantity":9000000000000000000}],"totalItems":2,"totalPages":1,"currentPage":0}
