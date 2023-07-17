@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.controller;
 import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validation.PageZeroValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressAnalyticsResponse;
@@ -49,7 +50,7 @@ public class AddressController {
   @LogMessage
   @Operation(summary = "Get top addresses")
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @PageZeroValid Pagination pagination) {
     return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
   }
 
