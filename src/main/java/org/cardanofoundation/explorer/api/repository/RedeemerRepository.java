@@ -18,7 +18,7 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " LEFT JOIN RedeemerData rd ON re.redeemerData = rd"
       + " LEFT JOIN TxIn txIn ON txIn.redeemer = re"
       + " LEFT JOIN TxOut txOut ON txIn.txOut = txOut.tx AND txIn.txOutIndex = txOut.index"
-      + " LEFT JOIN Datum d ON txOut.inlineDatum = d"
+      + " LEFT JOIN Datum d ON txOut.dataHash = d.hash"
       + " LEFT JOIN Script s ON re.scriptHash = s.hash"
       + " WHERE tx = :tx"
       + " ORDER BY re.id")

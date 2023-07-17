@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.config.datasource.DataBaseType;
+import org.cardanofoundation.explorer.api.config.datasource.SwitchDataSource;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
@@ -41,8 +43,6 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import static org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl.MIN_TIME;
 
 @Service
@@ -64,24 +64,17 @@ public class PoolReportServiceImpl implements PoolReportService {
   private final FetchRewardDataService fetchRewardDataService;
 
   private final PoolHistoryRepository poolHistoryRepository;
-
-  private final EpochRepository epochRepository;
+  private final ReportHistoryService reportHistoryService;
 
   @Override
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
-    PoolReportHistory poolReportHistory = saveToDb(poolReportCreateRequest, username);
-    kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
-    return true;
-  }
-
-  @Transactional
-  public PoolReportHistory saveToDb(PoolReportCreateRequest poolReportCreateRequest,
-                                    String username) {
     poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
-
     ReportHistory reportHistory = initReportHistory(poolReportCreateRequest, username);
-    return poolReportRepository.saveAndFlush(poolReportCreateRequest.toEntity(reportHistory));
+    PoolReportHistory poolReportHistory = poolReportCreateRequest.toEntity(reportHistory);
+    poolReportHistory = reportHistoryService.savePoolReportHistory(poolReportHistory);
+    kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
+    return true;
   }
 
   @Override
@@ -90,7 +83,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       throw new BusinessException(BusinessCode.EXPORT_TYPE_NOT_SUPPORTED);
     }
 
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username, reportId);
+    PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
     String storageKey = poolReport.getReportHistory().getStorageKey();
     String reportName = poolReport.getReportHistory().getReportName();
     ReportStatus reportStatus = poolReport.getReportHistory().getStatus();
@@ -107,6 +100,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
+  @SwitchDataSource(DataBaseType.ANALYTICS)
   public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username, ReportHistoryFilterRequest filterRequest) {
 
     Timestamp timeAt7DayAgo = new Timestamp(Instant.now().minus(Duration.ofDays(7)).toEpochMilli());
@@ -138,6 +132,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
+  @SwitchDataSource(DataBaseType.ANALYTICS)
   public PoolReportHistory detail(Long reportId, String username) {
     return poolReportRepository.findByUsernameAndId(username, reportId);
   }
@@ -146,8 +141,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(Long reportId,
                                                                                Pageable pageable,
                                                                                String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
     boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (isKoiOs) {
       Set<String> poolReportSet = Set.of(poolReport.getPoolView());
@@ -168,7 +162,7 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .map(PoolReportDetailResponse.EpochSize::toDomain).toList();
         return new BaseFilterResponse<>(this.convertListToPage(epochSizeList, pageable));
       } else {
-        return new BaseFilterResponse<>(null);
+        return new BaseFilterResponse<>();
       }
 
     } else {
@@ -197,8 +191,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(Long reportId,
                                                                         Pageable pageable,
                                                                         String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
     return poolLifecycleService.registrationList(poolReport.getPoolView(), pageable);
   }
 
@@ -206,8 +199,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(Long reportId,
                                                                       Pageable pageable,
                                                                       String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
     return poolLifecycleService.poolUpdateList(poolReport.getPoolView(), pageable);
   }
 
@@ -215,8 +207,8 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<RewardResponse> fetchRewardsDistribution(Long reportId,
                                                                      Pageable pageable,
                                                                      String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+
+    PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
     return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
                                                  poolReport.getBeginEpoch(),
                                                  poolReport.getEndEpoch(), pageable);
@@ -226,8 +218,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(Long reportId,
                                                                        Pageable pageable,
                                                                        String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
     return poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null,
                                                null, pageable);
   }
