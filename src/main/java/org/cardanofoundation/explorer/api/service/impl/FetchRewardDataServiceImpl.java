@@ -24,6 +24,16 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
   }
 
   @Override
+  public Boolean checkRewardAvailable(List<String> stakeAddressList) {
+    return true;
+  }
+
+  @Override
+  public Boolean fetchReward(List<String> stakeAddressList) {
+    return true;
+  }
+
+  @Override
   public Boolean checkPoolHistoryForPool(Set<String> poolIds) {
     return true;
   }
