@@ -47,7 +47,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +58,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -307,7 +305,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     Page<AddressTokenProjection> addressTokenProjectionPage =
-        addressTokenBalanceRepository.findAddressAndBalanceByAddress(addr, pageable);
+        addressTokenBalanceRepository.findTokenAndBalanceByAddress(addr, pageable);
 
     List<AddressTokenProjection> addressTokenProjectionList = addressTokenProjectionPage.getContent();
     long totalElements = addressTokenProjectionPage.getTotalElements();
@@ -354,11 +352,11 @@ public class AddressServiceImpl implements AddressService {
 
     List<AddressTokenProjection> addressTokenProjectionList =
         addressTokenBalanceRepository.
-            findAddressAndBalanceByAddress(addr)
+            findTokenAndBalanceByAddress(addr)
         .stream()
         .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
             addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
-        .collect(Collectors.toList());
+        .toList();
     
     List<TokenAddressResponse> tokenListResponse = addressTokenProjectionList.stream()
         .map(tokenMapper::fromAddressTokenProjection)
