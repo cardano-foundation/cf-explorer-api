@@ -207,6 +207,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<RewardResponse> fetchRewardsDistribution(Long reportId,
                                                                      Pageable pageable,
                                                                      String username) {
+
     PoolReportHistory poolReport = reportHistoryService.getPoolReportHistory(reportId, username);
     return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
                                                  poolReport.getBeginEpoch(),

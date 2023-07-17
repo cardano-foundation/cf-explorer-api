@@ -324,6 +324,6 @@ public class TokenServiceImpl implements TokenService {
   }
 
   private String makeQuery(String value){
-    return "\"" + value + "\"";
+    return "\"" + value.replaceAll("\\s+","") + "\"";
   }
 }
