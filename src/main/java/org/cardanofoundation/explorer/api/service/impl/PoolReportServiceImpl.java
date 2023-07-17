@@ -217,7 +217,9 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                      String username) {
     PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
                                                                             reportId);
-    return poolLifecycleService.listReward(poolReport.getPoolView(), pageable);
+    return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
+                                                 poolReport.getBeginEpoch(),
+                                                 poolReport.getEndEpoch(), pageable);
   }
 
   @Override
