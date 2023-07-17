@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
@@ -30,12 +29,9 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
-import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
