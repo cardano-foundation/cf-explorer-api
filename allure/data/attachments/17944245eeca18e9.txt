@@ -1,0 +1,1 @@
+{"epochNo":424,"countDownEndTime":201663351,"epochSlotNo":230336,"liveStake":22657588882983837,"delegators":1290926,"activePools":3182,"retiredPools":2483}
