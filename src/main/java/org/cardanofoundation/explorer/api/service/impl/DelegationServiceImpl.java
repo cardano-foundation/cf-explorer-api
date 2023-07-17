@@ -17,6 +17,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
@@ -101,7 +105,12 @@ public class DelegationServiceImpl implements DelegationService {
   private final EpochParamRepository epochParamRepository;
 
   private final TxRepository txRepository;
+
+  private final MeterRegistry registry;
+
   public static final int MILLI = 1000;
+  
+  private int counter = 0;
 
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
@@ -841,11 +850,11 @@ public class DelegationServiceImpl implements DelegationService {
 //        System.out.println("dasdasd: " + projections2.get(i - 1).getEpochNo() + " avg = " + avg);
 //      }
 //    }
-    double a = projections2.stream().filter(t -> !Objects.equals(t.getEpochNo(), currentEpoch)).mapToDouble(t -> this.getProducedBlock(this.getPoolLifetimeLuckProjection(projections1, t.getEpochNo()), t.getActiveStakePct())).sum();
-    double b = projections2.stream().filter(t -> !Objects.equals(t.getEpochNo(), currentEpoch)).mapToDouble(t -> this.getExpectedBlock(this.getPoolLifetimeLuckProjection(projections1, t.getEpochNo()), t.getActiveStakePct())).sum();
-    System.out.println(a*100/b);
+//    double a = projections2.stream().filter(t -> !Objects.equals(t.getEpochNo(), currentEpoch)).mapToDouble(t -> this.getProducedBlock(this.getPoolLifetimeLuckProjection(projections1, t.getEpochNo()), t.getActiveStakePct())).sum();
+//    double b = projections2.stream().filter(t -> !Objects.equals(t.getEpochNo(), currentEpoch)).mapToDouble(t -> this.getExpectedBlock(this.getPoolLifetimeLuckProjection(projections1, t.getEpochNo()), t.getActiveStakePct())).sum();
+//    System.out.println(a*100/b);
 
-    return projections2.stream().filter(t -> !Objects.equals(t.getEpochNo(), currentEpoch)).mapToDouble(t -> this.calculateLifetimeLuck(this.getPoolLifetimeLuckProjection(projections1, t.getEpochNo()), t.getActiveStakePct())).average().orElse(0);
+    return projections2.stream().filter(t -> !Objects.equals(t.getEpochNo(), currentEpoch)).sorted(Comparator.comparingInt(PoolHistoryKoiosProjection::getEpochNo)) .mapToDouble(t -> this.calculateLifetimeLuck(this.getPoolLifetimeLuckProjection(projections1, t.getEpochNo()), t, t.getActiveStakePct())).average().orElse(0);
   }
 
   private Boolean isSameEpoch(PoolLifetimeLuckProjection projection1, PoolHistoryKoiosProjection projection2) {
@@ -865,20 +874,28 @@ public class DelegationServiceImpl implements DelegationService {
 //    return round(new BigDecimal(blkProducedByPool).multiply(new BigDecimal(10000)).divide(new BigDecimal(21600).multiply(BigDecimal.ONE.subtract(decentralisation)).multiply(activeStakePct), 2, RoundingMode.HALF_UP));
 //  }
 
-  private Integer calculateLifetimeLuck(PoolLifetimeLuckProjection projection1, BigDecimal activeStakePct) {
-    if(Objects.isNull(projection1) || Objects.isNull(activeStakePct)) {
+  private int calculateLifetimeLuck(PoolLifetimeLuckProjection projection1, PoolHistoryKoiosProjection projection2, BigDecimal activeStakePct) {
+	Counter counter = registry.counter("lifetimeLuck1-"+projection2.getEpochNo());
+	if(Objects.isNull(projection1) || Objects.isNull(activeStakePct)) {
+      System.out.println("epoch: " + projection2.getEpochNo() + ", luck:" + 0);
+      counter.increment(0);
       return 0;
     }
     int luck = round(new BigDecimal(projection1.getBlkProducedByPool()).multiply(new BigDecimal(10000)).divide(new BigDecimal(21600).multiply(BigDecimal.ONE.subtract(projection1.getDecentralisation())).multiply(activeStakePct), 2, RoundingMode.HALF_UP));
-    System.out.println("epoch: " + projection1.getEpochNo() + ", luck: " + luck);
+    counter.increment(luck);
+    this.counter = luck;
+    System.out.println("epoch: " + projection1.getEpochNo() + ", luck:" + luck);
     return luck;
   }
 
   private Integer getExpectedBlock(PoolLifetimeLuckProjection projection1, BigDecimal activeStakePct) {
     if(Objects.isNull(projection1) || Objects.isNull(activeStakePct)) {
+
       return 0;
     }
-    return new BigDecimal(216).multiply(BigDecimal.ONE.subtract(projection1.getDecentralisation())).multiply(activeStakePct).intValue();
+    int luck = new BigDecimal(216).multiply(BigDecimal.ONE.subtract(projection1.getDecentralisation())).multiply(activeStakePct).intValue();
+    System.out.println(projection1.getEpochNo() + ": " + luck);
+    return luck;
   }
 
   private Integer getProducedBlock(PoolLifetimeLuckProjection projection1, BigDecimal activeStakePct) {
