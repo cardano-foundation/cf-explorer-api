@@ -343,6 +343,31 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     return response;
   }
 
+  @Override
+  public BaseFilterResponse<RewardResponse> listRewardFilter(String poolView, Integer beginEpoch,
+                                                       Integer endEpoch, Pageable pageable) {
+    BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
+    if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
+      List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
+      if (Boolean.FALSE.equals(fetchRewardDataService.checkRewardForPool(rewardAccounts))
+          && Boolean.FALSE.equals(fetchRewardDataService.fetchRewardForPool(rewardAccounts))) {
+        return res;
+      }
+    }
+    List<RewardResponse> rewardRes = new ArrayList<>();
+    Page<LifeCycleRewardProjection> projections = rewardRepository
+        .getRewardInfoByPoolFiler(poolView, beginEpoch, endEpoch, pageable);
+    if (Objects.nonNull(projections)) {
+      projections.stream().forEach(projection -> {
+        RewardResponse reward = new RewardResponse(projection);
+        rewardRes.add(reward);
+      });
+      res.setTotalItems(projections.getTotalElements());
+    }
+    res.setData(rewardRes);
+    return res;
+  }
+
   private BaseFilterResponse<PoolUpdateResponse> getDataForPoolUpdate(String poolView,
       String txHash,
       Date fromDate, Date toDate,

@@ -1,10 +1,10 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +20,16 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
 
   @Override
   public Boolean fetchReward(String stakeKey) {
+    return true;
+  }
+
+  @Override
+  public Boolean checkRewardAvailable(List<String> stakeAddressList) {
+    return true;
+  }
+
+  @Override
+  public Boolean fetchReward(List<String> stakeAddressList) {
     return true;
   }
 
@@ -81,6 +91,16 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
   @Override
   public Boolean fetchAdaPots(List<Integer> epochNo) {
     return true;
+  }
+
+  @Override
+  public Boolean checkEpochRewardDistributed(Epoch epoch) {
+    return true;
+  }
+
+  @Override
+  public List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNo) {
+    return Collections.emptyList();
   }
 
   @Override
