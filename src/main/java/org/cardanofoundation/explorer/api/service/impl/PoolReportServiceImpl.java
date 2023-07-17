@@ -162,7 +162,7 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .map(PoolReportDetailResponse.EpochSize::toDomain).toList();
         return new BaseFilterResponse<>(this.convertListToPage(epochSizeList, pageable));
       } else {
-        return new BaseFilterResponse<>(null);
+        return new BaseFilterResponse<>();
       }
 
     } else {
