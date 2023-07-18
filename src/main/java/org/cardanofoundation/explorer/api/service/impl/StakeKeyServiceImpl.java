@@ -1,25 +1,10 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
@@ -32,45 +17,30 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStake;
-import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
-import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
-import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
-import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
-import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
-import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
-import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
-import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.model.response.stake.*;
+import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
-import org.cardanofoundation.explorer.api.service.cache.TopDelegatorCacheService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
+import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -98,10 +68,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
-  private final EpochStakeRepository epochStakeRepository;
-  private final TopDelegatorCacheService topDelegatorCacheService;
-
-  private final PoolHashRepository poolHashRepository;
 
   private final RedisTemplate<String, Object> redisTemplate;
 
@@ -153,15 +119,13 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       }
     }
     stakeAddressResponse.setStakeAddress(stake);
-    BigInteger stakeTotalBalance
-        = addressRepository.findTotalBalanceByStakeAddress(stakeAddress).orElse(BigInteger.ZERO);
     BigInteger stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
         stake).orElse(BigInteger.ZERO);
     BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
         stake).orElse(BigInteger.ZERO);
     stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
     stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
-    stakeAddressResponse.setTotalStake(stakeTotalBalance.add(stakeAvailableReward)
+    stakeAddressResponse.setTotalStake(stakeAddress.getBalance().add(stakeAvailableReward)
             .subtract(stakeRewardWithdrawn));
     StakeDelegationProjection poolData = delegationRepository.findPoolDataByAddress(stakeAddress)
         .orElse(null);
@@ -261,16 +225,22 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    List<Long> topDelegatorStakeIdsCached = topDelegatorCacheService.getTopStakeDelegatorCache();
-
-    List<StakeAddressProjection> stakeList;
-    if (topDelegatorStakeIdsCached.isEmpty()) {
-      stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageable);
-    } else {
-      stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(topDelegatorStakeIdsCached, pageable);
-    }
-
+    Pageable pageableDouble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+    var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageableDouble);
     Set<String> stakeAddressList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
+    if (!fetchRewardDataService.checkRewardAvailable(stakeAddressList.stream().toList())) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeAddressList.stream().toList());
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
+    var stakeIdList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getId);
+    var stakeWithdrawals = withdrawalRepository.getRewardWithdrawnByAddrIn(stakeIdList);
+    var mapStakeWithdrawnByStakeId = StreamUtil
+        .toMap(stakeWithdrawals, StakeWithdrawalProjection::getStakeAddressId, StakeWithdrawalProjection::getAmount);
+    var stakeTotalRewards = rewardRepository.getTotalRewardByStakeAddressIn(stakeIdList);
+    var mapStakeAvailableRewardsByStakeId = StreamUtil
+        .toMap(stakeTotalRewards, StakeRewardProjection::getStakeAddressId, StakeRewardProjection::getAmount);
     var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
     var mapPoolByStakeAddress = StreamUtil.toMap(poolData, StakeDelegationProjection::getStakeAddress);
 
@@ -279,9 +249,16 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       StakeDelegationProjection delegation = mapPoolByStakeAddress.get(stake.getStakeAddress());
       StakeFilterResponse stakeResponse = stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
       stakeResponse.setPoolName(delegation.getPoolData());
+      var stakeWithdrawn = mapStakeWithdrawnByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
+      var stakeTotalReward = mapStakeAvailableRewardsByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
+      var availableReward = stakeTotalReward.subtract(stakeWithdrawn);
+      if(availableReward.compareTo(BigInteger.ZERO) < 0) {
+        availableReward = BigInteger.ZERO;
+      }
+      stakeResponse.setBalance(stake.getTotalStake().add(availableReward));
       content.add(stakeResponse);
     }
-
+    content.sort(Comparator.comparing(StakeFilterResponse::getBalance).reversed());
     Page<StakeFilterResponse> pageResponse = new PageImpl<>(content, pageable, pageable.getPageSize());
     return new BaseFilterResponse<>(pageResponse);
   }
@@ -319,22 +296,22 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey,
-      AnalyticType type)
-      throws ExecutionException, InterruptedException {
+  public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(
+      String stakeKey, AnalyticType type) throws ExecutionException, InterruptedException {
 
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey)
         .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     List<CompletableFuture<StakeAnalyticBalanceResponse>> futureStakeAnalytics = new ArrayList<>();
-    List<LocalDate> dates = getListDateAnalytic(type);
-    ExecutorService fixedExecutor = Executors.newFixedThreadPool(STAKE_ANALYTIC_NUMBER);
+    List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
+    ExecutorService fixedExecutor = Executors.newFixedThreadPool(5);
     final Optional<LocalDate> maxDateAgg = aggregateAddressTxBalanceRepository.getMaxDay();
-    dates.forEach(dateItem -> futureStakeAnalytics.add(
-        CompletableFuture.supplyAsync(() -> getBalanceOfStake(stakeAddress, dateItem, maxDateAgg),
-            fixedExecutor))
-    );
-
+    for (int i = 1; i < dates.size(); i++) {
+      LocalDateTime analyticTime = dates.get(i);
+      futureStakeAnalytics.add(CompletableFuture.supplyAsync(
+          () -> getBalanceOfStake(stakeAddress, analyticTime, type, maxDateAgg), fixedExecutor)
+      );
+    }
     CompletableFuture.allOf(futureStakeAnalytics.toArray(new CompletableFuture[0])).join();
     List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
 
@@ -345,57 +322,50 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   private StakeAnalyticBalanceResponse getBalanceOfStake(
-      StakeAddress stakeAddress,LocalDate to, Optional<LocalDate> maxDateAgg) {
-    if (maxDateAgg.isEmpty()) {
-      BigInteger balance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
-          stakeAddress,
-          Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      ).orElse(BigInteger.ZERO);
-      return new StakeAnalyticBalanceResponse(to, balance);
-    }
-
+      StakeAddress stakeAddress, LocalDateTime to,
+      AnalyticType type, Optional<LocalDate> maxDateAgg) {
     BigInteger balance;
-    if (LocalDate.now().isEqual(to)) {
-      balance = getBalanceInRangeHaveToday(stakeAddress, to, maxDateAgg.get());
+    if (maxDateAgg.isEmpty()) {
+      if (type == AnalyticType.ONE_DAY) {
+        balance = addressTxBalanceRepository
+            .getBalanceByStakeAddressAndTime(stakeAddress, Timestamp.valueOf(to))
+            .orElse(BigInteger.ZERO);
+      } else {
+        balance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
+            stakeAddress, Timestamp.valueOf(to.toLocalDate().atTime(LocalTime.MAX))
+        ).orElse(BigInteger.ZERO);
+      }
     } else {
-      balance = getBalanceInRangePreviousToday(stakeAddress, to, maxDateAgg.get());
+      if (type == AnalyticType.ONE_DAY) {
+        LocalDate previousDay = to.toLocalDate().minusDays(1);
+        BigInteger previousBalance = getBalanceOfStake(stakeAddress, previousDay, maxDateAgg.get());
+        BigInteger extraTimeBalance = addressTxBalanceRepository
+            .getBalanceByStakeAddressAndTime(stakeAddress,
+                Timestamp.valueOf(previousDay.atTime(LocalTime.MAX)), Timestamp.valueOf(to))
+            .orElse(BigInteger.ZERO);
+        balance = previousBalance.add(extraTimeBalance);
+      } else {
+        balance = getBalanceOfStake(stakeAddress, to.toLocalDate(), maxDateAgg.get());
+      }
     }
-
+    if (BigInteger.ZERO.equals(balance)) {
+      balance = checkNoRecord(stakeAddress, type, to) ? null : balance;
+    }
     return new StakeAnalyticBalanceResponse(to, balance);
   }
 
-  private BigInteger getBalanceInRangeHaveToday(
-      StakeAddress stakeAddress, LocalDate to, LocalDate maxDateAgg) {
-
-    BigInteger todayBalance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
-            stakeAddress,
-            Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
-            Timestamp.valueOf(to.atTime(LocalTime.MAX))
-        )
-        .orElse(BigInteger.ZERO);
-
-    boolean isNotMissingAggregationData = !to.minusDays(1).isAfter(maxDateAgg);
-    if (isNotMissingAggregationData) {
-      BigInteger rangeToYesterdayBalance = aggregateAddressTxBalanceRepository
-          .sumBalanceByStakeAddressId(stakeAddress.getId(), to.minusDays(1))
-          .orElse(BigInteger.ZERO);
-      return todayBalance.add(rangeToYesterdayBalance);
-
+  private boolean checkNoRecord(StakeAddress stakeAddress, AnalyticType type, LocalDateTime toDateTime) {
+    Timestamp endRange;
+    if (type == AnalyticType.ONE_DAY) {
+      endRange = Timestamp.valueOf(toDateTime);
     } else {
-      BigInteger balanceAgg = aggregateAddressTxBalanceRepository
-          .sumBalanceByStakeAddressId(stakeAddress.getId(), maxDateAgg)
-          .orElse(BigInteger.ZERO);
-
-      BigInteger balanceNotAgg = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
-          stakeAddress,
-          Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
-      ).orElse(BigInteger.ZERO);
-      return todayBalance.add(balanceAgg).add(balanceNotAgg);
+      endRange = Timestamp.valueOf(toDateTime.toLocalDate().atTime(LocalTime.MAX));
     }
+    Long numberBalanceRecord = addressTxBalanceRepository.countRecord(stakeAddress, endRange);
+    return numberBalanceRecord == null || numberBalanceRecord ==  0;
   }
 
-  private BigInteger getBalanceInRangePreviousToday(
+  private BigInteger getBalanceOfStake(
       StakeAddress stakeAddress, LocalDate to, LocalDate maxDateAgg) {
     boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
     if (isNotMissingAggregationData) {
@@ -414,36 +384,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         Timestamp.valueOf(to.atTime(LocalTime.MAX))
     ).orElse(BigInteger.ZERO);
     return balanceAgg.add(balanceNotAgg);
-  }
-
-  private List<LocalDate> getListDateAnalytic(AnalyticType type) {
-    LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-    List<LocalDate> dates = new ArrayList<>();
-    switch (type) {
-      case ONE_WEEK -> {
-        var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
-          dates.add(currentWeek.minusWeeks(i));
-        }
-      }
-      case ONE_MONTH -> {
-        var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
-          dates.add(currentMonth.minusMonths(i));
-        }
-      }
-      case THREE_MONTH -> {
-        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
-          dates.add(currentDate.minusMonths(i * 3L));
-        }
-      }
-      default -> {
-        for (int i = STAKE_ANALYTIC_NUMBER - 1; i >= 0; i--) {
-          dates.add(currentDate.minusDays(i));
-        }
-      }
-    }
-    return dates;
   }
 
   @Override

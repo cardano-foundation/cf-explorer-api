@@ -14,9 +14,7 @@ import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +45,7 @@ public class EpochController {
   @Operation(summary = "Get block list of epoch by its no")
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getBlockList(
        @PathVariable @Parameter(description = "Epoch Number") String no,
-       @ParameterObject @PaginationValid @PaginationDefault(sort = {"id"},
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
           direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(blockService.getBlockByEpoch(no, pagination.toPageable()));
   }

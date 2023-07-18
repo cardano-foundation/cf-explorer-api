@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
+import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.TxOut;
 import java.util.Collection;
@@ -52,4 +53,11 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
       + " WHERE txIn.txInput = :tx")
   List<AddressInputOutputProjection> getTxAddressInputInfo(@Param("tx") Tx tx);
+
+  @Query("SELECT txOut.id as txOutId, txOut.address as address, d.hash as datumHashOut, d.bytes as datumBytesOut"
+      + " FROM TxOut txOut"
+      + " JOIN Datum d ON (txOut.dataHash = d.hash OR txOut.inlineDatum = d)"
+      + " WHERE txOut.tx = :tx"
+      + " ORDER BY txOut.index DESC")
+  List<TxContractProjection> getContractDatumOutByTx(@Param("tx") Tx tx);
 }

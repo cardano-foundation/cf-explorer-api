@@ -26,8 +26,10 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,7 +80,6 @@ import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 
 @Service
 @RequiredArgsConstructor
@@ -119,6 +120,7 @@ public class TxServiceImpl implements TxService {
   private final TreasuryRepository treasuryRepository;
   private final ReserveRepository reserveRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final TxContractMapper txContractMapper;
   private final TxMetadataRepository txMetadataRepository;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
@@ -174,7 +176,7 @@ public class TxServiceImpl implements TxService {
             .epochSlotNo(tx.getEpochSlotNo())
             .slot(tx.getSlot())
             .time(tx.getTime())
-            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAIL)
+            .status(Boolean.TRUE.equals(tx.getValidContract()) ? TxStatus.SUCCESS : TxStatus.FAILED)
             .build();
         summaries.add(summary);
         return;
@@ -272,6 +274,23 @@ public class TxServiceImpl implements TxService {
     List<TxFilterResponse> data = mapDataFromTxByStakeListToResponseList(txPage,
         stakeAddress.getId());
     return new BaseFilterResponse<>(txPage, data);
+  }
+
+  @Override
+  public List<ContractResponse> getTxContractDetail(String txHash, String address) {
+    Tx tx = txRepository.findByHash(txHash).orElseThrow(
+        () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)
+    );
+    List<ContractResponse> contractResponses = getContractResponses(tx);
+
+    // if contract address is not null, filter contract response by address
+    if(!DataUtil.isNullOrEmpty(address)) {
+      contractResponses = contractResponses.stream()
+          .filter(contractResponse -> address.equals(contractResponse.getAddress()) ||
+              address.equals(contractResponse.getScriptHash()))
+          .collect(Collectors.toList());
+    }
+    return contractResponses;
   }
 
   /**
@@ -516,7 +535,7 @@ public class TxServiceImpl implements TxService {
     if (Boolean.TRUE.equals(tx.getValidContract())) {
       txResponse.getTx().setStatus(TxStatus.SUCCESS);
     } else {
-      txResponse.getTx().setStatus(TxStatus.FAIL);
+      txResponse.getTx().setStatus(TxStatus.FAILED);
       CollateralResponse collateralResponse = txResponse.getCollaterals();
       List<TxOutResponse> collateralInputs = collateralResponse.getCollateralInputResponses();
       List<TxOutResponse> collateralOutputs = collateralResponse.getCollateralOutputResponses();
@@ -666,17 +685,29 @@ public class TxServiceImpl implements TxService {
    * @param txResponse response data of transaction
    */
   private void getContracts(Tx tx, TxResponse txResponse) {
-    List<TxContractProjection> redeemers = redeemerRepository.findContractByTx(tx);
-    if (!CollectionUtils.isEmpty(redeemers)) {
-      List<ContractResponse> contractResponses = redeemers.stream().map(redeemer -> {
-        if (redeemer.getPurpose().equals(ScriptPurposeType.SPEND)) {
-          return new ContractResponse(redeemer.getAddress());
-        } else {
-          return new ContractResponse(redeemer.getScriptHash());
-        }
-      }).collect(Collectors.toList());
+    List<ContractResponse> contractResponses = getContractResponses(tx);
+    if(!CollectionUtils.isEmpty(contractResponses)) {
       txResponse.setContracts(contractResponses);
     }
+  }
+
+  private List<ContractResponse> getContractResponses(Tx tx) {
+    List<ContractResponse> contractResponses = redeemerRepository.findContractByTx(tx)
+        .stream().map(txContractMapper::fromTxContractProjectionToContractResponse).toList();
+    List<TxContractProjection> txContractProjections = txOutRepository.getContractDatumOutByTx(tx);
+    Map<String, TxContractProjection> txContractMap = txContractProjections.stream()
+            .collect(Collectors.groupingBy(TxContractProjection::getAddress,
+                    Collectors.collectingAndThen(Collectors.toList(), list -> list.get(0))));
+
+    contractResponses.forEach(contractResponse -> {
+      TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
+      if (txContractProjection != null) {
+        contractResponse.setDatumBytesOut(
+            txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));
+        contractResponse.setDatumHashOut(txContractProjection.getDatumHashOut());
+      }
+    });
+    return contractResponses;
   }
 
   /**

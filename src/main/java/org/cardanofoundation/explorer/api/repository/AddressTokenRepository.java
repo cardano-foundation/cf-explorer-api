@@ -73,4 +73,21 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + " WHERE addrToken.tx.id in :ids and addrToken.address.stakeAddress.id = :stakeId")
   List<AddressToken> findByTxIdInAndStakeId(@Param("ids") Collection<Long> ids,
                                             @Param("stakeId") Long stakeId);
+
+  @Query(value = "SELECT count(addrToken)"
+      + " FROM AddressToken addrToken"
+      + " WHERE addrToken.multiAsset = :multiAsset"
+      + " AND addrToken.tx.id >"
+      + "   (SELECT MAX(tx.id) FROM Tx tx WHERE tx.blockId = "
+      + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :from AND block.txCount > 0)"
+      + "   )"
+      + " AND addrToken.tx.id <="
+      + "   (SELECT MAX(tx.id) FROM Tx tx WHERE tx.blockId = "
+      + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :to AND block.txCount > 0)"
+      + "   )"
+      + " AND addrToken.balance > 0")
+  Long countRecord(@Param("multiAsset") MultiAsset multiAsset,
+                   @Param("from") Timestamp from,
+                   @Param("to") Timestamp to);
+
 }

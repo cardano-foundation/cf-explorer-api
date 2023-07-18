@@ -34,9 +34,7 @@ import org.springdoc.core.annotations.ParameterObject;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -56,28 +54,28 @@ public class StakeKeyReportController {
   @LogMessage
   @Operation(summary = "Generate stake key report")
   public ResponseEntity<StakeKeyReportHistoryResponse> generateStakeKeyReport(
-       HttpServletRequest request,
-       @RequestBody StakeKeyReportRequest stakeKeyReportRequest) {
+      HttpServletRequest request,
+      @RequestBody StakeKeyReportRequest stakeKeyReportRequest) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok()
-            .body(stakeKeyReportService.generateStakeKeyReport(stakeKeyReportRequest, username));
+        .body(stakeKeyReportService.generateStakeKeyReport(stakeKeyReportRequest, username));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/export")
   @LogMessage
   @Operation(summary = "Export stake key report by id")
   public ResponseEntity<Resource> exportStakeKeyReportByStorageKey(HttpServletRequest request,
-       @PathVariable Long reportId,
-       @RequestParam(required = false) ExportType exportType) {
+                                                                   @PathVariable Long reportId,
+                                                                   @RequestParam(required = false) ExportType exportType) {
     String username = request.getAttribute("username").toString();
     StakeKeyReportResponse response = stakeKeyReportService.exportStakeKeyReport(reportId, username,
-            exportType);
+                                                                                 exportType);
     return ResponseEntity.ok()
-            .contentLength(response.getByteArrayInputStream().available())
-            .header(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + response.getFileName() + "\"")
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(new InputStreamResource(response.getByteArrayInputStream()));
+        .contentLength(response.getByteArrayInputStream().available())
+        .header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + response.getFileName() + "\"")
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .body(new InputStreamResource(response.getByteArrayInputStream()));
   }
 
   @GetMapping(value = "/stake-key/{stakeKey}/history")

@@ -58,8 +58,9 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
       + " FROM AddressTokenBalance atb "
       + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
       + " WHERE atb.address = :address"
+      + " AND atb.balance > 0"
       + " ORDER BY atb.balance DESC")
-  List<AddressTokenProjection> findAddressAndBalanceByAddress(@Param("address") Address address);
+  List<AddressTokenProjection> findTokenAndBalanceByAddress(@Param("address") Address address);
 
   @Query("SELECT ma.fingerprint as fingerprint, ma.id as multiAssetId,"
       + " ma.policy as policy, "
@@ -68,12 +69,13 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
       + " FROM AddressTokenBalance atb "
       + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
       + " WHERE atb.address = :address"
+      + " AND atb.balance > 0"
       + " ORDER BY atb.balance DESC")
-  Page<AddressTokenProjection> findAddressAndBalanceByAddress(
+  Page<AddressTokenProjection> findTokenAndBalanceByAddress(
       @Param("address") Address address, Pageable pageable);
 
   @Query("SELECT ma.name as tokenName, ma.fingerprint as fingerprint,"
-      + " atb.addressId as addressId, atb.balance as quantity"
+      + " atb.addressId as addressId, atb.balance as quantity, ma.policy as policy"
       + " FROM AddressTokenBalance atb "
       + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
       + " WHERE ma.policy = :policy"
