@@ -16,6 +16,7 @@ import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
+import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
@@ -291,15 +292,57 @@ class AddressServiceTest {
     AddressTokenProjection projection = Mockito.mock(AddressTokenProjection.class);
     when(projection.getFingerprint()).thenReturn("fingerprint");
     when(projection.getTokenName()).thenReturn("token");
-    when(projection.getPolicy()).thenReturn("policy");
     addressTokenProjections.add(projection);
+    TokenAddressResponse tokenAddressResponse = TokenAddressResponse.builder()
+            .fingerprint("fingerprint")
+            .addressId(1L)
+            .address("address")
+            .policy("policy")
+            .fingerprint("fingerprint")
+            .quantity(BigInteger.ONE)
+            .displayName(HexUtils.fromHex("token", "fingerprint"))
+            .build();
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTokenBalanceRepository.findTokenAndBalanceByAddress(address)).thenReturn(addressTokenProjections);
+    when(tokenMapper.fromAddressTokenProjection(any())).thenReturn(tokenAddressResponse);
 
     var response = addressService.getTokenByDisplayName(pageable, addr, displayName);
-    System.out.println();
+    var expect = new BaseFilterResponse<>(List.of(tokenAddressResponse), 1);
+    Assertions.assertEquals(expect.getData(), response.getData());
+    Assertions.assertEquals(expect.getTotalItems(), response.getTotalItems());
+  }
 
+  @Test
+  void getTokenByDisplayName_emptyDisplay() {
+    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
+    Pageable pageable = PageRequest.of(0, 10);
+    Address address = Address.builder().address(addr).build();
+    List<AddressTokenProjection> addressTokenProjections = new ArrayList<>();
+    AddressTokenProjection projection = Mockito.mock(AddressTokenProjection.class);
+    when(projection.getMultiAssetId()).thenReturn(1L);
+    addressTokenProjections.add(projection);
+
+    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
+    when(addressTokenBalanceRepository.findTokenAndBalanceByAddress(address, pageable)).thenReturn(new PageImpl<>(addressTokenProjections));
+    when(multiAssetRepository.findAllById(List.of(1L))).thenReturn(List.of(MultiAsset.builder().id(1L).build()));
+    when(tokenMapper.fromMultiAssetAndAddressToken(any(MultiAsset.class), any(AddressTokenProjection.class))).thenReturn(TokenAddressResponse.builder().addressId(1L).policy("sub").name("ject").build());
+    when(assetMetadataRepository.findBySubjectIn(anySet())).thenReturn(List.of(AssetMetadata.builder().id(1L).subject("subject").build()));
+    when(assetMetadataMapper.fromAssetMetadata(any())).thenReturn(TokenMetadataResponse.builder().build());
+
+    var response = addressService.getTokenByDisplayName(pageable, addr, null);
+    Assertions.assertNotNull(response);
+  }
+
+  @Test
+  void getTokenByDisplayName_addressNotFound() {
+    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
+    Pageable pageable = PageRequest.of(0, 10);
+    String displayName = "fingerprint";
+
+    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.empty());
+
+    Assertions.assertThrows(NoContentException.class, () -> addressService.getTokenByDisplayName(pageable, addr, displayName));
   }
 
   @Test
