@@ -160,13 +160,14 @@ public class DelegationServiceTest {
     }
 
     @Test
-    public void testGetDataForDelegationHeader() {
+    public void testGetDataForDelegationHeader_shouldReturn() {
         // Mock dependencies
         Epoch epoch = new Epoch();
         epoch.setNo(1);
         epoch.setStartTime(Timestamp.from(Instant.now()));
         when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(epoch));
-        when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(true);
+        when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
+        when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
         when(fetchRewardDataService.isKoiOs()).thenReturn(true);
         when(poolInfoRepository.getTotalLiveStake(anyInt())).thenReturn(BigInteger.TEN);
 
@@ -187,6 +188,59 @@ public class DelegationServiceTest {
     }
 
     @Test
+    public void testGetDataForDelegationHeader_shouldReturnV2() {
+        // Mock dependencies
+        Epoch epoch = new Epoch();
+        epoch.setNo(1);
+        epoch.setStartTime(Timestamp.from(Instant.now()));
+        when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(epoch));
+        when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
+        when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
+        when(fetchRewardDataService.isKoiOs()).thenReturn(false);
+        when(redisTemplate.opsForValue().get(any())).thenReturn(10);
+
+        // Execute the method
+        DelegationHeaderResponse response = delegationService.getDataForDelegationHeader();
+
+        // Verify the results
+        assertEquals(1, response.getEpochNo());
+        assertEquals(0, response.getEpochSlotNo()); // Update this based on the actual calculation
+        assertEquals(BigInteger.TEN, response.getLiveStake());
+        assertEquals(10, response.getDelegators());
+
+        // Verify interactions with dependencies
+        verify(epochRepository).findByCurrentEpochNo();
+        verify(fetchRewardDataService).checkAdaPots(1);
+        verify(fetchRewardDataService).isKoiOs();
+    }
+
+    @Test
+    public void testGetDataForDelegationHeader_shouldReturnRedisIsNull() {
+        // Mock dependencies
+        Epoch epoch = new Epoch();
+        epoch.setNo(1);
+        epoch.setStartTime(Timestamp.from(Instant.now()));
+        when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(epoch));
+        when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
+        when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
+        when(fetchRewardDataService.isKoiOs()).thenReturn(false);
+
+        // Execute the method
+        DelegationHeaderResponse response = delegationService.getDataForDelegationHeader();
+
+        // Verify the results
+        assertEquals(1, response.getEpochNo());
+        assertEquals(0, response.getEpochSlotNo()); // Update this based on the actual calculation
+        assertEquals(BigInteger.ZERO, response.getLiveStake());
+        assertEquals(0, response.getDelegators());
+
+        // Verify interactions with dependencies
+        verify(epochRepository).findByCurrentEpochNo();
+        verify(fetchRewardDataService).checkAdaPots(1);
+        verify(fetchRewardDataService).isKoiOs();
+    }
+
+    @Test
     public void testGetDataForPoolTable_withSearch() {
         // Mocked input data
         Pageable pageable = PageRequest.of(0, 10);
@@ -194,6 +248,14 @@ public class DelegationServiceTest {
 
         // Mocked repository responses
         List<PoolListProjection> poolIdPageContent = new ArrayList<>();
+        PoolListProjection projection = Mockito.mock(PoolListProjection.class);
+        when(projection.getPoolView()).thenReturn("view");
+        when(projection.getPoolId()).thenReturn(1L);
+        when(projection.getPoolName()).thenReturn("name");
+        when(projection.getPledge()).thenReturn(BigInteger.ONE);
+        when(projection.getFee()).thenReturn(BigInteger.ONE);
+        when(projection.getMargin()).thenReturn(1D);
+        poolIdPageContent.add(projection);
         // Add mock data to poolIdPageContent
 
         Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
@@ -213,7 +275,7 @@ public class DelegationServiceTest {
     public void testGetDataForPoolTable_withoutSearch() {
         // Mocked input data
         Pageable pageable = PageRequest.of(0, 10);
-        String search = null;
+        String search = "";
 
         // Mocked repository responses
         List<PoolListProjection> poolIdPageContent = new ArrayList<>();
@@ -224,6 +286,38 @@ public class DelegationServiceTest {
         when(poolHashRepository.findAllByPoolViewAndPoolName(null, pageable)).thenReturn(poolIdPage);
         when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
         when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
+        // Call the method
+        BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable, search);
+
+        // Perform assertions
+        assertNotNull(response);
+        assertEquals(poolIdPageContent.size(), response.getData().size());
+        // Add more assertions as needed
+    }
+
+    @Test
+    public void testGetDataForPoolTable_withSearchKoiOs() {
+        // Mocked input data
+        Pageable pageable = PageRequest.of(0, 10);
+        String search = "example";
+
+        // Mocked repository responses
+        List<PoolListProjection> poolIdPageContent = new ArrayList<>();
+        PoolListProjection projection = Mockito.mock(PoolListProjection.class);
+        when(projection.getPoolView()).thenReturn("view");
+        when(projection.getPoolId()).thenReturn(1L);
+        when(projection.getPoolName()).thenReturn("name");
+        when(projection.getPledge()).thenReturn(BigInteger.ONE);
+        when(projection.getFee()).thenReturn(BigInteger.ONE);
+        when(projection.getMargin()).thenReturn(1D);
+        poolIdPageContent.add(projection);
+        // Add mock data to poolIdPageContent
+
+        Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
+
+        when(poolHashRepository.findAllByPoolViewAndPoolName(search, pageable)).thenReturn(poolIdPage);
+        when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+
         // Call the method
         BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable, search);
 
@@ -389,7 +483,7 @@ public class DelegationServiceTest {
 
     @Test
     public void testFindTopDelegationPool() {
-        PageRequest pageable = PageRequest.of(0, 20);
+        PageRequest pageable = PageRequest.of(0, 21);
         // Mock data
         PoolDelegationSummaryProjection pds1 = Mockito.mock(PoolDelegationSummaryProjection.class);
         when(pds1.getPoolName()).thenReturn("Pool 1");
