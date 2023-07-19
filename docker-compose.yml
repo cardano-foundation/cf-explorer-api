@@ -56,6 +56,8 @@ services:
       - API_MARKET_CACHE_TIME=${API_MARKET_CACHE_TIME}
       - API_CHECK_EPOCH_URL=${API_CHECK_EPOCH_URL}
 
+      - REPORT_LIMIT_PER_24HOURS=${REPORT_LIMIT_PER_24HOURS}
+
     ports:
       - ${PORT}:8080
     volumes:
