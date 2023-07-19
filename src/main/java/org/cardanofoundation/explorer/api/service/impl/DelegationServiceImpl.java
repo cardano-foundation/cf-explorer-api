@@ -190,8 +190,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
     Object delegatorCached = redisTemplate.opsForValue()
         .get(CommonConstant.REDIS_TOTAL_DELEGATOR + network);
-    Integer delegators =
-        Objects.nonNull(delegatorCached) ? Integer.parseInt(String.valueOf(delegatorCached)) : CommonConstant.ZERO;
+    Integer delegators = Objects.nonNull(delegatorCached) ? Integer.parseInt(String.valueOf(delegatorCached)) : 0;
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
         .activePools(Objects.nonNull(poolActiveObj) ? (Integer) poolActiveObj : CommonConstant.ZERO)
@@ -204,7 +203,10 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
-    if (Objects.nonNull(search) && search.isBlank()) {
+    if(Objects.nonNull(search)){
+      search = search.toLowerCase();
+    }
+    if (search.isBlank()) {
       search = null;
     }
     Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search,
@@ -288,7 +290,6 @@ public class DelegationServiceImpl implements DelegationService {
     response.setTotalItems(poolIdPage.getTotalElements());
     response.setTotalPages(poolIdPage.getTotalPages());
     response.setCurrentPage(pageable.getPageNumber());
-
     return response;
   }
 
