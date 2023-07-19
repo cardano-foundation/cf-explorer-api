@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validation.PageZeroValid;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
@@ -124,7 +125,8 @@ public class StakeKeyController {
   @GetMapping("/top-delegators")
   @LogMessage
   @Operation(summary = "Get top delegators")
-  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(@ParameterObject @PaginationValid Pagination pagination) {
+  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(@ParameterObject @PaginationValid
+                                                                    @PageZeroValid Pagination pagination) {
     return stakeService.getTopDelegators(pagination.toPageable());
   }
 
