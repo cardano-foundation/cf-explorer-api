@@ -18,6 +18,7 @@ import org.cardanofoundation.explorer.api.repository.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.PolicyService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
@@ -28,7 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -102,9 +102,16 @@ public class PolicyServiceImpl implements PolicyService {
         Collectors.toMap(Address::getId, Function.identity()));
     Page<TokenAddressResponse> tokenAddressResponses = multiAssetPage.map(
         tokenMapper::fromAddressTokenProjection);
+    Set<String> subjects = multiAssetPage.stream().map(
+        ma -> ma.getPolicy() + ma.getTokenName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
+        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
     tokenAddressResponses.forEach(tokenAddress -> {
       tokenAddress.setAddress(
           addressMap.get(tokenAddress.getAddressId()).getAddress());
+      tokenAddress.setMetadata(assetMetadataMapper.fromAssetMetadata(
+          assetMetadataMap.get(tokenAddress.getPolicy() + tokenAddress.getName())));
       tokenAddress.setAddressId(null);
     });
     return new BaseFilterResponse<>(tokenAddressResponses);

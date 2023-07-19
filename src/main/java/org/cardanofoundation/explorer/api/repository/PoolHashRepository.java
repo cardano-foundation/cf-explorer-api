@@ -32,7 +32,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-          + "WHERE :param IS NULL OR ph.view = :param OR po.poolName LIKE %:param% OR po.tickerName LIKE %:param% ")
+          + "WHERE :param IS NULL OR ph.view = :param OR lower(po.poolName) LIKE %:param% OR po.tickerName LIKE %:param% ")
   Page<PoolListProjection> findAllByPoolViewAndPoolName(@Param("param") String param, Pageable pageable);
 
   @Query(value = "SELECT ph.id FROM PoolHash ph "
@@ -62,7 +62,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "WHERE pu.id = :id")
   PoolRegistrationProjection getPoolRegistration(@Param("id") Long id);
 
-  @Query(value = "SELECT ph.id AS id, pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView "
+  @Query(value = "SELECT ph.id AS id, pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView, pod.iconUrl as icon "
       + "FROM PoolHash ph "
       + "LEFT JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.id = (SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id ) "
       + "WHERE ph.view = :poolView")
@@ -78,4 +78,11 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
           + "WHERE ph.view = :poolView")
   Page<PoolRegistrationProjection> getPoolRegistrationByPool(@Param("poolView") String poolView, Pageable pageable);
+
+  @Query(value = "SELECT ph.id AS id, pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView, pod.iconUrl as icon "
+      + "FROM PoolHash ph "
+      + "INNER JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.id = "
+      + "(SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id ) "
+      + "WHERE LOWER(pod.poolName) LIKE CONCAT('%', :query, '%')")
+  List<PoolInfoProjection> findByPoolNameLike(@Param("query") String query, Pageable pageable);
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.controller.validation.PageZeroValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -75,7 +76,7 @@ public class DelegationController {
   @GetMapping("/pool-detail-epochs")
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
       @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
-      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, page = 0) Pagination pagination) {
     return ResponseEntity.ok(
         delegationService.getEpochListForPoolDetail(pagination.toPageable(), poolView));
   }
@@ -92,7 +93,7 @@ public class DelegationController {
   @LogMessage
   @Operation(summary = "Find Top(default is 3) Delegation Pool order by pool size")
   public ResponseEntity<List<PoolResponse>> findTopDelegationPool(
-      @PaginationValid Pagination pagination) {
+      @PaginationValid @PageZeroValid Pagination pagination) {
     return ResponseEntity.ok(delegationService.findTopDelegationPool(pagination.toPageable()));
   }
 }
