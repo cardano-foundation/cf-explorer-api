@@ -70,6 +70,10 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
         stakeKeyReportRequest);
 
+    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
+      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    }
+
     if (DataUtil.isNullOrEmpty(stakeKeyReportRequest.getReportName())) {
       String reportName = generateReportName(stakeKeyReportHistory);
       stakeKeyReportHistory.getReportHistory().setReportName(reportName);

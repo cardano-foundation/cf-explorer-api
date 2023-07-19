@@ -123,7 +123,6 @@ public class GlobalRestControllerExceptionHandler {
                 .build());
   }
 
-
   @ExceptionHandler({NoContentException.class})
   public ResponseEntity<BaseFilterResponse<?>> handleNoContent(NoContentException e) {
     log.warn("No content");

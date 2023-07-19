@@ -91,6 +91,18 @@ public class PoolReportServiceTest {
   }
 
   @Test
+  void creat_shouldThrowExceptionWhenLimitReached() {
+    PoolReportCreateRequest request = PoolReportCreateRequest.builder()
+        .poolId("any")
+        .build();
+    String username = "username";
+    when(poolHashRepository.findByView(anyString())).thenReturn(Optional.of(new PoolHash()));
+    when(reportHistoryService.isLimitReached(username)).thenReturn(true);
+    Assertions.assertThrows(BusinessException.class,
+                            () -> poolReportService.create(request, username));
+  }
+
+  @Test
   void create_shouldCreate() {
     PoolReportCreateRequest request = PoolReportCreateRequest.builder()
         .poolId("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
@@ -128,6 +140,7 @@ public class PoolReportServiceTest {
 
     when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
     when(reportHistoryService.savePoolReportHistory(any(PoolReportHistory.class))).thenReturn(saved);
+    when(reportHistoryService.isLimitReached(username)).thenReturn(false);
     doNothing().when(kafkaService).sendReportHistory(any(ReportHistory.class));
     Assertions.assertTrue(poolReportService.create(request, username));
   }

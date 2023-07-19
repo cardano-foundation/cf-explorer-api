@@ -2,9 +2,9 @@
 multi-datasource: #specified for HikariDataSource
   datasourceLedgerSync:
     hikariConfig:
-      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.112}:${LEDGER_SYNC_PORT:54321}/${LEDGER_SYNC_DB:explorer}?currentSchema=${DB_SCHEMA}
-      username: ${LEDGER_SYNC_USER:cardano_read}
-      password: ${LEDGER_SYNC_PASSWORD:1}
+      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.75}:${LEDGER_SYNC_PORT:54322}/${LEDGER_SYNC_DB:explorer}?currentSchema=${DB_SCHEMA}
+      username: ${LEDGER_SYNC_USER:cardano-master}
+      password: ${LEDGER_SYNC_PASSWORD:postgres_master_pw}
       driverClassName: org.postgresql.Driver
       poolName: explorer-api-ledgersync-pool
       minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
@@ -135,6 +135,8 @@ application:
       base-url: ${API_CHECK_ADA_POTS_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
     check-epoch:
       base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
+  report:
+    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
 
 springdoc:
   api-docs.path: /apidocs
@@ -165,8 +167,8 @@ rsa:
 cloud:
   aws:
     credentials:
-      access-key: ${S3_ACCESS_KEY:minio_access_key}
-      secret-key: ${S3_SECRET_KEY:minio_secret_key}
+      access-key: ${S3_ACCESS_KEY:minio}
+      secret-key: ${S3_SECRET_KEY:minio123}
     region:
       static: ${S3_REGION:null}
     s3:
@@ -174,7 +176,7 @@ cloud:
         name: ${S3_BUCKET_NAME:cardano-explorer-api-storage-mainnet}
       path-style:
         enabled: true
-      endpoint: ${STORAGE_ENDPOINT:http://10.4.10.112:9000}
+      endpoint: ${STORAGE_ENDPOINT:http://10.4.10.231:9000}
 
 logging:
   level:

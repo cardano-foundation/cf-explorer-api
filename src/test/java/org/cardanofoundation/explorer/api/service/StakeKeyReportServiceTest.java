@@ -83,7 +83,6 @@ public class StakeKeyReportServiceTest {
 
   @Mock
   RewardRepository rewardRepository;
-
   @Mock
   ReportHistoryService reportHistoryService;
 
@@ -96,6 +95,18 @@ public class StakeKeyReportServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyReportService.generateStakeKeyReport(request, username));
+  }
+
+  @Test
+  void generateStakeKeyReport_shouldThrowExceptionWhenLimitReached() {
+    StakeKeyReportRequest request = StakeKeyReportRequest.builder()
+        .stakeKey("any")
+        .build();
+    String username = "username";
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(new StakeAddress()));
+    when(reportHistoryService.isLimitReached(username)).thenReturn(Boolean.TRUE);
+    Assertions.assertThrows(BusinessException.class,
+                            () -> stakeKeyReportService.generateStakeKeyReport(request, username));
   }
 
   @Test
@@ -139,7 +150,7 @@ public class StakeKeyReportServiceTest {
     when(reportHistoryService.saveStakeKeyReportHistory(any(StakeKeyReportHistory.class))).thenReturn(expect);
     when(stakeKeyReportMapper.toStakeKeyReportHistory(any(StakeKeyReportRequest.class))).thenReturn(
         expect);
-
+    when(reportHistoryService.isLimitReached(username)).thenReturn(Boolean.FALSE);
     when(stakeKeyReportMapper.toStakeKeyReportHistoryResponse(expect))
         .thenReturn(responseExpect);
 

@@ -70,6 +70,9 @@ public class PoolReportServiceImpl implements PoolReportService {
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
     poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
+      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    }
     ReportHistory reportHistory = initReportHistory(poolReportCreateRequest, username);
     PoolReportHistory poolReportHistory = poolReportCreateRequest.toEntity(reportHistory);
     poolReportHistory = reportHistoryService.savePoolReportHistory(poolReportHistory);
