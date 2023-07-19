@@ -13,7 +13,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -41,11 +43,16 @@ public class RedisStandaloneConfig implements CachingConfigurer {
     @Value("${application.api.coin.gecko.market.interval-time}")
     private int apiMarketIntervalTime;
 
-    @Bean(name = "lettuceConnectionFactory")
-    @Autowired
-    LettuceConnectionFactory lettuceConnectionFactory() {
+    @Bean
+    RedisStandaloneConfiguration redisStandaloneConfiguration() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(hostname, port);
         redisStandaloneConfiguration.setPassword(password);
+        return redisStandaloneConfiguration;
+    }
+
+    @Bean(name = "lettuceConnectionFactory")
+    @Autowired
+    LettuceConnectionFactory lettuceConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration) {
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
 
@@ -82,6 +89,12 @@ public class RedisStandaloneConfig implements CachingConfigurer {
             log.info("call Redis cache Key : " + sb);
             return sb.toString();
         };
+    }
+
+    @Bean(name = "jedisConnectionFactory")
+    @Autowired
+    JedisConnectionFactory jedisConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration) {
+        return new JedisConnectionFactory(redisStandaloneConfiguration);
     }
 
     @Bean(name = "cacheManager")
