@@ -42,13 +42,18 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `SPRING_PROFILES_ACTIVE`: Spring profiles (dev, prod, test, local), plus Redis Profiles, plus Koios service, See Below. Default is dev. In your case, you should use local
 
 - `PORT`: Port of application. Default is 8080.
-- `DB_HOST`: Database host
-- `DB_PORT`: Database port
-- `DB_USERNAME`: Database username
-- `DB_PASSWORD`: Database password
-- `DB_NAME`: Database name
+- `LEDGER_SYNC_HOST`: Ledger-sync database host.
+- `LEDGER_SYNC_PORT`: Ledger-sync database port
+- `LEDGER_SYNC_USER`: Ledger-sync database username
+- `LEDGER_SYNC_PASSWORD`: Ledger-sync database password
+- `LEDGER_SYNC_DB`: Ledger-sync database name
+- `ANALYTICS_HOST`: Analytics database host.
+- `ANALYTICS_PORT`: Analytics database port
+- `ANALYTICS_USER`: Analytics database username
+- `ANALYTICS_PASSWORD`: Analytics database password
+- `ANALYTICS_DB`: Analytics database name
 - `DB_SCHEMA`: Schema of database
-- `DB_MAXIUM_POOL_SIZE`: Maximum pool size of database connection pool. Default is 32.
+- `DB_MAXIMUM_POOL_SIZE`: Maximum pool size of database connection pool. Default is 32.
 
 - `KAFKA_BOOTSTRAP_SERVER`: Kafka bootstrap server. Default is kafka:9092.
 - `KAFKA_REPORTS_TOPIC`: Kafka reports topic. Default is dev.explorer.api.mainnet.reports
@@ -57,9 +62,9 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `S3_SECRET_KEY`: the AWS secret key
 - `S3_REGION`: the AWS region
 - `S3_BUCKET_NAME`: the AWS bucket
-- `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
-- `PATH_STYLE_ENABLED`: 
 
+- `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
+  
 - `LOG_PATH`: the path to store log files
 
 - `PRIVATE_MVN_REGISTRY_URL`: the url of private maven registry
@@ -71,6 +76,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `API_NEWS_CACHE_TIME`: Cache time for news data. Default is 120s.
 - `API_MARKET_URL`: URL for get market data. Default is `https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s`
 - `API_MARKET_CACHE_TIME` : Cache time for market data. Default is 120s.
+
+- `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.
 
 ### We have 3 options for redis cache:
 - `redis standalone`

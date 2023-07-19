@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
@@ -22,12 +23,12 @@ import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
 
@@ -46,7 +47,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,15 +78,20 @@ public class TokenServiceImpl implements TokenService {
   @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable)
+  public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable)
       throws ExecutionException, InterruptedException {
     Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
         tokenPageCacheService.getTokePageCache(pageable);
-    if (cacheResp.isPresent()){
+    if (cacheResp.isPresent() && StringUtils.isEmpty(query)) {
       return cacheResp.get();
     }
-
-    Page<MultiAsset> multiAssets = multiAssetRepository.findAll(pageable);
+    Page<MultiAsset> multiAssets;
+    if(StringUtils.isEmpty(query)){
+      multiAssets = multiAssetRepository.findAll(pageable);
+    } else {
+      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable);
+    }
     Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(), ma -> ma.getPolicy() + ma.getName());
 
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);

@@ -3,14 +3,17 @@ package org.cardanofoundation.explorer.api.model.response.pool;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigInteger;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolActiveStakeProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PoolDetailEpochResponse implements Serializable {
 
   private Integer epoch;
