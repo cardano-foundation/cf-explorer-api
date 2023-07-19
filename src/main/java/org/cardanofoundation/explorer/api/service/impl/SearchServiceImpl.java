@@ -103,7 +103,8 @@ public class SearchServiceImpl implements SearchService {
         return;
       }
       try {
-        if (checkNetworkAddress(query) && Objects.nonNull(AddressUtils.checkStakeAddress(query))) {
+        if (checkNetworkAddress(query)) {
+          AddressUtils.checkStakeAddress(query);
           searchResponse.setAddress(new AddressSearchResponse(query, true, false));
         }
       } catch (Exception e) {
