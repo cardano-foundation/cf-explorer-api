@@ -55,8 +55,7 @@ public class DelegationController {
 
   @GetMapping("/pool-list")
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0, sort = {
-          "pu.pledge"}, direction = Sort.Direction.DESC) Pagination pagination,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       @RequestParam("search") String search) {
     return ResponseEntity.ok(
         delegationService.getDataForPoolTable(pagination.toPageable(), search));
