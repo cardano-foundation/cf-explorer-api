@@ -51,10 +51,6 @@ public class EpochServiceImpl implements EpochService {
   @Transactional(readOnly = true)
   public EpochResponse getEpochDetail(String no) {
     try {
-      Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
-          .orElseThrow(() -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
-      LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
-
       Integer epochNo = Integer.parseInt(no);
       Epoch epoch = epochRepository.findFirstByNo(epochNo).orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
@@ -68,6 +64,9 @@ public class EpochServiceImpl implements EpochService {
         }
         epoch.setRewardsDistributed(fetchEpochResponse.get(0).getRewardsDistributed());
       }
+      Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
+          .orElseThrow(() -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
+      LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
       checkEpochStatus(response, currentEpoch);
       modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response);
