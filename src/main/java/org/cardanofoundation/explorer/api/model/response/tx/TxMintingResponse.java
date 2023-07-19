@@ -18,6 +18,7 @@ public class TxMintingResponse {
   private BigInteger assetQuantity;
   private String assetId;
   private String policy;
+  @JsonInclude
   private TokenMetadataResponse metadata;
   @JsonIgnore
   private Long multiAssetId;

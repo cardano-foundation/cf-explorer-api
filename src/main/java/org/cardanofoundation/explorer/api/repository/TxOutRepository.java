@@ -56,7 +56,7 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
 
   @Query("SELECT txOut.id as txOutId, txOut.address as address, d.hash as datumHashOut, d.bytes as datumBytesOut"
       + " FROM TxOut txOut"
-      + " JOIN Datum d ON txOut.inlineDatum = d"
+      + " JOIN Datum d ON (txOut.dataHash = d.hash OR txOut.inlineDatum = d)"
       + " WHERE txOut.tx = :tx"
       + " ORDER BY txOut.index DESC")
   List<TxContractProjection> getContractDatumOutByTx(@Param("tx") Tx tx);
