@@ -13,7 +13,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
-  @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE concat('%', :query, '%')"
+  @Query("SELECT ma FROM MultiAsset ma "
+      + " WHERE ma.fingerprint = :query OR LOWER(ma.nameView) LIKE CONCAT('%', :query, '%')"
       + " ORDER BY LENGTH(ma.nameView) ASC, ma.txCount DESC")
   Page<MultiAsset> findAll(@Param("query") String query, Pageable pageable);
 
