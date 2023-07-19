@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.3.19](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.18...v0.3.19) (2023-07-17)
+
+
+### Bug Fixes
+
+* added redis cache TTL config for ada price ([26bb5ba](https://github.com/cardano-foundation/cf-explorer-api/commit/26bb5ba1c66ba68dc5f5ac1e8a8d36e6632faa9a))
+
+## [0.3.18](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.17...v0.3.18) (2023-07-17)
+
+
+### Features
+
+* add unique account to epoch ([9a8a250](https://github.com/cardano-foundation/cf-explorer-api/commit/9a8a250e1cf0a291901067d26e281c516c0d3976))
+* MET-1271 fix latest epoch detail error fetching reward ([ef5ec37](https://github.com/cardano-foundation/cf-explorer-api/commit/ef5ec3783a7134de930af711b52afe8f8721286f))
+* MET-1271 fix unit test ([648ac59](https://github.com/cardano-foundation/cf-explorer-api/commit/648ac594e6e5f9835135a7d30f40206c9e0ed450))
+
+
+### Bug Fixes
+
+* conflict when create PR with develop ([e71ba52](https://github.com/cardano-foundation/cf-explorer-api/commit/e71ba527c4577a3127f3169e3a9a74e5d1e54297))
+* fetch spo registration record is incorrect ([552e970](https://github.com/cardano-foundation/cf-explorer-api/commit/552e97031cc6edada2303b2602ddbf0737e3b85c))
+* fix bug not return datum-out with same address of tx contract ([fe8662f](https://github.com/cardano-foundation/cf-explorer-api/commit/fe8662fca1e312ded408e8919adaff4e1bc3497d))
+* handle case same address in contract detail ([0e1117a](https://github.com/cardano-foundation/cf-explorer-api/commit/0e1117a5e7e00325744c400eeefb0a6d13a3d8fb))
+* miss code when fix conflict ([96008dc](https://github.com/cardano-foundation/cf-explorer-api/commit/96008dcd8a0aefe5f8927707890f3519a1ae8c7f))
+* remove space in ts query tx_metadata ([53a4e2f](https://github.com/cardano-foundation/cf-explorer-api/commit/53a4e2f191d797801f91a3985d7e7a95a06a8991))
+* reward distribution of pool not in epoch range ([58b8999](https://github.com/cardano-foundation/cf-explorer-api/commit/58b8999415847580c88d400f214f2f0da0db34c3))
+* unit test pool certificate ([685f504](https://github.com/cardano-foundation/cf-explorer-api/commit/685f504029d4b7325308a3e984a54b5796c01816))
+* update tx_contract_detail query after back fill redeemer,datum value ([eec72ca](https://github.com/cardano-foundation/cf-explorer-api/commit/eec72cacc362a150e68f2c3f262258615af16744))
+
 ## [0.3.17](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.16...v0.3.17) (2023-07-04)
 
 
