@@ -14,6 +14,8 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -40,12 +42,17 @@ public class RedisClusterConfig implements CachingConfigurer {
     @Value("${application.api.coin.gecko.market.interval-time}")
     private int apiMarketIntervalTime;
 
-    @Bean(name = "lettuceConnectionFactory")
-    @Autowired
-    LettuceConnectionFactory lettuceConnectionFactory() {
-        LettuceClientConfiguration lettuceClientConfiguration = LettuceClientConfiguration.builder().useSsl().build();
+    @Bean
+    RedisClusterConfiguration redisClusterConfiguration() {
         RedisClusterConfiguration redisClusterConfiguration = new RedisClusterConfiguration(nodes);
         redisClusterConfiguration.setPassword(password);
+        return redisClusterConfiguration;
+    }
+
+    @Bean(name = "lettuceConnectionFactory")
+    @Autowired
+    LettuceConnectionFactory lettuceConnectionFactory(RedisClusterConfiguration redisClusterConfiguration) {
+        LettuceClientConfiguration lettuceClientConfiguration = LettuceClientConfiguration.builder().useSsl().build();
         return new LettuceConnectionFactory(redisClusterConfiguration, lettuceClientConfiguration);
     }
 
@@ -82,6 +89,12 @@ public class RedisClusterConfig implements CachingConfigurer {
             log.info("call Redis cache Key : " + sb);
             return sb.toString();
         };
+    }
+
+    @Bean(name = "jedisConnectionFactory")
+    @Autowired
+    JedisConnectionFactory jedisConnectionFactory(RedisClusterConfiguration redisClusterConfiguration) {
+        return new JedisConnectionFactory(redisClusterConfiguration, JedisClientConfiguration.builder().useSsl().build());
     }
 
     @Bean(name = "cacheManager")
