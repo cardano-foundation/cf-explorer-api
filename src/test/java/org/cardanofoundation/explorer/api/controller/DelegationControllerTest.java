@@ -105,7 +105,7 @@ public class DelegationControllerTest {
     @Test
     public void testGetDataForPoolTable() throws Exception {
         // Mock request and response objects
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "pu.pledge"));
+        Pageable pageable = PageRequest.of(0, 10);
         String search = "testSearch";
         List<PoolResponse> mockResponse = Arrays.asList(
                 new PoolResponse(),
