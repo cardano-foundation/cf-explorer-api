@@ -604,7 +604,7 @@ public class StakeKeyReportServiceTest {
     expect.setFee(BigInteger.TWO);
     expect.setTime(LocalDateTime.ofInstant(toDate.toInstant(), ZoneOffset.UTC));
     expect.setType(StakeTxType.SENT);
-    expect.setStatus(TxStatus.FAIL);
+    expect.setStatus(TxStatus.FAILED);
     expect.setTxHash("txHash");
 
     when(stakeKeyLifeCycleService.getStakeWalletActivitiesByDateRange(anyString(), any(StakeLifeCycleFilterRequest.class), any(Pageable.class)))
