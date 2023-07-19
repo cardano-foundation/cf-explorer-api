@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.20](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.19...v0.3.20) (2023-07-19)
+
+
+### Bug Fixes
+
+* attempting to fix jedisConnectionFactory for cluster and standalone redis mode ([503f09b](https://github.com/cardano-foundation/cf-explorer-api/commit/503f09b65b979f48c7234140589c2a9dfdc2af7a))
+* update API responses for improved coherence and logical consistency ([7b63621](https://github.com/cardano-foundation/cf-explorer-api/commit/7b63621692951b7056c6c5cf8be3680fba24bda6))
+
 ## [0.3.19](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.18...v0.3.19) (2023-07-17)
 
 
