@@ -107,6 +107,8 @@ application:
       base-url: ${API_CHECK_EPOCH_STAKE_URL:http://10.4.10.231:8888/api/v1/epoch-stake/fetch}
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
+  report:
+    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
 
 springdoc:
   api-docs.path: /apidocs
