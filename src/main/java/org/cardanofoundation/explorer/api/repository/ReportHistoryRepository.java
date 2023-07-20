@@ -32,4 +32,12 @@ public interface ReportHistoryRepository extends JpaRepository<ReportHistory, Lo
                                                          @Param("username") String username,
                                                          Pageable pageable);
 
+  @Query("SELECT COUNT(rh.id) FROM ReportHistory rh "
+      + " WHERE 1 = 1"
+      + " AND (rh.username = :username)"
+      + " AND (rh.createdAt >= :fromDate)"
+      + " AND (rh.createdAt <= :toDate)")
+  Integer countByUsernameAndCreatedAtBetween(@Param("username") String username,
+                                             @Param("fromDate") Timestamp fromDate,
+                                             @Param("toDate") Timestamp toDate);
 }
