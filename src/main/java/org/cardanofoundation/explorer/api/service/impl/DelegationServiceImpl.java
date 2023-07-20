@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +29,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
 import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
+import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderResponse;
@@ -51,10 +52,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDet
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
-import org.cardanofoundation.explorer.api.projection.DelegationProjection;
-import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
-import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
-import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.DelegationRepository;
@@ -69,6 +67,7 @@ import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
+import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -117,6 +116,8 @@ public class DelegationServiceImpl implements DelegationService {
   private final EpochParamRepository epochParamRepository;
 
   private final TxRepository txRepository;
+
+  private final EpochService epochService;
   public static final int MILLI = 1000;
 
   @Value("${spring.data.web.pageable.default-page-size}")
@@ -161,8 +162,7 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public DelegationHeaderResponse getDataForDelegationHeader() {
-    Epoch epoch = epochRepository.findByCurrentEpochNo()
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    EpochSummary epoch = epochService.getCurrentEpochSummary();
     Integer epochNo = epoch.getNo();
     if (!fetchRewardDataService.checkAdaPots(epochNo)) {
       fetchRewardDataService.fetchAdaPots(List.of(epochNo));
@@ -171,11 +171,10 @@ public class DelegationServiceImpl implements DelegationService {
         .get(CommonConstant.REDIS_POOL_ACTIVATE + network);
     Object poolInActiveObj = redisTemplate.opsForValue()
         .get(CommonConstant.REDIS_POOL_INACTIVATE + network);
-    Timestamp startTime = epoch.getStartTime();
-    Long slot = (Instant.now().toEpochMilli() - startTime.getTime()) / MILLI;
-    long countDownTime =
-        Timestamp.from(startTime.toInstant().plus(5, ChronoUnit.DAYS)).getTime() - Timestamp.from(
-            Instant.now()).getTime();
+    LocalDateTime endTime = epoch.getEndTime();
+    Integer slot = epoch.getSlot();
+    long countDownTime
+        = Timestamp.valueOf(endTime).getTime() - Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)).getTime();
     BigInteger liveStake;
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (Boolean.TRUE.equals(isKoiOs)) {
