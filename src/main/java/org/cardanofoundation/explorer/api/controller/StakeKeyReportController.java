@@ -9,6 +9,7 @@ import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthVa
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.ReportLimitResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
@@ -202,5 +203,13 @@ public class StakeKeyReportController {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getWalletActivitiesByReportId(reportId, username, pagination.toPageable()));
+  }
+
+  @GetMapping(value = "/report-limit")
+  @LogMessage
+  @Operation(summary = "Get report limit information")
+  public ResponseEntity<ReportLimitResponse> getReportLimit(HttpServletRequest request) {
+    String username = request.getAttribute("username").toString();
+    return ResponseEntity.ok(reportHistoryService.getReportLimit(username));
   }
 }

@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.token;
 
 import java.math.BigInteger;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +10,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class TokenVolumeAnalyticsResponse {
-  private LocalDate date;
+  private LocalDateTime date;
   private BigInteger value;
 }
