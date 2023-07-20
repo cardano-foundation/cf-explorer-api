@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportHistoryServiceTest {
@@ -70,5 +71,37 @@ public class ReportHistoryServiceTest {
     Assertions.assertEquals(ReportStatus.GENERATED, response.getData().get(0).getStatus());
     Assertions.assertEquals(1L, response.getData().get(0).getStakeKeyReportId());
     Assertions.assertEquals(createdAt, response.getData().get(0).getCreatedAt());
+  }
+
+  @Test
+  void isLimitReached_shouldReturnTrueIfLimitIsReached() {
+    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
+    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
+                                                                    any(Timestamp.class),
+                                                                    any(Timestamp.class)))
+        .thenReturn(5);
+    Assertions.assertTrue(reportHistoryService.isLimitReached("username"));
+  }
+
+  @Test
+  void isLimitReached_shouldReturnFalseIfLimitIsNotReached() {
+    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
+    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
+                                                                    any(Timestamp.class),
+                                                                    any(Timestamp.class)))
+        .thenReturn(4);
+    Assertions.assertFalse(reportHistoryService.isLimitReached("username"));
+  }
+
+  @Test
+  void getReportLimitPer24Hours_shouldReturnLimit() {
+    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
+    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
+                                                                    any(Timestamp.class),
+                                                                    any(Timestamp.class)))
+        .thenReturn(4);
+    var reportLimit = reportHistoryService.getReportLimit("username");
+    Assertions.assertEquals(5, reportLimit.getLimitPer24hours());
+    Assertions.assertEquals(Boolean.FALSE, reportLimit.getIsLimitReached());
   }
 }

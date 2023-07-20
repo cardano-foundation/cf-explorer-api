@@ -66,6 +66,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   private final PoolHistoryRepository poolHistoryRepository;
 
   private final EpochRepository epochRepository;
+  private final ReportHistoryService reportHistoryService;
 
   @Override
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
@@ -79,7 +80,9 @@ public class PoolReportServiceImpl implements PoolReportService {
                                     String username) {
     poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
-
+    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
+      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    }
     ReportHistory reportHistory = initReportHistory(poolReportCreateRequest, username);
     return poolReportRepository.saveAndFlush(poolReportCreateRequest.toEntity(reportHistory));
   }
