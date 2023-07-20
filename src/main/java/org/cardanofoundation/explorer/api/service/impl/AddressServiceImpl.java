@@ -357,7 +357,7 @@ public class AddressServiceImpl implements AddressService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    if(Boolean.FALSE.equals(addr.getVerifiedContract())){
+    if(Boolean.FALSE.equals(addr.getVerifiedContract()) || Objects.isNull(addr.getVerifiedContract())){
       return ContractScript.builder().isVerified(Boolean.FALSE).data(null).build();
     }
 
