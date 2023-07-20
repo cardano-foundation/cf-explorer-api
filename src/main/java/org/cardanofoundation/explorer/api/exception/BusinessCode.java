@@ -20,7 +20,8 @@ public enum BusinessCode implements ErrorCode {
   PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support"),
   SCRIPT_NOT_FOUND("404-SCRIPT_NOT_FOUND", "Script not found"),
   FETCH_REWARD_ERROR("500-FETCH_REWARD_ERROR", "Fetch reward error"),
-  TIME_RANGE_ILLEGAL("400-TIME_RANGE_ILLEGAL", "Time range is illegal");
+  TIME_RANGE_ILLEGAL("400-TIME_RANGE_ILLEGAL", "Time range is illegal"),
+  REPORT_LIMIT_REACHED("400-REPORT_LIMIT_REACHED", "Report limit reached");
 
   private final String code;
   private final String desc;

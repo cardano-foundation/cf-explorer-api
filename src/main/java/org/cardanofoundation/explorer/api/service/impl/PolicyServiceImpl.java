@@ -102,9 +102,16 @@ public class PolicyServiceImpl implements PolicyService {
         Collectors.toMap(Address::getId, Function.identity()));
     Page<TokenAddressResponse> tokenAddressResponses = multiAssetPage.map(
         tokenMapper::fromAddressTokenProjection);
+    Set<String> subjects = multiAssetPage.stream().map(
+        ma -> ma.getPolicy() + ma.getTokenName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
+        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
     tokenAddressResponses.forEach(tokenAddress -> {
       tokenAddress.setAddress(
           addressMap.get(tokenAddress.getAddressId()).getAddress());
+      tokenAddress.setMetadata(assetMetadataMapper.fromAssetMetadata(
+          assetMetadataMap.get(tokenAddress.getPolicy() + tokenAddress.getName())));
       tokenAddress.setAddressId(null);
     });
     return new BaseFilterResponse<>(tokenAddressResponses);
