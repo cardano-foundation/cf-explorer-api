@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.21](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.20...v0.3.21) (2023-07-20)
+
+
+### Bug Fixes
+
+* met-753 handle case field verified_contract null ([9e377aa](https://github.com/cardano-foundation/cf-explorer-api/commit/9e377aa527bde514af7f66f59e6932ef5411bbfc))
+
+
+### Documentation
+
+* add REPORT_LIMIT_PER_24HOURS env ([79694c3](https://github.com/cardano-foundation/cf-explorer-api/commit/79694c39f802313c55e42176a527adf0f8858c4f))
+
 ## [0.3.20](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.19...v0.3.20) (2023-07-19)
 
 
