@@ -69,7 +69,7 @@ public class CommonConstant {
 
   public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
 
-
+  public static final String UNDERSCORE = "_";
 
   public static int hashCode(Object... a) {
     if (a == null) {
