@@ -1,19 +1,8 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-
-import jakarta.annotation.PostConstruct;
-
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -24,15 +13,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
-import org.cardanofoundation.explorer.api.projection.UniqueAddressProjection;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+import org.springframework.util.CollectionUtils;
+
+import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -42,10 +41,9 @@ public class EpochServiceImpl implements EpochService {
   private final EpochRepository epochRepository;
   private final EpochMapper epochMapper;
   private final RedisTemplate<String, Object> redisTemplate;
-  private static final String UNIQUE_ACCOUNTS = "UNIQUE_ACCOUNTS";
-  private static final String MAX_TRANSACTION_ID = "MAX_TRANSACTION_ID";
-  public static final long ONE_EPOCH = 5L;
-  public static final int NOT_EXPIRE = -1;
+  private final FetchRewardDataService fetchRewardDataService;
+  private static final String UNIQUE_ACCOUNTS_KEY = "UNIQUE_ACCOUNTS";
+  private static final String UNDERSCORE = "_";
 
   @Value("${application.network}")
   private String network;
@@ -58,10 +56,27 @@ public class EpochServiceImpl implements EpochService {
       Epoch epoch = epochRepository.findFirstByNo(epochNo).orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
       );
-      EpochResponse response = epochMapper.epochToEpochResponse(epoch);
       var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+      if (!fetchRewardDataService.checkEpochRewardDistributed(epoch) && epoch.getNo() < currentEpoch - 1 ) {
+        List<Epoch> fetchEpochResponse = fetchRewardDataService.fetchEpochRewardDistributed(List.of(epochNo));
+        if (CollectionUtils.isEmpty(fetchEpochResponse)) {
+          throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+        }
+        epoch.setRewardsDistributed(fetchEpochResponse.get(0).getRewardsDistributed());
+      }
+      Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
+          .orElseThrow(() -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
+      LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
+      EpochResponse response = epochMapper.epochToEpochResponse(epoch);
       checkEpochStatus(response, currentEpoch);
+      modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response);
+      String uniqueAccountRedisKey = String.join(
+          UNDERSCORE,
+          getRedisKey(UNIQUE_ACCOUNTS_KEY),
+          epoch.getNo().toString());
+      Integer account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
+      response.setAccount(account);
       return response;
     } catch (NumberFormatException e) {
       throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
@@ -71,12 +86,69 @@ public class EpochServiceImpl implements EpochService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable) {
+
+    Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
+        .orElseThrow(() -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
+    LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
+
     Page<Epoch> epochs = epochRepository.findAll(pageable);
+    var epochNeedFetch =  epochs.getContent().stream().filter(
+        epoch -> !fetchRewardDataService.checkEpochRewardDistributed(epoch)
+    ).map(Epoch::getNo).toList();
+    if (!CollectionUtils.isEmpty(epochNeedFetch)) {
+      List<Epoch> fetchEpochList = fetchRewardDataService.fetchEpochRewardDistributed(epochNeedFetch);
+      if (fetchEpochList == null) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+      Map<Integer, BigInteger> epochRewardMap
+          = StreamUtil.toMap(fetchEpochList, Epoch::getNo, Epoch::getRewardsDistributed);
+      epochs.forEach(epoch -> {
+        if(epochRewardMap.containsKey(epoch.getNo())) {
+          epoch.setRewardsDistributed(epochRewardMap.get(epoch.getNo()));
+        }
+      });
+    }
+
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
     var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
         () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
-    pageResponse.getContent().forEach(epoch -> checkEpochStatus(epoch, currentEpoch));
+    pageResponse.getContent().forEach(epoch -> {
+      checkEpochStatus(epoch, currentEpoch);
+      modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch);
+      String uniqueAccountRedisKey = String.join(
+          UNDERSCORE,
+          getRedisKey(UNIQUE_ACCOUNTS_KEY),
+          epoch.getNo().toString());
+      epoch.setAccount(redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue());
+    });
     return new BaseFilterResponse<>(pageResponse);
+  }
+
+  /**
+   * Set time of epoch belongs to start time of first epoch
+   * Set hour, minute, second of epoch belongs to hour, minute, second of first epoch
+   * @param firstEpochStartTime start time of first epoch
+   * @param epoch epoch need to modify
+   */
+  private static void modifyStartTimeAndEndTimeOfEpoch(LocalDateTime firstEpochStartTime, EpochResponse epoch) {
+    LocalDateTime epochStartTime = epoch.getStartTime();
+    LocalDateTime epochEndTime = epoch.getEndTime();
+    epochStartTime = LocalDateTime.of(
+        epochStartTime.getYear(),
+        epochStartTime.getMonth(),
+        epochStartTime.getDayOfMonth(),
+        firstEpochStartTime.getHour(),
+        firstEpochStartTime.getMinute(),
+        firstEpochStartTime.getSecond());
+    epochEndTime = LocalDateTime.of(
+        epochEndTime.getYear(),
+        epochEndTime.getMonth(),
+        epochEndTime.getDayOfMonth(),
+        firstEpochStartTime.getHour(),
+        firstEpochStartTime.getMinute(),
+        firstEpochStartTime.getSecond());
+    epoch.setStartTime(epochStartTime);
+    epoch.setEndTime(epochEndTime);
   }
 
   /**
@@ -89,13 +161,10 @@ public class EpochServiceImpl implements EpochService {
    * @param epoch epoch response
    */
   private void checkEpochStatus(EpochResponse epoch, Integer currentEpoch) {
-    var rewardTime = LocalDateTime.now().minusDays(10);
-    if (epoch.getStartTime().plusDays(EPOCH_DAYS).isAfter(LocalDateTime.now(ZoneId.of("UTC")))
-        && epoch.getStartTime().isBefore(LocalDateTime.now(ZoneId.of("UTC")))) {
+    if (epoch.getStartTime().plusDays(EPOCH_DAYS).isAfter(LocalDateTime.now(ZoneOffset.UTC))
+        && epoch.getStartTime().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
       epoch.setStatus(EpochStatus.IN_PROGRESS);
       epoch.setEndTime(epoch.getStartTime().plusDays(EPOCH_DAYS));
-    } else if (rewardTime.isBefore(epoch.getEndTime())) {
-      epoch.setStatus(EpochStatus.REWARDING);
     } else {
       epoch.setStatus(EpochStatus.FINISHED);
     }
@@ -117,53 +186,11 @@ public class EpochServiceImpl implements EpochService {
           var slot =
               currentLocalDateTime.toEpochSecond(ZoneOffset.UTC) - epochStartTime.toEpochSecond(
                   ZoneOffset.UTC);
-
-          Long startFromId = BigInteger.ZERO.longValue();
-          final String redisKey = getRedisKey(UNIQUE_ACCOUNTS, epochSummaryProjection.getNo());
-          final Long cacheSize = redisTemplate.opsForHash().size(redisKey);
-
-          if (cacheSize > BigInteger.ZERO.longValue()) {
-            Object maxTransaction = redisTemplate.opsForHash()
-                .get(redisKey, MAX_TRANSACTION_ID);
-
-            if (Objects.isNull(maxTransaction)) {
-              maxTransaction = redisTemplate.opsForHash().values(redisKey)
-                  .stream()
-                  .filter(Objects::nonNull)
-                  .map(Integer.class::cast)
-                  .max(Integer::compareTo)
-                  .orElse(BigInteger.ZERO.intValue());
-              redisTemplate.opsForHash().put(redisKey, MAX_TRANSACTION_ID, maxTransaction);
-            }
-
-            startFromId = Long.parseLong(Objects.requireNonNull(String.valueOf(maxTransaction)));
-          }
-
-          // TODO: handle rollback case
-
-          List<UniqueAddressProjection> uniqueAddress = epochRepository.getTotalAccountsAtEpoch(
-              epochSummaryProjection.getNo(), startFromId);
-
-          AtomicLong maxTxId = new AtomicLong(startFromId);
-
-          uniqueAddress.forEach(unique -> {
-            redisTemplate.opsForHash()
-                .put(redisKey, unique.getAddress(), unique.getId());
-            maxTxId.set(maxTxId.get() < unique.getId() ? unique.getId() : maxTxId.get());
-          });
-
-          redisTemplate.opsForHash().put(redisKey, MAX_TRANSACTION_ID, maxTxId.get());
-
-          var expire = redisTemplate.getExpire(
-              getRedisKey(UNIQUE_ACCOUNTS, epochSummaryProjection.getNo()));
-
-          if (expire == NOT_EXPIRE) {
-            redisTemplate.expire(redisKey, Duration.ofDays(ONE_EPOCH));
-          }
-
-          Integer account = redisTemplate.opsForHash().size(redisKey).intValue();
-          account =
-              account > BigInteger.ONE.intValue() ? account - BigInteger.ONE.intValue() : account;
+          String uniqueAccountRedisKey = String.join(
+              UNDERSCORE,
+              getRedisKey(UNIQUE_ACCOUNTS_KEY),
+              epochSummaryProjection.getNo().toString());
+          var account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
 
           return EpochSummary.builder()
               .no(epochSummaryProjection.getNo())
@@ -181,19 +208,7 @@ public class EpochServiceImpl implements EpochService {
             build());
   }
 
-
-  /**
-   * create redis key
-   *
-   * @param rawKey
-   * @return
-   */
-  private String getRedisKey(String rawKey, Integer epoch) {
-    return String.join("_", this.network, rawKey, String.valueOf(epoch));
-  }
-
-  @PostConstruct
-  void setUp() {
-    getCurrentEpochSummary();
+  private String getRedisKey(String key) {
+    return String.join(UNDERSCORE, network.toUpperCase(), key);
   }
 }

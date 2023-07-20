@@ -36,7 +36,7 @@ public class EpochController {
   @LogMessage
   @Operation(summary = "Get a epoch detail by its no")
   public ResponseEntity<EpochResponse> getEpochDetail(
-      @PathVariable @Parameter(description = "Epoch Number") String no) {
+       @PathVariable @Parameter(description = "Epoch Number") String no) {
     return ResponseEntity.ok(epochService.getEpochDetail(no));
   }
 
@@ -44,8 +44,8 @@ public class EpochController {
   @LogMessage
   @Operation(summary = "Get block list of epoch by its no")
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getBlockList(
-      @PathVariable @Parameter(description = "Epoch Number") String no,
-      @ParameterObject @PaginationValid @PaginationDefault(sort = {"id"},
+       @PathVariable @Parameter(description = "Epoch Number") String no,
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
           direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(blockService.getBlockByEpoch(no, pagination.toPageable()));
   }
@@ -54,7 +54,7 @@ public class EpochController {
   @LogMessage
   @Operation(summary = "Get all epoch")
   public ResponseEntity<BaseFilterResponse<EpochResponse>> filter(
-      @ParameterObject @PaginationValid @PaginationDefault(sort = {"id"},
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
           direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(epochService.getAllEpoch(pagination.toPageable()));
   }
