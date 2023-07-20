@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -23,12 +24,6 @@ import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigInteger;
@@ -70,8 +65,12 @@ public class EpochServiceImpl implements EpochService {
         }
         epoch.setRewardsDistributed(fetchEpochResponse.get(0).getRewardsDistributed());
       }
+      Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
+          .orElseThrow(() -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
+      LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
       checkEpochStatus(response, currentEpoch);
+      modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response);
       String uniqueAccountRedisKey = String.join(
           UNDERSCORE,
           getRedisKey(UNIQUE_ACCOUNTS_KEY),
@@ -87,6 +86,11 @@ public class EpochServiceImpl implements EpochService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable) {
+
+    Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
+        .orElseThrow(() -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
+    LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
+
     Page<Epoch> epochs = epochRepository.findAll(pageable);
     var epochNeedFetch =  epochs.getContent().stream().filter(
         epoch -> !fetchRewardDataService.checkEpochRewardDistributed(epoch)
@@ -110,6 +114,7 @@ public class EpochServiceImpl implements EpochService {
         () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
     pageResponse.getContent().forEach(epoch -> {
       checkEpochStatus(epoch, currentEpoch);
+      modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch);
       String uniqueAccountRedisKey = String.join(
           UNDERSCORE,
           getRedisKey(UNIQUE_ACCOUNTS_KEY),
@@ -117,6 +122,33 @@ public class EpochServiceImpl implements EpochService {
       epoch.setAccount(redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue());
     });
     return new BaseFilterResponse<>(pageResponse);
+  }
+
+  /**
+   * Set time of epoch belongs to start time of first epoch
+   * Set hour, minute, second of epoch belongs to hour, minute, second of first epoch
+   * @param firstEpochStartTime start time of first epoch
+   * @param epoch epoch need to modify
+   */
+  private static void modifyStartTimeAndEndTimeOfEpoch(LocalDateTime firstEpochStartTime, EpochResponse epoch) {
+    LocalDateTime epochStartTime = epoch.getStartTime();
+    LocalDateTime epochEndTime = epoch.getEndTime();
+    epochStartTime = LocalDateTime.of(
+        epochStartTime.getYear(),
+        epochStartTime.getMonth(),
+        epochStartTime.getDayOfMonth(),
+        firstEpochStartTime.getHour(),
+        firstEpochStartTime.getMinute(),
+        firstEpochStartTime.getSecond());
+    epochEndTime = LocalDateTime.of(
+        epochEndTime.getYear(),
+        epochEndTime.getMonth(),
+        epochEndTime.getDayOfMonth(),
+        firstEpochStartTime.getHour(),
+        firstEpochStartTime.getMinute(),
+        firstEpochStartTime.getSecond());
+    epoch.setStartTime(epochStartTime);
+    epoch.setEndTime(epochEndTime);
   }
 
   /**
