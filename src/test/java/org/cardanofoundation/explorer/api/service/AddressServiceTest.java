@@ -120,7 +120,8 @@ class AddressServiceTest {
 
   @Test
   void getAddressDetail_throwException() {
-    String addr = "address_error";
+    String addr = "addr_test_error";
+    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class, () -> addressService.getAddressDetail(addr));
   }
 
@@ -140,7 +141,7 @@ class AddressServiceTest {
   }
 
   @Test
-  void getAddressAnalytics_shouldReturnV2() throws ExecutionException, InterruptedException {
+  void getAddressAnalytics_shouldReturnOneMouth() throws ExecutionException, InterruptedException {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_MONTH;
     Address address = Address.builder().address(addr).build();
@@ -155,7 +156,7 @@ class AddressServiceTest {
   }
 
   @Test
-  void getAddressAnalytics_shouldReturnV3() throws ExecutionException, InterruptedException {
+  void getAddressAnalytics_shouldReturnOneMouthEmptyMaxday() throws ExecutionException, InterruptedException {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_MONTH;
     Address address = Address.builder().address(addr).build();
@@ -170,7 +171,7 @@ class AddressServiceTest {
   }
 
   @Test
-  void getAddressAnalytics_shouldReturnV4() throws ExecutionException, InterruptedException {
+  void getAddressAnalytics_shouldReturnOneDayEmptyMaxDay() throws ExecutionException, InterruptedException {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
     Address address = Address.builder().address(addr).build();
@@ -195,6 +196,36 @@ class AddressServiceTest {
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertEquals(response, List.of());
+
+  }
+
+  @Test
+  void getAddressAnalytics_shouldReturnOneWeek() throws ExecutionException, InterruptedException {
+    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
+    AnalyticType type = AnalyticType.ONE_WEEK;
+    Address address = Address.builder().address(addr).build();
+
+    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
+    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
+    when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.of(LocalDate.now().minusDays(1)));
+
+    var response = addressService.getAddressAnalytics(addr, type);
+    Assertions.assertNotNull(response);
+
+  }
+
+  @Test
+  void getAddressAnalytics_shouldReturnThreeMonth() throws ExecutionException, InterruptedException {
+    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
+    AnalyticType type = AnalyticType.THREE_MONTH;
+    Address address = Address.builder().address(addr).build();
+
+    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
+    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
+    when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.of(LocalDate.now().minusDays(1)));
+
+    var response = addressService.getAddressAnalytics(addr, type);
+    Assertions.assertNotNull(response);
 
   }
 
@@ -349,17 +380,17 @@ class AddressServiceTest {
   void verifyNativeScript_shouldReturnTrueIfPolicyIdMatches() {
 
     ScriptVerifyRequest scriptVerifyRequest = ScriptVerifyRequest.builder()
-        .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
-        .script("{\"type\":\"all\",\"scripts\":[{\"type\":\"sig\",\"keyHash\":\"e3124f98d11157535bc61ce8db0e04e95cfcf552a86bb116e593a76e\"},{\"type\":\"sig\",\"keyHash\":\"e52515f0f5e25adb0c57ac5835f67bf703e10e494be391d4b41bcfbd\"}]}")
-        .build();
+            .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
+            .script("{\"type\":\"all\",\"scripts\":[{\"type\":\"sig\",\"keyHash\":\"e3124f98d11157535bc61ce8db0e04e95cfcf552a86bb116e593a76e\"},{\"type\":\"sig\",\"keyHash\":\"e52515f0f5e25adb0c57ac5835f67bf703e10e494be391d4b41bcfbd\"}]}")
+            .build();
 
     Address address = Address.builder()
-        .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
-        .verifiedContract(false)
-        .build();
+            .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
+            .verifiedContract(false)
+            .build();
 
     when(addressRepository.findFirstByAddress(scriptVerifyRequest.getAddress()))
-        .thenReturn(Optional.of(address));
+            .thenReturn(Optional.of(address));
     when(addressRepository.save(any(Address.class))).thenReturn(new Address());
     Assertions.assertTrue(addressService.verifyNativeScript(scriptVerifyRequest));
   }
@@ -368,9 +399,9 @@ class AddressServiceTest {
   void verifyNativeScript_shouldReturnFalseIfPolicyIdDoesNotMatch() {
 
     ScriptVerifyRequest scriptVerifyRequest = ScriptVerifyRequest.builder()
-        .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
-        .script("{\"type\":\"all\",\"scripts\":[{\"type\":\"sig\",\"keyHash\":\"e3124f97d11157535bc61ce8db0e04e95cfcf552a86bb116e593a76e\"},{\"type\":\"sig\",\"keyHash\":\"e52515f0f5e25adb0c57ac5835f67bf703e10e494be391d4b41bcfbd\"}]}")
-        .build();
+            .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
+            .script("{\"type\":\"all\",\"scripts\":[{\"type\":\"sig\",\"keyHash\":\"e3124f97d11157535bc61ce8db0e04e95cfcf552a86bb116e593a76e\"},{\"type\":\"sig\",\"keyHash\":\"e52515f0f5e25adb0c57ac5835f67bf703e10e494be391d4b41bcfbd\"}]}")
+            .build();
 
     Assertions.assertFalse(addressService.verifyNativeScript(scriptVerifyRequest));
   }
@@ -379,9 +410,9 @@ class AddressServiceTest {
   void verifyNativeScript_shouldThrowException_whenAnyErrorsOccur() {
 
     ScriptVerifyRequest scriptVerifyRequest = ScriptVerifyRequest.builder()
-        .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
-        .script("Json parse error")
-        .build();
+            .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
+            .script("Json parse error")
+            .build();
 
     Assertions.assertThrows(BusinessException.class, () -> addressService.verifyNativeScript(scriptVerifyRequest));
   }
@@ -389,12 +420,12 @@ class AddressServiceTest {
   @Test
   void getJsonNativeScript_shouldReturnUnverifiedContractScript_whenContractNotVerifyYet(){
     Address address = Address.builder()
-        .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
-        .verifiedContract(false)
-        .build();
+            .address("addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
+            .verifiedContract(false)
+            .build();
 
     when(addressRepository.findFirstByAddress(address.getAddress()))
-        .thenReturn(Optional.of(address));
+            .thenReturn(Optional.of(address));
 
     ContractScript contractScript = addressService.getJsonNativeScript(address.getAddress());
 
@@ -405,21 +436,21 @@ class AddressServiceTest {
   @Test
   void getJsonNativeScript_shouldReturnNativeJsonScript() {
     Address address = Address.builder()
-        .address(
-            "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
-        .verifiedContract(true)
-        .build();
+            .address(
+                    "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
+            .verifiedContract(true)
+            .build();
 
     ShelleyAddress shelleyAddress = new ShelleyAddress(address.getAddress());
     String policyId = shelleyAddress.getHexPaymentPart();
     Script script = Script.builder()
-        .json("native script")
-        .build();
+            .json("native script")
+            .build();
 
     when(addressRepository.findFirstByAddress(address.getAddress()))
-        .thenReturn(Optional.of(address));
+            .thenReturn(Optional.of(address));
     when(scriptRepository.findByHash(policyId))
-        .thenReturn(Optional.of(script));
+            .thenReturn(Optional.of(script));
 
     ContractScript contractScript = addressService.getJsonNativeScript(address.getAddress());
 
@@ -430,20 +461,20 @@ class AddressServiceTest {
   @Test
   void getJsonNativeScript_shouldReturnUnverifiedContractScript_whenNativeScripJsonNull() {
     Address address = Address.builder()
-        .address(
-            "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
-        .verifiedContract(true)
-        .build();
+            .address(
+                    "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm")
+            .verifiedContract(true)
+            .build();
 
     ShelleyAddress shelleyAddress = new ShelleyAddress(address.getAddress());
     String policyId = shelleyAddress.getHexPaymentPart();
     Script script = Script.builder()
-        .build();
+            .build();
 
     when(addressRepository.findFirstByAddress(address.getAddress()))
-        .thenReturn(Optional.of(address));
+            .thenReturn(Optional.of(address));
     when(scriptRepository.findByHash(policyId))
-        .thenReturn(Optional.of(script));
+            .thenReturn(Optional.of(script));
 
     ContractScript contractScript = addressService.getJsonNativeScript(address.getAddress());
 

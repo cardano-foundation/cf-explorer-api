@@ -7,9 +7,9 @@ import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class BlockResponse {
 
   private String hash;

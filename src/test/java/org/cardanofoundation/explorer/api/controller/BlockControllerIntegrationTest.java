@@ -35,94 +35,94 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(BlockController.class)
 @Import({
-  SpringWebSecurityConfig.class,
-  WebConfig.class,
-  JacksonMapperDateConfig.class,
-  GlobalRestControllerExceptionHandler.class
+        SpringWebSecurityConfig.class,
+        WebConfig.class,
+        JacksonMapperDateConfig.class,
+        GlobalRestControllerExceptionHandler.class
 })
 @AutoConfigureMockMvc(addFilters = false)
 public class BlockControllerIntegrationTest {
 
-  @MockBean
-  private AuthInterceptor authInterceptor;
+    @MockBean
+    private AuthInterceptor authInterceptor;
 
-  @Autowired
-  private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-  @MockBean
-  private BlockService blockService;
+    @MockBean
+    private BlockService blockService;
 
-  @MockBean
-  private TxService txService;
+    @MockBean
+    private TxService txService;
 
-  @BeforeEach
-  void preControllerTest() throws Exception {
-    when(authInterceptor.preHandle(any(), any(), any())).thenReturn(true);
-  }
-  @Test
-  public void testGetBlockDetailByBlockId() throws Exception {
-    // Mock request and response objects
-    String blockId = "testBlockId";
-    BlockResponse mockResponse = BlockResponse.builder()
-            .hash(blockId)
-            .build();
+    @BeforeEach
+    void preControllerTest() throws Exception {
+        when(authInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+    }
+    @Test
+    public void testGetBlockDetailByBlockId() throws Exception {
+        // Mock request and response objects
+        String blockId = "testBlockId";
+        BlockResponse mockResponse = BlockResponse.builder()
+                .hash(blockId)
+                .build();
 
-    // Mock the service method
-    when(blockService.getBlockDetailByBlockId(blockId)).thenReturn(mockResponse);
+        // Mock the service method
+        when(blockService.getBlockDetailByBlockId(blockId)).thenReturn(mockResponse);
 
-    // Perform the GET request
-    mockMvc.perform(get("/api/v1/blocks/{blockId}", blockId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.hash").exists());
+        // Perform the GET request
+        mockMvc.perform(get("/api/v1/blocks/{blockId}", blockId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hash").exists());
 
-    // Verify that the service method was called with the correct argument
-    verify(blockService).getBlockDetailByBlockId(blockId);
-  }
+        // Verify that the service method was called with the correct argument
+        verify(blockService).getBlockDetailByBlockId(blockId);
+    }
 
-  @Test
-  public void testGetAll() throws Exception {
-    // Mock request and response objects
-    Pageable pageable = PageRequest.of(0, 20, Sort.Direction.DESC, "id");
-    List<BlockFilterResponse> mockResponse = Arrays.asList(
-            new BlockFilterResponse(),
-            new BlockFilterResponse()
-    );
-    BaseFilterResponse<BlockFilterResponse> response = new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
+    @Test
+    public void testGetAll() throws Exception {
+        // Mock request and response objects
+        Pageable pageable = PageRequest.of(0, 20, Sort.Direction.DESC, "id");
+        List<BlockFilterResponse> mockResponse = Arrays.asList(
+                new BlockFilterResponse(),
+                new BlockFilterResponse()
+        );
+        BaseFilterResponse<BlockFilterResponse> response = new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
 
-    // Mock the service method
-    when(blockService.filterBlock(any())).thenReturn(response);
+        // Mock the service method
+        when(blockService.filterBlock(any())).thenReturn(response);
 
-    // Perform the GET request
-    mockMvc.perform(get("/api/v1/blocks"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
+        // Perform the GET request
+        mockMvc.perform(get("/api/v1/blocks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
 
-    // Verify that the service method was called with the correct argument
-    verify(blockService).filterBlock(pageable);
-  }
+        // Verify that the service method was called with the correct argument
+        verify(blockService).filterBlock(pageable);
+    }
 
-  @Test
-  public void testGetTransactionsByBlock() throws Exception {
-    // Mock request and response objects
-    String blockId = "testBlockId";
-    Pageable pageable = PageRequest.of(0, 20, Sort.Direction.DESC, "blockId", "blockIndex");
-    List<TxFilterResponse> mockResponse = Arrays.asList(
-            new TxFilterResponse(),
-            new TxFilterResponse()
-    );
-    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
+    @Test
+    public void testGetTransactionsByBlock() throws Exception {
+        // Mock request and response objects
+        String blockId = "testBlockId";
+        Pageable pageable = PageRequest.of(0, 20, Sort.Direction.DESC, "blockId", "blockIndex");
+        List<TxFilterResponse> mockResponse = Arrays.asList(
+                new TxFilterResponse(),
+                new TxFilterResponse()
+        );
+        BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
 
-    // Mock the service method
-    when(txService.getTransactionsByBlock(any(), any())).thenReturn(response);
+        // Mock the service method
+        when(txService.getTransactionsByBlock(any(), any())).thenReturn(response);
 
-    // Perform the GET request
-    mockMvc.perform(get("/api/v1/blocks/{blockId}/txs", blockId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
+        // Perform the GET request
+        mockMvc.perform(get("/api/v1/blocks/{blockId}/txs", blockId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
 
-    // Verify that the service method was called with the correct arguments
-    verify(txService).getTransactionsByBlock(blockId, pageable);
-  }
+        // Verify that the service method was called with the correct arguments
+        verify(txService).getTransactionsByBlock(blockId, pageable);
+    }
 }
