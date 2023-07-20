@@ -821,12 +821,13 @@ public class DelegationServiceTest {
         DelegatorChartProjection dcp = Mockito.mock(DelegatorChartProjection.class);
         when(dcp.getChartValue()).thenReturn(1L);
 
-        when(poolHashRepository.findByView(poolView)).thenReturn(Optional.of(PoolHash.builder().id(poolId).build()));
+        when(poolHashRepository.findByView(poolView))
+            .thenReturn(Optional.of(PoolHash.builder().id(poolId).view(poolView).build()));
         when(fetchRewardDataService.isKoiOs()).thenReturn(true);
         when(fetchRewardDataService.checkPoolHistoryForPool(poolViews)).thenReturn(false);
         when(fetchRewardDataService.fetchPoolHistoryForPool(poolViews)).thenReturn(true);
         when(poolHistoryRepository.getPoolHistoryKoiOsForEpochChart(poolView)).thenReturn(List.of(ecp));
-        when(delegationRepository.getDataForDelegatorChart(poolId)).thenReturn(List.of(dcp));
+        when(poolHistoryRepository.getDataForDelegatorChart(poolView)).thenReturn(List.of(dcp));
 
         var response = delegationService.getAnalyticsForPoolDetail(poolView);
 
@@ -848,12 +849,12 @@ public class DelegationServiceTest {
         DelegatorChartProjection dcp = Mockito.mock(DelegatorChartProjection.class);
         when(dcp.getChartValue()).thenReturn(1L);
 
-        when(poolHashRepository.findByView(poolView)).thenReturn(Optional.of(PoolHash.builder().id(poolId).build()));
+        when(poolHashRepository.findByView(poolView))
+            .thenReturn(Optional.of(PoolHash.builder().id(poolId).view(poolView).build()));
         when(fetchRewardDataService.isKoiOs()).thenReturn(true);
         when(fetchRewardDataService.checkPoolHistoryForPool(poolViews)).thenReturn(true);
         when(poolHistoryRepository.getPoolHistoryKoiOsForEpochChart(poolView)).thenReturn(List.of(ecp));
-        when(delegationRepository.getDataForDelegatorChart(poolId)).thenReturn(List.of(dcp));
-
+        when(poolHistoryRepository.getDataForDelegatorChart(poolView)).thenReturn(List.of(dcp));
         var response = delegationService.getAnalyticsForPoolDetail(poolView);
 
         assert Objects.equals(response.getDelegatorChart().getHighest(), 1L);
