@@ -49,6 +49,8 @@ services:
       - API_MARKET_CACHE_TIME=${API_MARKET_CACHE_TIME}
       - API_CHECK_EPOCH_URL=${API_CHECK_EPOCH_URL}
 
+      - EPOCH_DAYS=${EPOCH_DAYS}
+
     ports:
       - ${PORT}:8080
     volumes:
