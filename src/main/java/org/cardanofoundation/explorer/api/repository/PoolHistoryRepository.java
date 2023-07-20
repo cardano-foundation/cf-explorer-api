@@ -2,6 +2,8 @@ package org.cardanofoundation.explorer.api.repository;
 
 import java.util.List;
 import java.util.Set;
+
+import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHistory;
@@ -44,4 +46,11 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
           + "WHERE ph.pool.view = :poolId "
           + "ORDER BY ph.epochNo ASC")
   List<EpochChartProjection> getPoolHistoryKoiOsForEpochChart(@Param("poolId") String poolId);
+
+  @Query(value =
+      "SELECT ph.epochNo AS chartKey, CAST(ph.delegatorCnt as long) AS chartValue "
+          + "FROM PoolHistory ph "
+          + "WHERE ph.pool.view = :poolId "
+          + "ORDER BY ph.epochNo ASC")
+  List<DelegatorChartProjection> getDataForDelegatorChart(@Param("poolId") String poolId);
 }
