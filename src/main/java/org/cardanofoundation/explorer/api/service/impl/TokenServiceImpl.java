@@ -1,35 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
-import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
-import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
-import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
-import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
-import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
-import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.*;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.*;
-import org.cardanofoundation.explorer.api.service.TokenService;
-import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
-import org.cardanofoundation.explorer.api.util.StreamUtil;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
-import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
-
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -37,17 +7,63 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.TaskExecutor;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
+import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
+import org.cardanofoundation.explorer.api.mapper.TokenMapper;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
+import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.AggregateAddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
+import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.service.TokenService;
+import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
+import org.cardanofoundation.explorer.api.util.DateUtils;
+import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
+import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
 
 @Service
 @RequiredArgsConstructor
@@ -66,75 +82,54 @@ public class TokenServiceImpl implements TokenService {
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
-  private final TokenPageCacheService tokenPageCacheService;
-
-  @Qualifier("taskExecutor")
-  private final TaskExecutor taskExecutor;
+  private final AggregatedDataCacheService aggregatedDataCacheService;
+  private final TokenInfoRepository tokenInfoRepository;
 
   static final Integer TOKEN_VOLUME_ANALYTIC_NUMBER = 5;
 
-  @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable)
-      throws ExecutionException, InterruptedException {
-    Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
-        tokenPageCacheService.getTokePageCache(pageable);
-    if (cacheResp.isPresent()){
-      return cacheResp.get();
+  public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable) {
+    int tokenCount = aggregatedDataCacheService.getTokenCount();
+
+    if (tokenCount == 0) {
+      tokenCount = (int) multiAssetRepository.count();
+    }
+    List<MultiAsset> dataContent;
+    Page<MultiAsset> multiAssets;
+    if (StringUtils.isEmpty(query)) {
+      dataContent = multiAssetRepository.findMultiAssets(pageable);
+      multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
+    } else {
+      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable);
     }
 
-    Page<MultiAsset> multiAssets = multiAssetRepository.findAll(pageable);
-    Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(), ma -> ma.getPolicy() + ma.getName());
-
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList, AssetMetadata::getSubject);
-
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
-    Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
-    List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(multiAssets.getContent(), txId);
+    List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(),
+        MultiAsset::getId);
 
-    List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(), MultiAsset::getId);
-    var numberOfHoldersWithStakeKeyAsync = CompletableFuture.supplyAsync(
-        () -> addressTokenBalanceRepository.countByMultiAssetIn(multiAssetIds), taskExecutor);
+    var tokenInfos = tokenInfoRepository.findTokenInfosByMultiAssetIdIn(multiAssetIds);
+    var tokenInfoMap = StreamUtil.toMap(tokenInfos, TokenInfo::getMultiAssetId,
+        Function.identity());
 
-    var numberOfHoldersWithAddressNotHaveStakeKeyAsync = CompletableFuture.supplyAsync(
-        () -> addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(multiAssetIds),
-        taskExecutor);
+    Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(),
+        ma -> ma.getPolicy() + ma.getName());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList,
+        AssetMetadata::getSubject);
 
-    CompletableFuture.allOf(numberOfHoldersWithStakeKeyAsync, numberOfHoldersWithAddressNotHaveStakeKeyAsync).join();
-    Map<Long, Long> numberHoldersStakeKeyMap = StreamUtil.toMap(
-        numberOfHoldersWithStakeKeyAsync.get(),
-        TokenNumberHoldersProjection::getIdent,
-        TokenNumberHoldersProjection::getNumberOfHolders
-    );
+    multiAssetResponsesList.forEach(ma -> {
+      ma.setNumberOfHolders(tokenInfoMap.containsKey(ma.getId()) ?
+                            tokenInfoMap.get(ma.getId()).getNumberOfHolders() : 0);
+      ma.setVolumeIn24h(String.valueOf(tokenInfoMap.containsKey(ma.getId()) ?
+                                       tokenInfoMap.get(ma.getId()).getVolume24h()
+                                                                            : BigInteger.ZERO));
+      ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
+          assetMetadataMap.get(ma.getPolicy() + ma.getName()))
+      );
+    });
 
-    Map<Long, Long> numberHoldersAddressNotHaveStakeKeyMap = StreamUtil.toMap(
-        numberOfHoldersWithAddressNotHaveStakeKeyAsync.get(),
-        TokenNumberHoldersProjection::getIdent,
-        TokenNumberHoldersProjection::getNumberOfHolders
-    );
-
-    Map<Long, BigInteger> tokenVolumeMap = StreamUtil
-        .toMap(volumes, TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume);
-
-    multiAssetResponsesList.forEach(
-        ma -> {
-          ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
-              assetMetadataMap.get(ma.getPolicy() + ma.getName()))
-          );
-          if (tokenVolumeMap.containsKey(ma.getId())) {
-            ma.setVolumeIn24h(tokenVolumeMap.get(ma.getId()).toString());
-          } else {
-            ma.setVolumeIn24h(String.valueOf(0));
-          }
-          ma.setVolumeIn24h(tokenVolumeMap.getOrDefault(ma.getId(), BigInteger.valueOf(0)).toString());
-          ma.setNumberOfHolders(numberHoldersStakeKeyMap.getOrDefault(ma.getId(), 0L)
-              + numberHoldersAddressNotHaveStakeKeyMap.getOrDefault(ma.getId(), 0L));
-          ma.setId(null);
-        }
-    );
     return new BaseFilterResponse<>(multiAssetResponsesList);
   }
 
@@ -204,22 +199,23 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type)
-      throws ExecutionException, InterruptedException {
+  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(
+      String tokenId, AnalyticType type) throws ExecutionException, InterruptedException {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
         .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
 
-    List<LocalDate> dates = getListDateAnalytic(type);
+    List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
     List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
+    final int NUMBER_PARALLEL = 5;
+    ExecutorService fixedExecutor = Executors.newFixedThreadPool(NUMBER_PARALLEL);
 
-    ExecutorService fixedExecutor = Executors.newFixedThreadPool(TOKEN_VOLUME_ANALYTIC_NUMBER);
     final Optional<LocalDate> maxDateAgg = aggregateAddressTokenRepository.getMaxDay();
     for (int i = 0; i < dates.size() - 1; i++) {
-      LocalDate startRange = dates.get(i);
-      LocalDate endRange = dates.get(i + 1);
+      LocalDateTime startRange = dates.get(i);
+      LocalDateTime endRange = dates.get(i + 1);
       futureTokenAnalytics.add(CompletableFuture.supplyAsync(
-          () -> getTokenVolumeAnalyticsResponse(multiAsset, startRange, endRange, maxDateAgg),
+          () -> getTokenVolumeAnalyticsResponse(multiAsset, type, startRange, endRange, maxDateAgg),
           fixedExecutor)
       );
     }
@@ -233,79 +229,56 @@ public class TokenServiceImpl implements TokenService {
     return responses;
   }
 
-  /**
-   * if param `to` less than today: get data from table: `agg_address_token`
-   * else: get data from table `address_token` for today
-   * and get data in range: `from` - previous day of `to` from table: `agg_address_token`
-   * and then sum data of 2 queries
-   * **/
   private TokenVolumeAnalyticsResponse getTokenVolumeAnalyticsResponse(
-      MultiAsset multiAsset,
-      LocalDate from, LocalDate to,
+      MultiAsset multiAsset, AnalyticType type,
+      LocalDateTime fromDateTime, LocalDateTime toDateTime,
       Optional<LocalDate> maxDateAgg) {
 
-    if (maxDateAgg.isEmpty() || !from.isBefore(maxDateAgg.get())) {
-      BigInteger balance = addressTokenRepository.sumBalanceBetweenTx(
-          multiAsset,
-          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      ).orElse(BigInteger.ZERO);
-      return new TokenVolumeAnalyticsResponse(to, balance);
-    }
-
     BigInteger balance;
-    if (LocalDate.now().isEqual(to)) {
-      balance = getBalanceInRangeHaveToday(multiAsset, from, to, maxDateAgg.get());
-    } else {
-      balance = getBalanceInRangePreviousToday(multiAsset, from, to, maxDateAgg.get());
-    }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTokenRepository.countRecord(
-          multiAsset,
-          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX)));
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
-    }
-
-    return new TokenVolumeAnalyticsResponse(to, balance);
-  }
-
-  private BigInteger getBalanceInRangeHaveToday(MultiAsset multiAsset,
-                                                LocalDate from, LocalDate to,
-                                                LocalDate maxDateAgg) {
-    BigInteger todayBalance = addressTokenRepository.sumBalanceBetweenTx(
-        multiAsset,
-        Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
-    ).orElse(BigInteger.ZERO);
-
-    //case missing aggregation data
-    boolean isMissingAggregationData = to.minusDays(1).isAfter(maxDateAgg);
-    if (isMissingAggregationData) {
-      BigInteger balanceAgg = aggregateAddressTokenRepository
-          .sumBalanceInTimeRange(multiAsset.getId(), from, maxDateAgg)
-          .orElse(BigInteger.ZERO);
-
-      //get missing aggregation data
-      BigInteger balanceNotAgg = addressTokenRepository.sumBalanceBetweenTx(
-          multiAsset,
-          Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
+    if (type == AnalyticType.ONE_DAY) {
+      balance = addressTokenRepository.sumBalanceBetweenTx(
+          multiAsset, Timestamp.valueOf(fromDateTime), Timestamp.valueOf(toDateTime)
       ).orElse(BigInteger.ZERO);
 
-      return todayBalance.add(balanceAgg).add(balanceNotAgg);
     } else {
-      BigInteger rangeToYesterdayBalance = aggregateAddressTokenRepository
-          .sumBalanceInTimeRange(multiAsset.getId(), from, to.minusDays(1))
-          .orElse(BigInteger.ZERO);
-      return todayBalance.add(rangeToYesterdayBalance);
+      LocalDate from = fromDateTime.toLocalDate();
+      LocalDate to = toDateTime.toLocalDate();
+      boolean isNotHaveAggData = maxDateAgg.isEmpty() || !from.isBefore(maxDateAgg.get());
+      if (isNotHaveAggData) {
+        balance = addressTokenRepository.sumBalanceBetweenTx(
+            multiAsset,
+            Timestamp.valueOf(from.atTime(LocalTime.MAX)),
+            Timestamp.valueOf(to.atTime(LocalTime.MAX))
+        ).orElse(BigInteger.ZERO);
+      } else {
+        balance = getBalance(multiAsset, from, to, maxDateAgg.get());
+      }
     }
+    if (BigInteger.ZERO.equals(balance)) {
+      balance = checkNoRecord(multiAsset, type, fromDateTime, toDateTime) ? null : balance;
+    }
+    return new TokenVolumeAnalyticsResponse(toDateTime, balance);
   }
 
-  private BigInteger getBalanceInRangePreviousToday(MultiAsset multiAsset,
-                                                    LocalDate from, LocalDate to,
-                                                    LocalDate maxDateAgg) {
+  private boolean checkNoRecord(
+      MultiAsset multiAsset, AnalyticType type,
+      LocalDateTime fromDateTime, LocalDateTime toDateTime
+  ) {
+    Timestamp startRange;
+    Timestamp endRange;
+    if (type == AnalyticType.ONE_DAY) {
+      startRange = Timestamp.valueOf(fromDateTime);
+      endRange = Timestamp.valueOf(toDateTime);
+    } else {
+      startRange = Timestamp.valueOf(fromDateTime.toLocalDate().atTime(LocalTime.MAX));
+      endRange = Timestamp.valueOf(toDateTime.toLocalDate().atTime(LocalTime.MAX));
+    }
+    Long numberBalanceRecord = addressTokenRepository.countRecord(multiAsset, startRange, endRange);
+    return numberBalanceRecord == null || numberBalanceRecord == 0;
+  }
+
+  private BigInteger getBalance(MultiAsset multiAsset,
+      LocalDate from, LocalDate to, LocalDate maxDateAgg) {
     boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
     if (isNotMissingAggregationData) {
       return aggregateAddressTokenRepository
@@ -322,36 +295,6 @@ public class TokenServiceImpl implements TokenService {
         Timestamp.valueOf(to.atTime(LocalTime.MAX))
     ).orElse(BigInteger.ZERO);
     return balanceAgg.add(balanceNotAgg);
-  }
-
-  private List<LocalDate> getListDateAnalytic(AnalyticType analyticType) {
-    LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-    List<LocalDate> dates = new ArrayList<>();
-    switch (analyticType) {
-      case ONE_WEEK -> {
-        var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
-          dates.add(currentWeek.minusWeeks(i));
-        }
-      }
-      case ONE_MONTH -> {
-        var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
-          dates.add(currentMonth.minusMonths(i));
-        }
-      }
-      case THREE_MONTH -> {
-        for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
-          dates.add(currentDate.minusMonths(i * 3L));
-        }
-      }
-      default -> {
-        for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
-          dates.add(currentDate.minusDays(i));
-        }
-      }
-    }
-    return dates;
   }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {

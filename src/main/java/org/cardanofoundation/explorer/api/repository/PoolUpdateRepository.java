@@ -52,7 +52,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "pmr.url AS metadataUrl, pmr.hash as metadataHash "
           + "FROM PoolUpdate pu "
           + "INNER JOIN PoolHash ph ON pu.poolHash.id = ph.id "
-          + "INNER JOIN PoolMetadataRef pmr ON pu.meta = pmr "
+          + "LEFT JOIN PoolMetadataRef pmr ON pu.meta = pmr "
           + "INNER JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
           + "WHERE pu.registeredTx = :tx")
   List<PoolUpdateDetailProjection> findByTx(@Param("tx") Tx tx);
@@ -85,8 +85,8 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin "
           + "FROM PoolHash ph "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "JOIN Tx tx ON pu.registeredTx.id  = tx.id AND (tx.deposit IS NULL OR tx.deposit < (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = pu.activeEpochNo)) "
-          + "JOIN Block bk ON tx.blockId = bk.id "
+          + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
+          + "JOIN Block bk ON tx.blockId = bk.id AND (tx.deposit IS NULL OR tx.deposit < (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = bk.epochNo)) "
           + "WHERE ph.view = :poolView "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
@@ -125,8 +125,8 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData pod ON ph.id = pod.pool.id AND pod.id = (SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id) "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "JOIN Tx tx ON pu.registeredTx.id = tx.id AND (tx.deposit IS NULL OR tx.deposit < (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = pu.activeEpochNo)) "
-          + "JOIN Block bk ON tx.block.id  = bk.id "
+          + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
+          + "JOIN Block bk ON tx.block.id  = bk.id AND (tx.deposit IS NULL OR tx.deposit < (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = bk.epochNo)) "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
           + "WHERE ph.view = :poolView ")
   Page<PoolUpdateDetailProjection> findPoolUpdateByPool(@Param("poolView") String poolView, Pageable pageable);
@@ -146,9 +146,9 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin, ep.poolDeposit AS deposit "
           + "FROM PoolHash ph "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-          + "JOIN EpochParam ep ON ep.epochNo = pu.activeEpochNo "
-          + "JOIN Tx tx ON pu.registeredTx.id  = tx.id AND tx.deposit IS NOT NULL AND tx.deposit >= ep.poolDeposit "
+          + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
           + "JOIN Block bk ON tx.blockId = bk.id "
+          + "JOIN EpochParam ep ON ep.epochNo = bk.epochNo AND tx.deposit IS NOT NULL AND tx.deposit >= ep.poolDeposit "
           + "WHERE ph.view = :poolView "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "

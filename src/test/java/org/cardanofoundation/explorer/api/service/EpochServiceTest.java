@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 

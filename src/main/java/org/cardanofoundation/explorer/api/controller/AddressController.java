@@ -49,6 +49,7 @@ public class AddressController {
   @GetMapping("/top-addresses")
   @LogMessage
   @Operation(summary = "Get top addresses")
+  @Validated
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
       @ParameterObject @PaginationValid @PageZeroValid Pagination pagination) {
     return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));

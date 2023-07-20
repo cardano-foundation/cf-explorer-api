@@ -189,8 +189,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
     Object delegatorCached = redisTemplate.opsForValue()
         .get(CommonConstant.REDIS_TOTAL_DELEGATOR + network);
-    Integer delegators =
-        Objects.nonNull(delegatorCached) ? Integer.parseInt(String.valueOf(delegatorCached)) : CommonConstant.ZERO;
+    Integer delegators = Objects.nonNull(delegatorCached) ? Integer.parseInt(String.valueOf(delegatorCached)) : 0;
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
         .activePools(Objects.nonNull(poolActiveObj) ? (Integer) poolActiveObj : CommonConstant.ZERO)
@@ -203,7 +202,10 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
-    if (Objects.nonNull(search) && search.isBlank()) {
+    if(Objects.nonNull(search)){
+      search = search.toLowerCase();
+    }
+    if (search.isBlank()) {
       search = null;
     }
     Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search,
@@ -287,7 +289,6 @@ public class DelegationServiceImpl implements DelegationService {
     response.setTotalItems(poolIdPage.getTotalElements());
     response.setTotalPages(poolIdPage.getTotalPages());
     response.setCurrentPage(pageable.getPageNumber());
-
     return response;
   }
 
@@ -546,9 +547,20 @@ public class DelegationServiceImpl implements DelegationService {
           .min(Comparator.comparing(EpochChartProjection::getChartValue));
       epochChart.setLowest(minEpochOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
     }
+    DelegatorChartResponse delegatorChart = getDelegatorChartResponse(poolHash);
+    return PoolDetailAnalyticsResponse.builder().epochChart(epochChart)
+        .delegatorChart(delegatorChart).build();
+  }
+
+  private DelegatorChartResponse getDelegatorChartResponse(PoolHash poolHash) {
     DelegatorChartResponse delegatorChart = new DelegatorChartResponse();
-    List<DelegatorChartProjection> delegatorDataCharts = delegationRepository.getDataForDelegatorChart(
-        poolId);
+    Boolean isKoiOs = fetchRewardDataService.isKoiOs();
+    List<DelegatorChartProjection> delegatorDataCharts;
+    if (Boolean.TRUE.equals(isKoiOs)) {
+      delegatorDataCharts = poolHistoryRepository.getDataForDelegatorChart(poolHash.getView());
+    } else{
+      delegatorDataCharts = delegationRepository.getDataForDelegatorChart(poolHash.getId());
+    }
     if (!delegatorDataCharts.isEmpty()) {
       delegatorChart.setDataByDays(
           delegatorDataCharts.stream().map(DelegatorChartList::new).toList());
@@ -561,8 +573,7 @@ public class DelegationServiceImpl implements DelegationService {
       delegatorChart.setLowest(
           minDelegatorOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
     }
-    return PoolDetailAnalyticsResponse.builder().epochChart(epochChart)
-        .delegatorChart(delegatorChart).build();
+    return delegatorChart;
   }
 
   @Override
