@@ -94,10 +94,13 @@ public class EpochServiceImpl implements EpochService {
         .orElseThrow(() -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
     LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
 
+    var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
+        () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
+
     Page<Epoch> epochs = epochRepository.findAll(pageable);
-    var epochNeedFetch =  epochs.getContent().stream().filter(
-        epoch -> !fetchRewardDataService.checkEpochRewardDistributed(epoch)
-    ).map(Epoch::getNo).toList();
+    var epochNeedFetch =  epochs.getContent().stream()
+        .filter(epoch -> !fetchRewardDataService.checkEpochRewardDistributed(epoch) && epoch.getNo() < currentEpoch - 1)
+        .map(Epoch::getNo).toList();
     if (!CollectionUtils.isEmpty(epochNeedFetch)) {
       List<Epoch> fetchEpochList = fetchRewardDataService.fetchEpochRewardDistributed(epochNeedFetch);
       if (fetchEpochList == null) {
@@ -113,8 +116,6 @@ public class EpochServiceImpl implements EpochService {
     }
 
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
-    var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
-        () -> new NoContentException(BusinessCode.EPOCH_NOT_FOUND));
     pageResponse.getContent().forEach(epoch -> {
       checkEpochStatus(epoch, currentEpoch);
       epoch.setStartTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime()));
