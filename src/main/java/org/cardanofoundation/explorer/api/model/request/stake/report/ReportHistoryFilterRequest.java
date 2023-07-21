@@ -14,9 +14,7 @@ import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 public class ReportHistoryFilterRequest {
   @DateValid(pattern = DatePattern.YYYY_MM_DD)
   private Date fromDate;
-
   @DateValid(pattern = DatePattern.YYYY_MM_DD)
   private Date toDate;
-
   private String reportName;
 }

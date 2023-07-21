@@ -35,7 +35,7 @@ public class ContractController {
   @LogMessage
   @Operation(summary = "Get list contract")
   public ResponseEntity<BaseFilterResponse<ContractFilterResponse>> filterContract(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           Address_.BALANCE}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(addressService.getContracts(pagination.toPageable()));
   }

@@ -795,43 +795,34 @@ public class TxServiceImpl implements TxService {
 
     unionTxsByAddress.forEach(
         (address, txs) -> {
-          if (txs.size() == 1) {
-            txs.get(0).getTokens().forEach(token -> {
-              setMetadata(assetMetadataMap, multiAssetMap, token);
-            });
-          }
-          if (txs.size() > 1) {
-            BigInteger totalValue = txs.get(0).getValue().add(txs.get(1).getValue());
-            txs.get(0).setValue(totalValue);
+          TxOutResponse txOutResponse = new TxOutResponse();
+          BigInteger totalValue = txs.stream().map(TxOutResponse::getValue).reduce(BigInteger.ZERO, BigInteger::add);
+          Map<String, List<TxMintingResponse>> unionTokenByAsset =
+              txs
+                  .stream()
+                  .map(TxOutResponse::getTokens).flatMap(List::stream)
+                  .collect(Collectors.groupingBy(TxMintingResponse::getAssetId, Collectors.toCollection(ArrayList::new)));
 
-            Map<String, List<TxMintingResponse>> unionTokenByAsset =
-                Stream.concat(txs.get(0).getTokens().stream(), txs.get(1).getTokens().stream())
-                    .collect(
-                        Collectors.groupingBy(
-                            TxMintingResponse::getAssetId,
-                            Collectors.toCollection(ArrayList::new)));
+          List<TxMintingResponse> tokenResponse = new ArrayList<>();
 
-            List<TxMintingResponse> tokenResponse = new ArrayList<>();
+          unionTokenByAsset.forEach(
+              (asset, tokens) -> {
+                BigInteger totalQuantity =
+                    tokens.stream()
+                        .map(TxMintingResponse::getAssetQuantity)
+                        .reduce(BigInteger.ZERO, BigInteger::add);
 
-            unionTokenByAsset.forEach(
-                (asset, tokens) -> {
-                  BigInteger totalQuantity =
-                      tokens.stream()
-                          .map(TxMintingResponse::getAssetQuantity)
-                          .reduce(BigInteger.ZERO, BigInteger::add);
-
-                  if (!BigInteger.ZERO.equals(totalQuantity)) {
-                    TxMintingResponse token = tokens.get(0);
-                    setMetadata(assetMetadataMap, multiAssetMap, token);
-                    token.setAssetQuantity(totalQuantity);
-                    tokenResponse.add(token);
-                  }
-                });
-
-            txs.get(0).setTokens(tokenResponse);
-          }
-
-          summary.add(txs.get(0));
+                if (!BigInteger.ZERO.equals(totalQuantity)) {
+                  TxMintingResponse token = tokens.get(0);
+                  setMetadata(assetMetadataMap, multiAssetMap, token);
+                  token.setAssetQuantity(totalQuantity);
+                  tokenResponse.add(token);
+                }
+              });
+          txOutResponse.setAddress(address);
+          txOutResponse.setTokens(tokenResponse);
+          txOutResponse.setValue(totalValue);
+          summary.add(txOutResponse);
         });
 
     return summary.stream()
