@@ -30,7 +30,7 @@ import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilt
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
@@ -386,7 +386,7 @@ public class StakeKeyReportServiceTest {
             .build());
 
     LocalDateTime curTime = LocalDateTime.now();
-    StakeRegistrationLifeCycle expect = StakeRegistrationLifeCycle.builder()
+    StakeRegistrationFilterResponse expect = StakeRegistrationFilterResponse.builder()
         .fee(BigInteger.TWO)
         .deposit(123L)
         .time(curTime)
@@ -425,7 +425,7 @@ public class StakeKeyReportServiceTest {
             .build());
 
     LocalDateTime curTime = LocalDateTime.now();
-    StakeRegistrationLifeCycle expect = StakeRegistrationLifeCycle.builder()
+    StakeRegistrationFilterResponse expect = StakeRegistrationFilterResponse.builder()
         .fee(BigInteger.TWO)
         .deposit(123L)
         .time(curTime)

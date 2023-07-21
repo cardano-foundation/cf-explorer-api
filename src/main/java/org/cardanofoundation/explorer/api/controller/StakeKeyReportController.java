@@ -14,7 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHist
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
@@ -130,7 +130,7 @@ public class StakeKeyReportController {
   @GetMapping(value = "/stake-key/{reportId}/registrations")
   @LogMessage
   @Operation(summary = "Get stake registrations by report id")
-  public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeKeyRegistrationsByReportId(
+  public ResponseEntity<BaseFilterResponse<StakeRegistrationFilterResponse>> getStakeKeyRegistrationsByReportId(
        HttpServletRequest request,
        @PathVariable Long reportId,
        @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
@@ -143,7 +143,7 @@ public class StakeKeyReportController {
   @GetMapping(value = "/stake-key/{reportId}/de-registrations")
   @LogMessage
   @Operation(summary = "Get stake deregistrations by report id")
-  public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeKeyDeregistrationsByReportId(
+  public ResponseEntity<BaseFilterResponse<StakeRegistrationFilterResponse>> getStakeKeyDeregistrationsByReportId(
        HttpServletRequest request,
        @PathVariable Long reportId,
        @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {

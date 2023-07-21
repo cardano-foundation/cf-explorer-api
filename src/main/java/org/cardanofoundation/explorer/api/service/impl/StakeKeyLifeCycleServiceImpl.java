@@ -11,14 +11,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 
@@ -65,6 +58,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final WithdrawalRepository withdrawalRepository;
   private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final TxRepository txRepository;
+  private final TxOutRepository txOutRepository;
   private final FetchRewardDataService fetchRewardDataService;
 
   @Override
@@ -81,8 +75,8 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   }
 
   @Override
-  public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey,
-      StakeLifeCycleFilterRequest condition, Pageable pageable) {
+  public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeRegistrations(String stakeKey,
+                                                                                   StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
@@ -100,7 +94,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     Page<StakeHistoryProjection> stakeHistoryList =
         stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress,
             condition.getTxHash(), fromDate, toDate, pageable);
-    var response = stakeHistoryList.map(item -> StakeRegistrationLifeCycle.builder()
+    var response = stakeHistoryList.map(item -> StakeRegistrationFilterResponse.builder()
         .txHash(item.getTxHash())
         .fee(item.getFee())
         .deposit(item.getDeposit())
@@ -108,6 +102,32 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         .build()
     );
     return new BaseFilterResponse<>(response);
+  }
+
+  @Override
+  public StakeRegistrationDetailResponse getStakeRegistrationDetail(String stakeKey, String hash) {
+    StakeHistoryProjection stakeHistoryProjection = stakeRegistrationRepository
+        .findByAddressAndTx(stakeKey, hash).orElseThrow(
+            () -> new BusinessException(BusinessCode.STAKE_REGISTRATION_NOT_FOUND));
+    Long numberStakeRegistrations = stakeRegistrationRepository
+        .countByTx(hash).orElseThrow(
+            () -> new BusinessException(BusinessCode.STAKE_REGISTRATION_NOT_FOUND));
+    Long deposit = stakeHistoryProjection.getDeposit() / numberStakeRegistrations;
+    boolean joinDepositPaid = true;
+    if (numberStakeRegistrations > BigInteger.ONE.longValue() ) {
+      BigInteger totalOutput = txOutRepository.sumValueOutputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
+          .orElse(BigInteger.ZERO);
+      BigInteger totalInput = txOutRepository.sumValueInputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
+          .orElse(BigInteger.ZERO);
+      joinDepositPaid = totalOutput.compareTo(totalInput) < BigInteger.ZERO.intValue();
+    }
+    return StakeRegistrationDetailResponse.builder()
+        .txHash(stakeHistoryProjection.getTxHash())
+        .fee(stakeHistoryProjection.getFee())
+        .deposit(deposit)
+        .time(stakeHistoryProjection.getTime().toLocalDateTime())
+        .joinDepositPaid(joinDepositPaid)
+        .build();
   }
 
   @Override
@@ -248,8 +268,8 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   }
 
   @Override
-  public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrations(String stakeKey,
-      StakeLifeCycleFilterRequest condition, Pageable pageable) {
+  public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrations(String stakeKey,
+                                                                                     StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
@@ -267,7 +287,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     Page<StakeHistoryProjection> stakeHistoryList =
         stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress,
             condition.getTxHash(), fromDate, toDate, pageable);
-    var response = stakeHistoryList.map(item -> StakeRegistrationLifeCycle.builder()
+    var response = stakeHistoryList.map(item -> StakeRegistrationFilterResponse.builder()
         .txHash(item.getTxHash())
         .fee(item.getFee())
         .deposit(item.getDeposit())
@@ -275,6 +295,32 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         .build()
     );
     return new BaseFilterResponse<>(response);
+  }
+
+  @Override
+  public StakeRegistrationDetailResponse getStakeDeRegistrationDetail(String stakeKey, String hash) {
+    StakeHistoryProjection stakeHistoryProjection = stakeDeRegistrationRepository
+        .findByAddressAndTx(stakeKey, hash).orElseThrow(
+            () -> new BusinessException(BusinessCode.STAKE_DE_REGISTRATION_NOT_FOUND));
+    Long numberStakeRegistrations = stakeDeRegistrationRepository
+        .countByTx(hash).orElseThrow(
+            () -> new BusinessException(BusinessCode.STAKE_DE_REGISTRATION_NOT_FOUND));
+    Long deposit = stakeHistoryProjection.getDeposit() / numberStakeRegistrations;
+    boolean joinDepositPaid = true;
+    if (numberStakeRegistrations > BigInteger.ONE.longValue() ) {
+      BigInteger totalOutput = txOutRepository.sumValueOutputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
+          .orElse(BigInteger.ZERO);
+      BigInteger totalInput = txOutRepository.sumValueInputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
+          .orElse(BigInteger.ZERO);
+      joinDepositPaid = totalOutput.compareTo(totalInput) > BigInteger.ZERO.intValue();
+    }
+    return StakeRegistrationDetailResponse.builder()
+        .txHash(stakeHistoryProjection.getTxHash())
+        .fee(stakeHistoryProjection.getFee())
+        .deposit(deposit)
+        .time(stakeHistoryProjection.getTime().toLocalDateTime())
+        .joinDepositPaid(joinDepositPaid)
+        .build();
   }
 
   @Override
