@@ -90,6 +90,8 @@ redis:
 
 application:
   network: ${SCHEMA:mainnet}
+  epoch:
+    days: ${EPOCH_DAYS:5}
   api.coin.gecko.market:
     interval-time: ${API_MARKET_CACHE_TIME:15}
     base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}

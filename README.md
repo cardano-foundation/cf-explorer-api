@@ -72,7 +72,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `API_MARKET_URL`: URL for get market data. Default is `https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s`
 - `API_MARKET_CACHE_TIME` : Cache time for market data. Default is 120s.
 
-- `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.
+- `EPOCH_DAYS` : Number of days in an epoch. Default is 5.
 
 ### We have 3 options for redis cache:
 - `redis standalone`
