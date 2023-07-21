@@ -140,4 +140,28 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
         .isLimitReached(isLimitReached(username))
         .build();
   }
+
+  /**
+   * Delete stake key report history
+   *
+   * @param stakeKeyReportHistory
+   */
+  @Override
+  @SwitchDataSource(DataBaseType.ANALYTICS)
+  @Transactional
+  public void deleteStakeKeyReportHistory(StakeKeyReportHistory stakeKeyReportHistory) {
+    stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
+  }
+
+  /**
+   * Delete pool report history
+   *
+   * @param poolReportHistory
+   */
+  @Override
+  @SwitchDataSource(DataBaseType.ANALYTICS)
+  @Transactional
+  public void deletePoolReportHistory(PoolReportHistory poolReportHistory) {
+    poolReportRepository.delete(poolReportHistory);
+  }
 }

@@ -27,7 +27,6 @@ import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -83,7 +82,11 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     stakeKeyReportHistory.getReportHistory().setType(ReportType.STAKE_KEY);
     stakeKeyReportHistory.getReportHistory().setUsername(username);
     reportHistoryService.saveStakeKeyReportHistory(stakeKeyReportHistory);
-    kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
+    Boolean isSuccess = kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
+    if(Boolean.FALSE.equals(isSuccess)) {
+      reportHistoryService.deleteStakeKeyReportHistory(stakeKeyReportHistory);
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+    }
     return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
   }
 

@@ -43,6 +43,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+
 import static org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl.MIN_TIME;
 
 @Service
@@ -76,7 +77,11 @@ public class PoolReportServiceImpl implements PoolReportService {
     ReportHistory reportHistory = initReportHistory(poolReportCreateRequest, username);
     PoolReportHistory poolReportHistory = poolReportCreateRequest.toEntity(reportHistory);
     poolReportHistory = reportHistoryService.savePoolReportHistory(poolReportHistory);
-    kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
+    Boolean isSuccess = kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
+    if(Boolean.FALSE.equals(isSuccess)) {
+      reportHistoryService.deletePoolReportHistory(poolReportHistory);
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+    }
     return true;
   }
 

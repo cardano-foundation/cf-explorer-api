@@ -90,6 +90,8 @@ spring:
         max:
           pool:
             interval: 60000
+          block:
+            ms: 3000
           in:
             flight:
               requests:
