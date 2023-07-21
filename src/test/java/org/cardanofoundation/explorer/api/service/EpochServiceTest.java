@@ -62,9 +62,6 @@ class EpochServiceTest {
   @Mock
   FetchRewardDataService fetchRewardDataService;
 
-  //TODO getAllEpoch
-
-  //TODO getCurrentEpochSummary
   @Test
   void testCurrentEpochSummary() {
 
