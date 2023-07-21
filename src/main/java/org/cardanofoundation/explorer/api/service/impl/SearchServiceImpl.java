@@ -36,6 +36,7 @@ public class SearchServiceImpl implements SearchService {
 
   @Override
   public SearchResponse search(String query) {
+    query = query.toLowerCase();
     SearchResponse searchResponse = new SearchResponse();
     searchEpoch(query, searchResponse);
     searchBlock(query, searchResponse);
@@ -85,7 +86,7 @@ public class SearchServiceImpl implements SearchService {
         searchResponse.setToken(new TokenSearchResponse(token.get().getNameView(), token.get().getFingerprint()));
     } else {
       Pageable pageable = PageRequest.of(0, 1);
-      var tokenList = multiAssetRepository.findByNameViewLike(query.toLowerCase(), pageable);
+      var tokenList = multiAssetRepository.findByNameViewLike(query, pageable);
       if(!CollectionUtils.isEmpty(tokenList)) {
         searchResponse.setValidTokenName(true);
       }
@@ -133,7 +134,7 @@ public class SearchServiceImpl implements SearchService {
       searchResponse.setPool(new PoolSearchResponse(pool.getPoolName(), pool.getPoolView(), pool.getIcon()));
     } else {
       Pageable pageable = PageRequest.of(0, 1);
-      var poolList = poolHashRepository.findByPoolNameLike(query.toLowerCase(), pageable);
+      var poolList = poolHashRepository.findByPoolNameLike(query, pageable);
       if(!CollectionUtils.isEmpty(poolList)) {
         searchResponse.setValidPoolName(true);
       }
