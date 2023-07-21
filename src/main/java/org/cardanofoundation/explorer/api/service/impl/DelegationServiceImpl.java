@@ -553,7 +553,7 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   private DelegatorChartResponse getDelegatorChartResponse(PoolHash poolHash) {
-    DelegatorChartResponse delegatorChart = new DelegatorChartResponse();
+      DelegatorChartResponse delegatorChart = new DelegatorChartResponse();
     Boolean isKoiOs = fetchRewardDataService.isKoiOs();
     List<DelegatorChartProjection> delegatorDataCharts;
     if (Boolean.TRUE.equals(isKoiOs)) {
