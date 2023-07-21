@@ -544,8 +544,7 @@ class ProtocolServiceTest {
         .builder()
         .value(BigInteger.ONE)
         .transactionHash("1")
-        .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC)))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.UPDATED)
         .build().hashCode(), histories.get(0).hashCode());
   }
@@ -608,8 +607,7 @@ class ProtocolServiceTest {
         .builder()
         .value(BigInteger.ONE)
         .transactionHash("1")
-        .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC)))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.UPDATED)
         .build().hashCode(), histories.get(0).hashCode());
 
@@ -678,16 +676,14 @@ class ProtocolServiceTest {
         .builder()
         .value(BigInteger.ONE)
         .transactionHash("1")
-        .time((LocalDateTime.ofInstant(transaction.get(0).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC)))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.UPDATED)
         .build().hashCode(), histories.get(0).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
         .value(BigInteger.ZERO)
-        .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC)))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.ADDED)
         .build().hashCode(), histories.get(1).hashCode());
   }
@@ -747,16 +743,14 @@ class ProtocolServiceTest {
         .builder()
         .value(BigInteger.ONE)
         .transactionHash("1")
-        .time((LocalDateTime.ofInstant(transaction.get(0).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC)))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.UPDATED)
         .build().hashCode(), histories.get(0).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
         .value(BigInteger.ZERO)
-        .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC)))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.ADDED)
         .build().hashCode(), histories.get(1).hashCode());
   }
@@ -817,8 +811,7 @@ class ProtocolServiceTest {
         .builder()
         .value(BigInteger.TWO)
         .transactionHash("2")
-        .time(LocalDateTime.ofInstant(transaction.get(0).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.UPDATED)
         .build(), histories.get(0));
 
@@ -826,16 +819,14 @@ class ProtocolServiceTest {
         .builder()
         .value(BigInteger.ONE)
         .transactionHash("1")
-        .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC)))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.UPDATED)
         .build().hashCode(), histories.get(1).hashCode());
 
     Assertions.assertEquals(ProtocolHistory
         .builder()
         .value(BigInteger.ZERO)
-        .time((LocalDateTime.ofInstant(transaction.get(1).getBlock().getTime().toInstant(),
-            ZoneOffset.UTC)))
+        .time(transaction.get(1).getBlock().getTime())
         .status(ProtocolStatus.ADDED)
         .build().hashCode(), histories.get(2).hashCode());
   }
@@ -6516,7 +6507,7 @@ class ProtocolServiceTest {
             List.of(
                 ProtocolHistory.builder()
                     .transactionHash(txTwo.getHash())
-                    .time(txOne.getBlock().getTime().toLocalDateTime())
+                    .time(txOne.getBlock().getTime())
                     .value(BigInteger.ONE)
                     .status(ProtocolStatus.ADDED)
                     .build()
