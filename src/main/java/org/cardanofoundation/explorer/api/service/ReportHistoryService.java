@@ -62,4 +62,16 @@ public interface ReportHistoryService {
    * @return ReportLimitResponse
    */
   ReportLimitResponse getReportLimit(String username);
+
+  /**
+   * Delete stake key report history
+   * @param stakeKeyReportHistory
+   */
+  void deleteStakeKeyReportHistory(StakeKeyReportHistory stakeKeyReportHistory);
+
+  /**
+   * Delete pool report history
+   * @param poolReportHistory
+   */
+  void deletePoolReportHistory(PoolReportHistory poolReportHistory);
 }
