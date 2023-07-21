@@ -4,8 +4,12 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.TxOut;
+
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -60,4 +64,20 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " WHERE txOut.tx = :tx"
       + " ORDER BY txOut.index DESC")
   List<TxContractProjection> getContractDatumOutByTx(@Param("tx") Tx tx);
+
+  @Query("SELECT COALESCE(sum(txOut.value), 0) FROM TxOut txOut "
+      + "INNER JOIN Tx tx ON tx.id = txOut.tx.id "
+      + "INNER JOIN StakeAddress stake ON txOut.stakeAddress = stake "
+      + "WHERE tx.hash = :txHash AND stake.view = :stakeAddress")
+  Optional<BigInteger> sumValueOutputByTxAndStakeAddress(@Param("txHash") String txHash,
+                                                         @Param("stakeAddress") String stakeAddress);
+
+  @Query("SELECT COALESCE(sum(txOut.value), 0) "
+      + "FROM TxOut txOut "
+      + "INNER JOIN TxIn txIn ON txOut.tx.id = txIn.txOut.id "
+      + "INNER JOIN Tx tx ON tx.id = txIn.txInput.id AND txIn.txOutIndex = txOut.index "
+      + "INNER JOIN StakeAddress stake ON txOut.stakeAddress = stake "
+      + "WHERE tx.hash = :txHash AND stake.view = :stakeAddress")
+  Optional<BigInteger> sumValueInputByTxAndStakeAddress(@Param("txHash") String txHash,
+                                                  @Param("stakeAddress") String stakeAddress);
 }

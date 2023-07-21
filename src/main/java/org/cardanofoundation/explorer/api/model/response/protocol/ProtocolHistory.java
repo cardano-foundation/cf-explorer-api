@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.protocol;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 @JsonInclude(value = Include.NON_NULL)
 public class ProtocolHistory {
 
-  LocalDateTime time;
+  Date time;
   String transactionHash;
   Object value;
   ProtocolStatus status;
