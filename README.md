@@ -17,7 +17,9 @@ To ensure the stability and reliability of this project, unit and mutation tests
 
 📊 [Postman Report](https://cardano-foundation.github.io/cf-explorer-api/html-report/reporthtml.html)
 
-📊 [Postman Report (allure format)](https://cardano-foundation.github.io/cf-explorer-api/allure/)
+📊 [Postman Report (allure format)](https://cardano-foundation.github.io/cf-explorer-api/allure-report/)
+
+📊 [LoadTest Report](https://cardano-foundation.github.io/cf-explorer-api/loadtest-report/k6_results.csv)
 
 📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/mutation-report/)
  
@@ -100,6 +102,21 @@ To ensure the stability and reliability of this project, unit and mutation tests
     - `API_CHECK_EPOCH_URL`: URL for get epoch data from koios service. Default is `http://localhost:8888/api/v1/epochs/fetch`.
 - without `koios`: We will use database to get data.
 
+## Local environments tests
 
+### Execute postman collection using docker - newman
 
+```shell
+docker run --rm -v "./:/tmp" -t postman/newman run /tmp/src/test/Postman/Cardano-Explorer-API.postman_collection.json -e /tmp/src/test/Postman/DevInt.postman_environment.json -r cli,htmlextra,allure --reporter-htmlextra-export=/tmp/reporthtml/reporthtml.html --timeout-request 1500
+```
 
+### Convert postman collection into K6 config file
+
+```shell
+docker run -it --rm -v "./:/tmp" -t loadimpact/postman-to-k6  /tmp/src/test/Postman/Cardano-Explorer-API.postman_collection.json --environment /tmp/src/test/Postman/DevInt.postman_environment.json  -o /tmp/k6-script.js --skip-post -i 10;
+```
+### Execute K6 Loadtest using postman collection
+
+```shell
+docker run -it  --rm -v "./:/tmp"  grafana/k6 run --vus 10 --out csv=/tmp/report/k6_results.csv /tmp/k6-script.js
+```
