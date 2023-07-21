@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class StakeRegistrationLifeCycle {
+public class StakeRegistrationFilterResponse {
 
   private String txHash;
   private BigInteger fee;

@@ -13,14 +13,7 @@ import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
@@ -70,6 +63,8 @@ class StakeKeyLifeCycleServiceTest {
 
   @Mock FetchRewardDataService fetchRewardDataService;
 
+  @Mock TxOutRepository txOutRepository;
+
   @InjectMocks
   private StakeKeyLifeCycleServiceImpl stakeKeyLifeCycleService;
 
@@ -109,6 +104,27 @@ class StakeKeyLifeCycleServiceTest {
         () -> stakeKeyLifeCycleService.getStakeWalletActivities("stake1notfound", pageable));
     Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeRewardActivities("stake1notfound", pageable));
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeLifeCycle("stake1notfound"));
+  }
+
+  @Test
+  void testStakeKeyLifeCycle() {
+    when(stakeAddressRepository.findByView("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna"))
+        .thenReturn(Optional.of(stakeAddress));
+    when(stakeRegistrationRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(stakeDeRegistrationRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(delegationRepository.existsByAddress(stakeAddress)).thenReturn(true);
+    when(rewardRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(withdrawalRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    var response = stakeKeyLifeCycleService
+        .getStakeLifeCycle("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna");
+    Assertions.assertNotNull(response);
+    Assertions.assertTrue(response.getHasRegistration());
+    Assertions.assertTrue(response.getHasDeRegistration());
+    Assertions.assertTrue(response.getHasDelegation());
+    Assertions.assertTrue(response.getHashRewards());
+    Assertions.assertTrue(response.getHasWithdrawal());
   }
 
   @Test
@@ -142,6 +158,171 @@ class StakeKeyLifeCycleServiceTest {
         response.getData().get(0).getTxHash());
     Assertions.assertEquals(BigInteger.valueOf(173333), response.getData().get(0).getFee());
     Assertions.assertEquals(2000000L, response.getData().get(0).getDeposit());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveRegistrationAndCountEqualOne_showReturnRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getDeposit()).thenReturn(2000000L);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    when(stakeRegistrationRepository.countByTx(txHash)).thenReturn(Optional.of(1L));
+    var response = stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertTrue(response.isJoinDepositPaid());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashNotHaveRegistration_showThrowException() {
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash));
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveCountEqualZeroRegistration_showThrowException() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    when(stakeRegistrationRepository.countByTx(txHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash));
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveRegistrationAndCountGreaterThanOneAndValueNegative_showReturnRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getDeposit()).thenReturn(80000000L);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    when(stakeRegistrationRepository.countByTx(txHash)).thenReturn(Optional.of(40L));
+    when(txOutRepository.sumValueOutputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(0L)));
+    when(txOutRepository.sumValueInputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(80173333L)));
+    var response = stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertTrue(response.isJoinDepositPaid());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveRegistrationAndCountGreaterThanOneAndValueNotNegative_showReturnRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getDeposit()).thenReturn(80000000L);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    when(stakeRegistrationRepository.countByTx(txHash)).thenReturn(Optional.of(40L));
+    when(txOutRepository.sumValueOutputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(0L)));
+    when(txOutRepository.sumValueInputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(0L)));
+    var response = stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertFalse(response.isJoinDepositPaid());
+  }
+
+
+  @Test
+  void whenStakeAddressAndTxHashHaveDeRegistrationAndCountEqualOne_showReturnDeRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getDeposit()).thenReturn(2000000L);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    when(stakeDeRegistrationRepository.countByTx(txHash)).thenReturn(Optional.of(1L));
+    var response = stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertTrue(response.isJoinDepositPaid());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashNotHaveDeRegistration_showThrowException() {
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash));
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveCountEqualZeroDeRegistration_showThrowException() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    when(stakeDeRegistrationRepository.countByTx(txHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash));
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveDeRegistrationAndCountGreaterThanOneAndValuePositive_showReturnDeRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getDeposit()).thenReturn(80000000L);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    when(stakeDeRegistrationRepository.countByTx(txHash)).thenReturn(Optional.of(40L));
+    when(txOutRepository.sumValueOutputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(80173333L)));
+    when(txOutRepository.sumValueInputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(0L)));
+    var response = stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertTrue(response.isJoinDepositPaid());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveDeRegistrationAndCountGreaterThanOneAndValueNotPositive_showReturnDeRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getDeposit()).thenReturn(80000000L);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    when(stakeDeRegistrationRepository.countByTx(txHash)).thenReturn(Optional.of(40L));
+    when(txOutRepository.sumValueOutputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(0L)));
+    when(txOutRepository.sumValueInputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(0L)));
+    var response = stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertFalse(response.isJoinDepositPaid());
   }
 
   @Test
