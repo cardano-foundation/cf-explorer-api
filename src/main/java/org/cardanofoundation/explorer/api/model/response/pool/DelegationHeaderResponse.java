@@ -2,13 +2,14 @@ package org.cardanofoundation.explorer.api.model.response.pool;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class DelegationHeaderResponse implements Serializable {
 
   private Integer epochNo;

@@ -20,6 +20,7 @@ import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.KafkaService;
+import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
@@ -56,6 +57,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private final StorageService storageService;
   private final KafkaService kafkaService;
   private final FetchRewardDataService fetchRewardDataService;
+  private final ReportHistoryService reportHistoryService;
 
   @Override
   public StakeKeyReportHistoryResponse generateStakeKeyReport(
@@ -72,6 +74,10 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
         stakeKeyReportRequest);
+
+    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
+      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    }
 
     if (DataUtil.isNullOrEmpty(stakeKeyReportRequest.getReportName())) {
       String reportName = generateReportName(stakeKeyReportHistory);

@@ -82,6 +82,8 @@ public class StakeKeyReportServiceTest {
 
   @Mock
   RewardRepository rewardRepository;
+  @Mock
+  ReportHistoryService reportHistoryService;
 
   @Test
   void generateStakeKeyReport_shouldThrowExceptionWhenNotFoundStakeAdress() {
@@ -92,6 +94,18 @@ public class StakeKeyReportServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyReportService.generateStakeKeyReport(request, username));
+  }
+
+  @Test
+  void generateStakeKeyReport_shouldThrowExceptionWhenLimitReached() {
+    StakeKeyReportRequest request = StakeKeyReportRequest.builder()
+        .stakeKey("any")
+        .build();
+    String username = "username";
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(new StakeAddress()));
+    when(reportHistoryService.isLimitReached(username)).thenReturn(Boolean.TRUE);
+    Assertions.assertThrows(BusinessException.class,
+                            () -> stakeKeyReportService.generateStakeKeyReport(request, username));
   }
 
   @Test
@@ -135,7 +149,7 @@ public class StakeKeyReportServiceTest {
     when(stakeKeyReportHistoryRepository.saveAndFlush(any(StakeKeyReportHistory.class))).thenReturn(expect);
     when(stakeKeyReportMapper.toStakeKeyReportHistory(any(StakeKeyReportRequest.class))).thenReturn(
         expect);
-
+    when(reportHistoryService.isLimitReached(username)).thenReturn(Boolean.FALSE);
     when(stakeKeyReportMapper.toStakeKeyReportHistoryResponse(expect))
         .thenReturn(responseExpect);
 
@@ -604,7 +618,7 @@ public class StakeKeyReportServiceTest {
     expect.setFee(BigInteger.TWO);
     expect.setTime(LocalDateTime.ofInstant(toDate.toInstant(), ZoneOffset.UTC));
     expect.setType(StakeTxType.SENT);
-    expect.setStatus(TxStatus.FAIL);
+    expect.setStatus(TxStatus.FAILED);
     expect.setTxHash("txHash");
 
     when(stakeKeyLifeCycleService.getStakeWalletActivitiesByDateRange(anyString(), any(StakeLifeCycleFilterRequest.class), any(Pageable.class)))

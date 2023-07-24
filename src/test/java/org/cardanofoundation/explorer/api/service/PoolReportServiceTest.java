@@ -62,6 +62,8 @@ public class PoolReportServiceTest {
 
   @Mock
   KafkaService kafkaService;
+  @Mock
+  ReportHistoryService reportHistoryService;
 
   @Test
   void create_shouldThrowExceptionWhenNotFoundStakeAdress() {
@@ -70,6 +72,18 @@ public class PoolReportServiceTest {
         .build();
     String username = "username";
     when(poolHashRepository.findByView(anyString())).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+                            () -> poolReportService.create(request, username));
+  }
+
+  @Test
+  void creat_shouldThrowExceptionWhenLimitReached() {
+    PoolReportCreateRequest request = PoolReportCreateRequest.builder()
+        .poolId("any")
+        .build();
+    String username = "username";
+    when(poolHashRepository.findByView(anyString())).thenReturn(Optional.of(new PoolHash()));
+    when(reportHistoryService.isLimitReached(username)).thenReturn(true);
     Assertions.assertThrows(BusinessException.class,
                             () -> poolReportService.create(request, username));
   }
@@ -112,6 +126,7 @@ public class PoolReportServiceTest {
 
     when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
+    when(reportHistoryService.isLimitReached(username)).thenReturn(false);
     doNothing().when(kafkaService).sendReportHistory(any(ReportHistory.class));
     Assertions.assertTrue(poolReportService.create(request, username));
   }
