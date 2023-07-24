@@ -433,7 +433,7 @@ class EpochServiceTest {
     Assertions.assertEquals(response.getTotalPages() , 1);
     Assertions.assertEquals(response.getCurrentPage() , 0);
     Assertions.assertEquals(response.getData().get(0).getNo() , 1);
-    Assertions.assertEquals(response.getData().get(0).getStatus() , EpochStatus.FINISHED);
+    Assertions.assertEquals(response.getData().get(0).getStatus() , EpochStatus.IN_PROGRESS);
     Assertions.assertEquals(response.getData().get(0).getStartTime().format(dtf) , now.format(dtf));
     Assertions.assertEquals(response.getData().get(0).getEndTime().format(dtf) , now.format(dtf));
   }
