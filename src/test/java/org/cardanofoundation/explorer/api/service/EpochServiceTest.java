@@ -14,7 +14,6 @@ import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.mockito.Mockito;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +27,6 @@ import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.service.impl.EpochServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.EpochSummaryProjectionImpl;
-import org.cardanofoundation.explorer.api.test.projection.UniqueAccountProjectionImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
@@ -67,7 +65,6 @@ class EpochServiceTest {
 
     var localDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
-    ReflectionTestUtils.setField(epochService, "EPOCH_DAYS", 5);
     when(epochRepository.findCurrentEpochSummary())
             .thenReturn(Optional.of(EpochSummaryProjectionImpl.builder()
                     .no(30)
@@ -84,14 +81,6 @@ class EpochServiceTest {
 
     when(hashOperations.size(any()))
             .thenReturn(1L);
-
-    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue()))
-            .thenReturn(Optional.of(
-                    Epoch.builder()
-                            .no(0)
-                            .startTime(Timestamp.valueOf(localDate))
-                            .endTime(Timestamp.valueOf(localDate.plusDays(5)))
-                            .build()));
 
     EpochSummary epochSummary = epochService.getCurrentEpochSummary();
 
@@ -134,7 +123,6 @@ class EpochServiceTest {
             .maxSlot(12)
             .startTime(epoch.getStartTime().toLocalDateTime())
             .endTime(epoch.getEndTime().toLocalDateTime())
-            //.rewardsDistributed(BigInteger.ONE)
             .build();
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
@@ -182,7 +170,6 @@ class EpochServiceTest {
             .maxSlot(12)
             .startTime(epoch.getStartTime().toLocalDateTime())
             .endTime(epoch.getEndTime().toLocalDateTime())
-            //.rewardsDistributed(BigInteger.ONE)
             .build();
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
@@ -216,7 +203,6 @@ class EpochServiceTest {
             .fees(BigInteger.ONE)
             .outSum(BigInteger.valueOf(12L))
             .maxSlot(12)
-            //.rewardsDistributed(BigInteger.ONE)
             .startTime(Timestamp.valueOf(LocalDateTime.now()))
             .endTime(Timestamp.valueOf(LocalDateTime.now()))
             .build();
@@ -230,7 +216,6 @@ class EpochServiceTest {
             .maxSlot(12)
             .startTime(epoch.getStartTime().toLocalDateTime())
             .endTime(epoch.getEndTime().toLocalDateTime())
-            //.rewardsDistributed(BigInteger.ONE)
             .build();
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
@@ -264,7 +249,6 @@ class EpochServiceTest {
             .fees(BigInteger.ONE)
             .outSum(BigInteger.valueOf(12L))
             .maxSlot(12)
-            //.rewardsDistributed(BigInteger.ONE)
             .startTime(Timestamp.valueOf(LocalDateTime.now()))
             .endTime(Timestamp.valueOf(LocalDateTime.now().minusDays(10)))
             .build();
@@ -278,7 +262,6 @@ class EpochServiceTest {
             .maxSlot(12)
             .startTime(epoch.getStartTime().toLocalDateTime())
             .endTime(epoch.getEndTime().toLocalDateTime())
-            //.rewardsDistributed(BigInteger.ONE)
             .build();
 
     when(epochRepository.findFirstByNo(any(Integer.class)))
@@ -311,7 +294,6 @@ class EpochServiceTest {
             .fees(BigInteger.ONE)
             .outSum(BigInteger.valueOf(12L))
             .maxSlot(12)
-            //.rewardsDistributed(BigInteger.ONE)
             .startTime(Timestamp.valueOf(LocalDateTime.now()))
             .endTime(Timestamp.valueOf(LocalDateTime.now()))
             .build();
@@ -323,7 +305,6 @@ class EpochServiceTest {
             .txCount(2)
             .outSum(BigInteger.valueOf(12L))
             .maxSlot(12)
-            //.rewardsDistributed(BigInteger.ONE)
             .status(EpochStatus.IN_PROGRESS)
             .build();
 
@@ -342,7 +323,6 @@ class EpochServiceTest {
             .fees(BigInteger.ONE)
             .outSum(BigInteger.valueOf(12L))
             .maxSlot(12)
-            //.rewardsDistributed(BigInteger.ONE)
             .startTime(Timestamp.valueOf(LocalDateTime.now()))
             .endTime(Timestamp.valueOf(LocalDateTime.now()))
             .build();
@@ -354,7 +334,6 @@ class EpochServiceTest {
             .txCount(2)
             .outSum(BigInteger.valueOf(12L))
             .maxSlot(12)
-            //.rewardsDistributed(BigInteger.ONE)
             .status(EpochStatus.IN_PROGRESS)
             .build();
 
@@ -382,17 +361,15 @@ class EpochServiceTest {
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(3));
     when(fetchRewardDataService.checkEpochRewardDistributed(epoch)).thenReturn(false);
     when(fetchRewardDataService.fetchEpochRewardDistributed(List.of(no))).thenReturn(List.of(Epoch.builder().rewardsDistributed(BigInteger.ONE).build()));
-    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(dateTime)).build()));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(EpochResponse.builder().startTime(dateTime).endTime(dateTime).build());
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
-    ReflectionTestUtils.setField(epochService, "EPOCH_DAYS", 2);
 
     var response = epochService.getEpochDetail(no.toString());
     Assertions.assertEquals(response.getStatus() , EpochStatus.IN_PROGRESS);
     Assertions.assertEquals(response.getStartTime().format(dtf), dateTime.format(dtf));
-    Assertions.assertEquals(response.getEndTime().format(dtf), dateTime.plusDays(2).format(dtf));
+    Assertions.assertEquals(response.getEndTime().format(dtf), dateTime.plusDays(EpochServiceImpl.EPOCH_DAYS).format(dtf));
     Assertions.assertEquals(response.getAccount(), 1);
   }
 
@@ -423,7 +400,6 @@ class EpochServiceTest {
     when(esp.getMaxSlot()).thenReturn(26000);
 
     when(epochRepository.findCurrentEpochSummary()).thenReturn(Optional.of(esp));
-    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(LocalDateTime.now())).build()));
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
@@ -433,7 +409,7 @@ class EpochServiceTest {
     Assertions.assertEquals(response.getTotalSlot(), 26000);
     Assertions.assertEquals(response.getAccount(), 1);
     Assertions.assertEquals(response.getStartTime().format(dtf), now.format(dtf));
-    Assertions.assertEquals(response.getEndTime().format(dtf), now.format(dtf));
+    Assertions.assertEquals(response.getEndTime().format(dtf), now.plusDays(EpochServiceImpl.EPOCH_DAYS).format(dtf));
   }
 
   @Test
@@ -443,7 +419,6 @@ class EpochServiceTest {
     Epoch epoch = Epoch.builder().no(1).build();
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss");
 
-    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(now)).build()));
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(3));
     when(epochRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(epoch)));
     when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(false);
@@ -467,8 +442,11 @@ class EpochServiceTest {
   void testGetAllEpoch_throwCurrentEpochNo() {
     Pageable pageable = PageRequest.of(0, 10);
     LocalDateTime now = LocalDateTime.now();
+    Epoch epoch = Epoch.builder().no(1).build();
 
-    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(now)).build()));
+    when(epochRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(epoch)));
+    when(fetchRewardDataService.checkEpochRewardDistributed(epoch)).thenReturn(true);
+    when(epochMapper.epochToEpochResponse(epoch)).thenReturn(EpochResponse.builder().no(1).build());
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.empty());
 
     Assertions.assertThrows(NoContentException.class, () -> epochService.getAllEpoch(pageable));
@@ -480,8 +458,6 @@ class EpochServiceTest {
     LocalDateTime now = LocalDateTime.now();
     Epoch epoch = Epoch.builder().no(1).build();
 
-    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(now)).build()));
-    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(3));
     when(epochRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(epoch)));
     when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(false);
     when(fetchRewardDataService.fetchEpochRewardDistributed(List.of(1))).thenReturn(null);
