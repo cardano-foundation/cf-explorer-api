@@ -153,7 +153,7 @@ public class StakeKeyReportServiceTest {
     when(stakeKeyReportMapper.toStakeKeyReportHistoryResponse(expect))
         .thenReturn(responseExpect);
 
-    doNothing().when(kafkaService).sendReportHistory(any(ReportHistory.class));
+    when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(Boolean.TRUE);
 
     var responseActual = stakeKeyReportService.generateStakeKeyReport(request, "username");
     Assertions.assertEquals(responseExpect.getStakeKey(), responseActual.getStakeKey());

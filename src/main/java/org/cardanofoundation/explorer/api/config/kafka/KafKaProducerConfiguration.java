@@ -38,6 +38,9 @@ public class KafKaProducerConfiguration {
   @Value("${spring.kafka.producer.retryBackoff}")
   private int retryBackoff;
 
+  @Value("${spring.kafka.producer.properties.max.block.ms}")
+  private int maxBlockMs;
+
   @Bean
   public ProducerFactory<String, Object> producerFactory() {
     Map<String, Object> map = new HashMap<>();
@@ -57,7 +60,7 @@ public class KafKaProducerConfiguration {
     map.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG,retryBackoff);
     map.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, MAX_REQUEST_SIZE);
     map.put(ProducerConfig.ACKS_CONFIG,acks);
-
+    map.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, maxBlockMs);
     return new DefaultKafkaProducerFactory<>(map);
   }
 
