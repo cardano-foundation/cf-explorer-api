@@ -75,7 +75,7 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
       @Param("address") Address address, Pageable pageable);
 
   @Query("SELECT ma.name as tokenName, ma.fingerprint as fingerprint,"
-      + " atb.addressId as addressId, atb.balance as quantity"
+      + " atb.addressId as addressId, atb.balance as quantity, ma.policy as policy"
       + " FROM AddressTokenBalance atb "
       + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
       + " WHERE ma.policy = :policy"

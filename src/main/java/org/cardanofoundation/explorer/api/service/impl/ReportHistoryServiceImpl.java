@@ -8,12 +8,14 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.ReportLimitResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
@@ -28,6 +30,9 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
   public static final String MIN_TIME = "1970-01-01 00:00:00";
 
   private final ReportHistoryRepository reportHistoryRepository;
+
+  @Value("${application.report.limit-per-24hours}")
+  private Integer limitPer24Hours;
 
   /**
    * Get report history
@@ -70,5 +75,23 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
         });
 
     return new BaseFilterResponse<>(reportHistoryProjections);
+  }
+
+  @Override
+  public Boolean isLimitReached(String username) {
+    Instant currentTime = Instant.now();
+    Integer reportCount = reportHistoryRepository
+        .countByUsernameAndCreatedAtBetween(username,
+                                            Timestamp.from(currentTime.minus(Duration.ofDays(1))),
+                                            Timestamp.from(currentTime));
+    return reportCount >= limitPer24Hours;
+  }
+
+  @Override
+  public ReportLimitResponse getReportLimit(String username) {
+    return ReportLimitResponse.builder()
+        .limitPer24hours(limitPer24Hours)
+        .isLimitReached(isLimitReached(username))
+        .build();
   }
 }

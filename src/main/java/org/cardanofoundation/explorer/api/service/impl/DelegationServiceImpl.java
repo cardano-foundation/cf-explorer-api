@@ -546,9 +546,20 @@ public class DelegationServiceImpl implements DelegationService {
           .min(Comparator.comparing(EpochChartProjection::getChartValue));
       epochChart.setLowest(minEpochOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
     }
-    DelegatorChartResponse delegatorChart = new DelegatorChartResponse();
-    List<DelegatorChartProjection> delegatorDataCharts = delegationRepository.getDataForDelegatorChart(
-        poolId);
+    DelegatorChartResponse delegatorChart = getDelegatorChartResponse(poolHash);
+    return PoolDetailAnalyticsResponse.builder().epochChart(epochChart)
+        .delegatorChart(delegatorChart).build();
+  }
+
+  private DelegatorChartResponse getDelegatorChartResponse(PoolHash poolHash) {
+      DelegatorChartResponse delegatorChart = new DelegatorChartResponse();
+    Boolean isKoiOs = fetchRewardDataService.isKoiOs();
+    List<DelegatorChartProjection> delegatorDataCharts;
+    if (Boolean.TRUE.equals(isKoiOs)) {
+      delegatorDataCharts = poolHistoryRepository.getDataForDelegatorChart(poolHash.getView());
+    } else{
+      delegatorDataCharts = delegationRepository.getDataForDelegatorChart(poolHash.getId());
+    }
     if (!delegatorDataCharts.isEmpty()) {
       delegatorChart.setDataByDays(
           delegatorDataCharts.stream().map(DelegatorChartList::new).toList());
@@ -561,8 +572,7 @@ public class DelegationServiceImpl implements DelegationService {
       delegatorChart.setLowest(
           minDelegatorOpt.map(BasePoolChartProjection::getChartValue).orElse(null));
     }
-    return PoolDetailAnalyticsResponse.builder().epochChart(epochChart)
-        .delegatorChart(delegatorChart).build();
+    return delegatorChart;
   }
 
   @Override

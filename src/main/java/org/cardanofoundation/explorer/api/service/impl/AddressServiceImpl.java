@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -21,12 +22,11 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressFilterRe
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
-import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
@@ -34,7 +34,9 @@ import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
+import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.HexUtils;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
@@ -59,7 +61,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -83,7 +84,6 @@ public class AddressServiceImpl implements AddressService {
   private final ScriptRepository scriptRepository;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
-  static final Integer ADDRESS_ANALYTIC_BALANCE_NUMBER = 5;
   static final String SCRIPT_NOT_VERIFIED = "Script not verified";
 
 
@@ -129,19 +129,21 @@ public class AddressServiceImpl implements AddressService {
     if (Long.valueOf(0).equals(txCount)) {
       return List.of();
     }
-    List<LocalDate> dates = getAnalyticDates(type);
-    ExecutorService executorService = Executors.newFixedThreadPool(ADDRESS_ANALYTIC_BALANCE_NUMBER);
+
+    List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
+    final int NUMBER_PARALLEL = 5;
+    ExecutorService fixedExecutor = Executors.newFixedThreadPool(NUMBER_PARALLEL);
 
     final Optional<LocalDate> maxDateAgg = aggregateAddressTxBalanceRepository.getMaxDay();
     List<CompletableFuture<AddressAnalyticsResponse>> futureAddressAnalytics = new ArrayList<>();
-    dates.forEach(dateItem -> futureAddressAnalytics.add(
-        CompletableFuture.supplyAsync(() ->
-            getBalanceOfAddress(addr, dateItem, maxDateAgg), executorService))
-    );
-
+    for (int i = 1; i < dates.size(); i++) {
+      LocalDateTime analyticTime = dates.get(i);
+      futureAddressAnalytics.add(CompletableFuture.supplyAsync(() ->
+          getAddressAnalyticsResponse(addr, type, analyticTime, maxDateAgg), fixedExecutor)
+      );
+    }
     CompletableFuture.allOf(futureAddressAnalytics.toArray(new CompletableFuture[0])).join();
     List<AddressAnalyticsResponse> responses = new ArrayList<>();
-
     for (CompletableFuture<AddressAnalyticsResponse> addressAnalytic : futureAddressAnalytics) {
       responses.add(addressAnalytic.get());
     }
@@ -149,94 +151,50 @@ public class AddressServiceImpl implements AddressService {
     return responses;
   }
 
-  private List<LocalDate> getAnalyticDates(AnalyticType type) {
-    LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-    List<LocalDate> dates = new ArrayList<>();
-    switch (type) {
-      case ONE_WEEK:
-        var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >= 0; i--) {
-          dates.add(currentWeek.minusWeeks(i));
-        }
-        break;
-      case ONE_MONTH:
-        var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >= 0; i--) {
-          dates.add(currentMonth.minusMonths(i));
-        }
-        break;
-      case THREE_MONTH:
-        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >= 0; i--) {
-          dates.add(currentDate.minusMonths(i * 3L));
-        }
-        break;
-      default:
-        for (int i = ADDRESS_ANALYTIC_BALANCE_NUMBER - 1; i >= 0; i--) {
-          dates.add(currentDate.minusDays(i));
-        }
-    }
-    return dates;
-  }
-
-  private AddressAnalyticsResponse getBalanceOfAddress(
-      Address address,LocalDate to, Optional<LocalDate> maxDateAgg) {
-    if (maxDateAgg.isEmpty()) {
-      BigInteger balance = addressTxBalanceRepository.getBalanceByAddressAndTime(
-          address,
-          Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      ).orElse(BigInteger.ZERO);
-      return new AddressAnalyticsResponse(to, balance);
-    }
-
+  private AddressAnalyticsResponse getAddressAnalyticsResponse(
+      Address address, AnalyticType type, LocalDateTime to, Optional<LocalDate> maxDateAgg
+  ) {
     BigInteger balance;
-    if (LocalDate.now().isEqual(to)) {
-      balance = getBalanceInRangeHaveToday(address, to, maxDateAgg.get());
+    if (maxDateAgg.isEmpty()) {
+      if (type == AnalyticType.ONE_DAY) {
+        balance = addressTxBalanceRepository
+            .getBalanceByAddressAndTime(address, Timestamp.valueOf(to)).orElse(BigInteger.ZERO);
+      } else {
+        Timestamp endRange = Timestamp.valueOf(to.toLocalDate().atTime(LocalTime.MAX));
+        balance = addressTxBalanceRepository
+            .getBalanceByAddressAndTime(address, endRange).orElse(BigInteger.ZERO);
+      }
     } else {
-      balance = getBalanceInRangePreviousToday(address, to, maxDateAgg.get());
+      if (type == AnalyticType.ONE_DAY) {
+        LocalDate previousDay = to.toLocalDate().minusDays(1);
+        BigInteger previousBalance = getBalanceOfAddress(address, previousDay, maxDateAgg.get());
+        BigInteger extraTimeBalance = addressTxBalanceRepository
+            .getBalanceByAddressAndTime(address,
+                Timestamp.valueOf(previousDay.atTime(LocalTime.MAX)), Timestamp.valueOf(to))
+            .orElse(BigInteger.ZERO);
+        balance = previousBalance.add(extraTimeBalance);
+      } else {
+        balance = getBalanceOfAddress(address, to.toLocalDate(), maxDateAgg.get());
+      }
     }
-
     if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTxBalanceRepository.countRecord(
-          address, Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      );
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord ==  0;
-      balance = isNoRecord ? null : balance;
+      balance = checkNoRecord(address, type, to) ? null : balance;
     }
-
     return new AddressAnalyticsResponse(to, balance);
   }
 
-  private BigInteger getBalanceInRangeHaveToday(
-      Address address, LocalDate to, LocalDate maxDateAgg) {
-    BigInteger todayBalance = addressTxBalanceRepository.getBalanceByAddressAndTime(
-            address,
-            Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX)),
-            Timestamp.valueOf(to.atTime(LocalTime.MAX))
-        )
-        .orElse(BigInteger.ZERO);
-
-    boolean isNotMissingAggregationData = !to.minusDays(1).isAfter(maxDateAgg);
-    if (isNotMissingAggregationData) {
-      BigInteger rangeToYesterdayBalance = aggregateAddressTxBalanceRepository
-          .sumBalanceByAddressId(address.getId(), to.minusDays(1))
-          .orElse(BigInteger.ZERO);
-      return todayBalance.add(rangeToYesterdayBalance);
+  private boolean checkNoRecord(Address address, AnalyticType type, LocalDateTime toDateTime) {
+    Timestamp endRange;
+    if (type == AnalyticType.ONE_DAY) {
+      endRange = Timestamp.valueOf(toDateTime);
     } else {
-      BigInteger balanceAgg = aggregateAddressTxBalanceRepository
-          .sumBalanceByAddressId(address.getId(), maxDateAgg)
-          .orElse(BigInteger.ZERO);
-
-      BigInteger balanceNotAgg = addressTxBalanceRepository.getBalanceByAddressAndTime(
-          address,
-          Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
-      ).orElse(BigInteger.ZERO);
-      return todayBalance.add(balanceAgg).add(balanceNotAgg);
+      endRange = Timestamp.valueOf(toDateTime.toLocalDate().atTime(LocalTime.MAX));
     }
+    Long numberBalanceRecord = addressTxBalanceRepository.countRecord(address, endRange);
+    return numberBalanceRecord == null || numberBalanceRecord ==  0;
   }
 
-  private BigInteger getBalanceInRangePreviousToday(
-      Address address, LocalDate to, LocalDate maxDateAgg) {
+  private BigInteger getBalanceOfAddress(Address address, LocalDate to, LocalDate maxDateAgg) {
     boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
     if (isNotMissingAggregationData) {
       return aggregateAddressTxBalanceRepository
@@ -356,8 +314,7 @@ public class AddressServiceImpl implements AddressService {
         .stream()
         .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
             addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
-        .toList();
-    
+        .collect(Collectors.toList());
     List<TokenAddressResponse> tokenListResponse = addressTokenProjectionList.stream()
         .map(tokenMapper::fromAddressTokenProjection)
         .sorted(Comparator.comparing(TokenAddressResponse::getQuantity).reversed()
@@ -400,7 +357,7 @@ public class AddressServiceImpl implements AddressService {
         () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    if(Boolean.FALSE.equals(addr.getVerifiedContract())){
+    if(Boolean.FALSE.equals(addr.getVerifiedContract()) || Objects.isNull(addr.getVerifiedContract())){
       return ContractScript.builder().isVerified(Boolean.FALSE).data(null).build();
     }
 
