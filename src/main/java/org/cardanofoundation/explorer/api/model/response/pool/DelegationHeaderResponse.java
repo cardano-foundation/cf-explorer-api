@@ -16,7 +16,7 @@ public class DelegationHeaderResponse implements Serializable {
 
   private Long countDownEndTime;
 
-  private Long epochSlotNo;
+  private Integer epochSlotNo;
 
   private BigInteger liveStake;
 
