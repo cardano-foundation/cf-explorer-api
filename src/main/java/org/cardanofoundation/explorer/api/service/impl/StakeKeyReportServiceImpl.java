@@ -63,7 +63,11 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   public StakeKeyReportHistoryResponse generateStakeKeyReport(
       StakeKeyReportRequest stakeKeyReportRequest, String username) {
     StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, username);
-    kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
+    Boolean isSuccess = kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
+    if(Boolean.FALSE.equals(isSuccess)) {
+      stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+    }
     return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
   }
 
