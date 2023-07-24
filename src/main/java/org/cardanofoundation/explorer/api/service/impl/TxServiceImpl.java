@@ -541,6 +541,11 @@ public class TxServiceImpl implements TxService {
       List<TxOutResponse> collateralOutputs = collateralResponse.getCollateralOutputResponses();
       collateralResponse.setCollateralInputResponses(txResponse.getUTxOs().getInputs());
       collateralResponse.setCollateralOutputResponses(txResponse.getUTxOs().getOutputs());
+      BigInteger totalInput = collateralResponse.getCollateralInputResponses().stream()
+          .reduce(BigInteger.ZERO, (a, b) -> a.add(b.getValue()), BigInteger::add);
+      BigInteger totalOutput = collateralResponse.getCollateralOutputResponses().stream()
+          .reduce(BigInteger.ZERO, (a, b) -> a.add(b.getValue()), BigInteger::add);
+      txResponse.getTx().setFee(totalInput.subtract(totalOutput));
       txResponse.setCollaterals(collateralResponse);
       UTxOResponse uTxOResponse = new UTxOResponse();
       uTxOResponse.setInputs(collateralInputs);
