@@ -108,7 +108,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   public HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypesInput,
                                                         BigInteger startTime,
                                                         BigInteger endTime) {
-    final String redisKey = String.format("%s_%s", network, PROTOCOL_HISTORY);
+    final String redisKey = String.format("%s_%s", network, PROTOCOL_HISTORY).toUpperCase();
 
     boolean isGetAll = Boolean.FALSE;
 
@@ -275,8 +275,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     if (isGetAll) {
       var currentEpoch = epochRepository.findByCurrentEpochNo().get();
       var redisKeyExpireTime = currentEpoch.getStartTime().toLocalDateTime().plusDays(epochDays);
-      final var seconds = ChronoUnit.SECONDS.between(redisKeyExpireTime,
-          LocalDateTime.now(ZoneOffset.UTC));
+      final var seconds = ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC),
+          redisKeyExpireTime);
       redisTemplate.opsForValue().set(redisKey, historiesProtocol);
       redisTemplate.expire(redisKey, Duration.ofSeconds(seconds));
     }
