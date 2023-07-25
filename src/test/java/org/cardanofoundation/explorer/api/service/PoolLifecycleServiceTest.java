@@ -1,8 +1,10 @@
 package org.cardanofoundation.explorer.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochRewardProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
@@ -12,22 +14,12 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReg
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
-import org.cardanofoundation.explorer.api.repository.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
-import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.impl.PoolLifecycleServiceImpl;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -73,6 +65,9 @@ class PoolLifecycleServiceTest {
 
   @Mock
   private FetchRewardDataService fetchRewardDataService;
+
+  @Mock
+  private PoolInfoRepository poolInfoRepository;
 
   @InjectMocks
   private PoolLifecycleServiceImpl poolLifecycleService;
@@ -904,5 +899,166 @@ class PoolLifecycleServiceTest {
         poolLifecycleService.poolLifecycleStatus(poolView).getIsReward());
     Assertions.assertEquals(true,
         poolLifecycleService.poolLifecycleStatus(poolView).getIsDeRegistration());
+  }
+
+  @Test
+  void testListReward_thenReturnKoiOs() {
+    String poolView = "poolView";
+    Pageable pageable = PageRequest.of(0, 10);
+    List<String> rewards = List.of("reward");
+
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(poolUpdateRepository.findRewardAccountByPoolView(poolView)).thenReturn(rewards);
+    when(fetchRewardDataService.checkRewardForPool(rewards)).thenReturn(false);
+    when(fetchRewardDataService.fetchRewardForPool(rewards)).thenReturn(false);
+
+    var response = poolLifecycleService.listReward(poolView, pageable);
+    Assertions.assertEquals(response.getData(), null);
+    Assertions.assertEquals(response.getTotalPages(), 0);
+    Assertions.assertEquals(response.getTotalItems(), 0);
+    Assertions.assertEquals(response.getCurrentPage(), 0);
+  }
+
+  @Test
+  void testPoolInfo_thenReturnKoiOs() {
+    String poolView = "poolView";
+    PoolInfoProjection projection = Mockito.mock(PoolInfoProjection.class);
+    when(projection.getPoolId()).thenReturn("1");
+    when(projection.getPoolName()).thenReturn("name");
+    when(projection.getPoolView()).thenReturn("view");
+    when(projection.getId()).thenReturn(1L);
+    List<String> accounts = List.of("account");
+
+    when(poolHashRepository.getPoolInfo(poolView)).thenReturn(projection);
+    when(poolUpdateRepository.findRewardAccountByPoolId(1L)).thenReturn(accounts);
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(1));
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, 1)).thenReturn(BigInteger.ONE);
+    when(fetchRewardDataService.checkRewardForPool(accounts)).thenReturn(false);
+    when(fetchRewardDataService.fetchRewardForPool(accounts)).thenReturn(false);
+    when(poolUpdateRepository.findOwnerAccountByPoolView(poolView)).thenReturn(List.of("stake"));
+    when(rewardRepository.getTotalRewardByPool(poolView)).thenReturn(BigInteger.ONE);
+    when(poolRetireRepository.findByPoolView(poolView)).thenReturn(List.of(1));
+
+    var response = poolLifecycleService.poolInfo(poolView);
+    Assertions.assertEquals(response.getPoolId(), "1");
+    Assertions.assertEquals(response.getPoolName(), "name");
+    Assertions.assertEquals(response.getPoolView(), "view");
+    Assertions.assertEquals(response.getStatus(), "RETIRING");
+    Assertions.assertEquals(response.getPoolSize(), BigInteger.ONE);
+    Assertions.assertEquals(response.getRewardAvailable(), BigInteger.ONE);
+    Assertions.assertEquals(response.getEpochNo(), 1);
+    Assertions.assertEquals(response.getStakeKeys().get(0), "stake");
+    Assertions.assertEquals(response.getRewardAccounts().get(0), "account");
+  }
+
+  @Test
+  void testDeRegistration_thenReturnKoiOs() {
+    String poolView = "poolView";
+    Pageable pageable = PageRequest.of(0, 10);
+    String txHash = "";
+    Date fromDate = new Date();
+    Date toDate = fromDate;
+    PoolInfoProjection projection = Mockito.mock(PoolInfoProjection.class);
+    when(projection.getId()).thenReturn(1L);
+    when(projection.getPoolId()).thenReturn("1");
+    when(projection.getPoolName()).thenReturn("name");
+    when(projection.getPoolView()).thenReturn("view");
+    PoolDeRegistrationProjection pdrp = Mockito.mock(PoolDeRegistrationProjection.class);
+    when(pdrp.getRetiringEpoch()).thenReturn(1);
+    when(pdrp.getRefundFlag()).thenReturn(true);
+    when(pdrp.getFee()).thenReturn(BigInteger.ONE);
+    List<String> accounts = List.of("account");
+    EpochRewardProjection erp = Mockito.mock(EpochRewardProjection.class);
+    when(erp.getAmount()).thenReturn(BigInteger.ONE);
+    when(erp.getEpochNo()).thenReturn(1);
+
+    when(poolHashRepository.getPoolInfo(poolView)).thenReturn(projection);
+    when(poolRetireRepository.getPoolDeRegistration(poolView, null, new Timestamp(fromDate.getTime()), new Timestamp(toDate.getTime()), pageable)).thenReturn(new PageImpl<>(List.of(pdrp)));
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(poolUpdateRepository.findRewardAccountByPoolId(1L)).thenReturn(accounts);
+    when(fetchRewardDataService.checkRewardForPool(accounts)).thenReturn(false);
+    when(fetchRewardDataService.fetchRewardForPool(accounts)).thenReturn(true);
+    when(rewardRepository.getRewardRefundByEpoch(any(), any())).thenReturn(List.of(erp));
+    when(poolUpdateRepository.findOwnerAccountByPoolView(poolView)).thenReturn(List.of("stake"));
+
+    var response = poolLifecycleService.deRegistration(poolView, txHash, fromDate, toDate, pageable);
+    Assertions.assertEquals(response.getTotalItems(), 1);
+    Assertions.assertEquals(response.getTotalPages(), 1);
+    Assertions.assertEquals(response.getCurrentPage(), 0);
+    Assertions.assertEquals(response.getData().get(0).getPoolId(), "1");
+    Assertions.assertEquals(response.getData().get(0).getPoolName(), "name");
+    Assertions.assertEquals(response.getData().get(0).getPoolView(), "view");
+    Assertions.assertEquals(response.getData().get(0).getStakeKeys(), List.of("stake"));
+    Assertions.assertEquals(response.getData().get(0).getTotalFee(), BigInteger.TWO);
+    Assertions.assertEquals(response.getData().get(0).getPoolHold(), BigInteger.ONE);
+    Assertions.assertEquals(response.getData().get(0).getFee(), BigInteger.ONE);
+    Assertions.assertEquals(response.getData().get(0).getRetiringEpoch(), 1);
+  }
+
+  @Test
+  void testPoolLifecycleStatus_thenReturnKoiOs() {
+    String poolView = "poolView";
+    List<String> accounts = List.of("account");
+    PoolHash pool = PoolHash.builder().build();
+
+    when(poolUpdateRepository.countPoolUpdateByPool(poolView)).thenReturn(1);
+    when(poolHashRepository.findByView(poolView)).thenReturn(Optional.of(pool));
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(poolUpdateRepository.findRewardAccountByPoolView(poolView)).thenReturn(accounts);
+    when(fetchRewardDataService.checkRewardForPool(accounts)).thenReturn(false);
+    when(fetchRewardDataService.fetchRewardForPool(accounts)).thenReturn(true);
+    when(rewardRepository.existsByPoolAndType(pool, RewardType.LEADER)).thenReturn(true);
+    when(poolRetireRepository.existsByPoolHash(pool)).thenReturn(true);
+
+    var response = poolLifecycleService.poolLifecycleStatus(poolView);
+    Assertions.assertTrue(response.getIsRegistration());
+    Assertions.assertTrue(response.getIsDeRegistration());
+    Assertions.assertTrue(response.getIsReward());
+    Assertions.assertFalse(response.getIsUpdate());
+  }
+
+  @Test
+  void testListRewardFilter_thenReturn() {
+    String poolView = "view";
+    Pageable pageable = PageRequest.of(0, 10);
+    int beginEpoch = 400;
+    int endEpoch = 410;
+    List<String> rewards = List.of("account");
+    LifeCycleRewardProjection lcrp = Mockito.mock(LifeCycleRewardProjection.class);
+    when(lcrp.getAddress()).thenReturn("address");
+    when(lcrp.getEpochNo()).thenReturn(1);
+    when(lcrp.getAmount()).thenReturn(BigInteger.ONE);
+
+    when(fetchRewardDataService.isKoiOs()).thenReturn(false);
+    when(rewardRepository.getRewardInfoByPoolFiler(poolView, beginEpoch, endEpoch, pageable)).thenReturn(new PageImpl<>(List.of(lcrp)));
+
+    var response = poolLifecycleService.listRewardFilter(poolView, beginEpoch, endEpoch, pageable);
+    Assertions.assertEquals(response.getData().get(0).getAmount(), BigInteger.ONE);
+    Assertions.assertEquals(response.getData().get(0).getEpochNo(), 1);
+    Assertions.assertEquals(response.getData().get(0).getRewardAccount(), "address");
+    Assertions.assertEquals(response.getTotalPages(), 0);
+    Assertions.assertEquals(response.getTotalItems(), 1);
+    Assertions.assertEquals(response.getCurrentPage(), 0);
+  }
+
+  @Test
+  void testListRewardFilter_thenReturnKoiOs() {
+    String poolView = "view";
+    Pageable pageable = PageRequest.of(0, 10);
+    int beginEpoch = 400;
+    int endEpoch = 410;
+    List<String> rewards = List.of("account");
+
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(poolUpdateRepository.findRewardAccountByPoolView(poolView)).thenReturn(rewards);
+    when(fetchRewardDataService.checkRewardForPool(rewards)).thenReturn(false);
+    when(fetchRewardDataService.fetchRewardForPool(rewards)).thenReturn(false);
+
+    var response = poolLifecycleService.listRewardFilter(poolView, beginEpoch, endEpoch, pageable);
+    Assertions.assertEquals(response.getData(), null);
+    Assertions.assertEquals(response.getTotalPages(), 0);
+    Assertions.assertEquals(response.getTotalItems(), 0);
+    Assertions.assertEquals(response.getCurrentPage(), 0);
   }
 }
