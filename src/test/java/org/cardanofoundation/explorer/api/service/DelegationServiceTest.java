@@ -1,15 +1,13 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.model.response.*;
+import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
-import org.cardanofoundation.explorer.api.projection.DelegationProjection;
-import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
-import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
-import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.impl.DelegationServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
@@ -30,6 +28,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -86,6 +85,9 @@ public class DelegationServiceTest {
 
     @Mock
     private TxRepository txRepository;
+
+    @Mock
+    private EpochService epochService;
 
     @InjectMocks
     private DelegationServiceImpl delegationService;
@@ -161,10 +163,15 @@ public class DelegationServiceTest {
     @Test
     public void testGetDataForDelegationHeader_shouldReturn() {
         // Mock dependencies
-        Epoch epoch = new Epoch();
-        epoch.setNo(1);
-        epoch.setStartTime(Timestamp.from(Instant.now()));
-        when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(epoch));
+        EpochSummary epochSummary = EpochSummary.builder()
+            .no(1)
+            .slot(0)
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusDays(5))
+            .totalSlot(432000)
+            .account(1)
+            .build();
+        when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
         when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
         when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
         when(fetchRewardDataService.isKoiOs()).thenReturn(true);
@@ -180,7 +187,6 @@ public class DelegationServiceTest {
         assertEquals(0, response.getDelegators());
 
         // Verify interactions with dependencies
-        verify(epochRepository).findByCurrentEpochNo();
         verify(fetchRewardDataService).checkAdaPots(1);
         verify(fetchRewardDataService).isKoiOs();
         verify(poolInfoRepository).getTotalLiveStake(1);
@@ -189,10 +195,15 @@ public class DelegationServiceTest {
     @Test
     public void testGetDataForDelegationHeader_shouldReturnV2() {
         // Mock dependencies
-        Epoch epoch = new Epoch();
-        epoch.setNo(1);
-        epoch.setStartTime(Timestamp.from(Instant.now()));
-        when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(epoch));
+        EpochSummary epochSummary = EpochSummary.builder()
+            .no(1)
+            .slot(0)
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusDays(5))
+            .totalSlot(432000)
+            .account(1)
+            .build();
+        when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
         when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
         when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
         when(fetchRewardDataService.isKoiOs()).thenReturn(false);
@@ -208,7 +219,6 @@ public class DelegationServiceTest {
         assertEquals(10, response.getDelegators());
 
         // Verify interactions with dependencies
-        verify(epochRepository).findByCurrentEpochNo();
         verify(fetchRewardDataService).checkAdaPots(1);
         verify(fetchRewardDataService).isKoiOs();
     }
@@ -216,10 +226,15 @@ public class DelegationServiceTest {
     @Test
     public void testGetDataForDelegationHeader_shouldReturnRedisIsNull() {
         // Mock dependencies
-        Epoch epoch = new Epoch();
-        epoch.setNo(1);
-        epoch.setStartTime(Timestamp.from(Instant.now()));
-        when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(epoch));
+        EpochSummary epochSummary = EpochSummary.builder()
+            .no(1)
+            .slot(0)
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusDays(5))
+            .totalSlot(432000)
+            .account(1)
+            .build();
+        when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
         when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
         when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
         when(fetchRewardDataService.isKoiOs()).thenReturn(false);
@@ -234,7 +249,6 @@ public class DelegationServiceTest {
         assertEquals(0, response.getDelegators());
 
         // Verify interactions with dependencies
-        verify(epochRepository).findByCurrentEpochNo();
         verify(fetchRewardDataService).checkAdaPots(1);
         verify(fetchRewardDataService).isKoiOs();
     }
