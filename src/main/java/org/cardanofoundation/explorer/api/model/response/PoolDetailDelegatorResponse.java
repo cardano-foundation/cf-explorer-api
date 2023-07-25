@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -9,6 +11,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class PoolDetailDelegatorResponse implements Serializable {
 
   private Long stakeAddressId;
