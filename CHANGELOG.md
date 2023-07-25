@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.23](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.22...v0.3.23) (2023-07-25)
+
+
+### Bug Fixes
+
+* trim query search ([f5ff062](https://github.com/cardano-foundation/cf-explorer-api/commit/f5ff062abfe4b4016981cf3d8d617c390eaed29a))
+
 ## [0.3.22](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.21...v0.3.22) (2023-07-25)
 
 
