@@ -4,5 +4,10 @@ import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
 
 public interface KafkaService {
 
-  void sendReportHistory(ReportHistory reportHistory);
+  /**
+   * Send report history to kafka
+   * @param reportHistory
+   * @return true if send success, false if send failure
+   */
+  Boolean sendReportHistory(ReportHistory reportHistory);
 }

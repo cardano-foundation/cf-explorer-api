@@ -65,12 +65,13 @@ class EpochServiceTest {
 
     var localDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
+    ReflectionTestUtils.setField(epochService, "EPOCH_DAYS", 5);
     when(epochRepository.findCurrentEpochSummary())
         .thenReturn(Optional.of(EpochSummaryProjectionImpl.builder()
             .no(30)
             .maxSlot(432000)
             .statTime(Timestamp.valueOf(localDate))
-                .endTime(Timestamp.valueOf(localDate.plusDays(5)))
+              .endTime(Timestamp.valueOf(localDate.plusDays(5)))
             .build()));
 
     when(redisTemplate.opsForHash())
@@ -81,6 +82,14 @@ class EpochServiceTest {
 
     when(hashOperations.size(any()))
         .thenReturn(1L);
+
+    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue()))
+        .thenReturn(Optional.of(
+            Epoch.builder()
+                .no(0)
+                .startTime(Timestamp.valueOf(localDate))
+                .endTime(Timestamp.valueOf(localDate.plusDays(5)))
+                .build()));
 
     EpochSummary epochSummary = epochService.getCurrentEpochSummary();
 
