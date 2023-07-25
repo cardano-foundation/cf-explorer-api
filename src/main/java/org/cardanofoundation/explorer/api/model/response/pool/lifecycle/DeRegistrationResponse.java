@@ -1,15 +1,17 @@
 package org.cardanofoundation.explorer.api.model.response.pool.lifecycle;
 
+import lombok.*;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class DeRegistrationResponse implements Serializable {
 
   private String poolId;
