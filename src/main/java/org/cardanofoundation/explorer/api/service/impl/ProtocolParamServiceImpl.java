@@ -5,12 +5,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +34,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -71,15 +75,19 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   public static final String SET = "set";
   public static final String PROPOSAL = "Proposal";
+  public static final String PROTOCOL_HISTORY = "PROTOCOL_HISTORY_ALL";
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
   final EpochRepository epochRepository;
   final TxRepository txRepository;
   final CostModelRepository costModelRepository;
   final ProtocolMapper protocolMapper;
+  final RedisTemplate<String, HistoriesProtocol> redisTemplate;
 
   @Value("${application.network}")
   String network;
+  @Value("${application.epoch.days}")
+  public int epochDays;
   public static final String GET = "get";
   // key::ProtocolType, value::getter>
   Map<ProtocolType, Method> epochParamMethods;
@@ -100,9 +108,16 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   public HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypesInput,
                                                         BigInteger startTime,
                                                         BigInteger endTime) {
+    final String redisKey = String.format("%s_%s", network, PROTOCOL_HISTORY).toUpperCase();
+
+    boolean isGetAll = Boolean.FALSE;
 
     if (ObjectUtils.isEmpty(protocolTypesInput) || protocolTypesInput.contains(ProtocolType.ALL)) {
       protocolTypesInput = ProtocolType.getAll();
+      isGetAll = Boolean.TRUE;
+      if (Objects.nonNull(redisTemplate.opsForValue().get(redisKey))) {
+        return redisTemplate.opsForValue().get(redisKey);
+      }
     }
 
     final List<ProtocolType> protocolTypes = protocolTypesInput;
@@ -137,6 +152,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       epochParams = epochParamRepository.findAll().stream()
           .collect(Collectors.toMap(EpochParam::getEpochNo, Function.identity(), (a, b) -> a));
     } else {
+      isGetAll = Boolean.FALSE;
       historiesChange = paramProposalRepository.findProtocolsChange(endFilterTime);
       epochParams = epochParamRepository.findEpochParamInTime(endFilterTime).stream()
           .collect(Collectors.toMap(EpochParam::getEpochNo, Function.identity(), (a, b) -> a));
@@ -256,6 +272,15 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       }
     }
 
+    if (isGetAll) {
+      var currentEpoch = epochRepository.findByCurrentEpochNo().get();
+      var redisKeyExpireTime = currentEpoch.getStartTime().toLocalDateTime().plusDays(epochDays);
+      final var seconds = ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC),
+          redisKeyExpireTime);
+      redisTemplate.opsForValue().set(redisKey, historiesProtocol);
+      redisTemplate.expire(redisKey, Duration.ofSeconds(seconds));
+    }
+
     return historiesProtocol;
   }
 
@@ -265,8 +290,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     List<LatestParamHistory> changeHistories = getParamHistories();
     final Protocols protocols = new Protocols();
     Map<Long, String> costModelMap = costModelRepository.findAll()
-            .stream()
-                .collect(Collectors.toMap(CostModel::getId, CostModel::getCosts));
+        .stream()
+        .collect(Collectors.toMap(CostModel::getId, CostModel::getCosts));
 
     changeHistories
         .stream()
@@ -292,15 +317,14 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                             .invoke(changeHistory)) ? changeHistory.getHash()
                                                     : null;
 
-                    if(protocolType.equals(ProtocolType.COST_MODEL)){
+                    if (protocolType.equals(ProtocolType.COST_MODEL)) {
                       changeValue = costModelMap.get(changeValue);
                     }
 
                     if (Objects.isNull(oldValue)) {
                       ProtocolHistory protocolHistory = ProtocolHistory.builder()
                           .transactionHash(transactionHash)
-                          .time(LocalDateTime
-                              .ofInstant(changeTime.toInstant(), ZoneOffset.UTC))
+                          .time(changeTime)
                           .epochNo(changeHistory.getEpochNo())
                           .value(changeValue)
                           .build();
@@ -309,8 +333,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                     }
 
                     if (!String.valueOf(oldValue.getValue()).equals(String.valueOf(changeValue))) {
-                      oldValue.setTime(LocalDateTime
-                          .ofInstant(changeTime.toInstant(), ZoneOffset.UTC));
+                      oldValue.setTime(changeTime);
                       oldValue.setTransactionHash(transactionHash);
                       oldValue.setValue(changeValue);
                       oldValue.setEpochNo(changeHistory.getEpochNo());
@@ -364,7 +387,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     timeChange.set(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
     return ProtocolHistory.builder()
         .value(currentProtocol)
-        .time(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC))
+        .time(tx.getBlock().getTime())
         .transactionHash(tx.getHash())
         .build();
   }
@@ -551,7 +574,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     timeChange.set(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
     return costModel.map(model -> ProtocolHistory.builder()
         .value(model.getCosts())
-        .time(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC))
+        .time(tx.getBlock().getTime())
         .transactionHash(tx.getHash())
         .costModelId(costModelId)
         .build()).orElse(null);
