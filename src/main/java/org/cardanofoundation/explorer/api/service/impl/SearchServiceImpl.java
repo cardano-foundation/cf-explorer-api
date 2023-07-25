@@ -36,7 +36,7 @@ public class SearchServiceImpl implements SearchService {
 
   @Override
   public SearchResponse search(String query) {
-    query = query.toLowerCase();
+    query = query.trim().toLowerCase();
     SearchResponse searchResponse = new SearchResponse();
     searchEpoch(query, searchResponse);
     searchBlock(query, searchResponse);
