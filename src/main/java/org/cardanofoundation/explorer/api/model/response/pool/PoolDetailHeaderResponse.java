@@ -7,13 +7,16 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PoolDetailHeaderResponse implements Serializable {
 
   private String poolName;
