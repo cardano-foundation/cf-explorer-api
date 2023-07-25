@@ -2,12 +2,9 @@ package org.cardanofoundation.explorer.api.service;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -60,15 +57,15 @@ class EpochServiceTest {
   @Test
   void testCurrentEpochSummary() {
 
-    var currentLocalDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     var localDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
+    ReflectionTestUtils.setField(epochService, "EPOCH_DAYS", 5);
     when(epochRepository.findCurrentEpochSummary())
         .thenReturn(Optional.of(EpochSummaryProjectionImpl.builder()
             .no(30)
             .maxSlot(432000)
             .statTime(Timestamp.valueOf(localDate))
-                .endTime(Timestamp.valueOf(localDate.plusDays(5)))
+              .endTime(Timestamp.valueOf(localDate.plusDays(5)))
             .build()));
 
     when(redisTemplate.opsForHash())
@@ -80,7 +77,13 @@ class EpochServiceTest {
     when(hashOperations.size(any()))
         .thenReturn(1L);
 
-    var time = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue()))
+        .thenReturn(Optional.of(
+            Epoch.builder()
+                .no(0)
+                .startTime(Timestamp.valueOf(localDate))
+                .endTime(Timestamp.valueOf(localDate.plusDays(5)))
+                .build()));
 
     EpochSummary epochSummary = epochService.getCurrentEpochSummary();
 

@@ -170,8 +170,12 @@ public class PoolReportServiceTest {
             .build();
 
     when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
+
 //    when(reportHistoryService.savePoolReportHistory(any(PoolReportHistory.class))).thenReturn(saved);
     doNothing().when(kafkaService).sendReportHistory(any(ReportHistory.class));
+    when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
+    when(reportHistoryService.isLimitReached(username)).thenReturn(false);
+    when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(true);
     Assertions.assertTrue(poolReportService.create(request, username));
   }
 
