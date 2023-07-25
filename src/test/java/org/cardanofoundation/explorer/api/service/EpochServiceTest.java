@@ -71,7 +71,7 @@ class EpochServiceTest {
             .no(30)
             .maxSlot(432000)
             .statTime(Timestamp.valueOf(localDate))
-              .endTime(Timestamp.valueOf(localDate.plusDays(5)))
+            .endTime(Timestamp.valueOf(localDate.plusDays(5)))
             .build()));
 
     when(redisTemplate.opsForHash())
@@ -370,15 +370,17 @@ class EpochServiceTest {
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(3));
     when(fetchRewardDataService.checkEpochRewardDistributed(epoch)).thenReturn(false);
     when(fetchRewardDataService.fetchEpochRewardDistributed(List.of(no))).thenReturn(List.of(Epoch.builder().rewardsDistributed(BigInteger.ONE).build()));
+    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(dateTime)).build()));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(EpochResponse.builder().startTime(dateTime).endTime(dateTime).build());
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
+    ReflectionTestUtils.setField(epochService, "EPOCH_DAYS", 2);
 
     var response = epochService.getEpochDetail(no.toString());
     Assertions.assertEquals(response.getStatus() , EpochStatus.IN_PROGRESS);
     Assertions.assertEquals(response.getStartTime().format(dtf), dateTime.format(dtf));
-    Assertions.assertEquals(response.getEndTime().format(dtf), dateTime.plusDays(EpochServiceImpl.EPOCH_DAYS).format(dtf));
+    Assertions.assertEquals(response.getEndTime().format(dtf), dateTime.plusDays(2).format(dtf));
     Assertions.assertEquals(response.getAccount(), 1);
   }
 
@@ -409,6 +411,7 @@ class EpochServiceTest {
     when(esp.getMaxSlot()).thenReturn(26000);
 
     when(epochRepository.findCurrentEpochSummary()).thenReturn(Optional.of(esp));
+    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(LocalDateTime.now())).build()));
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
@@ -418,7 +421,7 @@ class EpochServiceTest {
     Assertions.assertEquals(response.getTotalSlot(), 26000);
     Assertions.assertEquals(response.getAccount(), 1);
     Assertions.assertEquals(response.getStartTime().format(dtf), now.format(dtf));
-    Assertions.assertEquals(response.getEndTime().format(dtf), now.plusDays(EpochServiceImpl.EPOCH_DAYS).format(dtf));
+    Assertions.assertEquals(response.getEndTime().format(dtf), now.format(dtf));
   }
 
   @Test
@@ -428,6 +431,7 @@ class EpochServiceTest {
     Epoch epoch = Epoch.builder().no(1).build();
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss");
 
+    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(now)).build()));
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(3));
     when(epochRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(epoch)));
     when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(false);
@@ -451,11 +455,8 @@ class EpochServiceTest {
   void testGetAllEpoch_throwCurrentEpochNo() {
     Pageable pageable = PageRequest.of(0, 10);
     LocalDateTime now = LocalDateTime.now();
-    Epoch epoch = Epoch.builder().no(1).build();
 
-    when(epochRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(epoch)));
-    when(fetchRewardDataService.checkEpochRewardDistributed(epoch)).thenReturn(true);
-    when(epochMapper.epochToEpochResponse(epoch)).thenReturn(EpochResponse.builder().no(1).build());
+    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(now)).build()));
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.empty());
 
     Assertions.assertThrows(NoContentException.class, () -> epochService.getAllEpoch(pageable));
@@ -467,6 +468,8 @@ class EpochServiceTest {
     LocalDateTime now = LocalDateTime.now();
     Epoch epoch = Epoch.builder().no(1).build();
 
+    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(now)).build()));
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(3));
     when(epochRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(epoch)));
     when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(false);
     when(fetchRewardDataService.fetchEpochRewardDistributed(List.of(1))).thenReturn(null);
