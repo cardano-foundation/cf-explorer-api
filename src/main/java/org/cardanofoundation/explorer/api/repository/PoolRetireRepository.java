@@ -70,17 +70,4 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
   List<Integer> findByPoolView(@Param("poolView") String poolView);
 
   Boolean existsByPoolHash(@Param("poolHash") PoolHash poolHash);
-
-  @Query(value =
-      "SELECT tx.fee AS fee, pr.retiringEpoch AS retiringEpoch, tx.hash AS txHash, bk.time AS time, "
-          + "CASE "
-          + "WHEN tx.id = (SELECT max(pr1.announcedTx.id) FROM PoolRetire pr1 WHERE pr1.poolHash.id = ph.id AND pr.retiringEpoch = pr1.retiringEpoch) THEN TRUE "
-          + "ELSE FALSE "
-          + "END AS refundFlag "
-          + "FROM PoolRetire pr "
-          + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
-          + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
-          + "JOIN Block bk ON tx.block.id = bk.id "
-          + "WHERE ph.view = :poolView AND tx.hash = :txHash ")
-  PoolDeRegistrationProjection getPoolDeRegistrationByPoolAndTx(@Param("poolView") String poolView, @Param("txHash") String txHash);
 }
