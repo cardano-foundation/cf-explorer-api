@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>PoolReportListResponse.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.model.response.pool.report;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.sql.Timestamp;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.AllArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Builder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Data;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.NoArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_15'/>
+15
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_15'>85</a>
+<span>
+1. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+2. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+3. equals : replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+4. hashCode : replaced int return with 0 for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::hashCode &rarr; NO_COVERAGE<br/>
+5. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+6. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+7. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+8. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+9. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+10. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::toString &rarr; NO_COVERAGE<br/>
+11. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+12. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+13. equals : negated conditional &rarr; NO_COVERAGE<br/>
+14. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+15. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+16. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+17. equals : negated conditional &rarr; SURVIVED<br/>
+18. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+19. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+20. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+21. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+22. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+23. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+24. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+25. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+26. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+27. equals : negated conditional &rarr; NO_COVERAGE<br/>
+28. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+29. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+30. equals : negated conditional &rarr; NO_COVERAGE<br/>
+31. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+32. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+33. equals : negated conditional &rarr; NO_COVERAGE<br/>
+34. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+35. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+36. equals : negated conditional &rarr; NO_COVERAGE<br/>
+37. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+38. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+39. equals : negated conditional &rarr; NO_COVERAGE<br/>
+40. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+41. equals : negated conditional &rarr; NO_COVERAGE<br/>
+42. equals : negated conditional &rarr; NO_COVERAGE<br/>
+43. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+44. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+45. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+46. canEqual : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::canEqual &rarr; SURVIVED<br/>
+47. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+48. equals : negated conditional &rarr; NO_COVERAGE<br/>
+49. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+50. equals : negated conditional &rarr; NO_COVERAGE<br/>
+51. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+52. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+53. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+54. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+55. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+56. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+57. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE<br/>
+58. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+59. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+60. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+61. equals : negated conditional &rarr; KILLED<br/>
+62. equals : negated conditional &rarr; KILLED<br/>
+63. equals : negated conditional &rarr; KILLED<br/>
+64. equals : negated conditional &rarr; KILLED<br/>
+65. equals : negated conditional &rarr; KILLED<br/>
+66. equals : negated conditional &rarr; KILLED<br/>
+67. equals : negated conditional &rarr; KILLED<br/>
+68. equals : negated conditional &rarr; KILLED<br/>
+69. equals : negated conditional &rarr; KILLED<br/>
+70. equals : replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; KILLED<br/>
+71. equals : negated conditional &rarr; KILLED<br/>
+72. equals : negated conditional &rarr; KILLED<br/>
+73. equals : negated conditional &rarr; KILLED<br/>
+74. equals : negated conditional &rarr; KILLED<br/>
+75. equals : negated conditional &rarr; KILLED<br/>
+76. equals : negated conditional &rarr; KILLED<br/>
+77. equals : negated conditional &rarr; KILLED<br/>
+78. equals : negated conditional &rarr; KILLED<br/>
+79. equals : negated conditional &rarr; KILLED<br/>
+80. equals : negated conditional &rarr; KILLED<br/>
+81. equals : negated conditional &rarr; KILLED<br/>
+82. equals : negated conditional &rarr; KILLED<br/>
+83. canEqual : replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::canEqual &rarr; KILLED<br/>
+84. equals : negated conditional &rarr; KILLED<br/>
+85. equals : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@Data</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_16'/>
+16
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_16'>14</a>
+<span>
+1. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::toString &rarr; NO_COVERAGE<br/>
+2. eventDeregistration : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::eventDeregistration &rarr; KILLED<br/>
+3. epochRanges : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::epochRanges &rarr; KILLED<br/>
+4. isFeesPaid : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::isFeesPaid &rarr; KILLED<br/>
+5. eventPoolUpdate : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::eventPoolUpdate &rarr; KILLED<br/>
+6. status : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::status &rarr; KILLED<br/>
+7. build : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::build &rarr; KILLED<br/>
+8. eventRegistration : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::eventRegistration &rarr; KILLED<br/>
+9. reportName : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::reportName &rarr; KILLED<br/>
+10. createdAt : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::createdAt &rarr; KILLED<br/>
+11. isPoolSize : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::isPoolSize &rarr; KILLED<br/>
+12. eventReward : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::eventReward &rarr; KILLED<br/>
+13. reportId : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::reportId &rarr; KILLED<br/>
+14. builder : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::builder &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@Builder</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@AllArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@NoArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class PoolReportListResponse {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_20'/>
+20
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_20'>1</a>
+<span>
+1. getReportId : replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getReportId &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private Long reportId;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_22'/>
+22
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_22'>1</a>
+<span>
+1. getReportName : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getReportName &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private String reportName;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_24'/>
+24
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_24'>1</a>
+<span>
+1. getEpochRanges : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEpochRanges &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private Integer[] epochRanges;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_26'/>
+26
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_26'>2</a>
+<span>
+1. getIsPoolSize : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getIsPoolSize &rarr; SURVIVED<br/>
+2. getIsPoolSize : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getIsPoolSize &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private Boolean isPoolSize;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_28'/>
+28
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_28'>2</a>
+<span>
+1. getIsFeesPaid : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getIsFeesPaid &rarr; SURVIVED<br/>
+2. getIsFeesPaid : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getIsFeesPaid &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private Boolean isFeesPaid;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_30'/>
+30
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_30'>2</a>
+<span>
+1. getEventRegistration : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventRegistration &rarr; SURVIVED<br/>
+2. getEventRegistration : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventRegistration &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private Boolean eventRegistration;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_32'/>
+32
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_32'>2</a>
+<span>
+1. getEventDeregistration : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventDeregistration &rarr; SURVIVED<br/>
+2. getEventDeregistration : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventDeregistration &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private Boolean eventDeregistration;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_34'/>
+34
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_34'>2</a>
+<span>
+1. getEventReward : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventReward &rarr; SURVIVED<br/>
+2. getEventReward : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventReward &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private Boolean eventReward;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_36'/>
+36
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_36'>2</a>
+<span>
+1. getEventPoolUpdate : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventPoolUpdate &rarr; SURVIVED<br/>
+2. getEventPoolUpdate : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventPoolUpdate &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private Boolean eventPoolUpdate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_38'/>
+38
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_38'>1</a>
+<span>
+1. getCreatedAt : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getCreatedAt &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    private Timestamp createdAt;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_40'/>
+40
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_40'>1</a>
+<span>
+1. getStatus : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getStatus &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    private ReportStatus status;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public static PoolReportListResponse toDomain(PoolReportHistory entity) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_43'/>
+43
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_43'>1</a>
+<span>
+1. toDomain : replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::toDomain &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return PoolReportListResponse.builder()</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .reportId(entity.getId())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .reportName(entity.getReportHistory().getReportName())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .epochRanges(new Integer[]{entity.getBeginEpoch(), entity.getEndEpoch()})</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .isPoolSize(entity.getIsPoolSize())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .isFeesPaid(entity.getIsFeesPaid())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .eventRegistration(entity.getEventRegistration())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .eventDeregistration(entity.getEventDeregistration())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .eventReward(entity.getEventReward())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .eventPoolUpdate(entity.getEventPoolUpdate())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .createdAt(entity.getReportHistory().getCreatedAt())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .status(entity.getReportHistory().getStatus())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .build();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@60f728cb_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_15'>15</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_15'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> replaced int return with 0 for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::hashCode &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::toString &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>17.<span><b>17</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>18.<span><b>18</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>19.<span><b>19</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>20.<span><b>20</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>21.<span><b>21</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>22.<span><b>22</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>23.<span><b>23</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>24.<span><b>24</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>25.<span><b>25</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>26.<span><b>26</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>27.<span><b>27</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>28.<span><b>28</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>29.<span><b>29</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>30.<span><b>30</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>31.<span><b>31</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; KILLED</p> <p class='KILLED'><span class='pop'>32.<span><b>32</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>33.<span><b>33</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>34.<span><b>34</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>35.<span><b>35</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>36.<span><b>36</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>37.<span><b>37</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>38.<span><b>38</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>39.<span><b>39</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>40.<span><b>40</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>41.<span><b>41</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>42.<span><b>42</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>43.<span><b>43</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>44.<span><b>44</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>45.<span><b>45</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>46.<span><b>46</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>47.<span><b>47</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>48.<span><b>48</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>49.<span><b>49</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>50.<span><b>50</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>51.<span><b>51</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>52.<span><b>52</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>53.<span><b>53</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>54.<span><b>54</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>55.<span><b>55</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>56.<span><b>56</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>57.<span><b>57</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>58.<span><b>58</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>59.<span><b>59</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>60.<span><b>60</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>61.<span><b>61</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>62.<span><b>62</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>63.<span><b>63</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>64.<span><b>64</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>65.<span><b>65</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>66.<span><b>66</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>67.<span><b>67</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>68.<span><b>68</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::canEqual &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>69.<span><b>69</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::canEqual &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>70.<span><b>70</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>71.<span><b>71</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>72.<span><b>72</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>73.<span><b>73</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>74.<span><b>74</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>75.<span><b>75</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>76.<span><b>76</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>77.<span><b>77</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>78.<span><b>78</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>79.<span><b>79</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>80.<span><b>80</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>81.<span><b>81</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>82.<span><b>82</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>83.<span><b>83</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>84.<span><b>84</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>85.<span><b>85</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_16'>16</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_16'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>eventDeregistration<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::eventDeregistration &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>epochRanges<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::epochRanges &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>isFeesPaid<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::isFeesPaid &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>eventPoolUpdate<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::eventPoolUpdate &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>status<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::status &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>build<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::build &rarr; KILLED</p> <p class='KILLED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>eventRegistration<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::eventRegistration &rarr; KILLED</p> <p class='KILLED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>reportName<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::reportName &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::toString &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>createdAt<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::createdAt &rarr; KILLED</p> <p class='KILLED'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>isPoolSize<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::isPoolSize &rarr; KILLED</p> <p class='KILLED'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>eventReward<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::eventReward &rarr; KILLED</p> <p class='KILLED'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>reportId<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse$PoolReportListResponseBuilder::reportId &rarr; KILLED</p> <p class='KILLED'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>builder<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::builder &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_20'>20</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_20'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getReportId<br/><b>Killed by : </b>none</span></span> replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getReportId &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_22'>22</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_22'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getReportName<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getReportName &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_24'>24</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_24'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEpochRanges<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEpochRanges &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_26'>26</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_26'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getIsPoolSize<br/><b>Killed by : </b>none</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getIsPoolSize &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getIsPoolSize<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getIsPoolSize &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_28'>28</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_28'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getIsFeesPaid<br/><b>Killed by : </b>none</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getIsFeesPaid &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getIsFeesPaid<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getIsFeesPaid &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_30'>30</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_30'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEventRegistration<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventRegistration &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getEventRegistration<br/><b>Killed by : </b>none</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventRegistration &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_32'>32</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_32'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEventDeregistration<br/><b>Killed by : </b>none</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventDeregistration &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getEventDeregistration<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventDeregistration &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_34'>34</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_34'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEventReward<br/><b>Killed by : </b>none</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventReward &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getEventReward<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventReward &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_36'>36</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_36'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEventPoolUpdate<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventPoolUpdate &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getEventPoolUpdate<br/><b>Killed by : </b>none</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getEventPoolUpdate &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_38'>38</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_38'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getCreatedAt<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getCreatedAt &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_40'>40</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_40'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getStatus<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::getStatus &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@60f728cb_43'>43</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@60f728cb_43'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>toDomain<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/pool/report/PoolReportListResponse::toDomain &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.service.PoolReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.PoolReportServiceTest]/[method:list_shouldReturnResponse()] (1 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
