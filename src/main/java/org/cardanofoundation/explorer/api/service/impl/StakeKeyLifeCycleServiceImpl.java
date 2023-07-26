@@ -34,6 +34,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 
@@ -60,6 +61,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final TxRepository txRepository;
   private final TxOutRepository txOutRepository;
   private final FetchRewardDataService fetchRewardDataService;
+  private final EpochParamRepository epochParamRepository;
 
   @Override
   public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
@@ -94,10 +96,15 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     Page<StakeHistoryProjection> stakeHistoryList =
         stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress,
             condition.getTxHash(), fromDate, toDate, pageable);
+    var epochNoList = stakeHistoryList.stream().map(StakeHistoryProjection::getEpochNo)
+        .toList();
+    var epochParams = epochParamRepository.findByEpochNoIn(epochNoList);
+    Map<Integer, BigInteger> epochNoDepositMap = epochParams.stream()
+        .collect(Collectors.toMap(EpochParam::getEpochNo, EpochParam::getKeyDeposit));
     var response = stakeHistoryList.map(item -> StakeRegistrationFilterResponse.builder()
         .txHash(item.getTxHash())
         .fee(item.getFee())
-        .deposit(item.getDeposit())
+        .deposit(epochNoDepositMap.get(item.getEpochNo()).longValue())
         .time(item.getTime().toLocalDateTime())
         .build()
     );
@@ -109,18 +116,10 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     StakeHistoryProjection stakeHistoryProjection = stakeRegistrationRepository
         .findByAddressAndTx(stakeKey, hash).orElseThrow(
             () -> new BusinessException(BusinessCode.STAKE_REGISTRATION_NOT_FOUND));
-    Long numberStakeRegistrations = stakeRegistrationRepository
-        .countByTx(hash).orElseThrow(
-            () -> new BusinessException(BusinessCode.STAKE_REGISTRATION_NOT_FOUND));
-    Long deposit = stakeHistoryProjection.getDeposit() / numberStakeRegistrations;
-    boolean joinDepositPaid = true;
-    if (numberStakeRegistrations > BigInteger.ONE.longValue() ) {
-      BigInteger totalOutput = txOutRepository.sumValueOutputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
-          .orElse(BigInteger.ZERO);
-      BigInteger totalInput = txOutRepository.sumValueInputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
-          .orElse(BigInteger.ZERO);
-      joinDepositPaid = totalOutput.compareTo(totalInput) < BigInteger.ZERO.intValue();
-    }
+    Long deposit = epochParamRepository.findKeyDepositByEpochNo(stakeHistoryProjection.getEpochNo()).longValue();
+    BigInteger totalInput = txOutRepository.sumValueInputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
+        .orElse(BigInteger.ZERO);
+    boolean joinDepositPaid  = totalInput.compareTo(BigInteger.ZERO) > BigInteger.ZERO.intValue();
     return StakeRegistrationDetailResponse.builder()
         .txHash(stakeHistoryProjection.getTxHash())
         .fee(stakeHistoryProjection.getFee())
@@ -287,10 +286,15 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     Page<StakeHistoryProjection> stakeHistoryList =
         stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress,
             condition.getTxHash(), fromDate, toDate, pageable);
+    var epochNoList = stakeHistoryList.stream().map(StakeHistoryProjection::getEpochNo)
+        .toList();
+    var epochParams = epochParamRepository.findByEpochNoIn(epochNoList);
+    Map<Integer, BigInteger> epochNoDepositMap = epochParams.stream()
+        .collect(Collectors.toMap(EpochParam::getEpochNo, EpochParam::getKeyDeposit));
     var response = stakeHistoryList.map(item -> StakeRegistrationFilterResponse.builder()
         .txHash(item.getTxHash())
         .fee(item.getFee())
-        .deposit(item.getDeposit())
+        .deposit(epochNoDepositMap.get(item.getEpochNo()).multiply(BigInteger.valueOf(-1L)).longValue())
         .time(item.getTime().toLocalDateTime())
         .build()
     );
@@ -302,18 +306,11 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     StakeHistoryProjection stakeHistoryProjection = stakeDeRegistrationRepository
         .findByAddressAndTx(stakeKey, hash).orElseThrow(
             () -> new BusinessException(BusinessCode.STAKE_DE_REGISTRATION_NOT_FOUND));
-    Long numberStakeRegistrations = stakeDeRegistrationRepository
-        .countByTx(hash).orElseThrow(
-            () -> new BusinessException(BusinessCode.STAKE_DE_REGISTRATION_NOT_FOUND));
-    Long deposit = stakeHistoryProjection.getDeposit() / numberStakeRegistrations;
-    boolean joinDepositPaid = true;
-    if (numberStakeRegistrations > BigInteger.ONE.longValue() ) {
-      BigInteger totalOutput = txOutRepository.sumValueOutputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
-          .orElse(BigInteger.ZERO);
-      BigInteger totalInput = txOutRepository.sumValueInputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
-          .orElse(BigInteger.ZERO);
-      joinDepositPaid = totalOutput.compareTo(totalInput) > BigInteger.ZERO.intValue();
-    }
+    Long deposit = epochParamRepository.findKeyDepositByEpochNo(stakeHistoryProjection.getEpochNo())
+        .multiply(BigInteger.valueOf(-1)).longValue();
+    BigInteger totalOutput = txOutRepository.sumValueOutputByTxAndStakeAddress(stakeHistoryProjection.getTxHash(), stakeKey)
+        .orElse(BigInteger.ZERO);
+    boolean joinDepositPaid  = totalOutput.compareTo(BigInteger.ZERO) > BigInteger.ZERO.intValue();
     return StakeRegistrationDetailResponse.builder()
         .txHash(stakeHistoryProjection.getTxHash())
         .fee(stakeHistoryProjection.getFee())
