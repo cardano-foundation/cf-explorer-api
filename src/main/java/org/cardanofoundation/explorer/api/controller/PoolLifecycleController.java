@@ -144,7 +144,7 @@ public class PoolLifecycleController {
   }
 
   @GetMapping(value = "/de-registration-hash")
-  public ResponseEntity<DeRegistrationResponse> deRegistrationHash(
+  public ResponseEntity<DeRegistrationResponse> deRegistrationDetailHash(
       @Param("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
       @Param("txHash") @LengthValid(CommonConstant.TX_HASH_LENGTH) String txHash) {
     return ResponseEntity.ok(
