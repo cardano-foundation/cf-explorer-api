@@ -23,8 +23,17 @@ public interface StakeKeyLifeCycleService {
    * @param pageable page information
    * @return list stake key registration
    */
-  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrations(String stakeKey,
-      StakeLifeCycleFilterRequest condition, Pageable pageable);
+  BaseFilterResponse<StakeRegistrationFilterResponse> getStakeRegistrations(String stakeKey,
+                                                                            StakeLifeCycleFilterRequest condition, Pageable pageable);
+
+
+  /**
+   * Get detail registration in stake key life cycle
+   * @param stakeKey stake address view
+   * @param hash hash of transaction
+   * @return detail registration
+   */
+  StakeRegistrationDetailResponse getStakeRegistrationDetail(String stakeKey, String hash);
 
   /**
    * Get list delegation in stake key life cycle
@@ -81,8 +90,16 @@ public interface StakeKeyLifeCycleService {
    * @param pageable page information
    * @return list stake key de registration
    */
-  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrations(String stakeKey,
-      StakeLifeCycleFilterRequest condition, Pageable pageable);
+  BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrations(String stakeKey,
+                                                                              StakeLifeCycleFilterRequest condition, Pageable pageable);
+
+  /**
+   * Get detail registration in stake key life cycle
+   * @param stakeKey stake address view
+   * @param hash hash of transaction
+   * @return detail registration
+   */
+  StakeRegistrationDetailResponse getStakeDeRegistrationDetail(String stakeKey, String hash);
 
   /**
    * Get list activity in stake key life cycle
