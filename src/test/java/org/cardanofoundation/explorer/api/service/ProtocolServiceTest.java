@@ -8,18 +8,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.cardanofoundation.explorer.api.model.response.protocol.*;
+import org.cardanofoundation.explorer.api.projection.LatestParamHistory;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.mockito.Mockito;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.google.common.base.Objects;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
-import org.cardanofoundation.explorer.api.model.response.protocol.EpochChange;
-import org.cardanofoundation.explorer.api.model.response.protocol.HistoriesProtocol;
-import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
-import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.projection.EpochTimeProjection;
 import org.cardanofoundation.explorer.api.projection.ParamHistory;
 import org.cardanofoundation.explorer.api.repository.CostModelRepository;
@@ -40,8 +42,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.cardanofoundation.explorer.api.service.impl.ProtocolParamServiceImpl.getChangeProtocol;
-import static org.cardanofoundation.explorer.api.service.impl.ProtocolParamServiceImpl.mapProtocols;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -50,6 +50,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 @ContextConfiguration(classes = ProtocolMapper.class)
@@ -65,6 +66,11 @@ class ProtocolServiceTest {
   CostModelRepository costModelRepository;
   @Mock
   EpochRepository epochRepository;
+  @Mock
+  RedisTemplate<String, HistoriesProtocol> redisTemplate;
+  @Mock
+  ValueOperations valueOperations;
+
   @Spy
   ProtocolMapper protocolMapper = Mappers.getMapper(ProtocolMapper.class);
 
@@ -7391,6 +7397,99 @@ class ProtocolServiceTest {
         )
         .build();
     Assertions.assertEquals(expect.getCoinsPerUtxoSize(), actual.getCoinsPerUtxoSize());
+  }
+
+  @Test
+  void testGetHistoryProtocolParameters_redisCached() {
+    List<ProtocolType> protocolTypes = List.of();
+    BigInteger startTime = BigInteger.ONE;
+    BigInteger endTime = BigInteger.TWO;
+    String redisKey = "MAINNET_PROTOCOL_HISTORY_ALL";
+    HistoriesProtocol historiesProtocol = new HistoriesProtocol();
+
+
+    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
+    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    when(valueOperations.get(redisKey)).thenReturn(historiesProtocol);
+
+    Assertions.assertEquals(protocolParamService.getHistoryProtocolParameters(protocolTypes, startTime, endTime), historiesProtocol);
+  }
+
+  @Test
+  void testGetHistoryProtocolParameters_throwTimeRange() {
+    List<ProtocolType> protocolTypes = List.of(ProtocolType.MIN_FEE_A);
+    BigInteger startTime = BigInteger.ONE;
+    BigInteger endTime = null;
+    HistoriesProtocol historiesProtocol = new HistoriesProtocol();
+
+
+    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
+
+    Assertions.assertThrows(BusinessException.class, () -> protocolParamService.getHistoryProtocolParameters(protocolTypes, startTime, endTime));
+  }
+
+  @Test
+  void testGetHistoryProtocolParameters_throwTimeRangeV2() {
+    List<ProtocolType> protocolTypes = List.of(ProtocolType.MIN_FEE_A);
+    BigInteger startTime = BigInteger.TWO;
+    BigInteger endTime = BigInteger.ONE;
+    HistoriesProtocol historiesProtocol = new HistoriesProtocol();
+
+    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
+
+    Assertions.assertThrows(BusinessException.class, () -> protocolParamService.getHistoryProtocolParameters(protocolTypes, startTime, endTime));
+  }
+
+  @Test
+  void testGetLatestChange_thenReturn() {
+
+    LatestParamHistory lph = Mockito.mock(LatestParamHistory.class);
+    when(lph.getEpochNo()).thenReturn(1);
+
+    when(paramProposalRepository.findMaxEpochChange()).thenReturn(1);
+    when(paramProposalRepository.findProtocolsChange(1)).thenReturn(List.of(lph));
+    when(costModelRepository.findAll()).thenReturn(List.of(CostModel.builder().id(1L).costs("cost").build()));
+
+    var response = protocolParamService.getLatestChange();
+    Assertions.assertEquals(response.getMinFeeA().getEpochNo(), 1);
+    Assertions.assertEquals(response.getMinFeeB().getEpochNo(), 1);
+    Assertions.assertEquals(response.getMaxBlockSize().getEpochNo(), 1);
+    Assertions.assertEquals(response.getMaxTxSize().getEpochNo(), 1);
+    Assertions.assertEquals(response.getMaxBhSize().getEpochNo(), 1);
+  }
+
+  @Test
+  void testGetFixedProtocols_thenReturn() throws JsonProcessingException {
+    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
+    FixedProtocol fixedProtocol = FixedProtocol.builder().build();
+
+    when(protocolMapper.mapFixedProtocol("mainnet")).thenReturn(fixedProtocol);
+    Assertions.assertEquals(protocolParamService.getFixedProtocols(), fixedProtocol);
+  }
+
+  @Test
+  void testGetFixedProtocols_throwException() throws JsonProcessingException {
+    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
+    FixedProtocol fixedProtocol = FixedProtocol.builder().build();
+
+    when(protocolMapper.mapFixedProtocol("mainnet")).thenThrow(JsonProcessingException.class);
+    Assertions.assertNull(protocolParamService.getFixedProtocols());
+  }
+
+  @Test
+  void testMapProtocols_thenReturn() {
+    EpochParam epochParam = EpochParam.builder().costModel(CostModel.builder().costs("cost").build()).build();
+
+    var response = protocolParamService.mapProtocols(epochParam);
+    Assertions.assertEquals(response.getCostModel().getValue(), "cost");
+  }
+
+  @Test
+  void testMapProtocols_thenReturnCostModelNull() {
+    EpochParam epochParam = EpochParam.builder().costModel(null).build();
+
+    var response = protocolParamService.mapProtocols(epochParam);
+    Assertions.assertNull(response.getCostModel().getValue());
   }
 
 }
