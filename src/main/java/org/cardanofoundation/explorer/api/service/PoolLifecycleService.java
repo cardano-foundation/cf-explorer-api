@@ -120,4 +120,28 @@ public interface PoolLifecycleService {
    */
   BaseFilterResponse<RewardResponse> listRewardFilter(String poolView, Integer beginEpoch,
                                                 Integer endEpoch, Pageable pageable);
+
+  /**
+   * Get pool lifecycle registration detail by tx hash
+   *
+   * @param
+   * @return RegistrationResponse
+   */
+  RegistrationResponse registrationDetailByHash(String poolView, String txHash);
+
+  /**
+   * Get pool lifecycle pool update detail by tx hash
+   *
+   * @param
+   * @return PoolUpdateDetailResponse
+   */
+  PoolUpdateDetailResponse poolUpdateDetailByHash(String poolView, String txHash);
+
+  /**
+   * Get pool lifecycle de registration detail by tx hash
+   *
+   * @param
+   * @return BaseFilterResponse<DeRegistrationResponse>
+   */
+  DeRegistrationResponse deRegistrationByHash(String poolView, String txHash);
 }
