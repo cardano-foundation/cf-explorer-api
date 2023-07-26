@@ -69,7 +69,7 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
       @Param("stakeKey") StakeAddress stakeKey, @Param("txHash") String txHash,
       @Param("fromTime") Timestamp fromTime, @Param("toTime") Timestamp toTime, Pageable pageable);
 
-  @Query(value = "SELECT tx.hash as txHash, b.time as time,"
+  @Query(value = "SELECT tx.hash as txHash, b.time as time, b.epochNo as epochNo,"
       + " tx.fee as fee, tx.deposit as deposit"
       + " FROM StakeDeregistration sd"
       + " JOIN Tx tx ON tx.id = sd.tx.id"
@@ -79,12 +79,6 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
       + " AND tx.hash = :txHash")
   Optional<StakeHistoryProjection> findByAddressAndTx(
       @Param("stakeKey") String stakeKey, @Param("txHash") String txHash);
-
-  @Query(value = "SELECT count(sd.id) "
-      + "FROM StakeDeregistration sd "
-      + "JOIN Tx tx ON tx.id = sd.tx.id "
-      + "WHERE tx.hash = :txHash")
-  Optional<Long> countByTx(@Param("txHash") String txHash);
 
   @EntityGraph(attributePaths = {StakeRegistration_.ADDR})
   List<StakeDeregistration> findByTx(@Param("tx") Tx tx);
