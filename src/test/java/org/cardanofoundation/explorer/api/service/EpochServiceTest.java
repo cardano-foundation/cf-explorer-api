@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
+import org.cardanofoundation.explorer.api.repository.AdaPotsRepository;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.mockito.Mockito;
 import org.springframework.data.domain.PageImpl;
@@ -56,7 +57,8 @@ class EpochServiceTest {
   RedisTemplate<String, Object> redisTemplate;
   @Mock
   HashOperations hashOperations;
-
+  @Mock
+  AdaPotsRepository adaPotsRepository;
   @Mock
   FetchRewardDataService fetchRewardDataService;
 
@@ -90,7 +92,7 @@ class EpochServiceTest {
                 .startTime(Timestamp.valueOf(localDate))
                 .endTime(Timestamp.valueOf(localDate.plusDays(5)))
                 .build()));
-
+    when(adaPotsRepository.getUTxOByEpochNo(30)).thenReturn(Optional.of(BigInteger.ONE));
     EpochSummary epochSummary = epochService.getCurrentEpochSummary();
 
     EpochSummary expect = EpochSummary.builder()
@@ -375,7 +377,7 @@ class EpochServiceTest {
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
-    ReflectionTestUtils.setField(epochService, "EPOCH_DAYS", 2);
+    ReflectionTestUtils.setField(epochService, "epochDays", 2);
 
     var response = epochService.getEpochDetail(no.toString());
     Assertions.assertEquals(response.getStatus() , EpochStatus.IN_PROGRESS);
@@ -414,6 +416,7 @@ class EpochServiceTest {
     when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(LocalDateTime.now())).build()));
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
+    when(adaPotsRepository.getUTxOByEpochNo(1)).thenReturn(Optional.of(BigInteger.ONE));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
 
     var response = epochService.getCurrentEpochSummary();
