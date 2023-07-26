@@ -20,7 +20,7 @@ public class AddressUtils {
   public static String checkStakeAddress(String address) {
     String stakeAddress = null;
     try {
-      if(address.startsWith(CommonConstant.MAINNET_ADDRESS_PREFIX)) {
+      if(address.startsWith(CommonConstant.ADDRESS_PREFIX)) {
         ShelleyAddress shelleyAddress = new ShelleyAddress(address);
         if (shelleyAddress.containStakeAddress()) {
           //TO-DO: Move to common

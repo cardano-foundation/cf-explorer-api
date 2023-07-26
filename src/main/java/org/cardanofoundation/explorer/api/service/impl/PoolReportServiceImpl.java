@@ -65,13 +65,18 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private final PoolHistoryRepository poolHistoryRepository;
 
-  private final EpochRepository epochRepository;
   private final ReportHistoryService reportHistoryService;
 
   @Override
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
     PoolReportHistory poolReportHistory = saveToDb(poolReportCreateRequest, username);
-    kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
+
+    Boolean isSuccess = kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
+    if(Boolean.FALSE.equals(isSuccess)) {
+      poolReportRepository.delete(poolReportHistory);
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+    }
+
     return true;
   }
 

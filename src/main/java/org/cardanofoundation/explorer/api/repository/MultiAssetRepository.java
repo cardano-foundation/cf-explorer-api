@@ -13,7 +13,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
-  Page<MultiAsset> findAll(Pageable pageable);
+  @Query("SELECT ma FROM MultiAsset ma "
+      + " WHERE ma.fingerprint = :query OR LOWER(ma.nameView) LIKE CONCAT('%', :query, '%')"
+      + " ORDER BY LENGTH(ma.nameView) ASC, ma.txCount DESC")
+  Page<MultiAsset> findAll(@Param("query") String query, Pageable pageable);
 
   Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
 
@@ -26,4 +29,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   @Query("SELECT b.time FROM Tx tx JOIN Block b ON b.id = tx.blockId "
       + "WHERE tx.id = (SELECT max(adt.txId) FROM AddressToken adt WHERE adt.multiAsset = :multiAsset)")
   Timestamp getLastActivityTimeOfToken(@Param("multiAsset") MultiAsset multiAsset);
+
+  @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE CONCAT('%', :query, '%') ")
+  List<MultiAsset> findByNameViewLike(@Param("query") String query, Pageable pageable);
 }

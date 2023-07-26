@@ -1,10 +1,14 @@
 package org.cardanofoundation.explorer.api.model.response.protocol;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EpochChange implements Cloneable {
 
   Integer startEpoch;

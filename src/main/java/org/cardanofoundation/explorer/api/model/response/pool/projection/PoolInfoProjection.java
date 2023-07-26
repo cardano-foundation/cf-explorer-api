@@ -9,4 +9,6 @@ public interface PoolInfoProjection {
   String getPoolView();
 
   String getPoolName();
+
+  String getIcon();
 }
