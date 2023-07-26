@@ -59,7 +59,8 @@ public class EpochServiceImpl implements EpochService {
       );
       var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
-      if (!fetchRewardDataService.checkEpochRewardDistributed(epoch) && epoch.getNo() < currentEpoch - 1 ) {
+      if (Boolean.FALSE.equals(fetchRewardDataService.checkEpochRewardDistributed(epoch))
+          && epoch.getNo() < currentEpoch - 1 ) {
         List<Epoch> fetchEpochResponse = fetchRewardDataService.fetchEpochRewardDistributed(List.of(epochNo));
         if (CollectionUtils.isEmpty(fetchEpochResponse)) {
           throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
@@ -71,8 +72,9 @@ public class EpochServiceImpl implements EpochService {
       LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
       checkEpochStatus(response, currentEpoch);
-      response.setStartTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getStartTime()));
-      response.setEndTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getEndTime()));
+      LocalDateTime startTime = modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getStartTime());
+      response.setStartTime(startTime);
+      response.setEndTime(startTime.plusDays(EPOCH_DAYS));
       String uniqueAccountRedisKey = String.join(
           UNDERSCORE,
           getRedisKey(UNIQUE_ACCOUNTS_KEY),
@@ -117,8 +119,9 @@ public class EpochServiceImpl implements EpochService {
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
     pageResponse.getContent().forEach(epoch -> {
       checkEpochStatus(epoch, currentEpoch);
-      epoch.setStartTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime()));
-      epoch.setEndTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getEndTime()));
+      LocalDateTime startTime = modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime());
+      epoch.setStartTime(startTime);
+      epoch.setEndTime(startTime.plusDays(EPOCH_DAYS));
       String uniqueAccountRedisKey = String.join(
           UNDERSCORE,
           getRedisKey(UNIQUE_ACCOUNTS_KEY),
