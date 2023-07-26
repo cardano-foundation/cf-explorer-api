@@ -10,7 +10,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -108,7 +107,6 @@ public class TokenServiceImpl implements TokenService {
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
     List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(),
         MultiAsset::getId);
-
     var tokenInfos = tokenInfoRepository.findTokenInfosByMultiAssetIdIn(multiAssetIds);
     var tokenInfoMap = StreamUtil.toMap(tokenInfos, TokenInfo::getMultiAssetId,
         Function.identity());
@@ -118,13 +116,22 @@ public class TokenServiceImpl implements TokenService {
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
     Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList,
         AssetMetadata::getSubject);
-
+    var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     multiAssetResponsesList.forEach(ma -> {
-      ma.setNumberOfHolders(tokenInfoMap.containsKey(ma.getId()) ?
-                            tokenInfoMap.get(ma.getId()).getNumberOfHolders() : 0);
-      ma.setVolumeIn24h(String.valueOf(tokenInfoMap.containsKey(ma.getId()) ?
-                                       tokenInfoMap.get(ma.getId()).getVolume24h()
-                                                                            : BigInteger.ZERO));
+      var tokenInfo = tokenInfoMap.getOrDefault(ma.getId(), null);
+
+      if (tokenInfo == null) {
+        ma.setNumberOfHolders(0L);
+        ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+      } else {
+        if (tokenInfo.getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+          ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+        } else {
+          ma.setVolumeIn24h(String.valueOf(tokenInfo.getVolume24h()));
+        }
+        ma.setNumberOfHolders(tokenInfo.getNumberOfHolders());
+      }
+
       ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
           assetMetadataMap.get(ma.getPolicy() + ma.getName()))
       );
@@ -140,23 +147,22 @@ public class TokenServiceImpl implements TokenService {
         .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-    Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
-    var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, txId);
 
-    var numberOfHoldersHaveStakeKey = addressTokenBalanceRepository
-        .countAddressNotHaveStakeByMultiAsset(multiAsset)
-        .orElse(0L);
-    var numberOfHoldersNotHaveStakeKe =  addressTokenBalanceRepository
-        .countStakeByMultiAsset(multiAsset)
-        .orElse(0L);
+    var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
+    var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
-    tokenResponse.setNumberOfHolders(numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe);
-    if (Objects.isNull(volume)) {
-      tokenResponse.setVolumeIn24h(String.valueOf(0));
+    if (tokenInfo.isEmpty()) {
+      tokenResponse.setNumberOfHolders(0L);
+      tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
     } else {
-      tokenResponse.setVolumeIn24h(volume.toString());
+      if (tokenInfo.get().getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+        tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+      } else {
+        tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
+      }
+      tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
     }
+
     AssetMetadata assetMetadata = assetMetadataRepository
         .findFirstBySubject(multiAsset.getPolicy() + multiAsset.getName())
         .orElse(null);

@@ -1,14 +1,5 @@
 # Changelog
 
-## [0.3.22](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.21...v0.3.22) (2023-07-25)
-
-
-### Bug Fixes
-
-* change fee belongs to collateral when tx failed ([1223ca8](https://github.com/cardano-foundation/cf-explorer-api/commit/1223ca86ff4f87bf68bc48db744da9b95ad00949))
-* fix unit test delegation header ([6f97ae6](https://github.com/cardano-foundation/cf-explorer-api/commit/6f97ae67e48fb49107b7065b41ffefcbfa276f6c))
-* met-1394 handle kafka send report fail ([a1d2aa0](https://github.com/cardano-foundation/cf-explorer-api/commit/a1d2aa0269e404db8245458446db7983145b0cc3))
-
 ## [0.3.21](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.20...v0.3.21) (2023-07-20)
 
 

@@ -225,8 +225,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       });
       boolean isKoiOs = fetchRewardDataService.isKoiOs();
       if (isKoiOs) {
-        List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolId(
-            poolInfo.getId());
+        List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolId(poolInfo.getId());
         boolean isReward = fetchRewardDataService.checkRewardForPool(rewardAccounts);
         if (!isReward) {
           fetchRewardDataService.fetchRewardForPool(rewardAccounts);
@@ -346,7 +345,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
 
   @Override
   public BaseFilterResponse<RewardResponse> listRewardFilter(String poolView, Integer beginEpoch,
-      Integer endEpoch, Pageable pageable) {
+                                                       Integer endEpoch, Pageable pageable) {
     BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
     if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
       List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
@@ -367,83 +366,6 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     res.setData(rewardRes);
     return res;
-  }
-
-  @Override
-  public RegistrationResponse registrationDetailByHash(String poolView, String txHash) {
-    RegistrationResponse res = new RegistrationResponse();
-    PoolInfoProjection poolInfo = poolHashRepository.getPoolInfo(poolView);
-    Long poolId = Objects.nonNull(poolInfo) ? poolInfo.getId() : null;
-    PoolRegistrationProjection projection = poolHashRepository.getPoolRegistrationByHash(poolId,
-        txHash);
-    if (Objects.nonNull(projection)) {
-      res = new RegistrationResponse(projection);
-    }
-    if (Objects.nonNull(poolInfo)) {
-      res.setPoolId(poolInfo.getPoolId());
-      res.setPoolName(poolInfo.getPoolName());
-      res.setPoolView(poolInfo.getPoolView());
-    }
-    res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolAndTx(poolId, txHash));
-    return res;
-  }
-
-  @Override
-  public PoolUpdateDetailResponse poolUpdateDetailByHash(String poolView, String txHash) {
-    PoolUpdateDetailResponse res = null;
-    PoolUpdateDetailProjection projection = poolUpdateRepository.findPoolUpdateDetailByPoolAndTx(
-        poolView, txHash);
-    if (Objects.nonNull(projection)) {
-      res = new PoolUpdateDetailResponse(projection);
-      res.setStakeKeys(
-          poolUpdateRepository.findOwnerAccountByPoolAndTx(projection.getHashId(), txHash));
-      PoolUpdate poolUpdatePrevious = poolUpdateRepository.findTopByIdLessThanAndPoolHashIdOrderByIdDesc(
-          projection.getPoolUpdateId(), projection.getHashId());
-      if (Objects.nonNull(poolUpdatePrevious)) {
-        res.setPreviousPledge(poolUpdatePrevious.getPledge());
-        res.setPreviousMargin(poolUpdatePrevious.getMargin());
-      }
-    }
-    return res;
-  }
-
-  @Override
-  public DeRegistrationResponse deRegistrationByHash(String poolView, String txHash) {
-    PoolInfoProjection poolInfo = poolHashRepository.getPoolInfo(poolView);
-    PoolDeRegistrationProjection projection = poolRetireRepository.getPoolDeRegistrationByPoolAndTx(
-        poolView, txHash);
-    DeRegistrationResponse deRegistrationRes = null;
-    if (Objects.nonNull(projection)) {
-      deRegistrationRes = new DeRegistrationResponse(projection);
-      Integer epochNo = projection.getRetiringEpoch();
-      boolean isKoiOs = fetchRewardDataService.isKoiOs();
-      if (isKoiOs) {
-        List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolId(
-            poolInfo.getId());
-        boolean isReward = fetchRewardDataService.checkRewardForPool(rewardAccounts);
-        if (!isReward) {
-          fetchRewardDataService.fetchRewardForPool(rewardAccounts);
-        }
-      }
-      BigInteger epochReward = rewardRepository.getRewardRefundByEpoch(poolView, epochNo);
-      List<String> stakeKeys = poolUpdateRepository.findOwnerAccountByPoolView(poolView);
-      if (deRegistrationRes.isRefundFlag()) {
-        deRegistrationRes.setPoolHold(epochReward);
-      }
-      BigInteger totalFee = BigInteger.ZERO;
-      if (Objects.nonNull(deRegistrationRes.getPoolHold())) {
-        totalFee = totalFee.add(deRegistrationRes.getPoolHold());
-      }
-      if (Objects.nonNull(deRegistrationRes.getFee())) {
-        totalFee = totalFee.add(deRegistrationRes.getFee());
-      }
-      deRegistrationRes.setTotalFee(totalFee);
-      deRegistrationRes.setPoolId(poolInfo.getPoolId());
-      deRegistrationRes.setPoolName(poolInfo.getPoolName());
-      deRegistrationRes.setPoolView(poolInfo.getPoolView());
-      deRegistrationRes.setStakeKeys(stakeKeys);
-    }
-    return deRegistrationRes;
   }
 
   private BaseFilterResponse<PoolUpdateResponse> getDataForPoolUpdate(String poolView,

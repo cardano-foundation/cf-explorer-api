@@ -165,11 +165,4 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " AND r.stakeAddressId IN :stakeAddressIds"
       + " GROUP BY r.stakeAddressId")
   List<StakeRewardProjection> getTotalRewardByStakeAddressIn(@Param("stakeAddressIds") Collection<Long> stakeAddressIds);
-
-  @Query(value = "SELECT rw.amount "
-      + "FROM Reward rw "
-      + "JOIN PoolHash ph ON rw.pool.id = ph.id "
-      + "WHERE ph.view = :poolView AND rw.type = 'refund' AND rw.earnedEpoch = :epochNo")
-  BigInteger getRewardRefundByEpoch(@Param("poolView") String poolView,
-      @Param("epochNo") Integer epochNo);
 }

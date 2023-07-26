@@ -86,13 +86,4 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       + "WHERE LOWER(pod.poolName) LIKE CONCAT('%', :query, '%') OR "
       + "LOWER(pod.tickerName) LIKE CONCAT('%', :query, '%') ")
   List<PoolInfoProjection> findByPoolNameLike(@Param("query") String query, Pageable pageable);
-
-  @Query(value =
-      "SELECT pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, tx.deposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
-          + "FROM PoolUpdate pu "
-          + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
-          + "JOIN Block bk ON tx.block.id  = bk.id "
-          + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-          + "WHERE pu.poolHash.id = :poolId AND tx.hash = :txHash")
-  PoolRegistrationProjection getPoolRegistrationByHash(@Param("poolId") Long poolId, @Param("txHash") String txHash);
 }
