@@ -87,6 +87,7 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       + "   )"
       + " AND addrToken.balance > 0")
   Long countRecord(@Param("multiAsset") MultiAsset multiAsset,
-      @Param("from") Timestamp from,
-      @Param("to") Timestamp to);
+                   @Param("from") Timestamp from,
+                   @Param("to") Timestamp to);
+
 }

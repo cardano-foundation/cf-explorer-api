@@ -1,23 +1,20 @@
 # Infrastructure domain
-spring:
-  # Datasource specific configs
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?currentSchema=${DB_SCHEMA}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-    # Hikari specific configs
-    hikari:
-      pool-name: explorer-api-pool
-      minimum-idle: 10 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: ${DB_MAXIUM_POOL_SIZE:10} #maximum pool size
-      idle-timeout: 300000 #maximum idle time for connection
-      max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
-      connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
-      auto-commit: false #default auto-commit behavior.
-      connection-init-sql: SELECT 1
-      data-source-properties:
+multi-datasource: #specified for HikariDataSource
+  datasourceLedgerSync:
+    hikariConfig:
+      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST}:${LEDGER_SYNC_PORT}/${LEDGER_SYNC_DB}?currentSchema=${DB_SCHEMA}
+      username: ${LEDGER_SYNC_USER}
+      password: ${LEDGER_SYNC_PASSWORD}
+      driverClassName: org.postgresql.Driver
+      poolName: explorer-api-ledgersync-pool
+      minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximumPoolSize: ${DB_MAXIMUM_POOL_SIZE:32} #maximum pool size
+      idleTimeout: 300000 #maximum idle time for connection
+      maxLifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connectionTimeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      autoCommit: false #default auto-commit behavior.
+      connectionInitSql: SELECT 1
+      dataSourceProperties:
         cachePrepStmts: true
         prepStmtCacheSize: 250
         prepStmtCacheSqlLimit: 2048
@@ -28,6 +25,38 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
+    flyway:
+      enabled: false
+
+  datasourceAnalytics:
+    hikariConfig:
+      jdbcUrl: jdbc:postgresql://${ANALYTICS_HOST}:${ANALYTICS_PORT}/${ANALYTICS_DB}?currentSchema=${DB_SCHEMA}
+      username: ${ANALYTICS_USER}
+      password: ${ANALYTICS_PASSWORD}
+      driverClassName: org.postgresql.Driver
+      poolName: explorer-api-analytics-pool
+      minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximumPoolSize: ${DB_MAXIMUM_POOL_SIZE:32} #maximum pool size
+      idleTimeout: 300000 #maximum idle time for connection
+      maxLifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connectionTimeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      autoCommit: false #default auto-commit behavior.
+      connectionInitSql: SELECT 1
+      dataSourceProperties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+    flyway:
+      enabled: false
+
+spring:
   # JPA specific configs
   jpa:
     open-in-view: false
@@ -48,8 +77,6 @@ spring:
       pageable:
         default-page-size: 20
         max-page-size: 100
-  jackson:
-    default-property-inclusion: NON_NULL
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:127.0.0.1:29092}
     #client-id:  crawler
@@ -96,7 +123,7 @@ application:
     base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
   api.news:
     interval-time: ${API_NEWS_CACHE_TIME:120}
-    base-url: ${API_NEWS_URL}
+    base-url: ${API_NEWS_URL:http://dev.cf-explorer-monolith-mainnet.metadata.dev.cf-deployments.org:8085/?amount=%d}
   api:
     check-reward:
       base-url: ${API_CHECK_REWARD_URL:http://localhost:8888/api/v1/rewards/fetch}
@@ -158,7 +185,7 @@ cloud:
         name: ${S3_BUCKET_NAME:cardano-explorer-api-storage}
       path-style:
         enabled: ${S3_PATH_STYLE_ENABLED:true}
-      endpoint: ${S3_STORAGE_ENDPOINT}
+      endpoint: ${S3_STORAGE_ENDPOINT:http://172.16.1.230:9000}
 
 logging:
   level:
