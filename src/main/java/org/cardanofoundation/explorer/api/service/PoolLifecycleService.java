@@ -138,7 +138,7 @@ public interface PoolLifecycleService {
   PoolUpdateDetailResponse poolUpdateDetailByHash(String poolView, String txHash);
 
   /**
-   * Get pool lifecycle de registration by hash
+   * Get pool lifecycle de registration detail by hash
    *
    * @param
    * @return BaseFilterResponse<DeRegistrationResponse>
