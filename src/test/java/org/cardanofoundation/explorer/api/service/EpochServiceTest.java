@@ -59,7 +59,7 @@ class EpochServiceTest {
 
     var localDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
-    ReflectionTestUtils.setField(epochService, "EPOCH_DAYS", 5);
+    ReflectionTestUtils.setField(epochService, "epochDays", 5);
     when(epochRepository.findCurrentEpochSummary())
         .thenReturn(Optional.of(EpochSummaryProjectionImpl.builder()
             .no(30)
