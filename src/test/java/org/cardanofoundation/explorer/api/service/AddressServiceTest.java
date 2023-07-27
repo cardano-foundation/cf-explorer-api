@@ -321,8 +321,6 @@ class AddressServiceTest {
     Address address = Address.builder().address(addr).build();
     List<AddressTokenProjection> addressTokenProjections = new ArrayList<>();
     AddressTokenProjection projection = Mockito.mock(AddressTokenProjection.class);
-    when(projection.getFingerprint()).thenReturn("fingerprint");
-    when(projection.getTokenName()).thenReturn("token");
     addressTokenProjections.add(projection);
     TokenAddressResponse tokenAddressResponse = TokenAddressResponse.builder()
             .fingerprint("fingerprint")
@@ -335,7 +333,7 @@ class AddressServiceTest {
             .build();
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTokenBalanceRepository.findTokenAndBalanceByAddress(address)).thenReturn(addressTokenProjections);
+    when(addressTokenBalanceRepository.findTokenAndBalanceByAddressAndNameView(any(), any(), any())).thenReturn(new PageImpl<>(addressTokenProjections));
     when(tokenMapper.fromAddressTokenProjection(any())).thenReturn(tokenAddressResponse);
 
     var response = addressService.getTokenByDisplayName(pageable, addr, displayName);
