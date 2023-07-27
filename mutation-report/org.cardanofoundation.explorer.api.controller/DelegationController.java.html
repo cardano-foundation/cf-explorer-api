@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>DelegationController.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.controller;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import io.swagger.v3.oas.annotations.Operation;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.RequiredArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.common.constant.CommonConstant;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.config.LogMessage;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.controller.validation.PageZeroValid;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.DelegationResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.pool.DelegationHeaderResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.service.DelegationService;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.validation.length.LengthValid;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.validation.pagination.Pagination;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springdoc.core.annotations.ParameterObject;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.data.domain.Sort;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.http.ResponseEntity;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.validation.annotation.Validated;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.GetMapping;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.PathVariable;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RequestMapping;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RequestParam;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RestController;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@RestController</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@RequestMapping(&#34;/api/v1/delegations&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@RequiredArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Validated</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class DelegationController {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  private final DelegationService delegationService;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @GetMapping</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @LogMessage</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @Operation(summary = &#34;List delegations&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public ResponseEntity&#60;BaseFilterResponse&#60;DelegationResponse&#62;&#62; getDelegations(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {Delegation_.TX_ID},</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>          direction = Sort.Direction.DESC) Pagination pagination) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_48'/>
+48
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_48'>1</a>
+<span>
+1. getDelegations : replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDelegations &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ResponseEntity.ok(delegationService.getDelegations(pagination.toPageable()));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @GetMapping(&#34;/header&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public ResponseEntity&#60;DelegationHeaderResponse&#62; getDataForDelegationHeader() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_53'/>
+53
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_53'>1</a>
+<span>
+1. getDataForDelegationHeader : replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDataForDelegationHeader &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ResponseEntity.ok(delegationService.getDataForDelegationHeader());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @GetMapping(&#34;/pool-list&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public ResponseEntity&#60;BaseFilterResponse&#60;PoolResponse&#62;&#62; getDataForPoolTable(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_58'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @RequestParam(&#34;search&#34;) String search) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_60'/>
+60
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_60'>1</a>
+<span>
+1. getDataForPoolTable : replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDataForPoolTable &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ResponseEntity.ok(</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        delegationService.getDataForPoolTable(pagination.toPageable(), search));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_62'/>
+62
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_62'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_64'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @GetMapping(&#34;/pool-detail-header/{poolView}&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public ResponseEntity&#60;PoolDetailHeaderResponse&#62; getDataForPoolDetail(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_66'/>
+66
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_66'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_67'/>
+67
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_67'>1</a>
+<span>
+1. getDataForPoolDetail : replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDataForPoolDetail &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ResponseEntity.ok(delegationService.getDataForPoolDetail(poolView));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_68'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_69'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_70'/>
+70
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_70'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @GetMapping(&#34;/pool-detail-analytics&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_71'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public ResponseEntity&#60;PoolDetailAnalyticsResponse&#62; getAnalyticsForPoolDetail(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_72'/>
+72
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_72'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @RequestParam(&#34;poolView&#34;) @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_73'/>
+73
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_73'>1</a>
+<span>
+1. getAnalyticsForPoolDetail : replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getAnalyticsForPoolDetail &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ResponseEntity.ok(delegationService.getAnalyticsForPoolDetail(poolView));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_74'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_75'/>
+75
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_75'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_76'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @GetMapping(&#34;/pool-detail-epochs&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_77'/>
+77
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_77'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public ResponseEntity&#60;BaseFilterResponse&#60;PoolDetailEpochResponse&#62;&#62; getEpochListForPoolDetail(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_78'/>
+78
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_78'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @RequestParam(&#34;poolView&#34;) @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_79'/>
+79
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_79'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_80'/>
+80
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_80'>1</a>
+<span>
+1. getEpochListForPoolDetail : replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getEpochListForPoolDetail &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ResponseEntity.ok(</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_81'/>
+81
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_81'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        delegationService.getEpochListForPoolDetail(pagination.toPageable(), poolView));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_82'/>
+82
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_82'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_83'/>
+83
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_83'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_84'/>
+84
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_84'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @GetMapping(&#34;/pool-detail-delegators&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_85'/>
+85
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_85'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public ResponseEntity&#60;BaseFilterResponse&#60;PoolDetailDelegatorResponse&#62;&#62; getDelegatorForPoolDetail(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_86'/>
+86
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_86'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @RequestParam(&#34;poolView&#34;) @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW) @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_87'/>
+87
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_87'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_88'/>
+88
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_88'>1</a>
+<span>
+1. getDelegatorForPoolDetail : replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDelegatorForPoolDetail &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ResponseEntity.ok(</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_89'/>
+89
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_89'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        delegationService.getDelegatorsForPoolDetail(pagination.toPageable(), poolView));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_90'/>
+90
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_90'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_91'/>
+91
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_91'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_92'/>
+92
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_92'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @GetMapping(&#34;/top&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_93'/>
+93
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_93'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @LogMessage</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_94'/>
+94
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_94'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @Operation(summary = &#34;Find Top(default is 3) Delegation Pool order by pool size&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_95'/>
+95
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_95'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public ResponseEntity&#60;List&#60;PoolResponse&#62;&#62; findTopDelegationPool(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_96'/>
+96
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_96'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      @PaginationValid @PageZeroValid Pagination pagination) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_97'/>
+97
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_97'>1</a>
+<span>
+1. findTopDelegationPool : replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::findTopDelegationPool &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ResponseEntity.ok(delegationService.findTopDelegationPool(pagination.toPageable()));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_98'/>
+98
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_98'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_99'/>
+99
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_99'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_48'>48</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_48'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getDelegations<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDelegations()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDelegations &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_53'>53</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_53'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getDataForDelegationHeader<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForDelegationHeader()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDataForDelegationHeader &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_60'>60</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_60'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getDataForPoolTable<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDataForPoolTable &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_67'>67</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_67'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getDataForPoolDetail<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolDetail()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDataForPoolDetail &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_73'>73</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_73'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAnalyticsForPoolDetail<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetAnalyticsForPoolDetail()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getAnalyticsForPoolDetail &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_80'>80</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_80'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEpochListForPoolDetail<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetEpochListForPoolDetail()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getEpochListForPoolDetail &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_88'>88</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_88'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getDelegatorForPoolDetail<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDelegatorForPoolDetail()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::getDelegatorForPoolDetail &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@19d0d2a9_97'>97</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@19d0d2a9_97'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>findTopDelegationPool<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testFindTopDelegationPool()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/controller/DelegationController::findTopDelegationPool &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetEpochListForPoolDetail()] (16 ms)</li><li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetAnalyticsForPoolDetail()] (7 ms)</li><li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForDelegationHeader()] (13 ms)</li><li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()] (25 ms)</li><li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDelegations()] (35 ms)</li><li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDelegatorForPoolDetail()] (9 ms)</li><li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolDetail()] (37 ms)</li><li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testFindTopDelegationPool()] (13 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
