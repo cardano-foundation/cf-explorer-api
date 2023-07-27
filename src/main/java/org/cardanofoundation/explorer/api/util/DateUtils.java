@@ -18,7 +18,7 @@ public class DateUtils {
     List<LocalDateTime> dateAnalytics = new ArrayList<>();
     switch (analyticType) {
       case ONE_DAY -> {
-        LocalDateTime startMilestone = startOfYesterday.minusHours(2);
+        LocalDateTime startMilestone = startOfYesterday;
         while (!startMilestone.isAfter(currentDate.atStartOfDay())) {
           dateAnalytics.add(startMilestone);
           startMilestone = startMilestone.plusHours(2);

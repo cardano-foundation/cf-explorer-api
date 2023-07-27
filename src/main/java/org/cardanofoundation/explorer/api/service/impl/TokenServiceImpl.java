@@ -49,7 +49,6 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -268,7 +267,7 @@ public class TokenServiceImpl implements TokenService {
     if (BigInteger.ZERO.equals(balance)) {
       balance = checkNoRecord(multiAsset, type, fromDateTime, toDateTime) ? null : balance;
     }
-    return new TokenVolumeAnalyticsResponse(toDateTime, balance);
+    return new TokenVolumeAnalyticsResponse(fromDateTime, balance);
   }
 
   private boolean checkNoRecord(
