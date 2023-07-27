@@ -251,8 +251,10 @@ public class TokenServiceImpl implements TokenService {
       ).orElse(BigInteger.ZERO);
 
     } else {
-      LocalDate from = fromDateTime.toLocalDate();
-      LocalDate to = toDateTime.toLocalDate();
+      // aggregate address token is total volume of token from 00:00:00 to 23:59:59
+      // so to get volume of token between from date and to date, we need to sum between from date - 1 and to date - 1
+      LocalDate from = fromDateTime.toLocalDate().minusDays(1);
+      LocalDate to = toDateTime.toLocalDate().minusDays(1);
       boolean isNotHaveAggData = maxDateAgg.isEmpty() || !from.isBefore(maxDateAgg.get());
       if (isNotHaveAggData) {
         balance = addressTokenRepository.sumBalanceBetweenTx(
@@ -289,11 +291,6 @@ public class TokenServiceImpl implements TokenService {
 
   private BigInteger getBalance(MultiAsset multiAsset,
       LocalDate from, LocalDate to, LocalDate maxDateAgg) {
-    // aggregate address token is total volume of token from 00:00:00 to 23:59:59
-    // so to get volume of token between from date and to date, we need to sum between from date - 1 and to date - 1
-    from = from.minusDays(1);
-    to = to.minusDays(1);
-    maxDateAgg = maxDateAgg.minusDays(1);
     boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
     if (isNotMissingAggregationData) {
       return aggregateAddressTokenRepository
