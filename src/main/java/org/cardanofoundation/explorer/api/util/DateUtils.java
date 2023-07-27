@@ -14,11 +14,11 @@ public class DateUtils {
 
   public static List<LocalDateTime> getListDateAnalytic(AnalyticType analyticType) {
     LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-    LocalDateTime startOfYesterday = currentDate.minusDays(1).atStartOfDay();
+    LocalDateTime startOfToday = currentDate.atStartOfDay();
     List<LocalDateTime> dateAnalytics = new ArrayList<>();
     switch (analyticType) {
       case ONE_DAY -> {
-        LocalDateTime startMilestone = startOfYesterday;
+        LocalDateTime startMilestone = startOfToday.minusDays(1);
         while (!startMilestone.isAfter(currentDate.atStartOfDay())) {
           dateAnalytics.add(startMilestone);
           startMilestone = startMilestone.plusHours(2);
@@ -26,19 +26,19 @@ public class DateUtils {
       }
       case ONE_WEEK -> {
         for (int inc = 7; inc >= 0; inc--) {
-          dateAnalytics.add(startOfYesterday.minusDays(inc));
+          dateAnalytics.add(startOfToday.minusDays(inc));
         }
       }
       case ONE_MONTH -> {
-        LocalDateTime startMilestone = startOfYesterday.minusMonths(1).minusDays(2);
-        while (!startMilestone.isAfter(startOfYesterday)) {
+        LocalDateTime startMilestone = startOfToday.minusMonths(1).minusDays(2);
+        while (!startMilestone.isAfter(startOfToday)) {
           dateAnalytics.add(startMilestone);
           startMilestone = startMilestone.plusDays(2);
         }
       }
       case THREE_MONTH -> {
-        LocalDateTime startMilestone = startOfYesterday.minusMonths(3).minusDays(7);
-        while (!startMilestone.isAfter(startOfYesterday)) {
+        LocalDateTime startMilestone = startOfToday.minusMonths(3).minusDays(7);
+        while (!startMilestone.isAfter(startOfToday)) {
           dateAnalytics.add(startMilestone);
           startMilestone = startMilestone.plusDays(7);
         }
