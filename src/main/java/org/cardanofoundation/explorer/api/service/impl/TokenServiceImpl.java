@@ -263,7 +263,7 @@ public class TokenServiceImpl implements TokenService {
     if (BigInteger.ZERO.equals(balance)) {
       balance = checkNoRecord(multiAsset, type, fromDateTime, toDateTime) ? null : balance;
     }
-    return new TokenVolumeAnalyticsResponse(toDateTime, balance);
+    return new TokenVolumeAnalyticsResponse(fromDateTime, balance);
   }
 
   private boolean checkNoRecord(
