@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,7 +198,7 @@ class StakeKeyLifeCycleControllerTest {
     Date toDate = sdf.parse("2023/01/01 00:00:00");
     List<StakeRewardResponse> list = new ArrayList<>();
     list.add(new StakeRewardResponse(333,
-        toDate, BigInteger.valueOf(382916)));
+        toDate, BigInteger.valueOf(382916), RewardType.MEMBER));
     given(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, null,
         PageRequest.of(0, 1, Sort.by("id").descending())))
         .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));

@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -445,7 +446,7 @@ class StakeKeyLifeCycleServiceTest {
   void whenStakeAddressHaveRewards_showReturnRewards() {
     Pageable pageable = PageRequest.of(0, 1);
     StakeRewardResponse rewardResponse = new StakeRewardResponse(333,
-        Date.from(Instant.now()), BigInteger.valueOf(382916));
+        Date.from(Instant.now()), BigInteger.valueOf(382916), RewardType.MEMBER);
     Date fromDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
     Date toDate = Date.from(Instant.now());
     Page<StakeRewardResponse> page = new PageImpl<>(List.of(rewardResponse), pageable, 1);
@@ -718,9 +719,9 @@ class StakeKeyLifeCycleServiceTest {
   void whenGetStakeRewardActivities_showReturnRewardActivities() {
     Pageable pageable = PageRequest.of(0, 2);
     StakeRewardResponse stakeRewardResponse = new StakeRewardResponse(300, new Date(),
-        BigInteger.valueOf(1000000));
+        BigInteger.valueOf(1000000), RewardType.MEMBER);
     StakeRewardResponse stakeWithdrawnResponse = new StakeRewardResponse(301, new Date(),
-        BigInteger.valueOf(1000000));
+        BigInteger.valueOf(1000000), RewardType.MEMBER);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.findEpochWithdrawalByStake(stakeAddress)).thenReturn(
         List.of(stakeWithdrawnResponse));

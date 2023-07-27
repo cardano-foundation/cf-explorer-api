@@ -29,6 +29,7 @@ import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.BDDMockito;
 
@@ -350,7 +351,7 @@ class StakeKeyReportControllerTest {
     Long reportId = 1L;
     String username = "username";
     List<StakeRewardResponse> list = new ArrayList<>();
-    list.add(new StakeRewardResponse(333, Date.from(Instant.now()), BigInteger.valueOf(382916)));
+    list.add(new StakeRewardResponse(333, Date.from(Instant.now()), BigInteger.valueOf(382916), RewardType.MEMBER));
     given(stakeKeyReportService.getStakeRewardsByReportId(anyLong(), anyString(),
         any(Pageable.class)))
         .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));
