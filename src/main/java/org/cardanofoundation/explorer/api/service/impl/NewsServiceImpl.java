@@ -18,7 +18,7 @@ public class NewsServiceImpl implements NewsService {
   private final RestTemplate restTemplate;
 
   @SingletonCall(typeToken = TypeTokenGson.NEWS, expireAfterSeconds = 200)
-  public Object getNews(Integer amount) {
-    return restTemplate.getForObject(String.format(apiNewsDataUrl, amount), Object.class);
+  public Object getNews(Integer limit, Integer offset) {
+    return restTemplate.getForObject(String.format(apiNewsDataUrl, limit, offset), Object.class);
   }
 }
