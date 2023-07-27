@@ -305,30 +305,30 @@ public class AddressServiceImpl implements AddressService {
       return getTokenByAddress(pageable, address);
     }
 
+    displayName = "%" + displayName.trim().toLowerCase() + "%";
+
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
         () -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND)
     );
 
-    List<AddressTokenProjection> addressTokenProjectionList =
-        addressTokenBalanceRepository.
-            findTokenAndBalanceByAddress(addr)
-        .stream()
-        .filter(addressTokenProjection -> HexUtils.fromHex(addressTokenProjection.getTokenName(),
-            addressTokenProjection.getFingerprint()).toLowerCase().contains(displayName.toLowerCase()))
-        .collect(Collectors.toList());
-    List<TokenAddressResponse> tokenListResponse = addressTokenProjectionList.stream()
-        .map(tokenMapper::fromAddressTokenProjection)
-        .sorted(Comparator.comparing(TokenAddressResponse::getQuantity).reversed()
-            .thenComparing(TokenAddressResponse::getDisplayName))
-        .collect(Collectors.toList());
+    Page<TokenAddressResponse> tokenListResponse = addressTokenBalanceRepository
+        .findTokenAndBalanceByAddressAndNameView(addr, displayName, pageable)
+        .map(tokenMapper::fromAddressTokenProjection);
 
-    setMetadata(tokenListResponse);
+    Set<String> subjects = tokenListResponse.stream()
+        .map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
+        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
 
-    final int start = (int) pageable.getOffset();
-    final int end = Math.min((start + pageable.getPageSize()), addressTokenProjectionList.size());
-    Page<TokenAddressResponse> pageResponse = new PageImpl<>(tokenListResponse.subList(start, end),
-        pageable, addressTokenProjectionList.size());
-    return new BaseFilterResponse<>(pageResponse);
+    tokenListResponse.forEach(token -> {
+      AssetMetadata assetMetadata = assetMetadataMap.get(token.getPolicy() + token.getName());
+      if (Objects.nonNull(assetMetadata)) {
+        token.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
+      }
+    });
+
+    return new BaseFilterResponse<>(tokenListResponse);
   }
 
   @Override

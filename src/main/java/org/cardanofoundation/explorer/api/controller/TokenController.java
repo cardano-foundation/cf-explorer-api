@@ -49,7 +49,8 @@ public class TokenController {
   @GetMapping("/{tokenId}")
   @LogMessage
   @Operation(summary = "Detail token")
-  public ResponseEntity<TokenResponse> getTokenDetail(@PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT) @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId) {
+  public ResponseEntity<TokenResponse> getTokenDetail(@PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+       @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId) {
     return ResponseEntity.ok(tokenService.getTokenDetail(tokenId));
   }
 
@@ -57,9 +58,10 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token mint transaction")
   public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT) @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
-      @ParameterObject @PaginationValid @PaginationDefault(sort = {
-      BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
+       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+       @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
+       @PaginationValid @PaginationDefault(sort = {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pagination.toPageable()));
   }
 
@@ -67,8 +69,9 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter holders by token")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT) @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
-      @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+       @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
+       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pagination.toPageable()));
   }
 
@@ -76,8 +79,9 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT) @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
-      @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+       @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
+       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pagination.toPageable()));
   }
 
@@ -85,9 +89,10 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT) @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
-      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type)
-      throws ExecutionException, InterruptedException {
+       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+       @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId, @PathVariable
+       @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type)
+       throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
   }
 }
