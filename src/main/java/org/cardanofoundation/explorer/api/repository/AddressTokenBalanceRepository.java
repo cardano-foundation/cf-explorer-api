@@ -82,8 +82,7 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
       + " FROM AddressTokenBalance atb "
       + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
       + " WHERE atb.address = :address"
-      + " AND atb.balance > 0"
-      + " ORDER BY atb.balance DESC")
+      + " AND atb.balance > 0")
   Page<AddressTokenProjection> findTokenAndBalanceByAddress(
       @Param("address") Address address, Pageable pageable);
 
