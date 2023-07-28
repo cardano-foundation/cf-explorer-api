@@ -67,6 +67,17 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
       @Param("stakeKey") StakeAddress stakeKey, @Param("txHash") String txHash,
       @Param("fromTime") Timestamp fromTime, @Param("toTime") Timestamp toTime, Pageable pageable);
 
+  @Query(value = "SELECT tx.hash as txHash, b.time as time, b.epochNo as epochNo,"
+      + " tx.fee as fee, tx.deposit as deposit"
+      + " FROM StakeRegistration sr"
+      + " JOIN Tx tx ON tx.id = sr.tx.id"
+      + " JOIN Block b ON b.id = tx.blockId"
+      + " JOIN StakeAddress sa ON sa.id = sr.addr.id"
+      + " WHERE sa.view = :stakeKey"
+      + " AND tx.hash = :txHash")
+  Optional<StakeHistoryProjection> findByAddressAndTx(
+      @Param("stakeKey") String stakeKey, @Param("txHash") String txHash);
+
   @EntityGraph(attributePaths = {StakeRegistration_.ADDR})
   List<StakeRegistration> findByTx(@Param("tx") Tx tx);
 

@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.dashboard;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -18,4 +19,5 @@ public class EpochSummary {
   private Integer account;
   private LocalDateTime startTime;
   private LocalDateTime endTime;
+  private BigInteger circulatingSupply;
 }

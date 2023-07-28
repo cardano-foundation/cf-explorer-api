@@ -5,7 +5,6 @@ import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
-
 @Constraint(validatedBy = {StakeKeyLengthValidator.class})
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -16,5 +15,4 @@ public @interface StakeKeyLengthValid {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
 }

@@ -9,8 +9,8 @@ import java.math.BigInteger;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
 public class StakeAnalyticRewardResponse {
   private Integer epoch;
   private BigInteger value;
