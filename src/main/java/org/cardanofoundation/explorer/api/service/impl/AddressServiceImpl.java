@@ -302,7 +302,7 @@ public class AddressServiceImpl implements AddressService {
   public BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable,
       String address, String displayName) {
     if (StringUtils.isEmpty(displayName)) {
-      return getTokenByAddress(pageable, address);
+      displayName = "";
     }
 
     displayName = "%" + displayName.trim().toLowerCase() + "%";
