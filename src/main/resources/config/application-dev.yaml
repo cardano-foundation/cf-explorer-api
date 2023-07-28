@@ -139,6 +139,7 @@ application:
         base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
+  token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
 
 springdoc:
   api-docs.path: /apidocs
