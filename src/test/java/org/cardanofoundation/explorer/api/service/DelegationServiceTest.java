@@ -7,7 +7,10 @@ import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochRes
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
-import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.projection.DelegationProjection;
+import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
+import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
+import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.impl.DelegationServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
@@ -162,7 +165,7 @@ public class DelegationServiceTest {
 
     @Test
     public void testGetDataForDelegationHeader_shouldReturn() {
-        // Mock dependencies
+
         EpochSummary epochSummary = EpochSummary.builder()
             .no(1)
             .slot(0)
@@ -171,6 +174,7 @@ public class DelegationServiceTest {
             .totalSlot(432000)
             .account(1)
             .build();
+        // Mock dependencies
         when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
         when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
         when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
@@ -194,7 +198,6 @@ public class DelegationServiceTest {
 
     @Test
     public void testGetDataForDelegationHeader_shouldReturnV2() {
-        // Mock dependencies
         EpochSummary epochSummary = EpochSummary.builder()
             .no(1)
             .slot(0)
@@ -203,6 +206,7 @@ public class DelegationServiceTest {
             .totalSlot(432000)
             .account(1)
             .build();
+        // Mock dependencies
         when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
         when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
         when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
@@ -225,7 +229,6 @@ public class DelegationServiceTest {
 
     @Test
     public void testGetDataForDelegationHeader_shouldReturnRedisIsNull() {
-        // Mock dependencies
         EpochSummary epochSummary = EpochSummary.builder()
             .no(1)
             .slot(0)
@@ -234,6 +237,7 @@ public class DelegationServiceTest {
             .totalSlot(432000)
             .account(1)
             .build();
+        // Mock dependencies
         when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
         when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
         when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
@@ -835,12 +839,13 @@ public class DelegationServiceTest {
         DelegatorChartProjection dcp = Mockito.mock(DelegatorChartProjection.class);
         when(dcp.getChartValue()).thenReturn(1L);
 
-        when(poolHashRepository.findByView(poolView)).thenReturn(Optional.of(PoolHash.builder().id(poolId).build()));
+        when(poolHashRepository.findByView(poolView))
+            .thenReturn(Optional.of(PoolHash.builder().id(poolId).view(poolView).build()));
         when(fetchRewardDataService.isKoiOs()).thenReturn(true);
         when(fetchRewardDataService.checkPoolHistoryForPool(poolViews)).thenReturn(false);
         when(fetchRewardDataService.fetchPoolHistoryForPool(poolViews)).thenReturn(true);
         when(poolHistoryRepository.getPoolHistoryKoiOsForEpochChart(poolView)).thenReturn(List.of(ecp));
-        when(poolHistoryRepository.getDataForDelegatorChart(any())).thenReturn(List.of(dcp));
+        when(poolHistoryRepository.getDataForDelegatorChart(poolView)).thenReturn(List.of(dcp));
 
         var response = delegationService.getAnalyticsForPoolDetail(poolView);
 
@@ -862,12 +867,12 @@ public class DelegationServiceTest {
         DelegatorChartProjection dcp = Mockito.mock(DelegatorChartProjection.class);
         when(dcp.getChartValue()).thenReturn(1L);
 
-        when(poolHashRepository.findByView(poolView)).thenReturn(Optional.of(PoolHash.builder().id(poolId).build()));
+        when(poolHashRepository.findByView(poolView))
+            .thenReturn(Optional.of(PoolHash.builder().id(poolId).view(poolView).build()));
         when(fetchRewardDataService.isKoiOs()).thenReturn(true);
         when(fetchRewardDataService.checkPoolHistoryForPool(poolViews)).thenReturn(true);
         when(poolHistoryRepository.getPoolHistoryKoiOsForEpochChart(poolView)).thenReturn(List.of(ecp));
-        when(poolHistoryRepository.getDataForDelegatorChart(any())).thenReturn(List.of(dcp));
-
+        when(poolHistoryRepository.getDataForDelegatorChart(poolView)).thenReturn(List.of(dcp));
         var response = delegationService.getAnalyticsForPoolDetail(poolView);
 
         assert Objects.equals(response.getDelegatorChart().getHighest(), 1L);

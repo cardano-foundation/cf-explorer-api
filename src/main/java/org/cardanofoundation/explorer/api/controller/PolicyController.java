@@ -31,7 +31,7 @@ public class PolicyController {
   @LogMessage
   @Operation(summary = "Get a policy detail")
   public ResponseEntity<PolicyResponse> getPolicyDetail(
-      @PathVariable @Parameter(description = "Policy hash") String policyId) {
+       @PathVariable @Parameter(description = "Policy hash") String policyId) {
     return ResponseEntity.ok(policyService.getPolicyDetail(policyId));
   }
 
@@ -39,8 +39,8 @@ public class PolicyController {
   @LogMessage
   @Operation(summary = "Get tokens by policy")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> getTokens(
-      @PathVariable @Parameter(description = "Policy hash") String policyId,
-      @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @Parameter(description = "Policy hash") String policyId,
+       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(policyService.getTokens(policyId, pagination.toPageable()));
   }
 
@@ -48,8 +48,8 @@ public class PolicyController {
   @LogMessage
   @Operation(summary = "Get holders by policy")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
-      @PathVariable @Parameter(description = "Policy hash") String policyId,
-      @ParameterObject @PaginationValid Pagination pagination) {
+       @PathVariable @Parameter(description = "Policy hash") String policyId,
+       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(policyService.getHolders(policyId, pagination.toPageable()));
   }
 
