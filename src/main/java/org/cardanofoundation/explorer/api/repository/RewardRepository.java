@@ -61,7 +61,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
                                               Pageable pageable);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
-      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type)"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
       + " WHERE rw.addr = :stakeAddress")
@@ -118,7 +118,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
-      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type)"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
       + " WHERE rw.addr.view = :stakeKey"
