@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -499,11 +500,31 @@ public class TxServiceImpl implements TxService {
     Tx tx = txRepository.findByHash(hash).orElseThrow(
         () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)
     );
+    TxResponse txResponse = txMapper.txToTxResponse(tx);
+
+    List<CompletableFuture<Void>> futureInfoList = new ArrayList<>();
+    futureInfoList.add(CompletableFuture.runAsync(() -> getTxInfo(txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getSummaryAndUTxOs(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getContracts(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getCollaterals(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getWithdrawals(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getDelegations(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getMints(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getStakeCertificates(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getPoolCertificates(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getProtocols(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getInstantaneousRewards(tx, txResponse)));
+    futureInfoList.add(CompletableFuture.runAsync(() -> getMetadata(tx, txResponse)));
+    futureInfoList.forEach(CompletableFuture::join);
+
+    getTxStatus(tx, txResponse);
+    return txResponse;
+  }
+
+  private void getTxInfo(TxResponse txResponse) {
     Integer currentBlockNo = blockRepository.findCurrentBlock().orElseThrow(
         () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
     );
-    TxResponse txResponse = txMapper.txToTxResponse(tx);
-
     if (Objects.nonNull(txResponse.getTx().getEpochNo())) {
       Epoch epoch = epochRepository.findFirstByNo(txResponse.getTx().getEpochNo()).orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
@@ -515,19 +536,9 @@ public class TxServiceImpl implements TxService {
     } else {
       txResponse.getTx().setConfirmation(currentBlockNo);
     }
+  }
 
-    // get address input output
-    getSummaryAndUTxOs(tx, txResponse);
-    getContracts(tx, txResponse);
-    getCollaterals(tx, txResponse);
-    getWithdrawals(tx, txResponse);
-    getDelegations(tx, txResponse);
-    getMints(tx, txResponse);
-    getStakeCertificates(tx, txResponse);
-    getPoolCertificates(tx, txResponse);
-    getProtocols(tx, txResponse);
-    getInstantaneousRewards(tx, txResponse);
-    getMetadata(tx, txResponse);
+  private void getTxStatus(Tx tx, TxResponse txResponse) {
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -552,8 +563,6 @@ public class TxServiceImpl implements TxService {
       uTxOResponse.setOutputs(collateralOutputs);
       txResponse.setUTxOs(uTxOResponse);
     }
-
-    return txResponse;
   }
 
   /**
