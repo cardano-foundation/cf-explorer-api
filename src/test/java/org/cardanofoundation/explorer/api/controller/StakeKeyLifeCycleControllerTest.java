@@ -14,12 +14,7 @@ import java.text.SimpleDateFormat;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -59,8 +54,8 @@ class StakeKeyLifeCycleControllerTest {
   void shouldGetRegistrations() throws Exception {
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
     StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
-    List<StakeRegistrationLifeCycle> list = new ArrayList<>();
-    list.add(StakeRegistrationLifeCycle.builder()
+    List<StakeRegistrationFilterResponse> list = new ArrayList<>();
+    list.add(StakeRegistrationFilterResponse.builder()
         .txHash("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")
         .deposit(2000000L)
         .fee(BigInteger.valueOf(173333))
@@ -80,11 +75,32 @@ class StakeKeyLifeCycleControllerTest {
   }
 
   @Test
+  void shouldGetRegistrationDetail() throws Exception {
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    StakeRegistrationDetailResponse registration = StakeRegistrationDetailResponse.builder()
+        .txHash(txHash)
+        .deposit(2000000L)
+        .fee(BigInteger.valueOf(173333))
+        .time(LocalDateTime.now())
+        .joinDepositPaid(true)
+        .build();
+    given(stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash))
+        .willReturn(registration);
+    mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}/registrations/{hash}", stakeKey, txHash)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string(
+            containsString("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")))
+        .andDo(print());
+  }
+
+  @Test
   void shouldGetDeRegistrations() throws Exception {
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
-    List<StakeRegistrationLifeCycle> list = new ArrayList<>();
+    List<StakeRegistrationFilterResponse> list = new ArrayList<>();
     StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
-    list.add(StakeRegistrationLifeCycle.builder()
+    list.add(StakeRegistrationFilterResponse.builder()
         .txHash("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")
         .deposit(-2000000L)
         .fee(BigInteger.valueOf(173333))
@@ -101,6 +117,27 @@ class StakeKeyLifeCycleControllerTest {
         .andExpect(content().string(
             containsString("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")))
         .andDo(result -> System.out.println(result.getResponse().getContentAsString()));
+  }
+
+  @Test
+  void shouldGetDeRegistrationDetail() throws Exception {
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    StakeRegistrationDetailResponse registration = StakeRegistrationDetailResponse.builder()
+        .txHash(txHash)
+        .deposit(2000000L)
+        .fee(BigInteger.valueOf(173333))
+        .time(LocalDateTime.now())
+        .joinDepositPaid(true)
+        .build();
+    given(stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash))
+        .willReturn(registration);
+    mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}/de-registrations/{hash}", stakeKey, txHash)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string(
+            containsString("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")))
+        .andDo(print());
   }
 
   @Test
