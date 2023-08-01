@@ -112,7 +112,8 @@ application:
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
   report:
-    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
+    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:200}
+  token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
 
 springdoc:
   api-docs.path: /apidocs

@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.repository;
 
 import java.math.BigInteger;
+import java.util.Optional;
+
 import org.cardanofoundation.explorer.consumercommon.entity.AdaPots;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +16,7 @@ public interface AdaPotsRepository extends JpaRepository<AdaPots, Long> {
 
   @Query(value = "SELECT ap.reserves FROM AdaPots ap WHERE ap.epochNo = :epochNo")
   BigInteger getReservesByEpochNo(@Param("epochNo") Integer epochNo);
+
+  @Query(value = "SELECT ap.utxo FROM AdaPots ap WHERE ap.epochNo = :epochNo")
+  Optional<BigInteger> getUTxOByEpochNo(@Param("epochNo") Integer epochNo);
 }

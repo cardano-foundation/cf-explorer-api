@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -24,4 +25,9 @@ public interface EpochParamRepository extends JpaRepository<EpochParam, Long> {
 
   @Query(value = "SELECT ep.optimalPoolCount FROM EpochParam ep WHERE ep.epochNo = :epochNo")
   Integer getOptimalPoolCountByEpochNo(@Param("epochNo") Integer epochNo);
+
+  @Query(value = "SELECT COALESCE(ep.keyDeposit, 0) FROM EpochParam ep WHERE ep.epochNo = :epochNo")
+  BigInteger findKeyDepositByEpochNo(@Param("epochNo") Integer epochNo);
+
+  List<EpochParam> findByEpochNoIn(@Param("epochNo") List<Integer> epochNo);
 }
