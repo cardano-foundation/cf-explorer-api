@@ -21,7 +21,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHist
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
@@ -29,6 +29,7 @@ import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.BDDMockito;
 
@@ -264,8 +265,8 @@ class StakeKeyReportControllerTest {
   void shouldGetRegistrations() throws Exception {
     Long reportId = 1L;
     String username = "username";
-    List<StakeRegistrationLifeCycle> list = new ArrayList<>();
-    list.add(StakeRegistrationLifeCycle.builder()
+    List<StakeRegistrationFilterResponse> list = new ArrayList<>();
+    list.add(StakeRegistrationFilterResponse.builder()
         .txHash("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")
         .deposit(2000000L)
         .fee(BigInteger.valueOf(173333))
@@ -293,8 +294,8 @@ class StakeKeyReportControllerTest {
   void shouldGetDeRegistrations() throws Exception {
     String username = "username";
     Long reportId = 1L;
-    List<StakeRegistrationLifeCycle> list = new ArrayList<>();
-    list.add(StakeRegistrationLifeCycle.builder()
+    List<StakeRegistrationFilterResponse> list = new ArrayList<>();
+    list.add(StakeRegistrationFilterResponse.builder()
         .txHash("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2")
         .deposit(-2000000L)
         .fee(BigInteger.valueOf(173333))
@@ -350,7 +351,7 @@ class StakeKeyReportControllerTest {
     Long reportId = 1L;
     String username = "username";
     List<StakeRewardResponse> list = new ArrayList<>();
-    list.add(new StakeRewardResponse(333, Date.from(Instant.now()), BigInteger.valueOf(382916)));
+    list.add(new StakeRewardResponse(333, Date.from(Instant.now()), BigInteger.valueOf(382916), RewardType.MEMBER));
     given(stakeKeyReportService.getStakeRewardsByReportId(anyLong(), anyString(),
         any(Pageable.class)))
         .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));

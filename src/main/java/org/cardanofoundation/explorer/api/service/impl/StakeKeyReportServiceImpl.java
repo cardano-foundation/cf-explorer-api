@@ -11,7 +11,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
@@ -176,7 +176,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Override
-  public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrationsByReportId(
+  public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeRegistrationsByReportId(
       Long reportId, String username, Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
@@ -187,7 +187,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Override
-  public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrationsByReportId(
+  public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrationsByReportId(
       Long reportId, String username, Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(

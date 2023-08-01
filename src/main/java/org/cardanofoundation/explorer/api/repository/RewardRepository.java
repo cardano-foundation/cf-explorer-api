@@ -47,7 +47,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   List<StakeAnalyticRewardResponse> findRewardByStake(@Param("stakeAddress") String stakeAddress);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
-      + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
       + " WHERE rw.addr = :stakeAddress"
