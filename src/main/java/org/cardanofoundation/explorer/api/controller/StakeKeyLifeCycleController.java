@@ -50,7 +50,7 @@ public class StakeKeyLifeCycleController {
 
   @GetMapping("/{stakeKey}/registrations")
   @LogMessage
-  public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeRegistrations(
+  public ResponseEntity<BaseFilterResponse<StakeRegistrationFilterResponse>> getStakeRegistrations(
       @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
       @ParameterObject @DateValid StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
@@ -59,15 +59,33 @@ public class StakeKeyLifeCycleController {
         stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, condition, pagination.toPageable()));
   }
 
+  @GetMapping("/{stakeKey}/registrations/{hash}")
+  @LogMessage
+  public ResponseEntity<StakeRegistrationDetailResponse> getStakeRegistrationDetail(
+      @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
+      @PathVariable @Parameter(description = "Tx hash") @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash) {
+    return ResponseEntity.ok(
+        stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, hash));
+  }
+
   @GetMapping("/{stakeKey}/de-registrations")
   @LogMessage
-  public ResponseEntity<BaseFilterResponse<StakeRegistrationLifeCycle>> getStakeDeRegistrations(
+  public ResponseEntity<BaseFilterResponse<StakeRegistrationFilterResponse>> getStakeDeRegistrations(
       @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
       @ParameterObject @DateValid StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
         stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, condition, pagination.toPageable()));
+  }
+
+  @GetMapping("/{stakeKey}/de-registrations/{hash}")
+  @LogMessage
+  public ResponseEntity<StakeRegistrationDetailResponse> getStakeDeRegistrationDetail(
+      @PathVariable @Parameter(description = "Stake key") @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
+      @PathVariable @Parameter(description = "Tx hash") @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash) {
+    return ResponseEntity.ok(
+        stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, hash));
   }
 
   @GetMapping("/{stakeKey}/delegations")
