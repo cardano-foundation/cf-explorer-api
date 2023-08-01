@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.25](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.24...v0.3.25) (2023-08-01)
+
+
+### Features
+
+* MET-1128 remove unused reward type to query ([3f4c0cb](https://github.com/cardano-foundation/cf-explorer-api/commit/3f4c0cb11fbb4717bfc0f28437c72ebaa0c736e2))
+
+
+### Bug Fixes
+
+* add condition on findContract join statement query ([33e93b4](https://github.com/cardano-foundation/cf-explorer-api/commit/33e93b47724a6ece2f808a3199431d127d613c13))
+* add logo endpoint in front of relative path logo ([226a58a](https://github.com/cardano-foundation/cf-explorer-api/commit/226a58ab090aa2e5770a99f5adb95f2d94438d41))
+
 ## [0.3.24](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.23...v0.3.24) (2023-07-27)
 
 
