@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.api.repository.AdaPotsRepository;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -40,6 +41,7 @@ public class EpochServiceImpl implements EpochService {
   private final EpochMapper epochMapper;
   private final RedisTemplate<String, Object> redisTemplate;
   private final FetchRewardDataService fetchRewardDataService;
+  private final AdaPotsRepository adaPotsRepository;
   private static final String UNIQUE_ACCOUNTS_KEY = "UNIQUE_ACCOUNTS";
   private static final String UNDERSCORE = "_";
 
@@ -47,7 +49,7 @@ public class EpochServiceImpl implements EpochService {
   private String network;
 
   @Value("${application.epoch.days}")
-  public int EPOCH_DAYS;
+  public int epochDays;
 
   @Override
   @Transactional(readOnly = true)
@@ -59,7 +61,8 @@ public class EpochServiceImpl implements EpochService {
       );
       var currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
           () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
-      if (!fetchRewardDataService.checkEpochRewardDistributed(epoch) && epoch.getNo() < currentEpoch - 1 ) {
+      if (Boolean.FALSE.equals(fetchRewardDataService.checkEpochRewardDistributed(epoch))
+          && epoch.getNo() < currentEpoch - 1 ) {
         List<Epoch> fetchEpochResponse = fetchRewardDataService.fetchEpochRewardDistributed(List.of(epochNo));
         if (CollectionUtils.isEmpty(fetchEpochResponse)) {
           throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
@@ -71,8 +74,9 @@ public class EpochServiceImpl implements EpochService {
       LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
       checkEpochStatus(response, currentEpoch);
-      response.setStartTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getStartTime()));
-      response.setEndTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getEndTime()));
+      LocalDateTime startTime = modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getStartTime());
+      response.setStartTime(startTime);
+      response.setEndTime(startTime.plusDays(epochDays));
       String uniqueAccountRedisKey = String.join(
           UNDERSCORE,
           getRedisKey(UNIQUE_ACCOUNTS_KEY),
@@ -117,8 +121,9 @@ public class EpochServiceImpl implements EpochService {
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
     pageResponse.getContent().forEach(epoch -> {
       checkEpochStatus(epoch, currentEpoch);
-      epoch.setStartTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime()));
-      epoch.setEndTime(modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getEndTime()));
+      LocalDateTime startTime = modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime());
+      epoch.setStartTime(startTime);
+      epoch.setEndTime(startTime.plusDays(epochDays));
       String uniqueAccountRedisKey = String.join(
           UNDERSCORE,
           getRedisKey(UNIQUE_ACCOUNTS_KEY),
@@ -156,10 +161,10 @@ public class EpochServiceImpl implements EpochService {
    * @param epoch epoch response
    */
   private void checkEpochStatus(EpochResponse epoch, Integer currentEpoch) {
-    if (epoch.getStartTime().plusDays(EPOCH_DAYS).isAfter(LocalDateTime.now(ZoneOffset.UTC))
+    if (epoch.getStartTime().plusDays(epochDays).isAfter(LocalDateTime.now(ZoneOffset.UTC))
         && epoch.getStartTime().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
       epoch.setStatus(EpochStatus.IN_PROGRESS);
-      epoch.setEndTime(epoch.getStartTime().plusDays(EPOCH_DAYS));
+      epoch.setEndTime(epoch.getStartTime().plusDays(epochDays));
     } else {
       epoch.setStatus(EpochStatus.FINISHED);
     }
@@ -171,7 +176,6 @@ public class EpochServiceImpl implements EpochService {
   @Override
   @Transactional(readOnly = true)
   public EpochSummary getCurrentEpochSummary() {
-
     return epochRepository
         .findCurrentEpochSummary()
         .map(epochSummaryProjection -> {
@@ -188,14 +192,19 @@ public class EpochServiceImpl implements EpochService {
               getRedisKey(UNIQUE_ACCOUNTS_KEY),
               epochSummaryProjection.getNo().toString());
           var account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
-
+          if (Boolean.FALSE.equals(fetchRewardDataService.checkAdaPots(epochSummaryProjection.getNo()))) {
+            fetchRewardDataService.fetchAdaPots(List.of(epochSummaryProjection.getNo()));
+          }
+          var circulatingSupply = adaPotsRepository.getUTxOByEpochNo(epochSummaryProjection.getNo())
+              .orElse(BigInteger.ZERO);
           return EpochSummary.builder()
               .no(epochSummaryProjection.getNo())
               .slot((int) slot)
               .totalSlot(epochSummaryProjection.getMaxSlot())
               .startTime(epochStartTime)
-              .endTime(epochStartTime.plusDays(EPOCH_DAYS))
+              .endTime(epochStartTime.plusDays(epochDays))
               .account(account)
+              .circulatingSupply(circulatingSupply)
               .build();
         })
         .orElse(EpochSummary.builder().
