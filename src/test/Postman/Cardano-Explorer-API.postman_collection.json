@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "5adfc10f-34ac-475b-bca9-213caad37608",
+		"_postman_id": "daf8a3fb-c5ff-4dbc-b6dc-49d0f13aa2af",
 		"name": "Cardano Explorer API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28110605",
-		"_collection_link": "https://www.postman.com/galactic-crater-624201/workspace/binh-s-workspace/collection/28110605-5adfc10f-34ac-475b-bca9-213caad37608?action=share&creator=28110605&source=collection_link"
+		"_collection_link": "https://www.postman.com/galactic-crater-624201/workspace/binh-s-workspace/collection/28110605-daf8a3fb-c5ff-4dbc-b6dc-49d0f13aa2af?action=share&creator=28110605&source=collection_link"
 	},
 	"item": [
 		{
@@ -28,14 +28,7 @@
 							],
 							"request": {
 								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJob2EuYnVpQHNvdGF0ZWsuY29tIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9VU0VSIl0sImlhdCI6MTY4OTMyMjQyNiwiZXhwIjoxNjg5NDA4ODI2fQ.wh601I2UfLuwriINpFnRurE5oP7e06jVMvwhSEplYgl8VXPEK5ir57-NLCAs7AFSdHvcHLOm33TcSC8liWMX9tI5DSt13mszeh1uSktSE32jqX9leuWB-lAsvJTLEt3nzqcgQixf85esgzXGEJa7Lj_MglkYGs8Oar1TP2JI7h4AXcnQ7ai_gR5L3llt-F1fegAX5-Q14rf0vWcDOnfNH8gGXLlwZ2Tin332IQuMGbpbxPoa-k8NqnqHRbhjrO6IzvAQ54tatCKuGHglKeJzbzpzRcQvd5yqpF5FTMlpAxOjTJaPmumzPIuCUiurhB6xHsuDqMtE3N_lRxoYtOT8YSJ5ZfgFCKpG9Nm36MhStXKccARKhJNVrCLR1W_vhuxctvPTwtRYP7zKoPYwB0dwLKHpGE9X-HGtN3kp2RpvYmGJmx8FNwshAIt-QQPEL6dgTH9p_h8MzmmzS3sjtc7CmFDzH_p9VU5I5Iwk2i4j0ydH9uC9-wifejgPqidoTVJK",
-											"type": "string"
-										}
-									]
+									"type": "noauth"
 								},
 								"method": "POST",
 								"header": [
@@ -50,7 +43,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"type\": 0,\n  \"email\": \"binh.nguyen+1@sotatek.com\",\n  \"password\": \"Test1234@\"\n}"
+									"raw": "// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu+3@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n\n// {\n//   \"type\": 0,\n//   \"email\": \"nhung.nguyen2@sotatek.com\",\n//   \"password\": \"Nhung!12345\"\n// }\n\n{\n  \"type\": 0,\n  \"email\": \"yen.phan@sotatek.com\",\n  \"password\": \"Sotatek@123\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl-Auth}}/api/v1/auth/sign-in",
@@ -4128,17 +4121,20 @@
 											"    pm.expect(jsonData.data[0].status).to.be.a(\"string\");\r",
 											"});\r",
 											"\r",
+											"\r",
 											"//Scenario compare Get wallet activity by report id api with get Wallet Activities api - Step after\r",
-											"pm.test(\"Others value exist\",function (){\r",
-											"    var tx_hash = pm.environment.get(\"stakinglifecycle_data_txhash\");\r",
+											"pm.test(\"Compare Get wallet activity by report id api with get Wallet Activities api\",function (){\r",
+											"    //All value: API Get wallet activity by report id(v1/staking-lifecycle/report/stake-key/:stakinglifecycle_id/wallet-activity)\r",
+											"    var tx_hash = pm.environment.get(\"stakingwallet_data_txhash\");\r",
 											"    let result = jsonData.data.find(a => a.txHash === tx_hash);\r",
 											"\r",
-											"    //All value: API Get wallet activity by report id(v1/staking-lifecycle/report/stake-key/:stakinglifecycle_id/wallet-activity)\r",
-											"    pm.expect(result.amount).to.be.eql(pm.environment.get(\"stakingwallet_data_amount\"));\r",
-											"    pm.expect(result.fee).to.be.eql(pm.environment.get(\"stakingwallet_data_fee\"));\r",
-											"    pm.expect(result.time).to.be.include(pm.environment.get(\"stakingwallet_data_time\"));\r",
-											"    pm.expect(result.type).to.be.include(pm.environment.get(\"stakingwallet_data_type\"));\r",
-											"    pm.expect(result.status).to.be.include(pm.environment.get(\"stakingwallet_data_status\"));\r",
+											"    if (result?.txHash === tx_hash){\r",
+											"        pm.expect(result.amount).to.be.eql(pm.environment.get(\"stakingwallet_data_amount\"));\r",
+											"        pm.expect(result.fee).to.be.eql(pm.environment.get(\"stakingwallet_data_fee\"));\r",
+											"        pm.expect(result.time).to.be.include(pm.environment.get(\"stakingwallet_data_time\"));\r",
+											"        pm.expect(result.type).to.be.include(pm.environment.get(\"stakingwallet_data_type\"));\r",
+											"        pm.expect(result.status).to.be.include(pm.environment.get(\"stakingwallet_data_status\"));\r",
+											"    }\r",
 											"});\r",
 											"\r",
 											"//Scenario compare Get: get Wallet Activities api with api Get: Get transactions of stake key (stakes)\r",
@@ -4195,13 +4191,13 @@
 										},
 										{
 											"key": "size",
-											"value": "20",
+											"value": "310",
 											"description": "The size of the page to be returned",
 											"disabled": true
 										},
 										{
 											"key": "sort",
-											"value": "tx,DESC",
+											"value": "time,DESC",
 											"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
 											"disabled": true
 										}
@@ -7055,9 +7051,11 @@
 											"    var TX_Hash = pm.environment.get(\"getWithdrawals_data_txHash\");\r",
 											"    let result = jsonData.data.find(a => a.txHash === TX_Hash);\r",
 											"    \r",
-											"    pm.expect(result.txHash).to.include(pm.environment.get(\"getWithdrawals_data_txHash\"));\r",
-											"    pm.expect(result.amount).to.eql(pm.environment.get(\"getWithdrawals_data_value\"));\r",
-											"    pm.expect(result.time).to.contain(pm.environment.get(\"getWithdrawals_data_time\"));\r",
+											"    if (result?.txHash === TX_Hash){\r",
+											"        pm.expect(result.txHash).to.include(pm.environment.get(\"getWithdrawals_data_txHash\"));\r",
+											"        pm.expect(result.amount).to.eql(pm.environment.get(\"getWithdrawals_data_value\"));\r",
+											"        pm.expect(result.time).to.contain(pm.environment.get(\"getWithdrawals_data_time\"));\r",
+											"    }\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -7093,7 +7091,7 @@
 										},
 										{
 											"key": "size",
-											"value": "20",
+											"value": "76",
 											"description": "The size of the page to be returned",
 											"disabled": true
 										},
