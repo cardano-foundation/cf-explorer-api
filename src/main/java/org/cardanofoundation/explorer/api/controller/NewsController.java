@@ -20,7 +20,7 @@ public class NewsController {
   @GetMapping
   @LogMessage
   @Operation(summary = "Get news related to cardano")
-  public ResponseEntity<Object> getMarketData(@RequestParam Integer amount) {
-    return ResponseEntity.ok(newsService.getNews(amount));
+  public ResponseEntity<Object> getMarketData(@RequestParam Integer limit, @RequestParam Integer offset) {
+    return ResponseEntity.ok(newsService.getNews(limit, offset));
   }
 }

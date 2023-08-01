@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.24](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.23...v0.3.24) (2023-07-27)
+
+
+### Features
+
+* MET-1407 update paging for api news ([bae75e8](https://github.com/cardano-foundation/cf-explorer-api/commit/bae75e8aed75b906fede497ae76e235e2b675587))
+
 ## [0.3.23](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.22...v0.3.23) (2023-07-25)
 
 
