@@ -49,7 +49,6 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -252,8 +251,10 @@ public class TokenServiceImpl implements TokenService {
       ).orElse(BigInteger.ZERO);
 
     } else {
-      LocalDate from = fromDateTime.toLocalDate();
-      LocalDate to = toDateTime.toLocalDate();
+      // aggregate address token is total volume of token from 00:00:00 to 23:59:59
+      // so to get volume of token between from date and to date, we need to sum between from date - 1 and to date - 1
+      LocalDate from = fromDateTime.toLocalDate().minusDays(1);
+      LocalDate to = toDateTime.toLocalDate().minusDays(1);
       boolean isNotHaveAggData = maxDateAgg.isEmpty() || !from.isBefore(maxDateAgg.get());
       if (isNotHaveAggData) {
         balance = addressTokenRepository.sumBalanceBetweenTx(
@@ -268,7 +269,7 @@ public class TokenServiceImpl implements TokenService {
     if (BigInteger.ZERO.equals(balance)) {
       balance = checkNoRecord(multiAsset, type, fromDateTime, toDateTime) ? null : balance;
     }
-    return new TokenVolumeAnalyticsResponse(toDateTime, balance);
+    return new TokenVolumeAnalyticsResponse(fromDateTime, balance);
   }
 
   private boolean checkNoRecord(

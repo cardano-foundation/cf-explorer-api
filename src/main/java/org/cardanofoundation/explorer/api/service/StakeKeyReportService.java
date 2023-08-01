@@ -7,7 +7,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
@@ -83,9 +83,9 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeRegistrationLifeCycle>
    */
-  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrationsByReportId(Long reportId,
-                                                                                 String username,
-                                                                                 Pageable pageable);
+  BaseFilterResponse<StakeRegistrationFilterResponse> getStakeRegistrationsByReportId(Long reportId,
+                                                                                      String username,
+                                                                                      Pageable pageable);
 
   /**
    * Get stake de-registrations by report id
@@ -95,9 +95,9 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeRegistrationLifeCycle>
    */
-  BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrationsByReportId(Long reportId,
-                                                                                   String username,
-                                                                                   Pageable pageable);
+  BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrationsByReportId(Long reportId,
+                                                                                        String username,
+                                                                                        Pageable pageable);
 
   /**
    * Get stake delegations by report id
