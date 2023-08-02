@@ -1,0 +1,2326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>ProtocolType.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.common.enumeration;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.exception.BusinessCode;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.exceptions.BusinessException;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal_;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public enum ProtocolType {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MIN_FEE_A(EpochParam_.MIN_FEE_A),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MIN_FEE_B(EpochParam_.MIN_FEE_B),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_BLOCK_SIZE(EpochParam_.MAX_BLOCK_SIZE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_TX_SIZE(EpochParam_.MAX_TX_SIZE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_BH_SIZE(EpochParam_.MAX_BH_SIZE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  KEY_DEPOSIT(EpochParam_.KEY_DEPOSIT),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  POOL_DEPOSIT(EpochParam_.POOL_DEPOSIT),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_EPOCH(EpochParam_.MAX_EPOCH),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  OPTIMAL_POOL_COUNT(EpochParam_.OPTIMAL_POOL_COUNT),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MIN_UTXO_VALUE(EpochParam_.MIN_UTXO_VALUE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MIN_POOL_COST(EpochParam_.MIN_POOL_COST),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_TX_EX_MEM(EpochParam_.MAX_TX_EX_MEM),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_TX_EX_STEPS(EpochParam_.MAX_TX_EX_STEPS),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_BLOCK_EX_MEM(EpochParam_.MAX_BLOCK_EX_MEM),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_BLOCK_EX_STEPS(EpochParam_.MAX_BLOCK_EX_STEPS),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_VAL_SIZE(EpochParam_.MAX_VAL_SIZE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  COINS_PER_UTXO_SIZE(EpochParam_.COINS_PER_UTXO_SIZE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  INFLUENCE(EpochParam_.INFLUENCE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MONETARY_EXPAND_RATE(EpochParam_.MONETARY_EXPAND_RATE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  TREASURY_GROWTH_RATE(EpochParam_.TREASURY_GROWTH_RATE),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  DECENTRALISATION(EpochParam_.DECENTRALISATION),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  PRICE_MEM(EpochParam_.PRICE_MEM),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  PRICE_STEP(EpochParam_.PRICE_STEP),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  PROTOCOL_MAJOR(EpochParam_.PROTOCOL_MAJOR),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  PROTOCOL_MINOR(EpochParam_.PROTOCOL_MINOR),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  COLLATERAL_PERCENT(EpochParam_.COLLATERAL_PERCENT),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  MAX_COLLATERAL_INPUTS(EpochParam_.MAX_COLLATERAL_INPUTS),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  ENTROPY(ParamProposal_.ENTROPY),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  COST_MODEL(EpochParam_.COST_MODEL)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  ,ALL(&#34;ALL&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  private final String fieldName;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  ProtocolType(String fieldName) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    this.fieldName = fieldName;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public String getFieldName() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_50'/>
+50
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_50'>1</a>
+<span>
+1. getFieldName : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::getFieldName &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return fieldName;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static ProtocolType valueStringOf(String fieldName) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    switch (fieldName) {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MIN_FEE_A:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_56'/>
+56
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_56'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MIN_FEE_A;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MIN_FEE_B:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_58'/>
+58
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_58'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MIN_FEE_B;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_BLOCK_SIZE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_60'/>
+60
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_60'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_BLOCK_SIZE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_TX_SIZE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_62'/>
+62
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_62'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_TX_SIZE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_BH_SIZE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_64'/>
+64
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_64'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_BH_SIZE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.KEY_DEPOSIT:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_66'/>
+66
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_66'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return KEY_DEPOSIT;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_67'/>
+67
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_67'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.POOL_DEPOSIT:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_68'/>
+68
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_68'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return POOL_DEPOSIT;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_69'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_EPOCH:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_70'/>
+70
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_70'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_EPOCH;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_71'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.OPTIMAL_POOL_COUNT:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_72'/>
+72
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_72'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return OPTIMAL_POOL_COUNT;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_73'/>
+73
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_73'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MIN_UTXO_VALUE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_74'/>
+74
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_74'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MIN_UTXO_VALUE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_75'/>
+75
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_75'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MIN_POOL_COST:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_76'/>
+76
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_76'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MIN_POOL_COST;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_77'/>
+77
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_77'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_TX_EX_MEM:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_78'/>
+78
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_78'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_TX_EX_MEM;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_79'/>
+79
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_79'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_TX_EX_STEPS:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_80'/>
+80
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_80'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_TX_EX_STEPS;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_81'/>
+81
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_81'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_BLOCK_EX_MEM:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_82'/>
+82
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_82'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_BLOCK_EX_MEM;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_83'/>
+83
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_83'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_BLOCK_EX_STEPS:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_84'/>
+84
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_84'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_BLOCK_EX_STEPS;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_85'/>
+85
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_85'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_VAL_SIZE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_86'/>
+86
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_86'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_VAL_SIZE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_87'/>
+87
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_87'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.COINS_PER_UTXO_SIZE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_88'/>
+88
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_88'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return COINS_PER_UTXO_SIZE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_89'/>
+89
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_89'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.INFLUENCE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_90'/>
+90
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_90'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return INFLUENCE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_91'/>
+91
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_91'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MONETARY_EXPAND_RATE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_92'/>
+92
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_92'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MONETARY_EXPAND_RATE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_93'/>
+93
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_93'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.TREASURY_GROWTH_RATE:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_94'/>
+94
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_94'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return TREASURY_GROWTH_RATE;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_95'/>
+95
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_95'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.DECENTRALISATION:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_96'/>
+96
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_96'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return DECENTRALISATION;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_97'/>
+97
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_97'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.PRICE_MEM:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_98'/>
+98
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_98'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return PRICE_MEM;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_99'/>
+99
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_99'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.PRICE_STEP:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_100'/>
+100
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_100'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return PRICE_STEP;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_101'/>
+101
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_101'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.PROTOCOL_MAJOR:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_102'/>
+102
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_102'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return PROTOCOL_MAJOR;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_103'/>
+103
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_103'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.PROTOCOL_MINOR:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_104'/>
+104
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_104'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return PROTOCOL_MINOR;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_105'/>
+105
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_105'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.COLLATERAL_PERCENT:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_106'/>
+106
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_106'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return COLLATERAL_PERCENT;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_107'/>
+107
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_107'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.MAX_COLLATERAL_INPUTS:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_108'/>
+108
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_108'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return MAX_COLLATERAL_INPUTS;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_109'/>
+109
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_109'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case ParamProposal_.ENTROPY:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_110'/>
+110
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_110'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.EXTRA_ENTROPY:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_111'/>
+111
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_111'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return ENTROPY;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_112'/>
+112
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_112'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      case EpochParam_.COST_MODEL:</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_113'/>
+113
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_113'>1</a>
+<span>
+1. valueStringOf : replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return COST_MODEL;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_114'/>
+114
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_114'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      default:</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_115'/>
+115
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_115'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>        throw new BusinessException(BusinessCode.PROTOCOL_FIELD_NOT_FOUND);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_116'/>
+116
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_116'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_117'/>
+117
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_117'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_118'/>
+118
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_118'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_119'/>
+119
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_119'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static List&#60;ProtocolType&#62; getAll() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_120'/>
+120
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_120'>1</a>
+<span>
+1. getAll : replaced return value with Collections.emptyList for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::getAll &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return List.of(MIN_FEE_A, MIN_FEE_B, MAX_BLOCK_SIZE, MAX_TX_SIZE, MAX_BH_SIZE, KEY_DEPOSIT,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_121'/>
+121
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_121'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        POOL_DEPOSIT, MAX_EPOCH, OPTIMAL_POOL_COUNT, MIN_UTXO_VALUE, MIN_POOL_COST, MAX_TX_EX_MEM,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_122'/>
+122
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_122'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        MAX_TX_EX_STEPS, MAX_BLOCK_EX_MEM, MAX_BLOCK_EX_STEPS, MAX_VAL_SIZE, COINS_PER_UTXO_SIZE,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_123'/>
+123
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_123'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        INFLUENCE, MONETARY_EXPAND_RATE, TREASURY_GROWTH_RATE, DECENTRALISATION, PRICE_MEM,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_124'/>
+124
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_124'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        PRICE_STEP, PROTOCOL_MAJOR, PROTOCOL_MINOR, COLLATERAL_PERCENT, MAX_COLLATERAL_INPUTS,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_125'/>
+125
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_125'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        ENTROPY, COST_MODEL);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_126'/>
+126
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_126'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@613548fd_127'/>
+127
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_127'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_50'>50</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_50'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getFieldName<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::getFieldName &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_56'>56</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_56'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_58'>58</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_58'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_60'>60</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_60'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_62'>62</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_62'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_64'>64</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_64'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_66'>66</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_66'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_68'>68</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_68'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_70'>70</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_70'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_72'>72</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_72'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_74'>74</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_74'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_76'>76</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_76'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_78'>78</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_78'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_80'>80</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_80'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_82'>82</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_82'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_84'>84</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_84'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_86'>86</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_86'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_88'>88</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_88'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_90'>90</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_90'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_92'>92</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_92'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_94'>94</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_94'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_96'>96</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_96'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_98'>98</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_98'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_100'>100</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_100'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_102'>102</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_102'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_104'>104</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_104'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_106'>106</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_106'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_108'>108</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_108'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_111'>111</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_111'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_113'>113</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_113'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>valueStringOf<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::valueStringOf &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@613548fd_120'>120</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@613548fd_120'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAll<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testGetLatestChange_thenReturn()]</span></span> replaced return value with Collections.emptyList for org/cardanofoundation/explorer/api/common/enumeration/ProtocolType::getAll &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMinPoolCost()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMinFeeAThatShouldNotChooseTheLatest()] (111 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMinUtxoValue()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxBlockSizeThatChooseThePerfectOne()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMonetaryExpandRateThatChooseThePerfectOne()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesPoolDepositThatChooseThePerfectOne()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedOptimalPoolCountThatShouldNotChooseTheLatest()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxBhSizeThatShouldNotChooseTheLatest()] (9 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesPriceMem()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedDecentralisationThatChooseThePerfectOne()] (9 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxTxExMemThatShouldNotChooseTheLatest()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesInfluence()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedInfluenceThatShouldNotChooseTheLatest()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesDecentralisation()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesPriceStep()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxTxSizeThatShouldNotChooseTheLatest()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesProtocolMajor()] (8 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedInfluenceThatChooseThePerfectOne()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxBlockExStepsThatShouldNotChooseTheLatest()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedTreasuryGrowthRateThatShouldNotChooseTheLatest()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesProtocolMinor()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxValSize()] (5 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedPriceStepThatChooseThePerfectOne()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMinFeeA()] (8 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedCollateralPercentThatShouldNotChooseTheLatest()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxBlockExSteps()] (5 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMinUtxoValueThatShouldNotChooseTheLatest()] (13 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedPriceStepThatShouldNotChooseTheLatest()] (12 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxBlockExMemThatShouldNotChooseTheLatest()] (12 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMinFeeB()] (5 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesPriceMem()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangeHistoryChangeEpoch0To5()] (8 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesKeyDeposit()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxTxSize()] (9 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesExtraEntropy()] (5 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxTxExMem()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxCollateralInputsThatShouldNotChooseTheLatest()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesKeyDepositThatShouldNotChooseTheLatest()] (16 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxBlockExStepshatChooseThePerfectOne()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesProtocolMajor()] (5 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesPoolDeposit()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesCollateralPercent()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedCostModelThatShouldNotChooseTheLatest()] (5 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxCollateralInputsThatChooseThePerfectOne()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMinFeeAThatChooseThePerfectOne()] (13 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesDecentralisation()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testGetLatestChange_thenReturn()] (40 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMonetaryExpandRate()] (8 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxValSize()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProtocols()] (1 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesPoolDeposit()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxTxExSteps()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxTxExStepsThatChooseThePerfectOne()] (16 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxEpochThatShouldNotChooseTheLatest()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxValSizeThatShouldNotChooseTheLatest()] (15 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangeHistoryChangeEpoch2()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesPoolDepositThatShouldNotChooseTheLatest()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesInfluence()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedProtocolMajorThatChooseThePerfectOne()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxCollateralInputs()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedTreasuryGrowthRateThatChooseThePerfectOne()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxTxExMemThatChooseThePerfectOne()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedCoinsPerUtxoSizeThatChooseThePerfectOne()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedCostModelThatChooseThePerfectOne()] (13 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMinFeeB()] (13 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testGetHistoryProtocolParameters_throwTimeRangeV2()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxEpoch()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMinFeeBThatChooseThePerfectOne()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxEpoch()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testGetFixedProtocols_thenReturn()] (1 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxBhSize()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxBlockSize()] (14 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxEpochThatChooseThePerfectOne()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testGetFixedProtocols_throwException()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedPriceMemThatChooseThePerfectOne()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesCostModel()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxTxSize()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxBlockExMemThatChooseThePerfectOne()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesCollateralPercent()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedPriceMemThatShouldNotChooseTheLatest()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testMapProtocols_thenReturn()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesKeyDepositThatChooseThePerfectOne()] (16 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxTxSizeThatChooseThePerfectOne()] (8 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxTxExSteps()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedProtocolMajorThatShouldNotChooseTheLatest()] (8 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangeHistoryChangeEpoch0To4()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesCoinsPerUtxoSize()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesTreasuryGrowthRate()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxValSizethatChooseThePerfectOne()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesProtocolMinor()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMonetaryExpandRateThatShouldNotChooseTheLatest()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxBlockExSteps()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangeHistoryChangeEpoch2To4()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedCoinsPerUtxoSizeThatShouldNotChooseTheLatest()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMinPoolCostThatChooseThePerfectOne()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMinUtxoValue()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesKeyDeposit()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxBhSizeThatChooseThePerfectOne()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxCollateralInputs()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangeHistoryChangeEpoch3()] (25 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxBlockExMem()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedCollateralPercentthatChooseThePerfectOne()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesOptimalPoolCount()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxBlockSize()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxBlockExMem()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedProtocolMinorThatShouldNotChooseTheLatest()] (8 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMinUtxoValueThatChooseThePerfectOne()] (12 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangeHistoryChangeEpoch0To6()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMaxTxExStepsThatShouldNotChooseTheLatest()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesTreasuryGrowthRate()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMaxBhSize()] (8 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesPriceStep()] (9 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testEmptyProposalProtocols()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedMinPoolCostThatShouldNotChooseTheLatest()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testGetHistoryProtocolParameters_redisCached()] (13 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangeHistoryChangeEpoch1()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesCoinsPerUtxoSize()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMinFeeBThatShouldNotChooseTheLatest()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testMapProtocols_thenReturnCostModelNull()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testGetHistoryProtocolParameters_throwTimeRange()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesOptimalPoolCount()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMonetaryExpandRate()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedProtocolMinorThatChooseThePerfectOne()] (4 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxBlockSizeThatShouldNotChooseTheLatest()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesCostModel()] (11 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedHistoriesMaxTxExMem()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesEntropy()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMinPoolCost()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedOptimalPoolCountThatChooseThePerfectOne()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testAddedHistoriesMinFeeA()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.ProtocolServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ProtocolServiceTest]/[method:testChangedDecentralisationThatShouldNotChooseTheLatest()] (28 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
