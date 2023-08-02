@@ -310,21 +310,12 @@ public class TokenServiceImpl implements TokenService {
   }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
-    if(!multiAsset.getSupply().equals(BigInteger.ONE)){
+    String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(multiAsset.getFingerprint());
+    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
       tokenResponse.setTokenType(TokenType.FT);
-    } else{
-      String tsQuery = makeQuery(multiAsset.getPolicy()) + " & " + makeQuery(multiAsset.getNameView());
-      String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(tsQuery);
-      if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
-        tokenResponse.setTokenType(TokenType.FT);
-      } else{
-        tokenResponse.setTokenType(TokenType.NFT);
-        tokenResponse.setMetadataJson(txMetadataNFTToken);
-      }
+    } else {
+      tokenResponse.setTokenType(TokenType.NFT);
+      tokenResponse.setMetadataJson(txMetadataNFTToken);
     }
-  }
-
-  private String makeQuery(String value){
-    return "\"" + value.replaceAll("\\s+","") + "\"";
   }
 }
