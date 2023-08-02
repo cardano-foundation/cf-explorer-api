@@ -3,6 +3,7 @@ spring:
     standalone:
       host: ${REDIS_STANDALONE_HOST:127.0.0.1}
       port: ${REDIS_STANDALONE_PORT:6379}
+      useSsl: ${REDIS_USE_SSL:false}
     password: ${REDIS_STANDALONE_PASSWORD:bitnami}
 
 
