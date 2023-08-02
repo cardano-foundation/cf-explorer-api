@@ -15,7 +15,9 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -40,6 +42,9 @@ public class RedisStandaloneConfig implements CachingConfigurer {
     @Value("${spring.redis.password}")
     private String password;
 
+    @Value("${spring.redis.standalone.useSsl}")
+    private boolean useSsl;
+
     @Value("${application.api.coin.gecko.market.interval-time}")
     private int apiMarketIntervalTime;
 
@@ -53,7 +58,11 @@ public class RedisStandaloneConfig implements CachingConfigurer {
     @Bean(name = "lettuceConnectionFactory")
     @Autowired
     LettuceConnectionFactory lettuceConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration) {
-        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+        if(useSsl) {
+            return new LettuceConnectionFactory(redisStandaloneConfiguration, LettuceClientConfiguration.builder().useSsl().build());
+        } else {
+            return new LettuceConnectionFactory(redisStandaloneConfiguration);
+        }
     }
 
     @Bean
@@ -94,7 +103,11 @@ public class RedisStandaloneConfig implements CachingConfigurer {
     @Bean(name = "jedisConnectionFactory")
     @Autowired
     JedisConnectionFactory jedisConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration) {
-        return new JedisConnectionFactory(redisStandaloneConfiguration);
+        if(useSsl) {
+            return new JedisConnectionFactory(redisStandaloneConfiguration, JedisClientConfiguration.builder().useSsl().build());
+        } else {
+            return new JedisConnectionFactory(redisStandaloneConfiguration);
+        }
     }
 
     @Bean(name = "cacheManager")
