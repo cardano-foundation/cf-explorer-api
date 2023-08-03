@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.controller;
 import java.math.BigInteger;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,13 +28,14 @@ import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 @RequestMapping("/api/v1/protocols")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Tag(name = "protocols", description = "The protocols APIs")
 public class ProtocolParamController {
 
   final ProtocolParamService protocolParamService;
 
   @GetMapping("/histories/filter/{protocolsTypes}")
   @LogMessage
-  @Operation(summary = "Get current protocol history change")
+  @Operation(summary = "Get current protocol history change", tags = {"protocols"})
   public ResponseEntity<HistoriesProtocol> getCurrentProtocolWithFilter(
       @PathVariable(value = "protocolsTypes", required = false)
       @Parameter(description = "protocol want to filter")
@@ -49,14 +51,14 @@ public class ProtocolParamController {
 
   @GetMapping("/latest")
   @LogMessage
-  @Operation(summary = "Get current protocol latest change")
+  @Operation(summary = "Get current protocol latest change", tags = {"protocols"})
   public ResponseEntity<Protocols> getLatestChange() {
     return ResponseEntity.ok(protocolParamService.getLatestChange());
   }
 
   @GetMapping("/fixed")
   @LogMessage
-  @Operation(summary = "Get fixed protocols parameters ")
+  @Operation(summary = "Get fixed protocols parameters ", tags = {"protocols"})
   public ResponseEntity<FixedProtocol> getFixedProtocols() {
     return ResponseEntity.ok(protocolParamService.getFixedProtocols());
   }
