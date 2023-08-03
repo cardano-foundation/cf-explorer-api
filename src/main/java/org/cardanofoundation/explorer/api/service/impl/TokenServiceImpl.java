@@ -29,9 +29,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
+import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
@@ -51,7 +53,6 @@ import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -74,7 +75,6 @@ public class TokenServiceImpl implements TokenService {
   private final AssetMetadataRepository assetMetadataRepository;
   private final AddressTokenRepository addressTokenRepository;
   private final AddressRepository addressRepository;
-  private final TxRepository txRepository;
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
 
   private final TokenMapper tokenMapper;
@@ -83,8 +83,6 @@ public class TokenServiceImpl implements TokenService {
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
   private final AggregatedDataCacheService aggregatedDataCacheService;
   private final TokenInfoRepository tokenInfoRepository;
-
-  static final Integer TOKEN_VOLUME_ANALYTIC_NUMBER = 5;
 
   @Override
   @Transactional(readOnly = true)
@@ -307,11 +305,60 @@ public class TokenServiceImpl implements TokenService {
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
     String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(multiAsset.getFingerprint());
-    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
+    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty() ||
+        Boolean.FALSE.equals(verifyNFTTokenMetadata(txMetadataNFTToken, multiAsset))) {
       tokenResponse.setTokenType(TokenType.FT);
     } else {
       tokenResponse.setTokenType(TokenType.NFT);
       tokenResponse.setMetadataJson(txMetadataNFTToken);
     }
+  }
+
+  /**
+   * Verify NFT token metadata by cip-25 algorithm
+   * The version property is also optional. If not specified, the version is 1.
+   * If a version of metadata is 1:
+   *  - policy must be in text format for the key in the metadata map
+   *  - assetName must be utf-8 encoded and in text format for the key in the metadata map
+   * If a version of metadata is 2:
+   *  - policy must be raw bytes for the key in the metadata map
+   *  - assetName must be raw bytes for the key in the metadata map
+   * @param metadataJson metadata json
+   * @param multiAsset multi asset
+   * @return true if metadata json is valid
+   */
+  private Boolean verifyNFTTokenMetadata(String metadataJson, MultiAsset multiAsset) {
+    Map<String, Object> jsonMetadataMap = new Gson()
+        .fromJson(metadataJson, TypeTokenGson.NFT_TOKEN_METADATA.getType().get());
+    final String cddlVer = "version";
+    if (jsonMetadataMap.containsKey(cddlVer)) {
+      String cddlVerValue = jsonMetadataMap.get(cddlVer).toString();
+      if ("2".equals(cddlVerValue) || "2.0".equals(cddlVerValue)) {
+        final String rawBytesPolicy = "0x" + multiAsset.getPolicy();
+        final String rawBytesAssetName = "0x" + multiAsset.getName().toLowerCase();
+        return verifyPolicyAndAssetName(jsonMetadataMap, rawBytesPolicy, rawBytesAssetName)
+            || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), rawBytesAssetName)
+            || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), multiAsset.getName().toLowerCase());
+      }
+    }
+
+    return verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), multiAsset.getNameView());
+  }
+
+  /**
+   * Check contains policy and asset name in metadata json
+   *
+   * @param jsonMetadataMap
+   * @param policy
+   * @param assetName
+   * @return true if metadata json contains policy and asset name
+   */
+  private Boolean verifyPolicyAndAssetName(Map<String, Object> jsonMetadataMap, String policy,
+                                           String assetName) {
+    if (jsonMetadataMap.containsKey(policy)) {
+      Map<String, Object> policyMap = (Map<String, Object>) jsonMetadataMap.get(policy);
+      return policyMap.containsKey(assetName);
+    }
+    return Boolean.FALSE;
   }
 }
