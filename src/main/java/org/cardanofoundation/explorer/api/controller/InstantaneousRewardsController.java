@@ -28,7 +28,7 @@ public class InstantaneousRewardsController {
   @LogMessage
   @Operation(summary = "Get list of instantaneous rewards")
   public ResponseEntity<BaseFilterResponse<InstantaneousRewardsResponse>> getInstantaneousRewards(
-          @ParameterObject @PaginationValid @PaginationDefault(size = 20) Pagination pagination) {
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20) Pagination pagination) {
     return ResponseEntity.ok(instantaneousRewardsService.getAll(pagination.toPageable()));
   }
 }
