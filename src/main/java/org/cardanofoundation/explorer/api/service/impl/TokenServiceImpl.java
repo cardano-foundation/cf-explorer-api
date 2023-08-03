@@ -30,10 +30,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
+import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
@@ -53,7 +53,6 @@ import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -76,7 +75,6 @@ public class TokenServiceImpl implements TokenService {
   private final AssetMetadataRepository assetMetadataRepository;
   private final AddressTokenRepository addressTokenRepository;
   private final AddressRepository addressRepository;
-  private final TxRepository txRepository;
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
 
   private final TokenMapper tokenMapper;
@@ -85,8 +83,6 @@ public class TokenServiceImpl implements TokenService {
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
   private final AggregatedDataCacheService aggregatedDataCacheService;
   private final TokenInfoRepository tokenInfoRepository;
-
-  static final Integer TOKEN_VOLUME_ANALYTIC_NUMBER = 5;
 
   @Override
   @Transactional(readOnly = true)
