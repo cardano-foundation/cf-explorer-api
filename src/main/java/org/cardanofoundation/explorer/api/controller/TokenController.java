@@ -62,9 +62,10 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token mint transaction")
   public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT) @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
-      @ParameterObject @PaginationValid @PaginationDefault(sort = {
-      BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
+       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+       @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
+       @PaginationValid @PaginationDefault(sort = {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pagination.toPageable()));
   }
 

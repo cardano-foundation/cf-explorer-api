@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.util;
 import com.bloxbean.cardano.client.address.util.AddressUtil;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 
@@ -28,6 +29,8 @@ public class AddressUtils {
           ShelleyAddress stakeShelley = new ShelleyAddress(addr);
           stakeAddress = stakeShelley.getAddress();
         }
+      } else if(address.startsWith(CommonConstant.STAKE_ADDRESS_PREFIX)) {
+        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
       } else if(!AddressUtil.isValidAddress(address)) {
         throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
       }

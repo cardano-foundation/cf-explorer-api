@@ -21,7 +21,6 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 import org.junit.jupiter.api.Assertions;
@@ -69,9 +68,6 @@ class AddressServiceTest {
 
   @Mock
   AddressTokenBalanceRepository addressTokenBalanceRepository;
-
-  @Mock
-  MultiAssetRepository multiAssetRepository;
 
   @Mock
   TokenMapper tokenMapper;
@@ -283,37 +279,6 @@ class AddressServiceTest {
   }
 
   @Test
-  void getTokenByAddress_shouldReturn() {
-    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-    Pageable pageable = PageRequest.of(0, 10);
-    Address address = Address.builder().address(addr).build();
-    List<AddressTokenProjection> addressTokenProjections = new ArrayList<>();
-    AddressTokenProjection projection = Mockito.mock(AddressTokenProjection.class);
-    when(projection.getMultiAssetId()).thenReturn(1L);
-    addressTokenProjections.add(projection);
-
-    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTokenBalanceRepository.findTokenAndBalanceByAddress(address, pageable)).thenReturn(new PageImpl<>(addressTokenProjections));
-    when(multiAssetRepository.findAllById(List.of(1L))).thenReturn(List.of(MultiAsset.builder().id(1L).build()));
-    when(tokenMapper.fromMultiAssetAndAddressToken(any(MultiAsset.class), any(AddressTokenProjection.class))).thenReturn(TokenAddressResponse.builder().addressId(1L).policy("sub").name("ject").build());
-    when(assetMetadataRepository.findBySubjectIn(anySet())).thenReturn(List.of(AssetMetadata.builder().id(1L).subject("subject").build()));
-    when(assetMetadataMapper.fromAssetMetadata(any())).thenReturn(TokenMetadataResponse.builder().build());
-
-    var response = addressService.getTokenByAddress(pageable, addr);
-    Assertions.assertNotNull(response);
-  }
-
-  @Test
-  void getTokenByAddress_throwAddressNotFound() {
-    String addr = "address_error";
-    Pageable pageable = PageRequest.of(0, 10);
-
-    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.empty());
-
-    Assertions.assertThrows(NoContentException.class, () -> addressService.getTokenByAddress(pageable, addr));
-  }
-
-  @Test
   void getTokenByDisplayName_shouldReturn() {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     Pageable pageable = PageRequest.of(0, 10);
@@ -352,7 +317,7 @@ class AddressServiceTest {
     addressTokenProjections.add(projection);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTokenBalanceRepository.findTokenAndBalanceByAddressAndNameView(address, "%%", pageable)).thenReturn(new PageImpl<>(addressTokenProjections));
+    when(addressTokenBalanceRepository.findTokenAndBalanceByAddress(address, pageable)).thenReturn(new PageImpl<>(addressTokenProjections));
     when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class))).thenReturn(TokenAddressResponse.builder().addressId(1L).policy("sub").name("ject").build());
     when(assetMetadataRepository.findBySubjectIn(anySet())).thenReturn(List.of(AssetMetadata.builder().id(1L).subject("subject").build()));
     when(assetMetadataMapper.fromAssetMetadata(any())).thenReturn(TokenMetadataResponse.builder().build());

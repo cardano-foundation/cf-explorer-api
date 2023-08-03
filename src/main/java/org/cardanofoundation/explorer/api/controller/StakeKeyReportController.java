@@ -92,7 +92,7 @@ public class StakeKeyReportController {
       @ParameterObject @PaginationValid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeKeyReportHistoryByStakeKey(stakeKey, username, pagination.toPageable()));
+            stakeKeyReportService.getStakeKeyReportHistoryByStakeKey(stakeKey, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/detail")
@@ -103,16 +103,16 @@ public class StakeKeyReportController {
       @PathVariable @Parameter(description = "The identifier of report") Long reportId) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeKeyReportHistoryByReportId(reportId, username));
+            stakeKeyReportService.getStakeKeyReportHistoryByReportId(reportId, username));
   }
 
   @GetMapping(value = "/stake-key/history")
   @LogMessage
   @Operation(summary = "Get all stake key report history")
   public ResponseEntity<BaseFilterResponse<StakeKeyReportHistoryResponse>> getStakeReportHistory(
-      HttpServletRequest request,
-      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+       HttpServletRequest request,
+       @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(username, filterRequest, pagination.toPageable()));
@@ -122,13 +122,13 @@ public class StakeKeyReportController {
   @LogMessage
   @Operation(summary = "Get report history of stake key and pool id")
   public ResponseEntity<BaseFilterResponse<ReportHistoryResponse>> getReportHistory(
-      HttpServletRequest request,
-      @ParameterObject @Parameter(description = "filter condition") @DateValid ReportHistoryFilterRequest filterRequest,
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+       HttpServletRequest request,
+       @ParameterObject @Parameter(description = "filter condition") @DateValid ReportHistoryFilterRequest filterRequest,
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "createdAt"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        reportHistoryService.getReportHistory(filterRequest, username, pagination.toPageable()));
+            reportHistoryService.getReportHistory(filterRequest, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/registrations")
@@ -141,7 +141,7 @@ public class StakeKeyReportController {
           "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeRegistrationsByReportId(reportId, username, pagination.toPageable()));
+            stakeKeyReportService.getStakeRegistrationsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/de-registrations")
@@ -154,7 +154,7 @@ public class StakeKeyReportController {
           "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeDeRegistrationsByReportId(reportId, username, pagination.toPageable()));
+            stakeKeyReportService.getStakeDeRegistrationsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/delegations")
@@ -167,7 +167,7 @@ public class StakeKeyReportController {
           "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeDelegationsByReportId(reportId, username, pagination.toPageable()));
+            stakeKeyReportService.getStakeDelegationsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/rewards")
@@ -180,7 +180,7 @@ public class StakeKeyReportController {
           "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeRewardsByReportId(reportId, username, pagination.toPageable()));
+            stakeKeyReportService.getStakeRewardsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/withdrawals")
@@ -193,7 +193,7 @@ public class StakeKeyReportController {
           "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getStakeWithdrawalsByReportId(reportId, username, pagination.toPageable()));
+            stakeKeyReportService.getStakeWithdrawalsByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/wallet-activity")
@@ -206,7 +206,7 @@ public class StakeKeyReportController {
           "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        stakeKeyReportService.getWalletActivitiesByReportId(reportId, username, pagination.toPageable()));
+            stakeKeyReportService.getWalletActivitiesByReportId(reportId, username, pagination.toPageable()));
   }
 
   @GetMapping(value = "/report-limit")

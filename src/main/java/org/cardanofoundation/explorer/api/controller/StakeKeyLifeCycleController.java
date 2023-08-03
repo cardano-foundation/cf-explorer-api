@@ -20,7 +20,6 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationVal
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -116,7 +115,7 @@ public class StakeKeyLifeCycleController {
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           Delegation_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
+            stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/delegations/{hash}")
@@ -153,7 +152,7 @@ public class StakeKeyLifeCycleController {
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
+            stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/withdrawals/{hash}")

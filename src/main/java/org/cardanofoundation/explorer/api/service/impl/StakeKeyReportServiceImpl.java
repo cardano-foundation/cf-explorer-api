@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.config.datasource.DataBaseType;
+import org.cardanofoundation.explorer.api.config.datasource.SwitchDataSource;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.mapper.StakeKeyReportMapper;
@@ -41,7 +43,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -62,17 +63,6 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Override
   public StakeKeyReportHistoryResponse generateStakeKeyReport(
       StakeKeyReportRequest stakeKeyReportRequest, String username) {
-    StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, username);
-    Boolean isSuccess = kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
-    if(Boolean.FALSE.equals(isSuccess)) {
-      stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
-      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
-    }
-    return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
-  }
-
-  @Transactional
-  public StakeKeyReportHistory save(StakeKeyReportRequest stakeKeyReportRequest, String username) {
     stakeAddressRepository.findByView(stakeKeyReportRequest.getStakeKey())
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
@@ -91,10 +81,17 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.IN_PROGRESS);
     stakeKeyReportHistory.getReportHistory().setType(ReportType.STAKE_KEY);
     stakeKeyReportHistory.getReportHistory().setUsername(username);
-    return stakeKeyReportHistoryRepository.saveAndFlush(stakeKeyReportHistory);
+    reportHistoryService.saveStakeKeyReportHistory(stakeKeyReportHistory);
+    Boolean isSuccess = kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
+    if(Boolean.FALSE.equals(isSuccess)) {
+      reportHistoryService.deleteStakeKeyReportHistory(stakeKeyReportHistory);
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+    }
+    return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
   }
 
   @Override
+  @SwitchDataSource(DataBaseType.ANALYTICS)
   public BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(String username,
                                                                                     ReportHistoryFilterRequest filterRequest,
                                                                                     Pageable pageable) {
@@ -125,6 +122,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Override
+  @SwitchDataSource(DataBaseType.ANALYTICS)
   public BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistoryByStakeKey(
       String stakeKey, String username, Pageable pageable) {
 
@@ -141,7 +139,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
       throw new BusinessException(BusinessCode.EXPORT_TYPE_NOT_SUPPORTED);
     }
 
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+    StakeKeyReportHistory stakeKeyReportHistory = reportHistoryService.getStakeKeyReportHistory(
+        reportId, username);
     String storageKey = stakeKeyReportHistory.getReportHistory().getStorageKey();
     String reportName = stakeKeyReportHistory.getReportHistory().getReportName();
     ReportStatus reportStatus = stakeKeyReportHistory.getReportHistory().getStatus();
@@ -157,28 +156,20 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Override
+  @SwitchDataSource(DataBaseType.ANALYTICS)
   public StakeKeyReportHistoryResponse getStakeKeyReportHistoryByReportId(Long reportId,
                                                                           String username) {
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+    StakeKeyReportHistory stakeKeyReportHistory = reportHistoryService.getStakeKeyReportHistory(
+        reportId, username);
 
     return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
-  }
-
-  private StakeKeyReportHistory getStakeKeyReportHistory(Long reportId, String username) {
-    StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportHistoryRepository.findById(reportId)
-        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND));
-
-    if (DataUtil.isNullOrEmpty(username) || !username.equals(
-        stakeKeyReportHistory.getReportHistory().getUsername())) {
-      throw new BusinessException(BusinessCode.STAKE_REPORT_HISTORY_NOT_FOUND);
-    }
-    return stakeKeyReportHistory;
   }
 
   @Override
   public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeRegistrationsByReportId(
       Long reportId, String username, Pageable pageable) {
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+    StakeKeyReportHistory stakeKeyReportHistory = reportHistoryService.getStakeKeyReportHistory(
+        reportId, username);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
@@ -189,7 +180,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Override
   public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrationsByReportId(
       Long reportId, String username, Pageable pageable) {
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+    StakeKeyReportHistory stakeKeyReportHistory = reportHistoryService.getStakeKeyReportHistory(
+        reportId, username);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
@@ -200,7 +192,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Override
   public BaseFilterResponse<StakeDelegationFilterResponse> getStakeDelegationsByReportId(
       Long reportId, String username, Pageable pageable) {
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+    StakeKeyReportHistory stakeKeyReportHistory = reportHistoryService.getStakeKeyReportHistory(
+        reportId, username);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
@@ -212,7 +205,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   public BaseFilterResponse<StakeRewardResponse> getStakeRewardsByReportId(Long reportId,
                                                                            String username,
                                                                            Pageable pageable) {
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+    StakeKeyReportHistory stakeKeyReportHistory = reportHistoryService.getStakeKeyReportHistory(
+        reportId, username);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     fetchReward(stakeKey);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
@@ -230,7 +224,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Override
   public BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawalsByReportId(
       Long reportId, String username, Pageable pageable) {
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+    StakeKeyReportHistory stakeKeyReportHistory = reportHistoryService.getStakeKeyReportHistory(
+        reportId, username);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
@@ -241,7 +236,8 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   @Override
   public BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(
       Long reportId, String username, Pageable pageable) {
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+    StakeKeyReportHistory stakeKeyReportHistory = reportHistoryService.getStakeKeyReportHistory(
+        reportId, username);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
         stakeKeyReportHistory);
