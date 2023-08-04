@@ -20,6 +20,7 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationVal
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance_;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
+import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
