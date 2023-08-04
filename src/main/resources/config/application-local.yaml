@@ -1,26 +1,20 @@
 # Infrastructure domain
-infrastructure:
-  host: 172.16.1.230
-
-spring:
-  # Datasource specific configs
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:54321/explorer_api?currentSchema=dev
-    username: explorer_api_read
-    password: MTIzNDU2NzhhQUA=READ
-    driver-class-name: org.postgresql.Driver
-    # Hikari specific configs
-    hikari:
-      pool-name: explorer-api-pool
-      minimum-idle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: 1 #maximum pool size
-      idle-timeout: 300000 #maximum idle time for connection
-      max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
-      connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
-      auto-commit: false #default auto-commit behavior.
-      connection-init-sql: SELECT 1
-      data-source-properties:
+multi-datasource: #specified for HikariDataSource
+  datasourceLedgerSync:
+    hikariConfig:
+      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.75}:${LEDGER_SYNC_PORT:54322}/${LEDGER_SYNC_DB:explorer}?currentSchema=${DB_SCHEMA}
+      username: ${LEDGER_SYNC_USER:cardano-master}
+      password: ${LEDGER_SYNC_PASSWORD:postgres_master_pw}
+      driverClassName: org.postgresql.Driver
+      poolName: explorer-api-ledgersync-pool
+      minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximumPoolSize: ${DB_MAXIMUM_POOL_SIZE:48} #maximum pool size
+      idleTimeout: 300000 #maximum idle time for connection
+      maxLifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connectionTimeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      autoCommit: false #default auto-commit behavior.
+      connectionInitSql: SELECT 1
+      dataSourceProperties:
         cachePrepStmts: true
         prepStmtCacheSize: 250
         prepStmtCacheSqlLimit: 2048
@@ -31,6 +25,38 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
+    flyway:
+      enabled: ${FLYWAY_ENABLE:false}
+
+  datasourceAnalytics:
+    hikariConfig:
+      jdbcUrl: jdbc:postgresql://${ANALYTICS_HOST:localhost}:${ANALYTICS_PORT:54321}/${ANALYTICS_DB:explorer}?currentSchema=${DB_SCHEMA}
+      username: ${ANALYTICS_USER:cardano-master}
+      password: ${ANALYTICS_PASSWORD:Y2FyZGFuby1kYXRhYmFzZS1tYXN0ZXI=}
+      driverClassName: org.postgresql.Driver
+      poolName: explorer-api-analytics-pool
+      minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximumPoolSize: ${DB_MAXIMUM_POOL_SIZE:48} #maximum pool size
+      idleTimeout: 300000 #maximum idle time for connection
+      maxLifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connectionTimeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      autoCommit: false #default auto-commit behavior.
+      connectionInitSql: SELECT 1
+      dataSourceProperties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+    flyway:
+      enabled: ${FLYWAY_ENABLE:false}
+
+spring:
   # JPA specific configs
   jpa:
     open-in-view: false
@@ -39,11 +65,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: dev
+        default_schema: ${DB_SCHEMA:mainnet}
         show_sql: true
         format_sql: true
   flyway:
-    enabled: false
+    enabled: false # disable auto FlywayAutoConfiguration
   data:
     web:
       pageable:
@@ -99,7 +125,7 @@ application:
     base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
   api.news:
     interval-time: ${API_NEWS_CACHE_TIME:120}
-    base-url: ${API_NEWS_URL}
+    base-url: ${API_NEWS_URL:https://min-api.cryptocompare.com/data/v2/news/?lang=EN}
   api:
     check-reward:
       base-url: ${API_CHECK_REWARD_URL:http://10.4.10.231:8888/api/v1/rewards/fetch}
@@ -111,6 +137,8 @@ application:
       base-url: ${API_CHECK_EPOCH_STAKE_URL:http://10.4.10.231:8888/api/v1/epoch-stake/fetch}
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
+    check-epoch:
+      base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:200}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
@@ -144,16 +172,16 @@ rsa:
 cloud:
   aws:
     credentials:
-      access-key: ${S3_ACCESS_KEY}
-      secret-key: ${S3_SECRET_KEY}
+      access-key: ${S3_ACCESS_KEY:minio}
+      secret-key: ${S3_SECRET_KEY:minio123}
     region:
-      static: ${S3_REGION}
+      static: ${S3_REGION:null}
     s3:
       bucket:
-        name: ${S3_BUCKET_NAME}
+        name: ${S3_BUCKET_NAME:cardano-explorer-api-storage-mainnet}
       path-style:
-        enabled: false
-      endpoint: ${STORAGE_ENDPOINT}
+        enabled: true
+      endpoint: ${STORAGE_ENDPOINT:http://10.4.10.231:9000}
 
 logging:
   level:

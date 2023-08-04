@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
@@ -23,32 +24,39 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/policies")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "policies", description = "The policy APIs")
 public class PolicyController {
 
   private final PolicyService policyService;
 
   @GetMapping("/{policyId}")
   @LogMessage
-  @Operation(summary = "Get a policy detail")
+  @Operation(summary = "Get detail information of policy", tags = {"policies"} )
   public ResponseEntity<PolicyResponse> getPolicyDetail(
-      @PathVariable @Parameter(description = "Policy hash") String policyId) {
+      @PathVariable @Parameter(description = "The policy hash") String policyId) {
     return ResponseEntity.ok(policyService.getPolicyDetail(policyId));
   }
 
   @GetMapping("/{policyId}/tokens")
   @LogMessage
-  @Operation(summary = "Get tokens by policy")
+  @Operation(
+      summary = "Get tokens of a policy",
+      description = "Get all tokens of a policy",
+      tags = {"policies"})
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> getTokens(
-      @PathVariable @Parameter(description = "Policy hash") String policyId,
+      @PathVariable @Parameter(description = "The policy hash") String policyId,
       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(policyService.getTokens(policyId, pagination.toPageable()));
   }
 
   @GetMapping("/{policyId}/holders")
   @LogMessage
-  @Operation(summary = "Get holders by policy")
+  @Operation(
+      summary = "Get holders by policy",
+      description = "Get all holders of all tokens of policy",
+      tags = {"policies"})
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
-      @PathVariable @Parameter(description = "Policy hash") String policyId,
+      @PathVariable @Parameter(description = "The policy hash") String policyId,
       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(policyService.getHolders(policyId, pagination.toPageable()));
   }

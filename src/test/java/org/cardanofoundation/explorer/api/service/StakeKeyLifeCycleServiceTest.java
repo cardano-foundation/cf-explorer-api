@@ -95,7 +95,7 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeDelegations("stake1notfound", request, pageable));
     Assertions.assertThrows(NoContentException.class,
-        () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", fromDate, toDate ,null, pageable));
+        () -> stakeKeyLifeCycleService.getStakeRewards("stake1notfound", fromDate, toDate, null , pageable));
     Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeWithdrawals("stake1notfound", request, pageable));
     Assertions.assertThrows(BusinessException.class,
@@ -118,6 +118,7 @@ class StakeKeyLifeCycleServiceTest {
     when(delegationRepository.existsByAddress(stakeAddress)).thenReturn(true);
     when(rewardRepository.existsByAddr(stakeAddress)).thenReturn(true);
     when(withdrawalRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
     var response = stakeKeyLifeCycleService
         .getStakeLifeCycle("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna");
     Assertions.assertNotNull(response);

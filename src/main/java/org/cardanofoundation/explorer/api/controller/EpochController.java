@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/epochs")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "epoch", description = "The epoch APIs")
 public class EpochController {
 
   private final EpochService epochService;
@@ -34,17 +36,17 @@ public class EpochController {
 
   @GetMapping("/{no}")
   @LogMessage
-  @Operation(summary = "Get a epoch detail by its no")
+  @Operation(summary = "Get summary information of epoch by its number", tags = {"epoch"})
   public ResponseEntity<EpochResponse> getEpochDetail(
-      @PathVariable @Parameter(description = "Epoch Number") String no) {
+      @PathVariable @Parameter(description = "The epoch number") String no) {
     return ResponseEntity.ok(epochService.getEpochDetail(no));
   }
 
   @GetMapping("/{no}/blocks")
   @LogMessage
-  @Operation(summary = "Get block list of epoch by its no")
+  @Operation(summary = "Get block list of epoch by its number", tags = {"epoch"})
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getBlockList(
-      @PathVariable @Parameter(description = "Epoch Number") String no,
+      @PathVariable @Parameter(description = "The epoch number") String no,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
           direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(blockService.getBlockByEpoch(no, pagination.toPageable()));
@@ -52,15 +54,15 @@ public class EpochController {
 
   @GetMapping
   @LogMessage
-  @Operation(summary = "Get all epoch")
+  @Operation(summary = "Get all epoch", tags = {"epoch"})
   public ResponseEntity<BaseFilterResponse<EpochResponse>> filter(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
           direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(epochService.getAllEpoch(pagination.toPageable()));
   }
   @GetMapping("/current")
   @LogMessage
-  @Operation(summary = "Get current epoch")
+  @Operation(summary = "Get information of current epoch", tags = {"epoch"})
   public ResponseEntity<EpochSummary> findCurrentEpoch(){
     return ResponseEntity.ok(epochService.getCurrentEpochSummary());
   }

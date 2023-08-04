@@ -38,6 +38,7 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -128,8 +129,7 @@ public class AddressServiceImpl implements AddressService {
 
     final Optional<LocalDate> maxDateAgg = aggregateAddressTxBalanceRepository.getMaxDay();
     List<CompletableFuture<AddressAnalyticsResponse>> futureAddressAnalytics = new ArrayList<>();
-    for (int i = 1; i < dates.size(); i++) {
-      LocalDateTime analyticTime = dates.get(i);
+    for (LocalDateTime analyticTime : dates) {
       futureAddressAnalytics.add(CompletableFuture.supplyAsync(() ->
           getAddressAnalyticsResponse(addr, type, analyticTime, maxDateAgg), fixedExecutor)
       );

@@ -215,9 +215,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     });
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), instantaneousRewards.size());
+
     if (start >= instantaneousRewards.size()) {
       return new BaseFilterResponse<>(new PageImpl<>(List.of()));
     }
+
     Page<StakeInstantaneousRewardsProjection> page = new PageImpl<>(
         instantaneousRewards.subList(start, end), pageable, instantaneousRewards.size());
     return new BaseFilterResponse<>(page);
