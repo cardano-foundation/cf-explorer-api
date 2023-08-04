@@ -74,8 +74,8 @@ public class PolicyControllerTest {
         when(policyService.getTokens(policyId, pageable)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/policies/{policyId}/tokens", policyId)
-                        .param("page", "0")
-                        .param("size", "10"))
+                .param("page", "0")
+                .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists());
     }

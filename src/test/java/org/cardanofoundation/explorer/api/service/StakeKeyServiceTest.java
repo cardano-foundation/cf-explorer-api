@@ -18,6 +18,8 @@ import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -497,5 +499,47 @@ public class StakeKeyServiceTest {
         String address = "wrong_address";
 
         assertThrows(BusinessException.class, () -> stakeKeyService.getStakeByAddress(address));
+    }
+
+    @Test
+    void testRewardDistribution_thenReturnMember(){
+        String stakeKey = "stake_key";
+
+        when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(true);
+        when(rewardRepository.getAvailableRewardByStakeAddress(stakeKey)).thenReturn(Optional.of(BigInteger.valueOf(10)));
+        when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(Set.of(RewardType.MEMBER));
+
+        var response = stakeKeyService.getStakeAddressRewardDistributionInfo(stakeKey);
+        assertEquals(BigInteger.valueOf(10),response.getRewardAvailable());
+        assertTrue(response.isHasMemberReward());
+        assertFalse(response.isHasLeaderReward());
+    }
+
+    @Test
+    void testRewardDistribution_thenReturnMemberAndLeader(){
+        String stakeKey = "stake_key";
+
+        when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(true);
+        when(rewardRepository.getAvailableRewardByStakeAddress(stakeKey)).thenReturn(Optional.of(BigInteger.valueOf(10)));
+        when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(Set.of(RewardType.MEMBER,RewardType.LEADER));
+
+        var response = stakeKeyService.getStakeAddressRewardDistributionInfo(stakeKey);
+        assertEquals(BigInteger.valueOf(10),response.getRewardAvailable());
+        assertTrue(response.isHasMemberReward());
+        assertTrue(response.isHasLeaderReward());
+    }
+
+    @Test
+    void testRewardDistribution_thenReturnNoType(){
+        String stakeKey = "stake_key";
+
+        when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(true);
+        when(rewardRepository.getAvailableRewardByStakeAddress(stakeKey)).thenReturn(Optional.of(BigInteger.valueOf(10)));
+        when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(new HashSet<>());
+
+        var response = stakeKeyService.getStakeAddressRewardDistributionInfo(stakeKey);
+        assertEquals(BigInteger.valueOf(10),response.getRewardAvailable());
+        assertFalse(response.isHasMemberReward());
+        assertFalse(response.isHasLeaderReward());
     }
 }
