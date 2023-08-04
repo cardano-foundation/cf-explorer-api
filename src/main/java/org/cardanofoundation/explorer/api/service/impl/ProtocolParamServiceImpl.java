@@ -115,7 +115,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     if (ObjectUtils.isEmpty(protocolTypesInput) || protocolTypesInput.contains(ProtocolType.ALL)) {
       protocolTypesInput = ProtocolType.getAll();
       isGetAll = Boolean.TRUE;
-      if (Objects.nonNull(redisTemplate.opsForValue().get(redisKey))) {
+      if (Objects.nonNull(redisTemplate.opsForValue().get(redisKey)) &&
+          (Objects.isNull(startTime) || Objects.isNull(endTime))) {
         return redisTemplate.opsForValue().get(redisKey);
       }
     }
