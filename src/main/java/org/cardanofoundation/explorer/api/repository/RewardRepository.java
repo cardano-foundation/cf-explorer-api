@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -165,4 +166,9 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " AND r.stakeAddressId IN :stakeAddressIds"
       + " GROUP BY r.stakeAddressId")
   List<StakeRewardProjection> getTotalRewardByStakeAddressIn(@Param("stakeAddressIds") Collection<Long> stakeAddressIds);
+
+  @Query("SELECT reward.type FROM Reward reward "
+      + "JOIN StakeAddress stakeAddress ON stakeAddress.id = reward.stakeAddressId "
+      + "WHERE stakeAddress.view = :stakeView")
+  Set<RewardType> getAllRewardTypeOfAStakeKey(@Param("stakeView") String stakeView);
 }

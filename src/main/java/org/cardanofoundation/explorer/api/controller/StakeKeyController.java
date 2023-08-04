@@ -13,6 +13,7 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
@@ -187,6 +188,15 @@ public class StakeKeyController {
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey) {
     return ResponseEntity.ok(stakeService.getStakeMinMaxBalance(stakeKey));
+  }
+
+  @GetMapping("/reward-distribution/{stakeKey}")
+  @LogMessage
+  @Operation(summary = "Get reward distribution information", tags = "stake-key")
+  public ResponseEntity<StakeAddressRewardDistribution> getStakeAddressRewardDistributionInfo(
+      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
+      @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey) {
+    return ResponseEntity.ok(stakeService.getStakeAddressRewardDistributionInfo(stakeKey));
   }
 
 }
