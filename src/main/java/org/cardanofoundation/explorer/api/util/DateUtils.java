@@ -1,55 +1,60 @@
 package org.cardanofoundation.explorer.api.util;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 import lombok.experimental.UtilityClass;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 
 @UtilityClass
 public class DateUtils {
 
+  private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_DAY = Duration.ofHours(2);
+  private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_WEEK = Duration.ofDays(1);
+  private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_MONTH = Duration.ofDays(2);
+  private final TemporalAmount AMOUNT_TO_SUBTRACT_THREE_MONTH = Duration.ofDays(7);
+
   public static List<LocalDateTime> getListDateAnalytic(AnalyticType analyticType) {
     LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
     LocalDateTime startOfToday = currentDate.atStartOfDay();
-    List<LocalDateTime> dateAnalytics = new ArrayList<>();
+    // Default value for one day
+    TemporalAmount amountToSubtract = AMOUNT_TO_SUBTRACT_ONE_DAY;
+    LocalDateTime startMilestone = startOfToday.minusDays(1);
     switch (analyticType) {
-      case ONE_DAY -> {
-        LocalDateTime startMilestone = startOfToday.minusDays(1);
-        while (!startMilestone.isAfter(currentDate.atStartOfDay())) {
-          dateAnalytics.add(startMilestone);
-          startMilestone = startMilestone.plusHours(2);
-        }
-      }
       case ONE_WEEK -> {
-        for (int inc = 7; inc >= 0; inc--) {
-          dateAnalytics.add(startOfToday.minusDays(inc));
-        }
+        amountToSubtract = AMOUNT_TO_SUBTRACT_ONE_WEEK;
+        startMilestone = startOfToday.minusWeeks(1);
       }
       case ONE_MONTH -> {
-        LocalDateTime startMilestone = startOfToday.minusMonths(1).minusDays(2);
-        while (!startMilestone.isAfter(startOfToday)) {
-          dateAnalytics.add(startMilestone);
-          startMilestone = startMilestone.plusDays(2);
-        }
+        amountToSubtract = AMOUNT_TO_SUBTRACT_ONE_MONTH;
+        startMilestone = startOfToday.minusMonths(1);
       }
       case THREE_MONTH -> {
-        LocalDateTime startMilestone = startOfToday.minusMonths(3).minusDays(7);
-        while (!startMilestone.isAfter(startOfToday)) {
-          dateAnalytics.add(startMilestone);
-          startMilestone = startMilestone.plusDays(7);
-        }
+        amountToSubtract = AMOUNT_TO_SUBTRACT_THREE_MONTH;
+        startMilestone = startOfToday.minusMonths(3);
       }
     }
+    List<LocalDateTime> dateAnalytics = getDateAnalytics(startOfToday, startMilestone, amountToSubtract);
+    Collections.reverse(dateAnalytics);
     return dateAnalytics;
   }
 
-//  public static void main(String[] args) {
-//    List<LocalDateTime> data = getListDateAnalytic2(AnalyticType.THREE_MONTH);
-//    data.forEach(System.err::println);
-//  }
+  private List<LocalDateTime> getDateAnalytics(LocalDateTime startOfToday,
+                                               LocalDateTime startMilestone,
+                                               TemporalAmount amountToSubtract) {
+    List<LocalDateTime> dateAnalytics = new ArrayList<>();
+    while (!startOfToday.isBefore(startMilestone)) {
+      dateAnalytics.add(startOfToday);
+      startOfToday = startOfToday.minus(amountToSubtract);
+    }
+    return dateAnalytics;
+  }
 
 }
