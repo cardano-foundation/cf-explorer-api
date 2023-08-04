@@ -45,7 +45,7 @@ public class AddressController {
   @LogMessage
   @Operation(
       summary = "Get detail information of payment address",
-      description = "Get detail information of payment address with balance, txs, token and checjk contract",
+      description = "Get detail information of payment address with balance, txs, token and check contract",
       tags = {"address"})
   public ResponseEntity<AddressResponse> getAddressDetail(
       @PathVariable @Parameter(description = "The human readable encoding of the output address."
