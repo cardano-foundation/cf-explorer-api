@@ -67,6 +67,12 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
     return StakeLifecycleResponse.builder()
         .hasRegistration(stakeRegistrationRepository.existsByAddr(stakeAddress))
         .hasDeRegistration(stakeDeRegistrationRepository.existsByAddr(stakeAddress))
