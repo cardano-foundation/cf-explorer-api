@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -20,12 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/pools")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "pools", description = "The pool APIs")
 public class PoolController {
 
   private final PoolRegistrationService poolRegistrationService;
 
   @GetMapping("/registration")
   @LogMessage
+  @Operation(summary = "Get list of pool registrations", tags = {"pools"})
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "bk.time"}, direction = Sort.Direction.DESC) Pagination pagination) {
@@ -35,6 +39,7 @@ public class PoolController {
 
   @GetMapping("/de-registration")
   @LogMessage
+  @Operation(summary = "Get list of pool de-registrations", tags = {"pools"})
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "bk.time"}, direction = Sort.Direction.DESC) Pagination pagination) {

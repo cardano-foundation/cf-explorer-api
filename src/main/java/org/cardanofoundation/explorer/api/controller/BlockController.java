@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/blocks")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "block", description = "The block APIs")
 public class BlockController {
 
   private final BlockService blockService;
@@ -30,15 +32,16 @@ public class BlockController {
 
   @GetMapping("/{blockId}")
   @LogMessage
-  @Operation(summary = "Get a block detail")
+  @Operation(
+      summary = "Get detail information of block", tags = {"block"})
   public ResponseEntity<BlockResponse> getBlockDetailByBlockId(
-      @PathVariable @Parameter(description = "Block number or block hash") String blockId) {
+      @PathVariable @Parameter(description = "The hash identifier of the block.") String blockId) {
     return ResponseEntity.ok(blockService.getBlockDetailByBlockId(blockId));
   }
 
   @GetMapping
   @LogMessage
-  @Operation(summary = "Get all block")
+  @Operation(summary = "Get summary information of all block", tags = {"block"})
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getAll(
        @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
@@ -47,10 +50,10 @@ public class BlockController {
 
   @GetMapping("/{blockId}/txs")
   @LogMessage
-  @Operation(summary = "Get tx list of block")
+  @Operation(summary = "Get tx list of block", tags = {"block"})
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactionsByBlock(
-       @PathVariable @Parameter(description = "Block number or block hash") String blockId,
-       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+      @PathVariable @Parameter(description = "The hash identifier of the block.") String blockId,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByBlock(blockId, pagination.toPageable()));
   }

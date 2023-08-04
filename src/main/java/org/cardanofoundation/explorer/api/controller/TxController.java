@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/txs")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "transaction", description = "The transaction APIs")
 public class TxController {
 
   private final TxService txService;
@@ -52,8 +54,9 @@ public class TxController {
   @GetMapping("/{hash}")
   @LogMessage
   @Operation(summary = "Get transaction detail by hash")
-  public ResponseEntity<TxResponse> getTransactionDetail(@PathVariable
-                                                         @Parameter(description = "Hash value of transaction") @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash) {
+  public ResponseEntity<TxResponse> getTransactionDetail(
+      @PathVariable @Parameter(description = "The hash identifier of the transaction.")
+      @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash) {
     return ResponseEntity.ok(txService.getTxDetailByHash(hash));
   }
 
@@ -68,7 +71,7 @@ public class TxController {
   @LogMessage
   @Operation(summary = "Get transaction chart (1D , 1W, 2W, 1M)")
   public ResponseEntity<List<TxGraph>> getTransactionChart(
-          @PathVariable("range") TxChartRange range) {
+      @PathVariable("range") @Parameter(description = "Type for chart") TxChartRange range) {
     return ResponseEntity.ok(txService.getTransactionChartByRange(range));
   }
 
@@ -76,8 +79,8 @@ public class TxController {
   @LogMessage
   @Operation(summary = "Get tx contract detail by txHash and contract address(optional) ")
   public ResponseEntity<List<ContractResponse>> getTxContractDetailByTxHash(
-      @PathVariable("hash") String hash,
-      @RequestParam(required = false) String address) {
+      @PathVariable("hash") @Parameter(description = "The hash identifier of the transaction.") String hash,
+      @RequestParam(required = false) @Parameter(description = "The view of contract") String address) {
     return ResponseEntity.ok(txService.getTxContractDetail(hash, address));
   }
 }
