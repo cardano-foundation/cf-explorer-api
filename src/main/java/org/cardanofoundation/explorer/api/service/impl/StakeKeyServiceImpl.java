@@ -435,7 +435,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
       }
     }
-    stakeAddressRewardDistribution.setStakeAddress(stakeKey);
     BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
         stakeKey).orElse(BigInteger.ZERO);
     stakeAddressRewardDistribution.setRewardAvailable(stakeAvailableReward);
