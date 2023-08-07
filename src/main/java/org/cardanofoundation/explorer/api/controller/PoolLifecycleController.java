@@ -56,7 +56,7 @@ public class PoolLifecycleController {
       @Param("toDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.registration(poolView, txHash, fromDate, toDate, pagination.toPageable()));
+            poolLifecycleService.registration(poolView, txHash, fromDate, toDate, pagination.toPageable()));
   }
 
   @GetMapping(value = "/registration-detail")
@@ -83,7 +83,7 @@ public class PoolLifecycleController {
       @Param("toDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.poolUpdate(poolView, txHash, fromDate, toDate, pagination.toPageable()));
+            poolLifecycleService.poolUpdate(poolView, txHash, fromDate, toDate, pagination.toPageable()));
   }
 
   @GetMapping(value = "/pool-update-detail")
@@ -118,7 +118,7 @@ public class PoolLifecycleController {
       @Param("toDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.deRegistration(poolView, txHash, fromDate, toDate, pagination.toPageable()));
+            poolLifecycleService.deRegistration(poolView, txHash, fromDate, toDate, pagination.toPageable()));
   }
 
   @GetMapping(value = "/owner")
@@ -148,7 +148,7 @@ public class PoolLifecycleController {
       @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView,
       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
     return ResponseEntity.ok(
-        poolLifecycleService.registrationList(poolView, pagination.toPageable()));
+            poolLifecycleService.registrationList(poolView, pagination.toPageable()));
   }
 
   @GetMapping(value = "/pool-update-list")
@@ -159,7 +159,7 @@ public class PoolLifecycleController {
       @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView,
       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination) {
     return ResponseEntity.ok(
-        poolLifecycleService.poolUpdateList(poolView, pagination.toPageable()));
+            poolLifecycleService.poolUpdateList(poolView, pagination.toPageable()));
   }
 
   @GetMapping(value = "/status")

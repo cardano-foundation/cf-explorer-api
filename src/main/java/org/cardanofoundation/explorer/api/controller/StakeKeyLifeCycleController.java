@@ -62,7 +62,7 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeRegistrationFilterResponse>> getStakeRegistrations(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @DateValid StakeLifeCycleFilterRequest condition,
+      @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
@@ -87,7 +87,7 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeRegistrationFilterResponse>> getStakeDeRegistrations(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @DateValid StakeLifeCycleFilterRequest condition,
+      @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
@@ -112,11 +112,11 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeDelegationFilterResponse>> getDelegations(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @DateValid StakeLifeCycleFilterRequest condition,
+      @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           Delegation_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
+            stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/delegations/{hash}")
@@ -149,11 +149,11 @@ public class StakeKeyLifeCycleController {
   public ResponseEntity<BaseFilterResponse<StakeWithdrawalFilterResponse>> getWithdrawals(
       @PathVariable @Parameter(description = "The Bech32 encoded version of the stake address.")
       @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
-      @ParameterObject @Parameter(description = "filter condition") @DateValid StakeLifeCycleFilterRequest condition,
+      @ParameterObject @Parameter(description = "filter condition") StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
+            stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/withdrawals/{hash}")

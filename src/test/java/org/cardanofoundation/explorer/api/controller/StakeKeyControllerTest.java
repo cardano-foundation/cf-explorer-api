@@ -75,8 +75,8 @@ public class StakeKeyControllerTest {
         when(stakeService.getDataForStakeKeyRegistration(pageable)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/stakes/registration")
-                        .param("page", "0")
-                        .param("size", "10"))
+                .param("page", "0")
+                .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists());
     }
@@ -128,8 +128,8 @@ public class StakeKeyControllerTest {
         when(txService.getTransactionsByStake(stakeKey, pageable)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/stakes/{stakeKey}/txs", stakeKey)
-                        .param("page", "0")
-                        .param("size", "10"))
+                .param("page", "0")
+                .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists());
     }

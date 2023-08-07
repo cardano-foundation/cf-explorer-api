@@ -123,7 +123,7 @@ public class StakeKeyReportController {
   @Operation(summary = "Get report history of stake key and pool id")
   public ResponseEntity<BaseFilterResponse<ReportHistoryResponse>> getReportHistory(
       HttpServletRequest request,
-      @ParameterObject @Parameter(description = "filter condition") @DateValid ReportHistoryFilterRequest filterRequest,
+      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "createdAt"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();

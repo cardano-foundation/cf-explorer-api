@@ -43,7 +43,7 @@ public class BlockController {
   @LogMessage
   @Operation(summary = "Get summary information of all block", tags = {"block"})
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getAll(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(blockService.filterBlock(pagination.toPageable()));
   }
