@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.3.27](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.26...v0.3.27) (2023-08-07)
+
+
+### Features
+
+* MET-1530 check reward type of stake key ([e01c633](https://github.com/cardano-foundation/cf-explorer-api/commit/e01c63394f42e9e537421238e7e3c2d714585e47))
+* update unit test for delegation and spo ([34dcc33](https://github.com/cardano-foundation/cf-explorer-api/commit/34dcc33da608d66715039730c27af454980fac24))
+
+
+### Bug Fixes
+
+* implement cip-25 to verify nft token metadata ([b4eca24](https://github.com/cardano-foundation/cf-explorer-api/commit/b4eca248276e75ab84f717c8f8424219e34972f7))
+* MET_1420 change logic to get point for chart analytic ([a3b209e](https://github.com/cardano-foundation/cf-explorer-api/commit/a3b209e343ea30487accbd97d1b6fcbcd8edfc1f))
+* met-1105 add time condition ([47664e2](https://github.com/cardano-foundation/cf-explorer-api/commit/47664e2ce496ad6f811a9d40d87b802c67333565))
+* MET-1128 fix reward tab in stake lifecycle not active ([ce21094](https://github.com/cardano-foundation/cf-explorer-api/commit/ce21094ae96f2ef232e68f4189bb31f7adde9fdf))
+* MET-1509 validate stake address in check stake address by payment address ([4a0f273](https://github.com/cardano-foundation/cf-explorer-api/commit/4a0f273dc72dac09e9583f93f053e6dfa88ef66a))
+* met-684 fix search byron address not found ([bd8bce9](https://github.com/cardano-foundation/cf-explorer-api/commit/bd8bce90ac981836dee5c6a2fbf635f69ea06bb6))
+
+
+### Documentation
+
+* MET-1400 update swagger ([81b734f](https://github.com/cardano-foundation/cf-explorer-api/commit/81b734f8701f09ccd66e7efd90d347554ddbbcfe))
+
+## [0.3.26](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.25...v0.3.26) (2023-08-02)
+
+
+### Bug Fixes
+
+* attempting to force a release ([a4f1536](https://github.com/cardano-foundation/cf-explorer-api/commit/a4f1536c9b9c753b893ad847e1d2b825aa87225a))
+
 ## [0.3.25](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.24...v0.3.25) (2023-08-01)
 
 
