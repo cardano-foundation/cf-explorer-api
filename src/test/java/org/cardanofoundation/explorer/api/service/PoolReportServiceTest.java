@@ -62,6 +62,8 @@ public class PoolReportServiceTest {
 
   @Mock
   KafkaService kafkaService;
+  @Mock
+  ReportHistoryService reportHistoryService;
 
   @Test
   void create_shouldThrowExceptionWhenNotFoundStakeAdress() {
@@ -70,6 +72,18 @@ public class PoolReportServiceTest {
         .build();
     String username = "username";
     when(poolHashRepository.findByView(anyString())).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+                            () -> poolReportService.create(request, username));
+  }
+
+  @Test
+  void creat_shouldThrowExceptionWhenLimitReached() {
+    PoolReportCreateRequest request = PoolReportCreateRequest.builder()
+        .poolId("any")
+        .build();
+    String username = "username";
+    when(poolHashRepository.findByView(anyString())).thenReturn(Optional.of(new PoolHash()));
+    when(reportHistoryService.isLimitReached(username)).thenReturn(true);
     Assertions.assertThrows(BusinessException.class,
                             () -> poolReportService.create(request, username));
   }
@@ -112,7 +126,8 @@ public class PoolReportServiceTest {
 
     when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
-    doNothing().when(kafkaService).sendReportHistory(any(ReportHistory.class));
+    when(reportHistoryService.isLimitReached(username)).thenReturn(false);
+    when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(true);
     Assertions.assertTrue(poolReportService.create(request, username));
   }
 
@@ -286,7 +301,7 @@ public class PoolReportServiceTest {
         .build();
     when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
-    when(poolLifecycleService.listReward(any(), any())).thenReturn(rewardResponse);
+    when(poolLifecycleService.listRewardFilter(any(), any(), any(), any())).thenReturn(rewardResponse);
 
     var response = poolReportService.fetchRewardsDistribution(reportId, PageRequest.of(0, 1),
                                                               username);

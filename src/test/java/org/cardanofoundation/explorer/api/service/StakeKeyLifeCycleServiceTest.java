@@ -7,22 +7,17 @@ import static org.mockito.Mockito.when;
 import java.time.temporal.ChronoUnit;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
+import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -31,10 +26,9 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,10 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 @ExtendWith(MockitoExtension.class)
 class StakeKeyLifeCycleServiceTest {
@@ -69,6 +60,11 @@ class StakeKeyLifeCycleServiceTest {
   private TxRepository txRepository;
 
   @Mock FetchRewardDataService fetchRewardDataService;
+
+  @Mock TxOutRepository txOutRepository;
+
+  @Mock
+  EpochParamRepository epochParamRepository;
 
   @InjectMocks
   private StakeKeyLifeCycleServiceImpl stakeKeyLifeCycleService;
@@ -109,6 +105,28 @@ class StakeKeyLifeCycleServiceTest {
         () -> stakeKeyLifeCycleService.getStakeWalletActivities("stake1notfound", pageable));
     Assertions.assertThrows(NoContentException.class,
         () -> stakeKeyLifeCycleService.getStakeRewardActivities("stake1notfound", pageable));
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeLifeCycle("stake1notfound"));
+  }
+
+  @Test
+  void testStakeKeyLifeCycle() {
+    when(stakeAddressRepository.findByView("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna"))
+        .thenReturn(Optional.of(stakeAddress));
+    when(stakeRegistrationRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(stakeDeRegistrationRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(delegationRepository.existsByAddress(stakeAddress)).thenReturn(true);
+    when(rewardRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(withdrawalRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
+    var response = stakeKeyLifeCycleService
+        .getStakeLifeCycle("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna");
+    Assertions.assertNotNull(response);
+    Assertions.assertTrue(response.getHasRegistration());
+    Assertions.assertTrue(response.getHasDeRegistration());
+    Assertions.assertTrue(response.getHasDelegation());
+    Assertions.assertTrue(response.getHashRewards());
+    Assertions.assertTrue(response.getHasWithdrawal());
   }
 
   @Test
@@ -125,13 +143,17 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTxHash()).thenReturn(
         "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
     when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
-    when(projection.getDeposit()).thenReturn(2000000L);
+    when(projection.getEpochNo()).thenReturn(200);
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress,
         condition.getTxHash(),
         fromDate, toDate, pageable)).thenReturn(page);
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findByEpochNoIn(any())).thenReturn(Collections.singletonList(epochParam));
     var response = stakeKeyLifeCycleService.getStakeRegistrations(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
     Assertions.assertEquals(1, response.getTotalPages());
@@ -145,18 +167,173 @@ class StakeKeyLifeCycleServiceTest {
   }
 
   @Test
+  void whenStakeAddressAndTxHashHaveRegistrationAndCountEqualOne_showReturnRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findKeyDepositByEpochNo(any())).thenReturn(BigInteger.valueOf(2000000L));
+    when(txOutRepository.sumValueInputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(2173333L)));
+    var response = stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertTrue(response.isJoinDepositPaid());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashNotHaveRegistration_showThrowException() {
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash));
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveRegistrationAndCountGreaterThanOneAndValueNegative_showReturnRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findKeyDepositByEpochNo(any())).thenReturn(BigInteger.valueOf(2000000L));
+    when(txOutRepository.sumValueInputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(80173333L)));
+    var response = stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertTrue(response.isJoinDepositPaid());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveRegistrationAndCountGreaterThanOneAndValueNotNegative_showReturnRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findKeyDepositByEpochNo(any())).thenReturn(BigInteger.valueOf(2000000L));
+    when(txOutRepository.sumValueInputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(0L)));
+    var response = stakeKeyLifeCycleService.getStakeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(2000000L, response.getDeposit());
+    Assertions.assertFalse(response.isJoinDepositPaid());
+  }
+
+
+  @Test
+  void whenStakeAddressAndTxHashHaveDeRegistrationAndCountEqualOne_showReturnDeRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findKeyDepositByEpochNo(any())).thenReturn(BigInteger.valueOf(2000000L));
+    when(txOutRepository.sumValueOutputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(1826667)));
+    var response = stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(-2000000L, response.getDeposit());
+    Assertions.assertTrue(response.isJoinDepositPaid());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashNotHaveDeRegistration_showThrowException() {
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+        () -> stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash));
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveDeRegistrationAndCountGreaterThanOneAndValuePositive_showReturnDeRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findKeyDepositByEpochNo(any())).thenReturn(BigInteger.valueOf(2000000L));
+    when(txOutRepository.sumValueOutputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(80173333L)));
+    var response = stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(-2000000L, response.getDeposit());
+    Assertions.assertTrue(response.isJoinDepositPaid());
+  }
+
+  @Test
+  void whenStakeAddressAndTxHashHaveDeRegistrationAndCountGreaterThanOneAndValueNotPositive_showReturnDeRegistrationDetail() {
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    when(projection.getTxHash()).thenReturn(txHash);
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeDeRegistrationRepository.findByAddressAndTx(stakeKey, txHash)).thenReturn(Optional.of(projection));
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findKeyDepositByEpochNo(any())).thenReturn(BigInteger.valueOf(2000000L));
+    when(txOutRepository.sumValueOutputByTxAndStakeAddress(txHash, stakeKey))
+        .thenReturn(Optional.of(BigInteger.valueOf(0L)));
+    var response = stakeKeyLifeCycleService.getStakeDeRegistrationDetail(stakeKey, txHash);
+    Assertions.assertEquals(txHash, response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getFee());
+    Assertions.assertEquals(-2000000L, response.getDeposit());
+    Assertions.assertFalse(response.isJoinDepositPaid());
+  }
+
+  @Test
   void whenStakeAddressHaveRegistrationWithoutCondition_showReturnRegistrations() {
     Pageable pageable = PageRequest.of(0, 1);
     StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
     when(projection.getTxHash()).thenReturn(
         "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
     when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
-    when(projection.getDeposit()).thenReturn(2000000L);
+    when(projection.getEpochNo()).thenReturn(200);
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(stakeRegistrationRepository.getStakeRegistrationsByAddress(any(), any(),
         any(), any(), any())).thenReturn(page);
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findByEpochNoIn(any())).thenReturn(Collections.singletonList(epochParam));
     StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
     var response = stakeKeyLifeCycleService.getStakeRegistrations(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
@@ -268,7 +445,7 @@ class StakeKeyLifeCycleServiceTest {
   void whenStakeAddressHaveRewards_showReturnRewards() {
     Pageable pageable = PageRequest.of(0, 1);
     StakeRewardResponse rewardResponse = new StakeRewardResponse(333,
-        Date.from(Instant.now()), BigInteger.valueOf(382916));
+        Date.from(Instant.now()), BigInteger.valueOf(382916), RewardType.MEMBER);
     Date fromDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
     Date toDate = Date.from(Instant.now());
     Page<StakeRewardResponse> page = new PageImpl<>(List.of(rewardResponse), pageable, 1);
@@ -393,12 +570,16 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTxHash()).thenReturn(
         "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
     when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
-    when(projection.getDeposit()).thenReturn(2000000L);
+    when(projection.getEpochNo()).thenReturn(200);
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress,
         condition.getTxHash(), fromDate, toDate, pageable)).thenReturn(page);
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findByEpochNoIn(any())).thenReturn(Collections.singletonList(epochParam));
     var response = stakeKeyLifeCycleService.getStakeDeRegistrations(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
     Assertions.assertEquals(1, response.getTotalPages());
@@ -408,7 +589,7 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertEquals("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2",
         response.getData().get(0).getTxHash());
     Assertions.assertEquals(BigInteger.valueOf(173333), response.getData().get(0).getFee());
-    Assertions.assertEquals(2000000L, response.getData().get(0).getDeposit());
+    Assertions.assertEquals(-2000000L, response.getData().get(0).getDeposit());
   }
 
   @Test
@@ -421,12 +602,16 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTxHash()).thenReturn(
         "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
     when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
-    when(projection.getDeposit()).thenReturn(2000000L);
+    when(projection.getEpochNo()).thenReturn(200);
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(any(), any(), any(), any(),
         any())).thenReturn(page);
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findByEpochNoIn(any())).thenReturn(Collections.singletonList(epochParam));
     var response = stakeKeyLifeCycleService.getStakeDeRegistrations(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
     Assertions.assertEquals(1, response.getTotalPages());
@@ -436,7 +621,7 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertEquals("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2",
         response.getData().get(0).getTxHash());
     Assertions.assertEquals(BigInteger.valueOf(173333), response.getData().get(0).getFee());
-    Assertions.assertEquals(2000000L, response.getData().get(0).getDeposit());
+    Assertions.assertEquals(-2000000L, response.getData().get(0).getDeposit());
   }
 
   @Test
@@ -533,9 +718,9 @@ class StakeKeyLifeCycleServiceTest {
   void whenGetStakeRewardActivities_showReturnRewardActivities() {
     Pageable pageable = PageRequest.of(0, 2);
     StakeRewardResponse stakeRewardResponse = new StakeRewardResponse(300, new Date(),
-        BigInteger.valueOf(1000000));
+        BigInteger.valueOf(1000000), RewardType.MEMBER);
     StakeRewardResponse stakeWithdrawnResponse = new StakeRewardResponse(301, new Date(),
-        BigInteger.valueOf(1000000));
+        BigInteger.valueOf(1000000), RewardType.MEMBER);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.findEpochWithdrawalByStake(stakeAddress)).thenReturn(
         List.of(stakeWithdrawnResponse));
@@ -550,6 +735,236 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertEquals(2, response.getData().size());
     Assertions.assertEquals(StakeRewardType.REWARD_WITHDRAWN, response.getData().get(0).getType());
     Assertions.assertEquals(StakeRewardType.REWARD_RECEIVED, response.getData().get(1).getType());
+  }
+
+  @Test
+  void whenStakeAddressTxHashNull_showReturnRegistrations() {
+    Pageable pageable = PageRequest.of(0, 1);
+    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+            .toInstant(ZoneOffset.UTC));
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
+    condition.setTxHash("");
+    condition.setFromDate(fromDate);
+    condition.setToDate(toDate);
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    when(projection.getTxHash()).thenReturn(
+            "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getEpochNo()).thenReturn(200);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress,
+            null,
+            fromDate, toDate, pageable)).thenReturn(page);
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findByEpochNoIn(any())).thenReturn(Collections.singletonList(epochParam));
+    var response = stakeKeyLifeCycleService.getStakeRegistrations(
+            "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2",
+            response.getData().get(0).getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getData().get(0).getFee());
+    Assertions.assertEquals(2000000L, response.getData().get(0).getDeposit());
+  }
+
+  @Test
+  void whenStakeAddressTxNull_showReturnDelegations() {
+    Pageable pageable = PageRequest.of(0, 1);
+    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+            .toInstant(ZoneOffset.UTC));
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
+    condition.setTxHash("");
+    condition.setFromDate(fromDate);
+    condition.setToDate(toDate);
+    StakeDelegationProjection projection = Mockito.mock(StakeDelegationProjection.class);
+    when(projection.getTxHash()).thenReturn(
+            "bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488");
+    when(projection.getOutSum()).thenReturn(BigInteger.valueOf(102569063));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    Page<StakeDelegationProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(delegationRepository.findDelegationByAddress(any(), any(), any(), any(), any()))
+            .thenReturn(page);
+    var response = stakeKeyLifeCycleService.getStakeDelegations(
+            "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488",
+            response.getData().get(0).getTxHash());
+  }
+
+  @Test
+  void testGetStakeRewards_throwFetchRewardException() {
+    String stakeKey = "stake_key";
+    Date fromDate = new Date();
+    Date toDate = new Date();
+    RewardType type = RewardType.LEADER;
+    Pageable pageable = PageRequest.of(0, 10);
+
+    when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(new StakeAddress()));
+    when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(false);
+    when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(false);
+
+    Assertions.assertThrows(FetchRewardException.class, () -> stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, type, pageable));
+  }
+
+  @Test
+  void whenStakeAddressTxHashNull_showReturnWithdrawal() {
+    Pageable pageable = PageRequest.of(0, 1);
+    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+            .toInstant(ZoneOffset.UTC));
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
+    condition.setTxHash("");
+    condition.setFromDate(fromDate);
+    condition.setToDate(toDate);
+    StakeWithdrawalProjection projection = Mockito.mock(StakeWithdrawalProjection.class);
+    when(projection.getTxHash()).thenReturn(
+            "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
+    when(projection.getAmount()).thenReturn(BigInteger.valueOf(4846486));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    Page<StakeWithdrawalProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(withdrawalRepository.getWithdrawalByAddress(any(), any(), any(), any(), any()))
+            .thenReturn(page);
+    var response = stakeKeyLifeCycleService.getStakeWithdrawals(
+            "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381",
+            response.getData().get(0).getTxHash());
+  }
+
+  @Test
+  void testGetStakeWithdrawalDetail_throwFetchRewardException() {
+    String stakeKey = "stake_key";
+    String hash = "hash";
+
+    when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(new StakeAddress()));
+    when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(false);
+    when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(false);
+
+    Assertions.assertThrows(FetchRewardException.class, () -> stakeKeyLifeCycleService.getStakeWithdrawalDetail(stakeKey, hash));
+  }
+
+  @Test
+  void whenStakeAddressTxHashNull_showReturnDeRegistrations() {
+    Pageable pageable = PageRequest.of(0, 1);
+    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+            .toInstant(ZoneOffset.UTC));
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
+    condition.setTxHash("");
+    condition.setFromDate(fromDate);
+    condition.setToDate(toDate);
+    StakeHistoryProjection projection = Mockito.mock(StakeHistoryProjection.class);
+    when(projection.getTxHash()).thenReturn(
+            "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2");
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
+    when(projection.getEpochNo()).thenReturn(200);
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress,
+            null, fromDate, toDate, pageable)).thenReturn(page);
+    EpochParam epochParam = new EpochParam();
+    epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
+    epochParam.setEpochNo(200);
+    when(epochParamRepository.findByEpochNoIn(any())).thenReturn(Collections.singletonList(epochParam));
+    var response = stakeKeyLifeCycleService.getStakeDeRegistrations(
+            "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2",
+            response.getData().get(0).getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173333), response.getData().get(0).getFee());
+    Assertions.assertEquals(-2000000L, response.getData().get(0).getDeposit());
+  }
+
+  @Test
+  void testGetStakeRewardActivities_throwFetchRewardException() {
+    String stakeKey = "stake_key";
+    Pageable pageable = PageRequest.of(0, 10);
+
+    when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(new StakeAddress()));
+    when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(false);
+    when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(false);
+
+    Assertions.assertThrows(FetchRewardException.class, () -> stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pageable));
+  }
+
+  @Test
+  void whenGetStakeRewardActivitiesSort_showReturnRewardActivities() {
+    Pageable pageable = PageRequest.of(0, 2, Sort.Direction.ASC, "time");
+    StakeRewardResponse stakeRewardResponse = new StakeRewardResponse(300, new Date(),
+            BigInteger.valueOf(1000000), RewardType.MEMBER);
+    StakeRewardResponse stakeWithdrawnResponse = new StakeRewardResponse(301, new Date(),
+            BigInteger.valueOf(1000000), RewardType.MEMBER);
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(withdrawalRepository.findEpochWithdrawalByStake(stakeAddress)).thenReturn(
+            List.of(stakeWithdrawnResponse));
+    when(rewardRepository.findRewardByStake(stakeAddress)).thenReturn(
+            List.of(stakeRewardResponse));
+    when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
+    var response = stakeKeyLifeCycleService.getStakeRewardActivities(stakeAddress.getView(),
+            pageable);
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(2, response.getTotalItems());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals(2, response.getData().size());
+    Assertions.assertEquals(StakeRewardType.REWARD_RECEIVED, response.getData().get(0).getType());
+    Assertions.assertEquals(StakeRewardType.REWARD_WITHDRAWN, response.getData().get(1).getType());
+  }
+
+  @Test
+  void testGetStakeWalletActivitiesByDateRange_thenReturn() {
+    String stakeKey = "stake_key";
+    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+            .toInstant(ZoneOffset.UTC));
+    StakeLifeCycleFilterRequest condition = new StakeLifeCycleFilterRequest();
+    condition.setTxHash("bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488");
+    condition.setFromDate(fromDate);
+    condition.setToDate(toDate);
+    Pageable pageable = PageRequest.of(0, 10);
+    StakeTxProjection projection = Mockito.mock(StakeTxProjection.class);
+    when(projection.getTxId()).thenReturn(100L);
+    when(projection.getAmount()).thenReturn(BigInteger.valueOf(-500174301));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    StakeAddress stakeAddress = StakeAddress.builder().view("view").build();
+    List<Long> txIds = List.of(100L);
+
+    when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
+    when(addressTxBalanceRepository.findTxAndAmountByStakeAndDateRange("view", fromDate, toDate, pageable)).thenReturn(new PageImpl<>(List.of(projection)));
+    when(txRepository.findByIdIn(txIds)).thenReturn(List.of(Tx.builder().id(100L).hash("hash").fee(BigInteger.ONE).validContract(true).build()));
+    when(stakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
+            stakeAddress, txIds)).thenReturn(List.of(100L));
+    when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddressAndTxIn(
+            stakeAddress, txIds)).thenReturn(List.of(100L));
+    when(delegationRepository.findDelegationByAddressAndTxIn(stakeAddress, txIds)).thenReturn(List.of(100L));
+    when(withdrawalRepository.getWithdrawalByAddressAndTxIn(stakeAddress, txIds)).thenReturn(List.of(100L));
+
+    var response = stakeKeyLifeCycleService.getStakeWalletActivitiesByDateRange(stakeKey, condition, pageable);
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals("hash", response.getData().get(0).getTxHash());
+    Assertions.assertEquals(BigInteger.ONE, response.getData().get(0).getFee());
+    Assertions.assertEquals(StakeTxType.REWARD_WITHDRAWN_AND_CERTIFICATE_HOLD_PAID, response.getData().get(0).getType());
   }
 
 }

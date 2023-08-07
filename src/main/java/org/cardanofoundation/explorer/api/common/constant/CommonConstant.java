@@ -25,7 +25,9 @@ public class CommonConstant {
 
   public static final String POOL_STATUS_RETIRING = "RETIRING";
 
-  public static final String MAINNET_ADDRESS_PREFIX = "addr";
+  public static final String ADDRESS_PREFIX = "addr";
+
+  public static final String STAKE_ADDRESS_PREFIX = "stake";
 
   public static final String LOVELACE = "LOVELACE";
 

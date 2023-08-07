@@ -11,7 +11,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
@@ -20,6 +20,7 @@ import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.KafkaService;
+import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
@@ -56,12 +57,17 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private final StorageService storageService;
   private final KafkaService kafkaService;
   private final FetchRewardDataService fetchRewardDataService;
+  private final ReportHistoryService reportHistoryService;
 
   @Override
   public StakeKeyReportHistoryResponse generateStakeKeyReport(
       StakeKeyReportRequest stakeKeyReportRequest, String username) {
     StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, username);
-    kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
+    Boolean isSuccess = kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
+    if(Boolean.FALSE.equals(isSuccess)) {
+      stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+    }
     return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
   }
 
@@ -72,6 +78,10 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
         stakeKeyReportRequest);
+
+    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
+      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    }
 
     if (DataUtil.isNullOrEmpty(stakeKeyReportRequest.getReportName())) {
       String reportName = generateReportName(stakeKeyReportHistory);
@@ -166,7 +176,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Override
-  public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeRegistrationsByReportId(
+  public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeRegistrationsByReportId(
       Long reportId, String username, Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
@@ -177,7 +187,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Override
-  public BaseFilterResponse<StakeRegistrationLifeCycle> getStakeDeRegistrationsByReportId(
+  public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrationsByReportId(
       Long reportId, String username, Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(

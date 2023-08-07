@@ -6,6 +6,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
@@ -130,4 +131,11 @@ public interface StakeKeyService {
    * @return min and max balance of stake address
    */
   List<BigInteger> getStakeMinMaxBalance(String stakeKey);
+
+  /**
+   *
+   * @param stakeKey stake address
+   * @return stake reward of a stake key. Total reward and which reward this address has
+   */
+  StakeAddressRewardDistribution getStakeAddressRewardDistributionInfo(String stakeKey);
 }

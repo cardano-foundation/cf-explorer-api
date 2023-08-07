@@ -63,6 +63,8 @@ spring:
         max:
           pool:
             interval: 60000
+          block:
+            ms: 3000
           in:
             flight:
               requests:
@@ -87,6 +89,8 @@ redis:
 
 application:
   network: ${DB_SCHEMA:mainnet}
+  epoch:
+    days: ${EPOCH_DAYS:5}
   api.coin.gecko.market:
     interval-time: ${API_MARKET_CACHE_TIME:120}
     base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
@@ -104,6 +108,11 @@ application:
       base-url: ${API_CHECK_EPOCH_STAKE_URL:http://localhost:8888/api/v1/epoch-stake/fetch}
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://localhost:8888/api/v1/ada-pots/fetch}
+    check-epoch:
+        base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
+  report:
+    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
+  token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
 
 springdoc:
   api-docs.path: /apidocs

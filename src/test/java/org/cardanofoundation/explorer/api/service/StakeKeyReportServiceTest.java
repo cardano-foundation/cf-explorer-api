@@ -29,7 +29,7 @@ import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilt
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationLifeCycle;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
@@ -82,6 +82,8 @@ public class StakeKeyReportServiceTest {
 
   @Mock
   RewardRepository rewardRepository;
+  @Mock
+  ReportHistoryService reportHistoryService;
 
   @Test
   void generateStakeKeyReport_shouldThrowExceptionWhenNotFoundStakeAdress() {
@@ -92,6 +94,18 @@ public class StakeKeyReportServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
         () -> stakeKeyReportService.generateStakeKeyReport(request, username));
+  }
+
+  @Test
+  void generateStakeKeyReport_shouldThrowExceptionWhenLimitReached() {
+    StakeKeyReportRequest request = StakeKeyReportRequest.builder()
+        .stakeKey("any")
+        .build();
+    String username = "username";
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(new StakeAddress()));
+    when(reportHistoryService.isLimitReached(username)).thenReturn(Boolean.TRUE);
+    Assertions.assertThrows(BusinessException.class,
+                            () -> stakeKeyReportService.generateStakeKeyReport(request, username));
   }
 
   @Test
@@ -135,11 +149,11 @@ public class StakeKeyReportServiceTest {
     when(stakeKeyReportHistoryRepository.saveAndFlush(any(StakeKeyReportHistory.class))).thenReturn(expect);
     when(stakeKeyReportMapper.toStakeKeyReportHistory(any(StakeKeyReportRequest.class))).thenReturn(
         expect);
-
+    when(reportHistoryService.isLimitReached(username)).thenReturn(Boolean.FALSE);
     when(stakeKeyReportMapper.toStakeKeyReportHistoryResponse(expect))
         .thenReturn(responseExpect);
 
-    doNothing().when(kafkaService).sendReportHistory(any(ReportHistory.class));
+    when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(Boolean.TRUE);
 
     var responseActual = stakeKeyReportService.generateStakeKeyReport(request, "username");
     Assertions.assertEquals(responseExpect.getStakeKey(), responseActual.getStakeKey());
@@ -399,7 +413,7 @@ public class StakeKeyReportServiceTest {
             .build()));
 
     LocalDateTime curTime = LocalDateTime.now();
-    StakeRegistrationLifeCycle expect = StakeRegistrationLifeCycle.builder()
+    StakeRegistrationFilterResponse expect = StakeRegistrationFilterResponse.builder()
         .fee(BigInteger.TWO)
         .deposit(123L)
         .time(curTime)
@@ -438,7 +452,7 @@ public class StakeKeyReportServiceTest {
             .build()));
 
     LocalDateTime curTime = LocalDateTime.now();
-    StakeRegistrationLifeCycle expect = StakeRegistrationLifeCycle.builder()
+    StakeRegistrationFilterResponse expect = StakeRegistrationFilterResponse.builder()
         .fee(BigInteger.TWO)
         .deposit(123L)
         .time(curTime)
@@ -604,7 +618,7 @@ public class StakeKeyReportServiceTest {
     expect.setFee(BigInteger.TWO);
     expect.setTime(LocalDateTime.ofInstant(toDate.toInstant(), ZoneOffset.UTC));
     expect.setType(StakeTxType.SENT);
-    expect.setStatus(TxStatus.FAIL);
+    expect.setStatus(TxStatus.FAILED);
     expect.setTxHash("txHash");
 
     when(stakeKeyLifeCycleService.getStakeWalletActivitiesByDateRange(anyString(), any(StakeLifeCycleFilterRequest.class), any(Pageable.class)))

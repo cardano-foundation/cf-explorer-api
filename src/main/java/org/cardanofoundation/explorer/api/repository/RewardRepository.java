@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -47,7 +48,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   List<StakeAnalyticRewardResponse> findRewardByStake(@Param("stakeAddress") String stakeAddress);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
-      + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
       + " WHERE rw.addr = :stakeAddress"
@@ -82,6 +83,20 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
           + "JOIN Epoch e ON rw.spendableEpoch = e.no "
           + "WHERE ph.view  = :poolView AND rw.type = 'leader' ")
   Page<LifeCycleRewardProjection> getRewardInfoByPool(@Param("poolView") String poolView,
+                                                      Pageable pageable);
+
+  @Query(value =
+      "SELECT rw.earnedEpoch AS epochNo, e.startTime AS time, rw.amount AS amount, sa.view AS address "
+          + "FROM Reward rw "
+          + "JOIN PoolHash ph ON rw.pool.id = ph.id "
+          + "JOIN StakeAddress sa ON rw.addr.id = sa.id "
+          + "JOIN Epoch e ON rw.spendableEpoch = e.no "
+          + "WHERE ph.view  = :poolView AND rw.type = 'leader' "
+          + "AND (rw.earnedEpoch >= :beginEpoch) "
+          + "AND (rw.earnedEpoch <= :endEpoch)")
+  Page<LifeCycleRewardProjection> getRewardInfoByPoolFiler(@Param("poolView") String poolView,
+                                                      @Param("beginEpoch") Integer beginEpoch,
+                                                      @Param("endEpoch") Integer endEpoch,
                                                       Pageable pageable);
 
   @Query(value = "SELECT rw.earnedEpoch AS epochNo, rw.amount AS amount "
@@ -151,4 +166,9 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " AND r.stakeAddressId IN :stakeAddressIds"
       + " GROUP BY r.stakeAddressId")
   List<StakeRewardProjection> getTotalRewardByStakeAddressIn(@Param("stakeAddressIds") Collection<Long> stakeAddressIds);
+
+  @Query("SELECT reward.type FROM Reward reward "
+      + "JOIN StakeAddress stakeAddress ON stakeAddress.id = reward.stakeAddressId "
+      + "WHERE stakeAddress.view = :stakeView")
+  Set<RewardType> getAllRewardTypeOfAStakeKey(@Param("stakeView") String stakeView);
 }

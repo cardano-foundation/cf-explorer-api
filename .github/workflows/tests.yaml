@@ -14,7 +14,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -62,7 +62,7 @@ jobs:
 
   mutation-test:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -99,7 +99,7 @@ jobs:
 
   end2end:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: postman/newman
     steps:
@@ -108,11 +108,13 @@ jobs:
       - name: Install report library allure
         run: npm install -g newman-reporter-allure
       - name: Install allure
-        run: npm install -g allure
+        run: npm install -g allure @apideck/postman-to-k6
       - name: Install report library htmlextra
         run: npm install -g newman-reporter-htmlextra
+      - name: Migrate config
+        run: postman-to-k6 src/test/Postman/Cardano-Explorer-API.postman_collection.json --environment src/test/Postman/DevInt.postman_environment.json -o k6-script.js --skip-post -i 10
       - name: Test
-        run: newman run src/test/Postman/Cardano-Explorer-API.postman_collection.json -e src/test/Postman/DevInt.postman_environment.json -r cli,htmlextra,allure --reporter-htmlextra-export=reporthtml/reporthtml.html
+        run: newman run src/test/Postman/Cardano-Explorer-API.postman_collection.json -e src/test/Postman/DevInt.postman_environment.json -r cli,htmlextra,allure --reporter-htmlextra-export=reporthtml/reporthtml.html --timeout-request 5000
       - name: Allure Report action from marketplace
         uses: simple-elf/allure-report-action@master
         if: always()
@@ -125,6 +127,14 @@ jobs:
         with:
           name: html-report
           path: reporthtml
+      - name: Archive k6 script
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: k6-script
+          path: |
+            k6-script.js
+            libs/
       - name: Archive allure results
         uses: actions/upload-artifact@v3
         if: always()
@@ -132,6 +142,28 @@ jobs:
           name: allure-report
           path: allure-report
 
+  loadTest:
+    if: always()
+    needs: end2end
+    runs-on: self-hosted
+    #container:
+    #  image: loadimpact/k6:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v3
+      - name: Run local k6 test
+        uses: grafana/k6-action@v0.3.0
+        with:
+          filename: k6-script/k6-script.js
+          flags: --vus 10 --out csv=k6_results.csv
+      - name: Archive allure results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: loadtest-report
+          path: k6_results.csv
   pages:
     needs: end2end
     if: github.ref == 'refs/heads/main'
@@ -167,7 +199,7 @@ jobs:
         with:
           BRANCH: gh-pages
           folder: allure-report
-          target-folder: allure/
+          target-folder: allure-report/
 
       - name: Publish mutation test report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
@@ -176,3 +208,11 @@ jobs:
           BRANCH: gh-pages
           folder: html-report
           target-folder: html-report/
+
+      - name: Publish LoadTest report to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        if: always()
+        with:
+          BRANCH: gh-pages
+          folder: loadtest-report
+          target-folder: loadtest-report/

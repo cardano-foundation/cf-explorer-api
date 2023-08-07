@@ -65,12 +65,18 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private final PoolHistoryRepository poolHistoryRepository;
 
-  private final EpochRepository epochRepository;
+  private final ReportHistoryService reportHistoryService;
 
   @Override
   public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
     PoolReportHistory poolReportHistory = saveToDb(poolReportCreateRequest, username);
-    kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
+
+    Boolean isSuccess = kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
+    if(Boolean.FALSE.equals(isSuccess)) {
+      poolReportRepository.delete(poolReportHistory);
+      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+    }
+
     return true;
   }
 
@@ -79,7 +85,9 @@ public class PoolReportServiceImpl implements PoolReportService {
                                     String username) {
     poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
-
+    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
+      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    }
     ReportHistory reportHistory = initReportHistory(poolReportCreateRequest, username);
     return poolReportRepository.saveAndFlush(poolReportCreateRequest.toEntity(reportHistory));
   }
@@ -217,7 +225,9 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                      String username) {
     PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
                                                                             reportId);
-    return poolLifecycleService.listReward(poolReport.getPoolView(), pageable);
+    return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
+                                                 poolReport.getBeginEpoch(),
+                                                 poolReport.getEndEpoch(), pageable);
   }
 
   @Override

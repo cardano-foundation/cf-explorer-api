@@ -1,5 +1,120 @@
 # Changelog
 
+## [0.3.27](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.26...v0.3.27) (2023-08-07)
+
+
+### Features
+
+* MET-1530 check reward type of stake key ([e01c633](https://github.com/cardano-foundation/cf-explorer-api/commit/e01c63394f42e9e537421238e7e3c2d714585e47))
+* update unit test for delegation and spo ([34dcc33](https://github.com/cardano-foundation/cf-explorer-api/commit/34dcc33da608d66715039730c27af454980fac24))
+
+
+### Bug Fixes
+
+* implement cip-25 to verify nft token metadata ([b4eca24](https://github.com/cardano-foundation/cf-explorer-api/commit/b4eca248276e75ab84f717c8f8424219e34972f7))
+* MET_1420 change logic to get point for chart analytic ([a3b209e](https://github.com/cardano-foundation/cf-explorer-api/commit/a3b209e343ea30487accbd97d1b6fcbcd8edfc1f))
+* met-1105 add time condition ([47664e2](https://github.com/cardano-foundation/cf-explorer-api/commit/47664e2ce496ad6f811a9d40d87b802c67333565))
+* MET-1128 fix reward tab in stake lifecycle not active ([ce21094](https://github.com/cardano-foundation/cf-explorer-api/commit/ce21094ae96f2ef232e68f4189bb31f7adde9fdf))
+* MET-1509 validate stake address in check stake address by payment address ([4a0f273](https://github.com/cardano-foundation/cf-explorer-api/commit/4a0f273dc72dac09e9583f93f053e6dfa88ef66a))
+* met-684 fix search byron address not found ([bd8bce9](https://github.com/cardano-foundation/cf-explorer-api/commit/bd8bce90ac981836dee5c6a2fbf635f69ea06bb6))
+
+
+### Documentation
+
+* MET-1400 update swagger ([81b734f](https://github.com/cardano-foundation/cf-explorer-api/commit/81b734f8701f09ccd66e7efd90d347554ddbbcfe))
+
+## [0.3.26](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.25...v0.3.26) (2023-08-02)
+
+
+### Bug Fixes
+
+* attempting to force a release ([a4f1536](https://github.com/cardano-foundation/cf-explorer-api/commit/a4f1536c9b9c753b893ad847e1d2b825aa87225a))
+
+## [0.3.25](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.24...v0.3.25) (2023-08-01)
+
+
+### Features
+
+* MET-1128 remove unused reward type to query ([3f4c0cb](https://github.com/cardano-foundation/cf-explorer-api/commit/3f4c0cb11fbb4717bfc0f28437c72ebaa0c736e2))
+
+
+### Bug Fixes
+
+* add condition on findContract join statement query ([33e93b4](https://github.com/cardano-foundation/cf-explorer-api/commit/33e93b47724a6ece2f808a3199431d127d613c13))
+* add logo endpoint in front of relative path logo ([226a58a](https://github.com/cardano-foundation/cf-explorer-api/commit/226a58ab090aa2e5770a99f5adb95f2d94438d41))
+
+## [0.3.24](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.23...v0.3.24) (2023-07-27)
+
+
+### Features
+
+* MET-1407 update paging for api news ([bae75e8](https://github.com/cardano-foundation/cf-explorer-api/commit/bae75e8aed75b906fede497ae76e235e2b675587))
+
+## [0.3.23](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.22...v0.3.23) (2023-07-25)
+
+
+### Bug Fixes
+
+* trim query search ([f5ff062](https://github.com/cardano-foundation/cf-explorer-api/commit/f5ff062abfe4b4016981cf3d8d617c390eaed29a))
+
+## [0.3.22](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.21...v0.3.22) (2023-07-25)
+
+
+### Bug Fixes
+
+* change fee belongs to collateral when tx failed ([1223ca8](https://github.com/cardano-foundation/cf-explorer-api/commit/1223ca86ff4f87bf68bc48db744da9b95ad00949))
+* fix unit test delegation header ([6f97ae6](https://github.com/cardano-foundation/cf-explorer-api/commit/6f97ae67e48fb49107b7065b41ffefcbfa276f6c))
+* met-1394 handle kafka send report fail ([a1d2aa0](https://github.com/cardano-foundation/cf-explorer-api/commit/a1d2aa0269e404db8245458446db7983145b0cc3))
+
+## [0.3.21](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.20...v0.3.21) (2023-07-20)
+
+
+### Bug Fixes
+
+* met-753 handle case field verified_contract null ([9e377aa](https://github.com/cardano-foundation/cf-explorer-api/commit/9e377aa527bde514af7f66f59e6932ef5411bbfc))
+
+
+### Documentation
+
+* add REPORT_LIMIT_PER_24HOURS env ([79694c3](https://github.com/cardano-foundation/cf-explorer-api/commit/79694c39f802313c55e42176a527adf0f8858c4f))
+
+## [0.3.20](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.19...v0.3.20) (2023-07-19)
+
+
+### Bug Fixes
+
+* attempting to fix jedisConnectionFactory for cluster and standalone redis mode ([503f09b](https://github.com/cardano-foundation/cf-explorer-api/commit/503f09b65b979f48c7234140589c2a9dfdc2af7a))
+* update API responses for improved coherence and logical consistency ([7b63621](https://github.com/cardano-foundation/cf-explorer-api/commit/7b63621692951b7056c6c5cf8be3680fba24bda6))
+
+## [0.3.19](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.18...v0.3.19) (2023-07-17)
+
+
+### Bug Fixes
+
+* added redis cache TTL config for ada price ([26bb5ba](https://github.com/cardano-foundation/cf-explorer-api/commit/26bb5ba1c66ba68dc5f5ac1e8a8d36e6632faa9a))
+
+## [0.3.18](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.17...v0.3.18) (2023-07-17)
+
+
+### Features
+
+* add unique account to epoch ([9a8a250](https://github.com/cardano-foundation/cf-explorer-api/commit/9a8a250e1cf0a291901067d26e281c516c0d3976))
+* MET-1271 fix latest epoch detail error fetching reward ([ef5ec37](https://github.com/cardano-foundation/cf-explorer-api/commit/ef5ec3783a7134de930af711b52afe8f8721286f))
+* MET-1271 fix unit test ([648ac59](https://github.com/cardano-foundation/cf-explorer-api/commit/648ac594e6e5f9835135a7d30f40206c9e0ed450))
+
+
+### Bug Fixes
+
+* conflict when create PR with develop ([e71ba52](https://github.com/cardano-foundation/cf-explorer-api/commit/e71ba527c4577a3127f3169e3a9a74e5d1e54297))
+* fetch spo registration record is incorrect ([552e970](https://github.com/cardano-foundation/cf-explorer-api/commit/552e97031cc6edada2303b2602ddbf0737e3b85c))
+* fix bug not return datum-out with same address of tx contract ([fe8662f](https://github.com/cardano-foundation/cf-explorer-api/commit/fe8662fca1e312ded408e8919adaff4e1bc3497d))
+* handle case same address in contract detail ([0e1117a](https://github.com/cardano-foundation/cf-explorer-api/commit/0e1117a5e7e00325744c400eeefb0a6d13a3d8fb))
+* miss code when fix conflict ([96008dc](https://github.com/cardano-foundation/cf-explorer-api/commit/96008dcd8a0aefe5f8927707890f3519a1ae8c7f))
+* remove space in ts query tx_metadata ([53a4e2f](https://github.com/cardano-foundation/cf-explorer-api/commit/53a4e2f191d797801f91a3985d7e7a95a06a8991))
+* reward distribution of pool not in epoch range ([58b8999](https://github.com/cardano-foundation/cf-explorer-api/commit/58b8999415847580c88d400f214f2f0da0db34c3))
+* unit test pool certificate ([685f504](https://github.com/cardano-foundation/cf-explorer-api/commit/685f504029d4b7325308a3e984a54b5796c01816))
+* update tx_contract_detail query after back fill redeemer,datum value ([eec72ca](https://github.com/cardano-foundation/cf-explorer-api/commit/eec72cacc362a150e68f2c3f262258615af16744))
+
 ## [0.3.17](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.16...v0.3.17) (2023-07-04)
 
 

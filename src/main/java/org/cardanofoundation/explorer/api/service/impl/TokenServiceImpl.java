@@ -10,7 +10,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -25,10 +24,13 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -53,6 +55,7 @@ import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
+import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -86,21 +89,25 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseFilterResponse<TokenFilterResponse> filterToken(Pageable pageable) {
+  public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable) {
     int tokenCount = aggregatedDataCacheService.getTokenCount();
 
     if (tokenCount == 0) {
       tokenCount = (int) multiAssetRepository.count();
     }
-
-    var dataContent = multiAssetRepository.findMultiAssets(pageable);
-
-    Page<MultiAsset> multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
+    List<MultiAsset> dataContent;
+    Page<MultiAsset> multiAssets;
+    if (StringUtils.isEmpty(query)) {
+      dataContent = multiAssetRepository.findMultiAssets(pageable);
+      multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
+    } else {
+      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable);
+    }
 
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
     List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(),
         MultiAsset::getId);
-
     var tokenInfos = tokenInfoRepository.findTokenInfosByMultiAssetIdIn(multiAssetIds);
     var tokenInfoMap = StreamUtil.toMap(tokenInfos, TokenInfo::getMultiAssetId,
         Function.identity());
@@ -110,13 +117,22 @@ public class TokenServiceImpl implements TokenService {
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
     Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList,
         AssetMetadata::getSubject);
-
+    var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     multiAssetResponsesList.forEach(ma -> {
-      ma.setNumberOfHolders(tokenInfoMap.containsKey(ma.getId()) ?
-                            tokenInfoMap.get(ma.getId()).getNumberOfHolders() : 0);
-      ma.setVolumeIn24h(String.valueOf(tokenInfoMap.containsKey(ma.getId()) ?
-                                       tokenInfoMap.get(ma.getId()).getVolume24h()
-                                                                            : BigInteger.ZERO));
+      var tokenInfo = tokenInfoMap.getOrDefault(ma.getId(), null);
+
+      if (tokenInfo == null) {
+        ma.setNumberOfHolders(0L);
+        ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+      } else {
+        if (tokenInfo.getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+          ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+        } else {
+          ma.setVolumeIn24h(String.valueOf(tokenInfo.getVolume24h()));
+        }
+        ma.setNumberOfHolders(tokenInfo.getNumberOfHolders());
+      }
+
       ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
           assetMetadataMap.get(ma.getPolicy() + ma.getName()))
       );
@@ -132,23 +148,22 @@ public class TokenServiceImpl implements TokenService {
         .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-    Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
-    var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, txId);
 
-    var numberOfHoldersHaveStakeKey = addressTokenBalanceRepository
-        .countAddressNotHaveStakeByMultiAsset(multiAsset)
-        .orElse(0L);
-    var numberOfHoldersNotHaveStakeKe =  addressTokenBalanceRepository
-        .countStakeByMultiAsset(multiAsset)
-        .orElse(0L);
+    var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
+    var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
-    tokenResponse.setNumberOfHolders(numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe);
-    if (Objects.isNull(volume)) {
-      tokenResponse.setVolumeIn24h(String.valueOf(0));
+    if (tokenInfo.isEmpty()) {
+      tokenResponse.setNumberOfHolders(0L);
+      tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
     } else {
-      tokenResponse.setVolumeIn24h(volume.toString());
+      if (tokenInfo.get().getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+        tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+      } else {
+        tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
+      }
+      tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
     }
+
     AssetMetadata assetMetadata = assetMetadataRepository
         .findFirstBySubject(multiAsset.getPolicy() + multiAsset.getName())
         .orElse(null);
@@ -191,26 +206,26 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type)
-      throws ExecutionException, InterruptedException {
+  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(
+      String tokenId, AnalyticType type) throws ExecutionException, InterruptedException {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
         .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
 
-    List<LocalDate> dates = getListDateAnalytic(type);
+    List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
     List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
+    final int NUMBER_PARALLEL = 5;
+    ExecutorService fixedExecutor = Executors.newFixedThreadPool(NUMBER_PARALLEL);
 
-    ExecutorService fixedExecutor = Executors.newFixedThreadPool(TOKEN_VOLUME_ANALYTIC_NUMBER);
     final Optional<LocalDate> maxDateAgg = aggregateAddressTokenRepository.getMaxDay();
     for (int i = 0; i < dates.size() - 1; i++) {
-      LocalDate startRange = dates.get(i);
-      LocalDate endRange = dates.get(i + 1);
+      LocalDateTime startRange = dates.get(i);
+      LocalDateTime endRange = dates.get(i + 1);
       futureTokenAnalytics.add(CompletableFuture.supplyAsync(
-          () -> getTokenVolumeAnalyticsResponse(multiAsset, startRange, endRange, maxDateAgg),
+          () -> getTokenVolumeAnalyticsResponse(multiAsset, type, startRange, endRange, maxDateAgg),
           fixedExecutor)
       );
     }
-
     CompletableFuture.allOf(futureTokenAnalytics.toArray(new CompletableFuture[0])).join();
     List<TokenVolumeAnalyticsResponse> responses = new ArrayList<>();
 
@@ -220,79 +235,58 @@ public class TokenServiceImpl implements TokenService {
     return responses;
   }
 
-  /**
-   * if param `to` less than today: get data from table: `agg_address_token`
-   * else: get data from table `address_token` for today
-   * and get data in range: `from` - previous day of `to` from table: `agg_address_token`
-   * and then sum data of 2 queries
-   * **/
   private TokenVolumeAnalyticsResponse getTokenVolumeAnalyticsResponse(
-      MultiAsset multiAsset,
-      LocalDate from, LocalDate to,
+      MultiAsset multiAsset, AnalyticType type,
+      LocalDateTime fromDateTime, LocalDateTime toDateTime,
       Optional<LocalDate> maxDateAgg) {
 
-    if (maxDateAgg.isEmpty() || !from.isBefore(maxDateAgg.get())) {
-      BigInteger balance = addressTokenRepository.sumBalanceBetweenTx(
-          multiAsset,
-          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX))
-      ).orElse(BigInteger.ZERO);
-      return new TokenVolumeAnalyticsResponse(to, balance);
-    }
-
     BigInteger balance;
-    if (LocalDate.now().isEqual(to)) {
-      balance = getBalanceInRangeHaveToday(multiAsset, from, to, maxDateAgg.get());
-    } else {
-      balance = getBalanceInRangePreviousToday(multiAsset, from, to, maxDateAgg.get());
-    }
-
-    if (BigInteger.ZERO.equals(balance)) {
-      Long numberBalanceRecord = addressTokenRepository.countRecord(
-          multiAsset,
-          Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.atTime(LocalTime.MAX)));
-      boolean isNoRecord = numberBalanceRecord == null || numberBalanceRecord == 0;
-      balance = isNoRecord ? null : balance;
-    }
-
-    return new TokenVolumeAnalyticsResponse(to, balance);
-  }
-
-  private BigInteger getBalanceInRangeHaveToday(MultiAsset multiAsset,
-                                                LocalDate from, LocalDate to,
-                                                LocalDate maxDateAgg) {
-    BigInteger todayBalance = addressTokenRepository.sumBalanceBetweenTx(
-        multiAsset,
-        Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
-    ).orElse(BigInteger.ZERO);
-
-    //case missing aggregation data
-    boolean isMissingAggregationData = to.minusDays(1).isAfter(maxDateAgg);
-    if (isMissingAggregationData) {
-      BigInteger balanceAgg = aggregateAddressTokenRepository
-          .sumBalanceInTimeRange(multiAsset.getId(), from, maxDateAgg)
-          .orElse(BigInteger.ZERO);
-
-      //get missing aggregation data
-      BigInteger balanceNotAgg = addressTokenRepository.sumBalanceBetweenTx(
-          multiAsset,
-          Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
-          Timestamp.valueOf(to.minusDays(1).atTime(LocalTime.MAX))
+    if (type == AnalyticType.ONE_DAY) {
+      balance = addressTokenRepository.sumBalanceBetweenTx(
+          multiAsset, Timestamp.valueOf(fromDateTime), Timestamp.valueOf(toDateTime)
       ).orElse(BigInteger.ZERO);
 
-      return todayBalance.add(balanceAgg).add(balanceNotAgg);
     } else {
-      BigInteger rangeToYesterdayBalance = aggregateAddressTokenRepository
-          .sumBalanceInTimeRange(multiAsset.getId(), from, to.minusDays(1))
-          .orElse(BigInteger.ZERO);
-      return todayBalance.add(rangeToYesterdayBalance);
+      // aggregate address token is total volume of token from 00:00:00 to 23:59:59
+      // so to get volume of token between from date and to date, we need to sum between from date - 1 and to date - 1
+      LocalDate from = fromDateTime.toLocalDate().minusDays(1);
+      LocalDate to = toDateTime.toLocalDate().minusDays(1);
+      boolean isNotHaveAggData = maxDateAgg.isEmpty() || !from.isBefore(maxDateAgg.get());
+      if (isNotHaveAggData) {
+        balance = addressTokenRepository.sumBalanceBetweenTx(
+            multiAsset,
+            Timestamp.valueOf(from.atTime(LocalTime.MAX)),
+            Timestamp.valueOf(to.atTime(LocalTime.MAX))
+        ).orElse(BigInteger.ZERO);
+      } else {
+        balance = getBalance(multiAsset, from, to, maxDateAgg.get());
+      }
     }
+    if (BigInteger.ZERO.equals(balance)) {
+      balance = checkNoRecord(multiAsset, type, fromDateTime, toDateTime) ? null : balance;
+    }
+    return new TokenVolumeAnalyticsResponse(fromDateTime, balance);
   }
 
-  private BigInteger getBalanceInRangePreviousToday(MultiAsset multiAsset,
-                                                    LocalDate from, LocalDate to,
-                                                    LocalDate maxDateAgg) {
+  private boolean checkNoRecord(
+      MultiAsset multiAsset, AnalyticType type,
+      LocalDateTime fromDateTime, LocalDateTime toDateTime
+  ) {
+    Timestamp startRange;
+    Timestamp endRange;
+    if (type == AnalyticType.ONE_DAY) {
+      startRange = Timestamp.valueOf(fromDateTime);
+      endRange = Timestamp.valueOf(toDateTime);
+    } else {
+      startRange = Timestamp.valueOf(fromDateTime.toLocalDate().atTime(LocalTime.MAX));
+      endRange = Timestamp.valueOf(toDateTime.toLocalDate().atTime(LocalTime.MAX));
+    }
+    Long numberBalanceRecord = addressTokenRepository.countRecord(multiAsset, startRange, endRange);
+    return numberBalanceRecord == null || numberBalanceRecord == 0;
+  }
+
+  private BigInteger getBalance(MultiAsset multiAsset,
+      LocalDate from, LocalDate to, LocalDate maxDateAgg) {
     boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
     if (isNotMissingAggregationData) {
       return aggregateAddressTokenRepository
@@ -311,52 +305,62 @@ public class TokenServiceImpl implements TokenService {
     return balanceAgg.add(balanceNotAgg);
   }
 
-  private List<LocalDate> getListDateAnalytic(AnalyticType analyticType) {
-    LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-    List<LocalDate> dates = new ArrayList<>();
-    switch (analyticType) {
-      case ONE_WEEK -> {
-        var currentWeek = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
-          dates.add(currentWeek.minusWeeks(i));
-        }
-      }
-      case ONE_MONTH -> {
-        var currentMonth = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
-        for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
-          dates.add(currentMonth.minusMonths(i));
-        }
-      }
-      case THREE_MONTH -> {
-        for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
-          dates.add(currentDate.minusMonths(i * 3L));
-        }
-      }
-      default -> {
-        for (int i = TOKEN_VOLUME_ANALYTIC_NUMBER; i >= 0; i--) {
-          dates.add(currentDate.minusDays(i));
-        }
-      }
-    }
-    return dates;
-  }
-
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
-    if(!multiAsset.getSupply().equals(BigInteger.ONE)){
+    String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(multiAsset.getFingerprint());
+    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty() ||
+        Boolean.FALSE.equals(verifyNFTTokenMetadata(txMetadataNFTToken, multiAsset))) {
       tokenResponse.setTokenType(TokenType.FT);
-    } else{
-      String tsQuery = makeQuery(multiAsset.getPolicy()) + " & " + makeQuery(multiAsset.getNameView());
-      String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(tsQuery);
-      if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
-        tokenResponse.setTokenType(TokenType.FT);
-      } else{
-        tokenResponse.setTokenType(TokenType.NFT);
-        tokenResponse.setMetadataJson(txMetadataNFTToken);
-      }
+    } else {
+      tokenResponse.setTokenType(TokenType.NFT);
+      tokenResponse.setMetadataJson(txMetadataNFTToken);
     }
   }
 
-  private String makeQuery(String value){
-    return "\"" + value + "\"";
+  /**
+   * Verify NFT token metadata by cip-25 algorithm
+   * The version property is also optional. If not specified, the version is 1.
+   * If a version of metadata is 1:
+   *  - policy must be in text format for the key in the metadata map
+   *  - assetName must be utf-8 encoded and in text format for the key in the metadata map
+   * If a version of metadata is 2:
+   *  - policy must be raw bytes for the key in the metadata map
+   *  - assetName must be raw bytes for the key in the metadata map
+   * @param metadataJson metadata json
+   * @param multiAsset multi asset
+   * @return true if metadata json is valid
+   */
+  private Boolean verifyNFTTokenMetadata(String metadataJson, MultiAsset multiAsset) {
+    Map<String, Object> jsonMetadataMap = new Gson()
+        .fromJson(metadataJson, TypeTokenGson.NFT_TOKEN_METADATA.getType().get());
+    final String cddlVer = "version";
+    if (jsonMetadataMap.containsKey(cddlVer)) {
+      String cddlVerValue = jsonMetadataMap.get(cddlVer).toString();
+      if ("2".equals(cddlVerValue) || "2.0".equals(cddlVerValue)) {
+        final String rawBytesPolicy = "0x" + multiAsset.getPolicy();
+        final String rawBytesAssetName = "0x" + multiAsset.getName().toLowerCase();
+        return verifyPolicyAndAssetName(jsonMetadataMap, rawBytesPolicy, rawBytesAssetName)
+            || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), rawBytesAssetName)
+            || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), multiAsset.getName().toLowerCase());
+      }
+    }
+
+    return verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), multiAsset.getNameView());
+  }
+
+  /**
+   * Check contains policy and asset name in metadata json
+   *
+   * @param jsonMetadataMap
+   * @param policy
+   * @param assetName
+   * @return true if metadata json contains policy and asset name
+   */
+  private Boolean verifyPolicyAndAssetName(Map<String, Object> jsonMetadataMap, String policy,
+                                           String assetName) {
+    if (jsonMetadataMap.containsKey(policy)) {
+      Map<String, Object> policyMap = (Map<String, Object>) jsonMetadataMap.get(policy);
+      return policyMap.containsKey(assetName);
+    }
+    return Boolean.FALSE;
   }
 }
