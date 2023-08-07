@@ -33,6 +33,7 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
+import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
