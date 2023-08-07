@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.common.enumeration;
 
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.function.Supplier;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,10 @@ public enum TypeTokenGson {
   ),
   NEWS(
       () -> new TypeToken<>() {
+      }.getType()
+  ),
+  NFT_TOKEN_METADATA(
+      () -> new TypeToken<HashMap<String, Object>>() {
       }.getType()
   );
 

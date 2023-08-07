@@ -3,7 +3,14 @@ package org.cardanofoundation.explorer.api.service;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochRewardProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
@@ -15,20 +22,12 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKe
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
 import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolLifecycleServiceImpl;
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
@@ -69,6 +68,9 @@ class PoolLifecycleServiceTest {
 
   @Mock
   private EpochRepository epochRepository;
+
+  @Mock
+  private PoolInfoRepository poolInfoRepository;
 
   @Mock
   private FetchRewardDataService fetchRewardDataService;
@@ -822,7 +824,8 @@ class PoolLifecycleServiceTest {
     BusinessException exception = assertThrows(BusinessException.class, () -> {
       poolLifecycleService.poolLifecycleStatus(poolView);
     });
-    Assertions.assertEquals(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode(), exception.getErrorCode());
+    Assertions.assertEquals(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode(),
+        exception.getErrorCode());
   }
 
   @Test
@@ -903,5 +906,133 @@ class PoolLifecycleServiceTest {
         poolLifecycleService.poolLifecycleStatus(poolView).getIsReward());
     Assertions.assertEquals(true,
         poolLifecycleService.poolLifecycleStatus(poolView).getIsDeRegistration());
+  }
+
+  @Test
+  void whenPoolViewIsExist_usingKoiOs_fetchFail_returnEmptyResponse() {
+    Pageable pageable = PageRequest.of(0, 10);
+    List<String> rewardAccounts = List.of(
+        "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p");
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(poolUpdateRepository.findRewardAccountByPoolView(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(rewardAccounts);
+    when(fetchRewardDataService.checkRewardForPool(rewardAccounts)).thenReturn(false);
+    when(fetchRewardDataService.fetchRewardForPool(rewardAccounts)).thenReturn(false);
+    Assertions.assertEquals(0,
+        poolLifecycleService.listReward("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+            pageable).getTotalItems());
+    Assertions.assertNull(
+        poolLifecycleService.listReward("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+            pageable).getData());
+  }
+
+  @Test
+  void whenPoolViewIsExist_usingKoiOs_returnRewardResponse() {
+    Timestamp time = Timestamp.valueOf("2023-01-01 00:00:00");
+    Pageable pageable = PageRequest.of(0, 10);
+    List<String> rewardAccounts = List.of(
+        "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p");
+    LifeCycleRewardProjection projection = Mockito.mock(LifeCycleRewardProjection.class);
+    when(projection.getAddress()).thenReturn(
+        "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p");
+    when(projection.getAmount()).thenReturn(BigInteger.TWO);
+    when(projection.getEpochNo()).thenReturn(69);
+    when(projection.getTime()).thenReturn(time);
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(poolUpdateRepository.findRewardAccountByPoolView(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(rewardAccounts);
+    when(fetchRewardDataService.checkRewardForPool(rewardAccounts)).thenReturn(true);
+    when(rewardRepository.getRewardInfoByPool(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", pageable)).thenReturn(
+        new PageImpl<>(List.of(projection)));
+    Assertions.assertEquals(1,
+        poolLifecycleService.listReward("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+            pageable).getTotalItems());
+    Assertions.assertNotNull(
+        poolLifecycleService.listReward("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+            pageable).getData());
+  }
+
+  @Test
+  void whenPoolViewIsExist_usingKoiOs_returnInfoResponse() {
+    PoolInfoProjection projection = Mockito.mock(PoolInfoProjection.class);
+    when(projection.getPoolView()).thenReturn(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
+    when(projection.getId()).thenReturn(69L);
+    when(projection.getPoolName()).thenReturn("Test");
+    when(projection.getPoolId()).thenReturn(
+        "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
+    List<String> rewardAccounts = List.of(
+        "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p");
+    when(poolHashRepository.getPoolInfo(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(projection);
+    when(poolUpdateRepository.findRewardAccountByPoolId(69L)).thenReturn(rewardAccounts);
+    when(poolUpdateRepository.findOwnerAccountByPoolView(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(rewardAccounts);
+    when(rewardRepository.getTotalRewardByPool(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(
+        BigInteger.valueOf(10000));
+    when(poolRetireRepository.findByPoolView(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(List.of(69));
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(100));
+    when(poolInfoRepository.getActiveStakeByPoolAndEpoch(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", 100)).thenReturn(
+        BigInteger.TEN);
+    when(fetchRewardDataService.checkRewardForPool(rewardAccounts)).thenReturn(false);
+    when(fetchRewardDataService.fetchRewardForPool(rewardAccounts)).thenReturn(false);
+    Assertions.assertEquals("Test",
+        poolLifecycleService.poolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")
+            .getPoolName());
+    Assertions.assertEquals("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda",
+        poolLifecycleService.poolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")
+            .getPoolId());
+  }
+
+  @Test
+  void whenPoolViewIsExist_usingKoiOs_returnPoolRetireResponse() {
+    Pageable pageable = PageRequest.of(0, 10);
+    List<String> rewardAccounts = List.of(
+        "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p");
+    PoolDeRegistrationProjection retireProjection = Mockito.mock(
+        PoolDeRegistrationProjection.class);
+    when(retireProjection.getRetiringEpoch()).thenReturn(69);
+    when(retireProjection.getTxHash()).thenReturn(
+        "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
+    when(retireProjection.getFee()).thenReturn(BigInteger.TEN);
+    when(poolRetireRepository.getPoolDeRegistration(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        null, null, null, pageable)).thenReturn(new PageImpl<>(List.of(retireProjection)));
+    PoolInfoProjection projection = Mockito.mock(PoolInfoProjection.class);
+    when(projection.getPoolView()).thenReturn(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
+    when(projection.getPoolName()).thenReturn("Test");
+    when(projection.getPoolId()).thenReturn(
+        "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
+    when(projection.getId()).thenReturn(1L);
+    when(poolHashRepository.getPoolInfo(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(projection);
+    EpochRewardProjection rewardProjection = Mockito.mock(EpochRewardProjection.class);
+    when(rewardProjection.getEpochNo()).thenReturn(69);
+    when(rewardProjection.getAmount()).thenReturn(BigInteger.valueOf(1001));
+    when(rewardRepository.getRewardRefundByEpoch(
+        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", Set.of(69))).thenReturn(
+        List.of(rewardProjection));
+    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(poolUpdateRepository.findRewardAccountByPoolId(1L)).thenReturn(rewardAccounts);
+    when(fetchRewardDataService.checkRewardForPool(rewardAccounts)).thenReturn(false);
+    when(fetchRewardDataService.fetchRewardForPool(rewardAccounts)).thenReturn(true);
+    Assertions.assertEquals(1,
+        poolLifecycleService.deRegistration(
+                "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, null, null, pageable)
+            .getTotalItems());
+    Assertions.assertEquals(69,
+        poolLifecycleService.deRegistration(
+                "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, null, null, pageable)
+            .getData().get(0).getRetiringEpoch());
+    Assertions.assertEquals("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda",
+        poolLifecycleService.deRegistration(
+                "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, null, null, pageable)
+            .getData().get(0).getTxHash());
   }
 }

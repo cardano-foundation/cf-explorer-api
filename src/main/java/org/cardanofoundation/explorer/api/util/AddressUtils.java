@@ -28,6 +28,8 @@ public class AddressUtils {
           ShelleyAddress stakeShelley = new ShelleyAddress(addr);
           stakeAddress = stakeShelley.getAddress();
         }
+      } else if(address.startsWith(CommonConstant.STAKE_ADDRESS_PREFIX)) {
+        throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
       } else if(!AddressUtil.isValidAddress(address)) {
         throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
       }

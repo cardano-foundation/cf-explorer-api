@@ -22,10 +22,13 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
   @EntityGraph(attributePaths = {MaTxMint_.TX, "tx.block"})
   Page<MaTxMint> findByIdent(@Param("tokenId") String tokenId, Pageable pageable);
 
-  @Query(value = "SELECT tm.json FROM tx_metadata tm "
-      + "LEFT JOIN ma_tx_mint mtm on mtm.tx_id = tm.tx_id "
-      + "WHERE tm.key = 721 "
-      + "AND tm.ts_json @@ to_tsquery('simple', :tsQuery)"
-      + "ORDER BY mtm.id DESC LIMIT 1", nativeQuery = true)
-  String getTxMetadataNFTToken(@Param("tsQuery") String tsQuery);
+  @Query(value = "SELECT tm.json from Tx tx"
+      + " JOIN MaTxMint mtm ON mtm.tx = tx"
+      + " JOIN TxMetadata tm ON tm.tx = tx"
+      + " JOIN MultiAsset ma ON ma = mtm.ident"
+      + " WHERE tm.key = 721"
+      + " AND ma.supply = 1"
+      + " AND ma.fingerprint = :fingerprint"
+      + " ORDER BY mtm.id DESC LIMIT 1")
+  String getTxMetadataNFTToken(@Param("fingerprint") String fingerprint);
 }

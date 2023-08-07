@@ -17,6 +17,7 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.*;
@@ -29,6 +30,8 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -419,5 +422,28 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       return Collections.emptyList();
     }
     return List.of(balanceList.getMinVal(), balanceList.getMaxVal());
+  }
+
+  @Override
+  public StakeAddressRewardDistribution getStakeAddressRewardDistributionInfo(String stakeKey) {
+    StakeAddressRewardDistribution stakeAddressRewardDistribution = new StakeAddressRewardDistribution();
+    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
+      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
+      if (!fetchRewardResponse) {
+        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      }
+    }
+    stakeAddressRewardDistribution.setStakeAddress(stakeKey);
+    BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
+        stakeKey).orElse(BigInteger.ZERO);
+    stakeAddressRewardDistribution.setRewardAvailable(stakeAvailableReward);
+    Set<RewardType> rewardTypeOfStakeKey = rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey);
+    if (rewardTypeOfStakeKey.contains(RewardType.MEMBER)){
+      stakeAddressRewardDistribution.setHasMemberReward(true);
+    }
+    if(rewardTypeOfStakeKey.contains(RewardType.LEADER)){
+      stakeAddressRewardDistribution.setHasLeaderReward(true);
+    }
+    return stakeAddressRewardDistribution;
   }
 }

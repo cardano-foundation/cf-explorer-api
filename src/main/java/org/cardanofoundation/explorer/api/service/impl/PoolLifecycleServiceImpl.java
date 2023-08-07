@@ -196,8 +196,11 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public BaseFilterResponse<DeRegistrationResponse> deRegistration(String poolView, String txHash,
-      Date fromDate, Date toDate,
+  public BaseFilterResponse<DeRegistrationResponse> deRegistration(
+      String poolView,
+      String txHash,
+      Date fromDate,
+      Date toDate,
       Pageable pageable) {
     BaseFilterResponse<DeRegistrationResponse> res = new BaseFilterResponse<>();
     PoolInfoProjection poolInfo = poolHashRepository.getPoolInfo(poolView);
