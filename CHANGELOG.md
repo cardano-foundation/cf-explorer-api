@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.28](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.27...v0.3.28) (2023-08-08)
+
+
+### Bug Fixes
+
+* added string key serialiser ([89ce7f9](https://github.com/cardano-foundation/cf-explorer-api/commit/89ce7f959264571f79e7d8e421c44b4cd31b2149))
+
 ## [0.3.27](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.26...v0.3.27) (2023-08-07)
 
 
