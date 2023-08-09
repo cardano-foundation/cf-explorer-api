@@ -14,7 +14,9 @@ import lombok.*;
 @JsonInclude(Include.NON_NULL)
 public class TokenAddressResponse {
   private Long addressId;
+  private Long numberOfPaymentAddress;
   private String address;
+  private String stakeAddress;
   private String policy;
   private TokenMetadataResponse metadata;
   private String name;
