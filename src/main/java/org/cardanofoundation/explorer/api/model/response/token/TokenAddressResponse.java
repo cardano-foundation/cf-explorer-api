@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.math.BigInteger;
 
 import lombok.*;
+import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 
 @Getter
 @Setter
@@ -15,7 +16,7 @@ import lombok.*;
 public class TokenAddressResponse {
   private Long addressId;
   private String address;
-  private String stakeAddress;
+  private AddressType addressType;
   private String policy;
   private TokenMetadataResponse metadata;
   private String name;
