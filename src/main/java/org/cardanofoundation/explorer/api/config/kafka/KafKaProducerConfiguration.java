@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.config.kafka;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,9 @@ public class KafKaProducerConfiguration {
   private static final int MAX_REQUEST_SIZE = 2_097_152;
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
+
+  @Value("${spring.kafka.useSsl}")
+  private Boolean useSsl;
 
   @Value("${spring.kafka.producer.acks}")
   private String acks;
@@ -61,6 +65,11 @@ public class KafKaProducerConfiguration {
     map.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, MAX_REQUEST_SIZE);
     map.put(ProducerConfig.ACKS_CONFIG,acks);
     map.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, maxBlockMs);
+
+    if (useSsl) {
+      map.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
+    }
+
     return new DefaultKafkaProducerFactory<>(map);
   }
 
