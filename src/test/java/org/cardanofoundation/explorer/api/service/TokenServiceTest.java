@@ -661,7 +661,7 @@ class TokenServiceTest {
         .build();
     final StakeAddress stakeAddress = StakeAddress.builder()
         .id(0L)
-        .view("stake")
+        .view("address")
         .build();
     when(stakeAddressRepository.findByIdIn(anyCollection())).thenReturn(List.of(stakeAddress));
 
