@@ -523,8 +523,9 @@ class TokenServiceTest {
     // Configure AddressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(...).
     when(addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(eq(multiAsset),
         any(Pageable.class))).thenReturn(List.of(
-        AddressTokenProjectionImpl.builder()
-            .numberOfPaymentAddress(1L)
+        AddressTokenProjectionImpl
+            .builder()
+            .addressId(1L)
             .build()
     ));
 
@@ -542,7 +543,6 @@ class TokenServiceTest {
     final TokenAddressResponse tokenAddressResponse = TokenAddressResponse.builder()
         .address(address.getAddress())
         .addressId(address.getId())
-        .numberOfPaymentAddress(1L)
         .build();
     final StakeAddress stakeAddress = StakeAddress.builder()
         .id(0L)

@@ -43,12 +43,11 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
   List<TokenNumberHoldersProjection> countByMultiAssetIn(
       @Param("multiAssets") List<Long> multiAssetIds);
 
-  @Query(value = "SELECT COALESCE(atb.stakeAddress.id, atb.addressId) as addressId,"
-      + " COUNT(atb.stakeAddress.id) as numberOfPaymentAddress, SUM(atb.balance) as quantity"
+  @Query(value = "SELECT COALESCE(atb.stakeAddress.id, atb.addressId * -1L) as addressId, SUM(atb.balance) as quantity"
       + " FROM AddressTokenBalance atb "
       + " WHERE atb.multiAsset = :multiAsset"
       + " AND atb.balance > 0"
-      + " GROUP BY COALESCE(atb.stakeAddress.id, atb.addressId)"
+      + " GROUP BY COALESCE(atb.stakeAddress.id, atb.addressId * -1L)"
       + " ORDER BY SUM(atb.balance) DESC")
   List<AddressTokenProjection> findAddressAndBalanceByMultiAsset(
       @Param("multiAsset") MultiAsset multiAsset, Pageable pageable);

@@ -188,15 +188,15 @@ public class TokenServiceImpl implements TokenService {
         .orElse(0L);
     var numberOfHolder = numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe;
     Set<Long> stakeAddressIds = tokenAddresses.stream()
-        .filter(item -> item.getNumberOfPaymentAddress() > 0)
         .map(AddressTokenProjection::getAddressId)
+        .filter(addressId -> addressId > 0L)
         .collect(Collectors.toSet());
     List<StakeAddress> stakeAddressList = stakeAddressRepository.findByIdIn(stakeAddressIds);
     Map<Long, StakeAddress> stakeAddressMap = stakeAddressList.stream().collect(
         Collectors.toMap(StakeAddress::getId, Function.identity()));
     Set<Long> addressIds = tokenAddresses.stream()
-        .filter(item -> Long.valueOf(0).equals(item.getNumberOfPaymentAddress()))
-        .map(AddressTokenProjection::getAddressId)
+        .filter(item -> item.getAddressId() < 0L)
+        .map(item -> item.getAddressId() * -1L)
         .collect(Collectors.toSet());
     List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
     Map<Long, Address> addressMap = addressList.stream().collect(
@@ -204,13 +204,11 @@ public class TokenServiceImpl implements TokenService {
     List<TokenAddressResponse> tokenAddressResponses = tokenAddresses.stream().map(
         tokenMapper::fromAddressTokenProjection).toList();
     tokenAddressResponses.forEach(tokenAddress -> {
-      if (tokenAddress.getNumberOfPaymentAddress() > 0) {
-        tokenAddress.setStakeAddress(
-            stakeAddressMap.get(tokenAddress.getAddressId()).getView());
+      if (tokenAddress.getAddressId() < 0L) {
+        tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId() * -1L).getAddress());
       } else {
-        tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId()).getAddress());
+        tokenAddress.setStakeAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
       }
-      tokenAddress.setAddressId(null);
     });
     Page<TokenAddressResponse> response = new PageImpl<>(tokenAddressResponses, pageable, numberOfHolder);
     return new BaseFilterResponse<>(response);
