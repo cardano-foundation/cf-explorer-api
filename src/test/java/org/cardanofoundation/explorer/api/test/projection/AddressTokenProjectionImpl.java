@@ -19,6 +19,7 @@ public class AddressTokenProjectionImpl implements AddressTokenProjection {
   Long addressId;
   String policy;
   Long multiAssetId;
+  Long numberOfPaymentAddress;
 
   @Override
   public BigInteger getQuantity() {
@@ -53,5 +54,10 @@ public class AddressTokenProjectionImpl implements AddressTokenProjection {
   @Override
   public Long getMultiAssetId() {
     return this.multiAssetId;
+  }
+
+  @Override
+  public Long getNumberOfPaymentAddress() {
+    return this.numberOfPaymentAddress;
   }
 }
