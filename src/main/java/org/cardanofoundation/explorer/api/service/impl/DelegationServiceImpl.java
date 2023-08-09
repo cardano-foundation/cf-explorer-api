@@ -189,8 +189,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
     Object delegatorCached = redisTemplate.opsForValue()
         .get(CommonConstant.REDIS_TOTAL_DELEGATOR + network);
-    Integer delegators =
-        Objects.nonNull(delegatorCached) ? Integer.parseInt(String.valueOf(delegatorCached)) : CommonConstant.ZERO;
+    Integer delegators = Objects.nonNull(delegatorCached) ? Integer.parseInt(String.valueOf(delegatorCached)) : 0;
     return DelegationHeaderResponse.builder().epochNo(epochNo).epochSlotNo(slot)
         .liveStake(liveStake).delegators(delegators)
         .activePools(Objects.nonNull(poolActiveObj) ? (Integer) poolActiveObj : CommonConstant.ZERO)
@@ -290,7 +289,6 @@ public class DelegationServiceImpl implements DelegationService {
     response.setTotalItems(poolIdPage.getTotalElements());
     response.setTotalPages(poolIdPage.getTotalPages());
     response.setCurrentPage(pageable.getPageNumber());
-
     return response;
   }
 

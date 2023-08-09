@@ -14,7 +14,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StakeAddressRewardDistribution {
-  private String stakeAddress;
   private BigInteger rewardAvailable;
   private boolean hasMemberReward;
   private boolean hasLeaderReward;

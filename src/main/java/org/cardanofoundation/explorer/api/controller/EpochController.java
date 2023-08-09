@@ -56,7 +56,7 @@ public class EpochController {
   @LogMessage
   @Operation(summary = "Get all epoch", tags = {"epoch"})
   public ResponseEntity<BaseFilterResponse<EpochResponse>> filter(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
           direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(epochService.getAllEpoch(pagination.toPageable()));
   }

@@ -64,9 +64,9 @@ public class PoolReportController {
   @LogMessage
   @Operation(summary = "Get list pool report by user", tags = {"pool-report"})
   public ResponseEntity<BaseFilterResponse<PoolReportListResponse>> listPoolReport(
-      HttpServletRequest request,
-      @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+       HttpServletRequest request,
+       @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
+       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(poolReportService.list(pagination.toPageable(), username, filterRequest));
@@ -133,7 +133,7 @@ public class PoolReportController {
       HttpServletRequest request) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
-        poolReportService.fetchRewardsDistribution(reportId, pagination.toPageable(), username));
+            poolReportService.fetchRewardsDistribution(reportId, pagination.toPageable(), username));
   }
 
   @GetMapping(value = "detail/{reportId}/deregistration")

@@ -116,7 +116,7 @@ public class StakeKeyLifeCycleController {
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           Delegation_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
+            stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/delegations/{hash}")
@@ -153,7 +153,7 @@ public class StakeKeyLifeCycleController {
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
     return ResponseEntity.ok(
-        stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
+            stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
   }
 
   @GetMapping("/{stakeKey}/withdrawals/{hash}")

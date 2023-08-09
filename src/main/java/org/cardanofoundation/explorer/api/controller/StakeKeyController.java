@@ -56,7 +56,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake key registration", tags = "stake-key")
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-          @ParameterObject @PaginationValid Pagination pagination) {
+       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pagination.toPageable()));
   }
 
@@ -64,7 +64,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake key de-registration", tags = "stake-key")
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-          @ParameterObject @PaginationValid Pagination pagination) {
+       @ParameterObject @PaginationValid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pagination.toPageable()));
   }
   @GetMapping("/address/{address}")

@@ -33,7 +33,8 @@ public class PoolController {
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "bk.time"}, direction = Sort.Direction.DESC) Pagination pagination) {
-    return ResponseEntity.ok(poolRegistrationService.getDataForPoolRegistration(pagination.toPageable()));
+    return ResponseEntity.ok(
+        poolRegistrationService.getDataForPoolRegistration(pagination.toPageable()));
   }
 
   @GetMapping("/de-registration")
@@ -42,6 +43,7 @@ public class PoolController {
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "bk.time"}, direction = Sort.Direction.DESC) Pagination pagination) {
-    return ResponseEntity.ok(poolRegistrationService.getDataForPoolDeRegistration(pagination.toPageable()));
+    return ResponseEntity.ok(
+        poolRegistrationService.getDataForPoolDeRegistration(pagination.toPageable()));
   }
 }

@@ -510,7 +510,6 @@ public class StakeKeyServiceTest {
         when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(Set.of(RewardType.MEMBER));
 
         var response = stakeKeyService.getStakeAddressRewardDistributionInfo(stakeKey);
-        assertEquals(stakeKey,response.getStakeAddress());
         assertEquals(BigInteger.valueOf(10),response.getRewardAvailable());
         assertTrue(response.isHasMemberReward());
         assertFalse(response.isHasLeaderReward());
@@ -525,7 +524,6 @@ public class StakeKeyServiceTest {
         when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(Set.of(RewardType.MEMBER,RewardType.LEADER));
 
         var response = stakeKeyService.getStakeAddressRewardDistributionInfo(stakeKey);
-        assertEquals(stakeKey,response.getStakeAddress());
         assertEquals(BigInteger.valueOf(10),response.getRewardAvailable());
         assertTrue(response.isHasMemberReward());
         assertTrue(response.isHasLeaderReward());
@@ -540,7 +538,6 @@ public class StakeKeyServiceTest {
         when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(new HashSet<>());
 
         var response = stakeKeyService.getStakeAddressRewardDistributionInfo(stakeKey);
-        assertEquals(stakeKey,response.getStakeAddress());
         assertEquals(BigInteger.valueOf(10),response.getRewardAvailable());
         assertFalse(response.isHasMemberReward());
         assertFalse(response.isHasLeaderReward());
