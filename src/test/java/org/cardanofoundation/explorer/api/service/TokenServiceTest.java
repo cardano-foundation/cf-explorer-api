@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.springframework.core.task.TaskExecutor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +29,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
@@ -90,6 +95,12 @@ class TokenServiceTest {
   @Mock
   private AggregateAddressTokenRepository aggregateAddressTokenRepository;
 
+  @Mock
+  private TokenPageCacheService tokenPageCacheService;
+  @Mock
+  private TaskExecutor taskExecutor;
+  @Mock
+  private StakeAddressRepository stakeAddressRepository;
   @Mock
   private AggregatedDataCacheService aggregatedDataCacheService;
 
@@ -511,10 +522,12 @@ class TokenServiceTest {
 
     // Configure AddressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(...).
     when(addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(eq(multiAsset),
-        any(Pageable.class))).thenReturn(new PageImpl<>(List.of(
-        AddressTokenProjectionImpl.builder()
+        any(Pageable.class))).thenReturn(List.of(
+        AddressTokenProjectionImpl
+            .builder()
+            .addressId(1L)
             .build()
-    )));
+    ));
 
     // Configure AddressRepository.findAddressByIdIn(...).
     final Address address = Address.builder()
@@ -531,6 +544,11 @@ class TokenServiceTest {
         .address(address.getAddress())
         .addressId(address.getId())
         .build();
+    final StakeAddress stakeAddress = StakeAddress.builder()
+        .id(0L)
+        .view("stake")
+        .build();
+    when(stakeAddressRepository.findByIdIn(anyCollection())).thenReturn(List.of(stakeAddress));
 
     when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
         .thenReturn(tokenAddressResponse);

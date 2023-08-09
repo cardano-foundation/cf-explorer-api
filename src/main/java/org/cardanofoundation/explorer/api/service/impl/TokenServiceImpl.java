@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -45,26 +46,13 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AggregateAddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +66,7 @@ public class TokenServiceImpl implements TokenService {
   private final AddressRepository addressRepository;
   private final TxRepository txRepository;
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
+  private final StakeAddressRepository stakeAddressRepository;
 
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
@@ -188,21 +177,41 @@ public class TokenServiceImpl implements TokenService {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
         () -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND)
     );
-    Page<AddressTokenProjection> tokenAddresses
+    List<AddressTokenProjection> tokenAddresses
         = addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
-    Set<Long> addressIds = tokenAddresses.stream().map(AddressTokenProjection::getAddressId)
+
+    var numberOfHoldersHaveStakeKey = addressTokenBalanceRepository
+        .countAddressNotHaveStakeByMultiAsset(multiAsset)
+        .orElse(0L);
+    var numberOfHoldersNotHaveStakeKe =  addressTokenBalanceRepository
+        .countStakeByMultiAsset(multiAsset)
+        .orElse(0L);
+    var numberOfHolder = numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe;
+    Set<Long> stakeAddressIds = tokenAddresses.stream()
+        .map(AddressTokenProjection::getAddressId)
+        .filter(addressId -> addressId > 0L)
+        .collect(Collectors.toSet());
+    List<StakeAddress> stakeAddressList = stakeAddressRepository.findByIdIn(stakeAddressIds);
+    Map<Long, StakeAddress> stakeAddressMap = stakeAddressList.stream().collect(
+        Collectors.toMap(StakeAddress::getId, Function.identity()));
+    Set<Long> addressIds = tokenAddresses.stream()
+        .filter(item -> item.getAddressId() < 0L)
+        .map(item -> item.getAddressId() * -1L)
         .collect(Collectors.toSet());
     List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
     Map<Long, Address> addressMap = addressList.stream().collect(
         Collectors.toMap(Address::getId, Function.identity()));
-    Page<TokenAddressResponse> tokenAddressResponses = tokenAddresses.map(
-        tokenMapper::fromAddressTokenProjection);
+    List<TokenAddressResponse> tokenAddressResponses = tokenAddresses.stream().map(
+        tokenMapper::fromAddressTokenProjection).toList();
     tokenAddressResponses.forEach(tokenAddress -> {
-      tokenAddress.setAddress(
-              addressMap.get(tokenAddress.getAddressId()).getAddress());
-      tokenAddress.setAddressId(null);
+      if (tokenAddress.getAddressId() < 0L) {
+        tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId() * -1L).getAddress());
+      } else {
+        tokenAddress.setStakeAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
+      }
     });
-    return new BaseFilterResponse<>(tokenAddressResponses);
+    Page<TokenAddressResponse> response = new PageImpl<>(tokenAddressResponses, pageable, numberOfHolder);
+    return new BaseFilterResponse<>(response);
   }
 
   @Override

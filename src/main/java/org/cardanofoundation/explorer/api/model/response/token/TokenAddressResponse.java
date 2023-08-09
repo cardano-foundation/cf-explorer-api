@@ -15,6 +15,7 @@ import lombok.*;
 public class TokenAddressResponse {
   private Long addressId;
   private String address;
+  private String stakeAddress;
   private String policy;
   private TokenMetadataResponse metadata;
   private String name;
