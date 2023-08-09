@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
+import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
@@ -220,9 +221,12 @@ public class TokenServiceImpl implements TokenService {
     tokenAddressResponses.forEach(tokenAddress -> {
       if (tokenAddress.getAddressId() < 0L) {
         tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId() * -1L).getAddress());
+        tokenAddress.setAddressType(AddressType.PAYMENT_ADDRESS);
       } else {
-        tokenAddress.setStakeAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
+        tokenAddress.setAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
+        tokenAddress.setAddressType(AddressType.PAYMENT_ADDRESS);
       }
+      tokenAddress.setAddressId(null);
     });
     Page<TokenAddressResponse> response = new PageImpl<>(tokenAddressResponses, pageable, numberOfHolder);
     return new BaseFilterResponse<>(response);
