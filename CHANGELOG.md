@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.29](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.28...v0.3.29) (2023-08-09)
+
+
+### Bug Fixes
+
+* added kafka configuration ([5dbb357](https://github.com/cardano-foundation/cf-explorer-api/commit/5dbb3576e424d79edde54ee73de5fcd7e3872b23))
+* update README.md and trigger release ([179a94c](https://github.com/cardano-foundation/cf-explorer-api/commit/179a94c45d0e6ce85a5e19810e9670a31d7e086f))
+
+## [0.3.28](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.27...v0.3.28) (2023-08-08)
+
+
+### Bug Fixes
+
+* added string key serialiser ([89ce7f9](https://github.com/cardano-foundation/cf-explorer-api/commit/89ce7f959264571f79e7d8e421c44b4cd31b2149))
+
 ## [0.3.27](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.26...v0.3.27) (2023-08-07)
 
 

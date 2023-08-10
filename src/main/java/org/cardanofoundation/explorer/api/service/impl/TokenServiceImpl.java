@@ -344,21 +344,28 @@ public class TokenServiceImpl implements TokenService {
    * @return true if metadata json is valid
    */
   private Boolean verifyNFTTokenMetadata(String metadataJson, MultiAsset multiAsset) {
-    Map<String, Object> jsonMetadataMap = new Gson()
-        .fromJson(metadataJson, TypeTokenGson.NFT_TOKEN_METADATA.getType().get());
-    final String cddlVer = "version";
-    if (jsonMetadataMap.containsKey(cddlVer)) {
-      String cddlVerValue = jsonMetadataMap.get(cddlVer).toString();
-      if ("2".equals(cddlVerValue) || "2.0".equals(cddlVerValue)) {
-        final String rawBytesPolicy = "0x" + multiAsset.getPolicy();
-        final String rawBytesAssetName = "0x" + multiAsset.getName().toLowerCase();
-        return verifyPolicyAndAssetName(jsonMetadataMap, rawBytesPolicy, rawBytesAssetName)
-            || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), rawBytesAssetName)
-            || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), multiAsset.getName().toLowerCase());
+    try {
+      Map<String, Object> jsonMetadataMap = new Gson()
+          .fromJson(metadataJson, TypeTokenGson.NFT_TOKEN_METADATA.getType().get());
+      final String cddlVer = "version";
+      if (jsonMetadataMap.containsKey(cddlVer)) {
+        String cddlVerValue = jsonMetadataMap.get(cddlVer).toString();
+        if ("2".equals(cddlVerValue) || "2.0".equals(cddlVerValue)) {
+          final String rawBytesPolicy = "0x" + multiAsset.getPolicy();
+          final String rawBytesAssetName = "0x" + multiAsset.getName().toLowerCase();
+          return verifyPolicyAndAssetName(jsonMetadataMap, rawBytesPolicy, rawBytesAssetName)
+              || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(),
+                                          rawBytesAssetName)
+              || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(),
+                                          multiAsset.getName().toLowerCase());
+        }
       }
+      return verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(),
+                                      multiAsset.getNameView());
+    } catch (Exception e) {
+      log.error("Error when verify NFT token metadata", e);
+      return Boolean.FALSE;
     }
-
-    return verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), multiAsset.getNameView());
   }
 
   /**
