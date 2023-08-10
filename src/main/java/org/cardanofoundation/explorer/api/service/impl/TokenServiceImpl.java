@@ -224,7 +224,7 @@ public class TokenServiceImpl implements TokenService {
         tokenAddress.setAddressType(AddressType.PAYMENT_ADDRESS);
       } else {
         tokenAddress.setAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
-        tokenAddress.setAddressType(AddressType.PAYMENT_ADDRESS);
+        tokenAddress.setAddressType(AddressType.STAKE_ADDRESS);
       }
       tokenAddress.setAddressId(null);
     });
