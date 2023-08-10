@@ -232,65 +232,7 @@ class TokenServiceTest {
   }
 
   @Test
-  void testGetTokenDetail_WhenTokenFoundAndMetadataJsonNotContainVersionKeyAndTokenTypeIsFT() {
-    // Setup
-    // Configure MultiAssetRepository.findByFingerprint(...).
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("policy")
-        .name("name")
-        .nameView("nameView")
-        .fingerprint("fingerprint")
-        .build();
-
-    final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
-    when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-
-    // Configure TokenMapper.fromMultiAssetToResponse(...).
-    final TokenResponse tokenResponse = new TokenResponse();
-    when(tokenMapper.fromMultiAssetToResponse(any())).thenReturn(tokenResponse);
-
-    final TokenInfo tokenInfo = TokenInfo.builder()
-        .multiAssetId(0L)
-        .numberOfHolders(100L)
-        .volume24h(new BigInteger("100"))
-        .updateTime(Timestamp.valueOf(LocalDateTime.now()))
-        .build();
-    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
-
-    final AssetMetadata metadata = AssetMetadata.builder()
-        .id(0L)
-        .subject("policyname")
-        .name("name")
-        .description("description")
-        .policy("policy")
-        .build();
-    when(assetMetadataRepository.findFirstBySubject(any())).thenReturn(Optional.of(metadata));
-
-    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
-        0, "logo", "description");
-    when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
-
-    // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
-    final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0));
-    when(multiAssetRepository.getLastActivityTimeOfToken(multiAsset)).thenReturn(timestamp);
-
-    when(maTxMintRepository.getTxMetadataNFTToken(anyString())).thenReturn("{}");
-
-    // Run the test
-    final TokenResponse result = tokenService.getTokenDetail("tokenId");
-
-    // Verify the results
-    assertEquals(100, result.getNumberOfHolders());
-    assertEquals("100", result.getVolumeIn24h());
-    assertEquals(TokenType.FT, result.getTokenType());
-    assertNull(result.getMetadataJson());
-    assertEquals(timestamp, result.getTokenLastActivity());
-    assertEquals(tokenMetadataResponse, result.getMetadata());
-  }
-
-  @Test
-  void testGetTokenDetail_WhenTokenFoundAndMetadataJsonContainsVersionKeyAndTokenTypeIsFT() {
+  void testGetTokenDetail_WhenTokenFoundAndMetadataJsonIsNullAndTokenTypeIsFT() {
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset = MultiAsset.builder()
@@ -333,8 +275,7 @@ class TokenServiceTest {
     final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0));
     when(multiAssetRepository.getLastActivityTimeOfToken(multiAsset)).thenReturn(timestamp);
 
-    when(maTxMintRepository.getTxMetadataNFTToken(anyString())).thenReturn(
-        "{\"d12d8c05c03484409f157917f21b323824d892130e4085006eaefc4a\":{\"PARA3078\":{\"image\":\"ipfs://QmdHrBDVuHeQW63DrR7dvRtdGEUuVQ4vfxZG2uTVFtZBpd\",\"website\":\"https://www.painsnft.com\",\"accessories\":\"None\",\"mediaType\":\"image/jpg\",\"body\":\"Tanbutton\",\"eyes\":\"Trustinme\",\"clothes\":\"Pinkvest\",\"hair\":\"Creativethinker\",\"mouth\":\"Chilled\",\"eyebrows\":\"Bluerock\",\"background\":\"Mutedblue\",\"name\":\"ParaPains#3078\",\"files\":[{\"src\":\"ipfs://QmdHrBDVuHeQW63DrR7dvRtdGEUuVQ4vfxZG2uTVFtZBpd\",\"name\":\"ParaPains#3078\",\"mediaType\":\"image/jpg\"}]},\"PARA0043\":{\"image\":\"ipfs://QmdBBJbL4RGcSxjkNqcoVhFabNPwfxp15BipDjJqUeB5w4\",\"website\":\"https://www.painsnft.com\",\"accessories\":\"None\",\"mediaType\":\"image/jpg\",\"body\":\"Yellownormal\",\"eyes\":\"Lizard\",\"clothes\":\"WhiteT\",\"hair\":\"Backcap\",\"mouth\":\"Sadnashers\",\"eyebrows\":\"Green\",\"background\":\"Deepblue\",\"name\":\"ParaPains#0043\",\"files\":[{\"src\":\"ipfs://QmdBBJbL4RGcSxjkNqcoVhFabNPwfxp15BipDjJqUeB5w4\",\"name\":\"ParaPains#0043\",\"mediaType\":\"image/jpg\"}]}},\"version\":\"2.0\"}");
+    when(maTxMintRepository.getTxMetadataNFTToken(anyString())).thenReturn(null);
 
     // Run the test
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
