@@ -26,8 +26,7 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
       + " JOIN MaTxMint mtm ON mtm.tx = tx"
       + " JOIN TxMetadata tm ON tm.tx = tx"
       + " JOIN MultiAsset ma ON ma = mtm.ident"
-      + " WHERE tm.key = 721"
-      + " AND ma.supply = 1"
+      + " WHERE ma.supply = 1"
       + " AND ma.fingerprint = :fingerprint"
       + " ORDER BY mtm.id DESC LIMIT 1")
   String getTxMetadataNFTToken(@Param("fingerprint") String fingerprint);
