@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,14 +28,6 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AggregateAddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
@@ -41,10 +35,6 @@ import org.cardanofoundation.explorer.api.test.projection.TokenNumberHoldersProj
 import org.cardanofoundation.explorer.api.test.projection.TokenVolumeProjectionImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -94,6 +84,8 @@ class TokenServiceTest {
   private TokenPageCacheService tokenPageCacheService;
   @Mock
   private TaskExecutor taskExecutor;
+  @Mock
+  private StakeAddressRepository stakeAddressRepository;
   @InjectMocks
   private TokenServiceImpl tokenService;
 
@@ -645,10 +637,12 @@ class TokenServiceTest {
 
     // Configure AddressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(...).
     when(addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(eq(multiAsset),
-        any(Pageable.class))).thenReturn(new PageImpl<>(List.of(
-        AddressTokenProjectionImpl.builder()
+        any(Pageable.class))).thenReturn(List.of(
+        AddressTokenProjectionImpl
+            .builder()
+            .addressId(1L)
             .build()
-    )));
+    ));
 
     // Configure AddressRepository.findAddressByIdIn(...).
     final Address address = Address.builder()
@@ -665,6 +659,11 @@ class TokenServiceTest {
         .address(address.getAddress())
         .addressId(address.getId())
         .build();
+    final StakeAddress stakeAddress = StakeAddress.builder()
+        .id(0L)
+        .view("address")
+        .build();
+    when(stakeAddressRepository.findByIdIn(anyCollection())).thenReturn(List.of(stakeAddress));
 
     when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
         .thenReturn(tokenAddressResponse);

@@ -43,24 +43,14 @@ public interface AddressTokenBalanceRepository extends JpaRepository<AddressToke
   List<TokenNumberHoldersProjection> countByMultiAssetIn(
       @Param("multiAssets") List<Long> multiAssetIds);
 
-  @Query("SELECT atb.addressId as addressId, atb.balance as quantity"
+  @Query(value = "SELECT COALESCE(atb.stakeAddress.id, atb.addressId * -1L) as addressId, SUM(atb.balance) as quantity"
       + " FROM AddressTokenBalance atb "
       + " WHERE atb.multiAsset = :multiAsset"
       + " AND atb.balance > 0"
-      + " ORDER BY atb.balance DESC")
-  Page<AddressTokenProjection> findAddressAndBalanceByMultiAsset(
+      + " GROUP BY COALESCE(atb.stakeAddress.id, atb.addressId * -1L)"
+      + " ORDER BY SUM(atb.balance) DESC")
+  List<AddressTokenProjection> findAddressAndBalanceByMultiAsset(
       @Param("multiAsset") MultiAsset multiAsset, Pageable pageable);
-
-  @Query("SELECT ma.fingerprint as fingerprint, "
-      + " ma.policy as policy, "
-      + " ma.name as tokenName, "
-      + " atb.balance as quantity"
-      + " FROM AddressTokenBalance atb "
-      + " INNER JOIN MultiAsset ma ON ma.id = atb.multiAsset.id"
-      + " WHERE atb.address = :address"
-      + " AND atb.balance > 0"
-      + " ORDER BY atb.balance DESC")
-  List<AddressTokenProjection> findTokenAndBalanceByAddress(@Param("address") Address address);
 
   @Query("SELECT ma.fingerprint as fingerprint, "
       + " ma.policy as policy, "
