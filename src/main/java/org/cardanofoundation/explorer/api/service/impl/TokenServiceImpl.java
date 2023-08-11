@@ -6,9 +6,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
+import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
@@ -26,10 +25,7 @@ import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
@@ -49,6 +45,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -66,6 +63,7 @@ public class TokenServiceImpl implements TokenService {
   private final AddressRepository addressRepository;
   private final TxRepository txRepository;
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
+  private final StakeAddressRepository stakeAddressRepository;
 
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
@@ -192,21 +190,44 @@ public class TokenServiceImpl implements TokenService {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
         () -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND)
     );
-    Page<AddressTokenProjection> tokenAddresses
+    List<AddressTokenProjection> tokenAddresses
         = addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
-    Set<Long> addressIds = tokenAddresses.stream().map(AddressTokenProjection::getAddressId)
+
+    var numberOfHoldersHaveStakeKey = addressTokenBalanceRepository
+        .countAddressNotHaveStakeByMultiAsset(multiAsset)
+        .orElse(0L);
+    var numberOfHoldersNotHaveStakeKe =  addressTokenBalanceRepository
+        .countStakeByMultiAsset(multiAsset)
+        .orElse(0L);
+    var numberOfHolder = numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe;
+    Set<Long> stakeAddressIds = tokenAddresses.stream()
+        .map(AddressTokenProjection::getAddressId)
+        .filter(addressId -> addressId > 0L)
+        .collect(Collectors.toSet());
+    List<StakeAddress> stakeAddressList = stakeAddressRepository.findByIdIn(stakeAddressIds);
+    Map<Long, StakeAddress> stakeAddressMap = stakeAddressList.stream().collect(
+        Collectors.toMap(StakeAddress::getId, Function.identity()));
+    Set<Long> addressIds = tokenAddresses.stream()
+        .filter(item -> item.getAddressId() < 0L)
+        .map(item -> item.getAddressId() * -1L)
         .collect(Collectors.toSet());
     List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
     Map<Long, Address> addressMap = addressList.stream().collect(
         Collectors.toMap(Address::getId, Function.identity()));
-    Page<TokenAddressResponse> tokenAddressResponses = tokenAddresses.map(
-        tokenMapper::fromAddressTokenProjection);
+    List<TokenAddressResponse> tokenAddressResponses = tokenAddresses.stream().map(
+        tokenMapper::fromAddressTokenProjection).toList();
     tokenAddressResponses.forEach(tokenAddress -> {
-      tokenAddress.setAddress(
-              addressMap.get(tokenAddress.getAddressId()).getAddress());
+      if (tokenAddress.getAddressId() < 0L) {
+        tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId() * -1L).getAddress());
+        tokenAddress.setAddressType(AddressType.PAYMENT_ADDRESS);
+      } else {
+        tokenAddress.setAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
+        tokenAddress.setAddressType(AddressType.STAKE_ADDRESS);
+      }
       tokenAddress.setAddressId(null);
     });
-    return new BaseFilterResponse<>(tokenAddressResponses);
+    Page<TokenAddressResponse> response = new PageImpl<>(tokenAddressResponses, pageable, numberOfHolder);
+    return new BaseFilterResponse<>(response);
   }
 
   @Override
@@ -312,60 +333,11 @@ public class TokenServiceImpl implements TokenService {
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
     String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(multiAsset.getFingerprint());
-    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty() ||
-        Boolean.FALSE.equals(verifyNFTTokenMetadata(txMetadataNFTToken, multiAsset))) {
+    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
       tokenResponse.setTokenType(TokenType.FT);
     } else {
       tokenResponse.setTokenType(TokenType.NFT);
       tokenResponse.setMetadataJson(txMetadataNFTToken);
     }
-  }
-
-  /**
-   * Verify NFT token metadata by cip-25 algorithm
-   * The version property is also optional. If not specified, the version is 1.
-   * If a version of metadata is 1:
-   *  - policy must be in text format for the key in the metadata map
-   *  - assetName must be utf-8 encoded and in text format for the key in the metadata map
-   * If a version of metadata is 2:
-   *  - policy must be raw bytes for the key in the metadata map
-   *  - assetName must be raw bytes for the key in the metadata map
-   * @param metadataJson metadata json
-   * @param multiAsset multi asset
-   * @return true if metadata json is valid
-   */
-  private Boolean verifyNFTTokenMetadata(String metadataJson, MultiAsset multiAsset) {
-    Map<String, Object> jsonMetadataMap = new Gson()
-        .fromJson(metadataJson, TypeTokenGson.NFT_TOKEN_METADATA.getType().get());
-    final String cddlVer = "version";
-    if (jsonMetadataMap.containsKey(cddlVer)) {
-      String cddlVerValue = jsonMetadataMap.get(cddlVer).toString();
-      if ("2".equals(cddlVerValue) || "2.0".equals(cddlVerValue)) {
-        final String rawBytesPolicy = "0x" + multiAsset.getPolicy();
-        final String rawBytesAssetName = "0x" + multiAsset.getName().toLowerCase();
-        return verifyPolicyAndAssetName(jsonMetadataMap, rawBytesPolicy, rawBytesAssetName)
-            || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), rawBytesAssetName)
-            || verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), multiAsset.getName().toLowerCase());
-      }
-    }
-
-    return verifyPolicyAndAssetName(jsonMetadataMap, multiAsset.getPolicy(), multiAsset.getNameView());
-  }
-
-  /**
-   * Check contains policy and asset name in metadata json
-   *
-   * @param jsonMetadataMap
-   * @param policy
-   * @param assetName
-   * @return true if metadata json contains policy and asset name
-   */
-  private Boolean verifyPolicyAndAssetName(Map<String, Object> jsonMetadataMap, String policy,
-                                           String assetName) {
-    if (jsonMetadataMap.containsKey(policy)) {
-      Map<String, Object> policyMap = (Map<String, Object>) jsonMetadataMap.get(policy);
-      return policyMap.containsKey(assetName);
-    }
-    return Boolean.FALSE;
   }
 }
