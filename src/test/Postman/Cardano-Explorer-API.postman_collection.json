@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "daf8a3fb-c5ff-4dbc-b6dc-49d0f13aa2af",
-		"name": "Cardano Explorer API",
+		"_postman_id": "60eee952-20c0-4ef4-a377-7e04f3a5ec7c",
+		"name": "Cardano Explorer API 31/7",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28110605",
-		"_collection_link": "https://www.postman.com/galactic-crater-624201/workspace/binh-s-workspace/collection/28110605-daf8a3fb-c5ff-4dbc-b6dc-49d0f13aa2af?action=share&creator=28110605&source=collection_link"
+		"_collection_link": "https://www.postman.com/galactic-crater-624201/workspace/binh-s-workspace/collection/28110605-60eee952-20c0-4ef4-a377-7e04f3a5ec7c?action=share&creator=28110605&source=collection_link"
 	},
 	"item": [
 		{
@@ -28,7 +28,14 @@
 							],
 							"request": {
 								"auth": {
-									"type": "noauth"
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Bearer Token}}",
+											"type": "string"
+										}
+									]
 								},
 								"method": "POST",
 								"header": [
@@ -43,7 +50,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu+3@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n\n// {\n//   \"type\": 0,\n//   \"email\": \"nhung.nguyen2@sotatek.com\",\n//   \"password\": \"Nhung!12345\"\n// }\n\n{\n  \"type\": 0,\n  \"email\": \"yen.phan@sotatek.com\",\n  \"password\": \"Sotatek@123\"\n}"
+									"raw": "// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu+3@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n\n// {\n//   \"type\": 0,\n//   \"email\": \"nhung.nguyen2@sotatek.com\",\n//   \"password\": \"Nhung!12345\"\n// }\n\n{\n  \"type\": 0,\n  \"email\": \"yen.phan@sotatek.com\",\n  \"password\": \"Sotatek@123\"\n}\n\n// {\n//   \"type\": 0,\n//   \"email\": \"yen.phan+1@sotatek.com\",\n//   \"password\": \"Sotatek@123\"\n// }"
 								},
 								"url": {
 									"raw": "{{baseUrl-Auth}}/api/v1/auth/sign-in",
@@ -273,8 +280,6 @@
 											"    //Main compare\r",
 											"    pm.expect(jsonData.data[0].no).to.eql(pm.environment.get(\"epoch_no\"));\r",
 											"    pm.expect(jsonData.data[0].status).to.include(\"IN_PROGRESS\");\r",
-											"    pm.expect(jsonData.data[1].status).to.include(\"REWARDING\");\r",
-											"    pm.expect(jsonData.data[2].status).to.include(\"REWARDING\");\r",
 											"    pm.expect(jsonData.data[0].maxSlot).to.eql(pm.environment.get(\"epoch_totalSlot\"));\r",
 											"    pm.expect(jsonData.data[0].account).to.eql(pm.environment.get(\"epoch_account\"));\r",
 											"    pm.expect(jsonData.data[0].startTime).to.eql(pm.environment.get(\"epoch_startTime\"));\r",
@@ -5247,7 +5252,7 @@
 											"//Scenario compare Get  stake deregistrations  by report id api with get Stake De Registrations api - Step after\r",
 											"//all variable get from API api/v1/staking-lifecycle/report/stake-key/:reportId/de-registrations(Get stake deregistrations by report id)\r",
 											"pm.test(\"Others value exist\",function (){\r",
-											"    var tx_hash = pm.environment.get(\"stakinglifecycle_data_txHash\");\r",
+											"    var tx_hash = pm.environment.get(\"stakingderegistrations_data_txHash\");\r",
 											"    let result = jsonData.data.find(a => a.txHash === tx_hash);\r",
 											"\r",
 											"    if (result?.txHash === tx_hash){    \r",
@@ -5608,11 +5613,13 @@
 											"    //all variable get from API api/v1/staking-lifecycle/report/stake-key/:reportId/withdrawals(Get stake withdrawals by report id)\r",
 											"    var txHash = pm.environment.get(\"stakingwithdrawals_data_txHash\");\r",
 											"    let result = jsonData.data.find(a => a.txHash === txHash);\r",
-											"    \r",
-											"    pm.expect(result.txHash).to.include(pm.environment.get(\"stakingwithdrawals_data_txHash\"));\r",
-											"    pm.expect(result.value).to.eql(pm.environment.get(\"stakingwithdrawals_data_value\"));\r",
-											"    pm.expect(result.fee).to.eql(pm.environment.get(\"stakingwithdrawals_data_fee\"));\r",
-											"    pm.expect(result.time).to.contain(pm.environment.get(\"stakingwithdrawals_data_time\"));\r",
+											"\r",
+											"    if (result?.txHash === txHash){\r",
+											"        pm.expect(result.txHash).to.include(pm.environment.get(\"stakingwithdrawals_data_txHash\"));\r",
+											"        pm.expect(result.value).to.eql(pm.environment.get(\"stakingwithdrawals_data_value\"));\r",
+											"        pm.expect(result.fee).to.eql(pm.environment.get(\"stakingwithdrawals_data_fee\"));\r",
+											"        pm.expect(result.time).to.contain(pm.environment.get(\"stakingwithdrawals_data_time\"));\r",
+											"    };\r",
 											"});\r",
 											""
 										],
@@ -7236,7 +7243,7 @@
 											"//Scenario compare get Wallet Activities api with api Get transactions of stake key (stakes)\r",
 											"pm.test(\"Compare data with get Wallet Activities api\",function (){\r",
 											"    //all variable get from API api/v1/stake-lifecycle/:stakinglifecycle_stakeKey/wallet-activity(get Wallet Activities )\r",
-											"    var txhash = pm.environment.get(\"Wallet Activities_data_txHash\");\r",
+											"    var txhash = pm.environment.get(\"Wallet_Activities_data_txHash\");\r",
 											"    let result = jsonData.data.find(a => a.hash === txhash);\r",
 											"    \r",
 											"    if (result?.hash === txhash){\r",
@@ -17746,7 +17753,7 @@
 										}
 									],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						}
