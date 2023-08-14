@@ -10,15 +10,34 @@ import org.cardanofoundation.explorer.common.exceptions.*;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 @Log4j2
 @RestControllerAdvice
 public class GlobalRestControllerExceptionHandler {
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    FieldError fieldError = ex.getBindingResult().getFieldError();
+    String errorMessage = "Invalid parameter";
+    if (Objects.nonNull(fieldError)) {
+      errorMessage = fieldError.getDefaultMessage();
+    }
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(
+            ErrorResponse.builder()
+                .errorCode(CommonErrorCode.INVALID_PARAM.getCode())
+                .errorMessage(errorMessage)
+                .build());
+  }
+
   @ExceptionHandler({BusinessException.class})
   public ResponseEntity<ErrorResponse> handleException(BusinessException e) {
     log.warn("Business logic exception: {}, stack trace: {}", e.getMessage(), e.getErrorMsg());

@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -30,7 +31,7 @@ public class InstantaneousRewardsController {
   @LogMessage
   @Operation(summary = "Get list of instantaneous rewards", tags = {"instantaneous-rewards"})
   public ResponseEntity<BaseFilterResponse<InstantaneousRewardsResponse>> getInstantaneousRewards(
-          @ParameterObject @PaginationValid @PaginationDefault(size = 20) Pagination pagination) {
+          @ParameterObject @PaginationValid @PaginationDefault(size = 20) @Valid Pagination pagination) {
     return ResponseEntity.ok(instantaneousRewardsService.getAll(pagination.toPageable()));
   }
 }
