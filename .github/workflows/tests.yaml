@@ -100,7 +100,6 @@ jobs:
   end2end:
     needs: test
     runs-on: self-hosted
-    allow-failure: true
     container:
       image: postman/newman
     steps:
@@ -167,7 +166,7 @@ jobs:
           path: k6_results.csv
   pages:
     needs: end2end
-    if: github.ref == 'refs/heads/main'
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
