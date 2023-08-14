@@ -1,0 +1,1 @@
+{"status":"ACTIVE","stakeAddress":"stake1uxfneu4s3xg5qe2vem3gafmeh9ffymf5jwa2eht5yhdpv4qdhsqfs","totalStake":70610250608259,"rewardAvailable":207597500546,"rewardWithdrawn":0,"pool":{"tickerName":"DARK","poolName":"dark-private","poolId":"pool13c9mnvfx4nvwvkszxcprwlv60fh3tteef50hhhv9yxptsua2v70"},"rewardPools":[]}

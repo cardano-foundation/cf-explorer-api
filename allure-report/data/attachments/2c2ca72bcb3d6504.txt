@@ -1,0 +1,1 @@
+{"data":[{"id":357,"poolId":"pool1k0ucs0fau2vhr3p7qh7mnpfgrllwwda7petxjz2gzzaxkyp8f88","poolName":"Poly 0PCT Pool","poolSize":66760677613968,"reward":3.628100,"feePercent":0.000000,"feeAmount":340000000,"pledge":1400000000000,"saturation":90.880000,"numberDelegators":2717,"epochBlock":13,"lifetimeBlock":4281,"lifetimeRos":3.755478}],"totalItems":1,"totalPages":1,"currentPage":0}

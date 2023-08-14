@@ -1,1 +1,0 @@
-{"data":[{"id":5004,"poolId":"pool1xucruwwxsym3u9v0m4ex3az5d4vpz9xu877vsl9udpt0q237e9m","poolName":"Keen Lemon Fermi","poolSize":52364018458065,"reward":4.029600,"feePercent":0.050000,"feeAmount":340000000,"pledge":0,"saturation":72.540000,"numberDelegators":2,"epochBlock":15,"lifetimeBlock":5359,"lifetimeRos":3.855097}],"totalItems":1,"totalPages":1,"currentPage":0}
