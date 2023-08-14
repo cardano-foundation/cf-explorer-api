@@ -165,7 +165,7 @@ jobs:
           name: loadtest-report
           path: k6_results.csv
   pages:
-    needs: end2end
+    needs: [end2end,loadTest,mutation-test]
     if: always()
     runs-on: ubuntu-latest
     steps:
