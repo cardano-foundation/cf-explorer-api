@@ -56,6 +56,7 @@ jobs:
 
       - name: Publish coverage report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
+        if: github.ref == 'refs/heads/main'
         with:
           BRANCH: gh-pages
           folder: build/reports/jacoco/test/html
@@ -165,8 +166,8 @@ jobs:
           name: loadtest-report
           path: k6_results.csv
   pages:
-    needs: [end2end,loadTest,mutation-test]
-    if: always()
+    needs: [end2end,loadTest]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
