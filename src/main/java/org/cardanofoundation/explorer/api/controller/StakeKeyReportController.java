@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -27,7 +28,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import lombok.RequiredArgsConstructor;
 
-import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -89,7 +89,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeKeyReportHistoryByStakeKey(stakeKey, username, pagination.toPageable()));
@@ -113,7 +113,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(username, filterRequest, pagination.toPageable()));
   }
@@ -125,7 +125,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "createdAt"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "createdAt"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         reportHistoryService.getReportHistory(filterRequest, username, pagination.toPageable()));
@@ -138,7 +138,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeRegistrationsByReportId(reportId, username, pagination.toPageable()));
@@ -151,7 +151,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeDeRegistrationsByReportId(reportId, username, pagination.toPageable()));
@@ -164,7 +164,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeDelegationsByReportId(reportId, username, pagination.toPageable()));
@@ -177,7 +177,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeRewardsByReportId(reportId, username, pagination.toPageable()));
@@ -190,7 +190,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeWithdrawalsByReportId(reportId, username, pagination.toPageable()));
@@ -203,7 +203,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     String username = request.getAttribute("username").toString();
     return ResponseEntity.ok(
         stakeKeyReportService.getWalletActivitiesByReportId(reportId, username, pagination.toPageable()));

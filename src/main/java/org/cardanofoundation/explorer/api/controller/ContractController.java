@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -39,7 +40,7 @@ public class ContractController {
   @Operation(summary = "Get summary information of all contract", tags = {"contract"})
   public ResponseEntity<BaseFilterResponse<ContractFilterResponse>> getAll(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          Address_.BALANCE}, direction = Sort.Direction.DESC) Pagination pagination) {
+          Address_.BALANCE}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(addressService.getContracts(pagination.toPageable()));
   }
 

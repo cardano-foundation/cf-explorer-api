@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -47,7 +48,7 @@ public class TxController {
   @Operation(summary = "Filter transaction")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> filter(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(txService.getAll(pagination.toPageable()));
   }
 

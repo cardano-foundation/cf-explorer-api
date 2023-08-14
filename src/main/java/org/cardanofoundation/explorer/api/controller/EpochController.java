@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
@@ -48,7 +49,7 @@ public class EpochController {
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getBlockList(
       @PathVariable @Parameter(description = "The epoch number") String no,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
-          direction = Sort.Direction.DESC) Pagination pagination) {
+          direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(blockService.getBlockByEpoch(no, pagination.toPageable()));
   }
 
@@ -57,7 +58,7 @@ public class EpochController {
   @Operation(summary = "Get all epoch", tags = {"epoch"})
   public ResponseEntity<BaseFilterResponse<EpochResponse>> filter(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"id"},
-          direction = Sort.Direction.DESC) Pagination pagination) {
+          direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(epochService.getAllEpoch(pagination.toPageable()));
   }
   @GetMapping("/current")
