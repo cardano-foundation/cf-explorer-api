@@ -27,6 +27,7 @@ public interface ProtocolMapper {
 
   String MAINNET = "mainnet";
   String PREPROD = "preprod";
+  String PREVIEW = "preview";
   String MAINNET_NAME = "Mainnet";
   String TESTNET_NAME = "Testnet";
 
@@ -499,6 +500,51 @@ public interface ProtocolMapper {
             .slotLength(1)
             .maxKESEvolutions(62)
             .securityParam(2160)
+            .build();
+      case PREVIEW:
+        return FixedProtocol.builder()
+            .activeSlotsCoeff(0.05F)
+            .genDelegs(JsonUtil.parseJson("{\n"
+                + "        \"12b0f443d02861948a0fce9541916b014e8402984c7b83ad70a834ce\": {\n"
+                + "            \"delegate\": \"7c54a168c731f2f44ced620f3cca7c2bd90731cab223d5167aa994e6\",\n"
+                + "            \"vrf\": \"62d546a35e1be66a2b06e29558ef33f4222f1c466adbb59b52d800964d4e60ec\"\n"
+                + "        },\n"
+                + "        \"3df542796a64e399b60c74acfbdb5afa1e114532fa36b46d6368ef3a\": {\n"
+                + "            \"delegate\": \"c44bc2f3cc7e98c0f227aa399e4035c33c0d775a0985875fff488e20\",\n"
+                + "            \"vrf\": \"4f9d334decadff6eba258b2df8ae1f02580a2628bce47ae7d957e1acd3f42a3c\"\n"
+                + "        },\n"
+                + "        \"93fd5083ff20e7ab5570948831730073143bea5a5d5539852ed45889\": {\n"
+                + "            \"delegate\": \"82a02922f10105566b70366b07c758c8134fa91b3d8ae697dfa5e8e0\",\n"
+                + "            \"vrf\": \"8a57e94a9b4c65ec575f35d41edb1df399fa30fdf10775389f5d1ef670ca3f9f\"\n"
+                + "        },\n"
+                + "        \"a86cab3ea72eabb2e8aafbbf4abbd2ba5bdfd04eea26a39b126a78e4\": {\n"
+                + "            \"delegate\": \"10257f6d3bae913514bdc96c9170b3166bf6838cca95736b0e418426\",\n"
+                + "            \"vrf\": \"1b54aad6b013145a0fc74bb5c2aa368ebaf3999e88637d78e09706d0cc29874a\"\n"
+                + "        },\n"
+                + "        \"b799804a28885bd49c0e1b99d8b3b26de0fac17a5cf651ecf0c872f0\": {\n"
+                + "            \"delegate\": \"ebe606e22d932d51be2c1ce87e7d7e4c9a7d1f7df4a5535c29e23d22\",\n"
+                + "            \"vrf\": \"b3fc06a1f8ee69ff23185d9af453503be8b15b2652e1f9fb7c3ded6797a2d6f9\"\n"
+                + "        },\n"
+                + "        \"d125812d6ab973a2c152a0525b7fd32d36ff13555a427966a9cac9b1\": {\n"
+                + "            \"delegate\": \"e302198135fb5b00bfe0b9b5623426f7cf03179ab7ba75f945d5b79b\",\n"
+                + "            \"vrf\": \"b45ca2ed95f92248fa0322ce1fc9f815a5a5aa2f21f1adc2c42c4dccfc7ba631\"\n"
+                + "        },\n"
+                + "        \"ef27651990a26449a40767d5e06cdef1670a3f3ff4b951d385b51787\": {\n"
+                + "            \"delegate\": \"0e0b11e80d958732e587585d30978d683a061831d1b753878f549d05\",\n"
+                + "            \"vrf\": \"b860ec844f6cd476c4fabb4aa1ca72d5c74d82f3835aed3c9515a35b6e048719\"\n"
+                + "        }\n"
+                + "    }"))
+            .updateQuorum(5)
+            .networkId(TESTNET_NAME)
+            .initialFunds("")
+            .maxLovelaceSupply(BigInteger.valueOf(45000000000000000L))
+            .networkMagic(2)
+            .epochLength(86400)
+            .timestamp("2022-10-25 00:00:00")
+            .slotsPerKESPeriod(129600)
+            .slotLength(1)
+            .maxKESEvolutions(62)
+            .securityParam(432)
             .build();
       default:
         return null;
