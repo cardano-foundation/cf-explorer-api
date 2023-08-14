@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.31](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.30...v0.3.31) (2023-08-14)
+
+
+### Bug Fixes
+
+* validate request not working ([13c9a9f](https://github.com/cardano-foundation/cf-explorer-api/commit/13c9a9ff776661bbdd6eb2fb3c6565f47ec9edf6))
+
 ## [0.3.30](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.29...v0.3.30) (2023-08-11)
 
 
