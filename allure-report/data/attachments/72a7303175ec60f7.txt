@@ -1,0 +1,1 @@
+{"status":"ACTIVE","stakeAddress":"stake1u9zc6dc2uyg4ezrv9max98gt5xnf7stwyjtgjp83tncgwpqdnma8a","totalStake":71519554316573,"rewardAvailable":1049657775392,"rewardWithdrawn":3492523334648,"pool":{"poolId":"pool1v62c7d92xv6gyh4x9rhfpkwzlpw2ypxk92xvzavakg3xypatklv"},"rewardPools":[]}

@@ -1,0 +1,34 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+if  (jsonData.data.length > 0){
+    //Compare format data type
+    pm.test("Check data type of the response", () => {
+        let moment = require ('moment');
+        pm.expect(jsonData).to.be.an("object");
+        pm.expect(jsonData.totalItems).to.be.a("number");
+        pm.expect(jsonData.totalPages).to.be.a("number");
+        pm.expect(jsonData.currentPage).to.be.a("number");
+        pm.expect(jsonData.data).to.be.an("array");
+        pm.expect(typeof jsonData.data[0].stakeKeyReportId).to.be.oneOf([ 'object', 'number']);
+        pm.expect(typeof jsonData.data[0].poolReportId).to.be.oneOf([ 'object', 'number']);
+        pm.expect(jsonData.data[0].createdAt).to.include(moment(jsonData.data[0].createdAt).format('YYYY/MM/DD HH:mm:ss'));
+        pm.expect(jsonData.data[0].reportName).to.be.a("string");
+        pm.expect(jsonData.data[0].status).to.be.a("string");
+        pm.expect(jsonData.data[0].type).to.be.a("string");
+    });
+}

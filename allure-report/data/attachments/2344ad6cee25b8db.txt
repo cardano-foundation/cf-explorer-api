@@ -1,0 +1,89 @@
+// var stt = "200";
+// stt = pm.variables.get("stt");
+var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check blockNo value", function () {
+    pm.expect(jsonData[0].blockNo).to.be.a("number");
+});
+
+pm.test("Check fromAddress value", function () {
+    pm.expect(jsonData[0].fromAddress).to.be.a("Array");
+});
+
+pm.test("Check hash value", function () {
+    pm.expect(jsonData[0].hash).to.be.a("string");
+});
+
+pm.test("Check epochNo value", function () {
+    pm.expect(jsonData[0].epochNo).to.be.a("number");
+});
+
+pm.test("Check epochSlotNo value", function () {
+    pm.expect(jsonData[0].epochSlotNo).to.be.a("number");
+});
+
+pm.test("Check slot value", function () {
+    pm.expect(jsonData[0].slot).to.be.a("number");
+});
+
+pm.test("Check time value", function () {
+  let moment = require ('moment');
+    pm.expect(jsonData[0].time).to.include(moment(jsonData[0].time).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Check status value", function () {
+    pm.expect(jsonData[0].status).to.include("SUCCESS");
+});
+
+//Compare data type
+pm.test("Check data type of fromAddress", () => {
+  pm.expect(jsonData[0].fromAddress).to.be.a("array");
+});
+pm.test
+("Check data type of toAddress", () => {
+  pm.expect(jsonData[0].toAddress).to.be.a("array");
+});
+
+pm.test("Check data type of amount", () => {
+  pm.expect(jsonData[0].amount).to.be.a("number");
+});
+
+// Scenario Compare api: Get current transactions with api: Filter transaction
+//Get value
+pm.test("Hash value exist at current transactions ",function (){
+    pm.expect(jsonData[0].hash).not.empty;
+    pm.environment.set("tx_hash_00", jsonData[0].hash);
+
+    pm.expect(jsonData[1].hash).not.empty;
+    pm.environment.set("tx_hash_01", jsonData[1].hash);
+
+    pm.expect(jsonData[2].hash).not.empty;
+    pm.environment.set("tx_hash_02", jsonData[2].hash);
+
+    pm.expect(jsonData[3].hash).not.empty;
+    pm.environment.set("tx_hash_03", jsonData[3].hash);
+});
+
+pm.test("Get value of current transactions",function (){
+    
+    //Randome value
+    var randomIndex = Math.floor(Math.random() * 4);
+    console.log(randomIndex);
+
+    pm.environment.set("tx_hash", jsonData[randomIndex].hash);
+    pm.environment.set("tx_blockNo", jsonData[randomIndex].blockNo);
+    pm.environment.set("tx_amount", jsonData[randomIndex].amount);
+    pm.environment.set("tx_epochNo", jsonData[randomIndex].epochNo);
+    pm.environment.set("tx_epochSlotNo", jsonData[randomIndex].epochSlotNo);
+    pm.environment.set("tx_slot", jsonData[randomIndex].slot);
+    pm.environment.set("tx_time", jsonData[randomIndex].time);
+    pm.environment.set("tx_status", jsonData[randomIndex].status);
+});

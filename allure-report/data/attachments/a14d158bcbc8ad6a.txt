@@ -1,0 +1,58 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+//Compare format data type
+pm.test("Check data type of the response", () => {
+    let moment = require ('moment');
+    pm.expect(jsonData).to.be.an("object");
+    pm.expect(jsonData.totalItems).to.be.a("number");
+    pm.expect(jsonData.totalPages).to.be.a("number");
+    pm.expect(jsonData.currentPage).to.be.a("number");
+    pm.expect(jsonData.data).to.be.an("array");
+    pm.expect(jsonData.data[0].txHash).to.be.a("string");
+    pm.expect(jsonData.data[0].amount).to.be.a("number");
+    pm.expect(jsonData.data[0].fee).to.be.a("number");
+    pm.expect(jsonData.data[0].time).to.include(moment(jsonData.data[0].time).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.data[0].type).to.be.a("string");
+    pm.expect(jsonData.data[0].status).to.be.a("string");
+});
+
+
+//Scenario compare Get wallet activity by report id api with get Wallet Activities api - Step after
+pm.test("Compare Get wallet activity by report id api with get Wallet Activities api",function (){
+    //All value: API Get wallet activity by report id(v1/staking-lifecycle/report/stake-key/:stakinglifecycle_id/wallet-activity)
+    var tx_hash = pm.environment.get("stakingwallet_data_txhash");
+    let result = jsonData.data.find(a => a.txHash === tx_hash);
+
+    if (result?.txHash === tx_hash){
+        pm.expect(result.amount).to.be.eql(pm.environment.get("stakingwallet_data_amount"));
+        pm.expect(result.fee).to.be.eql(pm.environment.get("stakingwallet_data_fee"));
+        pm.expect(result.time).to.be.include(pm.environment.get("stakingwallet_data_time"));
+        pm.expect(result.type).to.be.include(pm.environment.get("stakingwallet_data_type"));
+        pm.expect(result.status).to.be.include(pm.environment.get("stakingwallet_data_status"));
+    }
+});
+
+//Scenario compare Get: get Wallet Activities api with api Get: Get transactions of stake key (stakes)
+pm.test("Get value of api get Wallet Activities",function (){
+    //Randome value
+    var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));
+    pm.environment.set("Wallet_Activities_data_txHash", jsonData.data[randomIndex].txHash);
+    pm.environment.set("Wallet_Activities_data_amount", jsonData.data[randomIndex].amount);
+    pm.environment.set("Wallet_Activities_data_fee", jsonData.data[randomIndex].fee);
+    pm.environment.set("Wallet_Activities_time", jsonData.data[randomIndex].time);
+});

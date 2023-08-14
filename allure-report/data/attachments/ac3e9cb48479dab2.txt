@@ -1,0 +1,68 @@
+var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+//Compare data type
+pm.test("Check data type of the response", () => {
+    let moment = require ('moment');
+    pm.expect(jsonData.no).to.be.a("number");
+    pm.expect(jsonData.status).to.be.a("string");
+    pm.expect(jsonData.blkCount).to.be.a("number");
+    pm.expect(jsonData.outSum).to.be.an("number");
+    pm.expect(jsonData.txCount).to.be.a("number");
+    pm.expect(jsonData.startTime).to.include(moment(jsonData.startTime).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.endTime).to.include(moment(jsonData.endTime).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.maxSlot).to.be.a("number");
+    // IF "status": "IN_PROGRESS" there will be no rewardsDistributed field
+    //pm.expect(typeof jsonData.rewardsDistributed).to.be.oneOf([ 'object', 'number']);
+    pm.expect(jsonData.account).to.be.a("number");
+  });
+
+// Scenario Compare api: Get all epoch with api: Get a epoch detail by its no
+//all variable get from API api/v1/epochs(Get all epoch)
+pm.test("Check no value", function () {
+    pm.expect(jsonData.no).to.eql(pm.environment.get("epoch_no"));
+});
+
+pm.test("Check status value", function () {
+    pm.expect(jsonData.status).to.include(pm.environment.get("epoch_status"));
+});
+
+pm.test("Check blkCount value", function () {
+    pm.expect(jsonData.blkCount).to.eql(pm.environment.get("epoch_blkCount"));
+});
+
+pm.test("Check outSum value", function () {
+    pm.expect((jsonData.outSum/10**6).toFixed(2)).to.eql((pm.environment.get("epoch_outSum")/10**6).toFixed(2));
+});
+
+pm.test("Check startTime value", function () {
+    pm.expect(jsonData.startTime).to.include(pm.environment.get("epoch_startTime"));
+});
+
+pm.test("Check endTime value", function () {
+    pm.expect(jsonData.endTime).to.contain(pm.environment.get("epoch_endTime"));
+});
+
+pm.test("Check maxSlot value", function () {
+    pm.expect(jsonData.maxSlot).to.eql(432000);
+});
+
+pm.test("Check txCount value", function () {
+    pm.expect(jsonData.txCount).to.eql(pm.environment.get("epoch_txCount"));
+});
+
+pm.test("Check rewardsDistributed value", function () {
+    // IF "status": "IN_PROGRESS" there will be no rewardsDistributed field
+    //pm.expect(jsonData.rewardsDistributed).to.eql(pm.environment.get("epoch_rewardsDistributed"));
+});
+
+pm.test("Check account value", function () {
+    pm.expect(jsonData.account).to.eql(pm.environment.get("epoch_account"));
+});

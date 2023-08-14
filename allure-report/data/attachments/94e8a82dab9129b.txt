@@ -1,0 +1,53 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+var current_page = 0
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+pm.test("Compare Currentpage", function () {
+    pm.expect(jsonData.currentPage).to.eql(current_page);
+});
+
+//Compare format dynamic data
+pm.test("Check data type of the response", () => {
+    let moment = require ('moment');
+
+    pm.expect(jsonData.data).to.be.an("array");
+    pm.expect(jsonData.totalItems).to.be.a("number");
+    pm.expect(jsonData.totalPages).to.be.a("number");
+    pm.expect(jsonData.data[0].hash).to.be.a("string");
+    pm.expect(jsonData.data[0].blockNo).to.be.a("number");
+    pm.expect(jsonData.data[0].blockHash).to.be.a("string");
+    pm.expect(jsonData.data[0].epochNo).to.be.a("number");
+    pm.expect(jsonData.data[0].epochSlotNo).to.be.a("number");
+    pm.expect(jsonData.data[0].slot).to.be.a("number");
+    pm.expect(jsonData.data[0].time).to.include(moment(jsonData.data[0].time).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.data[0].addressesInput).to.be.an("array");
+    pm.expect(jsonData.data[0].addressesOutput).to.be.an("array");
+    pm.expect(jsonData.data[0].fee).to.be.a("number");
+    pm.expect(jsonData.data[0].totalOutput).to.be.a("number");
+    pm.expect(jsonData.data[0].balance).to.be.a("number");
+    pm.expect(jsonData.data[0].tokens).to.be.an("array");
+});
+
+//Scenario compare get Wallet Activities api with api Get transactions of stake key (stakes)
+pm.test("Compare data with get Wallet Activities api",function (){
+    //all variable get from API api/v1/stake-lifecycle/:stakinglifecycle_stakeKey/wallet-activity(get Wallet Activities )
+    var txhash = pm.environment.get("Wallet_Activities_data_txHash");
+    let result = jsonData.data.find(a => a.hash === txhash);
+    
+    if (result?.hash === txhash){
+        pm.expect(result.hash).to.be.include(pm.environment.get("Wallet_Activities_data_txHash"));
+        pm.expect(result.balance).to.be.eql(pm.environment.get("Wallet_Activities_data_amount"));
+        pm.expect(result.fee).to.be.eql(pm.environment.get("Wallet_Activities_data_fee"));
+        pm.expect(result.time).to.be.contain(pm.environment.get("Wallet_Activities_time"));
+    }
+});
