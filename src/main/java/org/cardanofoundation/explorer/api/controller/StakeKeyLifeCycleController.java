@@ -4,6 +4,7 @@ import java.util.Date;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
@@ -64,7 +65,7 @@ public class StakeKeyLifeCycleController {
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
+          StakeRegistration_.TX}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
         stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, condition, pagination.toPageable()));
   }
@@ -89,7 +90,7 @@ public class StakeKeyLifeCycleController {
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          StakeRegistration_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
+          StakeRegistration_.TX}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
         stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, condition, pagination.toPageable()));
   }
@@ -114,7 +115,7 @@ public class StakeKeyLifeCycleController {
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
       @ParameterObject StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          Delegation_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
+          Delegation_.TX}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
         stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
   }
@@ -139,7 +140,7 @@ public class StakeKeyLifeCycleController {
       @RequestParam(value = "fromDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD) Date fromDate,
       @RequestParam(value = "toDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD) Date toDate,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, type, pagination.toPageable()));
   }
 
@@ -151,7 +152,7 @@ public class StakeKeyLifeCycleController {
       @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
       @ParameterObject @Parameter(description = "filter condition") StakeLifeCycleFilterRequest condition,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          BaseEntity_.ID}, direction = Sort.Direction.DESC) Pagination pagination) {
+          BaseEntity_.ID}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
         stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
   }
@@ -174,7 +175,7 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "The Bech32 encoded version of the stake address.")
       @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          AddressTxBalance_.TX}, direction = Sort.Direction.DESC) Pagination pagination) {
+          AddressTxBalance_.TX}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pagination.toPageable()));
   }
 
@@ -185,7 +186,7 @@ public class StakeKeyLifeCycleController {
       @PathVariable @Parameter(description = "The Bech32 encoded version of the stake address.")
       @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid String stakeKey,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pagination.toPageable()));
   }
 
