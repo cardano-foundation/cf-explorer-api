@@ -1,1 +1,0 @@
-{"errorCode":"400","errorMessage":"[Field should have a prefixed value of 'stake', The expected length of the hash is 59 characters]"}
