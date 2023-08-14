@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
@@ -45,7 +46,7 @@ public class PolicyController {
       tags = {"policies"})
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> getTokens(
       @PathVariable @Parameter(description = "The policy hash") String policyId,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(policyService.getTokens(policyId, pagination.toPageable()));
   }
 
@@ -57,7 +58,7 @@ public class PolicyController {
       tags = {"policies"})
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
       @PathVariable @Parameter(description = "The policy hash") String policyId,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(policyService.getHolders(policyId, pagination.toPageable()));
   }
 

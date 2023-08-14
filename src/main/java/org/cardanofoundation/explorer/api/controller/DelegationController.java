@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -47,7 +48,7 @@ public class DelegationController {
   @Operation(summary = "List delegations", tags = {"delegation"})
   public ResponseEntity<BaseFilterResponse<DelegationResponse>> getDelegations(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {Delegation_.TX_ID},
-          direction = Sort.Direction.DESC) Pagination pagination) {
+          direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(delegationService.getDelegations(pagination.toPageable()));
   }
 
@@ -62,7 +63,7 @@ public class DelegationController {
   @LogMessage
   @Operation(summary = "Get data for pool list", tags = {"delegation"})
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
-      @ParameterObject @PaginationValid Pagination pagination,
+      @ParameterObject @PaginationValid @Valid Pagination pagination,
       @RequestParam("search") @Parameter(description = "Query param for search pool by name or ticker name")
       String search) {
     return ResponseEntity.ok(
@@ -95,7 +96,7 @@ public class DelegationController {
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
       @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
       @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The Bech32 encoding of the pool hash.")
-      String poolView, @ParameterObject @PaginationValid Pagination pagination) {
+      String poolView, @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(
         delegationService.getEpochListForPoolDetail(pagination.toPageable(), poolView));
   }
@@ -107,7 +108,7 @@ public class DelegationController {
       @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
       @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The Bech32 encoding of the pool hash.")
       String poolView,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(
         delegationService.getDelegatorsForPoolDetail(pagination.toPageable(), poolView));
   }
@@ -116,7 +117,7 @@ public class DelegationController {
   @LogMessage
   @Operation(summary = "Find Top(default is 3) Delegation Pool order by pool size", tags = {"delegation"})
   public ResponseEntity<List<PoolResponse>> findTopDelegationPool(
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(delegationService.findTopDelegationPool(pagination.toPageable()));
   }
 }

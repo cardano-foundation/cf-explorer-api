@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
@@ -44,7 +45,7 @@ public class BlockController {
   @Operation(summary = "Get summary information of all block", tags = {"block"})
   public ResponseEntity<BaseFilterResponse<BlockFilterResponse>> getAll(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "id"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(blockService.filterBlock(pagination.toPageable()));
   }
 
@@ -54,7 +55,7 @@ public class BlockController {
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactionsByBlock(
       @PathVariable @Parameter(description = "The hash identifier of the block.") String blockId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "blockId", "blockIndex"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByBlock(blockId, pagination.toPageable()));
   }
 

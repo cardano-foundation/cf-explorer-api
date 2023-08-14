@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -32,7 +33,7 @@ public class PoolController {
   @Operation(summary = "Get list of pool registrations", tags = {"pools"})
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "bk.time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(poolRegistrationService.getDataForPoolRegistration(pagination.toPageable()));
   }
 
@@ -41,7 +42,7 @@ public class PoolController {
   @Operation(summary = "Get list of pool de-registrations", tags = {"pools"})
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "bk.time"}, direction = Sort.Direction.DESC) Pagination pagination) {
+          "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(poolRegistrationService.getDataForPoolDeRegistration(pagination.toPageable()));
   }
 }
