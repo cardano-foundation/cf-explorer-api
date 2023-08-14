@@ -1,0 +1,20 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare data type
+pm.test("Check data type of response", () => {
+    let moment = require ('moment');
+    pm.expect(jsonData[0].date).to.include(moment(jsonData[0].date).format('YYYY/MM/DD'));
+    pm.expect(jsonData[0].value).to.be.a("number");
+});
+

@@ -1,0 +1,82 @@
+var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+pm.test("Check maxSlot value", function () {
+    pm.expect(jsonData.data[0].maxSlot).to.eql(432000);
+});
+
+//Compare data type
+pm.test("Check data type of no", () => {
+  pm.expect(jsonData.data[0].no).to.be.a("number");
+});
+
+pm.test("Check data type of status", () => {
+  pm.expect(jsonData.data[0].status).to.be.a("string");
+});
+
+pm.test("Check data type of blkCount", () => {
+  pm.expect(jsonData.data[0].blkCount).to.be.a("number");
+});
+
+pm.test("Check data type of outSum", () => {
+  pm.expect(jsonData.data[0].outSum).to.be.a("number");
+});
+
+pm.test("Check data type of txCount", () => {
+  pm.expect(jsonData.data[0].txCount).to.be.a("number");
+});
+
+pm.test("Check data type of startTime", () => {
+        let moment = require ('moment');
+  pm.expect(jsonData.data[0].startTime).to.include(moment(jsonData.data[0].startTime).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Check data type of endTime", () => {
+        let moment = require ('moment');
+  pm.expect(jsonData.data[0].endTime).to.include(moment(jsonData.data[0].endTime).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Check data type of maxSlot", () => {
+  pm.expect(jsonData.data[0].maxSlot).to.be.a("number");
+});
+
+pm.test("Check data type of rewardsDistributed", () => {
+    //when status: FINISHED
+  pm.expect(typeof jsonData.data[2].rewardsDistributed).to.be.oneOf([ 'object', 'number']);
+});
+
+pm.test("Check data type of account", () => {
+  pm.expect(jsonData.data[0].account).to.be.a("number");
+});
+
+//Scenario Compare api: Get current epoch with api: Get all epoch
+//all variable get from API api/v1/epochs/current(Get current epoch)
+pm.test("Compare value between current epoch and Get all epoch", function () {
+    //Main compare
+    pm.expect(jsonData.data[0].no).to.eql(pm.environment.get("epoch_no"));
+    pm.expect(jsonData.data[0].status).to.include("IN_PROGRESS");
+    pm.expect(jsonData.data[0].maxSlot).to.eql(pm.environment.get("epoch_totalSlot"));
+    pm.expect(jsonData.data[0].account).to.eql(pm.environment.get("epoch_account"));
+    pm.expect(jsonData.data[0].startTime).to.eql(pm.environment.get("epoch_startTime"));
+    pm.expect(jsonData.data[0].endTime).to.eql(pm.environment.get("epoch_endTime"));
+});
+
+// Scenario Compare api: Get all epoch with api: Get a epoch detail by its no
+pm.test("Get data of Get all epoch api",function (){
+    pm.environment.set("epoch_status", jsonData.data[0].status);
+    pm.environment.set("epoch_blkCount", jsonData.data[0].blkCount);
+    pm.environment.set("epoch_outSum", jsonData.data[0].outSum);
+    pm.environment.set("epoch_txCount", jsonData.data[0].txCount);
+    pm.environment.set("epoch_rewardsDistributed", jsonData.data[0].rewardsDistributed);
+    pm.environment.set("epoch_account", jsonData.data[0].account);
+});

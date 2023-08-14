@@ -1,0 +1,1 @@
+pm.environment.set("Bearer Token", pm.response.json().token);

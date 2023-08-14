@@ -1,0 +1,107 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+var poolName = "StakeNuts"
+var hashView = "0f292fcaa02b8b2f9b3c8f9fd8e0bb21abedb692a6d5058df3ef2735"
+var createDate = "2020/07/29 22:00:31"
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+pm.test("Compare poolName", function () {
+    pm.expect(jsonData.poolName).to.eql(pm.environment.get("delegation_poolName"))
+    || pm.expect(jsonData.poolName).to.include(pm.environment.get("delegation_poolName"));
+});
+
+pm.test("Check data type of createDate", () => {
+        let moment = require ('moment');
+  pm.expect(jsonData.createDate).to.include(moment(jsonData.createDate).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Compare poolSize", function () {
+    pm.expect(jsonData.poolSize).to.eql(pm.environment.get("delegation_poolSize"));
+});
+
+pm.test("Compare reward", function () {
+    pm.expect(jsonData.reward).to.eql(pm.environment.get("delegation_reward"));
+});
+
+pm.test("Compare saturation", function () {
+    pm.expect(jsonData.saturation).to.eql(pm.environment.get("delegation_saturation"));
+});
+
+//Compare format dynamic data
+pm.test("Check data type of poolName", () => {
+  pm.expect(typeof jsonData.poolName).to.be.oneOf([ 'object', 'string']);
+});
+
+pm.test("Check data type of tickerName", () => {
+  pm.expect(typeof jsonData.tickerName).to.be.oneOf([ 'object', 'string']);
+});
+
+pm.test("Check data type of hashView", () => {
+  pm.expect(jsonData.hashView).to.be.a("string");
+});
+
+pm.test("Check data type of createDate", () => {
+        let moment = require ('moment');
+  pm.expect(jsonData.createDate).to.include(moment(jsonData.createDate).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Check data type of rewardAccounts", () => {
+  pm.expect(jsonData.rewardAccounts).to.be.a("array");
+});
+
+pm.test("Check data type of ownerAccounts", () => {
+  pm.expect(jsonData.ownerAccounts).to.be.a("array");
+});
+
+pm.test("Check data type of poolSize", () => {
+  pm.expect(jsonData.poolSize).to.be.a("number");
+});
+
+pm.test("Check data type of stakeLimit", () => {
+  pm.expect(jsonData.stakeLimit).to.be.a("number");
+});
+
+pm.test("Check data type of delegators", () => {
+  pm.expect(jsonData.delegators).to.be.a("number");
+});
+
+pm.test("Check data type of saturation", () => {
+  pm.expect(jsonData.saturation).to.be.a("number");
+});
+
+pm.test("Check data type of reward", () => {
+  pm.expect(jsonData.reward).to.be.a("number");
+});
+
+pm.test("Check data type of ros", () => {
+  pm.expect(jsonData.ros).to.be.a("number");
+});
+
+pm.test("Check data type of pledge", () => {
+  pm.expect(jsonData.pledge).to.be.a("number");
+});
+
+pm.test("Check data type of cost", () => {
+  pm.expect(jsonData.cost).to.be.a("number");
+});
+
+pm.test("Check data type of margin", () => {
+  pm.expect(jsonData.margin).to.be.a("number");
+});
+
+pm.test("Check data type of epochBlock", () => {
+  pm.expect(jsonData.epochBlock).to.be.a("number");
+});
+
+pm.test("Check data type of lifetimeBlock", () => {
+  pm.expect(jsonData.lifetimeBlock).to.be.a("number");
+});

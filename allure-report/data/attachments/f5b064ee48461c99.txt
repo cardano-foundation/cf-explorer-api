@@ -1,0 +1,53 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Waiting data to active -> In progress checking
+// pm.test("Compare totalStake", function () {
+//     pm.expect(jsonData.totalStake).to.eql(pm.environment.get("stakes_balance"));
+// });
+
+//Compare format dynamic data
+pm.test("Check data type of the response", () => {
+    pm.expect(jsonData.status).to.be.a("string");
+    pm.expect(jsonData.stakeAddress).to.be.a("string");
+    pm.expect(jsonData.totalStake).to.be.a("number");
+    pm.expect(jsonData.rewardAvailable).to.be.a("number");
+    pm.expect(jsonData.rewardWithdrawn).to.be.a("number");
+    pm.expect(jsonData.pool).to.be.an("object");
+    pm.expect(jsonData.rewardPools).to.be.an("array");
+});
+
+// Scenario Compare api: Get top delegators with api: Get a stake detail by stake key
+//all variable get from API api/v1/stakes/top-delegators(Get top delegators)
+pm.test("Compare Stakeaddress", function () {
+    pm.expect(jsonData.stakeAddress).to.include(pm.environment.get("stakes_stakeKey"));
+});
+
+pm.test("Compare PoolId", function () {
+    pm.expect(jsonData.pool.poolId).to.include(pm.environment.get("stakes_poolId"));
+});
+
+pm.test("Compare PoolId", function () {
+    pm.expect(jsonData.pool.poolName).to.eql(pm.environment.get("stakes_poolName"))
+    || pm.expect(jsonData.pool.poolName).to.include(pm.environment.get("stakes_poolName"));
+});
+
+pm.test("Compare PoolId", function () {
+    pm.expect(jsonData.pool.tickerName).to.eql(pm.environment.get("stakes_tickerName"))
+    || pm.expect(jsonData.pool.tickerName).to.include(pm.environment.get("stakes_tickerName"))
+});
+
+//Scenario compare api Get: pool Owner with api Get: Get a stake detail by stake key (stakes)
+pm.test("Get data of Get a stake detail by stake key api",function(){
+    pm.environment.set("stake_pool_poolId", jsonData.pool.poolId);
+});

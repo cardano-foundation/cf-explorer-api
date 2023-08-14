@@ -1,0 +1,59 @@
+var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+//Compare data type
+pm.test("Check data type of blockNo", () => {
+  pm.expect(jsonData.data[0].blockNo).to.be.a("number");
+});
+
+pm.test("Check data type of slotNo", () => {
+  pm.expect(jsonData.data[0].slotNo).to.be.a("number");
+});
+
+pm.test("Check data type of epochNo", () => {
+  pm.expect(jsonData.data[0].epochNo).to.be.a("number");
+});
+
+pm.test("Check data type of epochSlotNo", () => {
+  pm.expect(jsonData.data[0].epochSlotNo).to.be.a("number");
+});
+
+pm.test("Check data type of hash", () => {
+  pm.expect(jsonData.data[0].hash).to.be.a("string");
+});
+
+pm.test("Check data type of time", () => {
+        let moment = require ('moment');
+  pm.expect(jsonData.data[0].time).to.include(moment(jsonData.data[0].time).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Check data type of txCount", () => {
+  pm.expect(jsonData.data[0].txCount).to.be.a("number");
+});
+
+pm.test("Check data type of totalFees", () => {
+  pm.expect(jsonData.data[0].totalFees).to.be.a("number");
+});
+
+pm.test("Check data type of totalOutput", () => {
+  pm.expect(jsonData.data[0].totalOutput).to.be.a("number");
+});
+
+pm.test("Check data type of slotLeader", () => {
+  pm.expect(jsonData.data[0].slotLeader).to.be.a("string");
+});
+
+//Check scenario
+pm.test("Compare totalItems at api get list of epoch by its no  with api get a epoch detail by its no",function (){
+    pm.expect(jsonData.totalItems).to.eql(pm.environment.get("epoch_blkCount")); //From api: Get all epoch - v1/epochs
+});

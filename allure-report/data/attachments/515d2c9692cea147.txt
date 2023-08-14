@@ -1,0 +1,29 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+var current_page = 0
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+pm.test("Compare Currentpage", function () {
+    pm.expect(jsonData.currentPage).to.eql(current_page);
+});
+
+//Compare format dynamic data
+pm.test("Check data type of the response", () => {
+    pm.expect(jsonData.data).to.be.an("array");
+    pm.expect(jsonData.totalItems).to.be.a("number");
+    pm.expect(jsonData.totalPages).to.be.a("number");
+    pm.expect(jsonData.data[0].txCount).to.be.a("number");
+    pm.expect(jsonData.data[0].balance).to.be.a("number");
+    pm.expect(jsonData.data[0].address).to.be.a("string");
+});
+
+

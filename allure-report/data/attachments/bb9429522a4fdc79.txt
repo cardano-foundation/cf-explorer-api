@@ -1,0 +1,78 @@
+const jsonData = pm.response.json();
+let time = jsonData.data[0].time;
+
+//Compare static value
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+//Compare data type
+pm.test("Check data type of the response", () => {
+  let moment = require ('moment');
+  pm.expect(jsonData).to.be.an("object");
+  pm.expect(jsonData.totalItems).to.be.a("number");
+  pm.expect(jsonData.totalPages).to.be.a("number");
+  pm.expect(jsonData.currentPage).to.be.a("number");
+  pm.expect(jsonData.data).to.be.an("array");
+  pm.expect(jsonData.data[0].hash).to.be.a("string");
+  pm.expect(jsonData.data[0].blockNo).to.be.a("number");
+  pm.expect(jsonData.data[0].blockHash).to.be.a("string");
+  pm.expect(jsonData.data[0].epochNo).to.be.a("number");
+  pm.expect(jsonData.data[0].epochSlotNo).to.be.a("number");
+  pm.expect(jsonData.data[0].slot).to.be.a("number");
+  pm.expect(jsonData.data[0].epochSlotNo).to.be.a("number");
+  pm.expect(time).to.include(moment(time).format('YYYY/MM/DD HH:mm:ss'));
+  pm.expect(jsonData.data[0].addressesInput).to.be.an("array");
+  pm.expect(jsonData.data[0].addressesInput[0]).to.be.a("string");
+  pm.expect(jsonData.data[0].addressesOutput).to.be.an("array");
+  pm.expect(jsonData.data[0].addressesOutput[0]).to.be.a("string");
+  pm.expect(jsonData.data[0].fee).to.be.a("number");
+  pm.expect(jsonData.data[0].totalOutput).to.be.a("number");
+  //pm.expect(typeof jsonData.data[0].balance).to.be.oneOf([ 'object', 'number']);
+  pm.expect(jsonData.data[0].tokens).to.be.an("array");
+  pm.expect(jsonData.data[0].tokens).to.be.empty;
+});
+
+// Scenario Compare api: Filter transaction with api: Get current transactions (Latest Transactions of Dashboard) 
+pm.test("Check list of current transaction exist", function () {
+    var tx_hash_00 = pm.environment.get("tx_hash_00");
+    var tx_hash_01 = pm.environment.get("tx_hash_01");
+    var tx_hash_02 = pm.environment.get("tx_hash_02");
+    var tx_hash_03 = pm.environment.get("tx_hash_03");
+
+    var currentTx = [tx_hash_00,tx_hash_01,tx_hash_02,tx_hash_03];
+    for (let i = 0; i < jsonData.length; i++) {
+        for (let j = 0; j < currentTx.length; j++) {
+            pm.expect(jsonData[j].hash).to.eql(myKeysList[j]);
+        }
+    }
+});
+
+pm.test("Compare value between current transaction and filter transaction", function () {
+    var tx_hash = pm.environment.get("tx_hash");       
+    let result = jsonData.data.find(a => a.hash === tx_hash);
+
+    //Main compare
+    pm.expect(result.blockNo).to.eql(pm.environment.get("tx_blockNo"));
+    pm.expect((result.totalOutput/10**6).toFixed(2)).to.eql(((pm.environment.get("tx_amount"))/10**6).toFixed(2)); 
+    pm.expect(result.epochNo).to.eql(pm.environment.get("tx_epochNo"));
+    pm.expect(result.epochSlotNo).to.eql(pm.environment.get("tx_epochSlotNo"));
+    pm.expect(result.slot).to.eql(pm.environment.get("tx_slot"));
+    pm.expect(result.time).to.contain(pm.environment.get("tx_time"));
+});
+
+pm.test("Get others value exist at Filter transaction",function (){
+    var tx_hash = pm.environment.get("tx_hash");
+    let result = jsonData.data.find(a => a.hash === tx_hash);
+
+    pm.environment.set("tx_blockHash", result.blockHash);
+    pm.environment.set("tx_fee", result.fee);
+});
