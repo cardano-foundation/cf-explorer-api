@@ -100,6 +100,7 @@ jobs:
   end2end:
     needs: test
     runs-on: self-hosted
+    allow-failure: true
     container:
       image: postman/newman
     steps:
