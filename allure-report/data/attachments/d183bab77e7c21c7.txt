@@ -1,1 +1,0 @@
-{"data":[{"id":92,"poolId":"pool17ahr5ygy48vpdfnatqn2z4wfu2te4quapk2yx3k50ce6kd7feg0","poolName":"Steak.and.ADA","poolSize":64809000444820,"reward":3.628100,"feePercent":0.020000,"feeAmount":340000000,"pledge":1612388000000,"saturation":92.650000,"numberDelegators":10437,"epochBlock":15,"lifetimeBlock":8727,"lifetimeRos":3.379094}],"totalItems":1,"totalPages":1,"currentPage":0}
