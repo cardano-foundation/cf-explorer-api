@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.controller;
 import java.util.concurrent.ExecutionException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.controller.validation.PageZeroValid;
@@ -59,7 +60,7 @@ public class AddressController {
       summary = "Get top address by balance",
       tags = {"address"})
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-      @ParameterObject @PaginationValid @PageZeroValid Pagination pagination) {
+      @ParameterObject @PaginationValid @PageZeroValid @Valid Pagination pagination) {
     return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
   }
 
@@ -96,7 +97,7 @@ public class AddressController {
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
       @PathVariable @Parameter(description = "The human readable encoding of the output address."
           + " Will be Base58 for Byron era addresses and Bech32 for Shelley era.") String address,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByAddress(address, pagination.toPageable()));
   }
 
@@ -110,7 +111,7 @@ public class AddressController {
       @PathVariable @Parameter(description = "The human readable encoding of the output address."
           + " Will be Base58 for Byron era addresses and Bech32 for Shelley era.") String address,
       @RequestParam(required = false) @Parameter(description = "Display name query for search") String displayName,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(addressService.getTokenByDisplayName(pagination.toPageable(), address, displayName));
   }
 }
