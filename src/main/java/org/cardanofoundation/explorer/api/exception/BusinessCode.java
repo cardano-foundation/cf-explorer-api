@@ -16,6 +16,7 @@ public enum BusinessCode implements ErrorCode {
   STAKE_DELEGATION_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
   STAKE_WITHDRAWAL_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
   STAKE_REPORT_HISTORY_NOT_FOUND("404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found"),
+  POOL_REPORT_HISTORY_NOT_FOUND("404-POOL_REPORT_HISTORY_NOT_FOUND", "Pool report history not found"),
   REPORT_IS_IN_PROGRESS("404-REPORT_IS_IN_PROGRESS", "Report is in progress"),
   POOL_NOT_FOUND("404-POOL_NOT_FOUND", "PoolId not found"),
   EXPORT_TYPE_NOT_SUPPORTED("404-EXPORT_TYPE_NOT_SUPPORTED", "Export type not supported"),

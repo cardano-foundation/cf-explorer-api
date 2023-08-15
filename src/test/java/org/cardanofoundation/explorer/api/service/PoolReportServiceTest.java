@@ -136,12 +136,12 @@ public class PoolReportServiceTest {
     Long reportId = 1L;
     String username = "username";
     ExportType exportType = ExportType.EXCEL;
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(
-        PoolReportHistory.builder()
+    when(poolReportRepository.findById(any())).thenReturn(
+        Optional.of(PoolReportHistory.builder()
             .reportHistory(ReportHistory.builder()
                                .username(username)
                                .build())
-            .build());
+            .build()));
 
     Assertions.assertThrows(BusinessException.class,
                             () -> poolReportService.export(reportId, exportType, username));
@@ -162,7 +162,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
 
     PoolReportExportResponse expect = PoolReportExportResponse.builder()
         .fileName("reportName" + exportType.getValue())
@@ -200,7 +200,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     Page<PoolReportProjection> poolReportProjections = new PageImpl<>(List.of(),
                                                                       PageRequest.of(0, 1), 0);
     when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(),
@@ -238,7 +238,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+        when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<TabularRegisResponse> tabularRegisResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.registrationList(any(), any())).thenReturn(tabularRegisResponse);
 
@@ -269,7 +269,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+        when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateDetailResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.poolUpdateList(any(), any())).thenReturn(poolUpdateDetailResponse);
 
@@ -299,7 +299,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+        when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.listRewardFilter(any(), any(), any(), any())).thenReturn(rewardResponse);
 
@@ -330,7 +330,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+        when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<DeRegistrationResponse> deRegistrationResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.deRegistration(any(), any(), any(), any(), any())).thenReturn(
         deRegistrationResponse);
@@ -399,7 +399,7 @@ public class PoolReportServiceTest {
                            .build())
         .build();
 
-    when(poolReportRepository.findByUsernameAndId(username, reportId)).thenReturn(poolReport);
+    when(poolReportRepository.findById(reportId)).thenReturn(Optional.of(poolReport));
 
     var response = poolReportService.detail(reportId, username);
     Assertions.assertEquals(poolReport, response);
