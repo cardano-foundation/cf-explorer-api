@@ -50,7 +50,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu+3@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n\n// {\n//   \"type\": 0,\n//   \"email\": \"nhung.nguyen2@sotatek.com\",\n//   \"password\": \"Nhung!12345\"\n// }\n\n// {\n//   \"type\": 0,\n//   \"email\": \"yen.phan@sotatek.com\",\n//   \"password\": \"Sotatek@123\"\n// }\n\n// {\n//   \"type\": 0,\n//   \"email\": \"yen.phan+1@sotatek.com\",\n//   \"password\": \"Sotatek@123\"\n// }\n\n{\n  \"type\": 0,\n  \"email\": \"david.nguyen4@sotatek.com\",\n  \"password\": \"Hello@123\"\n}"
+									"raw": "{\n  \"type\": 0,\n  \"email\": \"david.nguyen4@sotatek.com\",\n  \"password\": \"Hello@123\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl-Auth}}/api/v1/auth/sign-in",
