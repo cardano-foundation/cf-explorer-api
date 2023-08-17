@@ -30,6 +30,8 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeDeregistration;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
 import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 
 import java.math.BigInteger;
@@ -37,6 +39,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -71,6 +74,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
+  private final TxRepository txRepository;
 
   private final RedisTemplate<String, Object> redisTemplate;
 
@@ -86,14 +90,47 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
-    Page<TrxBlockEpochStake> trxBlockEpochStakePage = stakeRegistrationRepository.getDataForStakeRegistration(pageable);
-    return new BaseFilterResponse<>(trxBlockEpochStakePage.map(StakeTxResponse::new));
+
+    Page<StakeRegistration> stakeRegistrationPage = stakeRegistrationRepository.findAll(pageable);
+    Page<StakeTxResponse> stakeTxResponsePage = stakeRegistrationPage.map(StakeTxResponse::new);
+    getDetailInfoStakeTxResponse(stakeTxResponsePage);
+    return new BaseFilterResponse<>(stakeTxResponsePage);
   }
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyDeRegistration(Pageable pageable) {
-    Page<TrxBlockEpochStake> trxBlockEpochStakePage = stakeDeRegistrationRepository.getDataForStakeDeRegistration(pageable);
-    return new BaseFilterResponse<>(trxBlockEpochStakePage.map(StakeTxResponse::new));
+
+    Page<StakeDeregistration> stakeDeregistrationPage = stakeDeRegistrationRepository.findAll(pageable);
+    Page<StakeTxResponse> stakeTxResponsePage = stakeDeregistrationPage.map(StakeTxResponse::new);
+    getDetailInfoStakeTxResponse(stakeTxResponsePage);
+    return new BaseFilterResponse<>(stakeTxResponsePage);
+  }
+
+  private void getDetailInfoStakeTxResponse(Page<StakeTxResponse> stakeTxResponsePage) {
+    Set<Long> txIds = stakeTxResponsePage.stream().map(StakeTxResponse::getTxId)
+        .collect(Collectors.toSet());
+    List<TxIOProjection> txList = txRepository.findTxIn(txIds);
+    Map<Long, TxIOProjection> txMap = txList.stream()
+        .collect(Collectors.toMap(TxIOProjection::getId, Function.identity()));
+
+    Set<Long> stakeAddressIds = stakeTxResponsePage.stream().map(StakeTxResponse::getStakeAddressId)
+        .collect(Collectors.toSet());
+    List<StakeAddress> stakeAddressList = stakeAddressRepository.findAllById(stakeAddressIds);
+    Map<Long, StakeAddress> stakeAddressMap = stakeAddressList.stream()
+        .collect(Collectors.toMap(StakeAddress::getId, Function.identity()));
+
+    stakeTxResponsePage.forEach(
+        item -> {
+          TxIOProjection txIOProjection = txMap.get(item.getTxId());
+          StakeAddress stakeAddress = stakeAddressMap.get(item.getStakeAddressId());
+          item.setTxHash(txIOProjection.getHash());
+          item.setEpoch(txIOProjection.getEpochNo());
+          item.setBlock(txIOProjection.getBlockNo());
+          item.setEpochSlotNo(txIOProjection.getEpochSlotNo());
+          item.setTxTime(Timestamp.valueOf(txIOProjection.getTime()));
+          item.setStakeKey(stakeAddress.getView());
+        }
+    );
   }
 
   @Override

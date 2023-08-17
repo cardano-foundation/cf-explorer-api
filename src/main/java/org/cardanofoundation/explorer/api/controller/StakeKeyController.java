@@ -32,9 +32,13 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeDeregistration_;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,7 +61,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake key registration", tags = "stake-key")
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-          @ParameterObject @PaginationValid @Valid Pagination pagination) {
+          @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {StakeRegistration_.TX_ID},
+              direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pagination.toPageable()));
   }
 
@@ -65,7 +70,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake key de-registration", tags = "stake-key")
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-          @ParameterObject @PaginationValid @Valid Pagination pagination) {
+          @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {StakeDeregistration_.TX_ID},
+              direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pagination.toPageable()));
   }
   @GetMapping("/address/{address}")

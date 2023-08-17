@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStake;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
@@ -21,16 +20,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StakeRegistrationRepository extends JpaRepository<StakeRegistration, Long> {
-
-  @Query(value =
-      "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.blockNo AS blockId, bk.epochNo AS epochNo, "
-          + "bk.slotNo as slotNo, bk.epochSlotNo as epochSlotNo, sr.addr.view as stakeKey "
-          + "FROM StakeRegistration sr "
-          + "JOIN Tx tx ON tx.id = sr.tx.id "
-          + "JOIN Block bk ON bk.id = tx.block.id "
-          + "ORDER BY tx.blockId DESC, tx.blockIndex DESC",
-      countQuery = "SELECT count(id) FROM StakeRegistration")
-  Page<TrxBlockEpochStake> getDataForStakeRegistration(Pageable pageable);
 
   @Query("SELECT max(stakeRegis.tx.id) "
       + " FROM StakeRegistration stakeRegis"
