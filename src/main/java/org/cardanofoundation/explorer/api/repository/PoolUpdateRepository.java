@@ -1,6 +1,9 @@
 package org.cardanofoundation.explorer.api.repository;
 
-import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
 import java.sql.Timestamp;
 import java.util.List;
@@ -43,10 +46,6 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "GROUP BY sa.view")
   List<String> findOwnerAccountByPoolView(@Param("poolView") String poolView);
 
-  @Query(value = "SELECT pu FROM PoolUpdate pu WHERE pu.poolHash.id = :poolId "
-      + "AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = :poolId)")
-  PoolUpdate findLastEpochByPool(@Param("poolId") Long poolId);
-
   @Query("SELECT pu.id AS poolUpdateId, ph.view AS poolView, pu.pledge AS pledge, "
           + "pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost  AS cost, sa.view AS rewardAccount, "
           + "pmr.url AS metadataUrl, pmr.hash as metadataHash "
@@ -57,13 +56,13 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE pu.registeredTx = :tx")
   List<PoolUpdateDetailProjection> findByTx(@Param("tx") Tx tx);
   @Query(value =
-      "SELECT tx.id AS txId, tx.hash AS txHash, bk.time AS txTime, bk.blockNo AS blockNo, bk.epochNo AS epochNo, bk.epochSlotNo AS slotNo, "
-          + "pu.pledge AS pledge, pu.margin AS margin, pu.fixedCost AS cost, pu.poolHash.id AS poolId, po.poolName AS poolName, ph.view AS poolView "
+      "SELECT pu.registeredTxId AS txId, pu.pledge AS pledge, pu.margin AS margin, pu.fixedCost AS cost, "
+          + "pu.poolHash.id AS poolId, po.poolName AS poolName, ph.view AS poolView "
           + "FROM PoolUpdate pu  "
           + "JOIN PoolHash ph ON pu.poolHash.id = ph.id "
-          + "JOIN Tx tx ON tx.id = pu.registeredTx.id "
-          + "JOIN Block bk ON bk.id = tx.block.id "
-          + "LEFT JOIN PoolOfflineData po ON pu.poolHash.id = po.pool.id AND (po.id is NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id  = pu.poolHash.id)) ")
+          + "LEFT JOIN PoolOfflineData po ON pu.poolHash.id = po.pool.id AND (po.id is NULL OR po.id = "
+          + "(SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id  = pu.poolHash.id)) ",
+      countQuery = "SELECT count(pu) FROM PoolUpdate pu")
   Page<TxBlockEpochProjection> getDataForPoolRegistration(Pageable pageable);
 
   @Query(value = "SELECT bk.time FROM PoolUpdate pu "
