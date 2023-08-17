@@ -2,13 +2,18 @@ package org.cardanofoundation.explorer.api.model.response.stake;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeDeregistration;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
 
 @Getter
 @Setter
 public class StakeTxResponse implements Serializable {
 
+  @JsonIgnore
   private Long txId;
 
   private String txHash;
@@ -21,19 +26,24 @@ public class StakeTxResponse implements Serializable {
 
   private Long slotNo;
 
-  private Long epochSlotNo;
+  private Integer epochSlotNo;
+
+  @JsonIgnore
+  private Long stakeAddressId;
 
   private String stakeKey;
 
-  public StakeTxResponse(TrxBlockEpochStake trxBlockEpochStake) {
-    this.txId = trxBlockEpochStake.getTxId();
-    this.txHash = trxBlockEpochStake.getTxHash();
-    this.txTime = trxBlockEpochStake.getTxTime();
-    this.block = trxBlockEpochStake.getBlockId();
-    this.epoch = trxBlockEpochStake.getEpochNo();
-    this.slotNo = trxBlockEpochStake.getSlotNo();
-    this.epochSlotNo = trxBlockEpochStake.getEpochSlotNo();
-    this.stakeKey = trxBlockEpochStake.getStakeKey();
+  public StakeTxResponse() {
+  }
+
+  public StakeTxResponse(StakeRegistration stakeRegistration) {
+    this.txId = stakeRegistration.getTxId();
+    this.stakeAddressId = stakeRegistration.getStakeAddressId();
+  }
+
+  public StakeTxResponse(StakeDeregistration stakeDeRegistration) {
+    this.txId = stakeDeRegistration.getTxId();
+    this.stakeAddressId = stakeDeRegistration.getStakeAddressId();
   }
 
 }
