@@ -54,7 +54,6 @@ spring:
 
   kafka:
     bootstrap-servers: ${BOOTSTRAP_SERVER:127.0.0.1:29092}
-    useSsl: ${KAFKA_USE_SSL:false}
     #client-id:  crawler
     producer:
       acks: all
