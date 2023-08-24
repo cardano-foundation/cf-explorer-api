@@ -14,7 +14,7 @@ env:
 
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -63,7 +63,7 @@ jobs:
 
   mutation-test:
     needs: test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -100,7 +100,7 @@ jobs:
 
   end2end:
     needs: test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: postman/newman
     steps:
@@ -146,7 +146,7 @@ jobs:
   loadTest:
     if: always()
     needs: end2end
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     #container:
     #  image: loadimpact/k6:latest
     steps:
