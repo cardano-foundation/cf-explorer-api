@@ -134,7 +134,6 @@
 											"    pm.environment.set(\"epoch_account\", jsonData.account);\r",
 											"    pm.environment.set(\"epoch_startTime\", jsonData.startTime);\r",
 											"    pm.environment.set(\"epoch_endTime\", jsonData.endTime);\r",
-											"    console.log(jsonData.no);\r",
 											"});\r",
 											"\r",
 											""
@@ -1405,7 +1404,6 @@
 											"    \r",
 											"    //Randome value\r",
 											"    var randomIndex = Math.floor(Math.random() * 4);\r",
-											"    console.log(randomIndex);\r",
 											"\r",
 											"    pm.environment.set(\"tx_hash\", jsonData[randomIndex].hash);\r",
 											"    pm.environment.set(\"tx_blockNo\", jsonData[randomIndex].blockNo);\r",
@@ -2287,7 +2285,6 @@
 											"pm.test(\"Check block \" + pm.environment.get(\"tx_blockNo\") + \" exist\",function (){\r",
 											"    var tx_blockNo = pm.environment.get(\"tx_blockNo\");\r",
 											"    let result = jsonData.data.find(a => a.blockNo === tx_blockNo);\r",
-											"console.log (tx_blockNo);\r",
 											"    pm.environment.set(\"block_blockNo\", result.blockNo);\r",
 											"    pm.environment.set(\"block_hash\", result.hash);\r",
 											"    pm.environment.set(\"block_epochNo\", result.epochNo);\r",
@@ -4337,7 +4334,6 @@
 											"    \r",
 											"    //Randome value \r",
 											"    var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));\r",
-											"    console.log(randomIndex);\r",
 											"    \r",
 											"    pm.environment.set(\"stakingwithdrawals_data_txHash\", jsonData.data[randomIndex].txHash)\r",
 											"    pm.environment.set(\"stakingwithdrawals_data_value\", jsonData.data[randomIndex].value)\r",
@@ -6155,7 +6151,6 @@
 											"pm.test(\"Get data of Get stake rewards by report id api\",function (){\r",
 											"    //Randome value \r",
 											"    var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));\r",
-											"    console.log(randomIndex);\r",
 											"    \r",
 											"    pm.environment.set(\"stakingrewards_data_epoch\", jsonData.data[randomIndex].epoch)\r",
 											"    pm.environment.set(\"stakingrewards_data_time\", jsonData.data[randomIndex].time)\r",
@@ -6866,7 +6861,6 @@
 											"pm.test(\"Get data by report id of Get stake delegations by report id api\",function(){\r",
 											"    //Randome value\r",
 											"    var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));\r",
-											"    console.log(randomIndex);\r",
 											"    pm.environment.set(\"stakingdelegations_data_txHash\", jsonData.data[randomIndex].txHash);\r",
 											"    pm.environment.set(\"stakingdelegations_data_outSum\", jsonData.data[randomIndex].outSum);\r",
 											"    pm.environment.set(\"stakingdelegations_data_fee\", jsonData.data[randomIndex].fee);\r",
@@ -7470,7 +7464,6 @@
 											"    \r",
 											"    //Randome value \r",
 											"    var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));\r",
-											"    console.log(randomIndex);\r",
 											"    \r",
 											"    pm.environment.set(\"stakingderegistrations_data_txHash\", jsonData.data[randomIndex].txHash)\r",
 											"    pm.environment.set(\"stakingderegistrations_data_fee\", jsonData.data[randomIndex].fee)\r",
@@ -12845,7 +12838,6 @@
 											"pm.test(\"Get Randome value of get Withdrawals api\",function(){\r",
 											"    //Randome value\r",
 											"    var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));\r",
-											"    console.log(randomIndex);\r",
 											"    pm.environment.set(\"getWithdrawals_data_txHash\", jsonData.data[randomIndex].txHash);\r",
 											"    pm.environment.set(\"getWithdrawals_data_value\", jsonData.data[randomIndex].value);\r",
 											"    pm.environment.set(\"getWithdrawals_data_fee\", jsonData.data[randomIndex].fee);\r",
@@ -13603,12 +13595,10 @@
 											"    pm.expect(jsonData.data).to.be.an(\"array\");\r",
 											"    pm.expect(jsonData.totalItems).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.totalPages).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.data[0].txId).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].txHash).to.be.a(\"string\");\r",
 											"    pm.expect(jsonData.data[0].txTime).to.include(moment(jsonData.data[0].txTime).format('YYYY/MM/DD HH:mm:ss'));\r",
 											"    pm.expect(jsonData.data[0].block).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].epoch).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.data[0].slotNo).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].epochSlotNo).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].stakeKey).to.be.a(\"string\");\r",
 											"});\r",
@@ -14155,12 +14145,10 @@
 											"    pm.expect(jsonData.data).to.be.an(\"array\");\r",
 											"    pm.expect(jsonData.totalItems).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.totalPages).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.data[0].txId).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].txHash).to.be.a(\"string\");\r",
 											"    pm.expect(jsonData.data[0].txTime).to.include(moment(jsonData.data[0].txTime).format('YYYY/MM/DD HH:mm:ss'));\r",
 											"    pm.expect(jsonData.data[0].block).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].epoch).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.data[0].slotNo).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].epochSlotNo).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].stakeKey).to.be.a(\"string\");\r",
 											"});\r",
@@ -20089,7 +20077,6 @@
 											"pm.test(\"Get data of Find Top(default is 3) Delegation Pool order by pool size api\",function (){    \r",
 											"    //Randome value\r",
 											"    var randomIndex = Math.floor(Math.random() * (jsonData.length-1));\r",
-											"    console.log(jsonData[randomIndex].poolId)\r",
 											"\r",
 											"    pm.environment.set(\"delegation_poolId\", jsonData[randomIndex].poolId);\r",
 											"    pm.environment.set(\"delegation_id\", jsonData[randomIndex].id);\r",
@@ -26525,6 +26512,640 @@
 							]
 						},
 						{
+							"name": "contracts",
+							"item": [
+								{
+									"name": "Verify native scrip contract",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"var stt = 200\r",
+													"var res_time = 5000\r",
+													"\r",
+													"//Compare static data\r",
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(stt);\r",
+													"});\r",
+													"pm.test(\"Response time is less than 5000ms\", function () {\r",
+													"    pm.expect(pm.response.responseTime).to.be.below(res_time);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"pm.environment.set(\"contracts_address\", \"addr1zyvxzknf28xjtvpvvcr34mgerm2lrh320n26plr3jktw6fgfzup4e9umthe6xgvhcxu4d5cygcj0h3vdslrt3whadmnsuexzkw\");\r",
+													"pm.environment.set(\"contracts_script\",JSON.stringify('{\"type\":\"all\",\"scripts\":[{\"type\":\"sig\",\"keyHash\":\"f319a0c8d1aca55e0e5dfbaf72deebc35426098c40fdc8fa308793e8\"},{\"type\":\"after\",\"slot\":67996801}]}'));\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"address\": \"{{contracts_address}}\",\n    \"script\": {{contracts_script}}\n}\n\n// {\n//     \"address\": \"addr1zyvxzknf28xjtvpvvcr34mgerm2lrh320n26plr3jktw6fgfzup4e9umthe6xgvhcxu4d5cygcj0h3vdslrt3whadmnsuexzkw\",\n//     \"script\": \"{\\\"type\\\":\\\"all\\\",\\\"scripts\\\":[{\\\"type\\\":\\\"sig\\\",\\\"keyHash\\\":\\\"f319a0c8d1aca55e0e5dfbaf72deebc35426098c40fdc8fa308793e8\\\"},{\\\"type\\\":\\\"after\\\",\\\"slot\\\":67996801}]}\"\n// }",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/contracts/verify/native",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"contracts",
+												"verify",
+												"native"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Authorization",
+														"value": "Bearer <token>",
+														"description": "Added as a part of security scheme: bearer"
+													},
+													{
+														"key": "Accept",
+														"value": "*/*"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"address\": \"ad Ut\",\n  \"script\": \"est nulla cupidatat\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/contracts/verify/native",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"contracts",
+														"verify",
+														"native"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "true"
+										}
+									]
+								},
+								{
+									"name": "Get list contract",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const jsonData = pm.response.json();\r",
+													"\r",
+													"//Compare static value\r",
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response time is less than 5000ms\", function () {\r",
+													"    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Check currentPage value\", function () {\r",
+													"    pm.expect(jsonData.currentPage).to.eql(0);\r",
+													"});\r",
+													"\r",
+													"//Compare data type\r",
+													"pm.test(\"Check data type of the response\", () => {\r",
+													"    pm.expect(jsonData.totalItems).to.be.a(\"number\");\r",
+													"    pm.expect(jsonData.totalPages).to.be.a(\"number\");\r",
+													"    pm.expect(jsonData.currentPage).to.be.a(\"number\");\r",
+													"    pm.expect(jsonData.data[0].address).to.be.a(\"string\");\r",
+													"    pm.expect(jsonData.data[0].txCount).to.be.a(\"number\");\r",
+													"    pm.expect(jsonData.data[0].balance).to.be.a(\"number\");\r",
+													"});\r",
+													"\r",
+													"// Check default size \r",
+													"if (jsonData.totalItems > 0){\r",
+													"    pm.test(\"Check Size default\", function(){\r",
+													"        pm.expect(jsonData.data.length).to.be.within(1, 100);\r",
+													"    });\r",
+													"};"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/contracts",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"contracts"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)",
+													"disabled": true
+												},
+												{
+													"key": "size",
+													"value": "20",
+													"description": "The size of the page to be returned",
+													"disabled": true
+												},
+												{
+													"key": "sort",
+													"value": "balance,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Authorization",
+														"value": "Bearer <token>",
+														"description": "Added as a part of security scheme: bearer"
+													},
+													{
+														"key": "Accept",
+														"value": "*/*"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/contracts?page=0&size=20&sort=balance,DESC",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"contracts"
+													],
+													"query": [
+														{
+															"key": "page",
+															"value": "0"
+														},
+														{
+															"key": "size",
+															"value": "20"
+														},
+														{
+															"key": "sort",
+															"value": "balance,DESC"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"address\": \"elit fugiat magna et\",\n      \"txCount\": -96260110,\n      \"balance\": -31166932\n    },\n    {\n      \"address\": \"ea officia culpa\",\n      \"txCount\": 76870377,\n      \"balance\": 78684995\n    }\n  ],\n  \"totalItems\": -86817919,\n  \"totalPages\": -14279308,\n  \"currentPage\": 727956\n}"
+										}
+									]
+								},
+								{
+									"name": "Boundary - Get list contract (100)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"if (jsonData.totalItems>=100){\r",
+													"    pm.test(\"Status code is 200\", function () {\r",
+													"        pm.response.to.have.status(200);\r",
+													"    });\r",
+													"\r",
+													"    pm.test(\"Check the length of the array with site max (100)\", function(){\r",
+													"        pm.expect(jsonData.data.length).to.eql(100);\r",
+													"    });\r",
+													"};"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/contracts?size=100",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"contracts"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)",
+													"disabled": true
+												},
+												{
+													"key": "size",
+													"value": "100",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "balance,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Boundary - Get list contract (101)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"pm.test(\"Status code is 400\", function () {\r",
+													"    pm.response.to.have.status(400 );\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Check errorMessage is Page size should not exceed 100\", function () {\r",
+													"    pm.expect(jsonData.errorMessage).to.include(\"Page size should not exceed 100\" );\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/contracts?size=101",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"contracts"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)",
+													"disabled": true
+												},
+												{
+													"key": "size",
+													"value": "101",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "balance,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Boundary - Get list contract (1)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"if (jsonData.totalItems>=1){\r",
+													"    pm.test(\"Status code is 200\", function () {\r",
+													"        pm.response.to.have.status(200);\r",
+													"    });\r",
+													"\r",
+													"    pm.test(\"Check the length of the array with  min + 1 (1)\", function(){\r",
+													"        pm.expect(jsonData.data.length).to.eql(1);\r",
+													"    });\r",
+													"};"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/contracts?size=1",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"contracts"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)",
+													"disabled": true
+												},
+												{
+													"key": "size",
+													"value": "1",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "balance,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Boundary - Get list contract (-1)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"pm.test(\"Status code is 400\", function () {\r",
+													"    pm.response.to.have.status(400);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Check errorMessage is Page size should be a positive integer\", function () {\r",
+													"    pm.expect(jsonData.errorMessage).to.include(\"Page size should be a positive integer\" );\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/contracts?size=-1",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"contracts"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "0",
+													"description": "Zero-based page index (0..N)",
+													"disabled": true
+												},
+												{
+													"key": "size",
+													"value": "-1",
+													"description": "The size of the page to be returned"
+												},
+												{
+													"key": "sort",
+													"value": "balance,DESC",
+													"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get native script of contract",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const jsonData = pm.response.json();\r",
+													"\r",
+													"//Compare static value\r",
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response time is less than 5000ms\", function () {\r",
+													"    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+													"});\r",
+													"\r",
+													"//Compare data type\r",
+													"pm.test(\"Check data type of the response\", () => {\r",
+													"    pm.expect(jsonData.isVerified).to.be.a(\"boolean\");\r",
+													"    pm.expect(jsonData.data).to.be.a(\"string\");\r",
+													"});\r",
+													"\r",
+													"//Scenario compare api Verify native scrip contract with api Get: Get native script of contract\r",
+													"pm.test(\"Compare value between Get native script of contract api and Verify native scrip contract api\",function(){\r",
+													"    pm.expect(JSON.parse(jsonData.data)).to.be.eql(JSON.parse(JSON.parse(pm.environment.get(\"contracts_script\"))));\r",
+													"});\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "*/*"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/contracts/:address/script",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"contracts",
+												":address",
+												"script"
+											],
+											"variable": [
+												{
+													"key": "address",
+													"value": "{{contracts_address}}",
+													"description": "api/v1/contracts/verify/native(Verify native scrip contract)"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Authorization",
+														"value": "Bearer <token>",
+														"description": "Added as a part of security scheme: bearer"
+													},
+													{
+														"key": "Accept",
+														"value": "*/*"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/contracts/:address/script",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"contracts",
+														":address",
+														"script"
+													],
+													"variable": [
+														{
+															"key": "address",
+															"value": "enim voluptate Excepteur ullamco",
+															"description": "(Required) "
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "enim voluptate Excepteur ullamco"
+										}
+									]
+								}
+							]
+						},
+						{
 							"name": "list Pool Report",
 							"event": [
 								{
@@ -30520,640 +31141,6 @@
 								}
 							},
 							"response": []
-						}
-					]
-				},
-				{
-					"name": "contracts",
-					"item": [
-						{
-							"name": "Verify native scrip contract",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"var jsonData = pm.response.json();\r",
-											"var stt = 200\r",
-											"var res_time = 5000\r",
-											"\r",
-											"//Compare static data\r",
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(stt);\r",
-											"});\r",
-											"pm.test(\"Response time is less than 5000ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(res_time);\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"pm.environment.set(\"contracts_address\", \"addr1zyvxzknf28xjtvpvvcr34mgerm2lrh320n26plr3jktw6fgfzup4e9umthe6xgvhcxu4d5cygcj0h3vdslrt3whadmnsuexzkw\");\r",
-											"pm.environment.set(\"contracts_script\",JSON.stringify('{\"type\":\"all\",\"scripts\":[{\"type\":\"sig\",\"keyHash\":\"f319a0c8d1aca55e0e5dfbaf72deebc35426098c40fdc8fa308793e8\"},{\"type\":\"after\",\"slot\":67996801}]}'));\r",
-											"\r",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Accept",
-										"value": "*/*"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"address\": \"{{contracts_address}}\",\n    \"script\": {{contracts_script}}\n}\n\n// {\n//     \"address\": \"addr1zyvxzknf28xjtvpvvcr34mgerm2lrh320n26plr3jktw6fgfzup4e9umthe6xgvhcxu4d5cygcj0h3vdslrt3whadmnsuexzkw\",\n//     \"script\": \"{\\\"type\\\":\\\"all\\\",\\\"scripts\\\":[{\\\"type\\\":\\\"sig\\\",\\\"keyHash\\\":\\\"f319a0c8d1aca55e0e5dfbaf72deebc35426098c40fdc8fa308793e8\\\"},{\\\"type\\\":\\\"after\\\",\\\"slot\\\":67996801}]}\"\n// }",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/contracts/verify/native",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"contracts",
-										"verify",
-										"native"
-									]
-								}
-							},
-							"response": [
-								{
-									"name": "OK",
-									"originalRequest": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Authorization",
-												"value": "Bearer <token>",
-												"description": "Added as a part of security scheme: bearer"
-											},
-											{
-												"key": "Accept",
-												"value": "*/*"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n  \"address\": \"ad Ut\",\n  \"script\": \"est nulla cupidatat\"\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/contracts/verify/native",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"contracts",
-												"verify",
-												"native"
-											]
-										}
-									},
-									"status": "OK",
-									"code": 200,
-									"_postman_previewlanguage": "text",
-									"header": [
-										{
-											"key": "Content-Type",
-											"value": "*/*"
-										}
-									],
-									"cookie": [],
-									"body": "true"
-								}
-							]
-						},
-						{
-							"name": "Get list contract",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"const jsonData = pm.response.json();\r",
-											"\r",
-											"//Compare static value\r",
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Response time is less than 5000ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Check currentPage value\", function () {\r",
-											"    pm.expect(jsonData.currentPage).to.eql(0);\r",
-											"});\r",
-											"\r",
-											"//Compare data type\r",
-											"pm.test(\"Check data type of the response\", () => {\r",
-											"    pm.expect(jsonData.totalItems).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.totalPages).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.currentPage).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.data[0].address).to.be.a(\"string\");\r",
-											"    pm.expect(jsonData.data[0].txCount).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.data[0].balance).to.be.a(\"number\");\r",
-											"});\r",
-											"\r",
-											"// Check default size \r",
-											"if (jsonData.totalItems > 0){\r",
-											"    pm.test(\"Check Size default\", function(){\r",
-											"        pm.expect(jsonData.data.length).to.be.within(1, 100);\r",
-											"    });\r",
-											"};"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "*/*"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/contracts",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"contracts"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "0",
-											"description": "Zero-based page index (0..N)",
-											"disabled": true
-										},
-										{
-											"key": "size",
-											"value": "20",
-											"description": "The size of the page to be returned",
-											"disabled": true
-										},
-										{
-											"key": "sort",
-											"value": "balance,DESC",
-											"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": [
-								{
-									"name": "OK",
-									"originalRequest": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Authorization",
-												"value": "Bearer <token>",
-												"description": "Added as a part of security scheme: bearer"
-											},
-											{
-												"key": "Accept",
-												"value": "*/*"
-											}
-										],
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/contracts?page=0&size=20&sort=balance,DESC",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"contracts"
-											],
-											"query": [
-												{
-													"key": "page",
-													"value": "0"
-												},
-												{
-													"key": "size",
-													"value": "20"
-												},
-												{
-													"key": "sort",
-													"value": "balance,DESC"
-												}
-											]
-										}
-									},
-									"status": "OK",
-									"code": 200,
-									"_postman_previewlanguage": "json",
-									"header": [
-										{
-											"key": "Content-Type",
-											"value": "*/*"
-										}
-									],
-									"cookie": [],
-									"body": "{\n  \"data\": [\n    {\n      \"address\": \"elit fugiat magna et\",\n      \"txCount\": -96260110,\n      \"balance\": -31166932\n    },\n    {\n      \"address\": \"ea officia culpa\",\n      \"txCount\": 76870377,\n      \"balance\": 78684995\n    }\n  ],\n  \"totalItems\": -86817919,\n  \"totalPages\": -14279308,\n  \"currentPage\": 727956\n}"
-								}
-							]
-						},
-						{
-							"name": "Boundary - Get list contract (100)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"var jsonData = pm.response.json();\r",
-											"if (jsonData.totalItems>=100){\r",
-											"    pm.test(\"Status code is 200\", function () {\r",
-											"        pm.response.to.have.status(200);\r",
-											"    });\r",
-											"\r",
-											"    pm.test(\"Check the length of the array with site max (100)\", function(){\r",
-											"        pm.expect(jsonData.data.length).to.eql(100);\r",
-											"    });\r",
-											"};"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "*/*"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/contracts?size=100",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"contracts"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "0",
-											"description": "Zero-based page index (0..N)",
-											"disabled": true
-										},
-										{
-											"key": "size",
-											"value": "100",
-											"description": "The size of the page to be returned"
-										},
-										{
-											"key": "sort",
-											"value": "balance,DESC",
-											"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Boundary - Get list contract (101)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"var jsonData = pm.response.json();\r",
-											"\r",
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400 );\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Check errorMessage is Page size should not exceed 100\", function () {\r",
-											"    pm.expect(jsonData.errorMessage).to.include(\"Page size should not exceed 100\" );\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "*/*"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/contracts?size=101",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"contracts"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "0",
-											"description": "Zero-based page index (0..N)",
-											"disabled": true
-										},
-										{
-											"key": "size",
-											"value": "101",
-											"description": "The size of the page to be returned"
-										},
-										{
-											"key": "sort",
-											"value": "balance,DESC",
-											"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Boundary - Get list contract (1)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"var jsonData = pm.response.json();\r",
-											"if (jsonData.totalItems>=1){\r",
-											"    pm.test(\"Status code is 200\", function () {\r",
-											"        pm.response.to.have.status(200);\r",
-											"    });\r",
-											"\r",
-											"    pm.test(\"Check the length of the array with  min + 1 (1)\", function(){\r",
-											"        pm.expect(jsonData.data.length).to.eql(1);\r",
-											"    });\r",
-											"};"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "*/*"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/contracts?size=1",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"contracts"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "0",
-											"description": "Zero-based page index (0..N)",
-											"disabled": true
-										},
-										{
-											"key": "size",
-											"value": "1",
-											"description": "The size of the page to be returned"
-										},
-										{
-											"key": "sort",
-											"value": "balance,DESC",
-											"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Boundary - Get list contract (-1)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"var jsonData = pm.response.json();\r",
-											"\r",
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Check errorMessage is Page size should be a positive integer\", function () {\r",
-											"    pm.expect(jsonData.errorMessage).to.include(\"Page size should be a positive integer\" );\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "*/*"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/contracts?size=-1",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"contracts"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "0",
-											"description": "Zero-based page index (0..N)",
-											"disabled": true
-										},
-										{
-											"key": "size",
-											"value": "-1",
-											"description": "The size of the page to be returned"
-										},
-										{
-											"key": "sort",
-											"value": "balance,DESC",
-											"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get native script of contract",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"const jsonData = pm.response.json();\r",
-											"\r",
-											"//Compare static value\r",
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Response time is less than 5000ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
-											"});\r",
-											"\r",
-											"//Compare data type\r",
-											"pm.test(\"Check data type of the response\", () => {\r",
-											"    pm.expect(jsonData.isVerified).to.be.a(\"boolean\");\r",
-											"    pm.expect(jsonData.data).to.be.a(\"string\");\r",
-											"});\r",
-											"\r",
-											"//Scenario compare api Verify native scrip contract with api Get: Get native script of contract\r",
-											"pm.test(\"Compare value between Get native script of contract api and Verify native scrip contract api\",function(){\r",
-											"    pm.expect(JSON.parse(jsonData.data)).to.be.eql(JSON.parse(JSON.parse(pm.environment.get(\"contracts_script\"))));\r",
-											"});\r",
-											"\r",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "*/*"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/contracts/:address/script",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"contracts",
-										":address",
-										"script"
-									],
-									"variable": [
-										{
-											"key": "address",
-											"value": "{{contracts_address}}",
-											"description": "api/v1/contracts/verify/native(Verify native scrip contract)"
-										}
-									]
-								}
-							},
-							"response": [
-								{
-									"name": "OK",
-									"originalRequest": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Authorization",
-												"value": "Bearer <token>",
-												"description": "Added as a part of security scheme: bearer"
-											},
-											{
-												"key": "Accept",
-												"value": "*/*"
-											}
-										],
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/contracts/:address/script",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"contracts",
-												":address",
-												"script"
-											],
-											"variable": [
-												{
-													"key": "address",
-													"value": "enim voluptate Excepteur ullamco",
-													"description": "(Required) "
-												}
-											]
-										}
-									},
-									"status": "OK",
-									"code": 200,
-									"_postman_previewlanguage": "text",
-									"header": [
-										{
-											"key": "Content-Type",
-											"value": "*/*"
-										}
-									],
-									"cookie": [],
-									"body": "enim voluptate Excepteur ullamco"
-								}
-							]
 						}
 					]
 				},
