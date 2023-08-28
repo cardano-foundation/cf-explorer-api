@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.32](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.31...v0.3.32) (2023-08-28)
+
+
+### Features
+
+* change self-host to ubuntu-latest ([878a01d](https://github.com/cardano-foundation/cf-explorer-api/commit/878a01d495e8817555426f8b34c5fa20541bc1a2))
+* met-1480 setup for preview network ([4ff3b39](https://github.com/cardano-foundation/cf-explorer-api/commit/4ff3b392f577645a39454d3c3ab088c3c030ad2d))
+* MET-1534 handle contract for failed tx ([8456f11](https://github.com/cardano-foundation/cf-explorer-api/commit/8456f117d2f9ca590f9c61b2640dda32633440ae))
+
+
+### Bug Fixes
+
+* Change another user to create report ([7d225d3](https://github.com/cardano-foundation/cf-explorer-api/commit/7d225d3b1ab8914da548a31ca1a8beb1a66fa315))
+* delete item check & delete consolog ([e40fa5f](https://github.com/cardano-foundation/cf-explorer-api/commit/e40fa5fae645faea7b32da169c2f9f4151ebac0b))
+* handle unauthorized user with pool report ([5d995c7](https://github.com/cardano-foundation/cf-explorer-api/commit/5d995c70b440dde1132fb5c203ce903af6448d76))
+* update env ([8b2080b](https://github.com/cardano-foundation/cf-explorer-api/commit/8b2080b2ccd94d26935b53be7607a23e61fa199f))
+* update postman test ([e8a8a32](https://github.com/cardano-foundation/cf-explorer-api/commit/e8a8a320624f7c72ac699eef5963bca6e8ca80c1))
+* update Sign-in body ([4fca81a](https://github.com/cardano-foundation/cf-explorer-api/commit/4fca81a8acef472744897139192b8bdb268c4c08))
+
+
+### Performance Improvements
+
+* MET-1615 optimize list pool registration and de-registration ([77a175c](https://github.com/cardano-foundation/cf-explorer-api/commit/77a175ca1bb1b9867e3d47815fdff086073e6f4c))
+* MET-1615 optimize list stake key registration and de-registration ([4dd4aad](https://github.com/cardano-foundation/cf-explorer-api/commit/4dd4aad4aeba1a9648b180d2d03559c974e957fc))
+
 ## [0.3.31](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.30...v0.3.31) (2023-08-14)
 
 
