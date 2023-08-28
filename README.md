@@ -52,6 +52,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `DB_SCHEMA`: Schema of database
 - `DB_MAXIUM_POOL_SIZE`: Maximum pool size of database connection pool. Default is 32.
 
+- `JACKSON_INCLUSION`: Jackson inclusion. Default is NON_NULL for ignore null value. Using USE_DEFAULTS for not ignore null value.
+
 - `KAFKA_BOOTSTRAP_SERVER`: Kafka bootstrap server. Default is kafka:9092.
 - `KAFKA_REPORTS_TOPIC`: Kafka reports topic. Default is dev.explorer.api.mainnet.reports
   

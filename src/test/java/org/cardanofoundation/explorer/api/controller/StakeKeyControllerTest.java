@@ -30,12 +30,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,30 +72,42 @@ public class StakeKeyControllerTest {
 
     @Test
     void testGetDataForStakeRegistration_thenReturn() throws Exception {
-        Pageable pageable = PageRequest.of(0, 10);
-        BaseFilterResponse<StakeTxResponse> response = new BaseFilterResponse<>();
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.DESC, "txId");
+        List<StakeTxResponse> mockResponse = Arrays.asList(
+            new StakeTxResponse(),
+            new StakeTxResponse()
+        );
+        BaseFilterResponse<StakeTxResponse> response = new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
 
         when(stakeService.getDataForStakeKeyRegistration(pageable)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/stakes/registration")
                         .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").exists());
+                        .param("size", "10")
+                        .param("sort", "txId,desc"))
+            .andExpect(jsonPath("$.data").isArray())
+            .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
+        verify(stakeService).getDataForStakeKeyRegistration(pageable);
     }
 
     @Test
     void testGetDataForStakeDeRegistration_thenReturn() throws Exception {
-        Pageable pageable = PageRequest.of(0, 10);
-        BaseFilterResponse<StakeTxResponse> response = new BaseFilterResponse<>();
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.DESC, "txId");
+        List<StakeTxResponse> mockResponse = Arrays.asList(
+            new StakeTxResponse(),
+            new StakeTxResponse()
+        );
+        BaseFilterResponse<StakeTxResponse> response = new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
 
         when(stakeService.getDataForStakeKeyDeRegistration(pageable)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/stakes/de-registration")
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").exists());
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "txId,desc"))
+            .andExpect(jsonPath("$.data").isArray())
+            .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
+        verify(stakeService).getDataForStakeKeyDeRegistration(pageable);
     }
 
     @Test
