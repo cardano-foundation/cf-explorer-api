@@ -14,7 +14,7 @@ env:
 
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -56,13 +56,14 @@ jobs:
 
       - name: Publish coverage report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
+        if: github.ref == 'refs/heads/main'
         with:
           BRANCH: gh-pages
           folder: build/reports/jacoco/test/html
 
   mutation-test:
     needs: test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -99,7 +100,7 @@ jobs:
 
   end2end:
     needs: test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: postman/newman
     steps:
@@ -145,7 +146,7 @@ jobs:
   loadTest:
     if: always()
     needs: end2end
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     #container:
     #  image: loadimpact/k6:latest
     steps:
@@ -165,7 +166,7 @@ jobs:
           name: loadtest-report
           path: k6_results.csv
   pages:
-    needs: end2end
+    needs: [end2end,loadTest]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
