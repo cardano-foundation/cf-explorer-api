@@ -829,7 +829,7 @@ class TxServiceTest {
   }
 
   @Test
-  void testGetTxContractDetail() {
+  void testGetTxContractDetailForTxSuccess() {
     // Setup
     // Configure TxRepository.findByHash(...).
     final Tx tx1 = new Tx();
@@ -839,7 +839,7 @@ class TxServiceTest {
     block.setEpochNo(0);
     tx1.setBlock(block);
     tx1.setBlockId(0L);
-    tx1.setValidContract(false);
+    tx1.setValidContract(true);
     final TxMetadataHash txMetadataHash = new TxMetadataHash();
     txMetadataHash.setId(0L);
     txMetadataHash.setHash("hash");
@@ -879,6 +879,59 @@ class TxServiceTest {
     assertEquals(contractResponse.getDatumBytesOut(), result.get(0).getDatumBytesOut());
     assertEquals(contractResponse.getDatumHashOut(), result.get(0).getDatumHashOut());
   }
+
+  @Test
+  void testGetTxContractDetailForTxFail() {
+    // Setup
+    // Configure TxRepository.findByHash(...).
+    final Tx tx1 = new Tx();
+    tx1.setId(0L);
+    final Block block = new Block();
+    block.setId(0L);
+    block.setEpochNo(0);
+    tx1.setBlock(block);
+    tx1.setBlockId(0L);
+    tx1.setValidContract(false);
+    final TxMetadataHash txMetadataHash = new TxMetadataHash();
+    txMetadataHash.setId(0L);
+    txMetadataHash.setHash("hash");
+    tx1.setTxMetadataHash(txMetadataHash);
+    final Optional<Tx> tx = Optional.of(tx1);
+    when(txRepository.findByHash(anyString())).thenReturn(tx);
+
+    // Configure RedeemerRepository.findContractByTx(...).
+    when(redeemerRepository.findContractByTxFail(tx1)).thenReturn(List.of(
+        TxContractProjectionImpl.builder().build()
+    ));
+
+    // Configure TxContractMapper.fromTxContractProjectionToContractResponse(...).
+    final ContractResponse contractResponse = ContractResponse.builder()
+        .address("address")
+        .scriptHash("scriptHash")
+        .build();
+    when(txContractMapper.fromTxContractProjectionToContractResponse(
+        any(TxContractProjection.class))).thenReturn(contractResponse);
+
+    // Configure TxOutRepository.getContractDatumOutByTx(...).
+    when(txOutRepository.getContractDatumOutByTxFail(tx1)).thenReturn(List.of(
+        TxContractProjectionImpl.builder()
+            .address("address")
+            .datumBytesOut("datumBytesOut".getBytes())
+            .datumHashOut("datumHashOut")
+            .build()
+    ));
+
+    when(txContractMapper.bytesToString(any(byte[].class))).thenReturn("datumBytesOut");
+
+    // Run the test
+    final List<ContractResponse> result = txService.getTxContractDetail("txHash",
+                                                                        "address");
+
+    // Verify the results
+    assertEquals(contractResponse.getDatumBytesOut(), result.get(0).getDatumBytesOut());
+    assertEquals(contractResponse.getDatumHashOut(), result.get(0).getDatumHashOut());
+  }
+
 
   @Test
   void testGetTxContractDetail_TxRepositoryReturnsAbsent() {

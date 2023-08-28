@@ -23,4 +23,18 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " WHERE tx = :tx"
       + " ORDER BY re.id")
   List<TxContractProjection> findContractByTx(@Param("tx") Tx tx);
+
+  @Query("SELECT re.scriptHash AS scriptHash, txOut.address AS address, re.purpose as purpose,"
+      + " rd.bytes as redeemerBytes, re.unitMem as redeemerMem, re.unitSteps as redeemerSteps,"
+      + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes, txOut.id as txOutId"
+      + " FROM Redeemer re"
+      + " INNER JOIN Tx tx ON re.tx = tx"
+      + " LEFT JOIN RedeemerData rd ON re.redeemerData = rd"
+      + " LEFT JOIN UnconsumeTxIn uti ON uti.redeemer = re"
+      + " LEFT JOIN TxOut txOut ON uti.txOut = txOut.tx AND uti.txOutIndex = txOut.index"
+      + " LEFT JOIN Datum d ON (txOut.dataHash = d.hash OR txOut.inlineDatum = d)"
+      + " LEFT JOIN Script s ON re.scriptHash = s.hash"
+      + " WHERE tx = :tx"
+      + " ORDER BY re.id")
+  List<TxContractProjection> findContractByTxFail(@Param("tx") Tx tx);
 }

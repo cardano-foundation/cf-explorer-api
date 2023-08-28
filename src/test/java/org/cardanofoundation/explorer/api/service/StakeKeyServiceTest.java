@@ -8,14 +8,12 @@ import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.TrxBlockEpochStake;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -33,6 +31,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -83,39 +82,65 @@ public class StakeKeyServiceTest {
     private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
     @Mock
     private ValueOperations valueOperations;
+    @Mock
+    private TxRepository txRepository;
 
     @Test
     void testGetDataForStakeKeyRegistration_thenReturn() {
         Pageable pageable = PageRequest.of(0, 10);
-        TrxBlockEpochStake tbes = Mockito.mock(TrxBlockEpochStake.class);
-        when(tbes.getStakeKey()).thenReturn("stakeKey");
-        when(tbes.getEpochNo()).thenReturn(400);
+        StakeRegistration stakeRegistration = new StakeRegistration();
+        stakeRegistration.setStakeAddressId(1L);
+        stakeRegistration.setTxId(1L);
 
-        when(stakeRegistrationRepository.getDataForStakeRegistration(pageable)).thenReturn(new PageImpl<>(List.of(tbes)));
+        TxIOProjection tx = Mockito.mock(TxIOProjection.class);
+        when(tx.getId()).thenReturn(1L);
+        when(tx.getHash()).thenReturn("67e20ecd3777bcdafc63e38ff830b0ab527d3bd5996d3940cefa14c61e33906c");
+        when(tx.getTime()).thenReturn(LocalDateTime.now());
+        when(tx.getEpochNo()).thenReturn(430);
+        when(txRepository.findTxIn(new HashSet<>(List.of(1L)))).thenReturn(List.of(tx));
+        when(stakeRegistrationRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(stakeRegistration)));
+
+        StakeAddress stakeAddress = new StakeAddress();
+        stakeAddress.setId(1L);
+        stakeAddress.setView("stake1u9lq4sfeuzpzew7ajn7p5n8cfzxcax6jl5kljttwpeju4ec9m2tu9");
+        when(stakeAddressRepository.findAllById(new HashSet<>(List.of(1L)))).thenReturn(List.of(stakeAddress));
 
         var response = stakeKeyService.getDataForStakeKeyRegistration(pageable);
         assertEquals(response.getTotalItems(), 1);
         assertEquals(response.getTotalPages(), 1);
         assertEquals(response.getCurrentPage(), 0);
-        assertEquals(response.getData().get(0).getEpoch(), 400);
-        assertEquals(response.getData().get(0).getStakeKey(), "stakeKey");
+        assertEquals(response.getData().get(0).getEpoch(), 430);
+        assertEquals(response.getData().get(0).getStakeKey(),
+            "stake1u9lq4sfeuzpzew7ajn7p5n8cfzxcax6jl5kljttwpeju4ec9m2tu9");
     }
 
     @Test
     void testGetDataForStakeKeyDeRegistration_thenReturn() {
         Pageable pageable = PageRequest.of(0, 10);
-        TrxBlockEpochStake tbes = Mockito.mock(TrxBlockEpochStake.class);
-        when(tbes.getStakeKey()).thenReturn("stakeKey");
-        when(tbes.getEpochNo()).thenReturn(400);
+        StakeDeregistration stakeRegistration = new StakeDeregistration();
+        stakeRegistration.setStakeAddressId(1L);
+        stakeRegistration.setTxId(1L);
 
-        when(stakeDeRegistrationRepository.getDataForStakeDeRegistration(pageable)).thenReturn(new PageImpl<>(List.of(tbes)));
+        TxIOProjection tx = Mockito.mock(TxIOProjection.class);
+        when(tx.getId()).thenReturn(1L);
+        when(tx.getHash()).thenReturn("c7d41594ea5fa56b9daf6dbbddeb61f74b1dd06392ac12830920de26d2f5f93d");
+        when(tx.getTime()).thenReturn(LocalDateTime.now());
+        when(tx.getEpochNo()).thenReturn(430);
+        when(txRepository.findTxIn(new HashSet<>(List.of(1L)))).thenReturn(List.of(tx));
+        when(stakeDeRegistrationRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(stakeRegistration)));
+
+        StakeAddress stakeAddress = new StakeAddress();
+        stakeAddress.setId(1L);
+        stakeAddress.setView("stake1u9q7f0kyqfe2ljlfwzyad9hl9n0kqg3zsq35kq8jxrnce4q4wy688");
+        when(stakeAddressRepository.findAllById(new HashSet<>(List.of(1L)))).thenReturn(List.of(stakeAddress));
 
         var response = stakeKeyService.getDataForStakeKeyDeRegistration(pageable);
         assertEquals(response.getTotalItems(), 1);
         assertEquals(response.getTotalPages(), 1);
         assertEquals(response.getCurrentPage(), 0);
-        assertEquals(response.getData().get(0).getEpoch(), 400);
-        assertEquals(response.getData().get(0).getStakeKey(), "stakeKey");
+        assertEquals(response.getData().get(0).getEpoch(), 430);
+        assertEquals(response.getData().get(0).getStakeKey(),
+            "stake1u9q7f0kyqfe2ljlfwzyad9hl9n0kqg3zsq35kq8jxrnce4q4wy688");
     }
 
     @Test

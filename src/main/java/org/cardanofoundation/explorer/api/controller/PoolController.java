@@ -11,6 +11,8 @@ import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolRetire_;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate_;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +35,7 @@ public class PoolController {
   @Operation(summary = "Get list of pool registrations", tags = {"pools"})
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
+          PoolUpdate_.REGISTERED_TX_ID}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(poolRegistrationService.getDataForPoolRegistration(pagination.toPageable()));
   }
 
@@ -42,7 +44,7 @@ public class PoolController {
   @Operation(summary = "Get list of pool de-registrations", tags = {"pools"})
   public ResponseEntity<BaseFilterResponse<PoolTxResponse>> getDataForPoolDeRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
+          PoolRetire_.ANNOUNCED_TX_ID}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(poolRegistrationService.getDataForPoolDeRegistration(pagination.toPageable()));
   }
 }

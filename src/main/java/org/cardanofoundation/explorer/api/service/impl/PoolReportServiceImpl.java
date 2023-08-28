@@ -98,7 +98,7 @@ public class PoolReportServiceImpl implements PoolReportService {
       throw new BusinessException(BusinessCode.EXPORT_TYPE_NOT_SUPPORTED);
     }
 
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username, reportId);
+    PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     String storageKey = poolReport.getReportHistory().getStorageKey();
     String reportName = poolReport.getReportHistory().getReportName();
     ReportStatus reportStatus = poolReport.getReportHistory().getStatus();
@@ -147,15 +147,15 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   @Override
   public PoolReportHistory detail(Long reportId, String username) {
-    return poolReportRepository.findByUsernameAndId(username, reportId);
+    return getPoolReportHistory(reportId, username);
   }
 
   @Override
   public BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(Long reportId,
                                                                                Pageable pageable,
                                                                                String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
+
     boolean isKoiOs = fetchRewardDataService.isKoiOs();
     if (isKoiOs) {
       Set<String> poolReportSet = Set.of(poolReport.getPoolView());
@@ -205,8 +205,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(Long reportId,
                                                                         Pageable pageable,
                                                                         String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     return poolLifecycleService.registrationList(poolReport.getPoolView(), pageable);
   }
 
@@ -214,8 +213,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(Long reportId,
                                                                       Pageable pageable,
                                                                       String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     return poolLifecycleService.poolUpdateList(poolReport.getPoolView(), pageable);
   }
 
@@ -223,8 +221,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<RewardResponse> fetchRewardsDistribution(Long reportId,
                                                                      Pageable pageable,
                                                                      String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
                                                  poolReport.getBeginEpoch(),
                                                  poolReport.getEndEpoch(), pageable);
@@ -234,10 +231,20 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(Long reportId,
                                                                        Pageable pageable,
                                                                        String username) {
-    PoolReportHistory poolReport = poolReportRepository.findByUsernameAndId(username,
-                                                                            reportId);
+    PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     return poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null,
                                                null, pageable);
+  }
+
+  private PoolReportHistory getPoolReportHistory(Long reportId, String username) {
+    PoolReportHistory poolReportHistory = poolReportRepository.findById(reportId)
+        .orElseThrow(() -> new BusinessException(BusinessCode.POOL_REPORT_HISTORY_NOT_FOUND));
+
+    if (DataUtil.isNullOrEmpty(username) || !username.equals(
+        poolReportHistory.getReportHistory().getUsername())) {
+      throw new BusinessException(BusinessCode.POOL_REPORT_HISTORY_NOT_FOUND);
+    }
+    return poolReportHistory;
   }
 
   private ReportHistory initReportHistory(PoolReportCreateRequest poolReportCreateRequest,
