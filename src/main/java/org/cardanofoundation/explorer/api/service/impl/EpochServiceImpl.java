@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.repository.AdaPotsRepository;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -195,8 +197,10 @@ public class EpochServiceImpl implements EpochService {
           if (Boolean.FALSE.equals(fetchRewardDataService.checkAdaPots(epochSummaryProjection.getNo()))) {
             fetchRewardDataService.fetchAdaPots(List.of(epochSummaryProjection.getNo()));
           }
-          var circulatingSupply = adaPotsRepository.getUTxOByEpochNo(epochSummaryProjection.getNo())
-              .orElse(BigInteger.ZERO);
+          var circulatingSupply = adaPotsRepository.getReservesByEpochNo(epochSummaryProjection.getNo());
+          if (Objects.isNull(circulatingSupply)) {
+            circulatingSupply = BigInteger.ZERO;
+          }
           return EpochSummary.builder()
               .no(epochSummaryProjection.getNo())
               .slot((int) slot)
@@ -204,7 +208,7 @@ public class EpochServiceImpl implements EpochService {
               .startTime(epochStartTime)
               .endTime(epochStartTime.plusDays(epochDays))
               .account(account)
-              .circulatingSupply(circulatingSupply)
+              .circulatingSupply(CommonConstant.TOTAL_ADA.toBigInteger().subtract(circulatingSupply))
               .build();
         })
         .orElse(EpochSummary.builder().
