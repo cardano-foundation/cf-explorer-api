@@ -69,7 +69,7 @@ public class CommonConstant {
 
   public static final String PREFIXED_TOKEN_FINGERPRINT = "asset";
 
-
+  public static final String UNDERSCORE = "_";
 
   public static int hashCode(Object... a) {
     if (a == null) {

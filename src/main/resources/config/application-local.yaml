@@ -1,14 +1,14 @@
 # Infrastructure domain
 infrastructure:
-  host: 172.16.1.230
+  host: 127.0.0.1
 
 spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:54321/explorer_api?currentSchema=dev
-    username: explorer_api_read
-    password: MTIzNDU2NzhhQUA=READ
+    url: jdbc:postgresql://${infrastructure.host}:5432/explorer?currentSchema=preprod
+    username: postgres
+    password: 1
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
@@ -92,7 +92,7 @@ redis:
 
 
 application:
-  network: ${SCHEMA:mainnet}
+  network: ${SCHEMA:preprod}
   epoch:
     days: ${EPOCH_DAYS:5}
   api.coin.gecko.market:
@@ -100,7 +100,7 @@ application:
     base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
   api.news:
     interval-time: ${API_NEWS_CACHE_TIME:120}
-    base-url: ${API_NEWS_URL}
+    base-url: ${API_NEWS_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
   api:
     check-reward:
       base-url: ${API_CHECK_REWARD_URL:http://10.4.10.231:8888/api/v1/rewards/fetch}
@@ -112,10 +112,13 @@ application:
       base-url: ${API_CHECK_EPOCH_STAKE_URL:http://10.4.10.231:8888/api/v1/epoch-stake/fetch}
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
+    check-epoch:
+      base-url: ${API_CHECK_EPOCH_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:200}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
-
+  healthcheck:
+    block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true
@@ -145,16 +148,16 @@ rsa:
 cloud:
   aws:
     credentials:
-      access-key: ${S3_ACCESS_KEY}
-      secret-key: ${S3_SECRET_KEY}
+      access-key: ${S3_ACCESS_KEY:minio}
+      secret-key: ${S3_SECRET_KEY:minio123}
     region:
-      static: ${S3_REGION}
+      static: ${S3_REGION:null}
     s3:
       bucket:
-        name: ${S3_BUCKET_NAME}
+        name: ${S3_BUCKET_NAME:cardano-explorer-api-storage-mainnet}
       path-style:
         enabled: false
-      endpoint: ${STORAGE_ENDPOINT}
+      endpoint: ${STORAGE_ENDPOINT:http://10.4.10.231:9000}
 
 logging:
   level:

@@ -110,11 +110,12 @@ application:
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://localhost:8888/api/v1/ada-pots/fetch}
     check-epoch:
-        base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
+      base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
-
+  healthcheck:
+    block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true
