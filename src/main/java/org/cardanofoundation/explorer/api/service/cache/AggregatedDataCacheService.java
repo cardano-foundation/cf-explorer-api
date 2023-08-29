@@ -4,4 +4,5 @@ import java.time.LocalDateTime;
 
 public interface AggregatedDataCacheService {
   LocalDateTime getLatestBlockTime();
+  int getTokenCount();
 }
