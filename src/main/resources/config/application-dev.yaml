@@ -169,3 +169,10 @@ logging:
           InstanceMetadataServiceResourceFetcher: error
         util:
           EC2MetadataUtils: error
+
+---
+# Redis pubsub topic
+spring:
+  redis:
+    pubsub:
+      topic: ${REDIS_PUBSUB_TOPIC:block-sync-topic}
