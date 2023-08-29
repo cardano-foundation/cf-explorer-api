@@ -78,6 +78,7 @@
         <version.apache.guava>31.1-jre</version.apache.guava>
         <version.pitest>1.14.2</version.pitest>
         <version.pitest-junit5>1.1.1</version.pitest-junit5>
+        <version.spring.websocket>6.0.11</version.spring.websocket>
     </properties>
 
     <repositories>
@@ -284,6 +285,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${version.apache.guava}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>${version.spring.websocket}</version>
         </dependency>
     </dependencies>
 
