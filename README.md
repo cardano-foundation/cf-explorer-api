@@ -1,4 +1,4 @@
-# Iris API
+# Explorer API
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/tests.yaml/badge.svg?branch=main" />
@@ -7,9 +7,9 @@
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
-The Iris API provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the Iris frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
+This service provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the explorer frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
 
-👉 Check the [Iris repository](https://github.com/cardano-foundation/cf-explorer) to understand how the microservices work together
+👉 Check the [Explorer repository](https://github.com/cardano-foundation/cf-explorer) to understand how the microservices work together
 
 ## 🧪 Test Reports
 
@@ -51,6 +51,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `DB_NAME`: Database name
 - `DB_SCHEMA`: Schema of database
 - `DB_MAXIUM_POOL_SIZE`: Maximum pool size of database connection pool. Default is 32.
+
+- `JACKSON_INCLUSION`: Jackson inclusion. Default is NON_NULL for ignore null value. Using USE_DEFAULTS for not ignore null value.
 
 - `KAFKA_BOOTSTRAP_SERVER`: Kafka bootstrap server. Default is kafka:9092.
 - `KAFKA_REPORTS_TOPIC`: Kafka reports topic. Default is dev.explorer.api.mainnet.reports

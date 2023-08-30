@@ -697,12 +697,22 @@ public class TxServiceImpl implements TxService {
   }
 
   private List<ContractResponse> getContractResponses(Tx tx) {
-    List<ContractResponse> contractResponses = redeemerRepository.findContractByTx(tx)
-        .stream().map(txContractMapper::fromTxContractProjectionToContractResponse).toList();
-    List<TxContractProjection> txContractProjections = txOutRepository.getContractDatumOutByTx(tx);
+    List<ContractResponse> contractResponses;
+    List<TxContractProjection> txContractProjections;
+    if (Boolean.TRUE.equals(tx.getValidContract())) {
+      contractResponses = redeemerRepository.findContractByTx(tx)
+          .stream().map(txContractMapper::fromTxContractProjectionToContractResponse).toList();
+      txContractProjections = txOutRepository.getContractDatumOutByTx(tx);
+    } else {
+      contractResponses = redeemerRepository.findContractByTxFail(tx)
+          .stream().map(txContractMapper::fromTxContractProjectionToContractResponse).toList();
+      txContractProjections = txOutRepository.getContractDatumOutByTxFail(tx);
+    }
+
     Map<String, TxContractProjection> txContractMap = txContractProjections.stream()
-            .collect(Collectors.groupingBy(TxContractProjection::getAddress,
-                    Collectors.collectingAndThen(Collectors.toList(), list -> list.get(0))));
+        .collect(Collectors.groupingBy(TxContractProjection::getAddress,
+                                       Collectors.collectingAndThen(Collectors.toList(),
+                                                                    list -> list.get(0))));
 
     contractResponses.forEach(contractResponse -> {
       TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
