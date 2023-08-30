@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.controller;
 import java.util.concurrent.ExecutionException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -31,9 +32,13 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeDeregistration_;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,7 +61,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake key registration", tags = "stake-key")
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeRegistration(
-          @ParameterObject @PaginationValid Pagination pagination) {
+          @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {StakeRegistration_.TX_ID},
+              direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyRegistration(pagination.toPageable()));
   }
 
@@ -64,7 +70,8 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get stake key de-registration", tags = "stake-key")
   public ResponseEntity<BaseFilterResponse<StakeTxResponse>> getDataForStakeDeRegistration(
-          @ParameterObject @PaginationValid Pagination pagination) {
+          @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {StakeDeregistration_.TX_ID},
+              direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDataForStakeKeyDeRegistration(pagination.toPageable()));
   }
   @GetMapping("/address/{address}")
@@ -91,7 +98,7 @@ public class StakeKeyController {
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pagination.toPageable()));
   }
 
@@ -101,7 +108,7 @@ public class StakeKeyController {
   public ResponseEntity<BaseFilterResponse<StakeDelegationProjection>> getDelegationHistories(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getDelegationHistories(stakeKey, pagination.toPageable()));
   }
   @GetMapping("/{stakeKey}/stake-history")
@@ -110,7 +117,7 @@ public class StakeKeyController {
   public ResponseEntity<BaseFilterResponse<StakeHistoryProjection>> getStakeHistories(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getStakeHistories(stakeKey, pagination.toPageable()));
   }
 
@@ -120,7 +127,7 @@ public class StakeKeyController {
   public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return stakeService.getWithdrawalHistories(stakeKey, pagination.toPageable());
   }
 
@@ -130,7 +137,7 @@ public class StakeKeyController {
   public BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return stakeService.getInstantaneousRewards(stakeKey, pagination.toPageable());
   }
 
@@ -138,7 +145,7 @@ public class StakeKeyController {
   @LogMessage
   @Operation(summary = "Get top delegators", description = "Get top delegators by stake amount", tags = "stake-key")
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(
-      @ParameterObject @PaginationValid @PageZeroValid Pagination pagination) {
+      @ParameterObject @PaginationValid @PageZeroValid @Valid Pagination pagination) {
     return stakeService.getTopDelegators(pagination.toPageable());
   }
 
@@ -148,7 +155,7 @@ public class StakeKeyController {
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
-      @ParameterObject @PaginationValid Pagination pagination) {
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
   }
 

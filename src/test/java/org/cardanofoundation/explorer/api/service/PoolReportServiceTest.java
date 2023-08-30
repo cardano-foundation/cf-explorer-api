@@ -136,12 +136,12 @@ public class PoolReportServiceTest {
     Long reportId = 1L;
     String username = "username";
     ExportType exportType = ExportType.EXCEL;
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(
-        PoolReportHistory.builder()
-            .reportHistory(ReportHistory.builder()
-                               .username(username)
-                               .build())
-            .build());
+    when(poolReportRepository.findById(any())).thenReturn(
+        Optional.of(PoolReportHistory.builder()
+                        .reportHistory(ReportHistory.builder()
+                                           .username(username)
+                                           .build())
+                        .build()));
 
     Assertions.assertThrows(BusinessException.class,
                             () -> poolReportService.export(reportId, exportType, username));
@@ -162,7 +162,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
 
     PoolReportExportResponse expect = PoolReportExportResponse.builder()
         .fileName("reportName" + exportType.getValue())
@@ -200,7 +200,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     Page<PoolReportProjection> poolReportProjections = new PageImpl<>(List.of(),
                                                                       PageRequest.of(0, 1), 0);
     when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(),
@@ -238,7 +238,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<TabularRegisResponse> tabularRegisResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.registrationList(any(), any())).thenReturn(tabularRegisResponse);
 
@@ -269,7 +269,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateDetailResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.poolUpdateList(any(), any())).thenReturn(poolUpdateDetailResponse);
 
@@ -299,9 +299,10 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
-    when(poolLifecycleService.listRewardFilter(any(), any(), any(), any())).thenReturn(rewardResponse);
+    when(poolLifecycleService.listRewardFilter(any(), any(), any(), any())).thenReturn(
+        rewardResponse);
 
     var response = poolReportService.fetchRewardsDistribution(reportId, PageRequest.of(0, 1),
                                                               username);
@@ -330,7 +331,7 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.findByUsernameAndId(any(), any())).thenReturn(poolReport);
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<DeRegistrationResponse> deRegistrationResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.deRegistration(any(), any(), any(), any(), any())).thenReturn(
         deRegistrationResponse);
@@ -361,7 +362,8 @@ public class PoolReportServiceTest {
                            .type(ReportType.STAKE_KEY)
                            .build())
         .build();
-    when(poolReportRepository.getPoolReportHistoryByFilter(any(), any(), any(), any(), any())).thenReturn(
+    when(poolReportRepository.getPoolReportHistoryByFilter(any(), any(), any(), any(),
+                                                           any())).thenReturn(
         new PageImpl<>(List.of(poolReport)));
 
     var response = poolReportService
@@ -372,12 +374,11 @@ public class PoolReportServiceTest {
     Assertions.assertEquals(0, response.getCurrentPage());
     Assertions.assertEquals(1, response.getData().size());
 
-
     Assertions.assertEquals(PoolReportListResponse.toDomain(poolReport), response.getData().get(0));
   }
 
   @Test
-  void detail_shouldReturnDetail(){
+  void detail_shouldReturnDetail() {
     String username = "username";
     Long reportId = 1L;
     PoolReportHistory poolReport = PoolReportHistory.builder()
@@ -399,7 +400,7 @@ public class PoolReportServiceTest {
                            .build())
         .build();
 
-    when(poolReportRepository.findByUsernameAndId(username, reportId)).thenReturn(poolReport);
+    when(poolReportRepository.findById(reportId)).thenReturn(Optional.of(poolReport));
 
     var response = poolReportService.detail(reportId, username);
     Assertions.assertEquals(poolReport, response);
