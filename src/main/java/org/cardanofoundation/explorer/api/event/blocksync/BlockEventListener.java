@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
+import org.cardanofoundation.explorer.api.service.EpochService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class BlockEventListener implements MessageListener {
 
   private final ApplicationEventPublisher applicationEventPublisher;
+  private final EpochService epochService;
 
   /**
    * Callback for processing received objects through Redis. publish event to WebSocketEventHandler.
@@ -28,8 +30,15 @@ public class BlockEventListener implements MessageListener {
   public void onMessage(Message payload, byte[] pattern) {
     long blockNo = Long.parseLong(new String(payload.getBody()));
     log.info("Received new block no: {}", blockNo);
-    WebSocketMessage webSocketMessage =
+    WebSocketMessage blockNoMessage =
         WebSocketMessage.builder().eventType(WebSocketEventType.BLOCK).payload(blockNo).build();
-    applicationEventPublisher.publishEvent(new WebSocketEvent(webSocketMessage) {});
+
+    WebSocketMessage epochSummaryMessage =
+        WebSocketMessage.builder()
+            .eventType(WebSocketEventType.CURRENT_EPOCH)
+            .payload(epochService.getCurrentEpochSummary())
+            .build();
+    applicationEventPublisher.publishEvent(new WebSocketEvent(blockNoMessage) {});
+    applicationEventPublisher.publishEvent(new WebSocketEvent(epochSummaryMessage) {});
   }
 }
