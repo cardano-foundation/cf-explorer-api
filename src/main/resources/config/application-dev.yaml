@@ -93,6 +93,7 @@ application:
     days: ${EPOCH_DAYS:5}
   api.coin.gecko.market:
     interval-time: ${API_MARKET_CACHE_TIME:120}
+    delay-time: ${WEB_SOCKET_MARKET_PUBLISH_DELAY_TIME:20000}
     base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
   api.news:
     interval-time: ${API_NEWS_CACHE_TIME:120}

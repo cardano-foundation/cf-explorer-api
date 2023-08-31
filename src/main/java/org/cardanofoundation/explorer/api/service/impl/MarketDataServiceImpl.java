@@ -20,23 +20,29 @@ public class MarketDataServiceImpl implements MarketDataService {
   @Value("${application.api.coin.gecko.market.base-url}")
   private String apiMarketDataUrl;
 
+  @Value("${application.api.coin.gecko.market.interval-time}")
+  private int marketTtl;
+
   private final RestTemplate restTemplate;
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
   private final RedisTemplate<String, Object> redisTemplate;
+  private static final String REDIS_PREFIX_KEY = "MARKET_DATA";
+  private static final String UNDERSCORE = "_";
 
   public Object getMarketData(String currency) {
-    Object cachedData = redisTemplate.opsForValue().get(currency);
+    String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
+    Object cachedData = redisTemplate.opsForValue().get(redisKey);
     if (cachedData == null) {
       cachedData =
           restTemplate.getForObject(String.format(apiMarketDataUrl, currency), Object.class);
-      redisTemplate.opsForValue().set(currency, cachedData, Duration.ofSeconds(30));
+      redisTemplate.opsForValue().set(redisKey, cachedData, Duration.ofSeconds(marketTtl));
     }
     return cachedData;
   }
 
-  @Scheduled(fixedDelay = 4000)
+  @Scheduled(fixedDelayString = "${application.api.coin.gecko.market.delay-time}")
   public void publishMarketData() {
     WebSocketMessage messagePriceUsd =
         WebSocketMessage.builder()
