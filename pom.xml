@@ -67,7 +67,7 @@
         <version.snakeyaml>2.0</version.snakeyaml>
         <version.mapstruct>1.5.3.Final</version.mapstruct>
         <version.lombok-mapstruct-binding>0.2.0</version.lombok-mapstruct-binding>
-        <version.ledgersync-common>0.1.0</version.ledgersync-common>
+        <version.ledgersync-common>0.1.6</version.ledgersync-common>
         <version.explorer-common>0.1.2-SNAPSHOT</version.explorer-common>
         <version.explorer-consumer-common>0.1.10</version.explorer-consumer-common>
         <sonar.coverage.jacoco.xmlReportPaths>../cardano-explorer-api/target/site/jacoco-aggregate/jacoco.xml
