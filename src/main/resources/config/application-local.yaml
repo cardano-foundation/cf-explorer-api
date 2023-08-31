@@ -6,7 +6,7 @@ spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:54322/explorer?currentSchema=preprod
+    url: jdbc:postgresql://${infrastructure.host}:54322/explorer?currentSchema=mainnet
     username: ${POSTGRES_USER:cardano-master}
     password: ${POSTGRES_PASSWORD:postgres_master_pw}
     driver-class-name: org.postgresql.Driver
@@ -39,7 +39,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: preprod
+        default_schema: mainnet
         show_sql: true
         format_sql: true
   flyway:
@@ -73,12 +73,12 @@ spring:
                 per:
                   connection: 1
     topics:
-      reports: ${REPORTS_TOPIC:dev.explorer.api.preprod.reports}
+      reports: ${REPORTS_TOPIC:dev.explorer.api.mainnet.reports}
 
 redis:
   databaseIndex: 0
   master: ${REDIS_MASTER_NAME:mymaster}
-  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
+  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pw}
   testOnBorrow: false
   maxTotal: 10
   maxIdle: 5
@@ -86,17 +86,18 @@ redis:
   testOnReturn: false
   testWhileIdle: false
   sentinels:
-    - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
-      port: 26379
+    - host: ${REDIS_SENTINEL_HOST:10.4.10.75}
+      port: 26371
 
 # Redis pubsub topic
 application:
-  network: ${SCHEMA:preprod}
+  network: ${SCHEMA:mainnet}
   epoch:
     days: ${EPOCH_DAYS:5}
   api.coin.gecko.market:
     interval-time: ${API_MARKET_CACHE_TIME:15}
-    base-url: ${API_MARKET_URL:https://a...content-available-to-author-only...o.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
+    delay-time: ${WEB_SOCKET_MARKET_PUBLISH_DELAY_TIME:20000}
+    base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
   api.news:
     interval-time: ${API_NEWS_CACHE_TIME:120}
     base-url: ${API_NEWS_URL:https://n...content-available-to-author-only...i.org/v2/everything?q=cardano&sortBy=publishedAt&pageSize=100&apiKey=%s}
@@ -171,4 +172,4 @@ logging:
 spring:
   redis:
     pubsub:
-      topic: ${REDIS_PUBSUB_TOPIC:block-sync-topic}
+      topic: ${REDIS_PUBSUB_TOPIC:block.mainnet}

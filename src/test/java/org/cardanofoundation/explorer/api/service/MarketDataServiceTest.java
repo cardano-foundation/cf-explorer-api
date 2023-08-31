@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.cardanofoundation.explorer.api.service.impl.MarketDataServiceImpl;
@@ -27,7 +28,7 @@ public class MarketDataServiceTest {
   void testGetMarketData_thenReturn() {
     String currency = "usd";
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-    when(valueOperations.get(currency)).thenReturn(null);
+    when(valueOperations.get(any())).thenReturn(null);
     ReflectionTestUtils.setField(marketDataService, "apiMarketDataUrl", "localhost:8080");
     when(restTemplate.getForObject(String.format("localhost:8080", currency), Object.class))
         .thenReturn(123);
