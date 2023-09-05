@@ -413,7 +413,7 @@ public interface ProtocolMapper {
     switch (network) {
       case MAINNET:
         return FixedProtocol.builder()
-            .activeSlotsCoeff(0.05F)
+            .activeSlotsCoeff(0.05)
             .genDelegs(JsonUtil.parseJson("{\n"
                 + "    \"ad5463153dc3d24b9ff133e46136028bdc1edbb897f5a7cf1b37950c\": {\n"
                 + "      \"delegate\": \"d9e5c76ad5ee778960804094a389f0b546b5c2b140a62f8ec43ea54d\",\n"
@@ -458,7 +458,7 @@ public interface ProtocolMapper {
             .build();
       case PREPROD:
         return FixedProtocol.builder()
-            .activeSlotsCoeff(0.05F)
+            .activeSlotsCoeff(0.05)
             .genDelegs(JsonUtil.parseJson("{\n"
                 + "        \"637f2e950b0fd8f8e3e811c5fbeb19e411e7a2bf37272b84b29c1a0b\": {\n"
                 + "            \"delegate\": \"aae9293510344ddd636364c2673e34e03e79e3eefa8dbaa70e326f7d\",\n"
@@ -503,7 +503,7 @@ public interface ProtocolMapper {
             .build();
       case PREVIEW:
         return FixedProtocol.builder()
-            .activeSlotsCoeff(0.05F)
+            .activeSlotsCoeff(0.05)
             .genDelegs(JsonUtil.parseJson("{\n"
                 + "        \"12b0f443d02861948a0fce9541916b014e8402984c7b83ad70a834ce\": {\n"
                 + "            \"delegate\": \"7c54a168c731f2f44ced620f3cca7c2bd90731cab223d5167aa994e6\",\n"
