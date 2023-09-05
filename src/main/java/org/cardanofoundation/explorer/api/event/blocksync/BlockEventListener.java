@@ -30,15 +30,16 @@ public class BlockEventListener implements MessageListener {
   public void onMessage(Message payload, byte[] pattern) {
     long blockNo = Long.parseLong(new String(payload.getBody()));
     log.info("Received new block no: {}", blockNo);
-    WebSocketMessage blockNoMessage =
-        WebSocketMessage.builder().eventType(WebSocketEventType.BLOCK).payload(blockNo).build();
-
-    WebSocketMessage epochSummaryMessage =
-        WebSocketMessage.builder()
-            .eventType(WebSocketEventType.CURRENT_EPOCH)
-            .payload(epochService.getCurrentEpochSummary())
+    BlockSyncInfo blockSyncInfo =
+        BlockSyncInfo.builder()
+            .blockNo(blockNo)
+            .epochSummary(epochService.getCurrentEpochSummary())
             .build();
-    applicationEventPublisher.publishEvent(new WebSocketEvent(blockNoMessage) {});
-    applicationEventPublisher.publishEvent(new WebSocketEvent(epochSummaryMessage) {});
+    WebSocketMessage webSocketMessage =
+        WebSocketMessage.builder()
+            .eventType(WebSocketEventType.BLOCK)
+            .payload(blockSyncInfo)
+            .build();
+    applicationEventPublisher.publishEvent(new WebSocketEvent(webSocketMessage) {});
   }
 }
