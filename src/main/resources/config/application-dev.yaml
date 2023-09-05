@@ -170,3 +170,13 @@ logging:
           InstanceMetadataServiceResourceFetcher: error
         util:
           EC2MetadataUtils: error
+
+genesis:
+  shelley:
+    mainnet: ${SHELLEY_GENESIS_MAINNET_URL:classpath:networks/mainnet/shelley-genesis.json}
+    preprod: ${SHELLEY_GENESIS_PREPROD_URL:classpath:networks/preprod/shelley-genesis.json}
+    preview: ${SHELLEY_GENESIS_PREVIEW_URL:classpath:networks/preview/shelley-genesis.json}
+  byron:
+    mainnet: ${BYRON_GENESIS_MAINNET_URL:classpath:networks/mainnet/byron-genesis.json}
+    preprod: ${BYRON_GENESIS_PREPROD_URL:classpath:networks/preprod/byron-genesis.json}
+    preview: ${BYRON_GENESIS_PREVIEW_URL:classpath:networks/preview/byron-genesis.json}
