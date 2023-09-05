@@ -12,10 +12,10 @@ import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthVa
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
@@ -27,7 +27,6 @@ import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import java.math.BigInteger;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -170,7 +169,7 @@ public class StakeKeyController {
   @GetMapping("/analytics-balance/{stakeKey}/{type}")
   @LogMessage
   @Operation(summary = "Get stake balance analytics", tags = "stake-key")
-  public ResponseEntity<List<StakeAnalyticBalanceResponse>> getStakeBalanceAnalytics(
+  public ResponseEntity<AddressChartBalanceResponse> getStakeBalanceAnalytics(
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
       @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type
@@ -186,15 +185,6 @@ public class StakeKeyController {
           @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
           @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey) {
     return ResponseEntity.ok(stakeService.getStakeRewardAnalytics(stakeKey));
-  }
-
-  @GetMapping("/min-max-balance/{stakeKey}")
-  @LogMessage
-  @Operation(summary = "Get the highest and lowest balance address", tags = "stake-key")
-  public ResponseEntity<List<BigInteger>> getStakeMinMaxBalance(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
-      @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey) {
-    return ResponseEntity.ok(stakeService.getStakeMinMaxBalance(stakeKey));
   }
 
   @GetMapping("/reward-distribution/{stakeKey}")
