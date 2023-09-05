@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.core.task.TaskExecutor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -29,12 +30,25 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
+import org.cardanofoundation.explorer.api.repository.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.AggregateAddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
+import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
-import org.cardanofoundation.explorer.api.test.projection.TokenNumberHoldersProjectionImpl;
-import org.cardanofoundation.explorer.api.test.projection.TokenVolumeProjectionImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
+import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -43,7 +57,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +64,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -73,6 +85,8 @@ class TokenServiceTest {
   @Mock
   private AddressTokenBalanceRepository addressTokenBalanceRepository;
   @Mock
+  private TokenInfoRepository tokenInfoRepository;
+  @Mock
   private TokenMapper tokenMapper;
   @Mock
   private MaTxMintMapper maTxMintMapper;
@@ -80,225 +94,141 @@ class TokenServiceTest {
   private AssetMetadataMapper assetMetadataMapper;
   @Mock
   private AggregateAddressTokenRepository aggregateAddressTokenRepository;
+
   @Mock
   private TokenPageCacheService tokenPageCacheService;
   @Mock
   private TaskExecutor taskExecutor;
   @Mock
   private StakeAddressRepository stakeAddressRepository;
+  @Mock
+  private AggregatedDataCacheService aggregatedDataCacheService;
+
   @InjectMocks
   private TokenServiceImpl tokenService;
 
   @Test
-  void testFilterToken_WhenQueryEmptyAndCacheAvailable() throws Exception {
+  void testFilterToken_WhenQueryEmpty() {
     // Setup
-    final Optional<BaseFilterResponse<TokenFilterResponse>> cacheResponse = Optional.of(
-        new BaseFilterResponse<>(new PageImpl<>(List.of(TokenFilterResponse.builder()
-            .id(1746535L)
-            .name("484f534b59")
-            .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-            .volumeIn24h("38874867596070")
-            .numberOfHolders(93233L)
-            .metadata(TokenMetadataResponse.builder()
-                .logo(
-                    "https://storage.ex-c.sotatek.works/cardano-explorer-api-storage-token/mainnet/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59")
-                .ticker("HOSKY")
-                .url("https://hosky.io")
-                .decimals(0)
-                .build())
-            .build()))));
-    when(tokenPageCacheService.getTokePageCache(any(Pageable.class)))
-        .thenReturn(cacheResponse);
+    when(aggregatedDataCacheService.getTokenCount()).thenReturn(1);
+
+    final MultiAsset multiAsset = MultiAsset.builder()
+        .id(0L)
+        .policy("policy")
+        .name("name")
+        .nameView("nameView")
+        .fingerprint("fingerprint")
+        .build();
+
+    when(multiAssetRepository.findMultiAssets(any(Pageable.class))).thenReturn(
+        List.of(multiAsset)
+    );
+    final TokenFilterResponse tokenFilterResponse = TokenFilterResponse.builder()
+        .id(0L)
+        .name("name")
+        .policy("policy")
+        .metadata(TokenMetadataResponse.builder().build())
+        .build();
+
+    when(tokenMapper.fromMultiAssetToFilterResponse(multiAsset))
+        .thenReturn(tokenFilterResponse);
+
+    final TokenInfo tokenInfo = TokenInfo.builder()
+        .multiAssetId(0L)
+        .numberOfHolders(100L)
+        .volume24h(new BigInteger("100"))
+        .updateTime(Timestamp.valueOf(LocalDateTime.now()))
+        .build();
+
+    final List<TokenInfo> tokenInfos = List.of(tokenInfo);
+    when(tokenInfoRepository.findTokenInfosByMultiAssetIdIn(anyCollection()))
+        .thenReturn(tokenInfos);
+
+    final AssetMetadata metadata = AssetMetadata.builder()
+        .id(0L)
+        .subject("policyname")
+        .name("name")
+        .description("description")
+        .policy("policy")
+        .build();
+    when(assetMetadataRepository.findBySubjectIn(any())).thenReturn(List.of(metadata));
+
+    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
+        0, "logo", "description");
+
+    when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Run the test
     final BaseFilterResponse<TokenFilterResponse> result = tokenService.filterToken(
         "", PageRequest.of(0, 1));
 
     // Verify the results
-    assertNotNull(result);
-    assertEquals(cacheResponse.get(), result);
+    assertEquals(tokenMetadataResponse, result.getData().get(0).getMetadata());
+    assertEquals("100", result.getData().get(0).getVolumeIn24h());
+    assertEquals(100, result.getData().get(0).getNumberOfHolders());
   }
 
   @Test
-  void testFilterToken_WhenQueryNotEmptyAndCacheAvailable() throws Exception {
+  void testFilterToken_WhenQueryNotEmpty() {
     // Setup
-    when(tokenPageCacheService.getTokePageCache(any(Pageable.class)))
-        .thenReturn(Optional.of(
-            new BaseFilterResponse<>(new PageImpl<>(List.of(TokenFilterResponse.builder()
-                .id(0L)
-                .name("484f534b59")
-                .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-                .volumeIn24h("38874867596070")
-                .numberOfHolders(93233L)
-                .metadata(TokenMetadataResponse.builder()
-                    .logo(
-                        "https://storage.ex-c.sotatek.works/cardano-explorer-api-storage-token/mainnet/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59")
-                    .ticker("HOSKY")
-                    .url("https://hosky.io")
-                    .decimals(0)
-                    .build())
-                .build())))));
+    when(aggregatedDataCacheService.getTokenCount()).thenReturn(1);
 
     final MultiAsset multiAsset = MultiAsset.builder()
         .id(0L)
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-        .name("484f534b59")
+        .policy("policy")
+        .name("name")
         .nameView("nameView")
         .fingerprint("fingerprint")
         .build();
-
     final Page<MultiAsset> multiAssets = new PageImpl<>(List.of(multiAsset));
 
-    when(multiAssetRepository.findAll(anyString(), any(Pageable.class)))
-        .thenReturn(multiAssets);
-
-    final AssetMetadata assetMetadata = AssetMetadata.builder()
-        .id(0L)
-        .subject("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59")
-        .name("name")
-        .description("description")
-        .policy("policy")
-        .ticker("HOSKY")
-        .logo(
-            "https://storage.ex-c.sotatek.works/cardano-explorer-api-storage-token/mainnet/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59")
-        .url("https://hosky.io")
-        .build();
-
-    final List<AssetMetadata> assetMetadataList = List.of(assetMetadata);
-    when(assetMetadataRepository.findBySubjectIn(any())).thenReturn(assetMetadataList);
+    when(multiAssetRepository.findAll(anyString(), any(Pageable.class))).thenReturn(
+        multiAssets
+    );
 
     final TokenFilterResponse tokenFilterResponse = TokenFilterResponse.builder()
         .id(0L)
-        .name("484f534b59")
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
+        .name("name")
+        .policy("policy")
+        .metadata(TokenMetadataResponse.builder().build())
         .build();
 
-    when(tokenMapper.fromMultiAssetToFilterResponse(any()))
+    when(tokenMapper.fromMultiAssetToFilterResponse(multiAsset))
         .thenReturn(tokenFilterResponse);
 
-    when(txRepository.findMinTxByAfterTime(any())).thenReturn(Optional.of(0L));
-
-    when(addressTokenRepository.sumBalanceAfterTx(anyCollection(), eq(0L))).thenReturn(List.of(
-        TokenVolumeProjectionImpl.builder()
-            .ident(0L)
-            .volume(BigInteger.valueOf(38874867596070L))
-            .build()
-    ));
-
-    doAnswer(invocation -> {
-      ((Runnable) invocation.getArguments()[0]).run();
-      return null;
-    }).when(taskExecutor).execute(any(Runnable.class));
-
-    when(addressTokenBalanceRepository.countByMultiAssetIn(any())).thenReturn(List.of(
-        TokenNumberHoldersProjectionImpl.builder()
-            .ident(0L)
-            .numberOfHolders(93233L)
-            .build()
-    ));
-    when(addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(
-        any())).thenReturn(List.of());
-
-    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse(
-        "https://hosky.io", "HOSKY",
-        0,
-        "https://storage.ex-c.sotatek.works/cardano-explorer-api-storage-token/mainnet/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59",
-        "description");
-
-    when(assetMetadataMapper.fromAssetMetadata(any())).thenReturn(tokenMetadataResponse);
-
-    // Run the test
-    final BaseFilterResponse<TokenFilterResponse> result = tokenService.filterToken(
-        "HOSKY", PageRequest.of(0, 1));
-
-    // Verify the results
-    assertEquals(1, result.getData().size());
-    assertEquals(93233L, result.getData().get(0).getNumberOfHolders());
-    assertEquals("38874867596070", result.getData().get(0).getVolumeIn24h());
-  }
-
-  @Test
-  void testFilterToken_WhenQueryNotEmptyAndCacheNotAvailable() throws Exception {
-    // Setup
-    when(tokenPageCacheService.getTokePageCache(any(Pageable.class)))
-        .thenReturn(Optional.empty());
-
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-        .name("484f534b59")
-        .nameView("nameView")
-        .fingerprint("fingerprint")
+    final TokenInfo tokenInfo = TokenInfo.builder()
+        .multiAssetId(0L)
+        .numberOfHolders(100L)
+        .volume24h(new BigInteger("100"))
+        .updateTime(Timestamp.valueOf(LocalDateTime.now()))
         .build();
 
-    final Page<MultiAsset> multiAssets = new PageImpl<>(List.of(multiAsset));
+    final List<TokenInfo> tokenInfos = List.of(tokenInfo);
+    when(tokenInfoRepository.findTokenInfosByMultiAssetIdIn(anyCollection()))
+        .thenReturn(tokenInfos);
 
-    when(multiAssetRepository.findAll(anyString(), any(Pageable.class)))
-        .thenReturn(multiAssets);
-
-    final AssetMetadata assetMetadata = AssetMetadata.builder()
+    final AssetMetadata metadata = AssetMetadata.builder()
         .id(0L)
-        .subject("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59")
+        .subject("policyname")
         .name("name")
         .description("description")
         .policy("policy")
-        .ticker("HOSKY")
-        .logo(
-            "https://storage.ex-c.sotatek.works/cardano-explorer-api-storage-token/mainnet/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59")
-        .url("https://hosky.io")
         .build();
+    when(assetMetadataRepository.findBySubjectIn(any())).thenReturn(List.of(metadata));
 
-    final List<AssetMetadata> assetMetadataList = List.of(assetMetadata);
-    when(assetMetadataRepository.findBySubjectIn(any())).thenReturn(assetMetadataList);
+    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
+        0, "logo", "description");
 
-    final TokenFilterResponse tokenFilterResponse = TokenFilterResponse.builder()
-        .id(0L)
-        .name("484f534b59")
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-        .build();
-
-    when(tokenMapper.fromMultiAssetToFilterResponse(any()))
-        .thenReturn(tokenFilterResponse);
-
-    when(txRepository.findMinTxByAfterTime(any())).thenReturn(Optional.of(0L));
-
-    when(addressTokenRepository.sumBalanceAfterTx(anyCollection(), eq(0L))).thenReturn(List.of(
-        TokenVolumeProjectionImpl.builder()
-            .ident(0L)
-            .volume(BigInteger.valueOf(38874867596070L))
-            .build()
-    ));
-
-    doAnswer(invocation -> {
-      ((Runnable) invocation.getArguments()[0]).run();
-      return null;
-    }).when(taskExecutor).execute(any(Runnable.class));
-
-    when(addressTokenBalanceRepository.countByMultiAssetIn(any())).thenReturn(List.of(
-        TokenNumberHoldersProjectionImpl.builder()
-            .ident(0L)
-            .numberOfHolders(93233L)
-            .build()
-    ));
-    when(addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(
-        any())).thenReturn(List.of());
-
-    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse(
-        "https://hosky.io", "HOSKY",
-        0,
-        "https://storage.ex-c.sotatek.works/cardano-explorer-api-storage-token/mainnet/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59",
-        "description");
-
-    when(assetMetadataMapper.fromAssetMetadata(any())).thenReturn(tokenMetadataResponse);
+    when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Run the test
     final BaseFilterResponse<TokenFilterResponse> result = tokenService.filterToken(
-        "HOSKY", PageRequest.of(0, 1));
+        "name", PageRequest.of(0, 1));
 
     // Verify the results
-    assertEquals(1, result.getData().size());
-    assertEquals(93233L, result.getData().get(0).getNumberOfHolders());
-    assertEquals("38874867596070", result.getData().get(0).getVolumeIn24h());
+    assertEquals(tokenMetadataResponse, result.getData().get(0).getMetadata());
+    assertEquals("100", result.getData().get(0).getVolumeIn24h());
+    assertEquals(100, result.getData().get(0).getNumberOfHolders());
   }
 
   @Test
@@ -318,38 +248,27 @@ class TokenServiceTest {
 
     // Configure TokenMapper.fromMultiAssetToResponse(...).
     final TokenResponse tokenResponse = new TokenResponse();
-    tokenResponse.setTokenLastActivity(Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0)));
-
     when(tokenMapper.fromMultiAssetToResponse(any())).thenReturn(tokenResponse);
 
-    when(txRepository.findMinTxByAfterTime(
-        any())).thenReturn(Optional.of(0L));
+    final TokenInfo tokenInfo = TokenInfo.builder()
+        .multiAssetId(0L)
+        .numberOfHolders(100L)
+        .volume24h(new BigInteger("100"))
+        .updateTime(Timestamp.valueOf(LocalDateTime.now()))
+        .build();
+    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
 
-    when(addressTokenRepository.sumBalanceAfterTx(multiAsset, 0L))
-        .thenReturn(new BigInteger("10000"));
+    final AssetMetadata metadata = AssetMetadata.builder()
+        .id(0L)
+        .subject("policyname")
+        .name("name")
+        .description("description")
+        .policy("policy")
+        .build();
+    when(assetMetadataRepository.findFirstBySubject(any())).thenReturn(Optional.of(metadata));
 
-    when(addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(
-        multiAsset)).thenReturn(Optional.of(100L));
-
-    // Configure AddressTokenBalanceRepository.countStakeByMultiAsset(...).
-    when(addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset))
-        .thenReturn(Optional.of(100L));
-
-    // Configure AssetMetadataRepository.findFirstBySubject(...).
-    final AssetMetadata metadata = new AssetMetadata();
-    metadata.setId(0L);
-    metadata.setSubject("subject");
-    metadata.setName("name");
-    metadata.setDescription("description");
-    metadata.setPolicy("policy");
-    final Optional<AssetMetadata> assetMetadata = Optional.of(metadata);
-
-    when(assetMetadataRepository.findFirstBySubject(anyString())).thenReturn(assetMetadata);
-
-    // Configure AssetMetadataMapper.fromAssetMetadata(...).
     final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
         0, "logo", "description");
-
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
@@ -362,8 +281,8 @@ class TokenServiceTest {
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
 
     // Verify the results
-    assertEquals(200, result.getNumberOfHolders());
-    assertEquals("10000", result.getVolumeIn24h());
+    assertEquals(100, result.getNumberOfHolders());
+    assertEquals("100", result.getVolumeIn24h());
     assertEquals(TokenType.FT, result.getTokenType());
     assertNull(result.getMetadataJson());
     assertEquals(timestamp, result.getTokenLastActivity());
@@ -387,38 +306,27 @@ class TokenServiceTest {
 
     // Configure TokenMapper.fromMultiAssetToResponse(...).
     final TokenResponse tokenResponse = new TokenResponse();
-    tokenResponse.setTokenLastActivity(Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0)));
-
     when(tokenMapper.fromMultiAssetToResponse(any())).thenReturn(tokenResponse);
 
-    when(txRepository.findMinTxByAfterTime(
-        any())).thenReturn(Optional.of(0L));
+    final TokenInfo tokenInfo = TokenInfo.builder()
+        .multiAssetId(0L)
+        .numberOfHolders(100L)
+        .volume24h(new BigInteger("100"))
+        .updateTime(Timestamp.valueOf(LocalDateTime.now()))
+        .build();
+    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
 
-    when(addressTokenRepository.sumBalanceAfterTx(multiAsset, 0L))
-        .thenReturn(new BigInteger("10000"));
+    final AssetMetadata metadata = AssetMetadata.builder()
+        .id(0L)
+        .subject("policyname")
+        .name("name")
+        .description("description")
+        .policy("policy")
+        .build();
+    when(assetMetadataRepository.findFirstBySubject(any())).thenReturn(Optional.of(metadata));
 
-    when(addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(
-        multiAsset)).thenReturn(Optional.of(100L));
-
-    // Configure AddressTokenBalanceRepository.countStakeByMultiAsset(...).
-    when(addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset))
-        .thenReturn(Optional.of(100L));
-
-    // Configure AssetMetadataRepository.findFirstBySubject(...).
-    final AssetMetadata metadata = new AssetMetadata();
-    metadata.setId(0L);
-    metadata.setSubject("subject");
-    metadata.setName("name");
-    metadata.setDescription("description");
-    metadata.setPolicy("policy");
-    final Optional<AssetMetadata> assetMetadata = Optional.of(metadata);
-
-    when(assetMetadataRepository.findFirstBySubject(anyString())).thenReturn(assetMetadata);
-
-    // Configure AssetMetadataMapper.fromAssetMetadata(...).
     final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
         0, "logo", "description");
-
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
@@ -431,8 +339,8 @@ class TokenServiceTest {
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
 
     // Verify the results
-    assertEquals(200, result.getNumberOfHolders());
-    assertEquals("10000", result.getVolumeIn24h());
+    assertEquals(100, result.getNumberOfHolders());
+    assertEquals("100", result.getVolumeIn24h());
     assertEquals(
         "{\"0495e7467b9f8285ef79fca99fe1ed85ca19faba5b7d4dd425c3d884\":{\"ElephantSecretAvatars215\":{\"image\":\"ipfs://QmNvjyj4o7p7UXMEbxnx9ZY5ZLFMJcy9sjMXaTiFRgC4nJ\",\"name\":\"ElephantSecretAvatars#0215\",\"files\":[{\"src\":\"ipfs://QmaRoAcJcHunUsEEE1FSiPm5SWe47PQbexwQpHZdbTLzde\",\"name\":\"ElephantSecretAvatars#0215\",\"mediaType\":\"model/gltf-binary\"}],\"Animation\":\"Idle\",\"Skin\":\"Pink\",\"mediaType\":\"image/png\"}}}",
         result.getMetadataJson());
@@ -458,39 +366,27 @@ class TokenServiceTest {
 
     // Configure TokenMapper.fromMultiAssetToResponse(...).
     final TokenResponse tokenResponse = new TokenResponse();
-    tokenResponse.setTokenLastActivity(Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0)));
-    tokenResponse.setTokenType(TokenType.NFT);
-
     when(tokenMapper.fromMultiAssetToResponse(any())).thenReturn(tokenResponse);
 
-    when(txRepository.findMinTxByAfterTime(
-        any())).thenReturn(Optional.of(0L));
+    final TokenInfo tokenInfo = TokenInfo.builder()
+        .multiAssetId(0L)
+        .numberOfHolders(100L)
+        .volume24h(new BigInteger("100"))
+        .updateTime(Timestamp.valueOf(LocalDateTime.now()))
+        .build();
+    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
 
-    when(addressTokenRepository.sumBalanceAfterTx(multiAsset, 0L))
-        .thenReturn(new BigInteger("10000"));
+    final AssetMetadata metadata = AssetMetadata.builder()
+        .id(0L)
+        .subject("policyname")
+        .name("name")
+        .description("description")
+        .policy("policy")
+        .build();
+    when(assetMetadataRepository.findFirstBySubject(any())).thenReturn(Optional.of(metadata));
 
-    when(addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(
-        multiAsset)).thenReturn(Optional.of(100L));
-
-    // Configure AddressTokenBalanceRepository.countStakeByMultiAsset(...).
-    when(addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset))
-        .thenReturn(Optional.of(100L));
-
-    // Configure AssetMetadataRepository.findFirstBySubject(...).
-    final AssetMetadata metadata = new AssetMetadata();
-    metadata.setId(0L);
-    metadata.setSubject("subject");
-    metadata.setName("name");
-    metadata.setDescription("description");
-    metadata.setPolicy("policy");
-    final Optional<AssetMetadata> assetMetadata = Optional.of(metadata);
-
-    when(assetMetadataRepository.findFirstBySubject(anyString())).thenReturn(assetMetadata);
-
-    // Configure AssetMetadataMapper.fromAssetMetadata(...).
     final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
         0, "logo", "description");
-
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
@@ -503,8 +399,8 @@ class TokenServiceTest {
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
 
     // Verify the results
-    assertEquals(200, result.getNumberOfHolders());
-    assertEquals("10000", result.getVolumeIn24h());
+    assertEquals(100, result.getNumberOfHolders());
+    assertEquals("100", result.getVolumeIn24h());
     assertEquals(TokenType.NFT, result.getTokenType());
     assertEquals(
         "{\"2aec93fa65aaedaf2fc0aa46c3ace89c0c8e091ed5f39b8f8127e664\":{\"Promises2239\":{\"Candidate\":\"RichardTrixson\",\"image\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"Series\":\"CampaignMaterials\",\"Promise\":\"Correct\",\"Number\":\"2239\",\"Banner\":\"Modern\",\"Asset\":\"Promises2239\",\"files\":[{\"src\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"},{\"src\":\"ipfs://QmTWuebKD7FC8kKh8tBoPsVedyhJg38g92dBopnb7fM98C\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"}],\"Collection\":\"OldMoney\",\"mediaType\":\"image/jpeg\",\"Name\":\"Promises\"}},\"version\":\"1.0\"}",
