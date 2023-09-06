@@ -179,12 +179,16 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNoList) {
-    Epoch[] epoch = restTemplate.postForObject(apiCheckEpochUrl, epochNoList,
-        Epoch[].class);
-    if (Objects.nonNull(epoch)) {
-      return Arrays.asList(epoch);
+    try {
+      Epoch[] epoch = restTemplate.postForObject(apiCheckEpochUrl, epochNoList,
+          Epoch[].class);
+      if (Objects.nonNull(epoch)) {
+        return Arrays.asList(epoch);
+      }
+      return Collections.emptyList();
+    } catch (Exception e) {
+      return null;
     }
-    return Collections.emptyList();
   }
 
   @Override
