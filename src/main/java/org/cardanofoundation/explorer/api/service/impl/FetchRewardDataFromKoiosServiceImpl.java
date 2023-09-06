@@ -10,6 +10,7 @@ import org.cardanofoundation.explorer.api.repository.PoolInfoCheckpointRepositor
 import org.cardanofoundation.explorer.api.repository.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -171,7 +172,10 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean checkEpochRewardDistributed(Epoch epoch) {
-    return Objects.nonNull(epoch.getRewardsDistributed());
+    return Objects.nonNull(epoch.getRewardsDistributed())
+        || epoch.getEra().equals(EraType.BYRON)
+        || epoch.getEra().equals(EraType.BYRON_EBB)
+        || epoch.getEra().equals(EraType.SHELLEY);
   }
 
   @Override
