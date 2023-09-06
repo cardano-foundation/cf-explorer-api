@@ -65,6 +65,13 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " ORDER BY txOut.index DESC")
   List<TxContractProjection> getContractDatumOutByTx(@Param("tx") Tx tx);
 
+  @Query("SELECT failedTxOut.id as txOutId, failedTxOut.address as address, d.hash as datumHashOut, d.bytes as datumBytesOut"
+      + " FROM FailedTxOut failedTxOut"
+      + " JOIN Datum d ON (failedTxOut.dataHash = d.hash OR failedTxOut.inlineDatum = d)"
+      + " WHERE failedTxOut.tx = :tx"
+      + " ORDER BY failedTxOut.index DESC")
+  List<TxContractProjection> getContractDatumOutByTxFail(@Param("tx") Tx tx);
+
   @Query("SELECT COALESCE(sum(txOut.value), 0) FROM TxOut txOut "
       + "INNER JOIN Tx tx ON tx.id = txOut.tx.id "
       + "INNER JOIN StakeAddress stake ON txOut.stakeAddress = stake "
