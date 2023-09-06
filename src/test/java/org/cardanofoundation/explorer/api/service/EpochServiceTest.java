@@ -92,7 +92,7 @@ class EpochServiceTest {
                 .startTime(Timestamp.valueOf(localDate))
                 .endTime(Timestamp.valueOf(localDate.plusDays(5)))
                 .build()));
-    when(adaPotsRepository.getUTxOByEpochNo(30)).thenReturn(Optional.of(BigInteger.ONE));
+    when(adaPotsRepository.getReservesByEpochNo(30)).thenReturn(BigInteger.ONE);
     EpochSummary epochSummary = epochService.getCurrentEpochSummary();
 
     EpochSummary expect = EpochSummary.builder()
@@ -416,7 +416,7 @@ class EpochServiceTest {
     when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(LocalDateTime.now())).build()));
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
-    when(adaPotsRepository.getUTxOByEpochNo(1)).thenReturn(Optional.of(BigInteger.ONE));
+    when(adaPotsRepository.getReservesByEpochNo(1)).thenReturn(BigInteger.ONE);
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
 
     var response = epochService.getCurrentEpochSummary();
