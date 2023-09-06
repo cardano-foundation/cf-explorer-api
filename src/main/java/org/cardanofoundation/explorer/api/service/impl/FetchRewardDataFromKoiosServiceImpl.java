@@ -174,8 +174,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   public Boolean checkEpochRewardDistributed(Epoch epoch) {
     return Objects.nonNull(epoch.getRewardsDistributed())
         || epoch.getEra().equals(EraType.BYRON)
-        || epoch.getEra().equals(EraType.BYRON_EBB)
-        || epoch.getEra().equals(EraType.SHELLEY);
+        || epoch.getEra().equals(EraType.BYRON_EBB);
   }
 
   @Override
