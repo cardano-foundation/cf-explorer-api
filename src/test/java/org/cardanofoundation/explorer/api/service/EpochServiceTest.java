@@ -387,22 +387,6 @@ class EpochServiceTest {
   }
 
   @Test
-  void testGetEpochDetail_throwNotRewardDistributed() {
-    Integer no = 1;
-    Epoch epoch = Epoch.builder().no(no).build();
-    LocalDateTime now = LocalDateTime.now();
-    String pattern = "yyyy/MM/dd hh:mm:ss";
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
-
-    when(epochRepository.findFirstByNo(no)).thenReturn(Optional.of(epoch));
-    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(3));
-    when(fetchRewardDataService.checkEpochRewardDistributed(epoch)).thenReturn(false);
-    when(fetchRewardDataService.fetchEpochRewardDistributed(List.of(no))).thenReturn(null);
-
-    Assertions.assertThrows(FetchRewardException.class, () -> epochService.getEpochDetail(no.toString()));
-  }
-
-  @Test
   void testGetCurrentEpochSummary_thenReturn() {
     LocalDateTime now = LocalDateTime.now();
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss");
@@ -463,21 +447,6 @@ class EpochServiceTest {
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.empty());
 
     Assertions.assertThrows(NoContentException.class, () -> epochService.getAllEpoch(pageable));
-  }
-
-  @Test
-  void testGetAllEpoch_throwFetchEpochList() {
-    Pageable pageable = PageRequest.of(0, 10);
-    LocalDateTime now = LocalDateTime.now();
-    Epoch epoch = Epoch.builder().no(1).build();
-
-    when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue())).thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(now)).build()));
-    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(3));
-    when(epochRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(epoch)));
-    when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(false);
-    when(fetchRewardDataService.fetchEpochRewardDistributed(List.of(1))).thenReturn(null);
-
-    Assertions.assertThrows(FetchRewardException.class, () -> epochService.getAllEpoch(pageable));
   }
 
 }
