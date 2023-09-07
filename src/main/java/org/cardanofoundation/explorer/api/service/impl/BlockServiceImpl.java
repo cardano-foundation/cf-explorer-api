@@ -1,21 +1,10 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.BlockMapper;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.BlockResponse;
-import org.cardanofoundation.explorer.api.repository.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.SlotLeaderRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.service.BlockService;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.SlotLeader;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,9 +12,27 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.mapper.BlockMapper;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.BlockResponse;
+import org.cardanofoundation.explorer.api.repository.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.CustomBlockRepository;
+import org.cardanofoundation.explorer.api.repository.SlotLeaderRepository;
+import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.service.BlockService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity;
+import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.consumercommon.entity.Block_;
+import org.cardanofoundation.explorer.consumercommon.entity.SlotLeader;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +45,10 @@ public class BlockServiceImpl implements BlockService {
   private final TxRepository txRepository;
   private final SlotLeaderRepository slotLeaderRepository;
   private final BlockMapper blockMapper;
+  private final CustomBlockRepository customBlockRepository;
+
+  public static final String MIN_TIME = "1970-01-01 00:00:00";
+  public static final String MAX_TIME = "9999-01-01 00:00:00";
 
   @Override
   @Transactional(readOnly = true)
@@ -57,6 +68,7 @@ public class BlockServiceImpl implements BlockService {
       return getBlockResponse(block);
     }
   }
+
   /**
    * Get block response from entity, calculate totalOutputs and total fees
    *
@@ -70,10 +82,11 @@ public class BlockServiceImpl implements BlockService {
         txList.stream().map(Tx::getOutSum).reduce(BigInteger.ZERO, BigInteger::add));
     blockResponse.setTotalFees(
         txList.stream().map(Tx::getFee).reduce(BigInteger.ZERO, BigInteger::add));
-    Integer currentBlockNo = blockRepository.findCurrentBlock().orElseThrow(
-        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
-    );
-    if(Objects.nonNull(block.getBlockNo())) {
+    Integer currentBlockNo =
+        blockRepository
+            .findCurrentBlock()
+            .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
+    if (Objects.nonNull(block.getBlockNo())) {
       blockResponse.setConfirmation(currentBlockNo - block.getBlockNo().intValue());
     }
     return blockResponse;
@@ -82,8 +95,129 @@ public class BlockServiceImpl implements BlockService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable) {
-    Page<Block> blockPage = blockRepository.findAllBlock(pageable);
+    long totalElements = blockRepository.countAllBlock();
+    Direction direction = null;
+    String sortField = null;
+    if (pageable.getSort().isSorted()) {
+      direction = pageable.getSort().stream().findFirst().get().getDirection();
+      sortField = pageable.getSort().stream().findFirst().get().getProperty();
+    }
+    Page<Block> blockPage;
+    if (Direction.ASC.equals(direction) && Block_.TIME.equals(sortField)) {
+      blockPage = getBlockFilterListByTimeAsc(pageable, totalElements);
+    } else if ((Direction.DESC.equals(direction) && Block_.TIME.equals(sortField))
+        || (Objects.isNull(direction) && Objects.isNull(sortField))) {
+      blockPage = getBlockFilterListByTimeDesc(pageable, totalElements);
+    } else {
+      blockPage = blockRepository.findAllBlock(pageable);
+    }
     return mapperBlockToBlockFilterResponse(blockPage);
+  }
+
+  private Page<Block> getBlockFilterListByTimeAsc(Pageable pageable, long totalElements) {
+    long firstBlockIndexOfPage = (long) pageable.getPageNumber() * pageable.getPageSize();
+    long currentMaxBlockNo = blockRepository.findCurrentBlock().map(Long::valueOf).orElse(0L);
+
+    Timestamp firstBlockTimeOfPage =
+        blockRepository
+            .findFirstByBlockNo(Math.min(firstBlockIndexOfPage, currentMaxBlockNo))
+            .map(Block::getTime)
+            .orElse(Timestamp.valueOf(MIN_TIME));
+
+    List<Block> ebbBlocks = blockRepository.findGenesisAndEbbBlockInfo();
+    int ebbBlockCountBeforeFirstBlockOfPage =
+        (int)
+            ebbBlocks.stream()
+                .filter(ebbBlock -> ebbBlock.getTime().before(firstBlockTimeOfPage))
+                .count();
+
+    long actualFirstBlockIndexOfPage;
+    if (ebbBlockCountBeforeFirstBlockOfPage > 0) {
+      actualFirstBlockIndexOfPage = firstBlockIndexOfPage + 1 - ebbBlockCountBeforeFirstBlockOfPage;
+    } else {
+      actualFirstBlockIndexOfPage = firstBlockIndexOfPage;
+    }
+
+    List<Block> blockList =
+        customBlockRepository.findByBlockNoAndSpecifiedOffset(
+            actualFirstBlockIndexOfPage, pageable.getPageSize(), Direction.ASC);
+
+    if (blockList.isEmpty()) {
+      return new PageImpl<>(Collections.emptyList(), pageable, totalElements);
+    }
+
+    Block firstBlockOfPage = blockList.get(0);
+    Block lastBlockOfPage = blockList.get(blockList.size() - 1);
+
+    List<Block> ebbBlockProjectionsInPage =
+        ebbBlocks.stream()
+            .filter(
+                ebbBlock -> {
+                  Timestamp blockTime = ebbBlock.getTime();
+                  return blockTime.compareTo(firstBlockOfPage.getTime()) >= 0
+                      && blockTime.compareTo(lastBlockOfPage.getTime()) <= 0;
+                })
+            .toList();
+
+    blockList.addAll(ebbBlockProjectionsInPage);
+    blockList.sort(Comparator.comparingLong(Block::getId));
+    if (blockList.size() > pageable.getPageSize()) {
+      blockList = blockList.subList(0, pageable.getPageSize());
+    }
+    return new PageImpl<>(blockList, pageable, totalElements);
+  }
+
+  private Page<Block> getBlockFilterListByTimeDesc(Pageable pageable, long totalElements) {
+    long firstBlockIndexOfPage =
+        totalElements - (long) pageable.getPageNumber() * pageable.getPageSize();
+    Timestamp firstBlockTimeOfPage =
+        blockRepository
+            .findFirstByBlockNo(firstBlockIndexOfPage)
+            .map(Block::getTime)
+            .orElse(Timestamp.valueOf(MAX_TIME));
+
+    List<Block> ebbBlocks = blockRepository.findGenesisAndEbbBlockInfo();
+    int ebbBlockCountAfterFirstBlockOfPage =
+        (int)
+            ebbBlocks.stream()
+                .filter(ebbBlock -> ebbBlock.getTime().after(firstBlockTimeOfPage))
+                .count();
+
+    long actualFirstBlockIndexOfPage;
+    if (ebbBlockCountAfterFirstBlockOfPage > 0) {
+      actualFirstBlockIndexOfPage =
+          firstBlockIndexOfPage - (ebbBlocks.size() - ebbBlockCountAfterFirstBlockOfPage);
+    } else {
+      actualFirstBlockIndexOfPage = firstBlockIndexOfPage;
+    }
+
+    List<Block> blockList =
+        customBlockRepository.findByBlockNoAndSpecifiedOffset(
+            actualFirstBlockIndexOfPage, pageable.getPageSize(), Direction.DESC);
+
+    if (blockList.isEmpty()) {
+      return new PageImpl<>(Collections.emptyList(), pageable, totalElements);
+    }
+
+    Block firstBlockOfPage = blockList.get(0);
+    Block lastBlockOfPage = blockList.get(blockList.size() - 1);
+
+    List<Block> ebbBlockProjectionsInPage =
+        ebbBlocks.stream()
+            .filter(
+                ebbBlock -> {
+                  Timestamp blockTime = ebbBlock.getTime();
+                  return blockTime.compareTo(firstBlockOfPage.getTime()) <= 0
+                      && blockTime.compareTo(lastBlockOfPage.getTime()) >= 0;
+                })
+            .toList();
+
+    blockList.addAll(ebbBlockProjectionsInPage);
+    blockList.sort(Comparator.comparingLong(Block::getId).reversed());
+    if (blockList.size() > pageable.getPageSize()) {
+      blockList = blockList.subList(0, pageable.getPageSize());
+    }
+    return new PageImpl<>(blockList, pageable, totalElements);
   }
 
   @Override
