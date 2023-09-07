@@ -1,12 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.MAINNET_NETWORK;
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.PREPROD_NETWORK;
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.PREVIEW_NETWORK;
 import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.isWithinRange;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -56,9 +51,11 @@ import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.service.GenesisFetching;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.model.ByronGenesis;
+import org.cardanofoundation.explorer.common.model.ShelleyGenesis;
+import org.cardanofoundation.explorer.common.utils.GenesisUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
@@ -78,19 +75,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   public static final String SET = "set";
   public static final String PROPOSAL = "Proposal";
   public static final String PROTOCOL_HISTORY = "PROTOCOL_HISTORY_ALL";
-  public static final String ACTIVE_SLOTS_COEFF = "activeSlotsCoeff";
-  public static final String GEN_DElEGS = "genDelegs";
-  public static final String UPDATE_QUORUM = "updateQuorum";
-  public static final String NETWORK_ID = "networkId";
-  public static final String INITIAL_FUNDS = "initialFunds";
-  public static final String MAX_LOVELACE_SUPPLY = "maxLovelaceSupply";
-  public static final String NETWORK_MAGIC = "networkMagic";
-  public static final String EPOCH_LENGTH = "epochLength";
-  public static final String TIMESTAMP = "startTime";
-  public static final String SLOT_SPERKES_PERIOD = "slotsPerKESPeriod";
-  public static final String SLOT_LENGTH = "slotLength";
-  public static final String MAX_KESEVOLUTIONS = "maxKESEvolutions";
-  public static final String SECURITY_PARAM = "securityParam";
 
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
@@ -99,26 +83,16 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   final CostModelRepository costModelRepository;
   final ProtocolMapper protocolMapper;
   final RedisTemplate<String, HistoriesProtocol> redisTemplate;
-  final GenesisFetching genesisFetching;
-  final ObjectMapper objectMapper;
 
   @Value("${application.network}")
   String network;
   @Value("${application.epoch.days}")
   public int epochDays;
   public static final String GET = "get";
-  @Value("${genesis.shelley.mainnet}")
-  String shelleyMainnet;
-  @Value("${genesis.shelley.preprod}")
-  String shelleyPreprod;
-  @Value("${genesis.shelley.preview}")
-  String shelleyPreview;
-  @Value("${genesis.byron.mainnet}")
-  String byronMainnet;
-  @Value("${genesis.byron.preprod}")
-  String byronPreprod;
-  @Value("${genesis.byron.preview}")
-  String byronPreview;
+  @Value("${genesis.shelley}")
+  String shelleyUrl;
+  @Value("${genesis.byron}")
+  String byronUrl;
   // key::ProtocolType, value::getter>
   Map<ProtocolType, Method> epochParamMethods;
 
@@ -380,7 +354,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   @Override
   public FixedProtocol getFixedProtocols() {
-    return getFixedProtocolByNetwork(network);
+    FixedProtocol fixedProtocol = getFixedProtocolFromShelleyGenesis(shelleyUrl);
+    return getFixedProtocolFromByronGenesis(byronUrl, fixedProtocol);
   }
 
   /**
@@ -1016,81 +991,40 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     }
   }
 
-  private FixedProtocol getFixedProtocolByNetwork(String network) {
-    FixedProtocol fixedProtocol;
-    switch (network) {
-      case MAINNET_NETWORK -> {
-        fixedProtocol = getFixedProtocolFromShelleyGenesis(shelleyMainnet);
-        return getFixedProtocolFromByronGenesis(byronMainnet, fixedProtocol);
-      }
-      case PREPROD_NETWORK -> {
-        fixedProtocol = getFixedProtocolFromShelleyGenesis(shelleyPreprod);
-        return getFixedProtocolFromByronGenesis(byronPreprod, fixedProtocol);
-      }
-      case PREVIEW_NETWORK -> {
-        fixedProtocol = getFixedProtocolFromShelleyGenesis(shelleyPreview);
-        return getFixedProtocolFromByronGenesis(byronPreview, fixedProtocol);
-      }
-      default -> {
-        return null;
-      }
-    }
-  }
-
   private FixedProtocol getFixedProtocolFromShelleyGenesis(String genesisShelley) {
-
     log.info("Read protocol data from url {}", genesisShelley);
-    String genesisShelleyJson = genesisFetching.getContent(genesisShelley);
-    try {
-      Map<String, Object> genesisShelleyJsonMap = objectMapper.readValue(genesisShelleyJson,
-          new TypeReference<>() {
-          });
-      return FixedProtocol.builder()
-          .activeSlotsCoeff((Double) genesisShelleyJsonMap.get(ACTIVE_SLOTS_COEFF))
-          .genDelegs(genesisShelleyJsonMap.get(GEN_DElEGS))
-          .updateQuorum((Integer) genesisShelleyJsonMap.get(UPDATE_QUORUM))
-          .networkId((String) genesisShelleyJsonMap.get(NETWORK_ID))
-          .initialFunds(genesisShelleyJsonMap.get(INITIAL_FUNDS))
-          .maxLovelaceSupply(
-              convertObjecToBigInteger(genesisShelleyJsonMap.get(MAX_LOVELACE_SUPPLY)))
-          .networkMagic((Integer) genesisShelleyJsonMap.get(NETWORK_MAGIC))
-          .epochLength((Integer) genesisShelleyJsonMap.get(EPOCH_LENGTH))
-          .slotsPerKESPeriod((Integer) genesisShelleyJsonMap.get(SLOT_SPERKES_PERIOD))
-          .slotLength((Integer) genesisShelleyJsonMap.get(SLOT_LENGTH))
-          .maxKESEvolutions((Integer) genesisShelleyJsonMap.get(MAX_KESEVOLUTIONS))
-          .securityParam((Integer) genesisShelleyJsonMap.get(SECURITY_PARAM))
-          .build();
-    } catch (Exception e) {
-      log.error("Genesis data at {} can't parse from json to java object", genesisShelley);
-      log.error("{} value \n {}", genesisShelley, genesisShelleyJson);
-      log.error("{}", e.getMessage());
-      System.exit(0);
+    ShelleyGenesis shelley = GenesisUtils.fillContentToShelley(genesisShelley);
+    if (Objects.isNull(shelley)) {
+      return null;
     }
-    return null;
+    return FixedProtocol.builder()
+        .activeSlotsCoeff(shelley.getActiveSlotsCoeff())
+        .genDelegs(shelley.getGenDelegs())
+        .updateQuorum(shelley.getUpdateQuorum())
+        .networkId(shelley.getNetworkId())
+        .initialFunds(shelley.getInitialFunds())
+        .maxLovelaceSupply(shelley.getMaxLovelaceSupply())
+        .networkMagic(shelley.getNetworkMagic())
+        .epochLength(shelley.getEpochLength())
+        .slotsPerKESPeriod(shelley.getSlotsPerKESPeriod())
+        .slotLength(shelley.getSlotLength())
+        .maxKESEvolutions(shelley.getMaxKESEvolutions())
+        .securityParam(shelley.getSecurityParam())
+        .build();
   }
 
   private FixedProtocol getFixedProtocolFromByronGenesis(String genesisByron,
       FixedProtocol fixedProtocol) {
-
     log.info("Read protocol data from url {}", genesisByron);
-    String genesisByronJson = genesisFetching.getContent(genesisByron);
-    try {
-      Map<String, Object> genesisByronJsonMap = objectMapper.readValue(genesisByronJson,
-          new TypeReference<>() {
-          });
-      Integer startTime = (Integer) genesisByronJsonMap.get(TIMESTAMP);
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      fixedProtocol.setTimestamp(
-          dateFormat.format(new Date(new Timestamp(startTime * 1000L).getTime())));
+    ByronGenesis byron = GenesisUtils.fillContentToByron(genesisByron);
+    if (Objects.isNull(fixedProtocol) || Objects.isNull(byron) || Objects.isNull(byron.getStartTime())) {
       return fixedProtocol;
-    } catch (Exception e) {
-      log.error("Genesis data at {} can't parse from json to java object", genesisByron);
-      log.error("{} value \n {}", genesisByron, genesisByronJson);
-      log.error("{}", e.getMessage());
-      System.exit(0);
     }
-    return null;
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    fixedProtocol.setTimestamp(
+        dateFormat.format(new Date(new Timestamp(byron.getStartTime() * 1000L).getTime())));
+    return fixedProtocol;
   }
 
   private BigInteger convertObjecToBigInteger(Object o) {
