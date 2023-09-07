@@ -52,7 +52,6 @@ spring:
     default-property-inclusion: ${JACKSON_INCLUSION:NON_NULL}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:127.0.0.1:29092}
-    useSsl: ${KAFKA_USE_SSL:false}
     #client-id:  crawler
     producer:
       acks: all
@@ -94,6 +93,7 @@ application:
     days: ${EPOCH_DAYS:5}
   api.coin.gecko.market:
     interval-time: ${API_MARKET_CACHE_TIME:120}
+    delay-time: ${WEB_SOCKET_MARKET_PUBLISH_DELAY_TIME:20000}
     base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
   api.news:
     interval-time: ${API_NEWS_CACHE_TIME:120}
@@ -170,6 +170,13 @@ logging:
           InstanceMetadataServiceResourceFetcher: error
         util:
           EC2MetadataUtils: error
+
+---
+# Redis pubsub topic
+spring:
+  redis:
+    pubsub:
+      topic: ${REDIS_PUBSUB_TOPIC:block-sync-topic}
 
 genesis:
   shelley: ${SHELLEY_GENESIS_URL:classpath:networks/${SCHEMA:mainnet}/shelley-genesis.json}

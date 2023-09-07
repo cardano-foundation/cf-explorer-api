@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.repository.AdaPotsRepository;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
@@ -30,8 +30,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -64,10 +63,9 @@ public class EpochServiceImpl implements EpochService {
       if (Boolean.FALSE.equals(fetchRewardDataService.checkEpochRewardDistributed(epoch))
           && epoch.getNo() < currentEpoch - 1 ) {
         List<Epoch> fetchEpochResponse = fetchRewardDataService.fetchEpochRewardDistributed(List.of(epochNo));
-        if (CollectionUtils.isEmpty(fetchEpochResponse)) {
-          throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+        if (!CollectionUtils.isEmpty(fetchEpochResponse)) {
+          epoch.setRewardsDistributed(fetchEpochResponse.get(0).getRewardsDistributed());
         }
-        epoch.setRewardsDistributed(fetchEpochResponse.get(0).getRewardsDistributed());
       }
       Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
           .orElseThrow(() -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
@@ -106,16 +104,15 @@ public class EpochServiceImpl implements EpochService {
         .map(Epoch::getNo).toList();
     if (!CollectionUtils.isEmpty(epochNeedFetch)) {
       List<Epoch> fetchEpochList = fetchRewardDataService.fetchEpochRewardDistributed(epochNeedFetch);
-      if (fetchEpochList == null) {
-        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+      if (!CollectionUtils.isEmpty(fetchEpochList)) {
+        Map<Integer, BigInteger> epochRewardMap
+            = StreamUtil.toMap(fetchEpochList, Epoch::getNo, Epoch::getRewardsDistributed);
+        epochs.forEach(epoch -> {
+          if (epochRewardMap.containsKey(epoch.getNo())) {
+            epoch.setRewardsDistributed(epochRewardMap.get(epoch.getNo()));
+          }
+        });
       }
-      Map<Integer, BigInteger> epochRewardMap
-          = StreamUtil.toMap(fetchEpochList, Epoch::getNo, Epoch::getRewardsDistributed);
-      epochs.forEach(epoch -> {
-        if(epochRewardMap.containsKey(epoch.getNo())) {
-          epoch.setRewardsDistributed(epochRewardMap.get(epoch.getNo()));
-        }
-      });
     }
 
     Page<EpochResponse> pageResponse = epochs.map(epochMapper::epochToEpochResponse);
@@ -195,8 +192,10 @@ public class EpochServiceImpl implements EpochService {
           if (Boolean.FALSE.equals(fetchRewardDataService.checkAdaPots(epochSummaryProjection.getNo()))) {
             fetchRewardDataService.fetchAdaPots(List.of(epochSummaryProjection.getNo()));
           }
-          var circulatingSupply = adaPotsRepository.getUTxOByEpochNo(epochSummaryProjection.getNo())
-              .orElse(BigInteger.ZERO);
+          var circulatingSupply = adaPotsRepository.getReservesByEpochNo(epochSummaryProjection.getNo());
+          if (Objects.isNull(circulatingSupply)) {
+            circulatingSupply = BigInteger.ZERO;
+          }
           return EpochSummary.builder()
               .no(epochSummaryProjection.getNo())
               .slot((int) slot)
@@ -204,7 +203,7 @@ public class EpochServiceImpl implements EpochService {
               .startTime(epochStartTime)
               .endTime(epochStartTime.plusDays(epochDays))
               .account(account)
-              .circulatingSupply(circulatingSupply)
+              .circulatingSupply(CommonConstant.TOTAL_ADA.toBigInteger().subtract(circulatingSupply))
               .build();
         })
         .orElse(EpochSummary.builder().

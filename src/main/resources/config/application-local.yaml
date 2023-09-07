@@ -1,20 +1,20 @@
 # Infrastructure domain
 infrastructure:
-  host: 172.16.1.230
+  host: ${POSTGRES_HOST:10.4.10.75}
 
 spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:54321/explorer_api?currentSchema=dev
-    username: explorer_api_read
-    password: MTIzNDU2NzhhQUA=READ
+    url: jdbc:postgresql://${infrastructure.host}:54322/explorer?currentSchema=mainnet
+    username: ${POSTGRES_USER:cardano-master}
+    password: ${POSTGRES_PASSWORD:postgres_master_pw}
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
       pool-name: explorer-api-pool
       minimum-idle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: 1 #maximum pool size
+      maximum-pool-size: 20 #maximum pool size
       idle-timeout: 300000 #maximum idle time for connection
       max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
       connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
@@ -39,7 +39,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: dev
+        default_schema: mainnet
         show_sql: true
         format_sql: true
   flyway:
@@ -50,11 +50,10 @@ spring:
         default-page-size: 20
         max-page-size: 100
   jackson:
-    default-property-inclusion: ${JACKSON_INCLUSION:NON_NULL}
+    default-property-inclusion: NON_NULL
 
   kafka:
     bootstrap-servers: ${BOOTSTRAP_SERVER:127.0.0.1:29092}
-    useSsl: ${KAFKA_USE_SSL:false}
     #client-id:  crawler
     producer:
       acks: all
@@ -79,7 +78,7 @@ spring:
 redis:
   databaseIndex: 0
   master: ${REDIS_MASTER_NAME:mymaster}
-  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
+  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pw}
   testOnBorrow: false
   maxTotal: 10
   maxIdle: 5
@@ -87,20 +86,21 @@ redis:
   testOnReturn: false
   testWhileIdle: false
   sentinels:
-    - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
-      port: 26379
+    - host: ${REDIS_SENTINEL_HOST:10.4.10.75}
+      port: 26371
 
-
+# Redis pubsub topic
 application:
   network: ${SCHEMA:mainnet}
   epoch:
     days: ${EPOCH_DAYS:5}
   api.coin.gecko.market:
     interval-time: ${API_MARKET_CACHE_TIME:15}
+    delay-time: ${WEB_SOCKET_MARKET_PUBLISH_DELAY_TIME:20000}
     base-url: ${API_MARKET_URL:https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s}
   api.news:
     interval-time: ${API_NEWS_CACHE_TIME:120}
-    base-url: ${API_NEWS_URL}
+    base-url: ${API_NEWS_URL:https://n...content-available-to-author-only...i.org/v2/everything?q=cardano&sortBy=publishedAt&pageSize=100&apiKey=%s}
   api:
     check-reward:
       base-url: ${API_CHECK_REWARD_URL:http://10.4.10.231:8888/api/v1/rewards/fetch}
@@ -112,6 +112,8 @@ application:
       base-url: ${API_CHECK_EPOCH_STAKE_URL:http://10.4.10.231:8888/api/v1/epoch-stake/fetch}
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
+    check-epoch:
+      base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:200}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
@@ -145,16 +147,16 @@ rsa:
 cloud:
   aws:
     credentials:
-      access-key: ${S3_ACCESS_KEY}
-      secret-key: ${S3_SECRET_KEY}
+      access-key: ${S3_ACCESS_KEY:minio_access_key}
+      secret-key: ${S3_SECRET_KEY:minio_secret_key}
     region:
-      static: ${S3_REGION}
+      static: ${S3_REGION:null}
     s3:
       bucket:
-        name: ${S3_BUCKET_NAME}
+        name: ${S3_BUCKET_NAME:cardano-explorer-api-storage-report}
       path-style:
-        enabled: false
-      endpoint: ${STORAGE_ENDPOINT}
+        enabled: true
+      endpoint: ${STORAGE_ENDPOINT:http://localhost:9099}
 
 logging:
   level:
@@ -164,6 +166,14 @@ logging:
           InstanceMetadataServiceResourceFetcher: error
         util:
           EC2MetadataUtils: error
+
+---
+# Redis pubsub topic
+spring:
+  redis:
+    pubsub:
+      topic: ${REDIS_PUBSUB_TOPIC:block.mainnet}
+
 
 genesis:
   shelley: ${SHELLEY_GENESIS_URL:classpath:networks/${SCHEMA:mainnet}/shelley-genesis.json}
