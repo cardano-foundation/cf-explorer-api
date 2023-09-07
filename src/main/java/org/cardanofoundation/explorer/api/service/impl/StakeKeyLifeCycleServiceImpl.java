@@ -160,6 +160,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
                 .fee(item.getFee())
                 .time(item.getTime().toLocalDateTime())
                 .outSum(item.getOutSum())
+                .poolName(item.getPoolName())
                 .build()
         )
     );

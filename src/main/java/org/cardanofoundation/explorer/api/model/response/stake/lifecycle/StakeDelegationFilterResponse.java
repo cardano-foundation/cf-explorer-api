@@ -15,4 +15,5 @@ public class StakeDelegationFilterResponse {
   private BigInteger outSum;
   private BigInteger fee;
   private LocalDateTime time;
+  private String poolName;
 }
