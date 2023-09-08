@@ -30,8 +30,8 @@ public interface AggregateAddressTxBalanceRepository extends JpaRepository<Aggre
   @Query(value = "SELECT aatb "
       + "FROM AggregateAddressTxBalance aatb "
       + "WHERE aatb.addressId = :addressId "
-      + "AND aatb.day > :from "
-      + "AND aatb.day <= :to "
+      + "AND aatb.day >= :from "
+      + "AND aatb.day < :to "
       + "ORDER BY aatb.day ASC")
   List<AggregateAddressTxBalance> findAllByAddressIdAndDayBetween(@Param("addressId") Long addressId,
                                                                   @Param("from") LocalDate from,
@@ -40,8 +40,8 @@ public interface AggregateAddressTxBalanceRepository extends JpaRepository<Aggre
   @Query(value = "SELECT sum(aatb.balance) as balance, aatb.day as day "
       + "FROM AggregateAddressTxBalance aatb "
       + "WHERE aatb.stakeAddressId = :stakeAddressId "
-      + "AND aatb.day > :from "
-      + "AND aatb.day <= :to "
+      + "AND aatb.day >= :from "
+      + "AND aatb.day < :to "
       + "GROUP BY aatb.day "
       + "ORDER BY aatb.day ASC")
   List<AggregateAddressBalanceProjection> findAllByStakeAddressIdAndDayBetween(@Param("stakeAddressId") Long stakeAddressId,
