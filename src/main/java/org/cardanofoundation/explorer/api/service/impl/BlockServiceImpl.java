@@ -106,7 +106,7 @@ public class BlockServiceImpl implements BlockService {
     if (Direction.ASC.equals(direction) && Block_.TIME.equals(sortField)) {
       blockPage = getBlockFilterListByTimeAsc(pageable, totalElements);
     } else if ((Direction.DESC.equals(direction) && Block_.TIME.equals(sortField))
-        || (Objects.isNull(direction) && Objects.isNull(sortField))) {
+        || (Objects.isNull(direction) || Objects.isNull(sortField))) {
       blockPage = getBlockFilterListByTimeDesc(pageable, totalElements);
     } else {
       blockPage = blockRepository.findAllBlock(pageable);
