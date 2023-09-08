@@ -53,13 +53,13 @@ import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.model.ByronGenesis;
-import org.cardanofoundation.explorer.common.model.ShelleyGenesis;
-import org.cardanofoundation.explorer.common.utils.GenesisUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.ledgersync.common.model.ByronGenesis;
+import org.cardanofoundation.ledgersync.common.model.ShelleyGenesis;
+import org.cardanofoundation.ledgersync.common.util.GenesisUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
@@ -1025,10 +1025,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     fixedProtocol.setTimestamp(
         dateFormat.format(new Date(new Timestamp(byron.getStartTime() * 1000L).getTime())));
     return fixedProtocol;
-  }
-
-  private BigInteger convertObjecToBigInteger(Object o) {
-    return new BigInteger(String.valueOf(o));
   }
 
   @PostConstruct
