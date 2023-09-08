@@ -4,11 +4,15 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.springframework.core.task.TaskExecutor;
 
 import org.springframework.data.domain.Page;
@@ -523,10 +527,6 @@ class TokenServiceTest {
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-
-    when(aggregateAddressTokenRepository.getMaxDay())
-        .thenReturn(Optional.of(LocalDate.of(2020, 1, 1)));
-
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
     when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
         any(),
@@ -544,8 +544,7 @@ class TokenServiceTest {
   }
 
   @Test
-  void testGetTokenVolumeAnalytic_WhenTokenFound_WithOneDayRangeAndExistsZeroBalance()
-      throws Exception {
+  void testGetTokenVolumeAnalytic_WhenTokenFound_WithOneDayRangeAndExistsZeroBalance() {
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset = MultiAsset.builder()
@@ -558,9 +557,6 @@ class TokenServiceTest {
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-
-    when(aggregateAddressTokenRepository.getMaxDay())
-        .thenReturn(Optional.of(LocalDate.of(2020, 1, 1)));
 
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
     when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
@@ -568,20 +564,18 @@ class TokenServiceTest {
         any()))
         .thenReturn(Optional.of(new BigInteger("0")));
 
-    when(addressTokenRepository.countRecord(any(MultiAsset.class), any(), any())).thenReturn(0L);
-
     // Run the test
     final List<TokenVolumeAnalyticsResponse> result = tokenService.getTokenVolumeAnalytic(
         "tokenId", AnalyticType.ONE_DAY);
 
     // Verify the results
     for (TokenVolumeAnalyticsResponse tokenVolumeAnalyticsResponse : result) {
-      assertEquals(null, tokenVolumeAnalyticsResponse.getValue());
+      assertEquals(BigInteger.ZERO, tokenVolumeAnalyticsResponse.getValue());
     }
   }
 
   @Test
-  void testGetTokenVolumeAnalytic_WhenTokenFound_WithNotOneDayRange() throws Exception {
+  void testGetTokenVolumeAnalytic_WhenTokenFound_WithNotOneDayRange() {
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset = MultiAsset.builder()
@@ -594,13 +588,17 @@ class TokenServiceTest {
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-
-    when(aggregateAddressTokenRepository.getMaxDay())
-        .thenReturn(Optional.of(LocalDate.now().minusDays(3)));
-
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
-    when(aggregateAddressTokenRepository.sumBalanceInTimeRange(any(), any(),
-        any())).thenReturn(Optional.of(new BigInteger("100")));
+
+    List<AggregateAddressToken> aggregateAddressTokens = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      aggregateAddressTokens.add(
+          new AggregateAddressToken(0L, new BigInteger("100"), LocalDate.now().minusDays(i))
+      );
+    }
+    Collections.reverse(aggregateAddressTokens);
+    when(aggregateAddressTokenRepository
+        .findAllByIdentAndDayBetween(any(), any(), any())).thenReturn(aggregateAddressTokens);
 
     lenient().when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
             any(),
@@ -633,19 +631,11 @@ class TokenServiceTest {
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
-    when(aggregateAddressTokenRepository.getMaxDay())
-        .thenReturn(Optional.of(LocalDate.now().minusDays(3)));
-
-    // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
-    when(aggregateAddressTokenRepository.sumBalanceInTimeRange(any(), any(),
-        any())).thenReturn(Optional.of(new BigInteger("100")));
 
     lenient().when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
             any(),
             any()))
         .thenReturn(Optional.of(new BigInteger("0")));
-
-    when(addressTokenRepository.countRecord(any(MultiAsset.class), any(), any())).thenReturn(10L);
 
     // Run the test
     final List<TokenVolumeAnalyticsResponse> result = tokenService.getTokenVolumeAnalytic(

@@ -248,40 +248,6 @@ class TokenControllerTest {
     assertEquals("[]", response.getContentAsString());
   }
 
-  @Test
-  void testGetTokenVolumeAnalytics_WhenTokenServiceThrowsExecutionException() throws Exception {
-    // Setup
-    when(tokenService.getTokenVolumeAnalytic(anyString(), eq(AnalyticType.ONE_DAY)))
-        .thenThrow(ExecutionException.class);
-
-    // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/tokens/analytics/{tokenId}/{type}",
-                "asset1nfetquxh86tjthzs6prsrstm8ts8gcpuxd8x0z", AnalyticType.ONE_DAY)
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
-  }
-
-  @Test
-  void testGetTokenVolumeAnalytics_TokenServiceThrowsInterruptedException() throws Exception {
-    // Setup
-    when(tokenService.getTokenVolumeAnalytic(anyString(), eq(AnalyticType.ONE_DAY)))
-        .thenThrow(InterruptedException.class);
-
-    // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/tokens/analytics/{tokenId}/{type}",
-                "asset1nfetquxh86tjthzs6prsrstm8ts8gcpuxd8x0z", AnalyticType.ONE_DAY)
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
-  }
-
   private static String asJsonString(final Object obj) {
     try {
       var objectMapper = new ObjectMapper();

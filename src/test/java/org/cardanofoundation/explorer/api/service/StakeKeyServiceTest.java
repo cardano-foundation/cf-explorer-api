@@ -377,14 +377,13 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testGetStakeBalanceAnalytics_thenReturnV1() throws ExecutionException, InterruptedException {
+    void testGetStakeBalanceAnalytics_thenReturnV1() {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_DAY;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
         LocalDate localDate = LocalDate.now().minusDays(5);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-        when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.of(localDate));
         when(aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(any(), any())).thenReturn(Optional.of(BigInteger.ONE));
         when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any(), any())).thenReturn(Optional.of(BigInteger.ONE));
 
@@ -402,70 +401,59 @@ public class StakeKeyServiceTest {
         LocalDate localDate = LocalDate.now().minusDays(5);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-        when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.of(localDate));
         when(aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(any(), any())).thenReturn(Optional.of(BigInteger.ONE));
-        when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any(), any())).thenReturn(Optional.of(BigInteger.ONE));
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
     }
 
     @Test
-    void testGetStakeBalanceAnalytics_thenReturnV3() throws ExecutionException, InterruptedException {
+    void testGetStakeBalanceAnalytics_thenReturnV3() {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_DAY;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
-        LocalDate localDate = LocalDate.now().minusDays(5);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-        when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.empty());
-        when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any())).thenReturn(Optional.of(BigInteger.ONE));
+        when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any(), any())).thenReturn(Optional.of(BigInteger.ZERO));
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
     }
 
     @Test
-    void testGetStakeBalanceAnalytics_thenReturnV4() throws ExecutionException, InterruptedException {
+    void testGetStakeBalanceAnalytics_thenReturnV4() {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_WEEK;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
         LocalDate localDate = LocalDate.now().minusDays(5);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-        when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.empty());
-        when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any())).thenReturn(Optional.of(BigInteger.ONE));
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
     }
 
     @Test
-    void testGetStakeBalanceAnalytics_thenReturnBalanceZero() throws ExecutionException, InterruptedException {
+    void testGetStakeBalanceAnalytics_thenReturnBalanceZero() {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_WEEK;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
         LocalDate localDate = LocalDate.now().minusDays(5);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-        when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.empty());
-        when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any())).thenReturn(Optional.of(BigInteger.ZERO));
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
     }
 
     @Test
-    void testGetStakeBalanceAnalytics_thenReturnBalanceZeroV2() throws ExecutionException, InterruptedException {
+    void testGetStakeBalanceAnalytics_thenReturnBalanceZeroV2() {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_DAY;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
-        LocalDate localDate = LocalDate.now().minusDays(5);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-        when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.empty());
-        when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any())).thenReturn(Optional.of(BigInteger.ZERO));
-
+        when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any(), any())).thenReturn(Optional.of(BigInteger.ZERO));
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
