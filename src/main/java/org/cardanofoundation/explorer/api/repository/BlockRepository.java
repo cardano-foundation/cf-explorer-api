@@ -31,8 +31,17 @@ public interface BlockRepository
       countQuery = "SELECT sum (e.blkCount) FROM Epoch e")
   Page<Block> findAllBlock(Pageable pageable);
 
-  @Query(value = "SELECT b FROM Block b " + "WHERE b.blockNo IS NULL")
-  List<Block> findGenesisAndEbbBlockInfo();
+  @Query(
+      value = "SELECT count(b) FROM Block b " + "WHERE b.blockNo IS NULL " + "AND b.id < :blockId")
+  Optional<Long> countGenesisAndEbbBlockInfoByBlockIdLessThan(@Param("blockId") Long blockId);
+
+  @Query(
+      value = "SELECT count(b) FROM Block b " + "WHERE b.blockNo IS NULL " + "AND b.id > :blockId")
+  Optional<Long> countGenesisAndEbbBlockInfoByBlockIdGreaterThan(@Param("blockId") Long blockId);
+
+  @Query(
+      value = "SELECT b.id FROM Block b " + "WHERE b.id > :blockId " + "ORDER BY b.id ASC LIMIT 1")
+  Long findNextBlockId(@Param("blockId") Long blockId);
 
   @Query(value = "SELECT sum(e.blkCount) FROM Epoch e")
   Long countAllBlock();
