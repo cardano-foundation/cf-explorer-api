@@ -12,8 +12,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.cardanofoundation.explorer.api.repository.CustomBlockRepository;
+import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.Block_;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,31 +28,24 @@ public class CustomBlockRepositoryImpl implements CustomBlockRepository {
 
   @Override
   @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
-  public List<Block> findByBlockNoAndSpecifiedOffset(Long blockNo, int limit, Direction direction) {
+  public List<Block> findByBlockIdAndLimit(Long blockId, int limit, Direction direction) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Block> blockQuery = criteriaBuilder.createQuery(Block.class);
     Root<Block> blockRoot = blockQuery.from(Block.class);
-    Predicate blockNoNotNull = criteriaBuilder.isNotNull(blockRoot.get(Block_.blockNo));
-    Predicate epochNoNotNull = criteriaBuilder.isNotNull(blockRoot.get(Block_.epochNo));
     Predicate selectionCondition;
-    Order orderByBlockNo;
+    Order orderByBlockId;
 
     if (direction.equals(Direction.ASC)) {
-      Predicate blockNoGreaterThanOrEqual =
-          criteriaBuilder.greaterThanOrEqualTo(blockRoot.get(Block_.blockNo), blockNo);
       selectionCondition =
-          criteriaBuilder.and(blockNoNotNull, epochNoNotNull, blockNoGreaterThanOrEqual);
-      orderByBlockNo = criteriaBuilder.asc(blockRoot.get(Block_.blockNo));
+          criteriaBuilder.greaterThanOrEqualTo(blockRoot.get(BaseEntity_.id), blockId);
+      orderByBlockId = criteriaBuilder.asc(blockRoot.get(BaseEntity_.id));
     } else {
-      Predicate blockNoLessThanOrEqual =
-          criteriaBuilder.lessThanOrEqualTo(blockRoot.get(Block_.blockNo), blockNo);
       selectionCondition =
-          criteriaBuilder.and(blockNoNotNull, epochNoNotNull, blockNoLessThanOrEqual);
-      orderByBlockNo = criteriaBuilder.desc(blockRoot.get(Block_.blockNo));
+          criteriaBuilder.lessThanOrEqualTo(blockRoot.get(BaseEntity_.id), blockId);
+      orderByBlockId = criteriaBuilder.desc(blockRoot.get(BaseEntity_.id));
     }
 
-    blockQuery.select(blockRoot).where(selectionCondition).orderBy(orderByBlockNo);
-
+    blockQuery.select(blockRoot).where(selectionCondition).orderBy(orderByBlockId);
     return entityManager.createQuery(blockQuery).setMaxResults(limit).getResultList();
   }
 }
