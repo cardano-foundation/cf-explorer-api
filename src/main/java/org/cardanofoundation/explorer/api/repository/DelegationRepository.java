@@ -99,7 +99,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       + " FROM Delegation delegation"
       + " INNER JOIN Tx tx ON delegation.tx = tx"
       + " INNER JOIN Block block ON tx.block = block"
-      + " INNER JOIN PoolOfflineData poolOfflineData on poolOfflineData.poolId = delegation.poolHash.id"
+      + " LEFT JOIN PoolOfflineData poolOfflineData on poolOfflineData.poolId = delegation.poolHash.id"
       + " WHERE delegation.address = :stakeKey"
       + " AND (block.time >= :fromTime ) "
       + " AND (block.time <= :toTime)"
