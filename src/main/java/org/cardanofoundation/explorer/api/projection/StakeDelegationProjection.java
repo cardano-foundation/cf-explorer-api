@@ -16,6 +16,7 @@ public interface StakeDelegationProjection {
   Integer getEpochNo();
   Integer getEpochSlotNo();
   String getPoolId();
+  String getPoolName();
   String getTickerName();
   String getPoolData();
   String getLogoUrl();
