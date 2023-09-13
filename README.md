@@ -106,6 +106,10 @@ To ensure the stability and reliability of this project, unit and mutation tests
     - `API_CHECK_EPOCH_URL`: URL for get epoch data from koios service. Default is `http://localhost:8888/api/v1/epochs/fetch`.
 - without `koios`: We will use database to get data.
 
+### Configuration of the genesis file path:
+  - `SHELLEY_GENESIS_FILE`: Shelley file path
+  - `BYRON_GENESIS_FILE`: Byron file path
+
 ## Local environments tests
 
 ### Execute postman collection using docker - newman
