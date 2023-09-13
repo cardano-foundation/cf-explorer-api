@@ -443,7 +443,6 @@ class DelegationServiceTest {
     // Verify the interactions
     verify(epochRepository).findCurrentEpochNo();
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
-    verify(rewardRepository).getPoolRewardByPool(poolId);
     verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
     verify(delegationRepository).liveDelegatorsCount(poolView);
@@ -481,8 +480,6 @@ class DelegationServiceTest {
     when(fetchRewardDataService.checkAdaPots(currentEpochNo)).thenReturn(false);
     when(fetchRewardDataService.fetchAdaPots(List.of(currentEpochNo))).thenReturn(true);
     when(fetchRewardDataService.useKoios()).thenReturn(true);
-    when(fetchRewardDataService.checkPoolHistoryForPool(poolIdList)).thenReturn(false);
-    when(fetchRewardDataService.fetchPoolHistoryForPool(poolIdList)).thenReturn(true);
     when(poolInfoRepository.getPoolInfoKoios(Set.of(poolView), currentEpochNo)).thenReturn(
         List.of(pikp));
 
@@ -537,7 +534,6 @@ class DelegationServiceTest {
     // Verify the interactions
     verify(epochRepository).findCurrentEpochNo();
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
-    verify(rewardRepository).getPoolRewardByPool(poolId);
     verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
     verify(delegationRepository).liveDelegatorsCount(poolView);
@@ -820,8 +816,6 @@ class DelegationServiceTest {
         poolCountProjections);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(currentEpoch));
     when(fetchRewardDataService.useKoios()).thenReturn(true);
-    when(fetchRewardDataService.checkPoolHistoryForPool(poolIds)).thenReturn(false);
-    when(fetchRewardDataService.fetchPoolHistoryForPool(poolIds)).thenReturn(true);
     when(poolHashRepository.getListPoolIdIn(poolIds)).thenReturn(Set.of(1L));
     when(delegationRepository.findDelegationPoolsSummary(Set.of(1L))).thenReturn(pools);
     when(blockRepository.getCountBlockByPools(Set.of(1L))).thenReturn(poolCountProjections);
