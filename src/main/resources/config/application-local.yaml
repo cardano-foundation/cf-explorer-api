@@ -166,5 +166,5 @@ logging:
           EC2MetadataUtils: error
 
 genesis:
-  shelley: ${SHELLEY_GENESIS_URL:classpath:networks/${SCHEMA:mainnet}/shelley-genesis.json}
-  byron: ${BYRON_GENESIS_URL:classpath:networks/${SCHEMA:mainnet}/byron-genesis.json}
+  shelley: ${SHELLEY_GENESIS_URL:src/main/resources/networks/${SCHEMA:mainnet}/shelley-genesis.json}
+  byron: ${BYRON_GENESIS_URL:src/main/resources/networks/${SCHEMA:mainnet}/byron-genesis.json}
