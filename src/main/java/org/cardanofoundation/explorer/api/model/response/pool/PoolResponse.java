@@ -27,9 +27,6 @@ public class PoolResponse implements Serializable {
   private BigInteger poolSize;
 
   @JsonSerialize(using = PercentSerializer.class)
-  private Double reward;
-
-  @JsonSerialize(using = PercentSerializer.class)
   private Double feePercent;
 
   private BigInteger feeAmount;
@@ -51,6 +48,4 @@ public class PoolResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
-  @JsonSerialize(using = PercentSerializer.class)
-  private Double lifetimeRos;
 }
