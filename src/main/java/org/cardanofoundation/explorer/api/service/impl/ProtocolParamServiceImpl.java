@@ -51,6 +51,7 @@ import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.service.GenesisService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
@@ -59,7 +60,6 @@ import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.ledgersync.common.model.ByronGenesis;
 import org.cardanofoundation.ledgersync.common.model.ShelleyGenesis;
-import org.cardanofoundation.ledgersync.common.util.GenesisUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
@@ -83,6 +83,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   final CostModelRepository costModelRepository;
   final ProtocolMapper protocolMapper;
   final RedisTemplate<String, HistoriesProtocol> redisTemplate;
+  final GenesisService genesisService;
 
   @Value("${application.network}")
   String network;
@@ -993,7 +994,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   private FixedProtocol getFixedProtocolFromShelleyGenesis(String genesisShelley) {
     log.info("Read protocol data from url {}", genesisShelley);
-    ShelleyGenesis shelley = GenesisUtils.fillContentToShelley(genesisShelley);
+    ShelleyGenesis shelley = genesisService.fillContentShelley(genesisShelley);
     if (Objects.isNull(shelley)) {
       return null;
     }
@@ -1016,8 +1017,9 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   private FixedProtocol getFixedProtocolFromByronGenesis(String genesisByron,
       FixedProtocol fixedProtocol) {
     log.info("Read protocol data from url {}", genesisByron);
-    ByronGenesis byron = GenesisUtils.fillContentToByron(genesisByron);
-    if (Objects.isNull(fixedProtocol) || Objects.isNull(byron) || Objects.isNull(byron.getStartTime())) {
+    ByronGenesis byron = genesisService.fillContentByron(genesisByron);
+    if (Objects.isNull(fixedProtocol) || Objects.isNull(byron) || Objects.isNull(
+        byron.getStartTime())) {
       return fixedProtocol;
     }
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
