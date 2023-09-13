@@ -15,7 +15,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   @Query("SELECT ma FROM MultiAsset ma "
       + " WHERE ma.fingerprint = :query OR LOWER(ma.nameView) LIKE CONCAT('%', :query, '%')"
-      + " ORDER BY LENGTH(ma.nameView) ASC, ma.txCount DESC")
+      + " ORDER BY LENGTH(ma.nameView) ASC, ma.nameView ASC, ma.txCount DESC")
   Page<MultiAsset> findAll(@Param("query") String query, Pageable pageable);
 
   @Query("select multiAsset from MultiAsset multiAsset")
