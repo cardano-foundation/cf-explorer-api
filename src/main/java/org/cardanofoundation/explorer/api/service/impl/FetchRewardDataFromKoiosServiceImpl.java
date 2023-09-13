@@ -185,7 +185,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   }
 
   @Override
-  public Boolean isKoiOs() {
+  public Boolean useKoios() {
     return true;
   }
 }

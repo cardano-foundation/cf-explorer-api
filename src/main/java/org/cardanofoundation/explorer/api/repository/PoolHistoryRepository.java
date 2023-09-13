@@ -21,7 +21,7 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
       "SELECT ph.pool.view AS view, ph.delegatorRewards AS delegateReward, ph.epochRos AS ros "
           + "FROM PoolHistory ph "
           + "WHERE ph.pool.view IN :poolIds AND ph.epochNo = :epochNo")
-  List<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolIds") Set<String> poolIds,
+  List<PoolHistoryKoiosProjection> getPoolHistoryKoios(@Param("poolIds") Set<String> poolIds,
       @Param("epochNo") Integer epochNo);
 
   @Query(value =
@@ -30,7 +30,7 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
           + "FROM PoolHistory ph "
           + "WHERE ph.pool.view = :poolId "
           + "ORDER BY ph.epochNo DESC")
-  Page<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId, Pageable pageable);
+  Page<PoolHistoryKoiosProjection> getPoolHistoryKoios(@Param("poolId") String poolId, Pageable pageable);
 
   @Query(value =
       "SELECT ph.epochNo AS epochNo, ph.delegatorRewards AS delegateReward, ph.epochRos AS ros, "
@@ -38,14 +38,14 @@ public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> 
           + "FROM PoolHistory ph "
           + "WHERE ph.pool.view = :poolId "
           + "ORDER BY ph.epochNo DESC")
-  List<PoolHistoryKoiosProjection> getPoolHistoryKoiOs(@Param("poolId") String poolId);
+  List<PoolHistoryKoiosProjection> getPoolHistoryKoios(@Param("poolId") String poolId);
 
   @Query(value =
       "SELECT ph.epochNo AS chartKey, ph.activeStake AS chartValue "
           + "FROM PoolHistory ph "
           + "WHERE ph.pool.view = :poolId "
           + "ORDER BY ph.epochNo ASC")
-  List<EpochChartProjection> getPoolHistoryKoiOsForEpochChart(@Param("poolId") String poolId);
+  List<EpochChartProjection> getPoolHistoryKoiosForEpochChart(@Param("poolId") String poolId);
 
   @Query(value =
       "SELECT ph.epochNo AS chartKey, CAST(ph.delegatorCnt as long) AS chartValue "
