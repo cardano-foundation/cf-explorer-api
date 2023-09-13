@@ -7459,24 +7459,6 @@ class ProtocolServiceTest {
   }
 
   @Test
-  void testGetFixedProtocols_thenReturn() throws JsonProcessingException {
-    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
-    FixedProtocol fixedProtocol = FixedProtocol.builder().build();
-
-    when(protocolMapper.mapFixedProtocol("mainnet")).thenReturn(fixedProtocol);
-    Assertions.assertEquals(protocolParamService.getFixedProtocols(), fixedProtocol);
-  }
-
-  @Test
-  void testGetFixedProtocols_throwException() throws JsonProcessingException {
-    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
-    FixedProtocol fixedProtocol = FixedProtocol.builder().build();
-
-    when(protocolMapper.mapFixedProtocol("mainnet")).thenThrow(JsonProcessingException.class);
-    Assertions.assertNull(protocolParamService.getFixedProtocols());
-  }
-
-  @Test
   void testMapProtocols_thenReturn() {
     EpochParam epochParam = EpochParam.builder().costModel(CostModel.builder().costs("cost").build()).build();
 

@@ -68,6 +68,11 @@ public class CommonConstant {
   public static final String PREFIXED_TOKEN_FINGERPRINT = "asset";
 
   public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
+  public static final String PREPROD_NETWORK = "preprod";
+
+  public static final String PREVIEW_NETWORK = "preview";
+
+
 
   public static final String UNDERSCORE = "_";
 
