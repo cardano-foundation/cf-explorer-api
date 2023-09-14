@@ -108,4 +108,7 @@ public interface BlockRepository
               + "ORDER BY countValue DESC")
   List<PoolCountProjection> findTopDelegationByEpochBlock(
       @Param("epochNo") Integer epochNo, Pageable pageable);
+
+  @Query(value = "SELECT b from Block b WHERE b.id = (SELECT max(b2.id) FROM Block b2)")
+  Block findCurrentBlockById();
 }
