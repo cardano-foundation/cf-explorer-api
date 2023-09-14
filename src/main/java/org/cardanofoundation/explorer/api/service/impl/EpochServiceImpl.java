@@ -205,6 +205,7 @@ public class EpochServiceImpl implements EpochService {
               .endTime(epochStartTime.plusDays(epochDays))
               .account(account)
               .circulatingSupply(circulatingSupply)
+              .blkCount(epochSummaryProjection.getBlkCount())
               .build();
         })
         .orElse(EpochSummary.builder().

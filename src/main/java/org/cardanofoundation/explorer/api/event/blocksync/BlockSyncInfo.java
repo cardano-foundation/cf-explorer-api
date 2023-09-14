@@ -10,5 +10,7 @@ import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 @Builder
 public class BlockSyncInfo {
   private long blockNo;
+  private String blockHash;
   private EpochSummary epochSummary;
+  private boolean hashTx;
 }

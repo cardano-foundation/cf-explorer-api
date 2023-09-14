@@ -4,7 +4,12 @@ import java.sql.Timestamp;
 
 public interface EpochSummaryProjection {
   Integer getNo();
+
   Integer getMaxSlot();
+
   Timestamp getStartTime();
+
   Timestamp getEndTime();
+
+  Integer getBlkCount();
 }
