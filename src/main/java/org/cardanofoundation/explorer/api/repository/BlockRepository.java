@@ -39,6 +39,9 @@ public interface BlockRepository
       value = "SELECT count(b) FROM Block b " + "WHERE b.blockNo IS NULL " + "AND b.id > :blockId")
   Optional<Long> countGenesisAndEbbBlockInfoByBlockIdGreaterThan(@Param("blockId") Long blockId);
 
+  @Query("SELECT min(b.blockNo) FROM Block b")
+  Long findMinBlockNo();
+
   @Query(
       value = "SELECT b.id FROM Block b " + "WHERE b.id > :blockId " + "ORDER BY b.id ASC LIMIT 1")
   Long findNextBlockId(@Param("blockId") Long blockId);
