@@ -129,7 +129,6 @@ class AddressServiceTest {
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
-    when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.of(LocalDate.MIN));
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
@@ -137,14 +136,13 @@ class AddressServiceTest {
   }
 
   @Test
-  void getAddressAnalytics_shouldReturnOneMouth() throws ExecutionException, InterruptedException {
+  void getAddressAnalytics_shouldReturnOneMonth() {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_MONTH;
     Address address = Address.builder().address(addr).build();
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
-    when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.of(LocalDate.now().minusDays(1)));
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
@@ -152,37 +150,7 @@ class AddressServiceTest {
   }
 
   @Test
-  void getAddressAnalytics_shouldReturnOneMouthEmptyMaxday() throws ExecutionException, InterruptedException {
-    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-    AnalyticType type = AnalyticType.ONE_MONTH;
-    Address address = Address.builder().address(addr).build();
-
-    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
-    when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.empty());
-
-    var response = addressService.getAddressAnalytics(addr, type);
-    Assertions.assertNotNull(response);
-
-  }
-
-  @Test
-  void getAddressAnalytics_shouldReturnOneDayEmptyMaxDay() throws ExecutionException, InterruptedException {
-    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-    AnalyticType type = AnalyticType.ONE_DAY;
-    Address address = Address.builder().address(addr).build();
-
-    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
-    when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.empty());
-
-    var response = addressService.getAddressAnalytics(addr, type);
-    Assertions.assertNotNull(response);
-
-  }
-
-  @Test
-  void getAddressAnalytics_shouldReturnListNull() throws ExecutionException, InterruptedException {
+  void getAddressAnalytics_shouldReturnListNull() {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
     Address address = Address.builder().address(addr).build();
@@ -203,7 +171,6 @@ class AddressServiceTest {
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
-    when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.of(LocalDate.now().minusDays(1)));
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
@@ -218,7 +185,6 @@ class AddressServiceTest {
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
-    when(aggregateAddressTxBalanceRepository.getMaxDay()).thenReturn(Optional.of(LocalDate.now().minusDays(1)));
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);

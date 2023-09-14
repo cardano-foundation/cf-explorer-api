@@ -53,6 +53,30 @@ import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
+import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
+
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -219,103 +243,40 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(
-      String tokenId, AnalyticType type) throws ExecutionException, InterruptedException {
+  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type) {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
         .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
 
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
-    List<CompletableFuture<TokenVolumeAnalyticsResponse>> futureTokenAnalytics = new ArrayList<>();
-    final int NUMBER_PARALLEL = 5;
-    ExecutorService fixedExecutor = Executors.newFixedThreadPool(NUMBER_PARALLEL);
 
-    final Optional<LocalDate> maxDateAgg = aggregateAddressTokenRepository.getMaxDay();
-    for (int i = 0; i < dates.size() - 1; i++) {
-      LocalDateTime startRange = dates.get(i);
-      LocalDateTime endRange = dates.get(i + 1);
-      futureTokenAnalytics.add(CompletableFuture.supplyAsync(
-          () -> getTokenVolumeAnalyticsResponse(multiAsset, type, startRange, endRange, maxDateAgg),
-          fixedExecutor)
-      );
-    }
-    CompletableFuture.allOf(futureTokenAnalytics.toArray(new CompletableFuture[0])).join();
     List<TokenVolumeAnalyticsResponse> responses = new ArrayList<>();
-
-    for (CompletableFuture<TokenVolumeAnalyticsResponse> fRes : futureTokenAnalytics) {
-      responses.add(fRes.get());
-    }
-    return responses;
-  }
-
-  private TokenVolumeAnalyticsResponse getTokenVolumeAnalyticsResponse(
-      MultiAsset multiAsset, AnalyticType type,
-      LocalDateTime fromDateTime, LocalDateTime toDateTime,
-      Optional<LocalDate> maxDateAgg) {
-
-    BigInteger balance;
-    if (type == AnalyticType.ONE_DAY) {
-      balance = addressTokenRepository.sumBalanceBetweenTx(
-          multiAsset, Timestamp.valueOf(fromDateTime), Timestamp.valueOf(toDateTime)
-      ).orElse(BigInteger.ZERO);
-
-    } else {
-      // aggregate address token is total volume of token from 00:00:00 to 23:59:59
-      // so to get volume of token between from date and to date, we need to sum between from date - 1 and to date - 1
-      LocalDate from = fromDateTime.toLocalDate().minusDays(1);
-      LocalDate to = toDateTime.toLocalDate().minusDays(1);
-      boolean isNotHaveAggData = maxDateAgg.isEmpty() || !from.isBefore(maxDateAgg.get());
-      if (isNotHaveAggData) {
-        balance = addressTokenRepository.sumBalanceBetweenTx(
-            multiAsset,
-            Timestamp.valueOf(from.atTime(LocalTime.MAX)),
-            Timestamp.valueOf(to.atTime(LocalTime.MAX))
+    if (AnalyticType.ONE_DAY.equals(type)) {
+      for (int i = 0; i < dates.size() - 1; i++) {
+        BigInteger balance = addressTokenRepository.sumBalanceBetweenTx(
+            multiAsset, Timestamp.valueOf(dates.get(i)), Timestamp.valueOf(dates.get(i + 1))
         ).orElse(BigInteger.ZERO);
-      } else {
-        balance = getBalance(multiAsset, from, to, maxDateAgg.get());
+        responses.add(new TokenVolumeAnalyticsResponse(dates.get(i), balance));
+      }
+    } else {
+      dates.remove(dates.size() - 1);
+      List<AggregateAddressToken> aggregateAddressTokens = aggregateAddressTokenRepository
+          .findAllByIdentAndDayBetween(
+              multiAsset.getId(),
+              dates.get(0).toLocalDate(),
+              dates.get(dates.size() - 1).toLocalDate());
+      Map<LocalDate, BigInteger> aggregateAddressTokenMap = StreamUtil.toMap(
+          aggregateAddressTokens,
+          AggregateAddressToken::getDay,
+          AggregateAddressToken::getBalance
+      );
+      for (LocalDateTime date : dates) {
+        TokenVolumeAnalyticsResponse tokenVolume = new TokenVolumeAnalyticsResponse(
+            date, aggregateAddressTokenMap.getOrDefault(date.toLocalDate(), BigInteger.ZERO));
+        responses.add(tokenVolume);
       }
     }
-    if (BigInteger.ZERO.equals(balance)) {
-      balance = checkNoRecord(multiAsset, type, fromDateTime, toDateTime) ? null : balance;
-    }
-    return new TokenVolumeAnalyticsResponse(fromDateTime, balance);
-  }
-
-  private boolean checkNoRecord(
-      MultiAsset multiAsset, AnalyticType type,
-      LocalDateTime fromDateTime, LocalDateTime toDateTime
-  ) {
-    Timestamp startRange;
-    Timestamp endRange;
-    if (type == AnalyticType.ONE_DAY) {
-      startRange = Timestamp.valueOf(fromDateTime);
-      endRange = Timestamp.valueOf(toDateTime);
-    } else {
-      startRange = Timestamp.valueOf(fromDateTime.toLocalDate().atTime(LocalTime.MAX));
-      endRange = Timestamp.valueOf(toDateTime.toLocalDate().atTime(LocalTime.MAX));
-    }
-    Long numberBalanceRecord = addressTokenRepository.countRecord(multiAsset, startRange, endRange);
-    return numberBalanceRecord == null || numberBalanceRecord == 0;
-  }
-
-  private BigInteger getBalance(MultiAsset multiAsset,
-      LocalDate from, LocalDate to, LocalDate maxDateAgg) {
-    boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
-    if (isNotMissingAggregationData) {
-      return aggregateAddressTokenRepository
-          .sumBalanceInTimeRange(multiAsset.getId(), from, to).orElse(BigInteger.ZERO);
-    }
-
-    BigInteger balanceAgg = aggregateAddressTokenRepository
-        .sumBalanceInTimeRange(multiAsset.getId(), from, maxDateAgg)
-        .orElse(BigInteger.ZERO);
-
-    BigInteger balanceNotAgg = addressTokenRepository.sumBalanceBetweenTx(
-        multiAsset,
-        Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
-        Timestamp.valueOf(to.atTime(LocalTime.MAX))
-    ).orElse(BigInteger.ZERO);
-    return balanceAgg.add(balanceNotAgg);
+    return responses;
   }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
