@@ -125,14 +125,15 @@ public class BlockServiceImpl implements BlockService {
   private Page<Block> getBlockFilterListByTimeAsc(Pageable pageable, long totalElements) {
     long firstBlockIndexOfPage = (long) pageable.getPageNumber() * pageable.getPageSize();
     long currentMaxBlockNo = blockRepository.findCurrentBlock().map(Long::valueOf).orElse(0L);
-
+    long minBlockNo = blockRepository.findMinBlockNo();
     // if current max block no is less than first block index of page, then call
     // getBlocksAscByAFewPageAhead
     if (currentMaxBlockNo < firstBlockIndexOfPage) {
       return getBlocksAscByAFewPageAhead(
           pageable, totalElements, firstBlockIndexOfPage, currentMaxBlockNo);
     }
-
+    // if blockNo start from 0, then the first block index of page should minus 1
+    firstBlockIndexOfPage = firstBlockIndexOfPage - ((minBlockNo == 0) ? 1 : 0);
     // get first block id by first block no of page
     long firstBlockId =
         blockRepository.findFirstByBlockNo(firstBlockIndexOfPage).map(Block::getId).orElse(0L);
