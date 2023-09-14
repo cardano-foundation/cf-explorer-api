@@ -304,10 +304,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public StakeAnalyticResponse getStakeAnalytics() {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
-    Boolean isKoiOs = fetchRewardDataService.isKoiOs();
+    Boolean useKoios = fetchRewardDataService.useKoios();
     BigInteger activeStake;
     BigInteger liveStake;
-    if (Boolean.TRUE.equals(isKoiOs)) {
+    if (Boolean.TRUE.equals(useKoios)) {
       activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
       liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
     } else {

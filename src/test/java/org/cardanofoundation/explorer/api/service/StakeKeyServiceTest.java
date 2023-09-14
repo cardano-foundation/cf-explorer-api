@@ -319,7 +319,7 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testGetTopDelegators_thenReturnKoiOs() {
+    void testGetTopDelegators_thenReturnKoios() {
         Pageable pageable = PageRequest.of(0, 10);
         StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
         when(sap.getStakeAddress()).thenReturn("address");
@@ -353,7 +353,7 @@ public class StakeKeyServiceTest {
     void testGetStakeAnalytics_thenReturn() {
         ReflectionTestUtils.setField(stakeKeyService, "network", "mainnet");
         when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(400));
-        when(fetchRewardDataService.isKoiOs()).thenReturn(false);
+        when(fetchRewardDataService.useKoios()).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("TOTAL_ACTIVATE_STAKE_mainnet_400")).thenReturn(BigInteger.ONE);
         when(valueOperations.get("TOTAL_LIVE_STAKE_mainnet")).thenReturn(BigInteger.TWO);
@@ -364,10 +364,10 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testGetStakeAnalytics_thenReturnKoiOs() {
+    void testGetStakeAnalytics_thenReturnKoios() {
         ReflectionTestUtils.setField(stakeKeyService, "network", "mainnet");
         when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(400));
-        when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+        when(fetchRewardDataService.useKoios()).thenReturn(true);
         when(poolInfoRepository.getTotalActiveStake(400)).thenReturn(BigInteger.ONE);
         when(poolInfoRepository.getTotalLiveStake(400)).thenReturn(BigInteger.TWO);
 

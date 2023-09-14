@@ -138,7 +138,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   @Override
   public BaseFilterResponse<RewardResponse> listReward(String poolView, Pageable pageable) {
     BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
-    if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
+    if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
       List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
       if (Boolean.FALSE.equals(fetchRewardDataService.checkRewardForPool(rewardAccounts))
           && Boolean.FALSE.equals(fetchRewardDataService.fetchRewardForPool(rewardAccounts))) {
@@ -169,7 +169,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setPoolView(projection.getPoolView());
       res.setRewardAccounts(poolUpdateRepository.findRewardAccountByPoolId(projection.getId()));
       Integer epochNo = epochRepository.findCurrentEpochNo().orElse(null);
-      if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
+      if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
         res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
         Boolean isReward = fetchRewardDataService.checkRewardForPool(res.getRewardAccounts());
         if (Boolean.FALSE.equals(isReward)) {
@@ -226,8 +226,8 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
         deRegistrations.add(deRegistrationRes);
         epochNos.add(projection.getRetiringEpoch());
       });
-      boolean isKoiOs = fetchRewardDataService.isKoiOs();
-      if (isKoiOs) {
+      boolean useKoios = fetchRewardDataService.useKoios();
+      if (useKoios) {
         List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolId(poolInfo.getId());
         boolean isReward = fetchRewardDataService.checkRewardForPool(rewardAccounts);
         if (!isReward) {
@@ -335,7 +335,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     PoolHash pool = poolHashRepository.findByView(poolView).orElseThrow(() -> new BusinessException(
         CommonErrorCode.UNKNOWN_ERROR));
-    if (fetchRewardDataService.isKoiOs()) {
+    if (fetchRewardDataService.useKoios()) {
       List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
       if (!fetchRewardDataService.checkRewardForPool(rewardAccounts)) {
         fetchRewardDataService.fetchRewardForPool(rewardAccounts);
@@ -350,7 +350,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   public BaseFilterResponse<RewardResponse> listRewardFilter(String poolView, Integer beginEpoch,
                                                        Integer endEpoch, Pageable pageable) {
     BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
-    if (Boolean.TRUE.equals(fetchRewardDataService.isKoiOs())) {
+    if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
       List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
       if (Boolean.FALSE.equals(fetchRewardDataService.checkRewardForPool(rewardAccounts))
           && Boolean.FALSE.equals(fetchRewardDataService.fetchRewardForPool(rewardAccounts))) {
