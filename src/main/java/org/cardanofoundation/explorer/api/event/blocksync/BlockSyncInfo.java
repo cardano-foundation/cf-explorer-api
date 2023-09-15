@@ -12,5 +12,5 @@ public class BlockSyncInfo {
   private long blockNo;
   private String blockHash;
   private EpochSummary epochSummary;
-  private boolean hashTx;
+  private boolean hasTx;
 }
