@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
@@ -72,13 +73,12 @@ import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -203,14 +203,15 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
-    if(Objects.nonNull(search)){
-      search = search.toLowerCase();
-    }
-    if (search.isBlank()) {
+    if (StringUtils.isEmpty(search)) {
       search = null;
+      pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, BaseEntity_.ID));
+    } else {
+      search = search.toLowerCase();
+      String poolNameLength = "poolNameLength";
+      pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, poolNameLength, PoolOfflineData_.POOL_NAME));
     }
-    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search,
-        pageable);
+    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
     Integer epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
     List<PoolResponse> poolList = new ArrayList<>();
     Set<Long> poolIds = new HashSet<>();
@@ -292,6 +293,21 @@ public class DelegationServiceImpl implements DelegationService {
     response.setCurrentPage(pageable.getPageNumber());
 
     return response;
+  }
+
+  /**
+   * Create pageable with sort, if sort is unsorted then use default sort
+   * @param pageable page information
+   * @param defaultSort default sort condition
+   * @return pageable with sort
+   */
+  private Pageable createPageableWithSort(Pageable pageable, Sort defaultSort) {
+    Sort sort = pageable.getSort();
+    if (sort.isUnsorted()) {
+      sort = defaultSort;
+    }
+    pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    return pageable;
   }
 
   @Override

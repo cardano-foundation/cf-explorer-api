@@ -295,7 +295,7 @@ class DelegationServiceTest {
   @Test
   void testGetDataForPoolTable_withSearch() {
     // Mocked input data
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
     String search = "example";
 
     // Mocked repository responses
@@ -327,7 +327,7 @@ class DelegationServiceTest {
   @Test
   void testGetDataForPoolTable_withoutSearch() {
     // Mocked input data
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
     String search = "";
 
     // Mocked repository responses
@@ -352,7 +352,7 @@ class DelegationServiceTest {
   @Test
   void testGetDataForPoolTable_withSearchKoiOs() {
     // Mocked input data
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
     String search = "example";
 
     // Mocked repository responses
@@ -393,7 +393,7 @@ class DelegationServiceTest {
   @Test
   void testGetDataForPoolTable_withoutSearchException() {
     // Mocked input data
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
     String search = "";
 
     // Mocked repository responses
