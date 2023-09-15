@@ -127,6 +127,7 @@ public class TokenServiceImpl implements TokenService {
             multiAsset.setTxCount(item.getTxCount());
             multiAsset.setSupply(item.getSupply());
             multiAsset.setTotalVolume(item.getTotalVolume());
+            multiAsset.setTime(item.getTime());
             return multiAsset;
           }
       );
