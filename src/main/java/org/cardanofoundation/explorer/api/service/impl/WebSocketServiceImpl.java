@@ -3,13 +3,13 @@ package org.cardanofoundation.explorer.api.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.blocksync.BlockSyncInfo;
-import org.cardanofoundation.explorer.api.event.blocksync.BlockSyncMessage;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
 import org.cardanofoundation.explorer.api.repository.BlockRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.MarketDataService;
 import org.cardanofoundation.explorer.api.service.WebSocketService;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,7 +39,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         BlockSyncInfo.builder()
             .blockNo(block.getBlockNo())
             .blockHash(block.getHash())
-            .hashTx(block.getTxCount() > 0)
+            .hasTx(block.getTxCount() > 0)
             .epochSummary(epochService.getCurrentEpochSummary())
             .build();
     return WebSocketMessage.builder()
@@ -54,7 +54,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         BlockSyncInfo.builder()
             .blockNo(blockSyncMessage.getLastBlockNo())
             .blockHash(blockSyncMessage.getLastBlockHash())
-            .hashTx(blockSyncMessage.isHashTx())
+            .hasTx(blockSyncMessage.isHasTx())
             .epochSummary(epochService.getCurrentEpochSummary())
             .build();
     return WebSocketMessage.builder()
