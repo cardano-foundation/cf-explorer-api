@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.search.AddressSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.PoolSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.SearchResponse;
@@ -10,6 +11,7 @@ import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.SearchService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -86,8 +88,12 @@ public class SearchServiceImpl implements SearchService {
     if (token.isPresent()) {
         searchResponse.setToken(new TokenSearchResponse(token.get().getNameView(), token.get().getFingerprint()));
     } else {
-      Pageable pageable = PageRequest.of(0, 1);
+      Pageable pageable = PageRequest.of(0, 2);
       var tokenList = multiAssetRepository.findByNameViewLike(query, pageable);
+      if (Integer.valueOf(1).equals(tokenList.size())) {
+        MultiAsset multiAsset = tokenList.get(0);
+        searchResponse.setToken(new TokenSearchResponse(multiAsset.getNameView(), multiAsset.getFingerprint()));
+      }
       if(!CollectionUtils.isEmpty(tokenList)) {
         searchResponse.setValidTokenName(true);
       }
@@ -134,8 +140,12 @@ public class SearchServiceImpl implements SearchService {
     if (Objects.nonNull(pool)) {
       searchResponse.setPool(new PoolSearchResponse(pool.getPoolName(), pool.getPoolView(), pool.getIcon()));
     } else {
-      Pageable pageable = PageRequest.of(0, 1);
+      Pageable pageable = PageRequest.of(0, 2);
       var poolList = poolHashRepository.findByPoolNameLike(query, pageable);
+      if (Integer.valueOf(1).equals(poolList.size())) {
+        PoolInfoProjection poolInfo = poolList.get(0);
+        searchResponse.setPool(new PoolSearchResponse(poolInfo.getPoolName(), poolInfo.getPoolView(), poolInfo.getIcon()));
+      }
       if(!CollectionUtils.isEmpty(poolList)) {
         searchResponse.setValidPoolName(true);
       }

@@ -1,10 +1,14 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.isWithinRange;
+
+import jakarta.annotation.PostConstruct;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -21,26 +25,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import jakarta.annotation.PostConstruct;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -58,14 +51,20 @@ import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.service.GenesisService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
 import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.isWithinRange;
+import org.cardanofoundation.ledgersync.common.model.ByronGenesis;
+import org.cardanofoundation.ledgersync.common.model.ShelleyGenesis;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 @Service
 @Log4j2
@@ -76,6 +75,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   public static final String SET = "set";
   public static final String PROPOSAL = "Proposal";
   public static final String PROTOCOL_HISTORY = "PROTOCOL_HISTORY_ALL";
+
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
   final EpochRepository epochRepository;
@@ -83,12 +83,17 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   final CostModelRepository costModelRepository;
   final ProtocolMapper protocolMapper;
   final RedisTemplate<String, HistoriesProtocol> redisTemplate;
+  final GenesisService genesisService;
 
   @Value("${application.network}")
   String network;
   @Value("${application.epoch.days}")
   public int epochDays;
   public static final String GET = "get";
+  @Value("${genesis.shelley}")
+  String shelleyUrl;
+  @Value("${genesis.byron}")
+  String byronUrl;
   // key::ProtocolType, value::getter>
   Map<ProtocolType, Method> epochParamMethods;
 
@@ -106,8 +111,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   @Override
   public HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypesInput,
-                                                        BigInteger startTime,
-                                                        BigInteger endTime) {
+      BigInteger startTime,
+      BigInteger endTime) {
     final String redisKey = String.format("%s_%s", network, PROTOCOL_HISTORY).toUpperCase();
 
     boolean isGetAll = Boolean.FALSE;
@@ -312,11 +317,11 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                     final var changeTime =
                         ((boolean) latestParamHistoryMethods.get(protocolType).getSecond()
                             .invoke(changeHistory)) ? changeHistory.getBlockTime()
-                                                    : changeHistory.getEpochTime();
+                            : changeHistory.getEpochTime();
                     final var transactionHash =
                         ((boolean) latestParamHistoryMethods.get(protocolType).getSecond()
                             .invoke(changeHistory)) ? changeHistory.getHash()
-                                                    : null;
+                            : null;
 
                     if (protocolType.equals(ProtocolType.COST_MODEL)) {
                       changeValue = costModelMap.get(changeValue);
@@ -350,16 +355,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   @Override
   public FixedProtocol getFixedProtocols() {
-    FixedProtocol fixedProtocol = null;
-    try {
-      return protocolMapper.mapFixedProtocol(network);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
-
-    log.error("{} network is not prepared ", network);
-
-    return fixedProtocol;
+    FixedProtocol fixedProtocol = getFixedProtocolFromShelleyGenesis(shelleyUrl);
+    return getFixedProtocolFromByronGenesis(byronUrl, fixedProtocol);
   }
 
   /**
@@ -383,7 +380,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @return
    */
   public static ProtocolHistory getChangeProtocol(Object currentProtocol, Tx tx,
-                                                  AtomicReference<LocalDateTime> timeChange) {
+      AtomicReference<LocalDateTime> timeChange) {
 
     timeChange.set(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
     return ProtocolHistory.builder()
@@ -495,13 +492,13 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @param protocolTypes  list protocol type must filter
    */
   private void getProtocolChangeInOneEpoch(List<ParamHistory> paramHistories,
-                                           Map<Long, Tx> txs, Protocols protocols,
-                                           List<ProtocolType> protocolTypes) {
+      Map<Long, Tx> txs, Protocols protocols,
+      List<ProtocolType> protocolTypes) {
     mapProtocols(paramHistories, protocols, txs, protocolTypes);
   }
 
   private void mapProtocols(List<ParamHistory> paramProposals, Protocols protocols,
-                            Map<Long, Tx> txs, List<ProtocolType> protocolTypes) {
+      Map<Long, Tx> txs, List<ProtocolType> protocolTypes) {
 
     paramProposals
         .stream()
@@ -568,8 +565,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @return
    */
   private ProtocolHistory getChangeCostModelProtocol(Long costModelId,
-                                                     Tx tx,
-                                                     AtomicReference<LocalDateTime> timeChange) {
+      Tx tx,
+      AtomicReference<LocalDateTime> timeChange) {
 
     Optional<CostModel> costModel = costModelRepository.findById(costModelId);
     timeChange.set(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
@@ -589,7 +586,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @param protocolTypes protocol type must filter
    */
   private void fillMissingProtocolField(Protocols protocols, EpochParam epochParam,
-                                        List<ProtocolType> protocolTypes) {
+      List<ProtocolType> protocolTypes) {
     protocolsMethods.entrySet()
         .stream()
         .filter(entry -> protocolTypes.contains(entry.getKey()))
@@ -615,7 +612,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @param protocolTypes
    */
   private void handleHistoriesChange(HistoriesProtocol historiesProtocol,
-                                     List<ProtocolType> protocolTypes) {
+      List<ProtocolType> protocolTypes) {
     historiesProtocolMethods.entrySet()
         .stream().filter(entry -> protocolTypes.contains(entry.getKey()))
         .parallel()
@@ -829,9 +826,9 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @param epochTime         map epoch time key::epoch no,value::EpochTimeProjection
    */
   private void filterProtocolTime(Timestamp startFilterTime, Timestamp endFilterTime,
-                                  HistoriesProtocol historiesProtocol,
-                                  List<ProtocolType> protocolTypes,
-                                  Map<Integer, EpochTimeProjection> epochTime) {
+      HistoriesProtocol historiesProtocol,
+      List<ProtocolType> protocolTypes,
+      Map<Integer, EpochTimeProjection> epochTime) {
 
     List<Entry<ProtocolType, Pair<Method, Method>>> methods = historiesProtocolMethods
         .entrySet()
@@ -907,9 +904,9 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * @return
    */
   List<Integer> getOutRangeIndex(List<EpochChange> list,
-                                 Timestamp startFilter,
-                                 Timestamp endFilter,
-                                 Map<Integer, EpochTimeProjection> epochTime) {
+      Timestamp startFilter,
+      Timestamp endFilter,
+      Map<Integer, EpochTimeProjection> epochTime) {
 
     return IntStream.range(BigInteger.ZERO.intValue(), list.size())
         .boxed()
@@ -993,6 +990,43 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       Pair<Method, Method> methodPair = Pair.of(getter.get(), getterProposal.get());
       latestParamHistoryMethods.put(ProtocolType.valueStringOf(field), methodPair);
     }
+  }
+
+  private FixedProtocol getFixedProtocolFromShelleyGenesis(String genesisShelley) {
+    log.info("Read protocol data from url {}", genesisShelley);
+    ShelleyGenesis shelley = genesisService.fillContentShelley(genesisShelley);
+    if (Objects.isNull(shelley)) {
+      return null;
+    }
+    return FixedProtocol.builder()
+        .activeSlotsCoeff(shelley.getActiveSlotsCoeff())
+        .genDelegs(shelley.getGenDelegs())
+        .updateQuorum(shelley.getUpdateQuorum())
+        .networkId(shelley.getNetworkId())
+        .initialFunds(shelley.getInitialFunds())
+        .maxLovelaceSupply(shelley.getMaxLovelaceSupply())
+        .networkMagic(shelley.getNetworkMagic())
+        .epochLength(shelley.getEpochLength())
+        .slotsPerKESPeriod(shelley.getSlotsPerKESPeriod())
+        .slotLength(shelley.getSlotLength())
+        .maxKESEvolutions(shelley.getMaxKESEvolutions())
+        .securityParam(shelley.getSecurityParam())
+        .build();
+  }
+
+  private FixedProtocol getFixedProtocolFromByronGenesis(String genesisByron,
+      FixedProtocol fixedProtocol) {
+    log.info("Read protocol data from url {}", genesisByron);
+    ByronGenesis byron = genesisService.fillContentByron(genesisByron);
+    if (Objects.isNull(fixedProtocol) || Objects.isNull(byron) || Objects.isNull(
+        byron.getStartTime())) {
+      return fixedProtocol;
+    }
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    fixedProtocol.setTimestamp(
+        dateFormat.format(new Date(new Timestamp(byron.getStartTime() * 1000L).getTime())));
+    return fixedProtocol;
   }
 
   @PostConstruct

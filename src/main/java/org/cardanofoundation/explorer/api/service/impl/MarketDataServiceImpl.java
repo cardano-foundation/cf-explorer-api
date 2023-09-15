@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
@@ -20,9 +21,6 @@ public class MarketDataServiceImpl implements MarketDataService {
   @Value("${application.api.coin.gecko.market.base-url}")
   private String apiMarketDataUrl;
 
-  @Value("${application.api.coin.gecko.market.interval-time}")
-  private int marketTtl;
-
   private final RestTemplate restTemplate;
 
   private final ApplicationEventPublisher applicationEventPublisher;
@@ -37,26 +35,38 @@ public class MarketDataServiceImpl implements MarketDataService {
     if (cachedData == null) {
       cachedData =
           restTemplate.getForObject(String.format(apiMarketDataUrl, currency), Object.class);
-      redisTemplate.opsForValue().set(redisKey, cachedData, Duration.ofSeconds(marketTtl));
+      redisTemplate.opsForValue().set(redisKey, cachedData);
     }
     return cachedData;
   }
 
+  public void publishMarketData(String currency) {
+    String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
+    Object marketDataCachedObject = redisTemplate.opsForValue().get(redisKey);
+    Object marketDataObject =
+        restTemplate.getForObject(String.format(apiMarketDataUrl, currency), Object.class);
+    LinkedHashMap<String, Object> marketData =
+        (LinkedHashMap<String, Object>) ((ArrayList) marketDataObject).get(0);
+    LinkedHashMap<String, Object> marketDataCached =
+        (LinkedHashMap<String, Object>) ((ArrayList) marketDataCachedObject).get(0);
+    if (!marketData
+        .get("last_updated")
+        .toString()
+        .equals(marketDataCached.get("last_updated").toString())) {
+      WebSocketMessage messageCurrentPrice = WebSocketMessage.builder().payload(marketDataObject).build();
+      if (currency.equals("usd")) {
+        messageCurrentPrice.setEventType(WebSocketEventType.CURRENT_PRICE_USD);
+      } else if (currency.equals("btc")) {
+        messageCurrentPrice.setEventType(WebSocketEventType.CURRENT_PRICE_BTC);
+      }
+      redisTemplate.opsForValue().set(redisKey, marketDataObject);
+      applicationEventPublisher.publishEvent(new WebSocketEvent(messageCurrentPrice) {});
+    }
+  }
+
   @Scheduled(fixedDelayString = "${application.api.coin.gecko.market.delay-time}")
   public void publishMarketData() {
-    WebSocketMessage messagePriceUsd =
-        WebSocketMessage.builder()
-            .eventType(WebSocketEventType.CURRENT_PRICE_USD)
-            .payload(getMarketData("usd"))
-            .build();
-
-    WebSocketMessage messagePriceBtc =
-        WebSocketMessage.builder()
-            .eventType(WebSocketEventType.CURRENT_PRICE_BTC)
-            .payload(getMarketData("btc"))
-            .build();
-
-    applicationEventPublisher.publishEvent(new WebSocketEvent(messagePriceUsd) {});
-    applicationEventPublisher.publishEvent(new WebSocketEvent(messagePriceBtc) {});
+    publishMarketData("usd");
+    publishMarketData("btc");
   }
 }

@@ -28,11 +28,12 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   List<PoolDetailEpochProjection> findEpochByPool(@Param("poolId") Long poolId, @Param("epochNo") Set<Integer> epochNo);
 
   @Query(value =
-      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, pu.margin AS margin "
+      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, "
+          + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-          + "WHERE :param IS NULL OR ph.view = :param OR LOWER(po.poolName) LIKE CONCAT(:param, '%') OR LOWER(po.tickerName) LIKE CONCAT(:param, '%') ")
+          + "WHERE :param IS NULL OR ph.view = :param OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%') OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%') ")
   Page<PoolListProjection> findAllByPoolViewAndPoolName(@Param("param") String param, Pageable pageable);
 
   @Query(value = "SELECT ph.id FROM PoolHash ph "
@@ -83,7 +84,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       + "FROM PoolHash ph "
       + "INNER JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.id = "
       + "(SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id ) "
-      + "WHERE LOWER(pod.poolName) LIKE CONCAT(:query, '%') OR "
-      + "LOWER(pod.tickerName) LIKE CONCAT(:query, '%') ")
+      + "WHERE LOWER(pod.poolName) LIKE CONCAT('%', :query, '%') OR "
+      + "LOWER(pod.tickerName) LIKE CONCAT('%', :query, '%') ")
   List<PoolInfoProjection> findByPoolNameLike(@Param("query") String query, Pageable pageable);
 }

@@ -43,5 +43,5 @@ public interface FetchRewardDataService {
 
   List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNo);
 
-  Boolean isKoiOs();
+  Boolean useKoios();
 }

@@ -1,10 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
@@ -14,10 +10,7 @@ import org.cardanofoundation.explorer.api.mapper.AddressMapper;
 import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
-import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
+import org.cardanofoundation.explorer.api.model.response.address.*;
 import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.*;
@@ -37,7 +30,6 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -312,10 +304,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public StakeAnalyticResponse getStakeAnalytics() {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
-    Boolean isKoiOs = fetchRewardDataService.isKoiOs();
+    Boolean useKoios = fetchRewardDataService.useKoios();
     BigInteger activeStake;
     BigInteger liveStake;
-    if (Boolean.TRUE.equals(isKoiOs)) {
+    if (Boolean.TRUE.equals(useKoios)) {
       activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
       liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
     } else {
@@ -334,94 +326,44 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(
-      String stakeKey, AnalyticType type) throws ExecutionException, InterruptedException {
+  public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type) {
 
-    StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey)
+    StakeAddress addr = stakeAddressRepository.findByView(stakeKey)
         .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
-    List<CompletableFuture<StakeAnalyticBalanceResponse>> futureStakeAnalytics = new ArrayList<>();
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
-    ExecutorService fixedExecutor = Executors.newFixedThreadPool(5);
-    final Optional<LocalDate> maxDateAgg = aggregateAddressTxBalanceRepository.getMaxDay();
-    for (int i = 1; i < dates.size(); i++) {
-      LocalDateTime analyticTime = dates.get(i);
-      futureStakeAnalytics.add(CompletableFuture.supplyAsync(
-          () -> getBalanceOfStake(stakeAddress, analyticTime, type, maxDateAgg), fixedExecutor)
-      );
-    }
-    CompletableFuture.allOf(futureStakeAnalytics.toArray(new CompletableFuture[0])).join();
-    List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
 
-    for (CompletableFuture<StakeAnalyticBalanceResponse> fRes : futureStakeAnalytics) {
-      responses.add(fRes.get());
+    var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
+        dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
+    List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
+    if (AnalyticType.ONE_DAY.equals(type)) {
+      responses.add(new StakeAnalyticBalanceResponse(dates.get(0), fromBalance));
+      for (int i = 1; i < dates.size(); i++) {
+        Optional<BigInteger> balance = addressTxBalanceRepository
+            .getBalanceByStakeAddressAndTime(addr, Timestamp.valueOf(dates.get(i-1)), Timestamp.valueOf(dates.get(i)));
+        if (balance.isPresent()) {
+          fromBalance = fromBalance.add(balance.get());
+        }
+        responses.add(new StakeAnalyticBalanceResponse(dates.get(i), fromBalance));
+      }
+    } else {
+      List<AggregateAddressBalanceProjection> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
+          .findAllByStakeAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
+              dates.get(dates.size() - 1).toLocalDate());
+
+      // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
+      // So we need to add 1 day to display correct data
+      Map<LocalDate, BigInteger> mapBalance = aggregateAddressTxBalances.stream()
+          .collect(Collectors.toMap(balance -> balance.getDay().plusDays(1),
+              AggregateAddressBalanceProjection::getBalance));
+      for (LocalDateTime date : dates) {
+        if (mapBalance.containsKey(date.toLocalDate())) {
+          fromBalance = fromBalance.add(mapBalance.get(date.toLocalDate()));
+        }
+        responses.add(new StakeAnalyticBalanceResponse(date, fromBalance));
+      }
     }
     return responses;
-  }
-
-  private StakeAnalyticBalanceResponse getBalanceOfStake(
-      StakeAddress stakeAddress, LocalDateTime to,
-      AnalyticType type, Optional<LocalDate> maxDateAgg) {
-    BigInteger balance;
-    if (maxDateAgg.isEmpty()) {
-      if (type == AnalyticType.ONE_DAY) {
-        balance = addressTxBalanceRepository
-            .getBalanceByStakeAddressAndTime(stakeAddress, Timestamp.valueOf(to))
-            .orElse(BigInteger.ZERO);
-      } else {
-        balance = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
-            stakeAddress, Timestamp.valueOf(to.toLocalDate().atTime(LocalTime.MAX))
-        ).orElse(BigInteger.ZERO);
-      }
-    } else {
-      if (type == AnalyticType.ONE_DAY) {
-        LocalDate previousDay = to.toLocalDate().minusDays(1);
-        BigInteger previousBalance = getBalanceOfStake(stakeAddress, previousDay, maxDateAgg.get());
-        BigInteger extraTimeBalance = addressTxBalanceRepository
-            .getBalanceByStakeAddressAndTime(stakeAddress,
-                Timestamp.valueOf(previousDay.atTime(LocalTime.MAX)), Timestamp.valueOf(to))
-            .orElse(BigInteger.ZERO);
-        balance = previousBalance.add(extraTimeBalance);
-      } else {
-        balance = getBalanceOfStake(stakeAddress, to.toLocalDate(), maxDateAgg.get());
-      }
-    }
-    if (BigInteger.ZERO.equals(balance)) {
-      balance = checkNoRecord(stakeAddress, type, to) ? null : balance;
-    }
-    return new StakeAnalyticBalanceResponse(to, balance);
-  }
-
-  private boolean checkNoRecord(StakeAddress stakeAddress, AnalyticType type, LocalDateTime toDateTime) {
-    Timestamp endRange;
-    if (type == AnalyticType.ONE_DAY) {
-      endRange = Timestamp.valueOf(toDateTime);
-    } else {
-      endRange = Timestamp.valueOf(toDateTime.toLocalDate().atTime(LocalTime.MAX));
-    }
-    Long numberBalanceRecord = addressTxBalanceRepository.countRecord(stakeAddress, endRange);
-    return numberBalanceRecord == null || numberBalanceRecord ==  0;
-  }
-
-  private BigInteger getBalanceOfStake(
-      StakeAddress stakeAddress, LocalDate to, LocalDate maxDateAgg) {
-    boolean isNotMissingAggregationData = !to.isAfter(maxDateAgg);
-    if (isNotMissingAggregationData) {
-      return aggregateAddressTxBalanceRepository
-          .sumBalanceByStakeAddressId(stakeAddress.getId(), to)
-          .orElse(BigInteger.ZERO);
-    }
-
-    BigInteger balanceAgg = aggregateAddressTxBalanceRepository
-        .sumBalanceByStakeAddressId(stakeAddress.getId(), maxDateAgg)
-        .orElse(BigInteger.ZERO);
-
-    BigInteger balanceNotAgg = addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
-        stakeAddress,
-        Timestamp.valueOf(maxDateAgg.atTime(LocalTime.MAX)),
-        Timestamp.valueOf(to.atTime(LocalTime.MAX))
-    ).orElse(BigInteger.ZERO);
-    return balanceAgg.add(balanceNotAgg);
   }
 
   @Override

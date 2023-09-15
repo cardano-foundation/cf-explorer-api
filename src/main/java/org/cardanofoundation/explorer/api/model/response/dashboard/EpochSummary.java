@@ -26,4 +26,5 @@ public class EpochSummary {
   private LocalDateTime endTime;
 
   private BigInteger circulatingSupply;
+  private Integer blkCount;
 }

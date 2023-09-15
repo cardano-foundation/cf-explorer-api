@@ -2,6 +2,8 @@ package org.cardanofoundation.explorer.api.repository;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import java.util.List;
 import java.util.Optional;
@@ -13,10 +15,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
-  @Query("SELECT ma FROM MultiAsset ma "
-      + " WHERE ma.fingerprint = :query OR LOWER(ma.nameView) LIKE CONCAT(:query, '%')"
-      + " ORDER BY LENGTH(ma.nameView) ASC, ma.txCount DESC")
-  Page<MultiAsset> findAll(@Param("query") String query, Pageable pageable);
+  @Query("SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ma.txCount as txCount,"
+      + " ma.fingerprint as fingerprint, ma.supply as supply, ma.totalVolume as totalVolume, ma.time as time,"
+      + " LENGTH(ma.nameView) as nameViewLength"
+      + " FROM MultiAsset ma "
+      + " WHERE ma.fingerprint = :query OR LOWER(ma.nameView) LIKE CONCAT('%', :query, '%')")
+  Page<TokenProjection> findAll(@Param("query") String query, Pageable pageable);
 
   @Query("select multiAsset from MultiAsset multiAsset")
   List<MultiAsset> findMultiAssets(Pageable pageable);
@@ -33,6 +37,6 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       + "WHERE tx.id = (SELECT max(adt.txId) FROM AddressToken adt WHERE adt.multiAsset = :multiAsset)")
   Timestamp getLastActivityTimeOfToken(@Param("multiAsset") MultiAsset multiAsset);
 
-  @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE CONCAT(:query, '%') ")
+  @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE CONCAT('%', :query, '%') ")
   List<MultiAsset> findByNameViewLike(@Param("query") String query, Pageable pageable);
 }
