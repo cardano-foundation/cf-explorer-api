@@ -205,7 +205,7 @@ public class PoolReportServiceTest {
                                                                       PageRequest.of(0, 1), 0);
     when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(),
                                                        any())).thenReturn(poolReportProjections);
-    when(fetchRewardDataService.isKoiOs()).thenReturn(false);
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
     var expect = new BaseFilterResponse<>(poolReportProjections, List.of());
 
     var response = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 1), username);

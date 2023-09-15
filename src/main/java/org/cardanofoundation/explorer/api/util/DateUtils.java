@@ -18,41 +18,31 @@ public class DateUtils {
 
   private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_DAY = Duration.ofHours(2);
   private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_WEEK = Duration.ofDays(1);
-  private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_MONTH = Duration.ofDays(2);
-  private final TemporalAmount AMOUNT_TO_SUBTRACT_THREE_MONTH = Duration.ofDays(7);
+  private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_MONTH = Duration.ofDays(1);
+  private final TemporalAmount AMOUNT_TO_SUBTRACT_THREE_MONTH = Duration.ofDays(1);
 
   public static List<LocalDateTime> getListDateAnalytic(AnalyticType analyticType) {
     LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
     LocalDateTime startOfToday = currentDate.atStartOfDay();
-    // Default value for one day
-    TemporalAmount amountToSubtract = AMOUNT_TO_SUBTRACT_ONE_DAY;
-    LocalDateTime startMilestone = startOfToday.minusDays(1);
-    switch (analyticType) {
-      case ONE_WEEK -> {
-        amountToSubtract = AMOUNT_TO_SUBTRACT_ONE_WEEK;
-        startMilestone = startOfToday.minusWeeks(1);
-      }
-      case ONE_MONTH -> {
-        amountToSubtract = AMOUNT_TO_SUBTRACT_ONE_MONTH;
-        startMilestone = startOfToday.minusMonths(1);
-      }
-      case THREE_MONTH -> {
-        amountToSubtract = AMOUNT_TO_SUBTRACT_THREE_MONTH;
-        startMilestone = startOfToday.minusMonths(3);
-      }
-    }
-    List<LocalDateTime> dateAnalytics = getDateAnalytics(startOfToday, startMilestone, amountToSubtract);
-    Collections.reverse(dateAnalytics);
-    return dateAnalytics;
+    return switch (analyticType) {
+      case ONE_WEEK ->
+          getDateAnalytics(startOfToday.minusWeeks(1), currentDate.atStartOfDay(), AMOUNT_TO_SUBTRACT_ONE_WEEK);
+      case ONE_MONTH ->
+          getDateAnalytics(startOfToday.minusMonths(1), currentDate.atStartOfDay(), AMOUNT_TO_SUBTRACT_ONE_MONTH);
+      case THREE_MONTH ->
+          getDateAnalytics(startOfToday.minusMonths(3), currentDate.atStartOfDay(), AMOUNT_TO_SUBTRACT_THREE_MONTH);
+      default ->
+          getDateAnalytics(startOfToday.minusDays(1), currentDate.atStartOfDay(), AMOUNT_TO_SUBTRACT_ONE_DAY);
+    };
   }
 
-  private List<LocalDateTime> getDateAnalytics(LocalDateTime startOfToday,
-                                               LocalDateTime startMilestone,
+  private List<LocalDateTime> getDateAnalytics(LocalDateTime start,
+                                               LocalDateTime end,
                                                TemporalAmount amountToSubtract) {
     List<LocalDateTime> dateAnalytics = new ArrayList<>();
-    while (!startOfToday.isBefore(startMilestone)) {
-      dateAnalytics.add(startOfToday);
-      startOfToday = startOfToday.minus(amountToSubtract);
+    while (!start.isAfter(end)) {
+      dateAnalytics.add(start);
+      start = start.plus(amountToSubtract);
     }
     return dateAnalytics;
   }

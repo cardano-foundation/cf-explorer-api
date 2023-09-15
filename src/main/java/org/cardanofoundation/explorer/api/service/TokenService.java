@@ -53,6 +53,5 @@ public interface TokenService {
    * @param type type of analytic
    * @return list analytic volume of token
    */
-  List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type)
-      throws ExecutionException, InterruptedException;
+  List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type);
 }
