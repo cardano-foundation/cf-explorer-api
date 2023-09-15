@@ -10,8 +10,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.mockito.Mockito;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.springframework.core.task.TaskExecutor;
 
@@ -176,15 +178,17 @@ class TokenServiceTest {
   void testFilterToken_WhenQueryNotEmpty() {
     // Setup
     when(aggregatedDataCacheService.getTokenCount()).thenReturn(1);
+    TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
+    when(tokenProjection.getId()).thenReturn(0L);
+    when(tokenProjection.getPolicy()).thenReturn("policy");
+    when(tokenProjection.getName()).thenReturn("name");
+    when(tokenProjection.getNameView()).thenReturn("nameView");
+    when(tokenProjection.getFingerprint()).thenReturn("fingerprint");
+    when(tokenProjection.getTxCount()).thenReturn(0L);
+    when(tokenProjection.getSupply()).thenReturn(new BigInteger("0"));
+    when(tokenProjection.getTotalVolume()).thenReturn(new BigInteger("0"));
 
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("policy")
-        .name("name")
-        .nameView("nameView")
-        .fingerprint("fingerprint")
-        .build();
-    final Page<MultiAsset> multiAssets = new PageImpl<>(List.of(multiAsset));
+    final Page<TokenProjection> multiAssets = new PageImpl<>(List.of(tokenProjection));
 
     when(multiAssetRepository.findAll(anyString(), any(Pageable.class))).thenReturn(
         multiAssets
@@ -197,8 +201,7 @@ class TokenServiceTest {
         .metadata(TokenMetadataResponse.builder().build())
         .build();
 
-    when(tokenMapper.fromMultiAssetToFilterResponse(multiAsset))
-        .thenReturn(tokenFilterResponse);
+    when(tokenMapper.fromMultiAssetToFilterResponse(any())).thenReturn(tokenFilterResponse);
 
     final TokenInfo tokenInfo = TokenInfo.builder()
         .multiAssetId(0L)

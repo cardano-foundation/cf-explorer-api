@@ -71,10 +71,7 @@ import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,11 +109,27 @@ public class TokenServiceImpl implements TokenService {
     List<MultiAsset> dataContent;
     Page<MultiAsset> multiAssets;
     if (StringUtils.isEmpty(query)) {
+      pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
       dataContent = multiAssetRepository.findMultiAssets(pageable);
       multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
     } else {
-      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable);
+      String lengthOfNameView = "nameViewLength";
+      pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
+          .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
+      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable).map(
+          item -> {
+            MultiAsset multiAsset = new MultiAsset();
+            multiAsset.setId(item.getId());
+            multiAsset.setPolicy(item.getPolicy());
+            multiAsset.setName(item.getName());
+            multiAsset.setNameView(item.getNameView());
+            multiAsset.setFingerprint(item.getFingerprint());
+            multiAsset.setTxCount(item.getTxCount());
+            multiAsset.setSupply(item.getSupply());
+            multiAsset.setTotalVolume(item.getTotalVolume());
+            return multiAsset;
+          }
+      );
     }
 
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
@@ -153,6 +166,21 @@ public class TokenServiceImpl implements TokenService {
     });
 
     return new BaseFilterResponse<>(multiAssetResponsesList);
+  }
+
+  /**
+   * Create pageable with sort, if sort is unsorted then use default sort
+   * @param pageable page information
+   * @param defaultSort default sort condition
+   * @return pageable with sort
+   */
+  private Pageable createPageableWithSort(Pageable pageable, Sort defaultSort) {
+    Sort sort = pageable.getSort();
+    if (sort.isUnsorted()) {
+      sort = defaultSort;
+    }
+    pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    return pageable;
   }
 
   @Override
