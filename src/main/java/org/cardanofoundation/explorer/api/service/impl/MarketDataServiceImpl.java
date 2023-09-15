@@ -53,7 +53,7 @@ public class MarketDataServiceImpl implements MarketDataService {
         .get("last_updated")
         .toString()
         .equals(marketDataCached.get("last_updated").toString())) {
-      WebSocketMessage messageCurrentPrice = WebSocketMessage.builder().payload(marketData).build();
+      WebSocketMessage messageCurrentPrice = WebSocketMessage.builder().payload(marketDataObject).build();
       if (currency.equals("usd")) {
         messageCurrentPrice.setEventType(WebSocketEventType.CURRENT_PRICE_USD);
       } else if (currency.equals("btc")) {
