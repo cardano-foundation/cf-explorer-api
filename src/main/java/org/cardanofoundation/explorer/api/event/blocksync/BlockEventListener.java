@@ -7,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
 import org.cardanofoundation.explorer.api.service.WebSocketService;
+import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
