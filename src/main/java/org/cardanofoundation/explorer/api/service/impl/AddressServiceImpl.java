@@ -113,32 +113,33 @@ public class AddressServiceImpl implements AddressService {
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type) {
     Address addr = addressRepository.findFirstByAddress(address)
         .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
-    Long txCount = addressTxBalanceRepository.countByAddress(addr);
-    if (Long.valueOf(0).equals(txCount)) {
+    if (Long.valueOf(0).equals( addr.getTxCount())) {
       return List.of();
     }
-
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
 
     var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByAddressId(addr.getId(),
-        dates.get(0).toLocalDate()).orElse(BigInteger.ZERO);
+        dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
     List<AddressAnalyticsResponse> responses = new ArrayList<>();
-      if (AnalyticType.ONE_DAY.equals(type)) {
-        responses.add(new AddressAnalyticsResponse(dates.get(0), fromBalance));
-        for (int i = 1; i < dates.size(); i++) {
-          Optional<BigInteger> balance = addressTxBalanceRepository
-              .getBalanceByAddressAndTime(addr, Timestamp.valueOf(dates.get(i-1)), Timestamp.valueOf(dates.get(i)));
-          if (balance.isPresent()) {
-            fromBalance = fromBalance.add(balance.get());
-          }
-          responses.add(new AddressAnalyticsResponse(dates.get(i), fromBalance));
+    if (AnalyticType.ONE_DAY.equals(type)) {
+      responses.add(new AddressAnalyticsResponse(dates.get(0), fromBalance));
+      for (int i = 1; i < dates.size(); i++) {
+        Optional<BigInteger> balance = addressTxBalanceRepository
+            .getBalanceByAddressAndTime(addr, Timestamp.valueOf(dates.get(i-1)), Timestamp.valueOf(dates.get(i)));
+        if (balance.isPresent()) {
+          fromBalance = fromBalance.add(balance.get());
         }
-      } else {
+        responses.add(new AddressAnalyticsResponse(dates.get(i), fromBalance));
+      }
+    } else {
       List<AggregateAddressTxBalance> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
           .findAllByAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());
+
+      // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
+      // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance = aggregateAddressTxBalances.stream()
-          .collect(Collectors.toMap(AggregateAddressTxBalance::getDay,
+          .collect(Collectors.toMap(balance -> balance.getDay().plusDays(1),
               AggregateAddressTxBalance::getBalance));
       for (LocalDateTime date : dates) {
         if (mapBalance.containsKey(date.toLocalDate())) {

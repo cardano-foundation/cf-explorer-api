@@ -334,7 +334,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
 
     var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
-        dates.get(0).toLocalDate()).orElse(BigInteger.ZERO);
+        dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
     List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
     if (AnalyticType.ONE_DAY.equals(type)) {
       responses.add(new StakeAnalyticBalanceResponse(dates.get(0), fromBalance));
@@ -350,8 +350,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       List<AggregateAddressBalanceProjection> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
           .findAllByStakeAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());
+
+      // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
+      // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance = aggregateAddressTxBalances.stream()
-          .collect(Collectors.toMap(AggregateAddressBalanceProjection::getDay,
+          .collect(Collectors.toMap(balance -> balance.getDay().plusDays(1),
               AggregateAddressBalanceProjection::getBalance));
       for (LocalDateTime date : dates) {
         if (mapBalance.containsKey(date.toLocalDate())) {
