@@ -156,18 +156,18 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                                String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
 
-    boolean isKoiOs = fetchRewardDataService.isKoiOs();
-    if (isKoiOs) {
+    boolean useKoios = fetchRewardDataService.useKoios();
+    if (useKoios) {
       Set<String> poolReportSet = Set.of(poolReport.getPoolView());
       boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolReportSet);
       List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
       if (!isHistory) {
         boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(Set.of(poolReport.getPoolView()));
         if (isFetch) {
-          poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolReport.getPoolView());
+          poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoios(poolReport.getPoolView());
         }
       } else {
-        poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoiOs(poolReport.getPoolView());
+        poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoios(poolReport.getPoolView());
       }
 
       if(Objects.nonNull(poolHistoryProjections)) {
