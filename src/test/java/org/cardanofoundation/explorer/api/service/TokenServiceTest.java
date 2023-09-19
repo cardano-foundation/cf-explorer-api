@@ -7,8 +7,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.mockito.Mockito;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -121,33 +123,18 @@ class TokenServiceTest {
 
   @Test
   void testFilterToken_WhenQueryNotEmptyAndCacheAvailable() throws Exception {
-    // Setup
-    when(tokenPageCacheService.getTokePageCache(any(Pageable.class)))
-        .thenReturn(Optional.of(
-            new BaseFilterResponse<>(new PageImpl<>(List.of(TokenFilterResponse.builder()
-                .id(0L)
-                .name("484f534b59")
-                .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-                .volumeIn24h("38874867596070")
-                .numberOfHolders(93233L)
-                .metadata(TokenMetadataResponse.builder()
-                    .logo(
-                        "https://storage.ex-c.sotatek.works/cardano-explorer-api-storage-token/mainnet/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59")
-                    .ticker("HOSKY")
-                    .url("https://hosky.io")
-                    .decimals(0)
-                    .build())
-                .build())))));
 
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-        .name("484f534b59")
-        .nameView("nameView")
-        .fingerprint("fingerprint")
-        .build();
+    TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
+    when(tokenProjection.getId()).thenReturn(0L);
+    when(tokenProjection.getPolicy()).thenReturn("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235");
+    when(tokenProjection.getName()).thenReturn("484f534b59");
+    when(tokenProjection.getNameView()).thenReturn("nameView");
+    when(tokenProjection.getFingerprint()).thenReturn("fingerprint");
+    when(tokenProjection.getTxCount()).thenReturn(0L);
+    when(tokenProjection.getSupply()).thenReturn(BigInteger.valueOf(0L));
+    when(tokenProjection.getTotalVolume()).thenReturn(BigInteger.valueOf(0L));
 
-    final Page<MultiAsset> multiAssets = new PageImpl<>(List.of(multiAsset));
+    final Page<TokenProjection> multiAssets = new PageImpl<>(List.of(tokenProjection));
 
     when(multiAssetRepository.findAll(anyString(), any(Pageable.class)))
         .thenReturn(multiAssets);
@@ -220,18 +207,18 @@ class TokenServiceTest {
   @Test
   void testFilterToken_WhenQueryNotEmptyAndCacheNotAvailable() throws Exception {
     // Setup
-    when(tokenPageCacheService.getTokePageCache(any(Pageable.class)))
-        .thenReturn(Optional.empty());
 
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-        .name("484f534b59")
-        .nameView("nameView")
-        .fingerprint("fingerprint")
-        .build();
+    TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
+    when(tokenProjection.getId()).thenReturn(0L);
+    when(tokenProjection.getPolicy()).thenReturn("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235");
+    when(tokenProjection.getName()).thenReturn("484f534b59");
+    when(tokenProjection.getNameView()).thenReturn("nameView");
+    when(tokenProjection.getFingerprint()).thenReturn("fingerprint");
+    when(tokenProjection.getTxCount()).thenReturn(0L);
+    when(tokenProjection.getSupply()).thenReturn(BigInteger.valueOf(0L));
+    when(tokenProjection.getTotalVolume()).thenReturn(BigInteger.valueOf(0L));
 
-    final Page<MultiAsset> multiAssets = new PageImpl<>(List.of(multiAsset));
+    final Page<TokenProjection> multiAssets = new PageImpl<>(List.of(tokenProjection));
 
     when(multiAssetRepository.findAll(anyString(), any(Pageable.class)))
         .thenReturn(multiAssets);
