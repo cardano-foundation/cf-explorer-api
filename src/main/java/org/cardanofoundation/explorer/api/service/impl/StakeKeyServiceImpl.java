@@ -75,8 +75,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final FetchRewardDataService fetchRewardDataService;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
-  private static final int STAKE_ANALYTIC_NUMBER = 5;
-
   @Value("${application.network}")
   private String network;
 
@@ -333,10 +331,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
 
-    var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
-        dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
     List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
     if (AnalyticType.ONE_DAY.equals(type)) {
+      var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
+          dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
       responses.add(new StakeAnalyticBalanceResponse(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
         Optional<BigInteger> balance = addressTxBalanceRepository
@@ -347,6 +345,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         responses.add(new StakeAnalyticBalanceResponse(dates.get(i), fromBalance));
       }
     } else {
+      // Remove last date because we will get data of today
+      dates.remove(0);
+      var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
+          dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
       List<AggregateAddressBalanceProjection> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
           .findAllByStakeAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());

@@ -72,9 +72,6 @@ public class AddressServiceImpl implements AddressService {
   private final ScriptRepository scriptRepository;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
-  static final String SCRIPT_NOT_VERIFIED = "Script not verified";
-
-
   @Value("${application.network}")
   private String network;
 
@@ -120,10 +117,10 @@ public class AddressServiceImpl implements AddressService {
 
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
 
-    var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByAddressId(addr.getId(),
-        dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
     List<AddressAnalyticsResponse> responses = new ArrayList<>();
     if (AnalyticType.ONE_DAY.equals(type)) {
+      var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByAddressId(addr.getId(),
+          dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
       responses.add(new AddressAnalyticsResponse(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
         Optional<BigInteger> balance = addressTxBalanceRepository
@@ -134,6 +131,10 @@ public class AddressServiceImpl implements AddressService {
         responses.add(new AddressAnalyticsResponse(dates.get(i), fromBalance));
       }
     } else {
+      // Remove last date because we will get data of today
+      dates.remove(0);
+      var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByAddressId(addr.getId(),
+          dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
       List<AggregateAddressTxBalance> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
           .findAllByAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());
