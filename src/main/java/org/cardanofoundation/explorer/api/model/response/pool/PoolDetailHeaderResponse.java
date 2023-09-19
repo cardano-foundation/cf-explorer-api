@@ -40,12 +40,6 @@ public class PoolDetailHeaderResponse implements Serializable {
   @JsonSerialize(using = PercentSerializer.class)
   private Double saturation;
 
-  @JsonSerialize(using = PercentSerializer.class)
-  private Double reward;
-
-  @JsonSerialize(using = PercentSerializer.class)
-  private Double ros;
-
   private BigInteger pledge;
 
   private BigInteger cost;
