@@ -110,7 +110,7 @@ public class AddressServiceImpl implements AddressService {
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type) {
     Address addr = addressRepository.findFirstByAddress(address)
         .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
-    Long txCount = addressTxBalanceRepository.countByAddress(addr);
+    Long txCount = addr.getTxCount();
     if (Long.valueOf(0).equals(txCount)) {
       return List.of();
     }
