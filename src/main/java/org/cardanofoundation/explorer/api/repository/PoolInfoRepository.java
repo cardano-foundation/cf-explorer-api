@@ -21,7 +21,7 @@ public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {
       "SELECT pi.pool.view AS view, pi.activeStake AS activeStake, pi.liveSaturation AS saturation "
           + "FROM PoolInfo pi "
           + "WHERE pi.pool.view IN :poolIds AND pi.fetchedAtEpoch = :epochNo")
-  List<PoolInfoKoiosProjection> getPoolInfoKoiOs(@Param("poolIds") Set<String> poolIds,
+  List<PoolInfoKoiosProjection> getPoolInfoKoios(@Param("poolIds") Set<String> poolIds,
       @Param("epochNo") Integer epochNo);
 
   @Query(value =
@@ -29,7 +29,7 @@ public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {
           + "FROM PoolInfo pi "
           + "WHERE pi.fetchedAtEpoch = :epochNo AND pi.activeStake IS NOT NULL "
           + "ORDER BY pi.activeStake DESC")
-  List<PoolInfoKoiosProjection> getTopPoolInfoKoiOs(@Param("epochNo") Integer epochNo,
+  List<PoolInfoKoiosProjection> getTopPoolInfoKoios(@Param("epochNo") Integer epochNo,
       Pageable pageable);
 
   @Query(value = "SELECT pi.activeStake FROM PoolInfo pi "
