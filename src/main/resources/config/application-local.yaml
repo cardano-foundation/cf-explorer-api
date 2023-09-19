@@ -7,8 +7,8 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:postgresql://${infrastructure.host}:54322/explorer?currentSchema=mainnet
-    username: ${POSTGRES_USER:cardano-master}
-    password: ${POSTGRES_PASSWORD:postgres_master_pw}
+    username: ${POSTGRES_USER:ducphung}
+    password: ${POSTGRES_PASSWORD:ducphung@pw}
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
@@ -79,7 +79,7 @@ spring:
 redis:
   databaseIndex: 0
   master: ${REDIS_MASTER_NAME:mymaster}
-  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pw}
+  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
   testOnBorrow: false
   maxTotal: 10
   maxIdle: 5
@@ -87,8 +87,8 @@ redis:
   testOnReturn: false
   testWhileIdle: false
   sentinels:
-    - host: ${REDIS_SENTINEL_HOST:10.4.10.75}
-      port: 26371
+    - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
+      port: 26379
 
 # Redis pubsub topic
 application:
