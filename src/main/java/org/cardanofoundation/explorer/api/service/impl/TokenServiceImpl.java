@@ -42,10 +42,7 @@ import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,17 +73,36 @@ public class TokenServiceImpl implements TokenService {
   @Transactional(readOnly = true)
   public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable)
       throws ExecutionException, InterruptedException {
-    Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
-        tokenPageCacheService.getTokePageCache(pageable);
-    if (cacheResp.isPresent() && StringUtils.isEmpty(query)) {
-      return cacheResp.get();
-    }
+
     Page<MultiAsset> multiAssets;
     if(StringUtils.isEmpty(query)){
-      multiAssets = multiAssetRepository.findAll(pageable);
+      pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
+      Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
+          tokenPageCacheService.getTokePageCache(pageable);
+      if (cacheResp.isPresent()) {
+        return cacheResp.get();
+      } else {
+        multiAssets = multiAssetRepository.findAll(pageable);
+      }
     } else {
-      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable);
+      String lengthOfNameView = "nameViewLength";
+      pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
+          .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
+      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable).map(
+          item -> {
+            MultiAsset multiAsset = new MultiAsset();
+            multiAsset.setId(item.getId());
+            multiAsset.setPolicy(item.getPolicy());
+            multiAsset.setName(item.getName());
+            multiAsset.setNameView(item.getNameView());
+            multiAsset.setFingerprint(item.getFingerprint());
+            multiAsset.setTxCount(item.getTxCount());
+            multiAsset.setSupply(item.getSupply());
+            multiAsset.setTotalVolume(item.getTotalVolume());
+            multiAsset.setTime(item.getTime());
+            return multiAsset;
+          }
+      );
     }
     Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(), ma -> ma.getPolicy() + ma.getName());
 
@@ -139,6 +155,21 @@ public class TokenServiceImpl implements TokenService {
         }
     );
     return new BaseFilterResponse<>(multiAssetResponsesList);
+  }
+
+  /**
+   * Create pageable with sort, if sort is unsorted then use default sort
+   * @param pageable page information
+   * @param defaultSort default sort condition
+   * @return pageable with sort
+   */
+  private Pageable createPageableWithSort(Pageable pageable, Sort defaultSort) {
+    Sort sort = pageable.getSort();
+    if (sort.isUnsorted()) {
+      sort = defaultSort;
+    }
+    pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    return pageable;
   }
 
   @Override
