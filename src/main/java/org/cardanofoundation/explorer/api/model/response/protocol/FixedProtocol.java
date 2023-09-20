@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FixedProtocol {
 
-  Float activeSlotsCoeff;
+  Double activeSlotsCoeff;
   Object genDelegs;
   Integer updateQuorum;
   String networkId;
-  String initialFunds;
+  Object initialFunds;
   BigInteger maxLovelaceSupply;
   Integer networkMagic;
   Integer epochLength;
