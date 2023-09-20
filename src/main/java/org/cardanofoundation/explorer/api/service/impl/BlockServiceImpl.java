@@ -27,7 +27,6 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +39,6 @@ public class BlockServiceImpl implements BlockService {
   private final BlockMapper blockMapper;
 
   @Override
-  @Transactional(readOnly = true)
   public BlockResponse getBlockDetailByBlockId(String blockId) {
     try {
       Long blockNo = Long.parseLong(blockId);
@@ -80,14 +78,12 @@ public class BlockServiceImpl implements BlockService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable) {
     Page<Block> blockPage = blockRepository.findAllBlock(pageable);
     return mapperBlockToBlockFilterResponse(blockPage);
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<BlockFilterResponse> getBlockByEpoch(String no, Pageable pageable) {
     try {
       Integer epochNo = Integer.parseInt(no);

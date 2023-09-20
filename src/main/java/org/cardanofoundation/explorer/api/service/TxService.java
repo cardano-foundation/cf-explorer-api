@@ -9,14 +9,11 @@ import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 public interface TxService {
 
-  @Transactional(readOnly = true)
   List<TxSummary> findLatestTxSummary();
 
-  @Transactional(readOnly = true)
   List<TxGraph> getTransactionChartByRange(TxChartRange range);
 
   /**

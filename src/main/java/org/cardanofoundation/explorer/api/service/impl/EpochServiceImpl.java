@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -51,7 +50,6 @@ public class EpochServiceImpl implements EpochService {
   public int epochDays;
 
   @Override
-  @Transactional(readOnly = true)
   public EpochResponse getEpochDetail(String no) {
     try {
       Integer epochNo = Integer.parseInt(no);
@@ -88,7 +86,6 @@ public class EpochServiceImpl implements EpochService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable) {
 
     Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
@@ -171,7 +168,6 @@ public class EpochServiceImpl implements EpochService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public EpochSummary getCurrentEpochSummary() {
     return epochRepository
         .findCurrentEpochSummary()

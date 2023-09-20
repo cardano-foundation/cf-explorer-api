@@ -4,7 +4,6 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 public interface EpochService {
 
@@ -35,6 +34,5 @@ public interface EpochService {
    *
    * @return epoch summary
    */
-  @Transactional(readOnly = true)
   EpochSummary getCurrentEpochSummary();
 }

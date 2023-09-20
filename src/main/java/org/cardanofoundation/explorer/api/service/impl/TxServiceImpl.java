@@ -41,7 +41,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -138,7 +137,6 @@ public class TxServiceImpl implements TxService {
 
 
   @Override
-  @Transactional(readOnly = true)
   public List<TxSummary> findLatestTxSummary() {
     List<Long> txIds = txRepository.findLatestTxId(
         PageRequest.of(BigInteger.ZERO.intValue(),
@@ -212,7 +210,6 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getAll(Pageable pageable) {
     Page<Tx> txPage = txRepository.findAllTx(pageable);
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
@@ -220,7 +217,6 @@ public class TxServiceImpl implements TxService {
 
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByBlock(String blockId,
                                                                      Pageable pageable) {
     Page<Tx> txPage;
@@ -234,7 +230,6 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
                                                                        Pageable pageable) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
@@ -247,7 +242,6 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId,
                                                                      Pageable pageable) {
     BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
@@ -263,7 +257,6 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
                                                                      Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
@@ -494,7 +487,6 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public TxResponse getTxDetailByHash(String hash) {
     Tx tx = txRepository.findByHash(hash).orElseThrow(
         () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)

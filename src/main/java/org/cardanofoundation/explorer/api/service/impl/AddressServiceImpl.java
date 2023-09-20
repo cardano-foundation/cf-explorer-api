@@ -59,7 +59,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -84,7 +83,6 @@ public class AddressServiceImpl implements AddressService {
 
 
   @Override
-  @Transactional(readOnly = true)
   public AddressResponse getAddressDetail(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElse(
         Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
@@ -113,7 +111,6 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type)
       throws ExecutionException, InterruptedException {
     Address addr = addressRepository.findFirstByAddress(address)
@@ -207,7 +204,6 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public List<BigInteger> getAddressMinMaxBalance(String address) {
     Address addr = addressRepository.findFirstByAddress(address)
         .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
@@ -221,7 +217,6 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
     Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
     Page<ContractFilterResponse> pageResponse = contractPage.map(addressMapper::fromAddressToContractFilter);
@@ -229,7 +224,6 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
     List<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
     List<AddressFilterResponse> responses = addressPage.stream()
@@ -248,7 +242,6 @@ public class AddressServiceImpl implements AddressService {
    * @return list token by display name
    */
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable,
       String address, String displayName) {
     Page<TokenAddressResponse> tokenListResponse;
