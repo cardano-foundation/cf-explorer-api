@@ -38,12 +38,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigInteger;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.any;
@@ -64,10 +62,10 @@ class AddressServiceTest {
   AddressTxBalanceRepository addressTxBalanceRepository;
 
   @Mock
-  AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
+  AddressTokenBalanceRepository addressTokenBalanceRepository;
 
   @Mock
-  AddressTokenBalanceRepository addressTokenBalanceRepository;
+  AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   @Mock
   TokenMapper tokenMapper;
@@ -122,13 +120,12 @@ class AddressServiceTest {
   }
 
   @Test
-  void getAddressAnalytics_shouldReturn() throws ExecutionException, InterruptedException {
+  void getAddressAnalytics_shouldReturn() {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
-    Address address = Address.builder().address(addr).build();
+    Address address = Address.builder().address(addr).txCount(1L).build();
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
@@ -139,10 +136,9 @@ class AddressServiceTest {
   void getAddressAnalytics_shouldReturnOneMonth() {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_MONTH;
-    Address address = Address.builder().address(addr).build();
+    Address address = Address.builder().address(addr).txCount(1L).build();
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
@@ -153,10 +149,9 @@ class AddressServiceTest {
   void getAddressAnalytics_shouldReturnListNull() {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
-    Address address = Address.builder().address(addr).build();
+    Address address = Address.builder().address(addr).txCount(0L).build();
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(0L);
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertEquals(response, List.of());
@@ -164,13 +159,12 @@ class AddressServiceTest {
   }
 
   @Test
-  void getAddressAnalytics_shouldReturnOneWeek() throws ExecutionException, InterruptedException {
+  void getAddressAnalytics_shouldReturnOneWeek() {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_WEEK;
-    Address address = Address.builder().address(addr).build();
+    Address address = Address.builder().address(addr).txCount(1L).build();
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
@@ -178,13 +172,12 @@ class AddressServiceTest {
   }
 
   @Test
-  void getAddressAnalytics_shouldReturnThreeMonth() throws ExecutionException, InterruptedException {
+  void getAddressAnalytics_shouldReturnThreeMonth() {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.THREE_MONTH;
-    Address address = Address.builder().address(addr).build();
+    Address address = Address.builder().address(addr).txCount(1L).build();
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxBalanceRepository.countByAddress(address)).thenReturn(1L);
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
