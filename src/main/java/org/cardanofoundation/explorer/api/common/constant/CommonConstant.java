@@ -69,6 +69,11 @@ public class CommonConstant {
 
   public static final String PREFIXED_TOKEN_FINGERPRINT = "asset";
 
+  public static final String PREPROD_NETWORK = "preprod";
+
+  public static final String PREVIEW_NETWORK = "preview";
+
+
 
 
   public static int hashCode(Object... a) {
