@@ -108,7 +108,8 @@ public class TokenServiceImpl implements TokenService {
     }
     List<MultiAsset> dataContent;
     Page<MultiAsset> multiAssets;
-    if (StringUtils.isEmpty(query)) {
+    boolean isQueryEmpty = StringUtils.isEmpty(query);
+    if(isQueryEmpty){
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
       dataContent = multiAssetRepository.findMultiAssets(pageable);
       multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
@@ -166,7 +167,11 @@ public class TokenServiceImpl implements TokenService {
       );
     });
 
-    return new BaseFilterResponse<>(multiAssetResponsesList);
+    if(isQueryEmpty){
+      return new BaseFilterResponse<>(multiAssetResponsesList);
+    } else {
+      return new BaseFilterResponse<>(multiAssetResponsesList, multiAssets.getTotalElements() >= 1000);
+    }
   }
 
   /**

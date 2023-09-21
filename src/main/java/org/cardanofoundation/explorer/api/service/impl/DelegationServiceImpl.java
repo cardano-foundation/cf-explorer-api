@@ -208,7 +208,8 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
-    if (StringUtils.isEmpty(search)) {
+    boolean isQueryEmpty = StringUtils.isEmpty(search);
+    if (isQueryEmpty) {
       search = null;
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, BaseEntity_.ID));
     } else {
@@ -283,7 +284,9 @@ public class DelegationServiceImpl implements DelegationService {
     response.setTotalItems(poolListProjectionPage.getTotalElements());
     response.setTotalPages(poolListProjectionPage.getTotalPages());
     response.setCurrentPage(pageable.getPageNumber());
-
+    if(!isQueryEmpty) {
+      response.setIsDataOverSize(poolListProjectionPage.getTotalElements() >= 1000);
+    }
     return response;
   }
 
