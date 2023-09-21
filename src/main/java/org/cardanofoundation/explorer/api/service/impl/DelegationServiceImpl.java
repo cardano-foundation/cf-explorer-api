@@ -285,7 +285,7 @@ public class DelegationServiceImpl implements DelegationService {
     response.setTotalPages(poolListProjectionPage.getTotalPages());
     response.setCurrentPage(pageable.getPageNumber());
     if(!isQueryEmpty) {
-      response.setIsDataOverSize(poolIdPage.getTotalElements() >= 1000);
+      response.setIsDataOverSize(poolListProjectionPage.getTotalElements() >= 1000);
     }
     return response;
   }
