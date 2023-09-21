@@ -70,7 +70,7 @@ public class TokenServiceImpl implements TokenService {
   @Qualifier("taskExecutor")
   private final TaskExecutor taskExecutor;
 
-//  @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
+  @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable)
