@@ -70,14 +70,15 @@ public class TokenServiceImpl implements TokenService {
   @Qualifier("taskExecutor")
   private final TaskExecutor taskExecutor;
 
-  @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
+//  @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable)
       throws ExecutionException, InterruptedException {
 
     Page<MultiAsset> multiAssets;
-    if(StringUtils.isEmpty(query)){
+    boolean isQueryEmpty = StringUtils.isEmpty(query);
+    if(isQueryEmpty){
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
       Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
           tokenPageCacheService.getTokePageCache(pageable);
@@ -156,7 +157,11 @@ public class TokenServiceImpl implements TokenService {
           ma.setId(null);
         }
     );
-    return new BaseFilterResponse<>(multiAssetResponsesList);
+    if(isQueryEmpty){
+      return new BaseFilterResponse<>(multiAssetResponsesList);
+    } else {
+      return new BaseFilterResponse<>(multiAssetResponsesList, multiAssets.getTotalElements() >= 1000);
+    }
   }
 
   /**
