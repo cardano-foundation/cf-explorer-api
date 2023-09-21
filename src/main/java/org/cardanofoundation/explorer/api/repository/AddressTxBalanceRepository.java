@@ -36,15 +36,16 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       @Param("from") Timestamp from,
       @Param("to") Timestamp to);
 
-  @Query(value = "select min(calculated_balances.sum_balance) as minVal, "
-      + "                max(calculated_balances.sum_balance) as maxVal, "
-      + "                max(calculated_balances.txId) as maxTxId "
-      + " from (select sum(atb.balance) over (order by atb.tx_id rows unbounded PRECEDING) as sum_balance, "
-      + "              atb.tx_id as txId "
-      + "       from mainnet.address_tx_balance atb "
-      + "       where atb.address_id = :addressId"
-      + "       order by atb.tx_id) as calculated_balances", nativeQuery = true)
-  MinMaxProjection findMinMaxBalanceByAddress(@Param("addressId") Long addressId);
+  @Query(value = "select :fromBalance + min(calculated_balances.sum_balance) as minVal, "
+      + "               :fromBalance + max(calculated_balances.sum_balance) as maxVal "
+      + " from (select sum(atb.balance) over (order by atb.tx_id rows unbounded PRECEDING) as sum_balance "
+      + "       from address_tx_balance atb "
+      + "       where atb.address_id = :addressId "
+      + "       and atb.time > :fromDate and atb.time <= :toDate ) as calculated_balances", nativeQuery = true)
+  MinMaxProjection findMinMaxBalanceByAddress(@Param("addressId") Long addressId,
+                                              @Param("fromBalance") BigInteger fromBalance,
+                                              @Param("fromDate") Timestamp fromDate,
+                                              @Param("toDate") Timestamp toDate);
 
   @Query("SELECT addrTxBalance.balance FROM AddressTxBalance addrTxBalance"
       + " INNER JOIN Tx tx ON addrTxBalance.tx = tx"
