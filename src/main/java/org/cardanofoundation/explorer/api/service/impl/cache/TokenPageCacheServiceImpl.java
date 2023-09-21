@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.explorer.api.common.enumeration.RedisKey;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -66,6 +67,27 @@ public class TokenPageCacheServiceImpl implements TokenPageCacheService {
       log.error("Exception when getTokenFilterResponseSchedulerCache key: {}", redisKey, e);
       return Optional.empty();
     }
+  }
+
+  @Override
+  public Optional<TokenResponse> getTokenDetailCache(String tokenId) {
+    String redisKey = RedisKey.REDIS_TOKEN_DETAIL.name() + ":" + network + ":" + tokenId;
+    Object cacheData = redisTemplate.opsForValue().get(redisKey);
+    if (cacheData == null) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(GSON.fromJson(cacheData.toString(), TokenResponse.class));
+    } catch (Exception e) {
+      log.error("Exception when getTokenDetailCache key: {}", redisKey, e);
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public void setTokenDetailCache(String tokenId, TokenResponse tokenResponse) {
+    String redisKey = RedisKey.REDIS_TOKEN_DETAIL.name() + ":" + network + ":" + tokenId;
+    redisTemplate.opsForValue().set(redisKey, GSON.toJson(tokenResponse));
   }
 
   private String toStr(Pageable pageable) {
