@@ -20,7 +20,6 @@ public class BaseFilterResponse<T> implements Serializable {
   private long totalItems;
   private int totalPages;
   private int currentPage;
-  private Boolean isDataOverSize;
 
   public BaseFilterResponse(Page<T> page) {
     this.data = page.getContent();
@@ -40,21 +39,4 @@ public class BaseFilterResponse<T> implements Serializable {
     this.data = data;
     this.totalItems = totalItems;
   }
-
-  public <S> BaseFilterResponse(List<T> data, long totalItems, int totalPages, int currentPage) {
-    this.data = data;
-    this.totalItems = totalItems;
-    this.totalPages = totalPages;
-    this.currentPage = currentPage;
-  }
-
-  public BaseFilterResponse(Page<T> page, boolean isDataOverSize) {
-    this.data = page.getContent();
-    this.totalItems = page.getTotalElements();
-    this.totalPages = page.getTotalPages();
-    this.currentPage = page.getNumber();
-    this.isDataOverSize = isDataOverSize;
-  }
-
-
 }

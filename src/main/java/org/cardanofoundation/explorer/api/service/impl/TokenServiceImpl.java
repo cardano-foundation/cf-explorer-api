@@ -108,8 +108,7 @@ public class TokenServiceImpl implements TokenService {
     }
     List<MultiAsset> dataContent;
     Page<MultiAsset> multiAssets;
-    boolean isQueryEmpty = StringUtils.isEmpty(query);
-    if(isQueryEmpty){
+    if (StringUtils.isEmpty(query)) {
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
       dataContent = multiAssetRepository.findMultiAssets(pageable);
       multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
@@ -167,31 +166,7 @@ public class TokenServiceImpl implements TokenService {
       );
     });
 
-
-    Map<Long, BigInteger> tokenVolumeMap = StreamUtil
-        .toMap(volumes, TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume);
-
-    multiAssetResponsesList.forEach(
-        ma -> {
-          ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
-              assetMetadataMap.get(ma.getPolicy() + ma.getName()))
-          );
-          if (tokenVolumeMap.containsKey(ma.getId())) {
-            ma.setVolumeIn24h(tokenVolumeMap.get(ma.getId()).toString());
-          } else {
-            ma.setVolumeIn24h(String.valueOf(0));
-          }
-          ma.setVolumeIn24h(tokenVolumeMap.getOrDefault(ma.getId(), BigInteger.valueOf(0)).toString());
-          ma.setNumberOfHolders(numberHoldersStakeKeyMap.getOrDefault(ma.getId(), 0L)
-              + numberHoldersAddressNotHaveStakeKeyMap.getOrDefault(ma.getId(), 0L));
-          ma.setId(null);
-        }
-    );
-    if(isQueryEmpty){
-      return new BaseFilterResponse<>(multiAssetResponsesList);
-    } else {
-      return new BaseFilterResponse<>(multiAssetResponsesList, multiAssets.getTotalElements() >= 1000);
-    }
+    return new BaseFilterResponse<>(multiAssetResponsesList);
   }
 
   /**
