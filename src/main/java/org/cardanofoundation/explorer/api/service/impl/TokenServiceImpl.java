@@ -187,15 +187,8 @@ public class TokenServiceImpl implements TokenService {
   @Override
   @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
-
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
         .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-    Timestamp tokenLastActivity = multiAssetRepository.getLastActivityTimeOfToken(multiAsset);
-
-    Optional<TokenResponse> cacheResp = tokenPageCacheService.getTokenDetailCache(tokenId);
-    if (cacheResp.isPresent() && cacheResp.get().getTokenLastActivity().equals(tokenLastActivity)) {
-      return cacheResp.get();
-    }
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
 
@@ -221,7 +214,6 @@ public class TokenServiceImpl implements TokenService {
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
     tokenResponse.setTokenLastActivity(multiAssetRepository.getLastActivityTimeOfToken(multiAsset));
     setTxMetadataJson(tokenResponse, multiAsset);
-    tokenPageCacheService.setTokenDetailCache(tokenId, tokenResponse);
     return tokenResponse;
   }
 

@@ -90,7 +90,7 @@ public class SearchServiceImpl implements SearchService {
     } else {
       Pageable pageable = PageRequest.of(0, 2);
       var tokenList = multiAssetRepository.findByNameViewLike(query, pageable);
-      if (tokenList.size() == 1) {
+      if (Integer.valueOf(1).equals(tokenList.size())) {
         MultiAsset multiAsset = tokenList.get(0);
         searchResponse.setToken(new TokenSearchResponse(multiAsset.getNameView(), multiAsset.getFingerprint()));
       }
@@ -142,7 +142,7 @@ public class SearchServiceImpl implements SearchService {
     } else {
       Pageable pageable = PageRequest.of(0, 2);
       var poolList = poolHashRepository.findByPoolNameLike(query, pageable);
-      if (poolList.size() == 1) {
+      if (Integer.valueOf(1).equals(poolList.size())) {
         PoolInfoProjection poolInfo = poolList.get(0);
         searchResponse.setPool(new PoolSearchResponse(poolInfo.getPoolName(), poolInfo.getPoolView(), poolInfo.getIcon()));
       }
