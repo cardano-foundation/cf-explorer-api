@@ -175,7 +175,6 @@ spring:
     pubsub:
       topic: ${REDIS_PUBSUB_TOPIC:block.mainnet}
 
-
 genesis:
   shelley: ${SHELLEY_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/shelley-genesis.json}
   byron: ${BYRON_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/byron-genesis.json}
