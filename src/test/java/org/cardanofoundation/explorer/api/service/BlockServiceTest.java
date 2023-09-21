@@ -133,7 +133,7 @@ public class BlockServiceTest {
     @Test
     public void testFilterBlock() {
         // Mock input and expected output
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("txCount").descending());
         Page<Block> blockPage = new PageImpl<>(Collections.singletonList(new Block()));
         List<Tx> txList = List.of(
                 Tx.builder().block(Block.builder().id(1L).build()).id(1L).outSum(BigInteger.ONE).fee(BigInteger.ONE).build(),
