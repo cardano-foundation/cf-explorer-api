@@ -217,7 +217,7 @@ public class DelegationServiceImpl implements DelegationService {
       String poolNameLength = "poolNameLength";
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, poolNameLength, PoolOfflineData_.POOL_NAME));
     }
-    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
+    Page<PoolListProjection> poolListProjectionPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
     Integer epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
 
     List<PoolResponse> poolList = new ArrayList<>();
@@ -225,7 +225,7 @@ public class DelegationServiceImpl implements DelegationService {
     List<Object> poolViews = new ArrayList<>();
     Set<String> poolIdList = new HashSet<>();
 
-    poolIdPage.stream().forEach(pool -> {
+    poolListProjectionPage.stream().forEach(pool -> {
       poolViews.add(pool.getPoolView());
       poolIdList.add(pool.getPoolView());
       poolList.add(PoolResponse.builder().poolId(pool.getPoolView())
@@ -281,8 +281,8 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
     response.setData(poolList);
-    response.setTotalItems(poolIdPage.getTotalElements());
-    response.setTotalPages(poolIdPage.getTotalPages());
+    response.setTotalItems(poolListProjectionPage.getTotalElements());
+    response.setTotalPages(poolListProjectionPage.getTotalPages());
     response.setCurrentPage(pageable.getPageNumber());
     if(!isQueryEmpty) {
       response.setIsDataOverSize(poolIdPage.getTotalElements() >= 1000);

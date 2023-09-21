@@ -1,7 +1,5 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import java.util.concurrent.ExecutionException;
-
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
@@ -73,8 +71,7 @@ public class AddressController {
   public ResponseEntity<List<AddressAnalyticsResponse>> getAddressAnalytics(
       @PathVariable @Parameter(description = "The human readable encoding of the output address."
           + " Will be Base58 for Byron era addresses and Bech32 for Shelley era.") String address,
-      @PathVariable @Parameter(description = "Type for analytics by time") AnalyticType type)
-      throws ExecutionException, InterruptedException {
+      @PathVariable @Parameter(description = "Type for analytics by time") AnalyticType type) {
     return ResponseEntity.ok(addressService.getAddressAnalytics(address, type));
   }
 
