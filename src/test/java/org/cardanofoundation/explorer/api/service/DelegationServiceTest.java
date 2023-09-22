@@ -398,7 +398,7 @@ class DelegationServiceTest {
 
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllByPoolViewAndPoolName(null, pageable)).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllWithoutQueryParam(pageable)).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
     when(redisTemplate.opsForHash()).thenReturn(null);
