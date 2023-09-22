@@ -13,7 +13,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressAnalyticsResponse {
+public class AddressChartBalanceData {
   private LocalDateTime date;
   private BigInteger value;
 }

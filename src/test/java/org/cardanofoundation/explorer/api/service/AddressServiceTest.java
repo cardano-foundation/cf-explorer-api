@@ -39,7 +39,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -124,8 +123,12 @@ class AddressServiceTest {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
     Address address = Address.builder().address(addr).txCount(1L).build();
+    MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+    when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
+    when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
+    when(addressTxBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
@@ -137,9 +140,12 @@ class AddressServiceTest {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_MONTH;
     Address address = Address.builder().address(addr).txCount(1L).build();
+    MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+    when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
+    when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-
+    when(addressTxBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
 
@@ -154,7 +160,9 @@ class AddressServiceTest {
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
 
     var response = addressService.getAddressAnalytics(addr, type);
-    Assertions.assertEquals(response, List.of());
+    Assertions.assertEquals(response.getData(), List.of());
+    Assertions.assertEquals(response.getHighestBalance(), BigInteger.ZERO);
+    Assertions.assertEquals(response.getLowestBalance(), BigInteger.ZERO);
 
   }
 
@@ -163,8 +171,12 @@ class AddressServiceTest {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_WEEK;
     Address address = Address.builder().address(addr).txCount(1L).build();
+    MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+    when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
+    when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
+    when(addressTxBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
@@ -176,39 +188,16 @@ class AddressServiceTest {
     String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.THREE_MONTH;
     Address address = Address.builder().address(addr).txCount(1L).build();
+    MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+    when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
+    when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
+    when(addressTxBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
 
-  }
-
-  @Test
-  void getAddressMinMaxBalance_shouldReturn() {
-    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-    MinMaxProjection projection = Mockito.mock(MinMaxProjection.class);
-    when(projection.getMinVal()).thenReturn(BigInteger.ONE);
-    when(projection.getMaxVal()).thenReturn(BigInteger.ONE);
-
-    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(Address.builder().id(1L).build()));
-    when(addressTxBalanceRepository.findMinMaxBalanceByAddress(1L)).thenReturn(projection);
-
-    var expect = List.of(BigInteger.ONE, BigInteger.ONE);
-    var response = addressService.getAddressMinMaxBalance(addr);
-    Assertions.assertEquals(expect, response);
-  }
-
-  @Test
-  void getAddressMinMaxBalance_shouldReturnListNull() {
-    String addr = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-
-    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(Address.builder().id(1L).build()));
-    when(addressTxBalanceRepository.findMinMaxBalanceByAddress(1L)).thenReturn(null);
-
-    var expect = Collections.emptyList();
-    var response = addressService.getAddressMinMaxBalance(addr);
-    Assertions.assertEquals(expect, response);
   }
 
   @Test
