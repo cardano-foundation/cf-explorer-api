@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -124,6 +125,7 @@ public class DelegationServiceImpl implements DelegationService {
 
   private final EpochService epochService;
   public static final int MILLI = 1000;
+  private static final int MAX_TOTAL_ELEMENTS = 1000;
 
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
@@ -216,6 +218,9 @@ public class DelegationServiceImpl implements DelegationService {
     } else {
       search = search.toLowerCase();
       String poolNameLength = "poolNameLength";
+      if(MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()){
+        throw new BusinessException(BusinessCode.OUT_OF_QUERY_LIMIT);
+      }
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, poolNameLength, PoolOfflineData_.POOL_NAME));
       poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
     }
