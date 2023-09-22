@@ -43,6 +43,15 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       nativeQuery = true)
   Page<PoolListProjection> findAllByPoolViewAndPoolName(@Param("param") String param, Pageable pageable);
 
+  @Query(value =
+      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, "
+          + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength "
+          + "FROM PoolHash ph "
+          + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
+          + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) ",
+      countQuery = "SELECT COUNT(ph.id) FROM PoolHash ph")
+  Page<PoolListProjection> findAllWithoutQueryParam(Pageable pageable);
+
   @Query(value = "SELECT ph.id FROM PoolHash ph "
       + "WHERE ph.view IN :poolViews ")
   Set<Long> getListPoolIdIn(@Param("poolViews") Set<String> poolViews);
