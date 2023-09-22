@@ -26,8 +26,9 @@ public interface BlockRepository extends JpaRepository<Block, Long>,
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER})
   Optional<Block> findFirstByHash(@Param("hash") String hash);
 
-  @Query(value = "SELECT b FROM Block b WHERE b.epochNo IS NOT NULL",
-      countQuery = "SELECT sum (e.blkCount) FROM Epoch e")
+  @Query(
+      value = "SELECT b FROM Block b",
+      countQuery = "SELECT sum (e.blkCount) + 1 FROM Epoch e")
   Page<Block> findAllBlock(Pageable pageable);
 
   List<Block> findAllByIdIn(@Param("ids") Collection<Long> ids);
