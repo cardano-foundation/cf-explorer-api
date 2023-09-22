@@ -95,7 +95,7 @@ public class TokenServiceImpl implements TokenService {
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
   private final AggregatedDataCacheService aggregatedDataCacheService;
   private final TokenInfoRepository tokenInfoRepository;
-
+  private static final int MAX_TOTAL_ELEMENTS = 1000;
   static final Integer TOKEN_VOLUME_ANALYTIC_NUMBER = 5;
 
   @Override
@@ -115,6 +115,9 @@ public class TokenServiceImpl implements TokenService {
       multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
     } else {
       String lengthOfNameView = "nameViewLength";
+      if(MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()){
+        throw new BusinessException(BusinessCode.OUT_OF_QUERY_LIMIT);
+      }
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
           .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
       multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable).map(
