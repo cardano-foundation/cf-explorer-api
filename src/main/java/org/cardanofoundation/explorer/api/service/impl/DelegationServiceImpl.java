@@ -33,7 +33,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
@@ -81,6 +80,7 @@ import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
@@ -208,16 +208,17 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
-    boolean isQueryEmpty = StringUtils.isEmpty(search);
+    Page<PoolListProjection> poolIdPage;
+    boolean isQueryEmpty = DataUtil.isNullOrEmpty(search);
     if (isQueryEmpty) {
-      search = null;
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, BaseEntity_.ID));
+      poolIdPage = poolHashRepository.findAllWithoutQueryParam(pageable);
     } else {
       search = search.toLowerCase();
       String poolNameLength = "poolNameLength";
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, poolNameLength, PoolOfflineData_.POOL_NAME));
+      poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
     }
-    Page<PoolListProjection> poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
     Integer epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
 
     List<PoolResponse> poolList = new ArrayList<>();
