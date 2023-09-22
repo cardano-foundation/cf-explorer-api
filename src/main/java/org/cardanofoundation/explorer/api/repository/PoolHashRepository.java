@@ -37,7 +37,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       countQuery = "SELECT COUNT(*) FROM "
           + "(SELECT 1 FROM pool_hash ph "
           + "LEFT JOIN pool_offline_data po ON ph.id = po.pool_id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM pool_offline_data po2 WHERE po2.pool_id = ph.id)) "
-          + "WHERE :param IS NULL OR ph.view = :param "
+          + "WHERE ph.view = :param "
           + "OR LOWER(po.pool_name) LIKE CONCAT('%', :param, '%') OR LOWER(po.ticker_name) LIKE CONCAT('%', :param, '%') "
           + "LIMIT 1000) AS A",
       nativeQuery = true)
