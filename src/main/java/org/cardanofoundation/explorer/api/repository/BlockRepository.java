@@ -97,7 +97,7 @@ public interface BlockRepository
               + "GROUP BY ph.id")
   List<PoolCountProjection> getCountBlockByPools(@Param("poolIds") Set<Long> poolIds);
 
-  @Query("SELECT b FROM Block b order by b.blockNo desc limit 1")
+  @Query("SELECT b FROM Block b WHERE b.blockNo IS NOT NULL ORDER BY b.blockNo DESC LIMIT 1")
   Optional<Block> findLatestBlock();
   @Query(
       value =
