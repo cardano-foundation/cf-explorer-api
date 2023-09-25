@@ -3,8 +3,11 @@ package org.cardanofoundation.explorer.api.repository;
 import java.sql.Timestamp;
 import java.util.Collection;
 
+import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -36,4 +39,8 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE CONCAT('%', :query, '%') ")
   List<MultiAsset> findByNameViewLike(@Param("query") String query, Pageable pageable);
+
+  @Query("SELECT ma.fingerprint as fingerprint, ma.name as tokenName, mtm.quantity as quantity FROM MultiAsset ma "
+      + "JOIN MaTxMint mtm on (mtm.ident = ma and mtm.tx = :tx and ma.policy = :policy)")
+  List<AddressTokenProjection> getMintingAssets(@Param("tx") Tx tx, @Param("policy") String policy);
 }

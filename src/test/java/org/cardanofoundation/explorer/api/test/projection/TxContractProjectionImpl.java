@@ -24,6 +24,7 @@ public class TxContractProjectionImpl implements TxContractProjection {
   String datumHashOut;
   byte[] datumBytesOut;
   Long txOutId;
+  String stakeAddress;
 
   @Override
   public String getScriptHash() {
@@ -83,5 +84,10 @@ public class TxContractProjectionImpl implements TxContractProjection {
   @Override
   public Long getTxOutId() {
     return this.txOutId;
+  }
+
+  @Override
+  public String getStakeAddress() {
+    return this.stakeAddress;
   }
 }
