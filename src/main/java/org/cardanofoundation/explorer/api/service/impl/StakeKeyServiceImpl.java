@@ -337,9 +337,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
           dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
-      var minMaxBalance = stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(addr.getId(), fromBalance,
-          Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
-
+      getHighestAndLowestBalance(addr, fromBalance, dates, response);
+      // init data for chart
       data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
         Optional<BigInteger> balance = addressTxBalanceRepository
@@ -349,20 +348,16 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         }
         data.add(new AddressChartBalanceData(dates.get(i), fromBalance));
       }
-      response.setHighestBalance(minMaxBalance.getMaxVal());
-      response.setLowestBalance(minMaxBalance.getMinVal());
       response.setData(data);
     } else {
       // Remove last date because we will get data of today
       dates.remove(0);
       var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
           dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
-      var minMaxBalance = stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(addr.getId(), fromBalance,
-          Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
+      getHighestAndLowestBalance(addr, fromBalance, dates, response);
       List<AggregateAddressBalanceProjection> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
           .findAllByStakeAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());
-
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance = aggregateAddressTxBalances.stream()
@@ -374,11 +369,50 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         }
         data.add(new AddressChartBalanceData(date, fromBalance));
       }
-      response.setHighestBalance(minMaxBalance.getMaxVal());
-      response.setLowestBalance(minMaxBalance.getMinVal());
       response.setData(data);
     }
     return response;
+  }
+
+  /**
+   * Get highest and lowest balance of stake address
+   * @param addr stake address
+   * @param fromBalance balance of stake address at start date
+   * @param dates list date
+   * @param response chart response
+   */
+  private void getHighestAndLowestBalance(StakeAddress addr,
+                                          BigInteger fromBalance,
+                                          List<LocalDateTime> dates,
+                                          AddressChartBalanceResponse response) {
+    var minMaxBalance = stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(addr.getId(), fromBalance,
+        Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
+    if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
+      response.setHighestBalance(minMaxBalance.getMaxVal());
+    }
+    else {
+      response.setHighestBalance(fromBalance);
+    }
+    if (minMaxBalance.getMinVal().compareTo(fromBalance) < 0) {
+      response.setLowestBalance(minMaxBalance.getMinVal());
+    }
+    else {
+      response.setLowestBalance(fromBalance);
+    }
+    Long maxTxId = stakeTxBalanceRepository
+        .findMaxTxIdByStakeAddressId(addr.getId())
+        .orElse(Long.MAX_VALUE);
+    if (!maxTxId.equals(Long.MAX_VALUE)) {
+      List<StakeTxProjection> stakeTxList = addressTxBalanceRepository.findTxAndAmountByStake(addr, maxTxId);
+      for (StakeTxProjection stakeTx : stakeTxList) {
+        if (response.getHighestBalance().add(stakeTx.getAmount()).compareTo(response.getHighestBalance()) > 0) {
+          response.setHighestBalance(response.getHighestBalance().add(stakeTx.getAmount()));
+        }
+        if (response.getLowestBalance().add(stakeTx.getAmount()).compareTo(response.getLowestBalance()) < 0) {
+          response.setLowestBalance(response.getLowestBalance().add(stakeTx.getAmount()));
+        }
+      }
+    }
   }
 
   @Override
