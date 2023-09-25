@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Builder
@@ -45,5 +46,6 @@ public class HistoriesProtocol {
    List<ProtocolHistory> maxValSize;
    List<ProtocolHistory> collateralPercent;
    List<ProtocolHistory> maxCollateralInputs;
+   @JsonProperty("coinsPerUtxoByte")
    List<ProtocolHistory> coinsPerUtxoSize;
 }
