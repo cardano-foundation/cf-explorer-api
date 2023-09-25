@@ -15,11 +15,14 @@ import org.springframework.data.repository.query.Param;
 
 public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
-  @Query("SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ma.txCount as txCount,"
-      + " ma.fingerprint as fingerprint, ma.supply as supply, ma.totalVolume as totalVolume, ma.time as time,"
-      + " LENGTH(ma.nameView) as nameViewLength"
-      + " FROM MultiAsset ma "
-      + " WHERE ma.fingerprint = :query OR LOWER(ma.nameView) LIKE CONCAT('%', :query, '%')")
+  @Query(value = "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.name_view as nameView, ma.tx_count as txCount,"
+      + " ma.fingerprint as fingerprint, ma.supply as supply, ma.total_volume as totalVolume, ma.time as time,"
+      + " LENGTH(ma.name_view) as nameViewLength"
+      + " FROM multi_asset ma "
+      + " WHERE ma.fingerprint = :query OR LOWER(ma.name_view) LIKE CONCAT('%', :query, '%')",
+      countQuery = "SELECT COUNT(*) FROM (SELECT 1 FROM multi_asset ma "
+          + "WHERE ma.fingerprint = :query OR LOWER(ma.name_view) LIKE CONCAT('%', :query, '%') limit 1000) as A",
+      nativeQuery = true)
   Page<TokenProjection> findAll(@Param("query") String query, Pageable pageable);
 
   @Query("select multiAsset from MultiAsset multiAsset")

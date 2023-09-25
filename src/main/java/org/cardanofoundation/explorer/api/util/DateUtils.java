@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import lombok.experimental.UtilityClass;
@@ -16,23 +15,28 @@ import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 @UtilityClass
 public class DateUtils {
 
-  private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_DAY = Duration.ofHours(2);
-  private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_WEEK = Duration.ofDays(1);
-  private final TemporalAmount AMOUNT_TO_SUBTRACT_ONE_MONTH = Duration.ofDays(1);
-  private final TemporalAmount AMOUNT_TO_SUBTRACT_THREE_MONTH = Duration.ofDays(1);
+  private final TemporalAmount ONE_DAY_TIME_SEGMENT = Duration.ofHours(2);
+  private final TemporalAmount ONE_WEEK_TIME_SEGMENT = Duration.ofDays(1);
+  private final TemporalAmount ONE_MONTH_TIME_SEGMENT = Duration.ofDays(1);
+  private final TemporalAmount THREE_MONTH_TIME_SEGMENT = Duration.ofDays(1);
+
+  private final TemporalAmount ONE_DAY = Duration.ofDays(1);
+  private final TemporalAmount ONE_WEEK = Duration.ofDays(7);
+  private final TemporalAmount ONE_MONTH = Duration.ofDays(30);
+  private final TemporalAmount THREE_MONTH = Duration.ofDays(90);
 
   public static List<LocalDateTime> getListDateAnalytic(AnalyticType analyticType) {
     LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
     LocalDateTime startOfToday = currentDate.atStartOfDay();
     return switch (analyticType) {
       case ONE_WEEK ->
-          getDateAnalytics(startOfToday.minusWeeks(1), currentDate.atStartOfDay(), AMOUNT_TO_SUBTRACT_ONE_WEEK);
+          getDateAnalytics(startOfToday.minus(ONE_WEEK), currentDate.atStartOfDay(), ONE_WEEK_TIME_SEGMENT);
       case ONE_MONTH ->
-          getDateAnalytics(startOfToday.minusMonths(1), currentDate.atStartOfDay(), AMOUNT_TO_SUBTRACT_ONE_MONTH);
+          getDateAnalytics(startOfToday.minus(ONE_MONTH), currentDate.atStartOfDay(), ONE_MONTH_TIME_SEGMENT);
       case THREE_MONTH ->
-          getDateAnalytics(startOfToday.minusMonths(3), currentDate.atStartOfDay(), AMOUNT_TO_SUBTRACT_THREE_MONTH);
+          getDateAnalytics(startOfToday.minus(THREE_MONTH), currentDate.atStartOfDay(), THREE_MONTH_TIME_SEGMENT);
       default ->
-          getDateAnalytics(startOfToday.minusDays(1), currentDate.atStartOfDay(), AMOUNT_TO_SUBTRACT_ONE_DAY);
+          getDateAnalytics(startOfToday.minus(ONE_DAY), currentDate.atStartOfDay(), ONE_DAY_TIME_SEGMENT);
     };
   }
 

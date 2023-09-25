@@ -30,10 +30,8 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigInteger;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
@@ -84,6 +82,8 @@ public class StakeKeyServiceTest {
     private ValueOperations valueOperations;
     @Mock
     private TxRepository txRepository;
+    @Mock
+    private StakeTxBalanceRepository stakeTxBalanceRepository;
 
     @Test
     void testGetDataForStakeKeyRegistration_thenReturn() {
@@ -381,11 +381,13 @@ public class StakeKeyServiceTest {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_DAY;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
-        LocalDate localDate = LocalDate.now().minusDays(5);
+        MinMaxProjection min = Mockito.mock(MinMaxProjection.class);
+        when(min.getMinVal()).thenReturn(BigInteger.ONE);
+        when(min.getMaxVal()).thenReturn(BigInteger.TEN);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
         when(aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(any(), any())).thenReturn(Optional.of(BigInteger.ONE));
-        when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any(), any())).thenReturn(Optional.of(BigInteger.ONE));
+        when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any())).thenReturn(min);
 
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
@@ -393,15 +395,18 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testGetStakeBalanceAnalytics_thenReturnV2() throws ExecutionException, InterruptedException {
+    void testGetStakeBalanceAnalytics_thenReturnV2() {
 
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_WEEK;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
-        LocalDate localDate = LocalDate.now().minusDays(5);
+        MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+        when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ONE);
+        when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
         when(aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(any(), any())).thenReturn(Optional.of(BigInteger.ONE));
+        when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
@@ -412,9 +417,13 @@ public class StakeKeyServiceTest {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_DAY;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
+        MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+        when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ONE);
+        when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
         when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any(), any())).thenReturn(Optional.of(BigInteger.ZERO));
+        when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
@@ -425,9 +434,12 @@ public class StakeKeyServiceTest {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_WEEK;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
-        LocalDate localDate = LocalDate.now().minusDays(5);
+        MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+        when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ONE);
+        when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
+        when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
@@ -438,9 +450,12 @@ public class StakeKeyServiceTest {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_WEEK;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
-        LocalDate localDate = LocalDate.now().minusDays(5);
+        MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+        when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ONE);
+        when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
+        when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
@@ -451,9 +466,13 @@ public class StakeKeyServiceTest {
         String stakeKey = "stake_key";
         AnalyticType type = AnalyticType.ONE_DAY;
         StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
+        MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
+        when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ONE);
+        when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
         when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any(), any())).thenReturn(Optional.of(BigInteger.ZERO));
+        when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any())).thenReturn(minMaxProjection);
 
         var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
         assertNotNull(response);
@@ -479,32 +498,6 @@ public class StakeKeyServiceTest {
 
         var response = stakeKeyService.getStakeRewardAnalytics(stakeKey);
         assertNotNull(response);
-    }
-
-    @Test
-    void testGetStakeMinMaxBalance_thenReturn() {
-        String stakeKey = "stake_key";
-        MinMaxProjection projection = Mockito.mock(MinMaxProjection.class);
-        when(projection.getMinVal()).thenReturn(BigInteger.ONE);
-        when(projection.getMaxVal()).thenReturn(BigInteger.TWO);
-
-        when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(StakeAddress.builder().id(1L).build()));
-        when(addressTxBalanceRepository.findMinMaxBalanceByStakeAddress(1L)).thenReturn(projection);
-
-        var response = stakeKeyService.getStakeMinMaxBalance(stakeKey);
-        assertEquals(response.get(0), BigInteger.ONE);
-        assertEquals(response.get(1), BigInteger.TWO);
-    }
-
-    @Test
-    void testGetStakeMinMaxBalance_thenReturnBalanceNull() {
-        String stakeKey = "stake_key";
-
-        when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(StakeAddress.builder().id(1L).build()));
-        when(addressTxBalanceRepository.findMinMaxBalanceByStakeAddress(1L)).thenReturn(null);
-
-        var response = stakeKeyService.getStakeMinMaxBalance(stakeKey);
-        assertEquals(response.size(), 0);
     }
 
     @Test

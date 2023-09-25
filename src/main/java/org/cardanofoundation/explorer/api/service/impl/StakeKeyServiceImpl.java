@@ -67,6 +67,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
   private final TxRepository txRepository;
+  private final StakeTxBalanceRepository stakeTxBalanceRepository;
 
   private final RedisTemplate<String, Object> redisTemplate;
 
@@ -74,8 +75,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   private final FetchRewardDataService fetchRewardDataService;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
-
-  private static final int STAKE_ANALYTIC_NUMBER = 5;
 
   @Value("${application.network}")
   private String network;
@@ -326,27 +325,40 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  public List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type) {
+  public AddressChartBalanceResponse getStakeBalanceAnalytics(String stakeKey, AnalyticType type) {
 
     StakeAddress addr = stakeAddressRepository.findByView(stakeKey)
         .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
+    AddressChartBalanceResponse response = new AddressChartBalanceResponse();
+    List<AddressChartBalanceData> data = new ArrayList<>();
 
-    var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
-        dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
-    List<StakeAnalyticBalanceResponse> responses = new ArrayList<>();
     if (AnalyticType.ONE_DAY.equals(type)) {
-      responses.add(new StakeAnalyticBalanceResponse(dates.get(0), fromBalance));
+      var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
+          dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
+      var minMaxBalance = stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(addr.getId(), fromBalance,
+          Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
+
+      data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
         Optional<BigInteger> balance = addressTxBalanceRepository
             .getBalanceByStakeAddressAndTime(addr, Timestamp.valueOf(dates.get(i-1)), Timestamp.valueOf(dates.get(i)));
         if (balance.isPresent()) {
           fromBalance = fromBalance.add(balance.get());
         }
-        responses.add(new StakeAnalyticBalanceResponse(dates.get(i), fromBalance));
+        data.add(new AddressChartBalanceData(dates.get(i), fromBalance));
       }
+      response.setHighestBalance(minMaxBalance.getMaxVal());
+      response.setLowestBalance(minMaxBalance.getMinVal());
+      response.setData(data);
     } else {
+      // Remove last date because we will get data of today
+      dates.remove(0);
+      var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByStakeAddressId(addr.getId(),
+          dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
+      var minMaxBalance = stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(addr.getId(), fromBalance,
+          Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
       List<AggregateAddressBalanceProjection> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
           .findAllByStakeAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());
@@ -360,10 +372,13 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         if (mapBalance.containsKey(date.toLocalDate())) {
           fromBalance = fromBalance.add(mapBalance.get(date.toLocalDate()));
         }
-        responses.add(new StakeAnalyticBalanceResponse(date, fromBalance));
+        data.add(new AddressChartBalanceData(date, fromBalance));
       }
+      response.setHighestBalance(minMaxBalance.getMaxVal());
+      response.setLowestBalance(minMaxBalance.getMinVal());
+      response.setData(data);
     }
-    return responses;
+    return response;
   }
 
   @Override
@@ -388,19 +403,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       responses.add(response);
     }
     return responses;
-  }
-
-  @Override
-  public List<BigInteger> getStakeMinMaxBalance(String stakeKey) {
-    StakeAddress stake = stakeAddressRepository.findByView(stakeKey)
-        .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-
-    MinMaxProjection balanceList = addressTxBalanceRepository.findMinMaxBalanceByStakeAddress(
-        stake.getId());
-    if (balanceList == null) {
-      return Collections.emptyList();
-    }
-    return List.of(balanceList.getMinVal(), balanceList.getMaxVal());
   }
 
   @Override

@@ -40,7 +40,7 @@ public class MarketDataServiceImpl implements MarketDataService {
     return cachedData;
   }
 
-  public void publishMarketData(String currency) {
+  private void publishMarketData(String currency) {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
     Object marketDataCachedObject = redisTemplate.opsForValue().get(redisKey);
     Object marketDataObject =
@@ -53,7 +53,8 @@ public class MarketDataServiceImpl implements MarketDataService {
         .get("last_updated")
         .toString()
         .equals(marketDataCached.get("last_updated").toString())) {
-      WebSocketMessage messageCurrentPrice = WebSocketMessage.builder().payload(marketDataObject).build();
+      WebSocketMessage messageCurrentPrice =
+          WebSocketMessage.builder().payload(marketDataObject).build();
       if (currency.equals("usd")) {
         messageCurrentPrice.setEventType(WebSocketEventType.CURRENT_PRICE_USD);
       } else if (currency.equals("btc")) {

@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.mapper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
@@ -17,7 +18,7 @@ import org.mapstruct.Mapping;
 public interface TokenMapper {
 
   @Mapping(target = "displayName",
-      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
+      expression = "java(getDisplayName(multiAsset.getNameView(), multiAsset.getFingerprint()))")
   @Mapping(target = "createdOn", source = "time")
   TokenFilterResponse fromMultiAssetToFilterResponse(MultiAsset multiAsset);
 
@@ -48,5 +49,12 @@ public interface TokenMapper {
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
     return timestamp == null ? null : timestamp.toLocalDateTime();
+  }
+
+  default String getDisplayName(String nameView, String fingerprint) {
+    if(!StringUtils.isEmpty(nameView)) {
+      return nameView;
+    }
+    else return fingerprint;
   }
 }

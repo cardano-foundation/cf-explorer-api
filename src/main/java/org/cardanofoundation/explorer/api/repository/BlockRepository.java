@@ -27,8 +27,8 @@ public interface BlockRepository
   Optional<Block> findFirstByHash(@Param("hash") String hash);
 
   @Query(
-      value = "SELECT b FROM Block b WHERE b.epochNo IS NOT NULL",
-      countQuery = "SELECT sum (e.blkCount) FROM Epoch e")
+      value = "SELECT b FROM Block b",
+      countQuery = "SELECT sum (e.blkCount) + 1 FROM Epoch e")
   Page<Block> findAllBlock(Pageable pageable);
 
   @Query(
