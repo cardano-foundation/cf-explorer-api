@@ -34,4 +34,6 @@ public class ContractResponse {
   private String stakeAddress;
   private List<TokenAddressResponse> mintingTokens;
   private List<TokenAddressResponse> burningTokens;
+  private Integer utxoIndex;
+  private String utxoHash;
 }

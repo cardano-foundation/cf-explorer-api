@@ -13,7 +13,7 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
   @Query("SELECT re.scriptHash AS scriptHash, txOut.address AS address, re.purpose as purpose,"
       + " rd.bytes as redeemerBytes, re.unitMem as redeemerMem, re.unitSteps as redeemerSteps,"
       + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes, txOut.id as txOutId,"
-      + " sa.view as stakeAddress"
+      + " txOut.index as utxoIndex, utxo.hash as utxoHash, sa.view as stakeAddress"
       + " FROM Redeemer re"
       + " INNER JOIN Tx tx ON re.tx = tx"
       + " LEFT JOIN RedeemerData rd ON re.redeemerData = rd"
@@ -25,6 +25,7 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " LEFT JOIN Delegation de ON re = de.redeemer"
       + " LEFT JOIN StakeDeregistration sdr ON re = sdr.redeemer"
       + " LEFT JOIN StakeAddress sa ON (w.addr = sa OR de.address = sa OR sdr.addr = sa)"
+      + " LEFT JOIN Tx utxo ON (txOut.tx = utxo)"
       + " WHERE tx = :tx"
       + " ORDER BY re.id")
   List<TxContractProjection> findContractByTx(@Param("tx") Tx tx);
@@ -32,7 +33,7 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
   @Query("SELECT re.scriptHash AS scriptHash, txOut.address AS address, re.purpose as purpose,"
       + " rd.bytes as redeemerBytes, re.unitMem as redeemerMem, re.unitSteps as redeemerSteps,"
       + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes, txOut.id as txOutId,"
-      + " sa.view as stakeAddress"
+      + " txOut.index as utxoIndex, utxo.hash as utxoHash, sa.view as stakeAddress"
       + " FROM Redeemer re"
       + " INNER JOIN Tx tx ON re.tx = tx"
       + " LEFT JOIN RedeemerData rd ON re.redeemerData = rd"
@@ -44,6 +45,7 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " LEFT JOIN Delegation de ON re = de.redeemer"
       + " LEFT JOIN StakeDeregistration sdr ON re = sdr.redeemer"
       + " LEFT JOIN StakeAddress sa ON (w.addr = sa OR de.address = sa OR sdr.addr = sa)"
+      + " LEFT JOIN Tx utxo ON (txOut.tx = utxo)"
       + " WHERE tx = :tx"
       + " ORDER BY re.id")
   List<TxContractProjection> findContractByTxFail(@Param("tx") Tx tx);
