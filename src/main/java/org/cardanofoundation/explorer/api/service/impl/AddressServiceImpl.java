@@ -125,6 +125,8 @@ public class AddressServiceImpl implements AddressService {
           dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
       var minMaxBalance = addressTxBalanceRepository. findMinMaxBalanceByAddress(addr.getId(), fromBalance,
           Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
+      response.setHighestBalance(minMaxBalance.getMaxVal());
+      response.setLowestBalance(minMaxBalance.getMinVal());
 
       data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
@@ -136,8 +138,6 @@ public class AddressServiceImpl implements AddressService {
         data.add(new AddressChartBalanceData(dates.get(i), fromBalance));
       }
       response.setData(data);
-      response.setHighestBalance(minMaxBalance.getMaxVal());
-      response.setLowestBalance(minMaxBalance.getMinVal());
     } else {
       // Remove last date because we will get data of today
       dates.remove(0);
@@ -146,6 +146,9 @@ public class AddressServiceImpl implements AddressService {
           dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
       var minMaxBalance = addressTxBalanceRepository.findMinMaxBalanceByAddress(addr.getId(), fromBalance,
           Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
+      response.setHighestBalance(minMaxBalance.getMaxVal());
+      response.setLowestBalance(minMaxBalance.getMinVal());
+
       List<AggregateAddressTxBalance> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
           .findAllByAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());
@@ -162,8 +165,6 @@ public class AddressServiceImpl implements AddressService {
         data.add(new AddressChartBalanceData(date, fromBalance));
       }
       response.setData(data);
-      response.setHighestBalance(minMaxBalance.getMaxVal());
-      response.setLowestBalance(minMaxBalance.getMinVal());
     }
     return response;
   }
