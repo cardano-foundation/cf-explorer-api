@@ -1,5 +1,8 @@
 package org.cardanofoundation.explorer.api.service.impl.cache;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +19,37 @@ import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheServi
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AggregatedDataCacheServiceImpl implements AggregatedDataCacheService {
+public class RedisAggregatedDateCacheServiceImpl implements AggregatedDataCacheService {
 
-  private static final String TEMP_PREFIX = "TEMP_";
   private static final String AGGREGATED_CACHE_KEY = "AGGREGATED_CACHE";
+  private static final String BLOCK_TIME_HASH_KEY = "LATEST_BLOCK_TIME";
+  private static final String BLOCK_INSERT_TIME_HASH_KEY = "LATEST_BLOCK_INSERT_TIME";
   private static final String TOKEN_COUNT_HASH_KEY = "TOTAL_TOKEN_COUNT";
   private final RedisTemplate<String, String> redisTemplate;
 
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
+      "yyyy-MM-dd HH:mm:ss");
+
   @Value("${application.network}")
   private String network;
+
+  @Override
+  public LocalDateTime getLatestBlockTime() {
+    String blockTime = getRedisHashValue(BLOCK_TIME_HASH_KEY);
+    if (Objects.isNull(blockTime)) {
+      return null;
+    }
+    return LocalDateTime.parse(blockTime, DATE_TIME_FORMATTER);
+  }
+
+  @Override
+  public LocalDateTime getLatestBlockInsertTime() {
+    String blockTime = getRedisHashValue(BLOCK_INSERT_TIME_HASH_KEY);
+    if (Objects.isNull(blockTime)) {
+      return null;
+    }
+    return LocalDateTime.parse(blockTime, DATE_TIME_FORMATTER);
+  }
 
   @Override
   public int getTokenCount() {
@@ -35,13 +60,6 @@ public class AggregatedDataCacheServiceImpl implements AggregatedDataCacheServic
   private String getRedisHashValue(String hashKey) {
     HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
 
-    // Get from both temp and real data
-    String tempRedisKey = getRedisKey(getTempRedisKey(AGGREGATED_CACHE_KEY));
-    String data = hashOperations.get(tempRedisKey, hashKey);
-    if (StringUtils.hasText(data)) {
-      return data;
-    }
-
     String redisKey = getRedisKey(AGGREGATED_CACHE_KEY);
     return hashOperations.get(redisKey, hashKey);
   }
@@ -50,7 +68,4 @@ public class AggregatedDataCacheServiceImpl implements AggregatedDataCacheServic
     return String.join(CommonConstant.UNDERSCORE, network.toUpperCase(), key);
   }
 
-  private String getTempRedisKey(String key) {
-    return TEMP_PREFIX + key;
-  }
 }

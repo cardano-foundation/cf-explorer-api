@@ -85,7 +85,7 @@ public class CommonConstant {
 
     for (Object element : a) {
       result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue()
-                                                       : element.hashCode());
+          : element.hashCode());
     }
 
     return result;
