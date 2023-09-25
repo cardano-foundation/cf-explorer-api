@@ -18,4 +18,6 @@ public interface TxContractProjection {
   byte[] getDatumBytesOut();
   Long getTxOutId();
   String getStakeAddress();
+  String getUtxoHash();
+  Integer getUtxoIndex();
 }
