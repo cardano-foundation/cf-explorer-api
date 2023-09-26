@@ -22,7 +22,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 📊 [LoadTest Report](https://cardano-foundation.github.io/cf-explorer-api/loadtest-report/k6_results.csv)
 
 📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/mutation-report/)
-
+ 
 ## Getting Started
 
 ### Prerequisites
@@ -32,7 +32,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 ### Installing
 
 - Clone this repository
-- Copy `./.m2/settings.default.xml` to `./.m2/settings.xml`
+- Copy `./.m2/settings.default.xml` to `./.m2/settings.xml` 
 - Fill `{username_github}` and `{token_github}` in `./.m2/settings.xml` with your github username and token. Guide to generate a token with `read:packages` scope [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
 - Copy `.env.example`  to `.env`
 - Fill the `.env` file with your values (explain below)
@@ -56,13 +56,13 @@ To ensure the stability and reliability of this project, unit and mutation tests
 
 - `KAFKA_BOOTSTRAP_SERVER`: Kafka bootstrap server. Default is kafka:9092.
 - `KAFKA_REPORTS_TOPIC`: Kafka reports topic. Default is dev.explorer.api.mainnet.reports
-
+  
 - `S3_ACCESS_KEY`: the AWS access key
 - `S3_SECRET_KEY`: the AWS secret key
 - `S3_REGION`: the AWS region
 - `S3_BUCKET_NAME`: the AWS bucket
 - `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
-- `PATH_STYLE_ENABLED`:
+- `PATH_STYLE_ENABLED`: 
 
 - `LOG_PATH`: the path to store log files
 
@@ -79,7 +79,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `EPOCH_DAYS` : Number of days in an epoch. Default is 5.
 - `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.
 - `TOKEN_LOGO_ENDPOINT`: Endpoint for get token logo.
-
+- `BLOCK_TIME_THRESHOLD_IN_SECOND` : The maximum allowable time difference, in seconds, between the timestamp of the latest block and the current time (for healthcheck)
 ### We have 3 options for redis cache:
 - `redis standalone`
     - `REDIS_STANDALONE_HOST` : Redis hostname eg. `127.0.0.1`.
