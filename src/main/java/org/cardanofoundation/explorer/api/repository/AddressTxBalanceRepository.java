@@ -26,8 +26,8 @@ public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalan
       @Param("from") Timestamp from,
       @Param("to") Timestamp to);
 
-  @Query(value = "select :fromBalance + min(calculated_balances.sum_balance) as minVal, "
-      + "               :fromBalance + max(calculated_balances.sum_balance) as maxVal "
+  @Query(value = "select :fromBalance + coalesce(min(calculated_balances.sum_balance), 0) as minVal, "
+      + "               :fromBalance + coalesce(max(calculated_balances.sum_balance), 0) as maxVal "
       + " from (select sum(atb.balance) over (order by atb.tx_id rows unbounded PRECEDING) as sum_balance "
       + "       from address_tx_balance atb "
       + "       where atb.address_id = :addressId "
