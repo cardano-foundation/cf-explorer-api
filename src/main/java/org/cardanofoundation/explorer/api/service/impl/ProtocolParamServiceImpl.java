@@ -111,11 +111,15 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   //key::ProtocolType, value::Pair<getter, getterProposal>
   Map<ProtocolType, Pair<Method, Method>> latestParamHistoryMethods;
 
+  private String getHistoryProtocolParametersKey(){
+    return String.format("%s_%s", network, PROTOCOL_HISTORY).toUpperCase();
+  }
+
   @Override
   public HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypesInput,
       BigInteger startTime,
       BigInteger endTime) {
-    final String redisKey = String.format("%s_%s", network, PROTOCOL_HISTORY).toUpperCase();
+    final String redisKey = getHistoryProtocolParametersKey();
 
     boolean isGetAll = Boolean.FALSE;
 
@@ -290,6 +294,10 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     }
 
     return historiesProtocol;
+  }
+
+  private void deleteProtocolHistoryCache(){
+    redisTemplate.delete(getHistoryProtocolParametersKey());
   }
 
   @Override
@@ -1053,5 +1061,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     setHistoriesProtocolMethods();
     setLatestParamHistoryMethods();
     loadFixedProtocols();
+    deleteProtocolHistoryCache();
   }
 }
