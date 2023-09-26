@@ -96,8 +96,7 @@ public class TokenController {
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
       @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
       @Parameter(description = "The CIP14 fingerprint for the MultiAsset.") String tokenId,
-      @PathVariable @Parameter(description = "Type analytics") AnalyticType type)
-      throws ExecutionException, InterruptedException {
+      @PathVariable @Parameter(description = "Type analytics") AnalyticType type) {
     return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
   }
 }

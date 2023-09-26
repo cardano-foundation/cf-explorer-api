@@ -18,6 +18,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.util.Pair;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 
 
@@ -57,6 +58,8 @@ public class Protocols {
   ProtocolHistory maxValSize;
   ProtocolHistory collateralPercent;
   ProtocolHistory maxCollateralInputs;
+
+  @JsonProperty("coinsPerUtxoByte")
   ProtocolHistory coinsPerUtxoSize;
   LocalDateTime timestamp;
 
