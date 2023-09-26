@@ -69,6 +69,7 @@ public class TokenServiceImpl implements TokenService {
   private final TokenPageCacheService tokenPageCacheService;
   @Qualifier("taskExecutor")
   private final TaskExecutor taskExecutor;
+  private static final int MAX_TOTAL_ELEMENTS = 1000;
 
   @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
   @Override
@@ -77,7 +78,8 @@ public class TokenServiceImpl implements TokenService {
       throws ExecutionException, InterruptedException {
 
     Page<MultiAsset> multiAssets;
-    if(StringUtils.isEmpty(query)){
+    boolean isQueryEmpty = StringUtils.isEmpty(query);
+    if(isQueryEmpty){
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
       Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
           tokenPageCacheService.getTokePageCache(pageable);
@@ -88,6 +90,9 @@ public class TokenServiceImpl implements TokenService {
       }
     } else {
       String lengthOfNameView = "nameViewLength";
+      if(MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()){
+        throw new BusinessException(BusinessCode.OUT_OF_QUERY_LIMIT);
+      }
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
           .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
       multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable).map(
@@ -156,7 +161,11 @@ public class TokenServiceImpl implements TokenService {
           ma.setId(null);
         }
     );
-    return new BaseFilterResponse<>(multiAssetResponsesList);
+    if(isQueryEmpty){
+      return new BaseFilterResponse<>(multiAssetResponsesList);
+    } else {
+      return new BaseFilterResponse<>(multiAssetResponsesList, multiAssets.getTotalElements() >= 1000);
+    }
   }
 
   /**
