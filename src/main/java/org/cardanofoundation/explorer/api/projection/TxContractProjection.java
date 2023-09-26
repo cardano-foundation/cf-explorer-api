@@ -20,4 +20,6 @@ public interface TxContractProjection {
   String getStakeAddress();
   String getUtxoHash();
   Integer getUtxoIndex();
+  Long getDelegationId();
+  Long getStakeDeregistrationId();
 }
