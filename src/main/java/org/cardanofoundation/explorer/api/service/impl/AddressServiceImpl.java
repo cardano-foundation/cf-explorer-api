@@ -123,10 +123,7 @@ public class AddressServiceImpl implements AddressService {
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByAddressId(addr.getId(),
           dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
-      var minMaxBalance = addressTxBalanceRepository. findMinMaxBalanceByAddress(addr.getId(), fromBalance,
-          Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
-      response.setHighestBalance(minMaxBalance.getMaxVal());
-      response.setLowestBalance(minMaxBalance.getMinVal());
+      getHighestAndLowestBalance(addr, fromBalance, dates, response);
 
       data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
@@ -144,10 +141,7 @@ public class AddressServiceImpl implements AddressService {
 
       var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByAddressId(addr.getId(),
           dates.get(0).minusDays(1).toLocalDate()).orElse(BigInteger.ZERO);
-      var minMaxBalance = addressTxBalanceRepository.findMinMaxBalanceByAddress(addr.getId(), fromBalance,
-          Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
-      response.setHighestBalance(minMaxBalance.getMaxVal());
-      response.setLowestBalance(minMaxBalance.getMinVal());
+      getHighestAndLowestBalance(addr, fromBalance, dates, response);
 
       List<AggregateAddressTxBalance> aggregateAddressTxBalances = aggregateAddressTxBalanceRepository
           .findAllByAddressIdAndDayBetween(addr.getId(), dates.get(0).toLocalDate(),
@@ -167,6 +161,33 @@ public class AddressServiceImpl implements AddressService {
       response.setData(data);
     }
     return response;
+  }
+
+  /**
+   * Get highest and lowest balance of address
+   * @param addr address
+   * @param fromBalance balance of address at start date
+   * @param dates list date
+   * @param response chart response
+   */
+  private void getHighestAndLowestBalance(Address addr,
+                                          BigInteger fromBalance,
+                                          List<LocalDateTime> dates,
+                                          AddressChartBalanceResponse response) {
+    var minMaxBalance = addressTxBalanceRepository. findMinMaxBalanceByAddress(addr.getId(), fromBalance,
+        Timestamp.valueOf(dates.get(0)), Timestamp.valueOf(dates.get(dates.size() - 1)));
+    if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
+      response.setHighestBalance(minMaxBalance.getMaxVal());
+    }
+    else {
+      response.setHighestBalance(fromBalance);
+    }
+    if (minMaxBalance.getMinVal().compareTo(fromBalance) < 0) {
+      response.setLowestBalance(minMaxBalance.getMinVal());
+    }
+    else {
+      response.setLowestBalance(fromBalance);
+    }
   }
 
   @Override
