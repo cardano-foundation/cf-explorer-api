@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.RedisKey;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
@@ -244,11 +246,7 @@ public class DelegationServiceImpl implements DelegationService {
       poolIds.add(pool.getPoolId());
     });
 
-    List<PoolCountProjection> delegatorsCountProjections = delegationRepository.liveDelegatorsCountByPools(
-        poolIds);
-    Map<Long, Integer> numberDelegatorsMap = delegatorsCountProjections.stream().collect(
-        Collectors.toMap(PoolCountProjection::getPoolId,
-            PoolCountProjection::getCountValue));
+    Map<Long, Integer> numberDelegatorsMap = getPoolDelegatorsCountMap(poolIds);
 
     List<PoolCountProjection> blockLifetimeProjections = blockRepository.getCountBlockByPools(
         poolIds);
@@ -294,6 +292,25 @@ public class DelegationServiceImpl implements DelegationService {
       response.setIsDataOverSize(poolIdPage.getTotalElements() >= 1000);
     }
     return response;
+  }
+
+  private Map<Long, Integer> getPoolDelegatorsCountMap(Set<Long> poolIds) {
+    String redisKey = RedisKey.POOLS_LIVE_DELEGATORS_COUNT.name() + "_" + network;
+    Map<Long, Integer> poolDelegatorsCountMap = redisTemplate.opsForHash().entries(redisKey)
+        .entrySet()
+        .stream().map(entry -> new AbstractMap.SimpleEntry<>(Long.parseLong(entry.getKey().toString()),
+                                                             Integer.parseInt(entry.getValue().toString())))
+        .filter(entry -> poolIds.contains(entry.getKey()))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    Set<Long> poolIdsNotInRedisCache = poolIds.stream()
+        .filter(poolId -> !poolDelegatorsCountMap.containsKey(poolId)).collect(Collectors.toSet());
+
+    poolDelegatorsCountMap.putAll(delegationRepository.liveDelegatorsCountByPools(poolIdsNotInRedisCache)
+                                      .stream().collect(Collectors.toMap(PoolCountProjection::getPoolId,
+                                                                         PoolCountProjection::getCountValue)));
+
+    return poolDelegatorsCountMap;
   }
 
   /**
