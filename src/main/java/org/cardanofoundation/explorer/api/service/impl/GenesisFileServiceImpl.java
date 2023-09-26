@@ -8,7 +8,7 @@ import org.cardanofoundation.ledgersync.common.util.GenesisUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-@Profile("!internet")
+@Profile("!submit-api")
 @Service
 @RequiredArgsConstructor
 public class GenesisFileServiceImpl implements GenesisService {
