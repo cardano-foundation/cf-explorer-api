@@ -28,7 +28,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   List<PoolDetailEpochProjection> findEpochByPool(@Param("poolId") Long poolId, @Param("epochNo") Set<Integer> epochNo);
 
   @Query(value =
-      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, "
+      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
+          + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
           + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "

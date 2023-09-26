@@ -230,6 +230,7 @@ public class DelegationServiceImpl implements DelegationService {
       poolList.add(PoolResponse.builder().poolId(pool.getPoolView())
           .id(pool.getPoolId())
           .poolName(pool.getPoolName())
+          .tickerName(pool.getTickerName())
           .pledge(pool.getPledge())
           .feeAmount(pool.getFee())
           .feePercent(pool.getMargin())
