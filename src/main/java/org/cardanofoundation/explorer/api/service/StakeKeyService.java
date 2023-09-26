@@ -4,10 +4,10 @@ import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
@@ -17,7 +17,6 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.springframework.data.domain.Pageable;
 
-import java.math.BigInteger;
 import java.util.List;
 
 public interface StakeKeyService {
@@ -115,7 +114,7 @@ public interface StakeKeyService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list balance value by stake
    */
-  List<StakeAnalyticBalanceResponse> getStakeBalanceAnalytics(String stakeKey, AnalyticType type)
+  AddressChartBalanceResponse getStakeBalanceAnalytics(String stakeKey, AnalyticType type)
       throws ExecutionException, InterruptedException;
 
   /**
@@ -124,13 +123,6 @@ public interface StakeKeyService {
    * @return list reward value by stake
    */
   List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey);
-
-  /**
-   *
-   * @param stakeKey stake address
-   * @return min and max balance of stake address
-   */
-  List<BigInteger> getStakeMinMaxBalance(String stakeKey);
 
   /**
    *

@@ -80,6 +80,7 @@ import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 
 @Service
 @RequiredArgsConstructor
@@ -714,12 +715,30 @@ public class TxServiceImpl implements TxService {
                                        Collectors.collectingAndThen(Collectors.toList(),
                                                                     list -> list.get(0))));
 
-    contractResponses.forEach(contractResponse -> {
+    contractResponses.parallelStream().forEach(contractResponse -> {
       TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
       if (txContractProjection != null) {
         contractResponse.setDatumBytesOut(
             txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));
         contractResponse.setDatumHashOut(txContractProjection.getDatumHashOut());
+      }
+      if (contractResponse.getPurpose().equals(ScriptPurposeType.MINT)) {
+        List<TokenAddressResponse> addressTokenProjections =
+            multiAssetRepository.getMintingAssets(tx, contractResponse.getScriptHash())
+                .stream().map(tokenMapper::fromAddressTokenProjection).toList();
+
+        contractResponse
+            .setMintingTokens(addressTokenProjections
+                                  .stream()
+                                  .filter(tokenAddressResponse ->
+                                              tokenAddressResponse.getQuantity().longValue() >= 0)
+                                  .toList());
+        contractResponse
+            .setBurningTokens(addressTokenProjections
+                                  .stream()
+                                  .filter(tokenAddressResponse ->
+                                              tokenAddressResponse.getQuantity().longValue() < 0)
+                                  .toList());
       }
     });
     return contractResponses;
