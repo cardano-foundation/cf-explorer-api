@@ -76,13 +76,15 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   public static final String PROPOSAL = "Proposal";
   public static final String PROTOCOL_HISTORY = "PROTOCOL_HISTORY_ALL";
 
+  public static final String FIXED_PROTOCOL = "FIXED_PROTOCOL";
+
   final ParamProposalRepository paramProposalRepository;
   final EpochParamRepository epochParamRepository;
   final EpochRepository epochRepository;
   final TxRepository txRepository;
   final CostModelRepository costModelRepository;
   final ProtocolMapper protocolMapper;
-  final RedisTemplate<String, HistoriesProtocol> redisTemplate;
+  final RedisTemplate<String, Object> redisTemplate;
   final GenesisService genesisService;
 
   @Value("${application.network}")
@@ -109,11 +111,15 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   //key::ProtocolType, value::Pair<getter, getterProposal>
   Map<ProtocolType, Pair<Method, Method>> latestParamHistoryMethods;
 
+  private String getHistoryProtocolParametersKey(){
+    return String.format("%s_%s", network, PROTOCOL_HISTORY).toUpperCase();
+  }
+
   @Override
   public HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypesInput,
       BigInteger startTime,
       BigInteger endTime) {
-    final String redisKey = String.format("%s_%s", network, PROTOCOL_HISTORY).toUpperCase();
+    final String redisKey = getHistoryProtocolParametersKey();
 
     boolean isGetAll = Boolean.FALSE;
 
@@ -122,7 +128,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       isGetAll = Boolean.TRUE;
       if (Objects.nonNull(redisTemplate.opsForValue().get(redisKey)) &&
           (Objects.isNull(startTime) || Objects.isNull(endTime))) {
-        return redisTemplate.opsForValue().get(redisKey);
+        return (HistoriesProtocol) redisTemplate.opsForValue().get(redisKey);
       }
     }
 
@@ -290,6 +296,10 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     return historiesProtocol;
   }
 
+  private void deleteProtocolHistoryCache(){
+    redisTemplate.delete(getHistoryProtocolParametersKey());
+  }
+
   @Override
   public Protocols getLatestChange() {
 
@@ -355,8 +365,22 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   @Override
   public FixedProtocol getFixedProtocols() {
+    FixedProtocol fixedProtocol = (FixedProtocol) redisTemplate.opsForValue().get(getFixedProtocolsKey());
+    if(Objects.isNull(fixedProtocol)){
+      fixedProtocol = loadFixedProtocols();
+    }
+    return fixedProtocol;
+  }
+
+  private String getFixedProtocolsKey(){
+    return String.format("%s_%s", network, FIXED_PROTOCOL).toUpperCase();
+  }
+
+  private FixedProtocol loadFixedProtocols() {
     FixedProtocol fixedProtocol = getFixedProtocolFromShelleyGenesis(shelleyUrl);
-    return getFixedProtocolFromByronGenesis(byronUrl, fixedProtocol);
+    getFixedProtocolFromByronGenesis(byronUrl, fixedProtocol);
+    redisTemplate.opsForValue().set(getFixedProtocolsKey(),fixedProtocol);
+    return fixedProtocol;
   }
 
   /**
@@ -1036,5 +1060,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     setParamHistoryMethods();
     setHistoriesProtocolMethods();
     setLatestParamHistoryMethods();
+    loadFixedProtocols();
+    deleteProtocolHistoryCache();
   }
 }

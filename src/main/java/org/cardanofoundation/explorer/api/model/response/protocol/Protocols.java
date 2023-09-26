@@ -59,7 +59,7 @@ public class Protocols {
   ProtocolHistory collateralPercent;
   ProtocolHistory maxCollateralInputs;
 
-  @JsonProperty("coinsPerUtxoByte")
+  @JsonProperty("coinsPerUTxOByte")
   ProtocolHistory coinsPerUtxoSize;
   LocalDateTime timestamp;
 
