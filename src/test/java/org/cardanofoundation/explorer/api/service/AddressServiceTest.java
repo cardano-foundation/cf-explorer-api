@@ -61,10 +61,10 @@ class AddressServiceTest {
   AddressTxBalanceRepository addressTxBalanceRepository;
 
   @Mock
-  AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
+  AddressTokenBalanceRepository addressTokenBalanceRepository;
 
   @Mock
-  AddressTokenBalanceRepository addressTokenBalanceRepository;
+  AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   @Mock
   TokenMapper tokenMapper;

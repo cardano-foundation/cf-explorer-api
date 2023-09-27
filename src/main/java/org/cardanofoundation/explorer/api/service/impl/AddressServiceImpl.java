@@ -115,7 +115,6 @@ public class AddressServiceImpl implements AddressService {
           .lowestBalance(BigInteger.ZERO).data(Collections.emptyList()).build();
     }
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
-
     List<AddressChartBalanceData> data = new ArrayList<>();
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByAddressId(addr.getId(),

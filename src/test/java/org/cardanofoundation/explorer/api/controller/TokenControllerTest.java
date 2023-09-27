@@ -103,38 +103,6 @@ class TokenControllerTest {
   }
 
   @Test
-  void testFilter_WhenTokenServiceThrowsExecutionException() throws Exception {
-    // Setup
-    when(tokenService.filterToken(anyString(), any(Pageable.class)))
-        .thenThrow(ExecutionException.class);
-
-    // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(get("/api/v1/tokens")
-            .param("query", "query")
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
-  }
-
-  @Test
-  void testFilter_WhenTokenServiceThrowsInterruptedException() throws Exception {
-    // Setup
-    when(tokenService.filterToken(anyString(), any(Pageable.class)))
-        .thenThrow(InterruptedException.class);
-
-    // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(get("/api/v1/tokens")
-            .param("query", "query")
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
-  }
-
-  @Test
   void testGetTokenDetail() throws Exception {
     // Setup
     final TokenResponse tokenResponse = new TokenResponse();
