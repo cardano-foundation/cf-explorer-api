@@ -19,7 +19,6 @@ public interface ProtocolParamService {
    * @param endTime
    * @return
    */
-  @Transactional(readOnly = true)
   HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypes,
                                                  BigInteger startTime, BigInteger endTime);
 
@@ -28,10 +27,8 @@ public interface ProtocolParamService {
    *
    * @return
    */
-  @Transactional(readOnly = true)
   Protocols getLatestChange();
 
-  @Transactional(readOnly = true)
   FixedProtocol getFixedProtocols();
 
 }
