@@ -125,7 +125,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public StakeAddressResponse getStakeByAddress(String address) {
     try {
       String stakeAddress = AddressUtils.checkStakeAddress(address);
@@ -137,7 +136,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public StakeAddressResponse getStake(String stake) {
     StakeAddressResponse stakeAddressResponse = new StakeAddressResponse();
     StakeAddress stakeAddress
@@ -185,7 +183,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<StakeDelegationProjection> getDelegationHistories(String stakeKey, Pageable pageable) {
     Page<StakeDelegationProjection> delegations
         = delegationRepository.findDelegationByAddress(stakeKey, pageable);
@@ -193,7 +190,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<StakeHistoryProjection> getStakeHistories(String stakeKey,
                                                                       Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
@@ -220,7 +216,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(String stakeKey, Pageable pageable) {
     Page<StakeWithdrawalProjection> withdrawalHistories
         = withdrawalRepository.getWithdrawalByAddress(stakeKey, pageable);
@@ -228,7 +223,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
       String stakeKey, Pageable pageable) {
     List<StakeInstantaneousRewardsProjection> instantaneousRewards
@@ -252,7 +246,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
     Pageable pageableDouble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
     var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageableDouble);
