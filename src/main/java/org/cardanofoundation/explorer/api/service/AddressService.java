@@ -1,17 +1,14 @@
 package org.cardanofoundation.explorer.api.service;
 
-import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressAnalyticsResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import java.math.BigInteger;
-import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 public interface AddressService {
@@ -31,16 +28,7 @@ public interface AddressService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list value balance
    */
-  List<AddressAnalyticsResponse> getAddressAnalytics(String address, AnalyticType type)
-      throws ExecutionException, InterruptedException;
-
-  /**
-   * Get the highest and lowest balance by address
-   *
-   * @param address wallet address
-   * @return the highest and lowest balance
-   */
-  List<BigInteger> getAddressMinMaxBalance(String address);
+  AddressChartBalanceResponse getAddressAnalytics(String address, AnalyticType type);
 
   /**
    * Get list contract
