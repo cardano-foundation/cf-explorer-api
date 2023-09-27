@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.mockito.Mockito;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.springframework.core.task.TaskExecutor;
@@ -591,8 +592,8 @@ class TokenServiceTest {
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-    // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
 
+    // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
     List<AggregateAddressToken> aggregateAddressTokens = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
       aggregateAddressTokens.add(
@@ -602,7 +603,6 @@ class TokenServiceTest {
     Collections.reverse(aggregateAddressTokens);
     when(aggregateAddressTokenRepository
         .findAllByIdentAndDayBetween(any(), any(), any())).thenReturn(aggregateAddressTokens);
-
     lenient().when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
             any(),
             any()))
@@ -633,7 +633,6 @@ class TokenServiceTest {
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-
 
     lenient().when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
             any(),

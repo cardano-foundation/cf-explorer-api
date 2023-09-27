@@ -77,7 +77,6 @@ public class AddressServiceImpl implements AddressService {
 
 
   @Override
-  @Transactional(readOnly = true)
   public AddressResponse getAddressDetail(String address) {
     Address addr = addressRepository.findFirstByAddress(address).orElse(
         Address.builder().address(address).txCount(0L).balance(BigInteger.ZERO).build()
@@ -106,7 +105,6 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public AddressChartBalanceResponse getAddressAnalytics(String address, AnalyticType type) {
     Address addr = addressRepository.findFirstByAddress(address)
         .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
@@ -116,9 +114,7 @@ public class AddressServiceImpl implements AddressService {
       return AddressChartBalanceResponse.builder().highestBalance(BigInteger.ZERO)
           .lowestBalance(BigInteger.ZERO).data(Collections.emptyList()).build();
     }
-
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
-
     List<AddressChartBalanceData> data = new ArrayList<>();
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance = aggregateAddressTxBalanceRepository.sumBalanceByAddressId(addr.getId(),
@@ -191,7 +187,6 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
     Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
     Page<ContractFilterResponse> pageResponse = contractPage.map(addressMapper::fromAddressToContractFilter);
@@ -199,7 +194,6 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
     List<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
     List<AddressFilterResponse> responses = addressPage.stream()
@@ -218,7 +212,6 @@ public class AddressServiceImpl implements AddressService {
    * @return list token by display name
    */
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable,
       String address, String displayName) {
     Page<TokenAddressResponse> tokenListResponse;

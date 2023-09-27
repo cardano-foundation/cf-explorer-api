@@ -99,10 +99,8 @@ public class TokenServiceImpl implements TokenService {
   static final Integer TOKEN_VOLUME_ANALYTIC_NUMBER = 5;
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable) {
     int tokenCount = aggregatedDataCacheService.getTokenCount();
-
     if (tokenCount == 0) {
       tokenCount = (int) multiAssetRepository.count();
     }
@@ -193,7 +191,6 @@ public class TokenServiceImpl implements TokenService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
         .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
@@ -226,14 +223,12 @@ public class TokenServiceImpl implements TokenService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TokenMintTxResponse> getMintTxs(String tokenId, Pageable pageable) {
     Page<MaTxMint> maTxMints = maTxMintRepository.findByIdent(tokenId, pageable);
     return new BaseFilterResponse<>(maTxMints.map(maTxMintMapper::fromMaTxMintToTokenMintTx));
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
         () -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND)
@@ -279,7 +274,6 @@ public class TokenServiceImpl implements TokenService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type) {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
