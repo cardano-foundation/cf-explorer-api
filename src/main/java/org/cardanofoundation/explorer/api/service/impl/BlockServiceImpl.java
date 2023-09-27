@@ -48,6 +48,7 @@ public class BlockServiceImpl implements BlockService {
   private final CustomBlockRepository customBlockRepository;
 
   @Override
+  @Transactional(readOnly = true)
   public BlockResponse getBlockDetailByBlockId(String blockId) {
     try {
       Long blockNo = Long.parseLong(blockId);
@@ -89,6 +90,7 @@ public class BlockServiceImpl implements BlockService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable) {
     long totalElements = blockRepository.countAllBlock();
     Direction direction = null;
@@ -283,6 +285,7 @@ public class BlockServiceImpl implements BlockService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<BlockFilterResponse> getBlockByEpoch(String no, Pageable pageable) {
     try {
       Integer epochNo = Integer.parseInt(no);

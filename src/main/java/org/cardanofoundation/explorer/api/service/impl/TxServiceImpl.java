@@ -139,6 +139,7 @@ public class TxServiceImpl implements TxService {
 
 
   @Override
+  @Transactional(readOnly = true)
   public List<TxSummary> findLatestTxSummary() {
     List<Long> txIds = txRepository.findLatestTxId(
         PageRequest.of(BigInteger.ZERO.intValue(),
@@ -212,6 +213,7 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getAll(Pageable pageable) {
     Page<Tx> txPage = txRepository.findAllTx(pageable);
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
@@ -219,6 +221,7 @@ public class TxServiceImpl implements TxService {
 
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByBlock(String blockId,
                                                                      Pageable pageable) {
     Page<Tx> txPage;
@@ -232,6 +235,7 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address,
                                                                        Pageable pageable) {
     Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
@@ -244,6 +248,7 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId,
                                                                      Pageable pageable) {
     BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
@@ -259,6 +264,7 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey,
                                                                      Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
@@ -368,6 +374,9 @@ public class TxServiceImpl implements TxService {
 
     Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
         getMapMetadataAndMapAsset(multiAssetIdList);
+    Map<Long, Address> addressMap = new HashMap<>() {{
+      put(address.getId(), address);
+    }};
 
     txFilterResponses.forEach(
         tx ->
@@ -376,6 +385,7 @@ public class TxServiceImpl implements TxService {
                 addressTokenMap,
                 getMapMetadataAndMapAsset.getFirst(),
                 getMapMetadataAndMapAsset.getSecond(),
+                addressMap,
                 tx));
     return txFilterResponses;
   }
@@ -406,6 +416,13 @@ public class TxServiceImpl implements TxService {
     Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
         getMapMetadataAndMapAsset(multiAssetIdList);
 
+    // get address
+    Set<Long> addressIdList = addressTokens.stream().map(AddressToken::getAddressId).collect(
+        Collectors.toSet());
+    List<Address> addresses = addressRepository.findAddressByIdIn(addressIdList);
+    Map<Long, Address> addressMap =
+        addresses.stream().collect(Collectors.toMap(Address::getId, Function.identity()));
+
     txFilterResponses.forEach(
         tx ->
             setAdditionalData(
@@ -413,6 +430,7 @@ public class TxServiceImpl implements TxService {
                 addressTokenMap,
                 getMapMetadataAndMapAsset.getFirst(),
                 getMapMetadataAndMapAsset.getSecond(),
+                addressMap,
                 tx));
     return txFilterResponses;
   }
@@ -438,6 +456,7 @@ public class TxServiceImpl implements TxService {
       Map<Long, List<AddressToken>> addressTokenMap,
       Map<String, AssetMetadata> assetMetadataMap,
       Map<Long, MultiAsset> multiAssetMap,
+      Map<Long, Address> addressMap,
       TxFilterResponse tx) {
 
     if (addressTxBalanceMap.containsKey(tx.getId())) {
@@ -462,6 +481,12 @@ public class TxServiceImpl implements TxService {
                       taResponse.setMetadata(
                           assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
                     }
+
+                    Address address = addressMap.get(addressToken.getAddressId());
+                    if (!Objects.isNull(address)) {
+                      taResponse.setAddress(address.getAddress());
+                    }
+
                     return taResponse;
                   })
               .toList();
@@ -470,6 +495,7 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public TxResponse getTxDetailByHash(String hash) {
     Tx tx = txRepository.findByHash(hash).orElseThrow(
         () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)

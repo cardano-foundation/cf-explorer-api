@@ -35,7 +35,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "WHERE b.hash = :blockHash")
   Page<Tx> findByBlockHash(@Param("blockHash") String blockHash, Pageable pageable);
 
-  @EntityGraph(attributePaths = {Tx_.BLOCK, Tx_.TX_METADATA_HASH})
+  @EntityGraph(attributePaths = {Tx_.BLOCK})
   Optional<Tx> findByHash(@Param("hash") String hash);
 
   @Query(value = "SELECT tx.id FROM Tx tx ")
