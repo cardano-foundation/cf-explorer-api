@@ -69,7 +69,6 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
 
   @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
-  @EntityGraph(attributePaths = {Tx_.BLOCK})
   List<Tx> findByIdIn(@Param("ids") List<Long> ids);
 
   @Query("SELECT tx.id as id, "
