@@ -1,0 +1,14 @@
+{
+  "roleConfig": [
+    {
+      "role": "ROLE_ELEVATED",
+      "apiUrl": "/api/v1/example",
+      "count": 50
+    },
+    {
+      "role": "ROLE_PUBLIC",
+      "apiUrl": "/api/v1/staking-lifecycle/report",
+      "count": 2
+    }
+  ]
+}

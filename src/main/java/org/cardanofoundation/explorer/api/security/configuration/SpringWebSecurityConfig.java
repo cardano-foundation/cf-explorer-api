@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.config;
+package org.cardanofoundation.explorer.api.security.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +10,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
 @Configuration
 @EnableWebSecurity
 public class SpringWebSecurityConfig {
+
     @Bean
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
         http.csrf((csrf) -> csrf.disable())
@@ -28,4 +29,6 @@ public class SpringWebSecurityConfig {
 
         return http.build();
     }
+
+
 }
