@@ -21,7 +21,7 @@ public class RoleConfiguration {
 
     public HashMap<String ,RoleFilterMapper> getRoleConfiguration() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        HashMap<String ,RoleFilterMapper> roleConfigs = new HashMap<String ,RoleFilterMapper>();
+        HashMap<String ,RoleFilterMapper> roleConfigs = new HashMap<>();
         JsonNode roleConfigJson = objectMapper.readValue(new ClassPathResource(path).getFile(), JsonNode.class).get("roleConfig");
 
         if (roleConfigJson.isArray()) {
@@ -29,7 +29,6 @@ public class RoleConfiguration {
                 RoleFilterMapper obj = RoleFilterMapper.builder()
                         .role(role.get("role").asText())
                         .apiUrl(role.get("apiUrl").asText())
-                        .count(role.get("count").asInt())
                         .build();
 
                 String key = role.get("role").asText() + role.get("apiUrl").asText();

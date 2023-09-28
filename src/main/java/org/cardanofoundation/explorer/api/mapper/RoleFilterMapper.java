@@ -12,5 +12,4 @@ import lombok.Setter;
 public class RoleFilterMapper {
     private String role;
     private String apiUrl;
-    private Integer count;
 }
