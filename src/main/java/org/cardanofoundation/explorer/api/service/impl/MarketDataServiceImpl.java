@@ -1,7 +1,8 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +13,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
 import org.cardanofoundation.explorer.api.service.MarketDataService;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,7 +35,6 @@ public class MarketDataServiceImpl implements MarketDataService {
   private final RedisTemplate<String, Object> redisTemplate;
 
   private final ObjectMapper objectMapper;
-  private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
   private static final String REDIS_PREFIX_KEY = "MARKET_DATA";
   private static final String UNDERSCORE = "_";
   private static final String LAST_UPDATED_FIELD = "last_updated";
@@ -46,6 +47,10 @@ public class MarketDataServiceImpl implements MarketDataService {
     if (cachedData == null) {
       cachedData =
           restTemplate.getForObject(String.format(apiMarketDataUrl, currency), Object.class);
+      JsonNode marketDataNode = objectMapper.valueToTree(cachedData);
+      ((ObjectNode) marketDataNode.get(0))
+          .put(LAST_UPDATED_FIELD, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toString());
+      cachedData = objectMapper.convertValue(marketDataNode, Object.class);
       redisTemplate.opsForValue().set(redisKey, cachedData);
     }
     return cachedData;
@@ -64,15 +69,15 @@ public class MarketDataServiceImpl implements MarketDataService {
       return;
     }
 
-    // if marketDataCachedNode is null and last_updated field is not equal, do update cache value
-    if (marketDataCachedNode == null ||
-        (!compareMarketDataField(marketDataNode, marketDataCachedNode, LAST_UPDATED_FIELD) &&
-            !compareMarketDataField(marketDataNode, marketDataCachedNode, CURRENT_PRICE_FIELD))) {
-      redisTemplate.opsForValue().set(redisKey, marketDataObject);
+    // if marketDataCachedNode is null and current_price field is not equal, do update cache value
+    if (marketDataCachedNode.isNull() ||
+            !compareMarketDataField(marketDataNode, marketDataCachedNode, CURRENT_PRICE_FIELD)) {
       // overwrite last_updated field in marketDataNode to current time
-      ((ObjectNode) marketDataNode.get(0)).put(LAST_UPDATED_FIELD, dateFormat.format(new Date()));
+      ((ObjectNode) marketDataNode.get(0))
+          .put(LAST_UPDATED_FIELD, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toString());
+      marketDataObject = objectMapper.convertValue(marketDataNode, Object.class);
       WebSocketMessage messageCurrentPrice = WebSocketMessage.builder()
-          .payload(objectMapper.convertValue(marketDataNode, Object.class))
+          .payload(marketDataObject)
           .build();
 
       if (currency.equals("usd")) {
@@ -80,6 +85,7 @@ public class MarketDataServiceImpl implements MarketDataService {
       } else if (currency.equals("btc")) {
         messageCurrentPrice.setEventType(WebSocketEventType.CURRENT_PRICE_BTC);
       }
+      redisTemplate.opsForValue().set(redisKey, marketDataObject);
       applicationEventPublisher.publishEvent(new WebSocketEvent(messageCurrentPrice) {});
     }
   }
