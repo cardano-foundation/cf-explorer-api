@@ -147,7 +147,11 @@ management:
 
 rsa:
   key:
-    path: /key/public_key
+    path: ${RSA_KEY_PATH:/key/public_key}
+
+keycloak:
+  role:
+    path: ${KEYCLOAK_ROLE_PATH:/permission/policy-enforcer.json}
 
 cloud:
   aws:

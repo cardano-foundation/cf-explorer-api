@@ -59,6 +59,9 @@ services:
       - SHELLEY_GENESIS_FILE=${SHELLEY_GENESIS_FILE}
       - BYRON_GENESIS_FILE=${BYRON_GENESIS_FILE}
 
+      - RSA_KEY_PATH=${RSA_KEY_PATH}
+      - KEYCLOAK_ROLE_PATH=${KEYCLOAK_ROLE_PATH}
+
     ports:
       - ${PORT}:8080
     volumes:
