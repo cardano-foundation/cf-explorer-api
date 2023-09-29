@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -74,6 +75,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -130,6 +132,9 @@ class DelegationServiceTest {
 
   @InjectMocks
   private DelegationServiceImpl delegationService;
+
+  @Mock
+  HashOperations hashOperations;
 
   @BeforeEach
   void preSetup() {
@@ -312,7 +317,8 @@ class DelegationServiceTest {
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
     when(poolHashRepository.findAllByPoolViewAndPoolName(search, pageable)).thenReturn(poolIdPage);
-
+    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+    when(hashOperations.entries(any())).thenReturn(new HashMap<>());
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search);
@@ -338,6 +344,8 @@ class DelegationServiceTest {
     when(poolHashRepository.findAllWithoutQueryParam(pageable)).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
+    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+    when(hashOperations.entries(any())).thenReturn(new HashMap<>());
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search);
@@ -376,6 +384,8 @@ class DelegationServiceTest {
     when(poolHashRepository.findAllByPoolViewAndPoolName(search, pageable)).thenReturn(poolIdPage);
     when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(poolInfoRepository.getPoolInfoKoios(Set.of("view"), 0)).thenReturn(List.of(pikp));
+    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+    when(hashOperations.entries(any())).thenReturn(new HashMap<>());
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search);
@@ -401,7 +411,8 @@ class DelegationServiceTest {
     when(poolHashRepository.findAllWithoutQueryParam(pageable)).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
-    when(redisTemplate.opsForHash()).thenReturn(null);
+    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+    when(hashOperations.entries(any())).thenReturn(new HashMap<>());
 
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
