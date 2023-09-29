@@ -5,7 +5,7 @@
 
 ### Features
 
-* change self-host to ubuntu-latest ([878a01d](https://github.com/cardano-foundation/cf-explorer-api/commit/878a01d495e8817555426f8b34c5fa20541bc1a2))
+* change self-host to self-hosted ([878a01d](https://github.com/cardano-foundation/cf-explorer-api/commit/878a01d495e8817555426f8b34c5fa20541bc1a2))
 * met-1480 setup for preview network ([4ff3b39](https://github.com/cardano-foundation/cf-explorer-api/commit/4ff3b392f577645a39454d3c3ab088c3c030ad2d))
 * MET-1534 handle contract for failed tx ([8456f11](https://github.com/cardano-foundation/cf-explorer-api/commit/8456f117d2f9ca590f9c61b2640dda32633440ae))
 
