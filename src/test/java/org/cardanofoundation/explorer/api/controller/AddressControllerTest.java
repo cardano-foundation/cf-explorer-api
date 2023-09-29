@@ -8,7 +8,8 @@ import org.cardanofoundation.explorer.api.controller.advice.GlobalRestController
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressAnalyticsResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
@@ -114,10 +115,16 @@ public class AddressControllerTest {
         // Mock request and response objects
         String address = "testAddress";
         AnalyticType type = AnalyticType.ONE_DAY;
-        List<AddressAnalyticsResponse> mockResponse = Arrays.asList(
-                new AddressAnalyticsResponse(),
-                new AddressAnalyticsResponse()
+        List<AddressChartBalanceData> data = Arrays.asList(
+                new AddressChartBalanceData(),
+                new AddressChartBalanceData()
         );
+
+        AddressChartBalanceResponse mockResponse = AddressChartBalanceResponse.builder()
+            .data(data)
+            .highestBalance(BigInteger.valueOf(100))
+            .lowestBalance(BigInteger.valueOf(50))
+            .build();
 
         // Mock the service method
         when(addressService.getAddressAnalytics(address, type)).thenReturn(mockResponse);
@@ -125,31 +132,10 @@ public class AddressControllerTest {
         // Perform the GET request
         mockMvc.perform(get("/api/v1/addresses/analytics/{address}/{type}", address, type))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(mockResponse.size()));
+                .andExpect(jsonPath("$.data.length()").value(mockResponse.getData().size()));
 
         // Verify that the service method was called with the correct arguments
         verify(addressService).getAddressAnalytics(address, type);
-    }
-
-    @Test
-    public void testGetAddressMinMaxBalance() throws Exception {
-        // Mock request and response objects
-        String address = "testAddress";
-        List<BigInteger> mockResponse = Arrays.asList(
-                BigInteger.valueOf(100),
-                BigInteger.valueOf(200)
-        );
-
-        // Mock the service method
-        when(addressService.getAddressMinMaxBalance(address)).thenReturn(mockResponse);
-
-        // Perform the GET request
-        mockMvc.perform(get("/api/v1/addresses/min-max-balance/{address}", address))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(mockResponse.size()));
-
-        // Verify that the service method was called with the correct argument
-        verify(addressService).getAddressMinMaxBalance(address);
     }
 
     @Test

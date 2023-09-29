@@ -9,9 +9,10 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
@@ -253,7 +254,8 @@ public class StakeKeyControllerTest {
     void testGetStakeBalanceAnalytics_thenReturn() throws Exception {
         String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
         AnalyticType type = AnalyticType.ONE_DAY;
-        List<StakeAnalyticBalanceResponse> response = List.of();
+        List<AddressChartBalanceData> data = List.of();
+        AddressChartBalanceResponse response = new AddressChartBalanceResponse(data, BigInteger.ZERO, BigInteger.ZERO);
 
         when(stakeService.getStakeBalanceAnalytics(stakeKey, type)).thenReturn(response);
 
@@ -270,18 +272,6 @@ public class StakeKeyControllerTest {
         when(stakeService.getStakeRewardAnalytics(stakeKey)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/stakes/analytics-reward/{stakeKey}", stakeKey))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").exists());
-    }
-
-    @Test
-    void testGetStakeMinMaxBalance_thenReturn() throws Exception {
-        String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
-        List<BigInteger> response = List.of();
-
-        when(stakeService.getStakeMinMaxBalance(stakeKey)).thenReturn(response);
-
-        mockMvc.perform(get("/api/v1/stakes/min-max-balance/{stakeKey}", stakeKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists());
     }

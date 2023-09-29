@@ -11,6 +11,8 @@ public interface PoolListProjection {
 
   String getPoolName();
 
+  String getTickerName();
+
   BigInteger getPledge();
 
   BigInteger getFee();

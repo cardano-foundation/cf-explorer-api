@@ -24,6 +24,8 @@ public class PoolResponse implements Serializable {
 
   private String poolName;
 
+  private String tickerName;
+
   private BigInteger poolSize;
 
   @JsonSerialize(using = PercentSerializer.class)
