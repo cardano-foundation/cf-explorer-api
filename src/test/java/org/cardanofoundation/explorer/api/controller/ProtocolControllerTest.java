@@ -3,7 +3,6 @@ package org.cardanofoundation.explorer.api.controller;
 import io.jsonwebtoken.lang.Strings;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
-import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;

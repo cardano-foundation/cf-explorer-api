@@ -1,0 +1,22 @@
+{
+  "auth": ["/api/v1/blocks"],
+  "role": [
+    {
+      "name": "ROLE_ELEVATED",
+      "exclude": [],
+      "function": []
+    },
+    {
+      "name": "ROLE_PUBLIC",
+      "exclude": [],
+      "function": [
+        {
+          "uri": "/stake/report",
+          "description": {
+            "reportLimit": 2
+          }
+        }
+      ]
+    }
+  ]
+}
