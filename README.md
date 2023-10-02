@@ -78,7 +78,13 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `WEB_SOCKET_MARKET_PUBLISH_DELAY_TIME`: Delay time for publish market data to websocket. Default is 20s.
 - `EPOCH_DAYS` : Number of days in an epoch. Default is 5.
 - `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.
-- `TOKEN_LOGO_ENDPOINT`: Endpoint for get token logo.
+
+### Two options for token logo storage with profiles:
+- For profile: `prod`
+    - `TOKEN_LOGO_S3_REGION`: token logo aws s3 region
+    - `TOKEN_LOGO_S3_BUCKET_NAME`: token logo aws s3 bucket name
+- For profile: `dev`
+    - `TOKEN_LOGO_ENDPOINT`: token logo endpoint
 
 ### We have 3 options for redis cache:
 - `redis standalone`
