@@ -5,15 +5,18 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.cardanofoundation.explorer.api.mapper.RoleConfigurationMapper;
 import org.cardanofoundation.explorer.api.mapper.RoleFilterMapper;
+import org.cardanofoundation.explorer.api.mapper.RoleFunction;
 import org.cardanofoundation.explorer.api.security.utility.RoleConfiguration;
 import org.cardanofoundation.explorer.common.utils.JwtUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.management.relation.Role;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.*;
 
 @Component
 @AllArgsConstructor
@@ -24,23 +27,22 @@ public class DynamicFilter extends OncePerRequestFilter {
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        HashMap<String, RoleFilterMapper> roleConf = roleConfiguration.getRoleConfiguration();
+        RoleFilterMapper roleConf = roleConfiguration.getRoleConfiguration();
 
-        if (roleConf.toString().contains(request.getRequestURI())) {
-            String jwt = JwtUtils.parseJwt(request);
+        if (roleConf.getAuth().contains(request.getRequestURI())) {
+            for (final RoleConfigurationMapper roleMapper : roleConf.getRoles()) {
+                String roleKey = roleMapper.getName();
+                Map<String, ? super Object> desc = roleMapper.getFunction().stream()
+                        .filter(RoleFunction.class::isInstance)
+                        .findAny().orElse(new RoleFunction("", null)).getDescription();
 
-            if(jwt != null){
-                String checkRequest = request.getAttribute("role").toString() + "/" + request.getRequestURI();
-                RoleFilterMapper roleFilter = roleConf.get(checkRequest);
-
-                //TO-DO: Save history to storage then check with configuration
-                if(null != roleFilter){
-                    response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized request");
+                if(null != desc){
+                    request.setAttribute(roleKey, desc);
                 }
             }
 
         } else {
-            //"Filter NOT intercepted";
+            //"Filter NOT intercepted";m
         }
 
         filterChain.doFilter(request, response);

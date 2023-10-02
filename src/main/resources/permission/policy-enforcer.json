@@ -1,12 +1,22 @@
 {
-  "roleConfig": [
+  "auth": ["/api/v1/blocks"],
+  "role": [
     {
-      "role": "ROLE_ELEVATED",
-      "apiUrl": "/api/v1/example"
+      "name": "ROLE_ELEVATED",
+      "exclude": [],
+      "function": []
     },
     {
-      "role": "ROLE_PUBLIC",
-      "apiUrl": "/api/v1/staking-lifecycle/report"
+      "name": "ROLE_PUBLIC",
+      "exclude": [],
+      "function": [
+        {
+          "uri": "/stake/report",
+          "description": {
+            "reportLimit": 2
+          }
+        }
+      ]
     }
   ]
 }
