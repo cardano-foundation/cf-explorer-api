@@ -74,6 +74,10 @@ rsa:
   key:
     public-key-file: /key/public_key
 
+keycloak:
+  role:
+    path: /permission/policy-enforcer.json
+
 authentication:
   ignore-check: true #ignore authentication check
 
