@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @NoArgsConstructor
 @JsonInclude(value = Include.NON_EMPTY)
 public class HistoriesProtocol {
+
   List<EpochChange> epochChanges;
   List<ProtocolHistory> minFeeA;
   List<ProtocolHistory> minFeeB;
