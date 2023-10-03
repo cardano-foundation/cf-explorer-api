@@ -29,7 +29,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value =
       "SELECT ph.id AS poolId, ph.view AS poolView, po.pool_name AS poolName, pu.pledge AS pledge, pu.fixed_cost AS fee, "
-          + "pu.margin AS margin, LENGTH(po.pool_name) as poolNameLength, "
+          + "po.ticker_name as tickerName, pu.margin AS margin, LENGTH(po.pool_name) as poolNameLength, "
           + "ap.delegator_cnt as numberDelegators, ap.block_in_epoch as epochBlock, ap.block_life_time as lifetimeBlock "
           + "FROM pool_hash ph "
           + "LEFT JOIN pool_offline_data po ON ph.id = po.pool_id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM pool_offline_data po2 WHERE po2.pool_id = ph.id)) "
@@ -46,7 +46,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   Page<PoolListProjection> findAllByPoolViewAndPoolName(@Param("param") String param, Pageable pageable);
 
   @Query(value =
-      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, "
+      "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
+          + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
           + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength, "
           + "ap.delegatorCount as numberDelegators, ap.blockInEpoch as epochBlock, ap.blockLifeTime as lifetimeBlock "
           + "FROM PoolHash ph "

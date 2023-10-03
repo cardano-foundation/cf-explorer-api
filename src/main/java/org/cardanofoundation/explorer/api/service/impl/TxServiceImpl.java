@@ -30,6 +30,7 @@ import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,6 +81,7 @@ import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 
 @Service
 @RequiredArgsConstructor
@@ -714,12 +716,47 @@ public class TxServiceImpl implements TxService {
                                        Collectors.collectingAndThen(Collectors.toList(),
                                                                     list -> list.get(0))));
 
-    contractResponses.forEach(contractResponse -> {
+    contractResponses.parallelStream().forEach(contractResponse -> {
       TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
       if (txContractProjection != null) {
         contractResponse.setDatumBytesOut(
             txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));
         contractResponse.setDatumHashOut(txContractProjection.getDatumHashOut());
+      }
+      if (contractResponse.getPurpose().equals(ScriptPurposeType.MINT)) {
+        List<TokenAddressResponse> addressTokenProjections =
+            multiAssetRepository.getMintingAssets(tx, contractResponse.getScriptHash())
+                .stream().map(tokenMapper::fromAddressTokenProjection).toList();
+
+        // set metadata for tokens
+        Set<String> subjects = addressTokenProjections.stream()
+            .map(tokenAddressResponse -> tokenAddressResponse.getName()
+                + contractResponse.getScriptHash())
+            .collect(Collectors.toSet());
+        Map<String, AssetMetadata> assetMetadataMap = assetMetadataRepository
+            .findBySubjectIn(subjects)
+            .stream()
+            .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+        addressTokenProjections
+            .forEach(tokenAddressResponse ->
+                         tokenAddressResponse
+                             .setMetadata(assetMetadataMapper.fromAssetMetadata(
+                                 assetMetadataMap.get(tokenAddressResponse.getName()
+                                                          + contractResponse.getScriptHash()))));
+
+        // set mint or burn tokens for contract response
+        contractResponse
+            .setMintingTokens(addressTokenProjections
+                                  .stream()
+                                  .filter(tokenAddressResponse ->
+                                              tokenAddressResponse.getQuantity().longValue() >= 0)
+                                  .toList());
+        contractResponse
+            .setBurningTokens(addressTokenProjections
+                                  .stream()
+                                  .filter(tokenAddressResponse ->
+                                              tokenAddressResponse.getQuantity().longValue() < 0)
+                                  .toList());
       }
     });
     return contractResponses;
