@@ -30,6 +30,7 @@ import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -701,6 +702,23 @@ public class TxServiceImpl implements TxService {
             multiAssetRepository.getMintingAssets(tx, contractResponse.getScriptHash())
                 .stream().map(tokenMapper::fromAddressTokenProjection).toList();
 
+        // set metadata for tokens
+        Set<String> subjects = addressTokenProjections.stream()
+            .map(tokenAddressResponse -> tokenAddressResponse.getName()
+                + contractResponse.getScriptHash())
+            .collect(Collectors.toSet());
+        Map<String, AssetMetadata> assetMetadataMap = assetMetadataRepository
+            .findBySubjectIn(subjects)
+            .stream()
+            .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+        addressTokenProjections
+            .forEach(tokenAddressResponse ->
+                         tokenAddressResponse
+                             .setMetadata(assetMetadataMapper.fromAssetMetadata(
+                                 assetMetadataMap.get(tokenAddressResponse.getName()
+                                                          + contractResponse.getScriptHash()))));
+
+        // set mint or burn tokens for contract response
         contractResponse
             .setMintingTokens(addressTokenProjections
                                   .stream()
