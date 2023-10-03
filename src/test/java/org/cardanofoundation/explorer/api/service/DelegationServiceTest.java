@@ -317,8 +317,6 @@ class DelegationServiceTest {
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
     when(poolHashRepository.findAllByPoolViewAndPoolName(search, pageable)).thenReturn(poolIdPage);
-    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
-    when(hashOperations.entries(any())).thenReturn(new HashMap<>());
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search);
@@ -344,8 +342,6 @@ class DelegationServiceTest {
     when(poolHashRepository.findAllWithoutQueryParam(pageable)).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
-    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
-    when(hashOperations.entries(any())).thenReturn(new HashMap<>());
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search);
@@ -384,8 +380,6 @@ class DelegationServiceTest {
     when(poolHashRepository.findAllByPoolViewAndPoolName(search, pageable)).thenReturn(poolIdPage);
     when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(poolInfoRepository.getPoolInfoKoios(Set.of("view"), 0)).thenReturn(List.of(pikp));
-    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
-    when(hashOperations.entries(any())).thenReturn(new HashMap<>());
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search);
@@ -411,8 +405,6 @@ class DelegationServiceTest {
     when(poolHashRepository.findAllWithoutQueryParam(pageable)).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
-    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
-    when(hashOperations.entries(any())).thenReturn(new HashMap<>());
 
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,

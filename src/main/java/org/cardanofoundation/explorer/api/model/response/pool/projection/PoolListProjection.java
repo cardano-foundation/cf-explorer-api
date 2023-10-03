@@ -17,4 +17,10 @@ public interface PoolListProjection {
 
   Double getMargin();
   Integer getPoolNameLength();
+
+  Integer getNumberDelegators();
+
+  Integer getEpochBlock();
+
+  Integer getLifetimeBlock();
 }

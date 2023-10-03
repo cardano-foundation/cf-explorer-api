@@ -242,28 +242,30 @@ public class DelegationServiceImpl implements DelegationService {
           .pledge(pool.getPledge())
           .feeAmount(pool.getFee())
           .feePercent(pool.getMargin())
+          .numberDelegators(pool.getNumberDelegators())
+          .lifetimeBlock(pool.getLifetimeBlock())
+          .epochBlock(pool.getEpochBlock())
           .build());
       poolIds.add(pool.getPoolId());
     });
 
-    CompletableFuture<Map<Long, Integer>> numberDelegatorsMapAsync =
-        CompletableFuture.supplyAsync(() -> getPoolDelegatorsCountMap(poolIds));
-    CompletableFuture<Map<Long, Integer>> blockLifetimesMapAsync =
-        CompletableFuture.supplyAsync(() -> getBlockLifeTimesMap(poolIds));
-    CompletableFuture<Map<Long, Integer>> blockEpochsMapAsync =
-        CompletableFuture.supplyAsync(() -> getBlockEpochsMap(poolIds, epochNo));
-
-    CompletableFuture.allOf(numberDelegatorsMapAsync, blockLifetimesMapAsync,
-                            blockEpochsMapAsync).join();
-
-    Map<Long, Integer> numberDelegatorsMap = numberDelegatorsMapAsync.join();
-    Map<Long, Integer> blockLifetimesMap = blockLifetimesMapAsync.join();
-    Map<Long, Integer> blockEpochsMap = blockEpochsMapAsync.join();
-
     Boolean useKoios = fetchRewardDataService.useKoios();
     if (Boolean.TRUE.equals(useKoios)) {
-      setPoolInfoKoios(poolList, epochNo, poolIdList, numberDelegatorsMap, blockLifetimesMap,
-          blockEpochsMap);
+      List<PoolInfoKoiosProjection> poolInfoProjections = poolInfoRepository.getPoolInfoKoios(
+          poolIdList, epochNo);
+      Map<String, PoolInfoKoiosProjection> poolInfoMap = poolInfoProjections.stream()
+          .collect(Collectors.toMap(PoolInfoKoiosProjection::getView, Function.identity()));
+      poolList.forEach(
+          pool -> {
+            PoolInfoKoiosProjection poolInfo = poolInfoMap.get(pool.getPoolId());
+            if (Objects.nonNull(poolInfo)) {
+              PoolInfoKoiosProjection projection = poolInfoMap.get(pool.getPoolId());
+              if (Objects.nonNull(projection)) {
+                pool.setPoolSize(projection.getActiveStake());
+                pool.setSaturation(projection.getSaturation());
+              }
+            }
+          });
     } else {
       Map<String, BigInteger> liveStakeMap = getStakeFromCache(
           CommonConstant.LIVE_STAKE, poolViews, null);
@@ -278,9 +280,6 @@ public class DelegationServiceImpl implements DelegationService {
             pool.setPoolSize(activeStakeMap.get(pool.getPoolId()));
             pool.setSaturation(
                 getSaturation(liveStakeMap.get(pool.getPoolId()), stakeLimit));
-            pool.setNumberDelegators(numberDelegatorsMap.get(pool.getId()));
-            pool.setLifetimeBlock(blockLifetimesMap.get(pool.getId()));
-            pool.setEpochBlock(blockEpochsMap.get(pool.getId()));
           });
     }
 
@@ -294,67 +293,6 @@ public class DelegationServiceImpl implements DelegationService {
     return response;
   }
 
-  private Map<Long, Integer> getPoolDelegatorsCountMap(Set<Long> poolIds) {
-    String redisKey = RedisKey.POOLS_LIVE_DELEGATORS_COUNT.name() + "_" + network;
-    Map<Long, Integer> poolDelegatorsCountMap = getPoolInfoMap(poolIds, redisKey);
-
-    Set<Long> poolIdsNotInRedisCache = poolIds.stream()
-        .filter(poolId -> !poolDelegatorsCountMap.containsKey(poolId)).collect(Collectors.toSet());
-
-    if (!poolIdsNotInRedisCache.isEmpty()) {
-      poolDelegatorsCountMap.putAll(
-          delegationRepository.liveDelegatorsCountByPools(poolIdsNotInRedisCache)
-              .stream().collect(Collectors.toMap(PoolCountProjection::getPoolId,
-                                                 PoolCountProjection::getCountValue)));
-    }
-
-    return new HashMap<>(poolDelegatorsCountMap);
-  }
-
-  private Map<Long, Integer> getBlockLifeTimesMap(Set<Long> poolIds) {
-    String redisKey = RedisKey.POOLS_BLOCK_LIFETIME.name() + "_" + network;
-    Map<Long, Integer> blockLifeTimesMap = getPoolInfoMap(poolIds, redisKey);
-
-    Set<Long> poolIdsNotInRedisCache = poolIds.stream()
-        .filter(poolId -> !blockLifeTimesMap.containsKey(poolId)).collect(Collectors.toSet());
-
-    if (!poolIdsNotInRedisCache.isEmpty()) {
-      blockLifeTimesMap.putAll(blockRepository.getCountBlockByPools(poolIdsNotInRedisCache)
-                                   .stream()
-                                   .collect(Collectors.toMap(PoolCountProjection::getPoolId,
-                                                             PoolCountProjection::getCountValue)));
-    }
-
-    return new HashMap<>(blockLifeTimesMap);
-  }
-
-  private Map<Long, Integer> getPoolInfoMap(Set<Long> poolIds, String redisKey) {
-    Map<Object, Object> cachingDataMap = redisTemplate.opsForHash().entries(redisKey);
-    Map<Long, Integer> rawValueMap;
-    if (!DataUtil.isNullOrEmpty(cachingDataMap)) {
-      rawValueMap = redisTemplate.opsForHash().entries(redisKey)
-          .entrySet()
-          .parallelStream()
-          .filter(entry -> poolIds.contains(Long.parseLong(entry.getKey().toString())))
-          .map(entry -> new AbstractMap.SimpleEntry<>(Long.parseLong(entry.getKey().toString()),
-                                                      Integer.parseInt(
-                                                          entry.getValue().toString())))
-          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    } else {
-      rawValueMap = new HashMap<>();
-    }
-    return rawValueMap;
-  }
-
-  private Map<Long, Integer> getBlockEpochsMap(Set<Long> poolIds, Integer epochNo) {
-    List<PoolCountProjection> blockEpochProjections = blockRepository.getCountBlockByPoolsAndCurrentEpoch(
-        poolIds, epochNo);
-
-    return blockEpochProjections
-        .stream()
-        .collect(
-            Collectors.toMap(PoolCountProjection::getPoolId, PoolCountProjection::getCountValue));
-  }
   /**
    * Create pageable with sort, if sort is unsorted then use default sort
    * @param pageable page information
