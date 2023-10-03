@@ -11,6 +11,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRe
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 
 import org.springframework.data.domain.Pageable;
 
@@ -26,8 +27,7 @@ public interface StakeKeyReportService {
    * @param username              username of current request user
    * @return StakeKeyReportHistoryResponse
    */
-  StakeKeyReportHistoryResponse generateStakeKeyReport(StakeKeyReportRequest stakeKeyReportRequest,
-                                                       String username);
+  StakeKeyReportHistoryResponse generateStakeKeyReport(StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal);
 
 
   /**
