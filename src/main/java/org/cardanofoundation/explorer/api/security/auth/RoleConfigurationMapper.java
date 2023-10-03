@@ -1,13 +1,13 @@
-package org.cardanofoundation.explorer.api.mapper;
+package org.cardanofoundation.explorer.api.security.auth;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Getter
 @Setter

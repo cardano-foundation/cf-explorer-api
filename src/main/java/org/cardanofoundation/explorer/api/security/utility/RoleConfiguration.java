@@ -11,7 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cardanofoundation.explorer.api.mapper.RoleFilterMapper;
+import org.cardanofoundation.explorer.api.security.auth.RoleFilterMapper;
 
 @Component
 @ConfigurationProperties("keycloak.role")

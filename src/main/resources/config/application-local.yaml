@@ -7,8 +7,8 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:postgresql://${infrastructure.host}:54322/explorer?currentSchema=mainnet
-    username: ${POSTGRES_USER:ducphung}
-    password: ${POSTGRES_PASSWORD:ducphung@pw}
+    username: ${POSTGRES_USER:cardano-master}
+    password: ${POSTGRES_PASSWORD:postgres_master_pw}
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
@@ -116,7 +116,7 @@ application:
     check-epoch:
       base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
   report:
-    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:200}
+    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:3}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
 
 springdoc:

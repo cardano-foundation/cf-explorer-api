@@ -18,9 +18,11 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWi
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.KafkaService;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
+import org.cardanofoundation.explorer.api.service.RoleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
@@ -58,13 +60,14 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private final KafkaService kafkaService;
   private final FetchRewardDataService fetchRewardDataService;
   private final ReportHistoryService reportHistoryService;
+  private final RoleService roleService;
 
   @Override
   public StakeKeyReportHistoryResponse generateStakeKeyReport(
-      StakeKeyReportRequest stakeKeyReportRequest, String username) {
-    StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, username);
+      StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal) {
+    StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, userPrincipal);
     Boolean isSuccess = kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
-    if(Boolean.FALSE.equals(isSuccess)) {
+    if (Boolean.FALSE.equals(isSuccess)) {
       stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
       throw new BusinessException(BusinessCode.INTERNAL_ERROR);
     }
@@ -72,15 +75,16 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Transactional
-  public StakeKeyReportHistory save(StakeKeyReportRequest stakeKeyReportRequest, String username) {
+  public StakeKeyReportHistory save(StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal) {
     stakeAddressRepository.findByView(stakeKeyReportRequest.getStakeKey())
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
         stakeKeyReportRequest);
-
-    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
-      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    int reportLimit = roleService.getReportLimit(userPrincipal.getRoleDescription());
+    if(reportLimit != -1){
+      if (Boolean.TRUE.equals(reportHistoryService.isLimitReached(userPrincipal.getUsername(),reportLimit))) {
+        throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+      }
     }
 
     if (DataUtil.isNullOrEmpty(stakeKeyReportRequest.getReportName())) {
@@ -90,7 +94,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.IN_PROGRESS);
     stakeKeyReportHistory.getReportHistory().setType(ReportType.STAKE_KEY);
-    stakeKeyReportHistory.getReportHistory().setUsername(username);
+    stakeKeyReportHistory.getReportHistory().setUsername(userPrincipal.getUsername());
     return stakeKeyReportHistoryRepository.saveAndFlush(stakeKeyReportHistory);
   }
 
@@ -183,7 +187,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeRegistrations(stakeKey, stakeLifeCycleFilterRequest,
-                                                          pageable);
+        pageable);
   }
 
   @Override
@@ -194,7 +198,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeDeRegistrations(stakeKey, stakeLifeCycleFilterRequest,
-                                                            pageable);
+        pageable);
   }
 
   @Override
@@ -205,7 +209,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeDelegations(stakeKey, stakeLifeCycleFilterRequest,
-                                                        pageable);
+        pageable);
   }
 
   @Override
@@ -220,9 +224,9 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     Page<StakeRewardResponse> stakeRewardResponses = rewardRepository
         .findRewardByStake(stakeKey,
-                           Timestamp.from(stakeLifeCycleFilterRequest.getFromDate().toInstant()),
-                           Timestamp.from(stakeLifeCycleFilterRequest.getToDate().toInstant()),
-                           pageable);
+            Timestamp.from(stakeLifeCycleFilterRequest.getFromDate().toInstant()),
+            Timestamp.from(stakeLifeCycleFilterRequest.getToDate().toInstant()),
+            pageable);
 
     return new BaseFilterResponse<>(stakeRewardResponses);
   }
@@ -235,7 +239,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportHistory);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
     return stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, stakeLifeCycleFilterRequest,
-                                                        pageable);
+        pageable);
   }
 
   @Override
@@ -261,10 +265,10 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     String dateTimePattern = "yyyyMMdd";
     return "report_stake_" + stakeKeyReportHistory.getStakeKey() + "_" +
         DataUtil.localDateTimeToString(stakeKeyReportHistory.getFromDate().toLocalDateTime(),
-                                       dateTimePattern)
+            dateTimePattern)
         + "_" +
         DataUtil.localDateTimeToString(stakeKeyReportHistory.getFromDate().toLocalDateTime(),
-                                       dateTimePattern);
+            dateTimePattern);
   }
 
   private void fetchReward(String stakeKey) {

@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -20,7 +22,9 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRe
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
+import org.cardanofoundation.explorer.api.service.RoleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,6 +44,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.hibernate5.SpringSessionContext;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,16 +58,16 @@ public class StakeKeyReportController {
 
   private final StakeKeyReportService stakeKeyReportService;
   private final ReportHistoryService reportHistoryService;
+  private final RoleService roleService;
 
   @PostMapping(value = "/stake-key")
   @LogMessage
   @Operation(summary = "Generate stake key report")
   public ResponseEntity<StakeKeyReportHistoryResponse> generateStakeKeyReport(
-      HttpServletRequest request,
-      @RequestBody StakeKeyReportRequest stakeKeyReportRequest) {
-    String username = request.getAttribute("username").toString();
+      @RequestBody StakeKeyReportRequest stakeKeyReportRequest,
+      @AuthenticationPrincipal UserPrincipal userPrincipal) {
     return ResponseEntity.ok()
-        .body(stakeKeyReportService.generateStakeKeyReport(stakeKeyReportRequest, username));
+        .body(stakeKeyReportService.generateStakeKeyReport(stakeKeyReportRequest, userPrincipal));
   }
 
   @GetMapping(value = "/stake-key/{reportId}/export")
@@ -212,8 +218,7 @@ public class StakeKeyReportController {
   @GetMapping(value = "/report-limit")
   @LogMessage
   @Operation(summary = "Get report limit information")
-  public ResponseEntity<ReportLimitResponse> getReportLimit(HttpServletRequest request) {
-    String username = request.getAttribute("username").toString();
-    return ResponseEntity.ok(reportHistoryService.getReportLimit(username));
+  public ResponseEntity<ReportLimitResponse> getReportLimit(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    return ResponseEntity.ok(reportHistoryService.getReportLimit(userPrincipal));
   }
 }

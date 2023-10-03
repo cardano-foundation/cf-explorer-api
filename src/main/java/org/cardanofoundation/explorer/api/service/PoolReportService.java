@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.Map;
+
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
@@ -11,6 +13,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularR
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
 
 import org.springframework.data.domain.Pageable;
@@ -25,7 +28,7 @@ public interface PoolReportService {
    * @param username                username of current request user
    * @return true if success
    */
-  Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username);
+  Boolean create(PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal);
 
 
   /**

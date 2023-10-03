@@ -1,19 +1,51 @@
 {
-  "auth": ["/api/v1/blocks"],
+  "auth": [
+    {
+      "uri": "/api/v1/pool-report/*",
+      "method": "*"
+    },
+    {
+      "uri": "/api/v1/staking-lifecycle/report/*",
+      "method": "*"
+    }
+  ],
   "role": [
     {
       "name": "ROLE_ELEVATED",
       "exclude": [],
-      "function": []
+      "function": [
+        {
+          "uri": "/api/v1/staking-lifecycle/report/stake-key",
+          "method": "POST",
+          "description": {
+            "reportLimitPer24Hours": -1
+          }
+        },
+        {
+          "uri": "/api/v1/pool-report/create",
+          "method": "POST",
+          "description": {
+            "reportLimitPer24Hours": -1
+          }
+        }
+      ]
     },
     {
       "name": "ROLE_PUBLIC",
       "exclude": [],
       "function": [
         {
-          "uri": "/stake/report",
+          "uri": "/api/v1/staking-lifecycle/report/stake-key",
+          "method": "POST",
           "description": {
-            "reportLimit": 2
+            "reportLimitPer24Hours": 5
+          }
+        },
+        {
+          "uri": "/api/v1/pool-report/create",
+          "method": "POST",
+          "description": {
+            "reportLimitPer24Hours": 2
           }
         }
       ]

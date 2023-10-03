@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +20,9 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularR
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
+import org.cardanofoundation.explorer.api.service.RoleService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -34,6 +38,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,14 +56,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class PoolReportController {
 
   private final PoolReportService poolReportService;
+  private final RoleService roleService;
 
   @PostMapping("create")
   @LogMessage
   @Operation(summary = "Create report for pool lifecycle", tags = {"pool-report"})
   public ResponseEntity<Boolean> createPoolReport(@RequestBody PoolReportCreateRequest body,
-                                                  HttpServletRequest request) {
-    String username = request.getAttribute("username").toString();
-    return ResponseEntity.ok(poolReportService.create(body, username));
+                                                  HttpServletRequest request,
+                                                  @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    return ResponseEntity.ok(poolReportService.create(body, userPrincipal));
   }
 
   @GetMapping("list")
