@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
-import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
@@ -34,6 +33,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeR
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
+import org.cardanofoundation.explorer.api.security.configuration.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

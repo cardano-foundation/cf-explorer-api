@@ -14,6 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportL
 import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
@@ -73,7 +74,7 @@ public class PoolReportServiceTest {
     String username = "username";
     when(poolHashRepository.findByView(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
-                            () -> poolReportService.create(request, username));
+                            () -> poolReportService.create(request, UserPrincipal.builder().username(username).build()));
   }
 
   @Test
@@ -83,9 +84,9 @@ public class PoolReportServiceTest {
         .build();
     String username = "username";
     when(poolHashRepository.findByView(anyString())).thenReturn(Optional.of(new PoolHash()));
-    when(reportHistoryService.isLimitReached(username)).thenReturn(true);
+    when(reportHistoryService.isLimitReached(username,1)).thenReturn(true);
     Assertions.assertThrows(BusinessException.class,
-                            () -> poolReportService.create(request, username));
+                            () -> poolReportService.create(request, UserPrincipal.builder().username(username).build()));
   }
 
   @Test
@@ -126,9 +127,9 @@ public class PoolReportServiceTest {
 
     when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
-    when(reportHistoryService.isLimitReached(username)).thenReturn(false);
+    when(reportHistoryService.isLimitReached(username,1)).thenReturn(false);
     when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(true);
-    Assertions.assertTrue(poolReportService.create(request, username));
+    Assertions.assertTrue(poolReportService.create(request, UserPrincipal.builder().username(username).build()));
   }
 
   @Test

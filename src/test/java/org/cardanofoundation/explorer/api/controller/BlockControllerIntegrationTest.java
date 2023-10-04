@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
-import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
@@ -9,6 +8,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.security.configuration.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.service.BlockService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

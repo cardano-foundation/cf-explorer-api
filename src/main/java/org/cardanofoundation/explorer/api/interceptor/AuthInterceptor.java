@@ -3,8 +3,15 @@ package org.cardanofoundation.explorer.api.interceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.RsaConfig;
 import org.cardanofoundation.explorer.common.annotation.IgnoreAuthentication;
@@ -34,36 +41,36 @@ public class AuthInterceptor implements HandlerInterceptor {
     return redisTemplate.opsForValue().get(CommonConstant.JWT + token) != null;
   }
 
-  @Override
-  public boolean preHandle(
-      HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
-      Object handler)
-      throws Exception {
-    log.info("Authentication Interceptor is running...");
-    HandlerMethod handlerMethod;
-    try {
-      handlerMethod = (HandlerMethod) handler;
-    } catch (ClassCastException e) {
-      log.error("Error handler: " + e.getMessage());
-      return HandlerInterceptor.super.preHandle(httpServletRequest, httpServletResponse, handler);
-    }
-    Method method = handlerMethod.getMethod();
-    log.info("Authentication Interceptor: {}", method);
-    if (method.isAnnotationPresent(IgnoreAuthentication.class)) {
-      log.info("Ignore method if marked IgnoreAuthentication annotation");
-      return true;
-    }
-    if (method.getDeclaringClass().isAnnotationPresent(IgnoreAuthentication.class)) {
-      log.info("Ignore class if marked IgnoreAuthentication annotation");
-      return true;
-    }
-    String token = JwtUtils.parseJwt(httpServletRequest);
-    JwtUtils.validateJwtToken(token, rsaConfig.getPublicKey());
-    if (isTokenBlacklisted(token)) {
-      throw new InvalidAccessTokenException();
-    }
-    String username = JwtUtils.getAccountIdFromJwtToken(token, rsaConfig.getPublicKey());
-    httpServletRequest.setAttribute("username", username);
-    return true;
-  }
+//  @Override
+//  public boolean preHandle(
+//      HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+//      Object handler)
+//      throws Exception {
+//    log.info("Authentication Interceptor is running...");
+//    HandlerMethod handlerMethod;
+//    try {
+//      handlerMethod = (HandlerMethod) handler;
+//    } catch (ClassCastException e) {
+//      log.error("Error handler: " + e.getMessage());
+//      return HandlerInterceptor.super.preHandle(httpServletRequest, httpServletResponse, handler);
+//    }
+//    Method method = handlerMethod.getMethod();
+//    log.info("Authentication Interceptor: {}", method);
+//    if (method.isAnnotationPresent(IgnoreAuthentication.class)) {
+//      log.info("Ignore method if marked IgnoreAuthentication annotation");
+//      return true;
+//    }
+//    if (method.getDeclaringClass().isAnnotationPresent(IgnoreAuthentication.class)) {
+//      log.info("Ignore class if marked IgnoreAuthentication annotation");
+//      return true;
+//    }
+//    String token = JwtUtils.parseJwt(httpServletRequest);
+//    JwtUtils.validateJwtToken(token, rsaConfig.getPublicKey());
+//    if (isTokenBlacklisted(token)) {
+//      throw new InvalidAccessTokenException();
+//    }
+//    String username = JwtUtils.getAccountIdFromJwtToken(token, rsaConfig.getPublicKey());
+//    httpServletRequest.setAttribute("username", username);
+//    return true;
+//  }
 }

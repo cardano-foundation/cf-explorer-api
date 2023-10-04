@@ -2,7 +2,6 @@ package org.cardanofoundation.explorer.api.controller;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
-import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
@@ -20,6 +19,7 @@ import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
+import org.cardanofoundation.explorer.api.security.configuration.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.junit.jupiter.api.BeforeEach;
