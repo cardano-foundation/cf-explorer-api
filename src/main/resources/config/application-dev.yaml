@@ -149,6 +149,10 @@ rsa:
   key:
     path: /key/public_key
 
+keycloak:
+  role:
+    path: ${AUTH_FILE_PATH:/permission/policy-enforcer.json}
+
 cloud:
   aws:
     credentials:
