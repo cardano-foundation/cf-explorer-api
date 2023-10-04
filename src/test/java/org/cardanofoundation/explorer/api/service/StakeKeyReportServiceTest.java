@@ -33,6 +33,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRe
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryRepository;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
@@ -93,7 +94,7 @@ public class StakeKeyReportServiceTest {
     String username = "username";
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
-        () -> stakeKeyReportService.generateStakeKeyReport(request, username));
+        () -> stakeKeyReportService.generateStakeKeyReport(request, UserPrincipal.builder().username(username).build()));
   }
 
   @Test
@@ -103,9 +104,9 @@ public class StakeKeyReportServiceTest {
         .build();
     String username = "username";
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(new StakeAddress()));
-    when(reportHistoryService.isLimitReached(username)).thenReturn(Boolean.TRUE);
+    when(reportHistoryService.isLimitReached(username,1)).thenReturn(Boolean.TRUE);
     Assertions.assertThrows(BusinessException.class,
-                            () -> stakeKeyReportService.generateStakeKeyReport(request, username));
+                            () -> stakeKeyReportService.generateStakeKeyReport(request, UserPrincipal.builder().username(username).build()));
   }
 
   @Test
@@ -149,13 +150,13 @@ public class StakeKeyReportServiceTest {
     when(stakeKeyReportHistoryRepository.saveAndFlush(any(StakeKeyReportHistory.class))).thenReturn(expect);
     when(stakeKeyReportMapper.toStakeKeyReportHistory(any(StakeKeyReportRequest.class))).thenReturn(
         expect);
-    when(reportHistoryService.isLimitReached(username)).thenReturn(Boolean.FALSE);
+    when(reportHistoryService.isLimitReached(username,1)).thenReturn(Boolean.FALSE);
     when(stakeKeyReportMapper.toStakeKeyReportHistoryResponse(expect))
         .thenReturn(responseExpect);
 
     when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(Boolean.TRUE);
 
-    var responseActual = stakeKeyReportService.generateStakeKeyReport(request, "username");
+    var responseActual = stakeKeyReportService.generateStakeKeyReport(request, UserPrincipal.builder().username(username).build());
     Assertions.assertEquals(responseExpect.getStakeKey(), responseActual.getStakeKey());
     Assertions.assertEquals(responseExpect.getFromDate(), responseActual.getFromDate());
     Assertions.assertEquals(responseExpect.getToDate(), responseActual.getToDate());
