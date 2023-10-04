@@ -67,7 +67,7 @@ public class StakeKeyReportController {
   @Operation(summary = "Generate stake key report")
   public ResponseEntity<StakeKeyReportHistoryResponse> generateStakeKeyReport(
       @RequestBody StakeKeyReportRequest stakeKeyReportRequest,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+      @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok()
         .body(stakeKeyReportService.generateStakeKeyReport(stakeKeyReportRequest, userPrincipal));
   }
@@ -79,7 +79,7 @@ public class StakeKeyReportController {
       HttpServletRequest request,
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @RequestParam(required = false) @Parameter(description = "Type for export") ExportType exportType,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     StakeKeyReportResponse response = stakeKeyReportService.exportStakeKeyReport(reportId,
         userPrincipal.getUsername(),
         exportType);
@@ -98,7 +98,7 @@ public class StakeKeyReportController {
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY) @StakeKeyLengthValid
       @Parameter(description = "The Bech32 encoded version of the stake address.") String stakeKey,
       @ParameterObject @PaginationValid @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeKeyReportHistoryByStakeKey(stakeKey,
             userPrincipal.getUsername(), pagination.toPageable()));
@@ -109,7 +109,7 @@ public class StakeKeyReportController {
   @Operation(summary = "Get stake key report detail by report id")
   public ResponseEntity<StakeKeyReportHistoryResponse> getStakeReportDetail(
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeKeyReportHistoryByReportId(reportId,
             userPrincipal.getUsername()));
@@ -122,7 +122,7 @@ public class StakeKeyReportController {
       @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(stakeKeyReportService.getStakeKeyReportHistory(
         userPrincipal.getUsername(), filterRequest, pagination.toPageable()));
   }
@@ -135,7 +135,7 @@ public class StakeKeyReportController {
       @ParameterObject @Parameter(description = "filter condition") ReportHistoryFilterRequest filterRequest,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "createdAt"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         reportHistoryService.getReportHistory(filterRequest, userPrincipal.getUsername(),
             pagination.toPageable()));
@@ -149,7 +149,7 @@ public class StakeKeyReportController {
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeRegistrationsByReportId(reportId, userPrincipal.getUsername(),
             pagination.toPageable()));
@@ -162,7 +162,7 @@ public class StakeKeyReportController {
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeDeRegistrationsByReportId(reportId,
             userPrincipal.getUsername(),
@@ -177,7 +177,7 @@ public class StakeKeyReportController {
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeDelegationsByReportId(reportId, userPrincipal.getUsername(),
             pagination.toPageable()));
@@ -191,7 +191,7 @@ public class StakeKeyReportController {
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeRewardsByReportId(reportId, userPrincipal.getUsername(),
             pagination.toPageable()));
@@ -205,7 +205,7 @@ public class StakeKeyReportController {
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         stakeKeyReportService.getStakeWithdrawalsByReportId(reportId, userPrincipal.getUsername(),
             pagination.toPageable()));
@@ -219,7 +219,7 @@ public class StakeKeyReportController {
       @PathVariable @Parameter(description = "The identifier of report") Long reportId,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
           "time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(
         stakeKeyReportService.getWalletActivitiesByReportId(reportId, userPrincipal.getUsername(),
             pagination.toPageable()));
@@ -229,7 +229,7 @@ public class StakeKeyReportController {
   @LogMessage
   @Operation(summary = "Get report limit information")
   public ResponseEntity<ReportLimitResponse> getReportLimit(
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+       @RequestAttribute("user") UserPrincipal userPrincipal) {
     return ResponseEntity.ok(reportHistoryService.getReportLimit(userPrincipal));
   }
 }

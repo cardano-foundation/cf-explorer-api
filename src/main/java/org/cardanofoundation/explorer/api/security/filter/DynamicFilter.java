@@ -12,14 +12,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -35,7 +32,7 @@ import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.common.utils.JwtUtils;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
 
-@Component
+
 public class DynamicFilter extends OncePerRequestFilter {
 
   private RoleFilterMapper roleConf;
@@ -46,7 +43,6 @@ public class DynamicFilter extends OncePerRequestFilter {
 
   private List<AntPathRequestMatcher> matchers;
 
-  @Qualifier("handlerExceptionResolver")
   private HandlerExceptionResolver resolver;
 
   public DynamicFilter(RoleFilterMapper roleConf, RsaConfig rsaConfig,
@@ -100,10 +96,7 @@ public class DynamicFilter extends OncePerRequestFilter {
         }
       }
       userPrincipal.setRoleDescription(roleDescription);
-      SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-          userPrincipal,
-          null
-      ));
+      request.setAttribute("user",userPrincipal);
       filterChain.doFilter(request, response);
     } catch (Exception e) {
       resolver.resolveException(request, response, null, e);

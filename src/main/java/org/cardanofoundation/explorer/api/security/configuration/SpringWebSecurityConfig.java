@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.security.configuration;
 
+import java.util.List;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -13,6 +14,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import org.cardanofoundation.explorer.api.config.RsaConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
@@ -25,15 +28,20 @@ import org.cardanofoundation.explorer.api.security.filter.DynamicFilter;
 @AllArgsConstructor
 public class SpringWebSecurityConfig {
 
-  private final RoleFilterMapper roleConf;
+  private RoleFilterMapper roleConf;
 
-  private final RsaConfig rsaConfig;
+  private RsaConfig rsaConfig;
 
-  private final RedisTemplate<String, Object> redisTemplate;
+  private RedisTemplate<String, Object> redisTemplate;
+
+
+  @Qualifier("handlerExceptionResolver")
+  private HandlerExceptionResolver handlerExceptionResolver;
 
   @Bean
   public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
     http.csrf((csrf) -> csrf.disable())
+        .authorizeHttpRequests((matcherRegistry) -> matcherRegistry.anyRequest().permitAll())
         .headers(
             (headers) ->
                 headers
@@ -45,6 +53,9 @@ public class SpringWebSecurityConfig {
                         (policy) ->
                             policy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
                     .permissionsPolicy((policy) -> policy.policy("geolocation=(self)")));
+    http.addFilterAfter(
+        new DynamicFilter(roleConf, rsaConfig, redisTemplate, handlerExceptionResolver),
+        BasicAuthenticationFilter.class);
     return http.build();
   }
 
