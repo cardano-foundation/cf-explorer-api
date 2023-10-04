@@ -58,6 +58,9 @@ public class PoolDetailHeaderResponse implements Serializable {
     this.pledge = poolDetail.getPledge();
     this.cost = poolDetail.getCost();
     this.margin = poolDetail.getMargin();
+    this.epochBlock = poolDetail.getEpochBlock();
+    this.lifetimeBlock = poolDetail.getLifetimeBlock();
+    this.delegators = poolDetail.getDelegators();
     this.rewardAccounts = Collections.singletonList(poolDetail.getRewardAddress());
   }
 }
