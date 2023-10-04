@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.pool.projection;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
 
 public interface PoolDetailUpdateProjection {
 
@@ -26,4 +27,5 @@ public interface PoolDetailUpdateProjection {
   Integer getEpochBlock();
   Integer getLifetimeBlock();
   Integer getDelegators();
+  Timestamp getLastUpdate();
 }

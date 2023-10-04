@@ -51,6 +51,8 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
+  private Timestamp lastUpdate;
+
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
@@ -61,6 +63,7 @@ public class PoolDetailHeaderResponse implements Serializable {
     this.epochBlock = poolDetail.getEpochBlock();
     this.lifetimeBlock = poolDetail.getLifetimeBlock();
     this.delegators = poolDetail.getDelegators();
+    this.lastUpdate = poolDetail.getLastUpdate();
     this.rewardAccounts = Collections.singletonList(poolDetail.getRewardAddress());
   }
 }
