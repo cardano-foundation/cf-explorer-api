@@ -16,6 +16,7 @@ public class InstantaneousRewardsResponse {
   private Long blockNo;
   private Integer epochNo;
   private Integer epochSlotNo;
+  private Integer slotNo;
   private Long numberOfStakes;
   private BigInteger rewards;
 }
