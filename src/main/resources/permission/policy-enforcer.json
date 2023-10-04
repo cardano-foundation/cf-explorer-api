@@ -38,7 +38,7 @@
           "uri": "/api/v1/staking-lifecycle/report/stake-key",
           "method": "POST",
           "description": {
-            "reportLimitPer24Hours": 5
+            "reportLimitPer24Hours": 2
           }
         },
         {
