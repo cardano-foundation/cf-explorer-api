@@ -16,6 +16,7 @@ public class DelegationResponse {
   private Long blockNo;
   private Integer epochNo;
   private Integer epochSlotNo;
+  private Integer slotNo;
   private List<String> stakeKeys;
   private List<DelegationPoolResponse> pools;
 }
