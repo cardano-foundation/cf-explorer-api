@@ -553,6 +553,7 @@ class DelegationServiceTest {
         poolActiveStakeProjections);
     when(poolUpdateRepository.findLastUpdateByPool(10L)).thenReturn(
         PoolUpdate.builder().margin(1D).fixedCost(BigInteger.ONE).build());
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(440));
 
     // Calling the method to be tested
     BaseFilterResponse<PoolDetailEpochResponse> epochList = delegationService.getEpochListForPoolDetail(
@@ -592,6 +593,7 @@ class DelegationServiceTest {
         poolHistoryKoiosProjections);
     when(poolHashRepository.findEpochByPool(1L, Set.of(400))).thenReturn(
         poolDetailEpochProjections);
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(440));
 
     var response = delegationService.getEpochListForPoolDetail(pageable, poolView);
     var expect = new BaseFilterResponse<>(List.of(
@@ -633,6 +635,7 @@ class DelegationServiceTest {
         poolHistoryKoiosProjections);
     when(poolHashRepository.findEpochByPool(1L, Set.of(400))).thenReturn(
         poolDetailEpochProjections);
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(440));
 
     var response = delegationService.getEpochListForPoolDetail(pageable, poolView);
     var expect = new BaseFilterResponse<>(List.of(

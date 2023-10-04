@@ -1,9 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.protocol;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
