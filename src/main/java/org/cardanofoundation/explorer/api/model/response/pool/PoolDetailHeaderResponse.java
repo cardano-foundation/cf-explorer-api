@@ -51,6 +51,14 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
+  private String homepage;
+
+  private String description;
+
+  private String logoUrl;
+
+  private String iconUrl;
+
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
@@ -59,5 +67,7 @@ public class PoolDetailHeaderResponse implements Serializable {
     this.cost = poolDetail.getCost();
     this.margin = poolDetail.getMargin();
     this.rewardAccounts = Collections.singletonList(poolDetail.getRewardAddress());
+    this.logoUrl = poolDetail.getLogoUrl();
+    this.iconUrl = poolDetail.getIconUrl();
   }
 }
