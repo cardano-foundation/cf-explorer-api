@@ -7,6 +7,7 @@ import org.cardanofoundation.explorer.api.controller.advice.GlobalRestController
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.model.response.*;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
+import org.cardanofoundation.explorer.api.security.configuration.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.service.BlockService;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.mockito.Mockito;

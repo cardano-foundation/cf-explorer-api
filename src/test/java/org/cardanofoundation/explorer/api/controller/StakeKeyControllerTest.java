@@ -19,6 +19,7 @@ import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
+import org.cardanofoundation.explorer.api.security.configuration.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.junit.jupiter.api.BeforeEach;

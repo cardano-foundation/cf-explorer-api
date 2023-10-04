@@ -33,6 +33,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeR
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
+import org.cardanofoundation.explorer.api.security.configuration.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

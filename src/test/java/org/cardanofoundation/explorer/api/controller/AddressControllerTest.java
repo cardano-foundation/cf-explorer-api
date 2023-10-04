@@ -12,6 +12,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressChartBal
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.security.configuration.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
