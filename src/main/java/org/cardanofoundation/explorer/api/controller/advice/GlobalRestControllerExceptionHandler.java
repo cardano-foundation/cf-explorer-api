@@ -10,6 +10,7 @@ import org.cardanofoundation.explorer.common.exceptions.*;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,7 +24,7 @@ import java.util.Objects;
 @RestControllerAdvice
 public class GlobalRestControllerExceptionHandler {
 
-  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ExceptionHandler({MethodArgumentNotValidException.class})
   public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
     FieldError fieldError = ex.getBindingResult().getFieldError();
     String errorMessage = "Invalid parameter";
@@ -82,36 +83,15 @@ public class GlobalRestControllerExceptionHandler {
         HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  @ExceptionHandler({TokenRefreshException.class})
-  public ResponseEntity<ErrorResponse> handleAuthException(TokenRefreshException e) {
-    log.warn("Refresh token exception: {}, stack trace:", e.getMessage());
+  @ExceptionHandler({AccessTokenExpireException.class,InvalidAccessTokenException.class,
+      AuthenticationException.class})
+  public ResponseEntity<ErrorResponse> handleAuthExceptions(Exception e) {
+    log.debug("Access token expired: {}, stack trace:", e.getMessage());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(
             ErrorResponse.builder()
-                .errorCode(e.getErrorCode().getServiceErrorCode())
-                .errorMessage(e.getErrorCode().getDesc())
-                .build());
-  }
-
-  @ExceptionHandler({AccessTokenExpireException.class})
-  public ResponseEntity<ErrorResponse> handleAuthException(AccessTokenExpireException e) {
-    log.warn("Access token expired: {}, stack trace:", e.getMessage());
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(
-            ErrorResponse.builder()
-                .errorCode(e.getErrorCode().getServiceErrorCode())
-                .errorMessage(e.getErrorCode().getDesc())
-                .build());
-  }
-
-  @ExceptionHandler({InvalidAccessTokenException.class})
-  public ResponseEntity<ErrorResponse> handleAuthException(InvalidAccessTokenException e) {
-    log.warn("Invalid access token: {}", e.getErrorCode());
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(
-            ErrorResponse.builder()
-                .errorCode(e.getErrorCode().getServiceErrorCode())
-                .errorMessage(e.getErrorCode().getDesc())
+                .errorCode(CommonErrorCode.INVALID_TOKEN.getServiceErrorCode())
+                .errorMessage(CommonErrorCode.INVALID_TOKEN.getDesc())
                 .build());
   }
 

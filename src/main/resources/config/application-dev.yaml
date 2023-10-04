@@ -151,7 +151,7 @@ rsa:
 
 keycloak:
   role:
-    path: /permission/policy-enforcer.json
+    path: ${AUTH_FILE_PATH:/permission/policy-enforcer.json}
 
 cloud:
   aws:

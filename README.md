@@ -56,13 +56,13 @@ To ensure the stability and reliability of this project, unit and mutation tests
 
 - `KAFKA_BOOTSTRAP_SERVER`: Kafka bootstrap server. Default is kafka:9092.
 - `KAFKA_REPORTS_TOPIC`: Kafka reports topic. Default is dev.explorer.api.mainnet.reports
-  
+
 - `S3_ACCESS_KEY`: the AWS access key
 - `S3_SECRET_KEY`: the AWS secret key
 - `S3_REGION`: the AWS region
 - `S3_BUCKET_NAME`: the AWS bucket
 - `S3_STORAGE_ENDPOINT`: the storage endpoint, only for S3 clone (either on localhost, Minio, etc.)
-- `PATH_STYLE_ENABLED`: 
+- `PATH_STYLE_ENABLED`:
 
 - `LOG_PATH`: the path to store log files
 
@@ -80,6 +80,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.
 - `TOKEN_LOGO_ENDPOINT`: Endpoint for get token logo.
 - `BLOCK_TIME_THRESHOLD_IN_SECOND` : The maximum allowable time difference, in seconds, between the timestamp of the latest block and the current time (for healthcheck)
+- `AUTH_FILE_PATH`: path file of authenticate configuration
+
 ### We have 3 options for redis cache:
 - `redis standalone`
     - `REDIS_STANDALONE_HOST` : Redis hostname eg. `127.0.0.1`.

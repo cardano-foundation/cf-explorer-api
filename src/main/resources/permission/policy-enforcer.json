@@ -1,11 +1,11 @@
 {
   "auth": [
     {
-      "uri": "/api/v1/pool-report/*",
+      "uri": "/api/v1/pool-report/**",
       "method": "*"
     },
     {
-      "uri": "/api/v1/staking-lifecycle/report/*",
+      "uri": "/api/v1/staking-lifecycle/report/**",
       "method": "*"
     }
   ],
