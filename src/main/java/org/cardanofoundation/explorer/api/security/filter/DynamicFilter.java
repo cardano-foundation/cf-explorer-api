@@ -66,11 +66,6 @@ public class DynamicFilter extends OncePerRequestFilter {
         }).toList();
   }
 
-  @Override
-  protected boolean shouldNotFilter(HttpServletRequest rq) {
-    return matchers.stream().noneMatch(matcher -> matcher.matches(rq));
-  }
-
   private boolean isTokenBlacklisted(String token) {
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {
       throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
@@ -83,6 +78,10 @@ public class DynamicFilter extends OncePerRequestFilter {
   public void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                FilterChain filterChain)
       throws IOException, ServletException, InvalidAccessTokenException {
+    if (matchers.stream().noneMatch(matcher -> matcher.matches(request))) {
+      filterChain.doFilter(request, response);
+      return;
+    }
     try {
       UserPrincipal userPrincipal = new UserPrincipal();
       String token = getToken(request, userPrincipal);
