@@ -418,10 +418,6 @@ public class DelegationServiceImpl implements DelegationService {
     Collections.sort(ownerAddress);
 
     poolDetailResponse.setOwnerAccounts(ownerAddress);
-    poolDetailResponse.setDelegators(delegationRepository.liveDelegatorsCount(poolView));
-    poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
-    poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
-
     return poolDetailResponse;
   }
 
