@@ -148,7 +148,7 @@ rsa:
 
 keycloak:
   role:
-    path: /permission/policy-enforcer.json
+    path: src/main/resources/permission/policy.json
 
 cloud:
   aws:

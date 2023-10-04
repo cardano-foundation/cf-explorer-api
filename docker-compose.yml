@@ -63,3 +63,4 @@ services:
       - ${PORT}:8080
     volumes:
       - ${LOG_PATH}:/cardano-explorer-api/logs/
+      -  ../auth/:/app/auth/
