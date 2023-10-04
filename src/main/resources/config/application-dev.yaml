@@ -111,7 +111,7 @@ application:
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://localhost:8888/api/v1/ada-pots/fetch}
     check-epoch:
-        base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
+      base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
@@ -151,7 +151,7 @@ rsa:
 
 keycloak:
   role:
-    path: /permission/policy-enforcer.json
+    path: ${AUTH_FILE_PATH:/permission/policy-enforcer.json}
 
 cloud:
   aws:
