@@ -72,6 +72,7 @@ public class CommonConstant {
 
   public static final String PREVIEW_NETWORK = "preview";
 
+  public static final String REPORT_LIMIT_PER_24HOURS = "reportLimitPer24Hours";
 
 
   public static final String UNDERSCORE = "_";

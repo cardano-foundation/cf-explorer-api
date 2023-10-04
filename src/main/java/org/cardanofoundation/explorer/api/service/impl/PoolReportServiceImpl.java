@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -67,12 +68,15 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private final ReportHistoryService reportHistoryService;
 
+  private final RoleService roleService;
+
   @Override
-  public Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username) {
-    PoolReportHistory poolReportHistory = saveToDb(poolReportCreateRequest, username);
+  public Boolean create(PoolReportCreateRequest poolReportCreateRequest,
+                        UserPrincipal userPrincipal) {
+    PoolReportHistory poolReportHistory = saveToDb(poolReportCreateRequest, userPrincipal);
 
     Boolean isSuccess = kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
-    if(Boolean.FALSE.equals(isSuccess)) {
+    if (Boolean.FALSE.equals(isSuccess)) {
       poolReportRepository.delete(poolReportHistory);
       throw new BusinessException(BusinessCode.INTERNAL_ERROR);
     }
@@ -82,13 +86,18 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   @Transactional
   public PoolReportHistory saveToDb(PoolReportCreateRequest poolReportCreateRequest,
-                                    String username) {
+                                    UserPrincipal userPrincipal) {
     poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
-    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
-      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    int reportLimit = roleService.getReportLimit(userPrincipal.getRoleDescription());
+    if (reportLimit != -1) { //"-1" it's mean unlimit report
+      if (Boolean.TRUE.equals(
+          reportHistoryService.isLimitReached(userPrincipal.getUsername(), reportLimit))) {
+        throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+      }
     }
-    ReportHistory reportHistory = initReportHistory(poolReportCreateRequest, username);
+    ReportHistory reportHistory = initReportHistory(poolReportCreateRequest,
+        userPrincipal.getUsername());
     return poolReportRepository.saveAndFlush(poolReportCreateRequest.toEntity(reportHistory));
   }
 
@@ -115,7 +124,8 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
-  public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username, ReportHistoryFilterRequest filterRequest) {
+  public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username,
+                                                         ReportHistoryFilterRequest filterRequest) {
 
     Timestamp timeAt7DayAgo = new Timestamp(Instant.now().minus(Duration.ofDays(7)).toEpochMilli());
     String reportName = DataUtil.makeLikeQuery(filterRequest.getReportName());
@@ -136,7 +146,7 @@ public class PoolReportServiceImpl implements PoolReportService {
           PoolReportListResponse response = PoolReportListResponse
               .toDomain(poolReportHistory);
 
-          if(response.getCreatedAt().before(timeAt7DayAgo)) {
+          if (response.getCreatedAt().before(timeAt7DayAgo)) {
             response.setStatus(ReportStatus.EXPIRED);
           }
           return response;
@@ -162,18 +172,23 @@ public class PoolReportServiceImpl implements PoolReportService {
       boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolReportSet);
       List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
       if (!isHistory) {
-        boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(Set.of(poolReport.getPoolView()));
+        boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(
+            Set.of(poolReport.getPoolView()));
         if (isFetch) {
-          poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoios(poolReport.getPoolView());
+          poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoios(
+              poolReport.getPoolView());
         }
       } else {
-        poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoios(poolReport.getPoolView());
+        poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoios(
+            poolReport.getPoolView());
       }
 
-      if(Objects.nonNull(poolHistoryProjections)) {
-        List<PoolReportDetailResponse.EpochSize> epochSizeList = poolHistoryProjections.stream().filter(t ->
-                        ValueRange.of(poolReport.getBeginEpoch(), poolReport.getEndEpoch()).isValidIntValue(t.getEpochNo()))
-                .map(PoolReportDetailResponse.EpochSize::toDomain).toList();
+      if (Objects.nonNull(poolHistoryProjections)) {
+        List<PoolReportDetailResponse.EpochSize> epochSizeList = poolHistoryProjections.stream()
+            .filter(t ->
+                ValueRange.of(poolReport.getBeginEpoch(), poolReport.getEndEpoch())
+                    .isValidIntValue(t.getEpochNo()))
+            .map(PoolReportDetailResponse.EpochSize::toDomain).toList();
         return new BaseFilterResponse<>(this.convertListToPage(epochSizeList, pageable));
       } else {
         return new BaseFilterResponse<>(null);
@@ -181,15 +196,16 @@ public class PoolReportServiceImpl implements PoolReportService {
 
     } else {
       Page<PoolReportProjection> epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(
-              poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
+          poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
       List<PoolReportProjection> epochSizeProjections = epochSizeProjectionPage.getContent();
       List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
-              .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
+          .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
       return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
     }
   }
 
-  private Page<PoolReportDetailResponse.EpochSize> convertListToPage(List<PoolReportDetailResponse.EpochSize> list, Pageable pageable) {
+  private Page<PoolReportDetailResponse.EpochSize> convertListToPage(
+      List<PoolReportDetailResponse.EpochSize> list, Pageable pageable) {
     int startIndex = pageable.getPageNumber() * pageable.getPageSize();
     int endIndex = Math.min(startIndex + pageable.getPageSize(), list.size());
     try {
@@ -223,8 +239,8 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                      String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
-                                                 poolReport.getBeginEpoch(),
-                                                 poolReport.getEndEpoch(), pageable);
+        poolReport.getBeginEpoch(),
+        poolReport.getEndEpoch(), pageable);
   }
 
   @Override
@@ -233,7 +249,7 @@ public class PoolReportServiceImpl implements PoolReportService {
                                                                        String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     return poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null,
-                                               null, pageable);
+        null, pageable);
   }
 
   private PoolReportHistory getPoolReportHistory(Long reportId, String username) {
