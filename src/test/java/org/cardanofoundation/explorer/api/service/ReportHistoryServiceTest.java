@@ -11,6 +11,7 @@ import java.util.List;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
 import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -80,7 +81,7 @@ public class ReportHistoryServiceTest {
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(5);
-    Assertions.assertTrue(reportHistoryService.isLimitReached("username"));
+    Assertions.assertTrue(reportHistoryService.isLimitReached("username",1));
   }
 
   @Test
@@ -90,7 +91,7 @@ public class ReportHistoryServiceTest {
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(4);
-    Assertions.assertFalse(reportHistoryService.isLimitReached("username"));
+    Assertions.assertFalse(reportHistoryService.isLimitReached("username",1));
   }
 
   @Test
@@ -100,7 +101,8 @@ public class ReportHistoryServiceTest {
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(4);
-    var reportLimit = reportHistoryService.getReportLimit("username");
+    var reportLimit = reportHistoryService.getReportLimit(
+        UserPrincipal.builder().username("username").build());
     Assertions.assertEquals(5, reportLimit.getLimitPer24hours());
     Assertions.assertEquals(Boolean.FALSE, reportLimit.getIsLimitReached());
   }

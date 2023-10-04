@@ -12,7 +12,9 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
 
   @Query("SELECT re.scriptHash AS scriptHash, txOut.address AS address, re.purpose as purpose,"
       + " rd.bytes as redeemerBytes, re.unitMem as redeemerMem, re.unitSteps as redeemerSteps,"
-      + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes, txOut.id as txOutId"
+      + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes, txOut.id as txOutId,"
+      + " txOut.index as utxoIndex, utxo.hash as utxoHash, sa.view as stakeAddress,"
+      + " de.id as delegationId, sdr.id as stakeDeregistrationId"
       + " FROM Redeemer re"
       + " INNER JOIN Tx tx ON re.tx = tx"
       + " LEFT JOIN RedeemerData rd ON re.redeemerData = rd"
@@ -20,13 +22,20 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " LEFT JOIN TxOut txOut ON txIn.txOut = txOut.tx AND txIn.txOutIndex = txOut.index"
       + " LEFT JOIN Datum d ON (txOut.dataHash = d.hash OR txOut.inlineDatum = d)"
       + " LEFT JOIN Script s ON re.scriptHash = s.hash"
+      + " LEFT JOIN Withdrawal w ON re = w.redeemer"
+      + " LEFT JOIN Delegation de ON re = de.redeemer"
+      + " LEFT JOIN StakeDeregistration sdr ON re = sdr.redeemer"
+      + " LEFT JOIN StakeAddress sa ON (w.addr = sa OR de.address = sa OR sdr.addr = sa)"
+      + " LEFT JOIN Tx utxo ON (txOut.tx = utxo)"
       + " WHERE tx = :tx"
       + " ORDER BY re.id")
   List<TxContractProjection> findContractByTx(@Param("tx") Tx tx);
 
   @Query("SELECT re.scriptHash AS scriptHash, txOut.address AS address, re.purpose as purpose,"
       + " rd.bytes as redeemerBytes, re.unitMem as redeemerMem, re.unitSteps as redeemerSteps,"
-      + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes, txOut.id as txOutId"
+      + " d.hash as datumHashIn, d.bytes as datumBytesIn, s.bytes as scriptBytes, txOut.id as txOutId,"
+      + " txOut.index as utxoIndex, utxo.hash as utxoHash, sa.view as stakeAddress,"
+      + " de.id as delegationId, sdr.id as stakeDeregistrationId"
       + " FROM Redeemer re"
       + " INNER JOIN Tx tx ON re.tx = tx"
       + " LEFT JOIN RedeemerData rd ON re.redeemerData = rd"
@@ -34,6 +43,11 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " LEFT JOIN TxOut txOut ON uti.txOut = txOut.tx AND uti.txOutIndex = txOut.index"
       + " LEFT JOIN Datum d ON (txOut.dataHash = d.hash OR txOut.inlineDatum = d)"
       + " LEFT JOIN Script s ON re.scriptHash = s.hash"
+      + " LEFT JOIN Withdrawal w ON re = w.redeemer"
+      + " LEFT JOIN Delegation de ON re = de.redeemer"
+      + " LEFT JOIN StakeDeregistration sdr ON re = sdr.redeemer"
+      + " LEFT JOIN StakeAddress sa ON (w.addr = sa OR de.address = sa OR sdr.addr = sa)"
+      + " LEFT JOIN Tx utxo ON (txOut.tx = utxo)"
       + " WHERE tx = :tx"
       + " ORDER BY re.id")
   List<TxContractProjection> findContractByTxFail(@Param("tx") Tx tx);

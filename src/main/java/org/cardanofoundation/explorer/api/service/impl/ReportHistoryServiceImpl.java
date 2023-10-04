@@ -18,7 +18,9 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.ReportLimitResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
+import org.cardanofoundation.explorer.api.security.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
+import org.cardanofoundation.explorer.api.service.RoleService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 
@@ -31,8 +33,7 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
 
   private final ReportHistoryRepository reportHistoryRepository;
 
-  @Value("${application.report.limit-per-24hours}")
-  private Integer limitPer24Hours;
+  RoleService roleService;
 
   /**
    * Get report history
@@ -78,20 +79,21 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
   }
 
   @Override
-  public Boolean isLimitReached(String username) {
+  public Boolean isLimitReached(String username, int limit) {
     Instant currentTime = Instant.now();
     Integer reportCount = reportHistoryRepository
         .countByUsernameAndCreatedAtBetween(username,
                                             Timestamp.from(currentTime.minus(Duration.ofDays(1))),
                                             Timestamp.from(currentTime));
-    return reportCount >= limitPer24Hours;
+    return reportCount >= limit;
   }
 
   @Override
-  public ReportLimitResponse getReportLimit(String username) {
+  public ReportLimitResponse getReportLimit(UserPrincipal userPrincipal) {
+    int limit = roleService.getReportLimit(userPrincipal.getRoleDescription());
     return ReportLimitResponse.builder()
-        .limitPer24hours(limitPer24Hours)
-        .isLimitReached(isLimitReached(username))
+        .limitPer24hours(limit)
+        .isLimitReached(isLimitReached(userPrincipal.getUsername(),limit))
         .build();
   }
 }

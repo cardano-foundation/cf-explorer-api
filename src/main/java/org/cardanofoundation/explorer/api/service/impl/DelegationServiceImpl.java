@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.RedisKey;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
@@ -242,32 +244,30 @@ public class DelegationServiceImpl implements DelegationService {
           .pledge(pool.getPledge())
           .feeAmount(pool.getFee())
           .feePercent(pool.getMargin())
+          .numberDelegators(pool.getNumberDelegators())
+          .lifetimeBlock(pool.getLifetimeBlock())
+          .epochBlock(pool.getEpochBlock())
           .build());
       poolIds.add(pool.getPoolId());
     });
 
-    List<PoolCountProjection> delegatorsCountProjections = delegationRepository.liveDelegatorsCountByPools(
-        poolIds);
-    Map<Long, Integer> numberDelegatorsMap = delegatorsCountProjections.stream().collect(
-        Collectors.toMap(PoolCountProjection::getPoolId,
-            PoolCountProjection::getCountValue));
-
-    List<PoolCountProjection> blockLifetimeProjections = blockRepository.getCountBlockByPools(
-        poolIds);
-    Map<Long, Integer> blockLifetimesMap = blockLifetimeProjections.stream().collect(
-        Collectors.toMap(PoolCountProjection::getPoolId,
-            PoolCountProjection::getCountValue));
-
-    List<PoolCountProjection> blockEpochProjections = blockRepository.getCountBlockByPoolsAndCurrentEpoch(
-        poolIds, epochNo);
-    Map<Long, Integer> blockEpochsMap = blockEpochProjections.stream().collect(
-        Collectors.toMap(PoolCountProjection::getPoolId,
-            PoolCountProjection::getCountValue));
-
     Boolean useKoios = fetchRewardDataService.useKoios();
     if (Boolean.TRUE.equals(useKoios)) {
-      setPoolInfoKoios(poolList, epochNo, poolIdList, numberDelegatorsMap, blockLifetimesMap,
-          blockEpochsMap);
+      List<PoolInfoKoiosProjection> poolInfoProjections = poolInfoRepository.getPoolInfoKoios(
+          poolIdList, epochNo);
+      Map<String, PoolInfoKoiosProjection> poolInfoMap = poolInfoProjections.stream()
+          .collect(Collectors.toMap(PoolInfoKoiosProjection::getView, Function.identity()));
+      poolList.forEach(
+          pool -> {
+            PoolInfoKoiosProjection poolInfo = poolInfoMap.get(pool.getPoolId());
+            if (Objects.nonNull(poolInfo)) {
+              PoolInfoKoiosProjection projection = poolInfoMap.get(pool.getPoolId());
+              if (Objects.nonNull(projection)) {
+                pool.setPoolSize(projection.getActiveStake());
+                pool.setSaturation(projection.getSaturation());
+              }
+            }
+          });
     } else {
       Map<String, BigInteger> liveStakeMap = getStakeFromCache(
           CommonConstant.LIVE_STAKE, poolViews, null);
@@ -282,9 +282,6 @@ public class DelegationServiceImpl implements DelegationService {
             pool.setPoolSize(activeStakeMap.get(pool.getPoolId()));
             pool.setSaturation(
                 getSaturation(liveStakeMap.get(pool.getPoolId()), stakeLimit));
-            pool.setNumberDelegators(numberDelegatorsMap.get(pool.getId()));
-            pool.setLifetimeBlock(blockLifetimesMap.get(pool.getId()));
-            pool.setEpochBlock(blockEpochsMap.get(pool.getId()));
           });
     }
 
@@ -423,10 +420,6 @@ public class DelegationServiceImpl implements DelegationService {
     Collections.sort(ownerAddress);
 
     poolDetailResponse.setOwnerAccounts(ownerAddress);
-    poolDetailResponse.setDelegators(delegationRepository.liveDelegatorsCount(poolView));
-    poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
-    poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
-
     return poolDetailResponse;
   }
 
@@ -678,7 +671,7 @@ public class DelegationServiceImpl implements DelegationService {
         poolIds, epochNo);
     Map<String, PoolInfoKoiosProjection> poolInfoMap = poolInfoProjections.stream()
         .collect(Collectors.toMap(PoolInfoKoiosProjection::getView, Function.identity()));
-    poolList.forEach(pool -> {
+    poolList.parallelStream().forEach(pool -> {
       PoolInfoKoiosProjection projection = poolInfoMap.get(pool.getPoolId());
       if (Objects.nonNull(projection)) {
         pool.setPoolSize(projection.getActiveStake());
