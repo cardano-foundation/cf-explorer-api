@@ -427,7 +427,6 @@ class DelegationServiceTest {
 
     String poolView = "poolView";
     Long poolId = 1L;
-    BigInteger reserves = BigInteger.valueOf(1000);
     Integer paramK = 2;
     PoolDetailUpdateProjection projection = Mockito.mock(PoolDetailUpdateProjection.class);
     when(projection.getPoolName()).thenReturn(poolView);
@@ -448,9 +447,6 @@ class DelegationServiceTest {
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
     verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
-    verify(delegationRepository).liveDelegatorsCount(poolView);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
 
     assertEquals(poolView, result.getPoolName());
   }
@@ -473,8 +469,6 @@ class DelegationServiceTest {
     when(projection.getPoolId()).thenReturn(poolId);
     when(projection.getReserves()).thenReturn(reserves);
     when(projection.getParamK()).thenReturn(paramK);
-    Set<String> poolIdList = new HashSet<>(Collections.singletonList(poolView));
-    PoolHistoryKoiosProjection phkp = Mockito.mock(PoolHistoryKoiosProjection.class);
     PoolInfoKoiosProjection pikp = Mockito.mock(PoolInfoKoiosProjection.class);
     when(pikp.getActiveStake()).thenReturn(BigInteger.ONE);
     when(pikp.getSaturation()).thenReturn(1D);
@@ -494,9 +488,6 @@ class DelegationServiceTest {
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
     verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
-    verify(delegationRepository).liveDelegatorsCount(poolView);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
 
     assertEquals(poolView, result.getPoolName());
   }
@@ -539,9 +530,6 @@ class DelegationServiceTest {
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
     verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
-    verify(delegationRepository).liveDelegatorsCount(poolView);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
 
     assertEquals(poolView, result.getPoolName());
   }
