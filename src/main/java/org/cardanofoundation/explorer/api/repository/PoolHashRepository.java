@@ -65,13 +65,15 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value =
       "SELECT ph.id AS poolId, ph.hashRaw AS hashRaw, po.poolName AS poolName, po.tickerName AS tickerName, pu.pledge AS pledge, pu.margin AS margin, "
-          + "pu.fixedCost AS cost, ep.optimalPoolCount AS paramK, ap.reserves AS reserves, sa.view AS rewardAddress "
+          + "pu.fixedCost AS cost, ep.optimalPoolCount AS paramK, ap.reserves AS reserves, sa.view AS rewardAddress, "
+          + "api.delegatorCount as delegators, api.blockLifeTime as lifetimeBlock, api.blockInEpoch as epochBlock "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id is NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id  = ph.id)) "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id  = ph.id) "
           + "LEFT JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
           + "LEFT JOIN EpochParam ep ON ep.epochNo = :epochNo "
           + "LEFT JOIN AdaPots ap ON ap.epochNo = :epochNo "
+          + "LEFT JOIN AggregatePoolInfo api ON api.poolHash = ph "
           + "WHERE ph.view = :poolView")
   PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolView") String poolView, @Param("epochNo") Integer epochNo);
 
