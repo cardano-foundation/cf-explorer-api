@@ -59,6 +59,8 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private String iconUrl;
 
+  private Timestamp lastUpdate;
+
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
@@ -66,6 +68,10 @@ public class PoolDetailHeaderResponse implements Serializable {
     this.pledge = poolDetail.getPledge();
     this.cost = poolDetail.getCost();
     this.margin = poolDetail.getMargin();
+    this.epochBlock = poolDetail.getEpochBlock();
+    this.lifetimeBlock = poolDetail.getLifetimeBlock();
+    this.delegators = poolDetail.getDelegators();
+    this.lastUpdate = poolDetail.getLastUpdate();
     this.rewardAccounts = Collections.singletonList(poolDetail.getRewardAddress());
     this.logoUrl = poolDetail.getLogoUrl();
     this.iconUrl = poolDetail.getIconUrl();

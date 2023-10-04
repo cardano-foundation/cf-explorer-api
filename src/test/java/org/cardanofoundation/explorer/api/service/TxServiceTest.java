@@ -106,6 +106,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.TxMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.TxMetadataHash;
 import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -849,13 +850,14 @@ class TxServiceTest {
 
     // Configure RedeemerRepository.findContractByTx(...).
     when(redeemerRepository.findContractByTx(tx1)).thenReturn(List.of(
-        TxContractProjectionImpl.builder().build()
+        TxContractProjectionImpl.builder().purpose(ScriptPurposeType.SPEND).build()
     ));
 
     // Configure TxContractMapper.fromTxContractProjectionToContractResponse(...).
     final ContractResponse contractResponse = ContractResponse.builder()
         .address("address")
         .scriptHash("scriptHash")
+        .purpose(ScriptPurposeType.SPEND)
         .build();
     when(txContractMapper.fromTxContractProjectionToContractResponse(
         any(TxContractProjection.class))).thenReturn(contractResponse);
@@ -901,13 +903,14 @@ class TxServiceTest {
 
     // Configure RedeemerRepository.findContractByTx(...).
     when(redeemerRepository.findContractByTxFail(tx1)).thenReturn(List.of(
-        TxContractProjectionImpl.builder().build()
+        TxContractProjectionImpl.builder().purpose(ScriptPurposeType.SPEND).build()
     ));
 
     // Configure TxContractMapper.fromTxContractProjectionToContractResponse(...).
     final ContractResponse contractResponse = ContractResponse.builder()
         .address("address")
         .scriptHash("scriptHash")
+        .purpose(ScriptPurposeType.SPEND)
         .build();
     when(txContractMapper.fromTxContractProjectionToContractResponse(
         any(TxContractProjection.class))).thenReturn(contractResponse);

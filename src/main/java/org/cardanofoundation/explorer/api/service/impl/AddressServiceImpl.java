@@ -116,6 +116,7 @@ public class AddressServiceImpl implements AddressService {
       return AddressChartBalanceResponse.builder().highestBalance(BigInteger.ZERO)
           .lowestBalance(BigInteger.ZERO).data(Collections.emptyList()).build();
     }
+
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
 
     List<AddressChartBalanceData> data = new ArrayList<>();
