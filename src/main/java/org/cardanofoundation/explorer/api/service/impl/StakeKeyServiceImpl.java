@@ -119,6 +119,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
           item.setBlock(txIOProjection.getBlockNo());
           item.setEpochSlotNo(txIOProjection.getEpochSlotNo());
           item.setTxTime(Timestamp.valueOf(txIOProjection.getTime()));
+          item.setSlotNo(txIOProjection.getSlot());
           item.setStakeKey(stakeAddress.getView());
         }
     );

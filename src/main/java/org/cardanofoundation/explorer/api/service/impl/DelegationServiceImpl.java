@@ -164,6 +164,7 @@ public class DelegationServiceImpl implements DelegationService {
             .epochSlotNo(txMap.get(item).getEpochSlotNo())
             .time(txMap.get(item).getTime())
             .epochSlotNo(txMap.get(item).getEpochSlotNo())
+            .slotNo(txMap.get(item).getSlot())
             .stakeKeys(delegationStakeKeyMap.get(item))
             .pools(delegationPoolMap.get(item).stream().toList())
             .build()
