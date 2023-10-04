@@ -79,6 +79,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `EPOCH_DAYS` : Number of days in an epoch. Default is 5.
 - `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.
 - `TOKEN_LOGO_ENDPOINT`: Endpoint for get token logo.
+- `AUTH_FILE_PATH`: path file of authenticate configuration
 
 ### We have 3 options for redis cache:
 - `redis standalone`
