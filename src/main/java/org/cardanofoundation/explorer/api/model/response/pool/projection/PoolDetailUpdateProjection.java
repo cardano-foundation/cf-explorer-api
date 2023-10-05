@@ -7,6 +7,8 @@ public interface PoolDetailUpdateProjection {
 
   Long getPoolId();
 
+  String getPoolView();
+
   String getHashRaw();
 
   String getPoolName();
