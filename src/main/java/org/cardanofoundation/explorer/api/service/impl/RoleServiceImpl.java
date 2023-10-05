@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.explorer.api.service.RoleService;
 
 import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.REPORT_LIMIT_PER_24HOURS;
+import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.UNLIMITED_REPORT;
 
 
 @Service
@@ -21,7 +22,7 @@ public class RoleServiceImpl implements RoleService {
       Map<String,Object> descriptions = roleDescriptions.get(role);
       if(descriptions.containsKey(REPORT_LIMIT_PER_24HOURS)){
         int reportLimit = (int) descriptions.get(REPORT_LIMIT_PER_24HOURS);
-        if(reportLimit < 0){ // if report limit is equal -1 then
+        if(reportLimit == UNLIMITED_REPORT){ // if report limit is equal -1 then
           return -1;
         }
         maxReportLimit = Math.max(maxReportLimit,reportLimit);
