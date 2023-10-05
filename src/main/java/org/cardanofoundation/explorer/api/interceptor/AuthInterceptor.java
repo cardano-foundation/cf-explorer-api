@@ -133,6 +133,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {
       throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
     }
-    return redisTemplate.opsForValue().get(CommonConstant.JWT + token) != null;
+    return redisTemplate.hasKey(CommonConstant.JWT + token);
   }
 }
