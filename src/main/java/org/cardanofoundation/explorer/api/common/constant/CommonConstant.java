@@ -73,8 +73,7 @@ public class CommonConstant {
 
   public static final String PREVIEW_NETWORK = "preview";
 
-
-
+  public static final String UNDERSCORE = "_";
 
   public static int hashCode(Object... a) {
     if (a == null) {
