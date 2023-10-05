@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
@@ -38,6 +40,9 @@ public class ReportHistoryServiceTest {
 
   @InjectMocks
   private ReportHistoryServiceImpl reportHistoryService;
+
+  @Mock
+  RoleService roleService;
 
   @Test
   void whenGetReportHistoryWithCondition_thenReturnReportHistory() {
@@ -95,11 +100,13 @@ public class ReportHistoryServiceTest {
 
   @Test
   void getReportLimitPer24Hours_shouldReturnLimit() {
+    Map<String, Map<String,Object>> roleDescriptions = new HashMap<>();
     when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(4);
-    var reportLimit = reportHistoryService.getReportLimit(UserPrincipal.builder().username("username").build());
+    when(roleService.getReportLimit(roleDescriptions)).thenReturn(5);
+    var reportLimit = reportHistoryService.getReportLimit(UserPrincipal.builder().username("username").roleDescription(roleDescriptions).build());
     Assertions.assertEquals(5, reportLimit.getLimitPer24hours());
     Assertions.assertEquals(Boolean.FALSE, reportLimit.getIsLimitReached());
   }

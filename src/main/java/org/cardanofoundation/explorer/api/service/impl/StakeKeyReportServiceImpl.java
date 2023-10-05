@@ -45,6 +45,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.UNLIMITED_REPORT;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -83,7 +85,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKeyReportRequest);
 
     int reportLimit = roleService.getReportLimit(userPrincipal.getRoleDescription());
-    if (reportLimit != -1) { //"-1" it's mean unlimit report
+    if (reportLimit != UNLIMITED_REPORT) { //"-1" it's mean unlimited report
       if (Boolean.TRUE.equals(reportHistoryService.isLimitReached(userPrincipal.getUsername(),reportLimit))) {
         throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
       }
