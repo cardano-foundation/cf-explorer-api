@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -74,6 +75,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -130,6 +132,9 @@ class DelegationServiceTest {
 
   @InjectMocks
   private DelegationServiceImpl delegationService;
+
+  @Mock
+  HashOperations hashOperations;
 
   @BeforeEach
   void preSetup() {
@@ -401,7 +406,6 @@ class DelegationServiceTest {
     when(poolHashRepository.findAllWithoutQueryParam(pageable)).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
-    when(redisTemplate.opsForHash()).thenReturn(null);
 
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
@@ -424,7 +428,6 @@ class DelegationServiceTest {
 
     String poolView = "poolView";
     Long poolId = 1L;
-    BigInteger reserves = BigInteger.valueOf(1000);
     Integer paramK = 2;
     PoolDetailUpdateProjection projection = Mockito.mock(PoolDetailUpdateProjection.class);
     when(projection.getPoolName()).thenReturn(poolView);
@@ -446,9 +449,6 @@ class DelegationServiceTest {
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
     verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
-    verify(delegationRepository).liveDelegatorsCount(poolView);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
 
     assertEquals(poolView, result.getPoolName());
   }
@@ -493,9 +493,6 @@ class DelegationServiceTest {
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
     verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
-    verify(delegationRepository).liveDelegatorsCount(poolView);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
 
     assertEquals(poolView, result.getPoolName());
   }
@@ -539,9 +536,6 @@ class DelegationServiceTest {
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
     verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
-    verify(delegationRepository).liveDelegatorsCount(poolView);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
-    verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
 
     assertEquals(poolView, result.getPoolName());
   }
@@ -565,6 +559,7 @@ class DelegationServiceTest {
         poolActiveStakeProjections);
     when(poolUpdateRepository.findLastUpdateByPool(10L)).thenReturn(
         PoolUpdate.builder().margin(1D).fixedCost(BigInteger.ONE).build());
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(440));
 
     // Calling the method to be tested
     BaseFilterResponse<PoolDetailEpochResponse> epochList = delegationService.getEpochListForPoolDetail(
@@ -604,6 +599,7 @@ class DelegationServiceTest {
         poolHistoryKoiosProjections);
     when(poolHashRepository.findEpochByPool(1L, Set.of(400))).thenReturn(
         poolDetailEpochProjections);
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(440));
 
     var response = delegationService.getEpochListForPoolDetail(pageable, poolView);
     var expect = new BaseFilterResponse<>(List.of(
@@ -645,6 +641,7 @@ class DelegationServiceTest {
         poolHistoryKoiosProjections);
     when(poolHashRepository.findEpochByPool(1L, Set.of(400))).thenReturn(
         poolDetailEpochProjections);
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(440));
 
     var response = delegationService.getEpochListForPoolDetail(pageable, poolView);
     var expect = new BaseFilterResponse<>(List.of(
