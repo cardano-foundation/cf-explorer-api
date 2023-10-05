@@ -85,6 +85,9 @@ public class CommonConstant {
 
   public static final String REPORT_LIMIT_PER_24HOURS = "reportLimitPer24Hours";
 
+  public static final int UNLIMITED_REPORT = -1;
+
+
   public static int hashCode(Object... a) {
     if (a == null) {
       return -BigInteger.ONE.intValue();
