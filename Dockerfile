@@ -17,5 +17,6 @@ RUN ./mvnw clean package -DskipTests
 FROM openjdk:18-jdk-slim AS runtime
 COPY --from=build /app/target/*.jar /app/app.jar
 COPY --from=build /app/src/main/resources/networks /app/genesis
+COPY --from=build /app/src/main/resources/permission /app/permission
 WORKDIR /app
 ENTRYPOINT ["java", "-jar", "app.jar"]
