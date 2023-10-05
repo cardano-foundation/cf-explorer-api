@@ -12,7 +12,6 @@
   "role": [
     {
       "name": "ROLE_ELEVATED",
-      "exclude": [],
       "function": [
         {
           "uri": "/api/v1/staking-lifecycle/report/stake-key",
@@ -32,7 +31,6 @@
     },
     {
       "name": "ROLE_PUBLIC",
-      "exclude": [],
       "function": [
         {
           "uri": "/api/v1/staking-lifecycle/report/stake-key",
