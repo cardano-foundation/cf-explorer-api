@@ -78,7 +78,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   List<Long> findDelegationByAddressAndTxIn(@Param("stakeKey") StakeAddress stakeKey,
       @Param("txIds") Collection<Long> txIds);
 
-  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo, block.slotNo as slotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, poolHash.view as poolId,"
       + " poolOfflineData.json as poolData, poolOfflineData.tickerName as tickerName"
       + " FROM Delegation delegation"
