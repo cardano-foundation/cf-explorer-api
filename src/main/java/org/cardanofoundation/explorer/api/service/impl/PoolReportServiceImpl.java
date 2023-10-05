@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
@@ -90,7 +91,7 @@ public class PoolReportServiceImpl implements PoolReportService {
     poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
     int reportLimit = roleService.getReportLimit(userPrincipal.getRoleDescription());
-    if (reportLimit != -1) { //"-1" it's mean unlimit report
+    if (reportLimit != CommonConstant.UNLIMITED_REPORT) { //"-1" it's mean unlimited report
       if (Boolean.TRUE.equals(
           reportHistoryService.isLimitReached(userPrincipal.getUsername(), reportLimit))) {
         throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
