@@ -82,7 +82,7 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
   @Override
   public Boolean isLimitReached(String username, int limit) {
     if(limit == CommonConstant.UNLIMITED_REPORT)
-      return true;
+      return false;
     Instant currentTime = Instant.now();
     Integer reportCount = reportHistoryRepository
         .countByUsernameAndCreatedAtBetween(username,
