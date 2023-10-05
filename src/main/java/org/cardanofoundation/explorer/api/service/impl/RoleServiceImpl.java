@@ -23,7 +23,7 @@ public class RoleServiceImpl implements RoleService {
       if(descriptions.containsKey(REPORT_LIMIT_PER_24HOURS)){
         int reportLimit = (int) descriptions.get(REPORT_LIMIT_PER_24HOURS);
         if(reportLimit == UNLIMITED_REPORT){ // if report limit is equal -1 then
-          return -1;
+          return UNLIMITED_REPORT;
         }
         maxReportLimit = Math.max(maxReportLimit,reportLimit);
       }
