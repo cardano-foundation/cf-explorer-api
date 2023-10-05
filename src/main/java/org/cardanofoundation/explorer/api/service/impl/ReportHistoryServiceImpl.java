@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -80,6 +81,8 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
 
   @Override
   public Boolean isLimitReached(String username, int limit) {
+    if(limit == CommonConstant.UNLIMITED_REPORT)
+      return true;
     Instant currentTime = Instant.now();
     Integer reportCount = reportHistoryRepository
         .countByUsernameAndCreatedAtBetween(username,
