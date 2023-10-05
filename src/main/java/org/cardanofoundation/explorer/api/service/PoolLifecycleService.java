@@ -28,7 +28,7 @@ public interface PoolLifecycleService {
    * @param
    * @return BaseFilterResponse<PoolUpdateResponse>
    */
-  BaseFilterResponse<PoolUpdateResponse> registration(String poolView, String txHash,
+  BaseFilterResponse<PoolUpdateResponse> registration(String poolViewOrHash, String txHash,
       Date fromDate, Date toDate,
       Pageable pageable);
 
@@ -64,7 +64,7 @@ public interface PoolLifecycleService {
    * @param
    * @return BaseFilterResponse<RewardResponse>
    */
-  BaseFilterResponse<RewardResponse> listReward(String poolView, Pageable pageable);
+  BaseFilterResponse<RewardResponse> listReward(String poolViewOrHash, Pageable pageable);
 
   /**
    * Get pool lifecycle pool info
@@ -99,7 +99,7 @@ public interface PoolLifecycleService {
    * @param
    * @return BaseFilterResponse<PoolUpdateDetailResponse>
    */
-  BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(String poolView, Pageable pageable);
+  BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(String poolViewOrHash, Pageable pageable);
 
   /**
    * Get status pool lifecycle

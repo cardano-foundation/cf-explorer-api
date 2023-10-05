@@ -10,5 +10,6 @@ public interface StakeInstantaneousRewardsProjection {
   Integer getBlockIndex();
   Integer getEpochNo();
   Integer getEpochSlotNo();
+  Integer getSlotNo();
   String getAmount();
 }

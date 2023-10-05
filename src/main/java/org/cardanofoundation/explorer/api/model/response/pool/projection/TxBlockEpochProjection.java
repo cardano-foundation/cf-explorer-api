@@ -13,7 +13,7 @@ public interface TxBlockEpochProjection {
 
   Integer getEpochNo();
 
-  Long getSlotNo();
+  Integer getSlotNo();
 
   BigInteger getPledge();
 
