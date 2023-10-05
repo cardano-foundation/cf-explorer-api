@@ -8,7 +8,7 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:postgresql://${infrastructure.host}:5432/explorer?currentSchema=mainnet
     username: ${POSTGRES_USER:cardano-master}
-    password: ${POSTGRES_PASSWORD:dbpass}
+    password: ${POSTGRES_PASSWORD:postgres_master_pw}
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
