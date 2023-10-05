@@ -88,7 +88,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   @Transactional
   public PoolReportHistory saveToDb(PoolReportCreateRequest poolReportCreateRequest,
                                     UserPrincipal userPrincipal) {
-    poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
+    poolHashRepository.findByViewOrHashRaw(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
     int reportLimit = roleService.getReportLimit(userPrincipal.getRoleDescription());
     if (reportLimit != CommonConstant.UNLIMITED_REPORT) { //"-1" it's mean unlimited report

@@ -227,7 +227,7 @@ public class DelegationServiceImpl implements DelegationService {
         throw new BusinessException(BusinessCode.OUT_OF_QUERY_LIMIT);
       }
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, poolNameLength, PoolOfflineData_.POOL_NAME));
-      poolIdPage = poolHashRepository.findAllByPoolViewAndPoolName(search, pageable);
+      poolIdPage = poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, pageable);
     }
     Integer epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
 
@@ -379,7 +379,7 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public PoolDetailHeaderResponse getDataForPoolDetail(String poolView) {
+  public PoolDetailHeaderResponse getDataForPoolDetail(String poolViewOrHash) {
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
 
     if (Boolean.FALSE.equals(fetchRewardDataService.checkAdaPots(currentEpoch))) {
@@ -387,7 +387,8 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
     PoolDetailUpdateProjection projection = poolHashRepository.getDataForPoolDetail(
-        poolView, currentEpoch);
+        poolViewOrHash, currentEpoch);
+    String poolView = projection.getPoolView();
     Long poolId = projection.getPoolId();
 
     PoolDetailHeaderResponse poolDetailResponse = Stream.of(projection)
@@ -436,12 +437,13 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
-      String poolView) {
+      String poolViewOrHash) {
     BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
     List<PoolDetailEpochResponse> epochOfPools;
-    PoolHash poolHash = poolHashRepository.findByView(poolView)
+    PoolHash poolHash = poolHashRepository.findByViewOrHashRaw(poolViewOrHash)
         .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
+    String poolView = poolHash.getView();
     long totalElm;
     int totalPage;
     Set<Integer> epochNos;
@@ -522,10 +524,11 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String poolView) {
-    PoolHash poolHash = poolHashRepository.findByView(poolView)
+  public PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String findByViewOrHashRaw) {
+    PoolHash poolHash = poolHashRepository.findByViewOrHashRaw(findByViewOrHashRaw)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     Long poolId = poolHash.getId();
+    String poolView = poolHash.getView();
     EpochChartResponse epochChart = new EpochChartResponse();
     Boolean useKoios = fetchRewardDataService.useKoios();
     List<EpochChartProjection> epochDataCharts = new ArrayList<>();
@@ -585,9 +588,9 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(
-      Pageable pageable, String poolView) {
+      Pageable pageable, String poolViewOrHash) {
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
-    Page<Long> addressIdPage = delegationRepository.liveDelegatorsList(poolView, pageable);
+    Page<Long> addressIdPage = delegationRepository.liveDelegatorsList(poolViewOrHash, pageable);
     if (!addressIdPage.isEmpty()) {
       Set<Long> addressIds = addressIdPage.stream().collect(Collectors.toSet());
       Integer currentEpoch = epochRepository.findCurrentEpochNo()

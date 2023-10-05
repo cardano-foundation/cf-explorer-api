@@ -77,7 +77,7 @@ public class PoolReportServiceTest {
         .poolId("any")
         .build();
     String username = "username";
-    when(poolHashRepository.findByView(anyString())).thenReturn(Optional.empty());
+    when(poolHashRepository.findByViewOrHashRaw(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
         () -> poolReportService.create(request,
             UserPrincipal.builder().username(username).build()));
@@ -90,7 +90,7 @@ public class PoolReportServiceTest {
         .build();
     String username = "username";
     Map<String, Map<String, Object>> roleDescriptions = new HashMap<>();
-    when(poolHashRepository.findByView(anyString())).thenReturn(Optional.of(new PoolHash()));
+    when(poolHashRepository.findByViewOrHashRaw(anyString())).thenReturn(Optional.of(new PoolHash()));
     when(reportHistoryService.isLimitReached(username, 10)).thenReturn(true);
     when(roleService.getReportLimit(roleDescriptions)).thenReturn(10);
     Assertions.assertThrows(BusinessException.class,
@@ -135,7 +135,7 @@ public class PoolReportServiceTest {
             .build())
         .build();
 
-    when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
+    when(poolHashRepository.findByViewOrHashRaw(any(String.class))).thenReturn(Optional.of(new PoolHash()));
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
     when(reportHistoryService.isLimitReached(username, 1)).thenReturn(false);
     when(roleService.getReportLimit(roleDescriptions)).thenReturn(1);
