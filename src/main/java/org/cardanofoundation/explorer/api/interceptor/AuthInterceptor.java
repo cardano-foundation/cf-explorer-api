@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +24,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.RsaConfig;
+import org.cardanofoundation.explorer.api.interceptor.auth.Request;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleConfigurationMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFunction;
@@ -47,6 +50,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   private List<AntPathRequestMatcher> matchers;
 
+  private Map<String, Request> authorEndpoint;
+
   @PostConstruct
   public void initAuth() {
     matchers = roleConf.getAuth().stream()
@@ -57,6 +62,8 @@ public class AuthInterceptor implements HandlerInterceptor {
           }
           return new AntPathRequestMatcher(request.getUri(), request.getMethod());
         }).toList();
+    authorEndpoint = roleConf.getAuth().stream()
+        .collect(Collectors.toMap(Request::getUri, Function.identity()));
   }
 
 
@@ -90,6 +97,9 @@ public class AuthInterceptor implements HandlerInterceptor {
     UserPrincipal userPrincipal = new UserPrincipal();
     String token = getToken(request, userPrincipal);
     Set<String> roles = getRoles(token);
+
+    checkRequestAllow(request,roles);
+
     Map<String, Map<String, Object>> roleDescription = new HashMap<>();
     for (RoleConfigurationMapper roleMapper : roleConf.getRoles()) {
       if (roles.contains(roleMapper.getName())) {
@@ -109,6 +119,25 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   }
 
+
+  private void checkRequestAllow(HttpServletRequest request, Set<String> roles){
+    boolean isAllowed = false;
+    if(authorEndpoint.containsKey(request.getRequestURI())){
+      Request requestAuthor = authorEndpoint.get(request.getRequestURI());
+      if(requestAuthor.getRoles().length == 0){// This feature doesn't require authorization
+        isAllowed = true;
+      }
+      for(String role : requestAuthor.getRoles()){
+        if(roles.contains(role))
+          isAllowed = true;
+      }
+    }else{// don't need to auth
+      isAllowed = true;
+    }
+    if(!isAllowed){
+      throw new InvalidAccessTokenException();
+    }
+  }
 
   private String getToken(HttpServletRequest request, UserPrincipal userPrincipal) {
     String token = JwtUtils.parseJwt(request);
