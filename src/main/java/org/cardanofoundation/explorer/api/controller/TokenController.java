@@ -18,7 +18,6 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationDef
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
@@ -42,8 +41,7 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> filter(
-      @ParameterObject @PaginationValid @PaginationDefault(sort = {MultiAsset_.SUPPLY,
-          MultiAsset_.TX_COUNT}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
+      @ParameterObject @PaginationValid @Valid Pagination pagination,
       @Parameter(description = "Token name") @RequestParam(required = false) String query)
       throws ExecutionException, InterruptedException {
     return ResponseEntity.ok(tokenService.filterToken(query, pagination.toPageable()));
@@ -98,8 +96,7 @@ public class TokenController {
       @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
       @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
       @Parameter(description = "The CIP14 fingerprint for the MultiAsset.") String tokenId,
-      @PathVariable @Parameter(description = "Type analytics") AnalyticType type)
-      throws ExecutionException, InterruptedException {
+      @PathVariable @Parameter(description = "Type analytics") AnalyticType type) {
     return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
   }
 }

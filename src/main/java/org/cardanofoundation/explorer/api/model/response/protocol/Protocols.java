@@ -1,9 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.protocol;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.util.Pair;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 
 
@@ -57,6 +56,8 @@ public class Protocols {
   ProtocolHistory maxValSize;
   ProtocolHistory collateralPercent;
   ProtocolHistory maxCollateralInputs;
+
+  @JsonProperty("coinsPerUTxOByte")
   ProtocolHistory coinsPerUtxoSize;
   LocalDateTime timestamp;
 
