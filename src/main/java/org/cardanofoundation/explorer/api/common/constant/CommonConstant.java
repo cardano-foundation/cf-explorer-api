@@ -23,7 +23,7 @@ public class CommonConstant {
 
   public static final String POOL_STATUS_ACTIVE = "ACTIVE";
 
-  public static final String POOL_STATUS_RETIRING = "RETIRING";
+  public static final String POOL_STATUS_RETIRED = "RETIRED";
 
   public static final String ADDRESS_PREFIX = "addr";
 
@@ -68,11 +68,16 @@ public class CommonConstant {
   public static final String PREFIXED_TOKEN_FINGERPRINT = "asset";
 
   public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
+
   public static final String PREPROD_NETWORK = "preprod";
 
   public static final String PREVIEW_NETWORK = "preview";
 
+  public static final String REPORT_LIMIT_PER_24HOURS = "reportLimitPer24Hours";
 
+  public static final String POOL_IDS_INACTIVATE = "POOL_IDS_INACTIVATE_";
+
+  public static final int UNLIMITED_REPORT = -1;
 
   public static final String UNDERSCORE = "_";
 

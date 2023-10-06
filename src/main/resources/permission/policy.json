@@ -1,0 +1,52 @@
+{
+  "auth": [
+    {
+      "uri": "/api/v1/pool-report/**",
+      "method": "*"
+    },
+    {
+      "uri": "/api/v1/staking-lifecycle/report/**",
+      "method": "*"
+    }
+  ],
+  "role": [
+    {
+      "name": "ROLE_ELEVATED",
+      "function": [
+        {
+          "uri": "/api/v1/staking-lifecycle/report/stake-key",
+          "method": "POST",
+          "description": {
+            "reportLimitPer24Hours": -1
+          }
+        },
+        {
+          "uri": "/api/v1/pool-report/create",
+          "method": "POST",
+          "description": {
+            "reportLimitPer24Hours": -1
+          }
+        }
+      ]
+    },
+    {
+      "name": "ROLE_PUBLIC",
+      "function": [
+        {
+          "uri": "/api/v1/staking-lifecycle/report/stake-key",
+          "method": "POST",
+          "description": {
+            "reportLimitPer24Hours": 2
+          }
+        },
+        {
+          "uri": "/api/v1/pool-report/create",
+          "method": "POST",
+          "description": {
+            "reportLimitPer24Hours": 2
+          }
+        }
+      ]
+    }
+  ]
+}

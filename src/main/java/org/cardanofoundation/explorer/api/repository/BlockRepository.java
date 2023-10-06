@@ -99,6 +99,7 @@ public interface BlockRepository
 
   @Query("SELECT b FROM Block b WHERE b.blockNo IS NOT NULL ORDER BY b.blockNo DESC LIMIT 1")
   Optional<Block> findLatestBlock();
+
   @Query(
       value =
           "SELECT ph.id AS poolId, ph.view AS poolView, count(bk.id) AS countValue "

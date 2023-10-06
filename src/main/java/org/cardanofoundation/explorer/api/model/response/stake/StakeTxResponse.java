@@ -24,7 +24,7 @@ public class StakeTxResponse implements Serializable {
 
   private Integer epoch;
 
-  private Long slotNo;
+  private Integer slotNo;
 
   private Integer epochSlotNo;
 

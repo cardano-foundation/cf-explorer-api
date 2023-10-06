@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -25,7 +26,7 @@ public interface PoolReportService {
    * @param username                username of current request user
    * @return true if success
    */
-  Boolean create(PoolReportCreateRequest poolReportCreateRequest, String username);
+  Boolean create(PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal);
 
 
   /**

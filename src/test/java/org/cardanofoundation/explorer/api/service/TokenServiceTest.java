@@ -4,18 +4,10 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import org.cardanofoundation.explorer.api.projection.TokenProjection;
-import org.cardanofoundation.explorer.api.repository.*;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
-import org.mockito.Mockito;
-import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
-import org.springframework.core.task.TaskExecutor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,7 +27,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
@@ -43,8 +35,8 @@ import org.cardanofoundation.explorer.api.repository.AggregateAddressTokenReposi
 import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
@@ -54,9 +46,12 @@ import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
+import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -87,8 +82,6 @@ class TokenServiceTest {
   @Mock
   private AddressRepository addressRepository;
   @Mock
-  private TxRepository txRepository;
-  @Mock
   private AddressTokenBalanceRepository addressTokenBalanceRepository;
   @Mock
   private TokenInfoRepository tokenInfoRepository;
@@ -101,10 +94,6 @@ class TokenServiceTest {
   @Mock
   private AggregateAddressTokenRepository aggregateAddressTokenRepository;
 
-  @Mock
-  private TokenPageCacheService tokenPageCacheService;
-  @Mock
-  private TaskExecutor taskExecutor;
   @Mock
   private StakeAddressRepository stakeAddressRepository;
   @Mock

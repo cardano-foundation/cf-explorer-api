@@ -70,47 +70,46 @@ public class DelegationController {
         delegationService.getDataForPoolTable(pagination.toPageable(), search));
   }
 
-  @GetMapping("/pool-detail-header/{poolView}")
+  @GetMapping("/pool-detail-header/{poolViewOrHash}")
   @LogMessage
   @Operation(summary = "Get data for pool detail header", tags = {"delegation"})
   public ResponseEntity<PoolDetailHeaderResponse> getDataForPoolDetail(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The Bech32 encoding of the pool hash.")
-      String poolView) {
-    return ResponseEntity.ok(delegationService.getDataForPoolDetail(poolView));
+      @PathVariable @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The Bech32 encoding of the pool hash.")
+      String poolViewOrHash) {
+    return ResponseEntity.ok(delegationService.getDataForPoolDetail(poolViewOrHash));
   }
 
   @GetMapping("/pool-detail-analytics")
   @LogMessage
   @Operation(summary = "Get analytics for pool detail", tags = {"delegation"})
   public ResponseEntity<PoolDetailAnalyticsResponse> getAnalyticsForPoolDetail(
-      @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The Bech32 encoding of the pool hash.")
-      String poolView) {
-    return ResponseEntity.ok(delegationService.getAnalyticsForPoolDetail(poolView));
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The Bech32 encoding of the pool hash.")
+      String poolViewOrHash) {
+    return ResponseEntity.ok(delegationService.getAnalyticsForPoolDetail(poolViewOrHash));
   }
 
   @GetMapping("/pool-detail-epochs")
   @LogMessage
   @Operation(summary = "Get epochs for pool detail", tags = {"delegation"})
   public ResponseEntity<BaseFilterResponse<PoolDetailEpochResponse>> getEpochListForPoolDetail(
-      @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The Bech32 encoding of the pool hash.")
-      String poolView, @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The Bech32 encoding of the pool hash.")
+      String poolViewOrHash, @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(
-        delegationService.getEpochListForPoolDetail(pagination.toPageable(), poolView));
+        delegationService.getEpochListForPoolDetail(pagination.toPageable(), poolViewOrHash));
   }
 
   @GetMapping("/pool-detail-delegators")
   @LogMessage
   @Operation(summary = "Get delegators for pool detail", tags = {"delegation"})
   public ResponseEntity<BaseFilterResponse<PoolDetailDelegatorResponse>> getDelegatorForPoolDetail(
-      @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The Bech32 encoding of the pool hash.")
-      String poolView,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The Bech32 encoding of the pool hash.")
+      String poolViewOrHash, @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(
-        delegationService.getDelegatorsForPoolDetail(pagination.toPageable(), poolView));
+        delegationService.getDelegatorsForPoolDetail(pagination.toPageable(), poolViewOrHash));
   }
 
   @GetMapping("/top")
