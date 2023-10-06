@@ -1,11 +1,13 @@
 package org.cardanofoundation.explorer.api.model.response.pool.projection;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 
 public interface PoolDetailUpdateProjection {
 
   Long getPoolId();
+
+  String getPoolView();
 
   String getHashRaw();
 
@@ -24,4 +26,16 @@ public interface PoolDetailUpdateProjection {
   BigInteger getReserves();
 
   String getRewardAddress();
+  
+  String getJson();
+
+  String getLogoUrl();
+
+  String getIconUrl();
+
+  Integer getEpochBlock();
+  Integer getLifetimeBlock();
+  Integer getDelegators();
+  Timestamp getLastUpdate();
+
 }

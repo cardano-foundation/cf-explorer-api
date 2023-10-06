@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
+import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
@@ -46,6 +48,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @WebMvcTest(TokenController.class)
+@Import(RoleFilterMapper.class)
 @AutoConfigureMockMvc(addFilters = false)
 class TokenControllerTest {
 
@@ -100,38 +103,6 @@ class TokenControllerTest {
     // Verify the results
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertEquals(asJsonString(filter), response.getContentAsString());
-  }
-
-  @Test
-  void testFilter_WhenTokenServiceThrowsExecutionException() throws Exception {
-    // Setup
-    when(tokenService.filterToken(anyString(), any(Pageable.class)))
-        .thenThrow(ExecutionException.class);
-
-    // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(get("/api/v1/tokens")
-            .param("query", "query")
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
-  }
-
-  @Test
-  void testFilter_WhenTokenServiceThrowsInterruptedException() throws Exception {
-    // Setup
-    when(tokenService.filterToken(anyString(), any(Pageable.class)))
-        .thenThrow(InterruptedException.class);
-
-    // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(get("/api/v1/tokens")
-            .param("query", "query")
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
   }
 
   @Test

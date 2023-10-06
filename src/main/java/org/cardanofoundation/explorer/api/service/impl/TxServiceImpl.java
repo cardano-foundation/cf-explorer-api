@@ -471,6 +471,7 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public TxResponse getTxDetailByHash(String hash) {
     Tx tx = txRepository.findByHash(hash).orElseThrow(
         () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)

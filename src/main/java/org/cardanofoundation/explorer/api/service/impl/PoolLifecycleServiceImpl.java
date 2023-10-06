@@ -88,10 +88,10 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public BaseFilterResponse<PoolUpdateResponse> registration(String poolView, String txHash,
+  public BaseFilterResponse<PoolUpdateResponse> registration(String poolViewOrHash, String txHash,
       Date fromDate, Date toDate,
       Pageable pageable) {
-    return getDataForPoolUpdate(poolView, txHash, fromDate, toDate, pageable, 0);
+    return getDataForPoolUpdate(poolViewOrHash, txHash, fromDate, toDate, pageable, 0);
   }
 
   @Override
@@ -136,17 +136,17 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public BaseFilterResponse<RewardResponse> listReward(String poolView, Pageable pageable) {
+  public BaseFilterResponse<RewardResponse> listReward(String poolViewOrHash, Pageable pageable) {
     BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
     if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
-      List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
+      List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolViewOrHash);
       if (Boolean.FALSE.equals(fetchRewardDataService.checkRewardForPool(rewardAccounts))
           && Boolean.FALSE.equals(fetchRewardDataService.fetchRewardForPool(rewardAccounts))) {
         return res;
       }
     }
     List<RewardResponse> rewardRes = new ArrayList<>();
-    Page<LifeCycleRewardProjection> projections = rewardRepository.getRewardInfoByPool(poolView,
+    Page<LifeCycleRewardProjection> projections = rewardRepository.getRewardInfoByPool(poolViewOrHash,
         pageable);
     if (Objects.nonNull(projections)) {
       projections.stream().forEach(projection -> {
@@ -163,7 +163,9 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   public PoolInfoResponse poolInfo(String poolView) {
     PoolInfoResponse res = new PoolInfoResponse();
     PoolInfoProjection projection = poolHashRepository.getPoolInfo(poolView);
+    Long poolId = 0L;
     if (Objects.nonNull(projection)) {
+      poolId = projection.getId();
       res.setPoolId(projection.getPoolId());
       res.setPoolName(projection.getPoolName());
       res.setPoolView(projection.getPoolView());
@@ -184,13 +186,13 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
       res.setRewardAvailable(rewardRepository.getTotalRewardByPool(poolView));
     }
-    List<Integer> retireEpochs = poolRetireRepository.findByPoolView(poolView);
-    if (Objects.isNull(retireEpochs) || retireEpochs.isEmpty()) {
-      res.setStatus(CommonConstant.POOL_STATUS_ACTIVE);
+    String status = getPoolStatusFromCacheByPoolId(poolId);
+    res.setStatus(status);
+    if (CommonConstant.POOL_STATUS_ACTIVE.equals(status)) {
       res.setEpochNo(epochRepository.findCurrentEpochNo().orElse(0));
     } else {
-      res.setStatus(CommonConstant.POOL_STATUS_RETIRING);
-      res.setEpochNo(retireEpochs.get(0));
+      List<Integer> retireEpochs = poolRetireRepository.findByPoolView(poolView);
+      res.setEpochNo(retireEpochs.isEmpty() ? CommonConstant.ZERO : retireEpochs.get(0));
     }
     return res;
   }
@@ -228,7 +230,8 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       });
       boolean useKoios = fetchRewardDataService.useKoios();
       if (useKoios) {
-        List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolId(poolInfo.getId());
+        List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolId(
+            poolInfo.getId());
         boolean isReward = fetchRewardDataService.checkRewardForPool(rewardAccounts);
         if (!isReward) {
           fetchRewardDataService.fetchRewardForPool(rewardAccounts);
@@ -266,12 +269,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public BaseFilterResponse<TabularRegisResponse> registrationList(String poolView,
+  public BaseFilterResponse<TabularRegisResponse> registrationList(String poolViewOrHash,
       Pageable pageable) {
     BaseFilterResponse<TabularRegisResponse> res = new BaseFilterResponse<>();
     List<TabularRegisResponse> tabularRegisList = new ArrayList<>();
     Page<PoolRegistrationProjection> projection = poolHashRepository.getPoolRegistrationByPool(
-        poolView, pageable);
+        poolViewOrHash, pageable);
     if (Objects.nonNull(projection)) {
       Set<Long> poolUpdateIds = new HashSet<>();
       projection.stream().forEach(tabularRegis -> {
@@ -294,12 +297,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(String poolView,
+  public BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(String poolViewOrHash,
       Pageable pageable) {
     BaseFilterResponse<PoolUpdateDetailResponse> res = new BaseFilterResponse<>();
     List<PoolUpdateDetailResponse> poolUpdateList = new ArrayList<>();
     Page<PoolUpdateDetailProjection> projection = poolUpdateRepository.findPoolUpdateByPool(
-        poolView, pageable);
+        poolViewOrHash, pageable);
     if (Objects.nonNull(projection)) {
       projection.stream().forEach(poolUpdate -> {
         PoolUpdateDetailResponse poolUpdateRes = new PoolUpdateDetailResponse(poolUpdate);
@@ -320,9 +323,9 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public SPOStatusResponse poolLifecycleStatus(String poolView) {
+  public SPOStatusResponse poolLifecycleStatus(String poolViewOrHash) {
     SPOStatusResponse response = new SPOStatusResponse();
-    Integer countPoolUpdate = poolUpdateRepository.countPoolUpdateByPool(poolView);
+    Integer countPoolUpdate = poolUpdateRepository.countPoolUpdateByPool(poolViewOrHash);
     if (Objects.isNull(countPoolUpdate) || countPoolUpdate == 0) {
       response.setIsRegistration(false);
       response.setIsUpdate(false);
@@ -333,8 +336,9 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       response.setIsRegistration(true);
       response.setIsUpdate(true);
     }
-    PoolHash pool = poolHashRepository.findByView(poolView).orElseThrow(() -> new BusinessException(
+    PoolHash pool = poolHashRepository.findByViewOrHashRaw(poolViewOrHash).orElseThrow(() -> new BusinessException(
         CommonErrorCode.UNKNOWN_ERROR));
+    String poolView = pool.getView();
     if (fetchRewardDataService.useKoios()) {
       List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
       if (!fetchRewardDataService.checkRewardForPool(rewardAccounts)) {
@@ -347,11 +351,11 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   @Override
-  public BaseFilterResponse<RewardResponse> listRewardFilter(String poolView, Integer beginEpoch,
+  public BaseFilterResponse<RewardResponse> listRewardFilter(String poolViewOrHash, Integer beginEpoch,
                                                        Integer endEpoch, Pageable pageable) {
     BaseFilterResponse<RewardResponse> res = new BaseFilterResponse<>();
     if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
-      List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);
+      List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolViewOrHash);
       if (Boolean.FALSE.equals(fetchRewardDataService.checkRewardForPool(rewardAccounts))
           && Boolean.FALSE.equals(fetchRewardDataService.fetchRewardForPool(rewardAccounts))) {
         return res;
@@ -359,7 +363,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     List<RewardResponse> rewardRes = new ArrayList<>();
     Page<LifeCycleRewardProjection> projections = rewardRepository
-        .getRewardInfoByPoolFiler(poolView, beginEpoch, endEpoch, pageable);
+        .getRewardInfoByPoolFiler(poolViewOrHash, beginEpoch, endEpoch, pageable);
     if (Objects.nonNull(projections)) {
       projections.stream().forEach(projection -> {
         RewardResponse reward = new RewardResponse(projection);
@@ -371,7 +375,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     return res;
   }
 
-  private BaseFilterResponse<PoolUpdateResponse> getDataForPoolUpdate(String poolView,
+  private BaseFilterResponse<PoolUpdateResponse> getDataForPoolUpdate(String poolViewOrHash,
       String txHash,
       Date fromDate, Date toDate,
       Pageable pageable, Integer type) {
@@ -387,12 +391,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     if (Objects.nonNull(txHash) && txHash.isBlank()) {
       txHash = null;
     }
-    Page<PoolUpdateProjection> projection = null;
+    Page<PoolUpdateProjection> projection;
     if (type == 0) {
-      projection = poolUpdateRepository.findPoolRegistrationByPool(poolView,
+      projection = poolUpdateRepository.findPoolRegistrationByPool(poolViewOrHash,
           txHash, fromTimestamp, toTimestamp, pageable);
     } else {
-      projection = poolUpdateRepository.findPoolUpdateByPool(poolView,
+      projection = poolUpdateRepository.findPoolUpdateByPool(poolViewOrHash,
           txHash, fromTimestamp, toTimestamp, pageable);
     }
     List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();
@@ -415,7 +419,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     List<Object> poolIds = List.of(poolView);
     String key = CommonConstant.ACTIVATE_STAKE + network + "_" + epochNo;
-    List<Object> objStakeList = null;
+    List<Object> objStakeList;
     try {
       objStakeList = redisTemplate.opsForHash().multiGet(key, poolIds);
     } catch (Exception e) {
@@ -428,5 +432,20 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
 
     }
     return stakeFromCache;
+  }
+
+  private String getPoolStatusFromCacheByPoolId(Long poolId) {
+    String key = CommonConstant.POOL_IDS_INACTIVATE + network;
+    Object obj = null;
+    try {
+      List<Object> objList = redisTemplate.opsForHash().multiGet(key, List.of(poolId));
+      obj = objList.get(0);
+    } catch (Exception e) {
+      log.error("Error: " + e.getMessage());
+    }
+    if (Objects.isNull(obj)) {
+      return CommonConstant.POOL_STATUS_ACTIVE;
+    }
+    return CommonConstant.POOL_STATUS_RETIRED;
   }
 }
