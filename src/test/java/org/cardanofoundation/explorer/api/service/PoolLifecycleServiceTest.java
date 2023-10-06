@@ -700,7 +700,7 @@ class PoolLifecycleServiceTest {
         BigInteger.valueOf(10000));
     when(poolRetireRepository.findByPoolView(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(List.of(69));
-    when(fetchRewardDataService.isKoiOs()).thenReturn(false);
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
     Assertions.assertEquals("Test",
         poolLifecycleService.poolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")
             .getPoolName());
@@ -909,11 +909,11 @@ class PoolLifecycleServiceTest {
   }
 
   @Test
-  void whenPoolViewIsExist_usingKoiOs_fetchFail_returnEmptyResponse() {
+  void whenPoolViewIsExist_usingKoios_fetchFail_returnEmptyResponse() {
     Pageable pageable = PageRequest.of(0, 10);
     List<String> rewardAccounts = List.of(
         "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p");
-    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(poolUpdateRepository.findRewardAccountByPoolView(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(rewardAccounts);
     when(fetchRewardDataService.checkRewardForPool(rewardAccounts)).thenReturn(false);
@@ -927,7 +927,7 @@ class PoolLifecycleServiceTest {
   }
 
   @Test
-  void whenPoolViewIsExist_usingKoiOs_returnRewardResponse() {
+  void whenPoolViewIsExist_usingKoios_returnRewardResponse() {
     Timestamp time = Timestamp.valueOf("2023-01-01 00:00:00");
     Pageable pageable = PageRequest.of(0, 10);
     List<String> rewardAccounts = List.of(
@@ -938,7 +938,7 @@ class PoolLifecycleServiceTest {
     when(projection.getAmount()).thenReturn(BigInteger.TWO);
     when(projection.getEpochNo()).thenReturn(69);
     when(projection.getTime()).thenReturn(time);
-    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(poolUpdateRepository.findRewardAccountByPoolView(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(rewardAccounts);
     when(fetchRewardDataService.checkRewardForPool(rewardAccounts)).thenReturn(true);
@@ -954,7 +954,7 @@ class PoolLifecycleServiceTest {
   }
 
   @Test
-  void whenPoolViewIsExist_usingKoiOs_returnInfoResponse() {
+  void whenPoolViewIsExist_usingKoios_returnInfoResponse() {
     PoolInfoProjection projection = Mockito.mock(PoolInfoProjection.class);
     when(projection.getPoolView()).thenReturn(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
@@ -974,7 +974,7 @@ class PoolLifecycleServiceTest {
         BigInteger.valueOf(10000));
     when(poolRetireRepository.findByPoolView(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(List.of(69));
-    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(100));
     when(poolInfoRepository.getActiveStakeByPoolAndEpoch(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", 100)).thenReturn(
@@ -990,7 +990,7 @@ class PoolLifecycleServiceTest {
   }
 
   @Test
-  void whenPoolViewIsExist_usingKoiOs_returnPoolRetireResponse() {
+  void whenPoolViewIsExist_usingKoios_returnPoolRetireResponse() {
     Pageable pageable = PageRequest.of(0, 10);
     List<String> rewardAccounts = List.of(
         "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p");
@@ -1018,7 +1018,7 @@ class PoolLifecycleServiceTest {
     when(rewardRepository.getRewardRefundByEpoch(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", Set.of(69))).thenReturn(
         List.of(rewardProjection));
-    when(fetchRewardDataService.isKoiOs()).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(poolUpdateRepository.findRewardAccountByPoolId(1L)).thenReturn(rewardAccounts);
     when(fetchRewardDataService.checkRewardForPool(rewardAccounts)).thenReturn(false);
     when(fetchRewardDataService.fetchRewardForPool(rewardAccounts)).thenReturn(true);

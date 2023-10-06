@@ -9,10 +9,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.cardanofoundation.explorer.api.model.response.protocol.*;
 import org.cardanofoundation.explorer.api.projection.LatestParamHistory;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.ledgersync.common.model.ByronGenesis;
+import org.cardanofoundation.ledgersync.common.model.ShelleyGenesis;
 import org.mockito.Mockito;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -67,18 +68,24 @@ class ProtocolServiceTest {
   @Mock
   EpochRepository epochRepository;
   @Mock
-  RedisTemplate<String, HistoriesProtocol> redisTemplate;
+  RedisTemplate<String, Object> redisTemplate;
   @Mock
   ValueOperations valueOperations;
 
   @Spy
   ProtocolMapper protocolMapper = Mappers.getMapper(ProtocolMapper.class);
 
+
+  @Mock
+  GenesisService genesisService;
   @InjectMocks
   private ProtocolParamServiceImpl protocolParamService;
 
   @BeforeEach
   void setup() {
+    when(genesisService.fillContentByron(any())).thenReturn(new ByronGenesis());
+    when(genesisService.fillContentShelley(any())).thenReturn(new ShelleyGenesis());
+    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     protocolParamService.setup();
   }
 
@@ -7456,24 +7463,6 @@ class ProtocolServiceTest {
     Assertions.assertEquals(response.getMaxBlockSize().getEpochNo(), 1);
     Assertions.assertEquals(response.getMaxTxSize().getEpochNo(), 1);
     Assertions.assertEquals(response.getMaxBhSize().getEpochNo(), 1);
-  }
-
-  @Test
-  void testGetFixedProtocols_thenReturn() throws JsonProcessingException {
-    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
-    FixedProtocol fixedProtocol = FixedProtocol.builder().build();
-
-    when(protocolMapper.mapFixedProtocol("mainnet")).thenReturn(fixedProtocol);
-    Assertions.assertEquals(protocolParamService.getFixedProtocols(), fixedProtocol);
-  }
-
-  @Test
-  void testGetFixedProtocols_throwException() throws JsonProcessingException {
-    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
-    FixedProtocol fixedProtocol = FixedProtocol.builder().build();
-
-    when(protocolMapper.mapFixedProtocol("mainnet")).thenThrow(JsonProcessingException.class);
-    Assertions.assertNull(protocolParamService.getFixedProtocols());
   }
 
   @Test

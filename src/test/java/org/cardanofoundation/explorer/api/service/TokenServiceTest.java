@@ -4,11 +4,16 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
+import org.mockito.Mockito;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -121,33 +126,18 @@ class TokenServiceTest {
 
   @Test
   void testFilterToken_WhenQueryNotEmptyAndCacheAvailable() throws Exception {
-    // Setup
-    when(tokenPageCacheService.getTokePageCache(any(Pageable.class)))
-        .thenReturn(Optional.of(
-            new BaseFilterResponse<>(new PageImpl<>(List.of(TokenFilterResponse.builder()
-                .id(0L)
-                .name("484f534b59")
-                .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-                .volumeIn24h("38874867596070")
-                .numberOfHolders(93233L)
-                .metadata(TokenMetadataResponse.builder()
-                    .logo(
-                        "https://storage.ex-c.sotatek.works/cardano-explorer-api-storage-token/mainnet/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59")
-                    .ticker("HOSKY")
-                    .url("https://hosky.io")
-                    .decimals(0)
-                    .build())
-                .build())))));
 
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-        .name("484f534b59")
-        .nameView("nameView")
-        .fingerprint("fingerprint")
-        .build();
+    TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
+    when(tokenProjection.getId()).thenReturn(0L);
+    when(tokenProjection.getPolicy()).thenReturn("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235");
+    when(tokenProjection.getName()).thenReturn("484f534b59");
+    when(tokenProjection.getNameView()).thenReturn("nameView");
+    when(tokenProjection.getFingerprint()).thenReturn("fingerprint");
+    when(tokenProjection.getTxCount()).thenReturn(0L);
+    when(tokenProjection.getSupply()).thenReturn(BigInteger.valueOf(0L));
+    when(tokenProjection.getTotalVolume()).thenReturn(BigInteger.valueOf(0L));
 
-    final Page<MultiAsset> multiAssets = new PageImpl<>(List.of(multiAsset));
+    final Page<TokenProjection> multiAssets = new PageImpl<>(List.of(tokenProjection));
 
     when(multiAssetRepository.findAll(anyString(), any(Pageable.class)))
         .thenReturn(multiAssets);
@@ -220,18 +210,18 @@ class TokenServiceTest {
   @Test
   void testFilterToken_WhenQueryNotEmptyAndCacheNotAvailable() throws Exception {
     // Setup
-    when(tokenPageCacheService.getTokePageCache(any(Pageable.class)))
-        .thenReturn(Optional.empty());
 
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-        .name("484f534b59")
-        .nameView("nameView")
-        .fingerprint("fingerprint")
-        .build();
+    TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
+    when(tokenProjection.getId()).thenReturn(0L);
+    when(tokenProjection.getPolicy()).thenReturn("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235");
+    when(tokenProjection.getName()).thenReturn("484f534b59");
+    when(tokenProjection.getNameView()).thenReturn("nameView");
+    when(tokenProjection.getFingerprint()).thenReturn("fingerprint");
+    when(tokenProjection.getTxCount()).thenReturn(0L);
+    when(tokenProjection.getSupply()).thenReturn(BigInteger.valueOf(0L));
+    when(tokenProjection.getTotalVolume()).thenReturn(BigInteger.valueOf(0L));
 
-    final Page<MultiAsset> multiAssets = new PageImpl<>(List.of(multiAsset));
+    final Page<TokenProjection> multiAssets = new PageImpl<>(List.of(tokenProjection));
 
     when(multiAssetRepository.findAll(anyString(), any(Pageable.class)))
         .thenReturn(multiAssets);
@@ -628,9 +618,6 @@ class TokenServiceTest {
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
-    when(aggregateAddressTokenRepository.getMaxDay())
-        .thenReturn(Optional.of(LocalDate.of(2020, 1, 1)));
-
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
     when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
         any(),
@@ -648,8 +635,7 @@ class TokenServiceTest {
   }
 
   @Test
-  void testGetTokenVolumeAnalytic_WhenTokenFound_WithOneDayRangeAndExistsZeroBalance()
-      throws Exception {
+  void testGetTokenVolumeAnalytic_WhenTokenFound_WithOneDayRangeAndExistsZeroBalance() {
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset = MultiAsset.builder()
@@ -662,9 +648,6 @@ class TokenServiceTest {
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-
-    when(aggregateAddressTokenRepository.getMaxDay())
-        .thenReturn(Optional.of(LocalDate.of(2020, 1, 1)));
 
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
     when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
@@ -672,20 +655,18 @@ class TokenServiceTest {
         any()))
         .thenReturn(Optional.of(new BigInteger("0")));
 
-    when(addressTokenRepository.countRecord(any(MultiAsset.class), any(), any())).thenReturn(0L);
-
     // Run the test
     final List<TokenVolumeAnalyticsResponse> result = tokenService.getTokenVolumeAnalytic(
         "tokenId", AnalyticType.ONE_DAY);
 
     // Verify the results
     for (TokenVolumeAnalyticsResponse tokenVolumeAnalyticsResponse : result) {
-      assertEquals(null, tokenVolumeAnalyticsResponse.getValue());
+      assertEquals(BigInteger.ZERO, tokenVolumeAnalyticsResponse.getValue());
     }
   }
 
   @Test
-  void testGetTokenVolumeAnalytic_WhenTokenFound_WithNotOneDayRange() throws Exception {
+  void testGetTokenVolumeAnalytic_WhenTokenFound_WithNotOneDayRange() {
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset = MultiAsset.builder()
@@ -699,13 +680,17 @@ class TokenServiceTest {
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
-    when(aggregateAddressTokenRepository.getMaxDay())
-        .thenReturn(Optional.of(LocalDate.now().minusDays(3)));
-
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
-    when(aggregateAddressTokenRepository.sumBalanceInTimeRange(any(), any(),
-        any())).thenReturn(Optional.of(new BigInteger("100")));
 
+    List<AggregateAddressToken> aggregateAddressTokens = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      aggregateAddressTokens.add(
+          new AggregateAddressToken(0L, new BigInteger("100"), LocalDate.now().minusDays(i))
+      );
+    }
+    Collections.reverse(aggregateAddressTokens);
+    when(aggregateAddressTokenRepository
+        .findAllByIdentAndDayBetween(any(), any(), any())).thenReturn(aggregateAddressTokens);
     lenient().when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
             any(),
             any()))
@@ -737,19 +722,10 @@ class TokenServiceTest {
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
-    when(aggregateAddressTokenRepository.getMaxDay())
-        .thenReturn(Optional.of(LocalDate.now().minusDays(3)));
-
-    // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
-    when(aggregateAddressTokenRepository.sumBalanceInTimeRange(any(), any(),
-        any())).thenReturn(Optional.of(new BigInteger("100")));
-
     lenient().when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class),
             any(),
             any()))
         .thenReturn(Optional.of(new BigInteger("0")));
-
-    when(addressTokenRepository.countRecord(any(MultiAsset.class), any(), any())).thenReturn(10L);
 
     // Run the test
     final List<TokenVolumeAnalyticsResponse> result = tokenService.getTokenVolumeAnalytic(
