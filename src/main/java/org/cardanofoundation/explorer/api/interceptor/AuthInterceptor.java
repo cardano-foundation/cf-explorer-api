@@ -49,7 +49,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   private List<AntPathRequestMatcher> matchers;
 
-  private Map<String, Request> authorEndpoint;
+  private Map<AntPathRequestMatcher, Request> authorEndpoint;
 
   public AuthInterceptor(RoleFilterMapper roleFilterMapper, RsaConfig rsaConfig,
                          RedisTemplate<String, Object> redisTemplate) {
@@ -61,15 +61,19 @@ public class AuthInterceptor implements HandlerInterceptor {
   @PostConstruct
   public void initAuth() {
     matchers = roleConf.getAuth().stream()
-        .map(request -> {
-          if (org.springframework.util.StringUtils.hasText(request.getMethod())
-              || request.getMethod().equals("*")) {
-            return new AntPathRequestMatcher(request.getUri());
-          }
-          return new AntPathRequestMatcher(request.getUri(), request.getMethod());
-        }).toList();
+        .map(this::convertRequestToAntPathRequestMatcher).toList();
+
     authorEndpoint = roleConf.getAuth().stream()
-        .collect(Collectors.toMap(Request::getUri, Function.identity()));
+        .collect(Collectors.toMap(this::convertRequestToAntPathRequestMatcher,
+            Function.identity()));
+  }
+
+  private AntPathRequestMatcher convertRequestToAntPathRequestMatcher(Request request) {
+    if (org.springframework.util.StringUtils.hasText(request.getMethod())
+        || request.getMethod().equals("*")) {
+      return new AntPathRequestMatcher(request.getUri());
+    }
+    return new AntPathRequestMatcher(request.getUri(), request.getMethod());
   }
 
 
@@ -97,14 +101,16 @@ public class AuthInterceptor implements HandlerInterceptor {
       return true;
     }
 
-    if (matchers.stream().noneMatch(matcher -> matcher.matches(request))) {
+    var matcherOpt = matchers.stream().filter(matchers -> matchers.matches(request)).findFirst();
+    if (matcherOpt.isEmpty()) {// if request need auth
       return true;
     }
+
     UserPrincipal userPrincipal = new UserPrincipal();
     String token = getToken(request, userPrincipal);
     Set<String> roles = getRoles(token);
 
-    checkRequestAllow(request, roles);
+    checkRequestAllow(matcherOpt.get(), roles);//check author
 
     Map<String, Map<String, Object>> roleDescription = new HashMap<>();
     for (RoleConfigurationMapper roleMapper : roleConf.getRoles()) {
@@ -126,24 +132,33 @@ public class AuthInterceptor implements HandlerInterceptor {
   }
 
 
-  private void checkRequestAllow(HttpServletRequest request, Set<String> roles) {
+  private void checkRequestAllow(AntPathRequestMatcher matcher, Set<String> roles) {
     boolean isAllowed = false;
-    if (authorEndpoint.containsKey(request.getRequestURI())) {
-      Request requestAuthor = authorEndpoint.get(request.getRequestURI());
-      if (requestAuthor.getRoles().length == 0) {// This feature doesn't require authorization
+    if (authorEndpoint.containsKey(matcher)) {
+      Request requestAuthor = authorEndpoint.get(matcher);
+      var rolesAuth = getRoles(requestAuthor.getRoles());
+      if (rolesAuth.length == 0) {// This feature doesn't require authorization
         isAllowed = true;
       }
-      for (String role : requestAuthor.getRoles()) {
+      for (String role : rolesAuth) {
         if (roles.contains(role)) {
           isAllowed = true;
         }
       }
+
     } else {// don't need to auth
       isAllowed = true;
     }
     if (!isAllowed) {
       throw new InvalidAccessTokenException();
     }
+  }
+
+  private String[] getRoles(String[] roles) {
+    if (Objects.isNull(roles)) {
+      return new String[]{};
+    }
+    return roles;
   }
 
   private String getToken(HttpServletRequest request, UserPrincipal userPrincipal) {
