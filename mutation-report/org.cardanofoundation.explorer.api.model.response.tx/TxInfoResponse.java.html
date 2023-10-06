@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>TxInfoResponse.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.model.response.tx;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.math.BigInteger;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.LocalDateTime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.AllArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Builder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Getter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.NoArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Setter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Getter</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@Setter</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@NoArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@AllArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_16'/>
+16
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_16'>14</a>
+<span>
+1. status : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::status &rarr; NO_COVERAGE<br/>
+2. confirmation : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::confirmation &rarr; NO_COVERAGE<br/>
+3. blockNo : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::blockNo &rarr; NO_COVERAGE<br/>
+4. maxEpochSlot : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::maxEpochSlot &rarr; NO_COVERAGE<br/>
+5. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::toString &rarr; NO_COVERAGE<br/>
+6. time : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::time &rarr; NO_COVERAGE<br/>
+7. blockHash : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::blockHash &rarr; NO_COVERAGE<br/>
+8. totalOutput : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::totalOutput &rarr; NO_COVERAGE<br/>
+9. fee : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::fee &rarr; NO_COVERAGE<br/>
+10. epochSlot : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::epochSlot &rarr; NO_COVERAGE<br/>
+11. epochNo : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::epochNo &rarr; KILLED<br/>
+12. builder : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::builder &rarr; KILLED<br/>
+13. hash : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::hash &rarr; KILLED<br/>
+14. build : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::build &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@Builder</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class TxInfoResponse {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_19'/>
+19
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_19'>1</a>
+<span>
+1. getHash : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getHash &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private String hash;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_20'/>
+20
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_20'>1</a>
+<span>
+1. getTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getTime &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private LocalDateTime time;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_21'/>
+21
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_21'>1</a>
+<span>
+1. getBlockNo : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getBlockNo &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private Integer blockNo;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_22'/>
+22
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_22'>1</a>
+<span>
+1. getBlockHash : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getBlockHash &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private String blockHash;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_23'/>
+23
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_23'>1</a>
+<span>
+1. getEpochSlot : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getEpochSlot &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private Integer epochSlot;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_24'/>
+24
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_24'>1</a>
+<span>
+1. getMaxEpochSlot : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getMaxEpochSlot &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private Integer maxEpochSlot;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_25'/>
+25
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_25'>1</a>
+<span>
+1. getEpochNo : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getEpochNo &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private Integer epochNo;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_26'/>
+26
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_26'>1</a>
+<span>
+1. getStatus : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getStatus &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private TxStatus status;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_27'/>
+27
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_27'>1</a>
+<span>
+1. getConfirmation : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getConfirmation &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private Integer confirmation;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_28'/>
+28
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_28'>1</a>
+<span>
+1. getFee : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getFee &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private BigInteger fee;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_29'/>
+29
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_29'>1</a>
+<span>
+1. getTotalOutput : replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getTotalOutput &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private BigInteger totalOutput;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@352a6431_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_16'>16</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_16'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>epochNo<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.TxServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.TxServiceTest]/[method:testGetTxDetailByHash_EpochRepositoryReturnsAbsent()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::epochNo &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>builder<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.TxServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.TxServiceTest]/[method:testGetTxDetailByHash_EpochRepositoryReturnsAbsent()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::builder &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>hash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.TxControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.TxControllerTest]/[method:testGetTransactionDetail()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::hash &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>status<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::status &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>confirmation<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::confirmation &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>blockNo<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::blockNo &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>maxEpochSlot<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::maxEpochSlot &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::toString &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>time<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::time &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>blockHash<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::blockHash &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>build<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.TxServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.TxServiceTest]/[method:testGetTxDetailByHash_EpochRepositoryReturnsAbsent()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::build &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>totalOutput<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::totalOutput &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>fee<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::fee &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>epochSlot<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse$TxInfoResponseBuilder::epochSlot &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_19'>19</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_19'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getHash<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getHash &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_20'>20</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_20'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTime<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getTime &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_21'>21</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_21'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getBlockNo<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getBlockNo &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_22'>22</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_22'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getBlockHash<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getBlockHash &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_23'>23</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_23'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEpochSlot<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getEpochSlot &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_24'>24</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_24'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMaxEpochSlot<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getMaxEpochSlot &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_25'>25</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_25'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEpochNo<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getEpochNo &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_26'>26</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_26'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getStatus<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getStatus &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_27'>27</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_27'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getConfirmation<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getConfirmation &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_28'>28</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_28'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getFee<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getFee &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@352a6431_29'>29</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@352a6431_29'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTotalOutput<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/tx/TxInfoResponse::getTotalOutput &rarr; SURVIVED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.controller.TxControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.TxControllerTest]/[method:testGetTransactionDetail()] (29 ms)</li><li>org.cardanofoundation.explorer.api.service.TxServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.TxServiceTest]/[method:testGetTxDetailByHash_EpochRepositoryReturnsAbsent()] (3 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
