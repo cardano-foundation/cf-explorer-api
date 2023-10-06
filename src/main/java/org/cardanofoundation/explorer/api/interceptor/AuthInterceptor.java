@@ -38,7 +38,6 @@ import org.cardanofoundation.explorer.common.utils.JwtUtils;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
 
 @Component
-@RequiredArgsConstructor
 @Log4j2
 public class AuthInterceptor implements HandlerInterceptor {
 
@@ -51,6 +50,13 @@ public class AuthInterceptor implements HandlerInterceptor {
   private List<AntPathRequestMatcher> matchers;
 
   private Map<String, Request> authorEndpoint;
+
+  public AuthInterceptor(RoleFilterMapper roleFilterMapper, RsaConfig rsaConfig,
+                         RedisTemplate<String, Object> redisTemplate) {
+    this.roleConf = roleFilterMapper;
+    this.rsaConfig = rsaConfig;
+    this.redisTemplate = redisTemplate;
+  }
 
   @PostConstruct
   public void initAuth() {
@@ -98,7 +104,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     String token = getToken(request, userPrincipal);
     Set<String> roles = getRoles(token);
 
-    checkRequestAllow(request,roles);
+    checkRequestAllow(request, roles);
 
     Map<String, Map<String, Object>> roleDescription = new HashMap<>();
     for (RoleConfigurationMapper roleMapper : roleConf.getRoles()) {
@@ -120,21 +126,22 @@ public class AuthInterceptor implements HandlerInterceptor {
   }
 
 
-  private void checkRequestAllow(HttpServletRequest request, Set<String> roles){
+  private void checkRequestAllow(HttpServletRequest request, Set<String> roles) {
     boolean isAllowed = false;
-    if(authorEndpoint.containsKey(request.getRequestURI())){
+    if (authorEndpoint.containsKey(request.getRequestURI())) {
       Request requestAuthor = authorEndpoint.get(request.getRequestURI());
-      if(requestAuthor.getRoles().length == 0){// This feature doesn't require authorization
+      if (requestAuthor.getRoles().length == 0) {// This feature doesn't require authorization
         isAllowed = true;
       }
-      for(String role : requestAuthor.getRoles()){
-        if(roles.contains(role))
+      for (String role : requestAuthor.getRoles()) {
+        if (roles.contains(role)) {
           isAllowed = true;
+        }
       }
-    }else{// don't need to auth
+    } else {// don't need to auth
       isAllowed = true;
     }
-    if(!isAllowed){
+    if (!isAllowed) {
       throw new InvalidAccessTokenException();
     }
   }
