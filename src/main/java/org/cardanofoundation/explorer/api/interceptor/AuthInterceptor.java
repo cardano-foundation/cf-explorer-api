@@ -33,6 +33,7 @@ import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.common.annotation.IgnoreAuthentication;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
+import org.cardanofoundation.explorer.common.exceptions.UnauthorizedException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.common.utils.JwtUtils;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
@@ -150,7 +151,7 @@ public class AuthInterceptor implements HandlerInterceptor {
       isAllowed = true;
     }
     if (!isAllowed) {
-      throw new InvalidAccessTokenException();
+      throw new UnauthorizedException();
     }
   }
 
