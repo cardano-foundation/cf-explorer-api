@@ -166,8 +166,8 @@ public class GlobalRestControllerExceptionHandler {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(
             ErrorResponse.builder()
-                .errorCode(e.getErrorCode().getCode())
-                .errorMessage(e.getMessage())
+                .errorCode(e.getErrorCode().getServiceErrorCode())
+                .errorMessage(e.getErrorCode().getDesc())
                 .build());
   }
 }
