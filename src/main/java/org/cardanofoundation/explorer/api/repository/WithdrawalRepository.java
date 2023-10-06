@@ -92,7 +92,7 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       " GROUP BY w.stakeAddressId")
   List<StakeWithdrawalProjection> getRewardWithdrawnByAddrIn(@Param("stakeIds") Collection<Long> stakeIds);
 
-  @Query("SELECT SUM(w.amount) FROM Withdrawal w "
+  @Query("SELECT COALESCE(SUM(w.amount), 0) FROM Withdrawal w "
       + " INNER JOIN StakeAddress stakeAddress ON w.addr.id = stakeAddress.id"
       + " WHERE stakeAddress.view IN :addressList")
   BigInteger getRewardWithdrawnByAddressList(@Param("addressList") List<String> addressList);
