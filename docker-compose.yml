@@ -58,6 +58,9 @@ services:
       - SHELLEY_GENESIS_FILE=${SHELLEY_GENESIS_FILE}
       - BYRON_GENESIS_FILE=${BYRON_GENESIS_FILE}
       - AUTH_FILE_PATH=${AUTH_FILE_PATH}
+
+      - RSA_PUBLIC_KEY_AUTH=${RSA_PUBLIC_KEY_AUTH}
+
     ports:
       - ${PORT}:8080
     volumes:

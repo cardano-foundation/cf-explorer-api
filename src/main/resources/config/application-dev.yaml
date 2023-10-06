@@ -145,7 +145,7 @@ management:
 
 rsa:
   key:
-    path: /key/public_key
+    public-key-str: ${RSA_PUBLIC_KEY_AUTH}
 
 keycloak:
   role:
