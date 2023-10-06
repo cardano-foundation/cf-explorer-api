@@ -1,12 +1,14 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,22 +24,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-
-import com.google.common.collect.Lists;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.common.enumeration.RedisKey;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
@@ -82,6 +71,7 @@ import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
@@ -89,8 +79,18 @@ import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolOfflineData_;
+import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -124,6 +124,8 @@ public class DelegationServiceImpl implements DelegationService {
   private final AdaPotsRepository adaPotsRepository;
 
   private final EpochParamRepository epochParamRepository;
+
+  private final WithdrawalRepository withdrawalRepository;
 
   private final TxRepository txRepository;
 
@@ -407,12 +409,19 @@ public class DelegationServiceImpl implements DelegationService {
     BigDecimal stakeLimit = getPoolSaturation(projection.getReserves(),
         projection.getParamK());
     poolDetailResponse.setStakeLimit(stakeLimit);
+    poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
 
+    List<String> ownerAddress = poolUpdateRepository.findOwnerAccountByPool(poolId);
+    Collections.sort(ownerAddress);
+
+    poolDetailResponse.setOwnerAccounts(ownerAddress);
     Boolean useKoios = fetchRewardDataService.useKoios();
     if (Boolean.TRUE.equals(useKoios)) {
       Set<String> poolIdList = new HashSet<>(Collections.singletonList(poolView));
       setPoolInfoKoios(poolDetailResponse, currentEpoch, poolIdList);
-
+      if (!fetchRewardDataService.checkRewardForPool(ownerAddress)) {
+        fetchRewardDataService.fetchRewardForPool(ownerAddress);
+      }
     } else {
       List<Object> poolViews = new ArrayList<>();
       poolViews.add(poolView);
@@ -428,10 +437,14 @@ public class DelegationServiceImpl implements DelegationService {
 
     poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
 
-    List<String> ownerAddress = poolUpdateRepository.findOwnerAccountByPool(poolId);
-    Collections.sort(ownerAddress);
+    BigInteger totalBalance = stakeAddressRepository.getBalanceByView(ownerAddress)
+        .add(rewardRepository.getAvailableRewardByAddressList(ownerAddress))
+        .subtract(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress));
+    poolDetailResponse.setTotalBalance(totalBalance);
+    poolDetailResponse.setDelegators(delegationRepository.liveDelegatorsCount(poolView));
+    poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
+    poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
 
-    poolDetailResponse.setOwnerAccounts(ownerAddress);
     return poolDetailResponse;
   }
 

@@ -171,4 +171,10 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "JOIN StakeAddress stakeAddress ON stakeAddress.id = reward.stakeAddressId "
       + "WHERE stakeAddress.view = :stakeView")
   Set<RewardType> getAllRewardTypeOfAStakeKey(@Param("stakeView") String stakeView);
+
+  @Query("SELECT SUM(r.amount) FROM Reward r "
+      + " INNER JOIN StakeAddress stakeAddress ON r.addr.id = stakeAddress.id"
+      + " WHERE r.spendableEpoch <= (SELECT max(no) FROM Epoch)"
+      + " AND stakeAddress.view IN :addressList")
+  BigInteger getAvailableRewardByAddressList(@Param("addressList") List<String> addressList);
 }
