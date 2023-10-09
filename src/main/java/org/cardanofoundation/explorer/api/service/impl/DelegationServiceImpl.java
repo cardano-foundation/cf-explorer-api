@@ -527,6 +527,7 @@ public class DelegationServiceImpl implements DelegationService {
           epochOfPool.setBlock(epochBlockMap.get(epochOfPool.getEpoch()));
           if (epochOfPool.getEpoch().equals(currentEpoch - 1)) {
             epochOfPool.setDelegators(null);
+            epochOfPool.setFee(null);
           }
         });
     epochRes.setData(epochOfPools);
