@@ -28,6 +28,7 @@ public interface TxMapper {
   @Mapping(target = "tx.time", source = "block.time")
   @Mapping(target = "tx.fee", source = "fee")
   @Mapping(target = "tx.totalOutput", source = "outSum")
+  @Mapping(target = "tx.slotNo", source = "block.slotNo")
   TxResponse txToTxResponse(Tx tx);
 
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
