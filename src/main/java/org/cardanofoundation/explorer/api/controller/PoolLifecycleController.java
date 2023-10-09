@@ -50,16 +50,16 @@ public class PoolLifecycleController {
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> registration(
       @ParameterObject @PaginationValid @PaginationDefault(sort = {
           "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @Param("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView,
-      @Param("txHash") @LengthValid(CommonConstant.TX_HASH_LENGTH)
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The pool view") String poolViewOrHash,
+      @RequestParam(value = "txHash", required = false) @LengthValid(CommonConstant.TX_HASH_LENGTH)
       @Parameter(description = "The hash identifier of the transaction") String txHash,
-      @Param("fromDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
+      @RequestParam(value = "fromDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date fromDate,
-      @Param("toDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
+      @RequestParam(value = "toDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.registration(poolView, txHash, fromDate, toDate,
+        poolLifecycleService.registration(poolViewOrHash, txHash, fromDate, toDate,
             pagination.toPageable()));
   }
 
@@ -67,10 +67,9 @@ public class PoolLifecycleController {
   @LogMessage
   @Operation(summary = "Get information detail for pool registration", tags = {"pool-lifecycle"})
   public ResponseEntity<RegistrationResponse> registrationDetail(
-      @Param("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH) String poolViewOrHash,
       @RequestParam("id") @Parameter(description = "Id of pool registration") Long id) {
-    return ResponseEntity.ok(poolLifecycleService.registrationDetail(poolView, id));
+    return ResponseEntity.ok(poolLifecycleService.registrationDetail(poolViewOrHash, id));
   }
 
   @GetMapping(value = "/pool-update")
@@ -79,16 +78,16 @@ public class PoolLifecycleController {
   public ResponseEntity<BaseFilterResponse<PoolUpdateResponse>> poolUpdate(
       @ParameterObject @PaginationValid @PaginationDefault(sort = {
           "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @Param("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView,
-      @Param("txHash") @LengthValid(CommonConstant.TX_HASH_LENGTH)
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The pool view") String poolViewOrHash,
+      @RequestParam(value = "txHash", required = false) @LengthValid(CommonConstant.TX_HASH_LENGTH)
       @Parameter(description = "The hash identifier of the transaction") String txHash,
-      @Param("fromDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
+      @RequestParam(value = "fromDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date fromDate,
-      @Param("toDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
+      @RequestParam(value = "toDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.poolUpdate(poolView, txHash, fromDate, toDate,
+        poolLifecycleService.poolUpdate(poolViewOrHash, txHash, fromDate, toDate,
             pagination.toPageable()));
   }
 
@@ -104,10 +103,10 @@ public class PoolLifecycleController {
   @LogMessage
   @Operation(summary = "Get pool reward list", tags = {"pool-lifecycle"})
   public ResponseEntity<BaseFilterResponse<RewardResponse>> reward(
-      @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The pool view") String poolViewOrHash,
       @ParameterObject @PaginationValid @Valid Pagination pagination) {
-    return ResponseEntity.ok(poolLifecycleService.listReward(poolView, pagination.toPageable()));
+    return ResponseEntity.ok(poolLifecycleService.listReward(poolViewOrHash, pagination.toPageable()));
   }
 
   @GetMapping(value = "/de-registration")
@@ -116,16 +115,16 @@ public class PoolLifecycleController {
   public ResponseEntity<BaseFilterResponse<DeRegistrationResponse>> deRegistration(
       @ParameterObject @PaginationValid @PaginationDefault(sort = {
           "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination,
-      @Param("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView,
-      @Param("txHash") @LengthValid(CommonConstant.TX_HASH_LENGTH)
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The pool view") String poolViewOrHash,
+      @RequestParam(value = "txHash", required = false) @LengthValid(CommonConstant.TX_HASH_LENGTH)
       @Parameter(description = "The hash identifier of the transaction") String txHash,
-      @Param("fromDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
+      @RequestParam(value = "fromDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date fromDate,
-      @Param("toDate") @DateValid(pattern = DatePattern.YYYY_MM_DD)
+      @RequestParam(value = "toDate", required = false) @DateValid(pattern = DatePattern.YYYY_MM_DD)
       @Parameter(description = "Filter from date (with format: yyyy/MM/dd)") Date toDate) {
     return ResponseEntity.ok(
-        poolLifecycleService.deRegistration(poolView, txHash, fromDate, toDate,
+        poolLifecycleService.deRegistration(poolViewOrHash, txHash, fromDate, toDate,
             pagination.toPageable()));
   }
 
@@ -144,41 +143,41 @@ public class PoolLifecycleController {
   @LogMessage
   @Operation(summary = "Get pool information", tags = {"pool-lifecycle"})
   public ResponseEntity<PoolInfoResponse> poolInfo(
-      @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView) {
-    return ResponseEntity.ok(poolLifecycleService.poolInfo(poolView));
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The pool view") String poolViewOrHash) {
+    return ResponseEntity.ok(poolLifecycleService.poolInfo(poolViewOrHash));
   }
 
   @GetMapping(value = "/registration-list")
   @LogMessage
   @Operation(summary = "Get pool registration list for tabular view", tags = {"pool-lifecycle"})
   public ResponseEntity<BaseFilterResponse<TabularRegisResponse>> registrationList(
-      @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The pool view") String poolViewOrHash,
       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0, sort = {
           "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
-        poolLifecycleService.registrationList(poolView, pagination.toPageable()));
+        poolLifecycleService.registrationList(poolViewOrHash, pagination.toPageable()));
   }
 
   @GetMapping(value = "/pool-update-list")
   @LogMessage
   @Operation(summary = "Get pool update list for tabular view", tags = {"pool-lifecycle"})
   public ResponseEntity<BaseFilterResponse<PoolUpdateDetailResponse>> poolUpdate(
-      @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView,
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The pool view") String poolViewOrHash,
       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0, sort = {
           "bk.time"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
-        poolLifecycleService.poolUpdateList(poolView, pagination.toPageable()));
+        poolLifecycleService.poolUpdateList(poolViewOrHash, pagination.toPageable()));
   }
 
   @GetMapping(value = "/status")
   @LogMessage
   @Operation(summary = "Get pool status", tags = {"pool-lifecycle"})
   public ResponseEntity<SPOStatusResponse> poolStatus(
-      @RequestParam("poolView") @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
-      @LengthValid(CommonConstant.POOL_VIEW_LENGTH) @Parameter(description = "The pool view") String poolView) {
-    return ResponseEntity.ok(poolLifecycleService.poolLifecycleStatus(poolView));
+      @RequestParam("poolView") @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
+      @Parameter(description = "The pool view") String poolViewOrHash) {
+    return ResponseEntity.ok(poolLifecycleService.poolLifecycleStatus(poolViewOrHash));
   }
 }

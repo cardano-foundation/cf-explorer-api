@@ -18,7 +18,6 @@ public class PoolReportCreateRequest {
 
   private String reportName;
 
-  @PrefixedValid(CommonConstant.PREFIXED_POOL_VIEW)
   @LengthValid(CommonConstant.POOL_VIEW_LENGTH)
   private String poolId;
 
