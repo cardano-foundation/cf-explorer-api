@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.interceptor.utility;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 
 import lombok.Getter;
@@ -23,9 +24,19 @@ public class RoleConfiguration {
 
   @Bean
   public RoleFilterMapper getRoleConfiguration() throws IOException {
-    String authData = FileUtils.readFile(path);
+    StringBuilder content = new StringBuilder();
+    try (BufferedInputStream file = new BufferedInputStream(
+        FileUtils.class.getClassLoader().getResourceAsStream(path))) {
+      byte[] bytes = new byte[500];
+      while (file.available() != 0) {
+        file.read(bytes);
+        content.append(new String(bytes));
+      }
+    } catch (IOException exception) {
+      throw new RuntimeException("Can not read data of configuration file");
+    }
     ObjectMapper objectMapper = new ObjectMapper();
-    return objectMapper.readValue(authData,
+    return objectMapper.readValue(content.toString(),
         RoleFilterMapper.class);
   }
 
