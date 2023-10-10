@@ -25,4 +25,5 @@ public class TxResponse {
   private List<TxInstantaneousRewardsProjection> instantaneousRewards;
   private String metadataHash;
   private List<TxMetadataResponse> metadata;
+  private List<String> signersInformation;
 }
