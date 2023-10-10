@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.service.impl;
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.mapper.StakeKeyReportMapper;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
@@ -21,6 +22,7 @@ import org.cardanofoundation.explorer.api.repository.StakeKeyReportHistoryReposi
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.KafkaService;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
+import org.cardanofoundation.explorer.api.service.RoleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
@@ -58,11 +60,12 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private final KafkaService kafkaService;
   private final FetchRewardDataService fetchRewardDataService;
   private final ReportHistoryService reportHistoryService;
+  private final RoleService roleService;
 
   @Override
   public StakeKeyReportHistoryResponse generateStakeKeyReport(
-      StakeKeyReportRequest stakeKeyReportRequest, String username) {
-    StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, username);
+      StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal) {
+    StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, userPrincipal);
     Boolean isSuccess = kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
     if(Boolean.FALSE.equals(isSuccess)) {
       stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
@@ -72,15 +75,18 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   }
 
   @Transactional
-  public StakeKeyReportHistory save(StakeKeyReportRequest stakeKeyReportRequest, String username) {
+  public StakeKeyReportHistory save(StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal) {
     stakeAddressRepository.findByView(stakeKeyReportRequest.getStakeKey())
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     StakeKeyReportHistory stakeKeyReportHistory = stakeKeyReportMapper.toStakeKeyReportHistory(
         stakeKeyReportRequest);
 
-    if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
-      throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+    int reportLimit = roleService.getReportLimit(userPrincipal.getRoleDescription());
+    if (reportLimit != -1) { //"-1" it's mean unlimit report
+      if (Boolean.TRUE.equals(reportHistoryService.isLimitReached(userPrincipal.getUsername(),reportLimit))) {
+        throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
+      }
     }
 
     if (DataUtil.isNullOrEmpty(stakeKeyReportRequest.getReportName())) {
@@ -90,7 +96,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
 
     stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.IN_PROGRESS);
     stakeKeyReportHistory.getReportHistory().setType(ReportType.STAKE_KEY);
-    stakeKeyReportHistory.getReportHistory().setUsername(username);
+    stakeKeyReportHistory.getReportHistory().setUsername(userPrincipal.getUsername());
     return stakeKeyReportHistoryRepository.saveAndFlush(stakeKeyReportHistory);
   }
 

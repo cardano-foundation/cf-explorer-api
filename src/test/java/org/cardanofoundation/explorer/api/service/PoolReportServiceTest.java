@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -73,7 +74,7 @@ public class PoolReportServiceTest {
     String username = "username";
     when(poolHashRepository.findByViewOrHashRaw(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
-                            () -> poolReportService.create(request, username));
+                            () -> poolReportService.create(request, UserPrincipal.builder().username(username).build()));
   }
 
   @Test
@@ -83,9 +84,9 @@ public class PoolReportServiceTest {
         .build();
     String username = "username";
     when(poolHashRepository.findByViewOrHashRaw(anyString())).thenReturn(Optional.of(new PoolHash()));
-    when(reportHistoryService.isLimitReached(username)).thenReturn(true);
+    when(reportHistoryService.isLimitReached(username,10)).thenReturn(true);
     Assertions.assertThrows(BusinessException.class,
-                            () -> poolReportService.create(request, username));
+                            () -> poolReportService.create(request, UserPrincipal.builder().username(username).build()));
   }
 
   @Test
@@ -126,9 +127,9 @@ public class PoolReportServiceTest {
 
     when(poolHashRepository.findByViewOrHashRaw(any(String.class))).thenReturn(Optional.of(new PoolHash()));
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
-    when(reportHistoryService.isLimitReached(username)).thenReturn(false);
+    when(reportHistoryService.isLimitReached(username,1)).thenReturn(false);
     when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(true);
-    Assertions.assertTrue(poolReportService.create(request, username));
+    Assertions.assertTrue(poolReportService.create(request, UserPrincipal.builder().username(username).build()));
   }
 
   @Test
