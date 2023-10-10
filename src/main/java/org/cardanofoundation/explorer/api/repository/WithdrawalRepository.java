@@ -42,7 +42,7 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   List<Long> getWithdrawalByAddressAndTxIn(@Param("stakeKey") StakeAddress stakeKey,
                                            @Param("txIds") List<Long> txIds);
 
-  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo, block.slotNo as slotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"
       + " FROM Withdrawal withdrawal"
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"

@@ -10,6 +10,7 @@ public interface StakeWithdrawalProjection {
   Long getBlockNo();
   Integer getEpochNo();
   Integer getEpochSlotNo();
+  Integer getSlotNo();
   BigInteger getAmount();
   BigInteger getFee();
   Long getStakeAddressId();

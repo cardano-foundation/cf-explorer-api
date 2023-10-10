@@ -51,7 +51,6 @@ public class EpochServiceImpl implements EpochService {
   public int epochDays;
 
   @Override
-  @Transactional(readOnly = true)
   public EpochResponse getEpochDetail(String no) {
     try {
       Integer epochNo = Integer.parseInt(no);
@@ -88,7 +87,6 @@ public class EpochServiceImpl implements EpochService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable) {
 
     Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
@@ -171,7 +169,6 @@ public class EpochServiceImpl implements EpochService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public EpochSummary getCurrentEpochSummary() {
     return epochRepository
         .findCurrentEpochSummary()
