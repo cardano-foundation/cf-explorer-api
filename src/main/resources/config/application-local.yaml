@@ -6,9 +6,9 @@ spring:
   # Datasource specific configs
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:54322/explorer?currentSchema=mainnet
-    username: ${POSTGRES_USER:ducphung}
-    password: ${POSTGRES_PASSWORD:ducphung@pw}
+    url: jdbc:postgresql://${infrastructure.host}:5432/explorer?currentSchema=mainnet
+    username: ${POSTGRES_USER:cardano-master}
+    password: ${POSTGRES_PASSWORD:dbpass}
     driver-class-name: org.postgresql.Driver
     # Hikari specific configs
     hikari:
@@ -118,7 +118,9 @@ application:
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:200}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
-
+  healthcheck:
+    block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
+    inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true
@@ -134,11 +136,13 @@ management:
     enabled-by-default: false
     web:
       exposure:
-        include: "health,prometheus"
+        include: "health,prometheus,info,sync-status"
   endpoint:
     health:
       enabled: true
     prometheus:
+      enabled: true
+    sync-status:
       enabled: true
 
 rsa:
