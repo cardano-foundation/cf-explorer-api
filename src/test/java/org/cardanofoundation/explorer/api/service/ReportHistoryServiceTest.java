@@ -8,6 +8,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
 import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
@@ -75,32 +77,29 @@ public class ReportHistoryServiceTest {
 
   @Test
   void isLimitReached_shouldReturnTrueIfLimitIsReached() {
-    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
     when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(5);
-    Assertions.assertTrue(reportHistoryService.isLimitReached("username"));
+    Assertions.assertTrue(reportHistoryService.isLimitReached("username",5));
   }
 
   @Test
   void isLimitReached_shouldReturnFalseIfLimitIsNotReached() {
-    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
     when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(4);
-    Assertions.assertFalse(reportHistoryService.isLimitReached("username"));
+    Assertions.assertFalse(reportHistoryService.isLimitReached("username",5));
   }
 
   @Test
   void getReportLimitPer24Hours_shouldReturnLimit() {
-    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
     when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(4);
-    var reportLimit = reportHistoryService.getReportLimit("username");
+    var reportLimit = reportHistoryService.getReportLimit(UserPrincipal.builder().username("username").build());
     Assertions.assertEquals(5, reportLimit.getLimitPer24hours());
     Assertions.assertEquals(Boolean.FALSE, reportLimit.getIsLimitReached());
   }

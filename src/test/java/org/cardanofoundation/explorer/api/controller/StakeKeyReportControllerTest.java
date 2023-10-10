@@ -99,7 +99,7 @@ class StakeKeyReportControllerTest {
         .build();
 
     BDDMockito.given(
-            stakeKeyReportService.generateStakeKeyReport(any(StakeKeyReportRequest.class), anyString()))
+            stakeKeyReportService.generateStakeKeyReport(any(StakeKeyReportRequest.class), any()))
         .willReturn(responseExpect);
 
     mockMvc.perform(post(END_POINT + "/stake-key")

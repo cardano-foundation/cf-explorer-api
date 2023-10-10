@@ -149,6 +149,10 @@ rsa:
   key:
     public-key-str: ${RSA_PUBLIC_KEY_AUTH:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAthC/F58t/zLXPvh0cy91cyIHPRxZIEvRncffj/LJVH4nuDG3SgrlpW0NnuuSP23TiSYJIHOv0zsuNtGztU7/INdG29lgpHtG7RnqZwpwP6GG/U9F1N+Dt1CDT/3DcA9JXd9skoxpKQtyLxqLP799cBxtt7LlcRG4LV4tS5L+qrTR50jLR2JWXEphOPyc5zElgbMPjHkcZyoGd4t5DnTBdLXffS2hJzFr8X1GtE91dkApC099CMjM5ifoIDQibiPJElnB3j60Zuto6Mc9+eRONuCQcGPT49zHZgmqNiwkHL1fhJnCSujVLM/y3ZzzG9/IspbRlEcCCk9W7p4IJEPmewIDAQAB}
 
+keycloak:
+  role:
+    path: classpath:permission/policy.json
+
 cloud:
   aws:
     credentials:
@@ -178,7 +182,6 @@ spring:
   redis:
     pubsub:
       topic: ${REDIS_PUBSUB_TOPIC:block.mainnet}
-
 
 genesis:
   shelley: ${SHELLEY_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/shelley-genesis.json}
