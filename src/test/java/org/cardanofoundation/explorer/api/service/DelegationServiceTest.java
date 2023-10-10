@@ -456,7 +456,6 @@ class DelegationServiceTest {
     // Verify the interactions
     verify(epochRepository).findCurrentEpochNo();
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
-    verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
     verify(delegationRepository).liveDelegatorsCount(poolView);
     verify(blockRepository).getCountBlockByPoolAndCurrentEpoch(poolId);
@@ -509,7 +508,6 @@ class DelegationServiceTest {
     // Verify the interactions
     verify(epochRepository).findCurrentEpochNo();
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
-    verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
 
     assertEquals(poolView, result.getPoolName());
@@ -558,8 +556,6 @@ class DelegationServiceTest {
     // Verify the interactions
     verify(epochRepository).findCurrentEpochNo();
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
-    verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
-    verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
 
     assertEquals(poolView, result.getPoolName());
   }
