@@ -115,8 +115,6 @@ application:
       base-url: ${API_CHECK_ADA_POTS_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
     check-epoch:
       base-url: ${API_CHECK_EPOCH_URL:http://10.4.10.231:8888/api/v1/ada-pots/fetch}
-  report:
-    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:3}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
   healthcheck:
     block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
@@ -144,7 +142,7 @@ management:
 
 rsa:
   key:
-    path: /key/public_key
+    public-key-str: ${RSA_PUBLIC_KEY_AUTH:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAthC/F58t/zLXPvh0cy91cyIHPRxZIEvRncffj/LJVH4nuDG3SgrlpW0NnuuSP23TiSYJIHOv0zsuNtGztU7/INdG29lgpHtG7RnqZwpwP6GG/U9F1N+Dt1CDT/3DcA9JXd9skoxpKQtyLxqLP799cBxtt7LlcRG4LV4tS5L+qrTR50jLR2JWXEphOPyc5zElgbMPjHkcZyoGd4t5DnTBdLXffS2hJzFr8X1GtE91dkApC099CMjM5ifoIDQibiPJElnB3j60Zuto6Mc9+eRONuCQcGPT49zHZgmqNiwkHL1fhJnCSujVLM/y3ZzzG9/IspbRlEcCCk9W7p4IJEPmewIDAQAB}
 
 keycloak:
   role:
