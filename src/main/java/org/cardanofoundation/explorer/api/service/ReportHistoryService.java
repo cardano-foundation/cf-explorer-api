@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.springframework.data.domain.Pageable;
 
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.ReportLimitResponse;
@@ -23,12 +24,12 @@ public interface ReportHistoryService {
    * @param username
    * @return True if the limit is reached. Otherwise, return false
    */
-  Boolean isLimitReached(String username);
+  Boolean isLimitReached(String username, int limit);
 
   /**
    * Get report limit information
    * @param username
    * @return ReportLimitResponse
    */
-  ReportLimitResponse getReportLimit(String username);
+  ReportLimitResponse getReportLimit(UserPrincipal userPrincipal);
 }

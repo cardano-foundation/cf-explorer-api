@@ -17,6 +17,7 @@ import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
+import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
@@ -37,7 +38,8 @@ import org.springframework.test.web.servlet.MockMvc;
     SpringWebSecurityConfig.class,
     WebConfig.class,
     JacksonMapperDateConfig.class,
-    GlobalRestControllerExceptionHandler.class
+    GlobalRestControllerExceptionHandler.class,
+    RoleFilterMapper.class
 })
 @AutoConfigureMockMvc(addFilters = false)
 public class PoolControllerTest {

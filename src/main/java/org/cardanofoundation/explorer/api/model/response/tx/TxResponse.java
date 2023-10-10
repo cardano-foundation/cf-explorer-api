@@ -22,6 +22,7 @@ public class TxResponse {
   private List<TxPoolCertificate> poolCertificates;
   private ProtocolParamResponse protocols;
   private ProtocolParamResponse previousProtocols;
+  private List<String> protocolSigners;
   private List<TxInstantaneousRewardsProjection> instantaneousRewards;
   private String metadataHash;
   private List<TxMetadataResponse> metadata;

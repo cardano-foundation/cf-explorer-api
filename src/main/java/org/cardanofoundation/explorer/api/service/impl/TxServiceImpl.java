@@ -1332,6 +1332,7 @@ public class TxServiceImpl implements TxService {
     if (!ObjectUtils.isEmpty(paramProposals)) {
       //find current change param
       txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
+      txResponse.setProtocolSigners(paramProposals.stream().map(ParamProposal::getKey).toList());
       //get previous value
       if (Objects.nonNull(txResponse.getProtocols())) {
         Integer epochNo = tx.getBlock().getEpochNo();
