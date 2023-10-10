@@ -87,7 +87,8 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
       pool.setTxHash(txMap.get(pool.getTxId()).getHash());
       pool.setBlock(txMap.get(pool.getTxId()).getBlockNo());
       pool.setEpoch(txMap.get(pool.getTxId()).getEpochNo());
-      pool.setSlotNo(txMap.get(pool.getTxId()).getEpochSlotNo().longValue());
+      pool.setEpochSlotNo(txMap.get(pool.getTxId()).getEpochSlotNo());
+      pool.setSlotNo(txMap.get(pool.getTxId()).getSlot());
       pool.setTxTime(Timestamp.valueOf(txMap.get(pool.getTxId()).getTime()));
       List<String> stakeKeys = stakeKeyStrMap.get(pool.getPoolId());
       if (Objects.nonNull(stakeKeys)) {
