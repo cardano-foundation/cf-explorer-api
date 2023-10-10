@@ -155,6 +155,10 @@ rsa:
   key:
     public-key-str: ${RSA_PUBLIC_KEY_AUTH}
 
+keycloak:
+  role:
+    path: ${AUTH_FILE_PATH:classpath:permission/policy.json}
+
 cloud:
   aws:
     credentials:
