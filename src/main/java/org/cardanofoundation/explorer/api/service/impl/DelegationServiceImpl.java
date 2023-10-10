@@ -426,10 +426,10 @@ public class DelegationServiceImpl implements DelegationService {
       poolDetailResponse.setSaturation(getSaturation(liveStakeMap.get(poolView), stakeLimit));
     }
 
-    BigInteger totalBalance = stakeAddressRepository.getBalanceByView(ownerAddress)
+    BigInteger totalBalanceOfPoolOwners = stakeAddressRepository.getBalanceByView(ownerAddress)
         .add(rewardRepository.getAvailableRewardByAddressList(ownerAddress))
         .subtract(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress));
-    poolDetailResponse.setTotalBalance(totalBalance);
+    poolDetailResponse.setTotalBalanceOfPoolOwners(totalBalanceOfPoolOwners);
     poolDetailResponse.setDelegators(delegationRepository.liveDelegatorsCount(poolView));
     poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
     poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
