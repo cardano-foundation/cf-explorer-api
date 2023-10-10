@@ -23,7 +23,7 @@ public class CommonConstant {
 
   public static final String POOL_STATUS_ACTIVE = "ACTIVE";
 
-  public static final String POOL_STATUS_RETIRING = "RETIRING";
+  public static final String POOL_STATUS_RETIRED = "RETIRED";
 
   public static final String ADDRESS_PREFIX = "addr";
 
@@ -72,6 +72,8 @@ public class CommonConstant {
   public static final String PREPROD_NETWORK = "preprod";
 
   public static final String PREVIEW_NETWORK = "preview";
+
+  public static final String POOL_IDS_INACTIVATE = "POOL_IDS_INACTIVATE_";
 
   public static final String UNDERSCORE = "_";
 
