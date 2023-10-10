@@ -90,7 +90,6 @@ public class EpochServiceImpl implements EpochService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable) {
 
     Epoch firstEpoch = epochRepository.findFirstByNo(BigInteger.ZERO.intValue())
@@ -174,7 +173,6 @@ public class EpochServiceImpl implements EpochService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public EpochSummary getCurrentEpochSummary() {
     return epochRepository
         .findCurrentEpochSummary()

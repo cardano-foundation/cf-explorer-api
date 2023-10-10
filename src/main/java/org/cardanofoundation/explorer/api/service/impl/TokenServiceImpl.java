@@ -49,7 +49,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +74,6 @@ public class TokenServiceImpl implements TokenService {
 
   @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable)
       throws ExecutionException, InterruptedException {
     Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
@@ -144,7 +142,6 @@ public class TokenServiceImpl implements TokenService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public TokenResponse getTokenDetail(String tokenId) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
         .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
@@ -178,14 +175,12 @@ public class TokenServiceImpl implements TokenService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TokenMintTxResponse> getMintTxs(String tokenId, Pageable pageable) {
     Page<MaTxMint> maTxMints = maTxMintRepository.findByIdent(tokenId, pageable);
     return new BaseFilterResponse<>(maTxMints.map(maTxMintMapper::fromMaTxMintToTokenMintTx));
   }
 
   @Override
-  @Transactional(readOnly = true)
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId).orElseThrow(
         () -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND)
@@ -231,7 +226,6 @@ public class TokenServiceImpl implements TokenService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(
       String tokenId, AnalyticType type) throws ExecutionException, InterruptedException {
 
