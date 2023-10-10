@@ -172,7 +172,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "WHERE stakeAddress.view = :stakeView")
   Set<RewardType> getAllRewardTypeOfAStakeKey(@Param("stakeView") String stakeView);
 
-  @Query("SELECT SUM(r.amount) FROM Reward r "
+  @Query("SELECT COALESCE(SUM(r.amount), 0) FROM Reward r "
       + " INNER JOIN StakeAddress stakeAddress ON r.addr.id = stakeAddress.id"
       + " WHERE r.spendableEpoch <= (SELECT max(no) FROM Epoch)"
       + " AND stakeAddress.view IN :addressList")

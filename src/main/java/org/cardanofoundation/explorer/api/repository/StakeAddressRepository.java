@@ -40,6 +40,6 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   List<StakeAddress> findByIdIn(Collection<Long> ids);
 
-  @Query(value = "SELECT sum(sa.balance) FROM StakeAddress sa WHERE sa.view IN :views")
+  @Query(value = "SELECT COALESCE(sum(sa.balance), 0) FROM StakeAddress sa WHERE sa.view IN :views")
   BigInteger getBalanceByView(@Param("views") List<String> views);
 }
