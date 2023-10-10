@@ -17,6 +17,10 @@ import org.cardanofoundation.explorer.api.service.HealthCheckService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 
+import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.DATA_IS_NOT_SYNCING;
+import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.READY_TO_SERVE;
+import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.SYNCING_BUT_NOT_READY;
+
 @Service
 @RequiredArgsConstructor
 public class HealthCheckServiceImpl implements HealthCheckService {
@@ -25,7 +29,10 @@ public class HealthCheckServiceImpl implements HealthCheckService {
   private final BlockRepository blockRepository;
 
   @Value("${application.healthcheck.block-time-threshold}")
-  private String blockTimeThreshold;
+  private Long blockTimeThresholdInSecond;
+
+  @Value("${application.healthcheck.inserted-time-threshold}")
+  private Long insertedTimeThresholdInSecond;
 
   @Override
   public SyncStatus getSyncStatus() {
@@ -34,22 +41,48 @@ public class HealthCheckServiceImpl implements HealthCheckService {
     LocalDateTime latestBlockTime = aggregatedDataCacheService.getLatestBlockTime();
     LocalDateTime latestBlockInsertTime = aggregatedDataCacheService.getLatestBlockInsertTime();
 
+    if(Objects.isNull(latestBlockInsertTime)){
+      syncStatus.setMessage(DATA_IS_NOT_SYNCING);
+      syncStatus.setIsSyncing(Boolean.FALSE);
+      return syncStatus;
+    }
+
     if (Objects.isNull(latestBlockTime)) {
       Optional<Block> latestBlock = blockRepository.findLatestBlock();
       if (latestBlock.isEmpty()) {
+        syncStatus.setMessage(DATA_IS_NOT_SYNCING);
         syncStatus.setIsSyncing(Boolean.FALSE);
         return syncStatus;
       }
       latestBlockTime = latestBlock.get().getTime().toLocalDateTime();
     }
+    boolean isSyncing;
+    String message;
 
-    long secondsSinceLatestBlock = ChronoUnit.SECONDS.between(latestBlockTime,
-        LocalDateTime.now(ZoneOffset.UTC));
-    long thresholdBlockTimeInSeconds = Long.parseLong(blockTimeThreshold);
+    if (isOutOfThreshold(insertedTimeThresholdInSecond, latestBlockInsertTime)) {
+      isSyncing = false;
+      message = DATA_IS_NOT_SYNCING;
+    } else {
+      isSyncing = true;
+      message = SYNCING_BUT_NOT_READY;
+    }
 
-    Boolean isSyncing = secondsSinceLatestBlock <= thresholdBlockTimeInSeconds;
+    if (isSyncing) {
+      if (isOutOfThreshold(blockTimeThresholdInSecond, latestBlockTime)) {
+        message = SYNCING_BUT_NOT_READY;
+      } else {
+        message = READY_TO_SERVE;
+      }
+    }
 
-    return SyncStatus.builder().isSyncing(isSyncing).latestBlockInsertTime(latestBlockInsertTime)
+    return SyncStatus.builder().isSyncing(isSyncing)
+        .message(message)
+        .latestBlockInsertTime(latestBlockInsertTime)
         .build();
+  }
+
+  public boolean isOutOfThreshold(Long threshold, LocalDateTime time) {
+    long value = ChronoUnit.SECONDS.between(time, LocalDateTime.now(ZoneOffset.UTC));
+    return threshold <= value;
   }
 }
