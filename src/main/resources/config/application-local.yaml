@@ -146,7 +146,7 @@ rsa:
 
 keycloak:
   role:
-    path: src/main/resources/permission/policy.json
+    path: permission/policy.json
 
 cloud:
   aws:
