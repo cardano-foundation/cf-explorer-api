@@ -42,7 +42,6 @@ public class HealthCheckServiceImpl implements HealthCheckService {
       }
       latestBlockTime = latestBlock.get().getTime().toLocalDateTime();
     }
-
     long secondsSinceLatestBlock = ChronoUnit.SECONDS.between(latestBlockTime,
         LocalDateTime.now(ZoneOffset.UTC));
     long thresholdBlockTimeInSeconds = Long.parseLong(blockTimeThreshold);

@@ -33,10 +33,12 @@ public interface DelegationService {
   /**
    * Get list pool for delegate pools
    *
-   * @param pageable,search
+   * @param pageable page, size and sort parameters
+   * @param search query for search by pool name or ticker name
+   * @param showRetired show retired pool
    * @return BaseFilterResponse<PoolResponse>
    */
-  BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search);
+  BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search, boolean showRetired);
 
   /**
    * Get detail pool for delegate pools detail

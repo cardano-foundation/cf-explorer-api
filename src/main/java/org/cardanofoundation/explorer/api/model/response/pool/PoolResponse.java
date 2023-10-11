@@ -50,4 +50,6 @@ public class PoolResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
+  private boolean retired;
+
 }

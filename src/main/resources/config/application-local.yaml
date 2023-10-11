@@ -133,11 +133,13 @@ management:
     enabled-by-default: false
     web:
       exposure:
-        include: "health,prometheus"
+        include: "health,prometheus,info,sync-status"
   endpoint:
     health:
       enabled: true
     prometheus:
+      enabled: true
+    sync-status:
       enabled: true
 
 rsa:

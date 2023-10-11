@@ -116,7 +116,7 @@ public class DelegationControllerTest {
         BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
 
         // Mock the service method
-        when(delegationService.getDataForPoolTable(pageable, search)).thenReturn(response);
+        when(delegationService.getDataForPoolTable(pageable, search, true)).thenReturn(response);
 
         // Perform the GET request
         mockMvc.perform(get("/api/v1/delegations/pool-list")
@@ -128,7 +128,7 @@ public class DelegationControllerTest {
                 .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
 
         // Verify that the service method was called with the correct arguments
-        verify(delegationService).getDataForPoolTable(pageable, search);
+        verify(delegationService).getDataForPoolTable(pageable, search, true);
     }
 
     @Test

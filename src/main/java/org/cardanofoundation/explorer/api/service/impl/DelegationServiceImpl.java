@@ -24,6 +24,21 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
@@ -130,7 +145,6 @@ public class DelegationServiceImpl implements DelegationService {
   private final TxRepository txRepository;
 
   private final EpochService epochService;
-  public static final int MILLI = 1000;
   private static final int MAX_TOTAL_ELEMENTS = 1000;
 
   @Value("${spring.data.web.pageable.default-page-size}")
@@ -215,13 +229,20 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   @Override
-  public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search) {
+  public BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search, boolean showRetired) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     Page<PoolListProjection> poolIdPage;
+    Set<Long> poolRetiredIds = new HashSet<>();
+    // add -1L to poolRetiredIds to avoid empty list
+    poolRetiredIds.add(-1L);
+    if (!showRetired) {
+      String poolRetiredIdKey = CommonConstant.POOL_IDS_INACTIVATE + network;
+      poolRetiredIds = redisTemplate.opsForHash().values(poolRetiredIdKey).stream()
+          .map(item -> Long.parseLong(String.valueOf(item))).collect(Collectors.toSet());
+    }
     boolean isQueryEmpty = DataUtil.isNullOrEmpty(search);
     if (isQueryEmpty) {
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, BaseEntity_.ID));
-      poolIdPage = poolHashRepository.findAllWithoutQueryParam(pageable);
     } else {
       search = search.toLowerCase();
       String poolNameLength = "poolNameLength";
@@ -229,19 +250,19 @@ public class DelegationServiceImpl implements DelegationService {
         throw new BusinessException(BusinessCode.OUT_OF_QUERY_LIMIT);
       }
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, poolNameLength, PoolOfflineData_.POOL_NAME));
-      poolIdPage = poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, pageable);
     }
     Integer epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
-
     List<PoolResponse> poolList = new ArrayList<>();
-    Set<Long> poolIds = new HashSet<>();
-    List<Object> poolViews = new ArrayList<>();
-    Set<String> poolIdList = new HashSet<>();
-
-    poolIdPage.stream().forEach(pool -> {
-      poolViews.add(pool.getPoolView());
-      poolIdList.add(pool.getPoolView());
-      poolList.add(PoolResponse.builder().poolId(pool.getPoolView())
+    Set<Long> finalPoolRetiredIds = poolRetiredIds;
+    Boolean useKoios = fetchRewardDataService.useKoios();
+    if (Boolean.TRUE.equals(useKoios)) {
+      if (isQueryEmpty) {
+        poolIdPage = poolHashRepository.findAllWithoutQueryParam(poolRetiredIds, epochNo, pageable);
+      } else {
+        poolIdPage = poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, poolRetiredIds, epochNo, pageable);
+      }
+      poolIdPage.stream().forEach(pool -> poolList.add(PoolResponse.builder()
+          .poolId(pool.getPoolView())
           .id(pool.getPoolId())
           .poolName(pool.getPoolName())
           .tickerName(pool.getTickerName())
@@ -251,28 +272,18 @@ public class DelegationServiceImpl implements DelegationService {
           .numberDelegators(pool.getNumberDelegators())
           .lifetimeBlock(pool.getLifetimeBlock())
           .epochBlock(pool.getEpochBlock())
-          .build());
-      poolIds.add(pool.getPoolId());
-    });
-
-    Boolean useKoios = fetchRewardDataService.useKoios();
-    if (Boolean.TRUE.equals(useKoios)) {
-      List<PoolInfoKoiosProjection> poolInfoProjections = poolInfoRepository.getPoolInfoKoios(
-          poolIdList, epochNo);
-      Map<String, PoolInfoKoiosProjection> poolInfoMap = poolInfoProjections.stream()
-          .collect(Collectors.toMap(PoolInfoKoiosProjection::getView, Function.identity()));
-      poolList.forEach(
-          pool -> {
-            PoolInfoKoiosProjection poolInfo = poolInfoMap.get(pool.getPoolId());
-            if (Objects.nonNull(poolInfo)) {
-              PoolInfoKoiosProjection projection = poolInfoMap.get(pool.getPoolId());
-              if (Objects.nonNull(projection)) {
-                pool.setPoolSize(projection.getActiveStake());
-                pool.setSaturation(projection.getSaturation());
-              }
-            }
-          });
+          .retired(finalPoolRetiredIds.contains(pool.getPoolId()))
+          .poolSize(pool.getPoolSize())
+          .saturation(pool.getSaturation())
+          .build()));
     } else {
+      if (isQueryEmpty) {
+        poolIdPage = poolHashRepository.findAllWithoutQueryParam(poolRetiredIds, epochNo, pageable);
+      } else {
+        poolIdPage = poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, poolRetiredIds, epochNo, pageable);
+      }
+      List<Object> poolViews = poolIdPage.stream().map(PoolListProjection::getPoolView)
+          .collect(Collectors.toList());
       Map<String, BigInteger> liveStakeMap = getStakeFromCache(
           CommonConstant.LIVE_STAKE, poolViews, null);
       Map<String, BigInteger> activeStakeMap = getStakeFromCache(
@@ -281,12 +292,21 @@ public class DelegationServiceImpl implements DelegationService {
       var reserves = adaPotsRepository.getReservesByEpochNo(epochNo);
       var paramK = epochParamRepository.getOptimalPoolCountByEpochNo(epochNo);
       var stakeLimit = getPoolSaturation(reserves, paramK);
-      poolList.forEach(
-          pool -> {
-            pool.setPoolSize(activeStakeMap.get(pool.getPoolId()));
-            pool.setSaturation(
-                getSaturation(liveStakeMap.get(pool.getPoolId()), stakeLimit));
-          });
+      poolIdPage.stream().forEach(pool -> poolList.add(PoolResponse.builder()
+          .poolId(pool.getPoolView())
+          .id(pool.getPoolId())
+          .poolName(pool.getPoolName())
+          .tickerName(pool.getTickerName())
+          .pledge(pool.getPledge())
+          .feeAmount(pool.getFee())
+          .feePercent(pool.getMargin())
+          .numberDelegators(pool.getNumberDelegators())
+          .lifetimeBlock(pool.getLifetimeBlock())
+          .epochBlock(pool.getEpochBlock())
+          .retired(finalPoolRetiredIds.contains(pool.getPoolId()))
+          .poolSize(activeStakeMap.get(pool.getPoolView()))
+          .saturation(getSaturation(liveStakeMap.get(pool.getPoolView()), stakeLimit))
+          .build()));
     }
 
     response.setData(poolList);
@@ -309,6 +329,9 @@ public class DelegationServiceImpl implements DelegationService {
     Sort sort = pageable.getSort();
     if (sort.isUnsorted()) {
       sort = defaultSort;
+    }
+    if (Objects.isNull(sort.getOrderFor(BaseEntity_.ID))) {
+      sort = sort.and(Sort.by(Sort.Direction.ASC, BaseEntity_.ID));
     }
     pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     return pageable;
@@ -434,7 +457,6 @@ public class DelegationServiceImpl implements DelegationService {
       poolDetailResponse.setPoolSize(activeStakeMap.get(poolView));
       poolDetailResponse.setSaturation(getSaturation(liveStakeMap.get(poolView), stakeLimit));
     }
-
     poolDetailResponse.setCreateDate(poolUpdateRepository.getCreatedTimeOfPool(poolId));
 
     BigInteger totalBalanceOfPoolOwners = stakeAddressRepository.getBalanceByView(ownerAddress)

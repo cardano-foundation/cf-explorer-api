@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
 import java.util.Optional;
 
 import org.springframework.test.util.ReflectionTestUtils;
@@ -55,6 +56,7 @@ class HealthCheckServiceTest {
   }
 
   @Test
+
   void testGetSyncStatus_WhenLatestBlockTimeAvailableInRedisAndSyncNotOK() {
     var latestBlockTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5);
     var latestBlockInsertTime = LocalDateTime.now(ZoneOffset.UTC).minusSeconds(30);
@@ -86,6 +88,7 @@ class HealthCheckServiceTest {
   void testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncNotOK() {
     var latestBlockTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5);
     var latestBlockInsertTime = LocalDateTime.now(ZoneOffset.UTC).minusSeconds(30);
+    
     when(aggregatedDataCacheService.getLatestBlockTime()).thenReturn(null);
     when(aggregatedDataCacheService.getLatestBlockInsertTime()).thenReturn(latestBlockInsertTime);
 

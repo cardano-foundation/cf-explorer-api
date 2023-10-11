@@ -51,8 +51,6 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
-  private BigInteger totalBalanceOfPoolOwners;
-
   private String homepage;
 
   private String description;
@@ -60,6 +58,8 @@ public class PoolDetailHeaderResponse implements Serializable {
   private String logoUrl;
 
   private String iconUrl;
+
+  private BigInteger totalBalanceOfPoolOwners;
 
   private Timestamp lastUpdate;
 

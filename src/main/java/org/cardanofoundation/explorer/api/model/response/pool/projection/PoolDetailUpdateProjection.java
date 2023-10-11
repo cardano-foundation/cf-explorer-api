@@ -26,16 +26,16 @@ public interface PoolDetailUpdateProjection {
   BigInteger getReserves();
 
   String getRewardAddress();
-  
-  String getJson();
-
-  String getLogoUrl();
-
-  String getIconUrl();
 
   Integer getEpochBlock();
   Integer getLifetimeBlock();
   Integer getDelegators();
   Timestamp getLastUpdate();
+
+  String getJson();
+
+  String getLogoUrl();
+
+  String getIconUrl();
 
 }
