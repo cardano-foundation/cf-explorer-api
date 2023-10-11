@@ -35,6 +35,5 @@ public interface EpochService {
    *
    * @return epoch summary
    */
-  @Transactional(readOnly = true)
   EpochSummary getCurrentEpochSummary();
 }

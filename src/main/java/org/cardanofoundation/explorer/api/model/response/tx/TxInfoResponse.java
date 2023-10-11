@@ -23,6 +23,7 @@ public class TxInfoResponse {
   private Integer epochSlot;
   private Integer maxEpochSlot;
   private Integer epochNo;
+  private Integer slotNo;
   private TxStatus status;
   private Integer confirmation;
   private BigInteger fee;

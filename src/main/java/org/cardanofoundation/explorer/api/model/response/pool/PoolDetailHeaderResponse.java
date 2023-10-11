@@ -59,6 +59,8 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private String iconUrl;
 
+  private BigInteger totalBalanceOfPoolOwners;
+
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
