@@ -28,6 +28,9 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       nativeQuery = true)
   Page<TokenProjection> findAll(@Param("query") String query, Pageable pageable);
 
+  @Query("select multiAsset from MultiAsset multiAsset")
+  List<MultiAsset> findMultiAssets(Pageable pageable);
+
   Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
 
   Integer countByPolicy(@Param("policy") String policy);
