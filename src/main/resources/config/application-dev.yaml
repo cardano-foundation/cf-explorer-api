@@ -13,7 +13,7 @@ spring:
       minimum-idle: 10 #minimum number of idle connections maintained by HikariCP in a connection pool
       maximum-pool-size: ${DB_MAXIUM_POOL_SIZE:10} #maximum pool size
       idle-timeout: 300000 #maximum idle time for connection
-      max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      max-lifetime: 500000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
       connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
       auto-commit: false #default auto-commit behavior.
       connection-init-sql: SELECT 1
@@ -111,11 +111,13 @@ application:
     check-ada-pots:
       base-url: ${API_CHECK_ADA_POTS_URL:http://localhost:8888/api/v1/ada-pots/fetch}
     check-epoch:
-        base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
+      base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
-
+  healthcheck:
+    block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
+    inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true
@@ -131,11 +133,15 @@ management:
     enabled-by-default: false
     web:
       exposure:
-        include: "health,prometheus"
+        include: "health,prometheus,info,sync-status"
   endpoint:
     health:
       enabled: true
     prometheus:
+      enabled: true
+    info:
+      enabled: true
+    sync-status:
       enabled: true
 
   metrics:
@@ -147,7 +153,7 @@ management:
 
 rsa:
   key:
-    path: /key/public_key
+    public-key-str: ${RSA_PUBLIC_KEY_AUTH}
 
 cloud:
   aws:

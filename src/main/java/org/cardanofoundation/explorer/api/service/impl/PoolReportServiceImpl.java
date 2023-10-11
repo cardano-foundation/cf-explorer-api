@@ -83,7 +83,7 @@ public class PoolReportServiceImpl implements PoolReportService {
   @Transactional
   public PoolReportHistory saveToDb(PoolReportCreateRequest poolReportCreateRequest,
                                     String username) {
-    poolHashRepository.findByView(poolReportCreateRequest.getPoolId())
+    poolHashRepository.findByViewOrHashRaw(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
     if(Boolean.TRUE.equals(reportHistoryService.isLimitReached(username))){
       throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);

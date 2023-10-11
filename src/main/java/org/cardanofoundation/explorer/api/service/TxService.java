@@ -13,10 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface TxService {
 
-  @Transactional(readOnly = true)
   List<TxSummary> findLatestTxSummary();
 
-  @Transactional(readOnly = true)
   List<TxGraph> getTransactionChartByRange(TxChartRange range);
 
   /**
