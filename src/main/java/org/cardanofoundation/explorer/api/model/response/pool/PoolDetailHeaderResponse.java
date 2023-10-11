@@ -51,6 +51,14 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
+  private String homepage;
+
+  private String description;
+
+  private String logoUrl;
+
+  private String iconUrl;
+
   private BigInteger totalBalanceOfPoolOwners;
 
   private Timestamp lastUpdate;
@@ -67,5 +75,7 @@ public class PoolDetailHeaderResponse implements Serializable {
     this.delegators = poolDetail.getDelegators();
     this.lastUpdate = poolDetail.getLastUpdate();
     this.rewardAccounts = Collections.singletonList(poolDetail.getRewardAddress());
+    this.logoUrl = poolDetail.getLogoUrl();
+    this.iconUrl = poolDetail.getIconUrl();
   }
 }

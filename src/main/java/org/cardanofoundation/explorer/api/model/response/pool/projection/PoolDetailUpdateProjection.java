@@ -30,4 +30,10 @@ public interface PoolDetailUpdateProjection {
   Integer getLifetimeBlock();
   Integer getDelegators();
   Timestamp getLastUpdate();
+
+  String getJson();
+
+  String getLogoUrl();
+
+  String getIconUrl();
 }
