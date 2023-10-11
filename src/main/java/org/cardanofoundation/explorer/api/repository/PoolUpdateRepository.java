@@ -86,8 +86,8 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
           + "JOIN Block bk ON tx.blockId = bk.id AND (tx.deposit IS NULL OR tx.deposit < (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = bk.epochNo)) "
-          + "WHERE ph.view = :poolViewOrHash "
-          + "OR ph.hashRaw = :poolViewOrHash "
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash) "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
@@ -150,8 +150,8 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
           + "JOIN Block bk ON tx.blockId = bk.id "
           + "JOIN EpochParam ep ON ep.epochNo = bk.epochNo AND tx.deposit IS NOT NULL AND tx.deposit >= ep.poolDeposit "
-          + "WHERE ph.view = :poolViewOrHash "
-          + "OR ph.hashRaw = :poolViewOrHash "
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash) "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
