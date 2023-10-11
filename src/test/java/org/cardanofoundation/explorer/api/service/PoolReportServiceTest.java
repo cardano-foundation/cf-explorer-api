@@ -71,7 +71,7 @@ public class PoolReportServiceTest {
         .poolId("any")
         .build();
     String username = "username";
-    when(poolHashRepository.findByView(anyString())).thenReturn(Optional.empty());
+    when(poolHashRepository.findByViewOrHashRaw(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
                             () -> poolReportService.create(request, username));
   }
@@ -82,7 +82,7 @@ public class PoolReportServiceTest {
         .poolId("any")
         .build();
     String username = "username";
-    when(poolHashRepository.findByView(anyString())).thenReturn(Optional.of(new PoolHash()));
+    when(poolHashRepository.findByViewOrHashRaw(anyString())).thenReturn(Optional.of(new PoolHash()));
     when(reportHistoryService.isLimitReached(username)).thenReturn(true);
     Assertions.assertThrows(BusinessException.class,
                             () -> poolReportService.create(request, username));
@@ -124,7 +124,7 @@ public class PoolReportServiceTest {
                            .build())
         .build();
 
-    when(poolHashRepository.findByView(any(String.class))).thenReturn(Optional.of(new PoolHash()));
+    when(poolHashRepository.findByViewOrHashRaw(any(String.class))).thenReturn(Optional.of(new PoolHash()));
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
     when(reportHistoryService.isLimitReached(username)).thenReturn(false);
     when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(true);

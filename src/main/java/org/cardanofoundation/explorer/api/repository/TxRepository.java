@@ -35,7 +35,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + "WHERE b.hash = :blockHash")
   Page<Tx> findByBlockHash(@Param("blockHash") String blockHash, Pageable pageable);
 
-  @EntityGraph(attributePaths = {Tx_.BLOCK})
+  @EntityGraph(attributePaths = {Tx_.BLOCK, Tx_.TX_METADATA_HASH})
   Optional<Tx> findByHash(@Param("hash") String hash);
 
   @Query(value = "SELECT tx.id FROM Tx tx ")
@@ -69,6 +69,7 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
   List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
 
   @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
+  @EntityGraph(attributePaths = {Tx_.BLOCK})
   List<Tx> findByIdIn(@Param("ids") List<Long> ids);
 
   @Query("SELECT tx.id as id, "
