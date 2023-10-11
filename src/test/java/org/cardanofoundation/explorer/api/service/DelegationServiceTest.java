@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -299,7 +300,8 @@ class DelegationServiceTest {
     // Mocked input data
     Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
     String search = "example";
-
+    List<Object> poolRetiredIds = new ArrayList<>();
+    poolRetiredIds.add(-1L);
     // Mocked repository responses
     List<PoolListProjection> poolIdPageContent = new ArrayList<>();
     PoolListProjection projection = Mockito.mock(PoolListProjection.class);
@@ -309,15 +311,16 @@ class DelegationServiceTest {
     when(projection.getPledge()).thenReturn(BigInteger.ONE);
     when(projection.getFee()).thenReturn(BigInteger.ONE);
     when(projection.getMargin()).thenReturn(1D);
+    when(redisTemplate.opsForHash().values(any())).thenReturn(poolRetiredIds);
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(100));
     poolIdPageContent.add(projection);
     // Add mock data to poolIdPageContent
-
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, pageable)).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), anyCollection(), any(),  any())).thenReturn(poolIdPage);
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
-        search);
+        search, true);
 
     // Perform assertions
     assertNotNull(response);
@@ -337,12 +340,12 @@ class DelegationServiceTest {
 
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllWithoutQueryParam(pageable)).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllWithoutQueryParam(any(), anyInt(), any())).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
-        search);
+        search, true);
 
     // Perform assertions
     assertNotNull(response);
@@ -368,19 +371,15 @@ class DelegationServiceTest {
     poolIdPageContent.add(projection);
     PoolAmountProjection pap = Mockito.mock(PoolAmountProjection.class);
     PoolInfoKoiosProjection pikp = Mockito.mock(PoolInfoKoiosProjection.class);
-    when(pikp.getView()).thenReturn("view");
-    when(pikp.getActiveStake()).thenReturn(BigInteger.ONE);
-    when(pikp.getSaturation()).thenReturn(1D);
     // Add mock data to poolIdPageContent
 
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, pageable)).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), any(), anyInt(), any())).thenReturn(poolIdPage);
     when(fetchRewardDataService.useKoios()).thenReturn(true);
-    when(poolInfoRepository.getPoolInfoKoios(Set.of("view"), 0)).thenReturn(List.of(pikp));
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
-        search);
+        search, true);
 
     // Perform assertions
     assertNotNull(response);
@@ -400,13 +399,13 @@ class DelegationServiceTest {
 
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllWithoutQueryParam(pageable)).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllWithoutQueryParam(any(), anyInt(), any())).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
 
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
-        search);
+        search, true);
 
     // Perform assertions
     assertNotNull(response);

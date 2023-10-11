@@ -24,4 +24,8 @@ public interface PoolListProjection {
   Integer getEpochBlock();
 
   Integer getLifetimeBlock();
+
+  BigInteger getPoolSize();
+
+  Double getSaturation();
 }
