@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,7 +35,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.common.enumeration.RedisKey;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
@@ -129,7 +127,6 @@ public class DelegationServiceImpl implements DelegationService {
   private final TxRepository txRepository;
 
   private final EpochService epochService;
-  public static final int MILLI = 1000;
   private static final int MAX_TOTAL_ELEMENTS = 1000;
 
   @Value("${spring.data.web.pageable.default-page-size}")

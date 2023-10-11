@@ -17,8 +17,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -76,7 +74,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -136,9 +133,6 @@ class DelegationServiceTest {
 
   @InjectMocks
   private DelegationServiceImpl delegationService;
-
-  @Mock
-  HashOperations hashOperations;
 
   @BeforeEach
   void preSetup() {
