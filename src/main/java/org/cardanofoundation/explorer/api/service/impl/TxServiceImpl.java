@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -124,6 +125,7 @@ public class TxServiceImpl implements TxService {
   private final StakeAddressRepository stakeAddressRepository;
   private final TxContractMapper txContractMapper;
   private final TxMetadataRepository txMetadataRepository;
+  private final TxVkeyWitnessesRepository txVkeyWitnessesRepository;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -505,6 +507,8 @@ public class TxServiceImpl implements TxService {
     getProtocols(tx, txResponse);
     getInstantaneousRewards(tx, txResponse);
     getMetadata(tx, txResponse);
+    getSignersInformation(tx, txResponse);
+
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -531,6 +535,29 @@ public class TxServiceImpl implements TxService {
     }
 
     return txResponse;
+  }
+
+  /**
+   * Get signers (Delegate Keys) Information for MIR (instantaneous rewards) Transaction
+   *
+   * @param tx
+   * @param txResponse
+   */
+  private void getSignersInformation(Tx tx, TxResponse txResponse) {
+    List<TxVkeyWitness> txVkeyWitnesses = txVkeyWitnessesRepository.findAllByTx(tx);
+    if (!CollectionUtils.isEmpty(txVkeyWitnesses)) {
+      Map<Integer, String> signersIndexMap = new HashMap<>();
+      txVkeyWitnesses.forEach(txVkeyWitness ->
+                                  Arrays.stream(txVkeyWitness.getIndexArr()).forEach(
+                                      index -> signersIndexMap.put(index, txVkeyWitness.getKey())));
+
+      List<String> signersInformation = signersIndexMap.entrySet().stream()
+          .sorted(Map.Entry.comparingByKey())
+          .map(Map.Entry::getValue)
+          .toList();
+
+      txResponse.setSignersInformation(signersInformation);
+    }
   }
 
   /**
@@ -1305,6 +1332,7 @@ public class TxServiceImpl implements TxService {
     if (!ObjectUtils.isEmpty(paramProposals)) {
       //find current change param
       txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
+      txResponse.setGenesisDelegateKeys(paramProposals.stream().map(ParamProposal::getKey).toList());
       //get previous value
       if (Objects.nonNull(txResponse.getProtocols())) {
         Integer epochNo = tx.getBlock().getEpochNo();

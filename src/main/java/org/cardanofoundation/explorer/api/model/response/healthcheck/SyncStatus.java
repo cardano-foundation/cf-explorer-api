@@ -18,6 +18,5 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude
 public class SyncStatus {
   Boolean isSyncing;
-  String message;
   LocalDateTime latestBlockInsertTime;
 }

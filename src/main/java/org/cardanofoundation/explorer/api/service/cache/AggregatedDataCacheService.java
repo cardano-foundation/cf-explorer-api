@@ -14,5 +14,9 @@ public interface AggregatedDataCacheService {
    */
   LocalDateTime getLatestBlockInsertTime();
 
+  /**
+   * Get token count
+   * @return
+   */
   int getTokenCount();
 }

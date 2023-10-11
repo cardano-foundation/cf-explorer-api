@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
+
 import java.util.Optional;
 
 import org.springframework.test.util.ReflectionTestUtils;
@@ -17,9 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.DATA_IS_NOT_SYNCING;
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.READY_TO_SERVE;
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.SYNCING_BUT_NOT_READY;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +39,7 @@ class HealthCheckServiceTest {
 
   @BeforeEach
   void setup() {
-    ReflectionTestUtils.setField(healthCheckService, "blockTimeThresholdInSecond", Long.valueOf(240));
-    ReflectionTestUtils.setField(healthCheckService, "insertedTimeThresholdInSecond", Long.valueOf(1200));
+    ReflectionTestUtils.setField(healthCheckService, "blockTimeThreshold", "240");
   }
 
   @Test
@@ -60,23 +56,23 @@ class HealthCheckServiceTest {
   }
 
   @Test
-  void testGetSyncStatus_WhenLatestBlockTimeAvailableInRedisAndSyncOKButNotReadyToServe() {
-    var latestBlockTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(10);
+
+  void testGetSyncStatus_WhenLatestBlockTimeAvailableInRedisAndSyncNotOK() {
+    var latestBlockTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5);
     var latestBlockInsertTime = LocalDateTime.now(ZoneOffset.UTC).minusSeconds(30);
     when(aggregatedDataCacheService.getLatestBlockTime()).thenReturn(latestBlockTime);
     when(aggregatedDataCacheService.getLatestBlockInsertTime()).thenReturn(latestBlockInsertTime);
 
     final SyncStatus result = healthCheckService.getSyncStatus();
 
-    assertTrue(result.getIsSyncing());
-    assertEquals(SYNCING_BUT_NOT_READY,result.getMessage());
+    assertFalse(result.getIsSyncing());
     assertEquals(latestBlockInsertTime, result.getLatestBlockInsertTime());
   }
 
   @Test
-  void testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever() {
+  void testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOK() {
     var latestBlockTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1);
-    var latestBlockInsertTime = LocalDateTime.now(ZoneOffset.UTC).minusSeconds(15);
+    var latestBlockInsertTime = LocalDateTime.now(ZoneOffset.UTC).minusSeconds(30);
     when(aggregatedDataCacheService.getLatestBlockTime()).thenReturn(null);
     when(aggregatedDataCacheService.getLatestBlockInsertTime()).thenReturn(latestBlockInsertTime);
 
@@ -85,14 +81,14 @@ class HealthCheckServiceTest {
     final SyncStatus result = healthCheckService.getSyncStatus();
 
     assertTrue(result.getIsSyncing());
-    assertEquals(READY_TO_SERVE,result.getMessage());
     assertEquals(latestBlockInsertTime, result.getLatestBlockInsertTime());
   }
 
   @Test
-  void testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndNotSyncing() {
-    var latestBlockTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(6);
-    var latestBlockInsertTime = LocalDateTime.now(ZoneOffset.UTC).minusSeconds(1500);
+  void testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncNotOK() {
+    var latestBlockTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5);
+    var latestBlockInsertTime = LocalDateTime.now(ZoneOffset.UTC).minusSeconds(30);
+    
     when(aggregatedDataCacheService.getLatestBlockTime()).thenReturn(null);
     when(aggregatedDataCacheService.getLatestBlockInsertTime()).thenReturn(latestBlockInsertTime);
 
@@ -101,7 +97,6 @@ class HealthCheckServiceTest {
     final SyncStatus result = healthCheckService.getSyncStatus();
 
     assertFalse(result.getIsSyncing());
-    assertEquals(DATA_IS_NOT_SYNCING ,result.getMessage());
     assertEquals(latestBlockInsertTime, result.getLatestBlockInsertTime());
   }
 }

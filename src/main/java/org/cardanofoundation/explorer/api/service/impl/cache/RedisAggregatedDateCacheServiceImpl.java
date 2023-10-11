@@ -23,8 +23,8 @@ public class RedisAggregatedDateCacheServiceImpl implements AggregatedDataCacheS
 
   private static final String AGGREGATED_CACHE_KEY = "AGGREGATED_CACHE";
   private static final String BLOCK_TIME_HASH_KEY = "LATEST_BLOCK_TIME";
-  private static final String TOKEN_COUNT_HASH_KEY = "TOTAL_TOKEN_COUNT";
   private static final String BLOCK_INSERT_TIME_HASH_KEY = "LATEST_BLOCK_INSERT_TIME";
+  private static final String TOKEN_COUNT_HASH_KEY = "TOTAL_TOKEN_COUNT";
   private final RedisTemplate<String, String> redisTemplate;
 
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(

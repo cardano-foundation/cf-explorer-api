@@ -26,6 +26,7 @@ public interface PoolDetailUpdateProjection {
   BigInteger getReserves();
 
   String getRewardAddress();
+
   Integer getEpochBlock();
   Integer getLifetimeBlock();
   Integer getDelegators();
@@ -36,4 +37,5 @@ public interface PoolDetailUpdateProjection {
   String getLogoUrl();
 
   String getIconUrl();
+
 }

@@ -52,7 +52,6 @@ spring:
     default-property-inclusion: ${JACKSON_INCLUSION:NON_NULL}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:127.0.0.1:29092}
-    useSsl: ${KAFKA_USE_SSL:false}
     #client-id:  crawler
     producer:
       acks: all
@@ -112,12 +111,9 @@ application:
       base-url: ${API_CHECK_ADA_POTS_URL:http://localhost:8888/api/v1/ada-pots/fetch}
     check-epoch:
       base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
-  report:
-    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
   healthcheck:
     block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
-    inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true
@@ -154,6 +150,10 @@ management:
 rsa:
   key:
     public-key-str: ${RSA_PUBLIC_KEY_AUTH}
+
+keycloak:
+  role:
+    path: ${AUTH_FILE_PATH:permission/policy.json}
 
 cloud:
   aws:

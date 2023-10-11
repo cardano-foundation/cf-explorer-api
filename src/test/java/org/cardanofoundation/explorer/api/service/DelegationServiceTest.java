@@ -18,6 +18,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,6 +78,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -134,6 +138,9 @@ class DelegationServiceTest {
 
   @InjectMocks
   private DelegationServiceImpl delegationService;
+
+  @Mock
+  HashOperations hashOperations;
 
   @BeforeEach
   void preSetup() {
@@ -448,7 +455,6 @@ class DelegationServiceTest {
     // Verify the interactions
     verify(epochRepository).findCurrentEpochNo();
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
-    verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
 
     assertEquals(poolView, result.getPoolName());
@@ -496,7 +502,6 @@ class DelegationServiceTest {
     // Verify the interactions
     verify(epochRepository).findCurrentEpochNo();
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
-    verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
 
     assertEquals(poolView, result.getPoolName());
@@ -545,8 +550,6 @@ class DelegationServiceTest {
     // Verify the interactions
     verify(epochRepository).findCurrentEpochNo();
     verify(poolHashRepository).getDataForPoolDetail(poolView, currentEpochNo);
-    verify(poolUpdateRepository).getCreatedTimeOfPool(poolId);
-    verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
 
     assertEquals(poolView, result.getPoolName());
   }
