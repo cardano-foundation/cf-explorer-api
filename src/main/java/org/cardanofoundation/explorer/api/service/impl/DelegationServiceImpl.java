@@ -22,6 +22,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -399,6 +401,15 @@ public class DelegationServiceImpl implements DelegationService {
         .map(PoolDetailHeaderResponse::new).findFirst()
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
 
+    Gson gson = new Gson();
+    JsonObject jsonObject = gson
+        .fromJson(projection.getJson(), JsonObject.class);
+    if (Objects.nonNull(jsonObject) && jsonObject.has("homepage")) {
+      poolDetailResponse.setHomepage(jsonObject.get("homepage").getAsString());
+    }
+    if (Objects.nonNull(jsonObject) && jsonObject.has("description")) {
+      poolDetailResponse.setDescription(jsonObject.get("description").getAsString());
+    }
     BigDecimal stakeLimit = getPoolSaturation(projection.getReserves(),
         projection.getParamK());
     poolDetailResponse.setStakeLimit(stakeLimit);
@@ -504,6 +515,9 @@ public class DelegationServiceImpl implements DelegationService {
         }
       });
     }
+
+    Integer currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow(
+        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
     List<PoolDetailEpochProjection> epochBlockProjections = poolHashRepository.findEpochByPool(
         poolId,
         epochNos);
@@ -511,7 +525,13 @@ public class DelegationServiceImpl implements DelegationService {
         Collectors.toMap(PoolDetailEpochProjection::getEpochNo,
             PoolDetailEpochProjection::getCountBlock));
     epochOfPools.forEach(
-        epochOfPool -> epochOfPool.setBlock(epochBlockMap.get(epochOfPool.getEpoch())));
+        epochOfPool -> {
+          epochOfPool.setBlock(epochBlockMap.get(epochOfPool.getEpoch()));
+          if (epochOfPool.getEpoch().equals(currentEpoch - 1)) {
+            epochOfPool.setDelegators(null);
+            epochOfPool.setFee(null);
+          }
+        });
     epochRes.setData(epochOfPools);
     epochRes.setTotalItems(totalElm);
     epochRes.setTotalPages(totalPage);
