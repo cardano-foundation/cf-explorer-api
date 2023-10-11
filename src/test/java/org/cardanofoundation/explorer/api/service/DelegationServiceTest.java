@@ -479,6 +479,7 @@ class DelegationServiceTest {
     when(projection.getPoolId()).thenReturn(poolId);
     when(projection.getReserves()).thenReturn(reserves);
     when(projection.getParamK()).thenReturn(paramK);
+    when(projection.getPoolView()).thenReturn(poolView);
     PoolInfoKoiosProjection pikp = Mockito.mock(PoolInfoKoiosProjection.class);
     when(pikp.getActiveStake()).thenReturn(BigInteger.ONE);
     when(pikp.getSaturation()).thenReturn(1D);
