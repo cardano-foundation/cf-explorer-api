@@ -18,7 +18,6 @@ public interface PoolListProjection {
   BigInteger getFee();
 
   Double getMargin();
-  Integer getPoolNameLength();
 
   Integer getNumberDelegators();
 

@@ -63,8 +63,6 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       + "WHERE ph.view IN :poolViews ")
   Set<Long> getListPoolIdIn(@Param("poolViews") Set<String> poolViews);
 
-  Optional<PoolHash> findByView(@Param("view") String view);
-
   @Query(value = "SELECT ph FROM PoolHash ph "
       + "WHERE ph.view = :poolViewOrHash "
       + "OR ph.hashRaw = :poolViewOrHash")
