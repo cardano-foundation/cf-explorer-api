@@ -55,6 +55,7 @@ public class InstantaneousRewardsServiceImpl implements InstantaneousRewardsServ
             .epochSlotNo(txMap.get(item.getTxId()).getEpochSlotNo())
             .time(txMap.get(item.getTxId()).getTime())
             .epochSlotNo(txMap.get(item.getTxId()).getEpochSlotNo())
+            .slotNo(txMap.get(item.getTxId()).getSlot())
             .numberOfStakes(item.getNumberOfStakes())
             .rewards(item.getRewards())
             .build()).collect(Collectors.toList());

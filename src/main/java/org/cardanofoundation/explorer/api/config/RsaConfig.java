@@ -14,13 +14,13 @@ import org.springframework.stereotype.Component;
 @Setter
 public class RsaConfig {
 
-  private String path;
+  private String publicKeyStr;
 
   private PublicKey publicKey;
 
   @PostConstruct
   public void createRsaKey() {
     java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    publicKey = RsaUtils.getPublicKey(path);
+    publicKey = RsaUtils.getPublicKey(publicKeyStr);
   }
 }

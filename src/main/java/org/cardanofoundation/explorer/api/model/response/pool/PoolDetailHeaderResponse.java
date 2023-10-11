@@ -51,6 +51,8 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
+  private BigInteger totalBalanceOfPoolOwners;
+
   private Timestamp lastUpdate;
 
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
