@@ -559,7 +559,7 @@ public class TxServiceImpl implements TxService {
           .map(entry -> TxSignersResponse.builder().publicKey(entry.getValue()).build())
           .toList();
 
-      if (!CollectionUtils.isEmpty(txResponse.getGenesisDelegateKeys())) {
+      if (!Objects.isNull(txResponse.getProtocols())) {
         Map<String, String> dKeyHash224Map = protocolParamService.getGenesisDelegateKeysMap();
         txSignersResponses.forEach(txSignersResponse -> {
           byte[] pkeyHash224 = Blake2bUtil.blake2bHash224(
@@ -1347,7 +1347,6 @@ public class TxServiceImpl implements TxService {
     if (!ObjectUtils.isEmpty(paramProposals)) {
       //find current change param
       txResponse.setProtocols(protocolMapper.mapProtocolParamResponse(paramProposals));
-      txResponse.setGenesisDelegateKeys(paramProposals.stream().map(ParamProposal::getKey).toList());
       //get previous value
       if (Objects.nonNull(txResponse.getProtocols())) {
         Integer epochNo = tx.getBlock().getEpochNo();
