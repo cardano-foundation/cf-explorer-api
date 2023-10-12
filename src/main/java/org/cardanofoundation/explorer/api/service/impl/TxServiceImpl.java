@@ -27,11 +27,13 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import com.bloxbean.cardano.client.crypto.Blake2bUtil;
+import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -126,6 +128,7 @@ public class TxServiceImpl implements TxService {
   private final TxContractMapper txContractMapper;
   private final TxMetadataRepository txMetadataRepository;
   private final TxVkeyWitnessesRepository txVkeyWitnessesRepository;
+  private final ProtocolParamService protocolParamService;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -551,12 +554,24 @@ public class TxServiceImpl implements TxService {
                                   Arrays.stream(txVkeyWitness.getIndexArr()).forEach(
                                       index -> signersIndexMap.put(index, txVkeyWitness.getKey())));
 
-      List<String> signersInformation = signersIndexMap.entrySet().stream()
+      List<TxSignersResponse> txSignersResponses = signersIndexMap.entrySet().stream()
           .sorted(Map.Entry.comparingByKey())
-          .map(Map.Entry::getValue)
+          .map(entry -> TxSignersResponse.builder().publicKey(entry.getValue()).build())
           .toList();
 
-      txResponse.setSignersInformation(signersInformation);
+      if (!CollectionUtils.isEmpty(txResponse.getGenesisDelegateKeys())) {
+        Map<String, String> dKeyHash224Map = protocolParamService.getGenesisDelegateKeysMap();
+        txSignersResponses.forEach(txSignersResponse -> {
+          byte[] pkeyHash224 = Blake2bUtil.blake2bHash224(
+              HexUtil.decodeHexString(txSignersResponse.getPublicKey()));
+          String pkeyHash224Hex = HexUtil.encodeHexString(pkeyHash224);
+          if (dKeyHash224Map.containsKey(pkeyHash224Hex)) {
+            txSignersResponse.setDelegateKey(dKeyHash224Map.get(pkeyHash224Hex));
+          }
+        });
+      }
+
+      txResponse.setSignersInformation(txSignersResponses);
     }
   }
 
