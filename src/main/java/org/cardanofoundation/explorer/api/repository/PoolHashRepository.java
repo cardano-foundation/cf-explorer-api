@@ -61,7 +61,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength, "
           + "COALESCE(ap.delegatorCount, 0) as numberDelegators, COALESCE(ap.blockInEpoch, 0) as epochBlock, "
           + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock, "
-          + "COALESCE(pi.activeStake, 0) AS poolSize, (pi.liveSaturation, 0) AS saturation "
+          + "COALESCE(pi.activeStake, 0) AS poolSize, COALESCE(pi.liveSaturation, 0) AS saturation "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
@@ -78,8 +78,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   Set<Long> getListPoolIdIn(@Param("poolViews") Set<String> poolViews);
 
   @Query(value = "SELECT ph FROM PoolHash ph "
-      + "WHERE ph.view = :poolViewOrHash "
-      + "OR ph.hashRaw = :poolViewOrHash")
+      + "WHERE (ph.view = :poolViewOrHash "
+      + "OR ph.hashRaw = :poolViewOrHash)")
   Optional<PoolHash> findByViewOrHashRaw(@Param("poolViewOrHash") String poolViewOrHash);
 
   @Query(value =
@@ -94,8 +94,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "LEFT JOIN EpochParam ep ON ep.epochNo = :epochNo "
           + "LEFT JOIN AdaPots ap ON ap.epochNo = :epochNo "
           + "LEFT JOIN AggregatePoolInfo api ON api.poolHash = ph "
-          + "WHERE ph.view = :poolViewOrHash "
-          + "OR ph.hashRaw = :poolViewOrHash")
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash)")
   PoolDetailUpdateProjection getDataForPoolDetail(@Param("poolViewOrHash") String poolViewOrHash, @Param("epochNo") Integer epochNo);
 
   @Query(value =
@@ -110,8 +110,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   @Query(value = "SELECT ph.id AS id, pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView, pod.iconUrl as icon "
       + "FROM PoolHash ph "
       + "LEFT JOIN PoolOfflineData pod ON ph.id  = pod.pool.id AND pod.id = (SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id ) "
-      + "WHERE ph.view = :poolViewOrHash "
-      + "OR ph.hashRaw = :poolViewOrHash")
+      + "WHERE (ph.view = :poolViewOrHash "
+      + "OR ph.hashRaw = :poolViewOrHash)")
   PoolInfoProjection getPoolInfo(@Param("poolViewOrHash") String poolViewOrHash);
 
   @Query(value =
@@ -122,8 +122,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "JOIN Block bk ON tx.block.id  = bk.id "
           + "JOIN EpochParam ep ON ep.epochNo = bk.epochNo AND tx.deposit IS NOT NULL AND tx.deposit >= ep.poolDeposit "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-          + "WHERE ph.view = :poolViewOrHash "
-          + "OR ph.hashRaw = :poolViewOrHash ")
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash) ")
   Page<PoolRegistrationProjection> getPoolRegistrationByPool(@Param("poolViewOrHash") String poolViewOrHash,
                                                              Pageable pageable);
 
