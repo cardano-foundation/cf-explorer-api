@@ -23,6 +23,8 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private String tickerName;
 
+  private String poolView;
+
   private String hashView;
 
   private Timestamp createDate;
@@ -66,6 +68,7 @@ public class PoolDetailHeaderResponse implements Serializable {
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
+    this.poolView = poolDetail.getPoolView();
     this.hashView = poolDetail.getHashRaw();
     this.pledge = poolDetail.getPledge();
     this.cost = poolDetail.getCost();
