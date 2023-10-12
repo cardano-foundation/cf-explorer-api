@@ -463,9 +463,6 @@ public class DelegationServiceImpl implements DelegationService {
         .add(rewardRepository.getAvailableRewardByAddressList(ownerAddress))
         .subtract(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress));
     poolDetailResponse.setTotalBalanceOfPoolOwners(totalBalanceOfPoolOwners);
-    poolDetailResponse.setDelegators(delegationRepository.liveDelegatorsCount(poolView));
-    poolDetailResponse.setEpochBlock(blockRepository.getCountBlockByPoolAndCurrentEpoch(poolId));
-    poolDetailResponse.setLifetimeBlock(blockRepository.getCountBlockByPool(poolId));
 
     return poolDetailResponse;
   }
