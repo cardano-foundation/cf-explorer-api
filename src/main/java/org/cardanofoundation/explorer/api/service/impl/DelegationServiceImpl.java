@@ -217,13 +217,13 @@ public class DelegationServiceImpl implements DelegationService {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     Page<PoolListProjection> poolIdPage;
     Set<Long> poolRetiredIds = new HashSet<>();
-    // add -1L to poolRetiredIds to avoid empty list
-    poolRetiredIds.add(-1L);
     if (!showRetired) {
       String poolRetiredIdKey = CommonConstant.POOL_IDS_INACTIVATE + network;
       poolRetiredIds = redisTemplate.opsForHash().values(poolRetiredIdKey).stream()
           .map(item -> Long.parseLong(String.valueOf(item))).collect(Collectors.toSet());
     }
+    // add -1L to poolRetiredIds to avoid empty list
+    poolRetiredIds.add(-1L);
     boolean isQueryEmpty = DataUtil.isNullOrEmpty(search);
     if (isQueryEmpty) {
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, BaseEntity_.ID));
