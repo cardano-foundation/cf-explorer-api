@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReserveRepository extends JpaRepository<Reserve, Long> {
 
-  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo, block.slotNo as slotNo,"
       + " block.blockNo as blockNo, tx.blockIndex as blockIndex, block.epochNo as epochNo, "
       + " reserve.amount as amount"
       + " FROM Reserve reserve"

@@ -42,7 +42,7 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   List<Long> getWithdrawalByAddressAndTxIn(@Param("stakeKey") StakeAddress stakeKey,
                                            @Param("txIds") List<Long> txIds);
 
-  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo, block.slotNo as slotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, withdrawal.amount as amount"
       + " FROM Withdrawal withdrawal"
       + " INNER JOIN Tx tx ON withdrawal.tx = tx"
@@ -91,4 +91,9 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       " WHERE w.stakeAddressId IN :stakeIds" +
       " GROUP BY w.stakeAddressId")
   List<StakeWithdrawalProjection> getRewardWithdrawnByAddrIn(@Param("stakeIds") Collection<Long> stakeIds);
+
+  @Query("SELECT COALESCE(SUM(w.amount), 0) FROM Withdrawal w "
+      + " INNER JOIN StakeAddress stakeAddress ON w.addr.id = stakeAddress.id"
+      + " WHERE stakeAddress.view IN :addressList")
+  BigInteger getRewardWithdrawnByAddressList(@Param("addressList") List<String> addressList);
 }
