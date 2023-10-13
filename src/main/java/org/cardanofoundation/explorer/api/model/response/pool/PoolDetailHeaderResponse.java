@@ -23,6 +23,8 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private String tickerName;
 
+  private String poolView;
+
   private String hashView;
 
   private Timestamp createDate;
@@ -51,13 +53,32 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
+  private String homepage;
+
+  private String description;
+
+  private String logoUrl;
+
+  private String iconUrl;
+
+  private BigInteger totalBalanceOfPoolOwners;
+
+  private Timestamp lastUpdate;
+
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
+    this.poolView = poolDetail.getPoolView();
     this.hashView = poolDetail.getHashRaw();
     this.pledge = poolDetail.getPledge();
     this.cost = poolDetail.getCost();
     this.margin = poolDetail.getMargin();
+    this.epochBlock = poolDetail.getEpochBlock();
+    this.lifetimeBlock = poolDetail.getLifetimeBlock();
+    this.delegators = poolDetail.getDelegators();
+    this.lastUpdate = poolDetail.getLastUpdate();
     this.rewardAccounts = Collections.singletonList(poolDetail.getRewardAddress());
+    this.logoUrl = poolDetail.getLogoUrl();
+    this.iconUrl = poolDetail.getIconUrl();
   }
 }

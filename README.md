@@ -78,6 +78,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `WEB_SOCKET_MARKET_PUBLISH_DELAY_TIME`: Delay time for publish market data to websocket. Default is 20s.
 - `EPOCH_DAYS` : Number of days in an epoch. Default is 5.
 - `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.
+- `BLOCK_TIME_THRESHOLD_IN_SECOND` : The maximum allowable time difference, in seconds, between the timestamp of the latest block and the current time (for sync status)
+- `INSERTED_TIME_THRESHOLD_IN_SECOND`: The maximum allowable time difference, in seconds, between the timestamp of the latest inserted block and the current time (for sync status)
 
 ### Two options for token logo storage with profiles:
 - For profile: `prod`

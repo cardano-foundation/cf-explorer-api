@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.3.33](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.32...v0.3.33) (2023-10-06)
+
+
+### Features
+
+* [MET-1640] Add poolName, poolId fields to the response when getting the list of delegation transactions for a stake key ([901ba69](https://github.com/cardano-foundation/cf-explorer-api/commit/901ba69d0a005eede1e4a7e4b47044f2dc827b73))
+* add fixed-delay-time to publish market data to websocket ([6e04a37](https://github.com/cardano-foundation/cf-explorer-api/commit/6e04a37654b7cecefbd13affb165bc91d568140f))
+* delete cache  protocol history ([28b037c](https://github.com/cardano-foundation/cf-explorer-api/commit/28b037c24cd06539aeb97bf3731a504178391ff2))
+* impl redis-subscribe and websocket to publishing latest block to client ([d5b5f80](https://github.com/cardano-foundation/cf-explorer-api/commit/d5b5f805e18713e73bbd01dcc2978875d26e4a0a))
+* MET-1533 rename coinPerUtxoSize to coinsPerByte ([59dff55](https://github.com/cardano-foundation/cf-explorer-api/commit/59dff5507dab957fd8d374fd6e86c9c29084f3e3))
+* MET-1606 update tx contract response for new contract design page ([9715791](https://github.com/cardano-foundation/cf-explorer-api/commit/97157915464729d7938f629c4215b07a903ac5c8))
+* MET-1664 limit result set when searching for token and pool ([efac65f](https://github.com/cardano-foundation/cf-explorer-api/commit/efac65fac0424a6137c0825cef2eca4c65935b53))
+* MET-1672 handle missing genesis block data ([a719071](https://github.com/cardano-foundation/cf-explorer-api/commit/a7190713c5412735012711d24caf5e50ae1a8000))
+* publish current epoch to websocket ([f7dca47](https://github.com/cardano-foundation/cf-explorer-api/commit/f7dca47a5beefdf0856f3e124ab8a1db0cb8cfe6))
+* publish market price to websocket ([1687ac5](https://github.com/cardano-foundation/cf-explorer-api/commit/1687ac55e97c70c402c3fadb75d42b6e4d772acc))
+* update cache fixed protocol ([edbe655](https://github.com/cardano-foundation/cf-explorer-api/commit/edbe6553560976877435f5767009a248e516ed31))
+
+
+### Bug Fixes
+
+* add datetime serializer for epoch summary ([7b42641](https://github.com/cardano-foundation/cf-explorer-api/commit/7b42641679809a7043b1a828c564b1c3e524fb22))
+* add more information to websocket message ([ff44723](https://github.com/cardano-foundation/cf-explorer-api/commit/ff4472307de3dbbc405c188f4197679b58759a3e))
+* add response token create date ([1523b7a](https://github.com/cardano-foundation/cf-explorer-api/commit/1523b7a30b28a0a4785af350925f0e63cb486f3b))
+* add utxo hash and index to tx response ([a68f12f](https://github.com/cardano-foundation/cf-explorer-api/commit/a68f12f35f396d08fab7b5c23baeb438e2310bb6))
+* change common method ([503eea2](https://github.com/cardano-foundation/cf-explorer-api/commit/503eea272c5dd492a84fccaf5c9daa269eb52675))
+* change logic search to order by alphabet ([f80f1aa](https://github.com/cardano-foundation/cf-explorer-api/commit/f80f1aa91d7de1617f4d91f08732a0c699a1cd11))
+* fetch reward distributed for Shelly block ([5f6b8da](https://github.com/cardano-foundation/cf-explorer-api/commit/5f6b8da0db4f02afa5ca1f8bc5d1d679a3b8ab25))
+* fix typo KoiOs ([93f107a](https://github.com/cardano-foundation/cf-explorer-api/commit/93f107a3a0b0cb18c4452a97d00fb9a401385ff9))
+* get data from genesis file using method common ([3f24fa0](https://github.com/cardano-foundation/cf-explorer-api/commit/3f24fa0102752e86aac1bdb699502bfa0881431d))
+* handle case blockNo start with 0 ([6338029](https://github.com/cardano-foundation/cf-explorer-api/commit/63380296148ce97731626eb8bf35ae0f2c32aca7))
+* handle connection exception to reward service ([9f57a4a](https://github.com/cardano-foundation/cf-explorer-api/commit/9f57a4a155f5d3a5657651aba20b44bfa28d89ab))
+* MET-1528 change logic for analytic chart ([6eaecf2](https://github.com/cardano-foundation/cf-explorer-api/commit/6eaecf262af2beda6b7e6d6fdbaf44991df44460))
+* MET-1559 update logic sorting when filter token and pool ([e1373f4](https://github.com/cardano-foundation/cf-explorer-api/commit/e1373f4d6ad1f1d114fc2e0556d297da33522748))
+* MET-1629 missing rewards for epoch ([93eaed4](https://github.com/cardano-foundation/cf-explorer-api/commit/93eaed4dd88bffa094d76a9e9e7b14314da9e76f))
+* MET-1651 add ticker name in pool list response ([631705a](https://github.com/cardano-foundation/cf-explorer-api/commit/631705a7f44d8442d6d26a3f8c8653e892d26a31))
+* MET-1651 refactor code ([ba12ea4](https://github.com/cardano-foundation/cf-explorer-api/commit/ba12ea4a822022cd2bdccdfbcfa695aacc41281c))
+* MET-1652 remove reward percentage in some pool response ([327ea0d](https://github.com/cardano-foundation/cf-explorer-api/commit/327ea0dca5defa64e1abb4b531369a5c8b3519b6))
+* MET-1682 fix problem lazy fetch data ([4676167](https://github.com/cardano-foundation/cf-explorer-api/commit/4676167a261f68d46cc342763380ffa4151e7d31))
+* MET-1682 remove transactional read only in service method ([d2af470](https://github.com/cardano-foundation/cf-explorer-api/commit/d2af4704fc4bf30407501ab358e18d1f4de01d4e))
+* remove fetching pool history data from koios when getting pool list, top delegation pool, pool detail header ([6722d2e](https://github.com/cardano-foundation/cf-explorer-api/commit/6722d2e7cdfdd134ac8f58c4cd2e67b12289d639))
+* resolved conflict with develop ([5390a25](https://github.com/cardano-foundation/cf-explorer-api/commit/5390a2599e23d20c7fce42e82862d53509465bdc))
+* Retrieve parameter values from the genesis file instead of hardcode them ([31f5365](https://github.com/cardano-foundation/cf-explorer-api/commit/31f5365fc33789cf7817192d51c82fd1ca362e80))
+* transaction detail protocol update error with cost model ([699c407](https://github.com/cardano-foundation/cf-explorer-api/commit/699c40729280b15de0fec8341ba2134be99e5904))
+* update env genesis file ([15669ef](https://github.com/cardano-foundation/cf-explorer-api/commit/15669ef167c9caaed65d778a3cf0acf3d17c1102))
+* update fill content from url and local file ([c9c22e2](https://github.com/cardano-foundation/cf-explorer-api/commit/c9c22e235703df898082843d3fe3b83db30fc68d))
+* update flow websocket ([bb61299](https://github.com/cardano-foundation/cf-explorer-api/commit/bb61299ece67d1cc53650965a336c11f9d41123a))
+* update logic pool search ([8e7d4f5](https://github.com/cardano-foundation/cf-explorer-api/commit/8e7d4f5a868ddc2fed7a92508a5213790ae034c0))
+* update logic search all for token and pool when return one result ([c47bf76](https://github.com/cardano-foundation/cf-explorer-api/commit/c47bf7691e7655e22702552986eceba3b9e672f0))
+* update logic to publish market data to ws ([25b9354](https://github.com/cardano-foundation/cf-explorer-api/commit/25b9354c9da9d7a5e67481875668542dc4852711))
+
+
+### Performance Improvements
+
+* improve performance block list info ([5b9fa3a](https://github.com/cardano-foundation/cf-explorer-api/commit/5b9fa3a299587d443c5868e4095bbb09416f7da4))
+
 ## [0.3.32](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.31...v0.3.32) (2023-08-28)
 
 

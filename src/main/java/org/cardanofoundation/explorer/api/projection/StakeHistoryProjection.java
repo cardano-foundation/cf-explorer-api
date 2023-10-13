@@ -11,6 +11,7 @@ public interface StakeHistoryProjection {
   Integer getBlockIndex();
   Integer getEpochNo();
   Integer getEpochSlotNo();
+  Integer getSlotNo();
   String getAction();
   BigInteger getFee();
   Long getDeposit();

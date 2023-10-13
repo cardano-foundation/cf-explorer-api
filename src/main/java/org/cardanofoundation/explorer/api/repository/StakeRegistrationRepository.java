@@ -26,7 +26,7 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
       + " WHERE stakeRegis.addr = :stake")
   Optional<Long> findMaxTxIdByStake(@Param("stake") StakeAddress stake);
 
-  @Query(value = "SELECT tx.hash as txHash, b.time as time,"
+  @Query(value = "SELECT tx.hash as txHash, b.time as time, b.slotNo as slotNo,"
       + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
       + " 'Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
       + " FROM StakeRegistration sr"
