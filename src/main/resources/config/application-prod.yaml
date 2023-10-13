@@ -115,7 +115,9 @@ application:
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
   token-logo-endpoint: https://${TOKEN_LOGO_S3_BUCKET_NAME}.s3.${TOKEN_LOGO_S3_REGION}.amazonaws.com/
-
+  healthcheck:
+    block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
+    inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true
@@ -131,11 +133,15 @@ management:
     enabled-by-default: false
     web:
       exposure:
-        include: "health,prometheus"
+        include: "health,prometheus,info,sync-status"
   endpoint:
     health:
       enabled: true
     prometheus:
+      enabled: true
+    info:
+      enabled: true
+    sync-status:
       enabled: true
 
   metrics:
@@ -147,7 +153,7 @@ management:
 
 rsa:
   key:
-    path: /key/public_key
+    public-key-str: ${RSA_PUBLIC_KEY_AUTH}
 
 cloud:
   aws:
