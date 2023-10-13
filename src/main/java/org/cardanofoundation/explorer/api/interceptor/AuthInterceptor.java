@@ -111,12 +111,9 @@ public class AuthInterceptor implements HandlerInterceptor {
     for (RoleConfigurationMapper roleMapper : roleConf.getRoles()) {
       if (roles.contains(roleMapper.getName())) {
         String roleKey = roleMapper.getName();
-        Map<String, Object> desc = roleMapper.getFunction().stream()
-            .filter(Objects::nonNull)
-            .findAny().orElse(new RoleFunction()).getDescription();
 
-        if (Objects.nonNull(desc)) {
-          roleDescription.put(roleKey, desc);
+        if (Objects.nonNull(roleMapper.getAttributes())) {
+          roleDescription.put(roleKey, new HashMap<>(roleMapper.getAttributes()));
         }
       }
     }
