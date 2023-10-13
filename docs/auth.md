@@ -23,41 +23,15 @@ example
   "role": [
     {
       "name": "ROLE_ELEVATED",
-      "function": [
-        {
-          "uri": "/api/v1/staking-lifecycle/report/stake-key",
-          "method": "POST",
-          "description": {
-            "reportLimitPer24Hours": -1
-          }
-        },
-        {
-          "uri": "/api/v1/pool-report/create",
-          "method": "POST",
-          "description": {
-            "reportLimitPer24Hours": -1
-          }
-        }
-      ]
+      "attributes": {
+        "reportLimitPer24Hours": -1
+      }
     },
     {
       "name": "ROLE_PUBLIC",
-      "function": [
-        {
-          "uri": "/api/v1/staking-lifecycle/report/stake-key",
-          "method": "POST",
-          "description": {
-            "reportLimitPer24Hours": 10
-          }
-        },
-        {
-          "uri": "/api/v1/pool-report/create",
-          "method": "POST",
-          "description": {
-            "reportLimitPer24Hours": 2
-          }
-        }
-      ]
+      "attributes": {
+        "reportLimitPer24Hours": 6
+      }
     }
   ]
 }
@@ -93,25 +67,12 @@ all url has prefix is `/api/v1/protocols/` with method `GET` need to authenticat
 ```
 {
   "name": "ROLE_PUBLIC",
-  "function": [
-    {
-      "uri": "/api/v1/staking-lifecycle/report/stake-key",
-      "method": "POST",
-      "description": {
-        "reportLimitPer24Hours": 10
-      }
-    },
-    {
-      "uri": "/api/v1/pool-report/create",
-      "method": "POST",
-      "description": {
-        "reportLimitPer24Hours": 2
-      }
-    }
-  ]
+  "attributes": {
+    "reportLimitPer24Hours": 6
+  }
 }
 ```
 
-User has role "ROLE_PUBLIC" can create 10 stake report per 24h and 2 pool report per 24h
+User has role "ROLE_PUBLIC" can create 10 report per 24h
 
 reportLimitPer24Hours = -1 it means unlimited report
