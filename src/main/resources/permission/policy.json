@@ -19,7 +19,7 @@
     {
       "name": "ROLE_PUBLIC",
       "attributes": {
-        "reportLimitPer24Hours": 6
+        "reportLimitPer24Hours": 2
       }
     }
   ]
