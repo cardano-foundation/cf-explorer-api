@@ -81,6 +81,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `TOKEN_LOGO_ENDPOINT`: Endpoint for get token logo.
 - `BLOCK_TIME_THRESHOLD_IN_SECOND` : The maximum allowable time difference, in seconds, between the timestamp of the latest block and the current time (for sync status)
 - `INSERTED_TIME_THRESHOLD_IN_SECOND`: The maximum allowable time difference, in seconds, between the timestamp of the latest inserted block and the current time (for sync status)
+- `AUTH_FILE_PATH`: path file of authenticate configuration
+
 ### We have 3 options for redis cache:
 - `redis standalone`
     - `REDIS_STANDALONE_HOST` : Redis hostname eg. `127.0.0.1`.
