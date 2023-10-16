@@ -40,7 +40,8 @@ out/
 
 
 ### ENV ###
-.env
+.env*
+!.env.example
 
 
 ### Maven ###
