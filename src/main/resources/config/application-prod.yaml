@@ -112,8 +112,6 @@ application:
       base-url: ${API_CHECK_ADA_POTS_URL:http://localhost:8888/api/v1/ada-pots/fetch}
     check-epoch:
       base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
-  report:
-    limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:2}
   token-logo-endpoint: https://${TOKEN_LOGO_S3_BUCKET_NAME}.s3.${TOKEN_LOGO_S3_REGION}.amazonaws.com/
   healthcheck:
     block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
@@ -154,6 +152,10 @@ management:
 rsa:
   key:
     public-key-str: ${RSA_PUBLIC_KEY_AUTH}
+
+keycloak:
+  role:
+    path: ${AUTH_FILE_PATH:classpath:permission/policy.json}
 
 cloud:
   aws:
