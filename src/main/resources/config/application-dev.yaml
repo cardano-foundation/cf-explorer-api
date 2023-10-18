@@ -4,7 +4,7 @@ multi-datasource: #specified for HikariDataSource
     hikariConfig:
       jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.112}:${LEDGER_SYNC_PORT:54323}/${LEDGER_SYNC_DB:explorer_api}?currentSchema=mainnet
       username: ${LEDGER_SYNC_USER:cardano-read}
-      password: ${LEDGER_SYNC_USER:1}
+      password: ${LEDGER_SYNC_PASSWORD:1}
       driverClassName: org.postgresql.Driver
       poolName: explorer-schedule-ledgersync-pool
       minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
