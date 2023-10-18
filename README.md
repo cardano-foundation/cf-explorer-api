@@ -51,11 +51,11 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `LEDGER_SYNC_USER`: Ledger-sync database username
 - `LEDGER_SYNC_PASSWORD`: Ledger-sync database password
 - `LEDGER_SYNC_DB`: Ledger-sync database name
-- `ANALYTICS_HOST`: Analytics database host.
-- `ANALYTICS_PORT`: Analytics database port
-- `ANALYTICS_USER`: Analytics database username
-- `ANALYTICS_PASSWORD`: Analytics database password
-- `ANALYTICS_DB`: Analytics database name
+- `EXPLORER_HOST`: Explorer database host.
+- `EXPLORER_PORT`: Explorer database port
+- `EXPLORER_USER`: Explorer database username
+- `EXPLORER_PASSWORD`: Explorer database password
+- `EXPLORER_DB`: Explorer database name
 
 
 - `JACKSON_INCLUSION`: Jackson inclusion. Default is NON_NULL for ignore null value. Using USE_DEFAULTS for not ignore null value.

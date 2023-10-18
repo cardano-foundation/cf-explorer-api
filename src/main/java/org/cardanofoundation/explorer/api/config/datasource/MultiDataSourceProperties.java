@@ -1,7 +1,5 @@
 package org.cardanofoundation.explorer.api.config.datasource;
 
-import java.util.Objects;
-
 import javax.sql.DataSource;
 
 import lombok.AccessLevel;
@@ -27,7 +25,7 @@ import org.flywaydb.core.Flyway;
 public class MultiDataSourceProperties {
 
   DataSourceConfig datasourceLedgerSync;
-  DataSourceConfig datasourceAnalytics;
+  DataSourceConfig datasourceExplorer;
 
   @Data
   @FieldDefaults(level = AccessLevel.PRIVATE)
