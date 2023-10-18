@@ -17,35 +17,35 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    entityManagerFactoryRef = "analyticsEntityManagerFactory",
-    transactionManagerRef = "analyticsTransactionManager",
-    basePackages = {"org.cardanofoundation.explorer.api.repository.analytics"})
-public class AnalyticsDatasourceConfig {
+    entityManagerFactoryRef = "explorerEntityManagerFactory",
+    transactionManagerRef = "explorerTransactionManager",
+    basePackages = {"org.cardanofoundation.explorer.api.repository.explorer"})
+public class ExplorerDatasourceConfig {
 
   private final MultiDataSourceProperties multiDataSourceProperties;
 
-  public AnalyticsDatasourceConfig(
+  public ExplorerDatasourceConfig(
       MultiDataSourceProperties multiDataSourceProperties) {this.multiDataSourceProperties = multiDataSourceProperties;}
 
-  @Bean(name = "analyticsDataSource")
+  @Bean(name = "explorerDataSource")
   public DataSource ledgerSyncDataSource() {
     return multiDataSourceProperties.buildDataSource(
-        multiDataSourceProperties.getDatasourceAnalytics());
+        multiDataSourceProperties.getDatasourceExplorer());
   }
 
-  @Bean(name = "analyticsEntityManagerFactory")
+  @Bean(name = "explorerEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean
       (EntityManagerFactoryBuilder builder,
-       @Qualifier("analyticsDataSource") DataSource dataSource) {
+       @Qualifier("explorerDataSource") DataSource dataSource) {
     return builder
         .dataSource(dataSource)
-        .packages("org.cardanofoundation.explorer.consumercommon.analytics.entity")
+        .packages("org.cardanofoundation.explorer.consumercommon.explorer.entity")
         .build();
   }
 
-  @Bean(name = "analyticsTransactionManager")
+  @Bean(name = "explorerTransactionManager")
   public PlatformTransactionManager todosTransactionManager(
-      @Qualifier("analyticsEntityManagerFactory") LocalContainerEntityManagerFactoryBean ledgerSyncEntityManagerFactory) {
+      @Qualifier("explorerEntityManagerFactory") LocalContainerEntityManagerFactoryBean ledgerSyncEntityManagerFactory) {
     return new JpaTransactionManager(
         Objects.requireNonNull(ledgerSyncEntityManagerFactory.getObject()));
   }

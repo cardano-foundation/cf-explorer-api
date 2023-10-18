@@ -26,14 +26,13 @@ multi-datasource: #specified for HikariDataSource
         elideSetAutoCommits: true
         maintainTimeStats: false
 
-  datasourceAnalytics:
+  datasourceExplorer:
     hikariConfig:
-      #      jdbcUrl: jdbc:postgresql://localhost:${ANALYTICS_HOST:54321}/${ANALYTICS_PORT:explorer}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
-      jdbcUrl: jdbc:postgresql://localhost:${ANALYTICS_HOST:54321}/${ANALYTICS_PORT:explorer}?currentSchema=mainnet2
-      username: ${ANALYTICS_USER:cardano-master}
-      password: ${ANALYTICS_PASSWORD:Y2FyZGFuby1kYXRhYmFzZS1tYXN0ZXI=}
+      jdbcUrl: jdbc:postgresql://localhost:${EXPLORER_HOST:54321}/${EXPLORER_PORT:explorer}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+      username: ${EXPLORER_USER:cardano-master}
+      password: ${EXPLORER_PASSWORD:Y2FyZGFuby1kYXRhYmFzZS1tYXN0ZXI=}
       driverClassName: org.postgresql.Driver
-      poolName: explorer-schedule-analytics-pool
+      poolName: explorer-schedule-explorer-pool
       minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
       maximumPoolSize: ${MAXIMUM_POOL_SIZE:48} #maximum pool size
       idleTimeout: 300000 #maximum idle time for connection
