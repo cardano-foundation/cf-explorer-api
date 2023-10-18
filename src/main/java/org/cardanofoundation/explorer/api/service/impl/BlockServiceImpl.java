@@ -15,10 +15,10 @@ import org.cardanofoundation.explorer.api.mapper.BlockMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
-import org.cardanofoundation.explorer.api.repository.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.CustomBlockRepository;
-import org.cardanofoundation.explorer.api.repository.SlotLeaderRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.CustomBlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.SlotLeaderRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.BlockService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -34,7 +34,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

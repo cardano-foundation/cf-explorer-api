@@ -14,7 +14,7 @@ import java.util.Map;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
-import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -30,7 +30,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportHistoryServiceTest {

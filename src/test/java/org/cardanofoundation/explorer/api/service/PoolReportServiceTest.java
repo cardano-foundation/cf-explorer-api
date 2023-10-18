@@ -12,9 +12,9 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularR
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
-import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
-import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
