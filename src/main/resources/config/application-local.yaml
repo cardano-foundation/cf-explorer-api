@@ -2,11 +2,11 @@
 multi-datasource: #specified for HikariDataSource
   datasourceLedgerSync:
     hikariConfig:
-      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.75}:${LEDGER_SYNC_PORT:54322}/${LEDGER_SYNC_DB:explorer}?currentSchema=mainnet
+      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.112}:${LEDGER_SYNC_PORT:54323}/${LEDGER_SYNC_DB:explorer_api}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
       username: ${LEDGER_SYNC_USER:ducphung}
       password: ${LEDGER_SYNC_PASSWORD:ducphung@pw}
       driverClassName: org.postgresql.Driver
-      poolName: explorer-schedule-ledgersync-pool
+      poolName: explorer-api-ledgersync-pool
       minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
       maximumPoolSize: ${MAXIMUM_POOL_SIZE:48} #maximum pool size
       idleTimeout: 300000 #maximum idle time for connection
@@ -28,11 +28,11 @@ multi-datasource: #specified for HikariDataSource
 
   datasourceExplorer:
     hikariConfig:
-      jdbcUrl: jdbc:postgresql://localhost:${EXPLORER_HOST:54321}/${EXPLORER_PORT:explorer}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+      jdbcUrl: jdbc:postgresql://${EXPLORER_HOST:10.4.10.112}:${EXPLORER_PORT:54323}/${EXPLORER_DB:explorer_api}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
       username: ${EXPLORER_USER:cardano-master}
       password: ${EXPLORER_PASSWORD:Y2FyZGFuby1kYXRhYmFzZS1tYXN0ZXI=}
       driverClassName: org.postgresql.Driver
-      poolName: explorer-schedule-explorer-pool
+      poolName: explorer-api-explorer-pool
       minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
       maximumPoolSize: ${MAXIMUM_POOL_SIZE:48} #maximum pool size
       idleTimeout: 300000 #maximum idle time for connection
