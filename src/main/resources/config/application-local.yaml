@@ -118,7 +118,9 @@ application:
   report:
     limit-per-24hours: ${REPORT_LIMIT_PER_24HOURS:200}
   token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://localhost:9001}
-
+  healthcheck:
+    block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
+    inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true
@@ -134,16 +136,22 @@ management:
     enabled-by-default: false
     web:
       exposure:
-        include: "health,prometheus"
+        include: "health,prometheus,info,sync-status"
   endpoint:
     health:
       enabled: true
     prometheus:
       enabled: true
+    sync-status:
+      enabled: true
 
 rsa:
   key:
-    path: /key/public_key
+    public-key-str: ${RSA_PUBLIC_KEY_AUTH:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAthC/F58t/zLXPvh0cy91cyIHPRxZIEvRncffj/LJVH4nuDG3SgrlpW0NnuuSP23TiSYJIHOv0zsuNtGztU7/INdG29lgpHtG7RnqZwpwP6GG/U9F1N+Dt1CDT/3DcA9JXd9skoxpKQtyLxqLP799cBxtt7LlcRG4LV4tS5L+qrTR50jLR2JWXEphOPyc5zElgbMPjHkcZyoGd4t5DnTBdLXffS2hJzFr8X1GtE91dkApC099CMjM5ifoIDQibiPJElnB3j60Zuto6Mc9+eRONuCQcGPT49zHZgmqNiwkHL1fhJnCSujVLM/y3ZzzG9/IspbRlEcCCk9W7p4IJEPmewIDAQAB}
+
+keycloak:
+  role:
+    path: classpath:permission/policy.json
 
 cloud:
   aws:
@@ -174,7 +182,6 @@ spring:
   redis:
     pubsub:
       topic: ${REDIS_PUBSUB_TOPIC:block.mainnet}
-
 
 genesis:
   shelley: ${SHELLEY_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/shelley-genesis.json}
