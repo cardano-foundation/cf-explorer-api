@@ -1,50 +1,67 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
-import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
-import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
-import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
-import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
-import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
-import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.*;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.*;
-import org.cardanofoundation.explorer.api.service.TokenService;
-import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
-import org.cardanofoundation.explorer.api.util.DateUtils;
-import org.cardanofoundation.explorer.api.util.StreamUtil;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
-import org.cardanofoundation.explorer.api.projection.TokenNumberHoldersProjection;
-
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.data.domain.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
+import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
+import org.cardanofoundation.explorer.api.mapper.TokenMapper;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
+import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TokenInfoRepository;
+import org.cardanofoundation.explorer.api.service.TokenService;
+import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
+import org.cardanofoundation.explorer.api.util.DateUtils;
+import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.NoContentException;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
+import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
+import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
+import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
+import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +73,6 @@ public class TokenServiceImpl implements TokenService {
   private final AssetMetadataRepository assetMetadataRepository;
   private final AddressTokenRepository addressTokenRepository;
   private final AddressRepository addressRepository;
-  private final TxRepository txRepository;
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final StakeAddressRepository stakeAddressRepository;
 
@@ -64,27 +80,25 @@ public class TokenServiceImpl implements TokenService {
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
-  private final TokenPageCacheService tokenPageCacheService;
-  @Qualifier("taskExecutor")
-  private final TaskExecutor taskExecutor;
+  private final AggregatedDataCacheService aggregatedDataCacheService;
+  private final TokenInfoRepository tokenInfoRepository;
   private static final int MAX_TOTAL_ELEMENTS = 1000;
 
-  @SingletonCall(typeToken = TypeTokenGson.TOKEN_FILTER, expireAfterSeconds = 150, callAfterMilis = 200)
   @Override
-  public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable)
-      throws ExecutionException, InterruptedException {
+  @Transactional(readOnly = true)
+  public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable) {
+    int tokenCount = aggregatedDataCacheService.getTokenCount();
 
+    if (tokenCount == 0) {
+      tokenCount = (int) multiAssetRepository.count();
+    }
+    List<MultiAsset> dataContent;
     Page<MultiAsset> multiAssets;
     boolean isQueryEmpty = StringUtils.isEmpty(query);
     if(isQueryEmpty){
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
-      Optional<BaseFilterResponse<TokenFilterResponse>> cacheResp =
-          tokenPageCacheService.getTokePageCache(pageable);
-      if (cacheResp.isPresent()) {
-        return cacheResp.get();
-      } else {
-        multiAssets = multiAssetRepository.findAll(pageable);
-      }
+      dataContent = multiAssetRepository.findMultiAssets(pageable);
+      multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
     } else {
       String lengthOfNameView = "nameViewLength";
       if(MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()){
@@ -108,56 +122,40 @@ public class TokenServiceImpl implements TokenService {
           }
       );
     }
-    Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(), ma -> ma.getPolicy() + ma.getName());
-
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList, AssetMetadata::getSubject);
 
     var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
-    Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
-    List<TokenVolumeProjection> volumes = addressTokenRepository.sumBalanceAfterTx(multiAssets.getContent(), txId);
+    List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(),
+        MultiAsset::getId);
+    var tokenInfos = tokenInfoRepository.findTokenInfosByMultiAssetIdIn(multiAssetIds);
+    var tokenInfoMap = StreamUtil.toMap(tokenInfos, TokenInfo::getMultiAssetId,
+        Function.identity());
 
-    List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(), MultiAsset::getId);
-    var numberOfHoldersWithStakeKeyAsync = CompletableFuture.supplyAsync(
-        () -> addressTokenBalanceRepository.countByMultiAssetIn(multiAssetIds), taskExecutor);
+    Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(),
+        ma -> ma.getPolicy() + ma.getName());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList,
+        AssetMetadata::getSubject);
+    var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    multiAssetResponsesList.forEach(ma -> {
+      var tokenInfo = tokenInfoMap.getOrDefault(ma.getId(), null);
 
-    var numberOfHoldersWithAddressNotHaveStakeKeyAsync = CompletableFuture.supplyAsync(
-        () -> addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAssetIn(multiAssetIds),
-        taskExecutor);
-
-    CompletableFuture.allOf(numberOfHoldersWithStakeKeyAsync, numberOfHoldersWithAddressNotHaveStakeKeyAsync).join();
-    Map<Long, Long> numberHoldersStakeKeyMap = StreamUtil.toMap(
-        numberOfHoldersWithStakeKeyAsync.get(),
-        TokenNumberHoldersProjection::getIdent,
-        TokenNumberHoldersProjection::getNumberOfHolders
-    );
-
-    Map<Long, Long> numberHoldersAddressNotHaveStakeKeyMap = StreamUtil.toMap(
-        numberOfHoldersWithAddressNotHaveStakeKeyAsync.get(),
-        TokenNumberHoldersProjection::getIdent,
-        TokenNumberHoldersProjection::getNumberOfHolders
-    );
-
-    Map<Long, BigInteger> tokenVolumeMap = StreamUtil
-        .toMap(volumes, TokenVolumeProjection::getIdent, TokenVolumeProjection::getVolume);
-
-    multiAssetResponsesList.forEach(
-        ma -> {
-          ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
-              assetMetadataMap.get(ma.getPolicy() + ma.getName()))
-          );
-          if (tokenVolumeMap.containsKey(ma.getId())) {
-            ma.setVolumeIn24h(tokenVolumeMap.get(ma.getId()).toString());
-          } else {
-            ma.setVolumeIn24h(String.valueOf(0));
-          }
-          ma.setVolumeIn24h(tokenVolumeMap.getOrDefault(ma.getId(), BigInteger.valueOf(0)).toString());
-          ma.setNumberOfHolders(numberHoldersStakeKeyMap.getOrDefault(ma.getId(), 0L)
-              + numberHoldersAddressNotHaveStakeKeyMap.getOrDefault(ma.getId(), 0L));
-          ma.setId(null);
+      if (tokenInfo == null) {
+        ma.setNumberOfHolders(0L);
+        ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+      } else {
+        if (tokenInfo.getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+          ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+        } else {
+          ma.setVolumeIn24h(String.valueOf(tokenInfo.getVolume24h()));
         }
-    );
+        ma.setNumberOfHolders(tokenInfo.getNumberOfHolders());
+      }
+
+      ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
+          assetMetadataMap.get(ma.getPolicy() + ma.getName()))
+      );
+    });
+
     if(isQueryEmpty){
       return new BaseFilterResponse<>(multiAssetResponsesList);
     } else {
@@ -186,23 +184,22 @@ public class TokenServiceImpl implements TokenService {
         .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-    Timestamp yesterday = Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusDays(1));
-    Long txId = txRepository.findMinTxByAfterTime(yesterday).orElse(Long.MAX_VALUE);
-    var volume = addressTokenRepository.sumBalanceAfterTx(multiAsset, txId);
 
-    var numberOfHoldersHaveStakeKey = addressTokenBalanceRepository
-        .countAddressNotHaveStakeByMultiAsset(multiAsset)
-        .orElse(0L);
-    var numberOfHoldersNotHaveStakeKe =  addressTokenBalanceRepository
-        .countStakeByMultiAsset(multiAsset)
-        .orElse(0L);
+    var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
+    var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
-    tokenResponse.setNumberOfHolders(numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe);
-    if (Objects.isNull(volume)) {
-      tokenResponse.setVolumeIn24h(String.valueOf(0));
+    if (tokenInfo.isEmpty()) {
+      tokenResponse.setNumberOfHolders(0L);
+      tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
     } else {
-      tokenResponse.setVolumeIn24h(volume.toString());
+      if (tokenInfo.get().getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+        tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+      } else {
+        tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
+      }
+      tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
     }
+
     AssetMetadata assetMetadata = assetMetadataRepository
         .findFirstBySubject(multiAsset.getPolicy() + multiAsset.getName())
         .orElse(null);

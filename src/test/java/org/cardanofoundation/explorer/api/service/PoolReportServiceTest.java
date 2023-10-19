@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -11,9 +12,9 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularR
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
-import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
-import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.PoolReportRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
@@ -34,7 +35,9 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -65,6 +68,9 @@ public class PoolReportServiceTest {
   @Mock
   ReportHistoryService reportHistoryService;
 
+  @Mock
+  RoleService roleService;
+
   @Test
   void create_shouldThrowExceptionWhenNotFoundStakeAdress() {
     PoolReportCreateRequest request = PoolReportCreateRequest.builder()
@@ -73,7 +79,8 @@ public class PoolReportServiceTest {
     String username = "username";
     when(poolHashRepository.findByViewOrHashRaw(anyString())).thenReturn(Optional.empty());
     Assertions.assertThrows(BusinessException.class,
-                            () -> poolReportService.create(request, username));
+        () -> poolReportService.create(request,
+            UserPrincipal.builder().username(username).build()));
   }
 
   @Test
@@ -82,10 +89,13 @@ public class PoolReportServiceTest {
         .poolId("any")
         .build();
     String username = "username";
+    Map<String, Map<String, Object>> roleDescriptions = new HashMap<>();
     when(poolHashRepository.findByViewOrHashRaw(anyString())).thenReturn(Optional.of(new PoolHash()));
-    when(reportHistoryService.isLimitReached(username)).thenReturn(true);
+    when(reportHistoryService.isLimitReached(username, 10)).thenReturn(true);
+    when(roleService.getReportLimit(roleDescriptions)).thenReturn(10);
     Assertions.assertThrows(BusinessException.class,
-                            () -> poolReportService.create(request, username));
+        () -> poolReportService.create(request,
+            UserPrincipal.builder().username(username).roleDescription(roleDescriptions).build()));
   }
 
   @Test
@@ -101,6 +111,7 @@ public class PoolReportServiceTest {
         .epochRanges(new Integer[]{300, 410})
         .build();
     String username = "username";
+    Map<String, Map<String, Object>> roleDescriptions = new HashMap<>();
 
     PoolReportHistory saved = PoolReportHistory.builder()
         .isPoolSize(true)
@@ -114,21 +125,24 @@ public class PoolReportServiceTest {
         .id(1L)
         .poolView("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
         .reportHistory(ReportHistory.builder()
-                           .id(1L)
-                           .reportName(
-                               "report_pool_pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
-                           .status(ReportStatus.IN_PROGRESS)
-                           .type(ReportType.POOL_ID)
-                           .username(username)
-                           .createdAt(new Timestamp(System.currentTimeMillis()))
-                           .build())
+            .id(1L)
+            .reportName(
+                "report_pool_pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
+            .status(ReportStatus.IN_PROGRESS)
+            .type(ReportType.POOL_ID)
+            .username(username)
+            .createdAt(new Timestamp(System.currentTimeMillis()))
+            .build())
         .build();
 
     when(poolHashRepository.findByViewOrHashRaw(any(String.class))).thenReturn(Optional.of(new PoolHash()));
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
-    when(reportHistoryService.isLimitReached(username)).thenReturn(false);
+    when(reportHistoryService.isLimitReached(username, 1)).thenReturn(false);
+    when(roleService.getReportLimit(roleDescriptions)).thenReturn(1);
     when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(true);
-    Assertions.assertTrue(poolReportService.create(request, username));
+    Assertions.assertTrue(
+        poolReportService.create(request,
+            UserPrincipal.builder().username(username).roleDescription(roleDescriptions).build()));
   }
 
   @Test
@@ -138,13 +152,13 @@ public class PoolReportServiceTest {
     ExportType exportType = ExportType.EXCEL;
     when(poolReportRepository.findById(any())).thenReturn(
         Optional.of(PoolReportHistory.builder()
-                        .reportHistory(ReportHistory.builder()
-                                           .username(username)
-                                           .build())
-                        .build()));
+            .reportHistory(ReportHistory.builder()
+                .username(username)
+                .build())
+            .build()));
 
     Assertions.assertThrows(BusinessException.class,
-                            () -> poolReportService.export(reportId, exportType, username));
+        () -> poolReportService.export(reportId, exportType, username));
   }
 
   @Test
@@ -155,12 +169,12 @@ public class PoolReportServiceTest {
     byte[] bytes = new byte[1];
     PoolReportHistory poolReport = PoolReportHistory.builder()
         .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.STAKE_KEY)
-                           .build())
+            .username(username)
+            .storageKey("storageKey")
+            .reportName("reportName")
+            .status(ReportStatus.GENERATED)
+            .type(ReportType.STAKE_KEY)
+            .build())
         .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
 
@@ -193,18 +207,18 @@ public class PoolReportServiceTest {
         .beginEpoch(300)
         .endEpoch(410)
         .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.STAKE_KEY)
-                           .build())
+            .username(username)
+            .storageKey("storageKey")
+            .reportName("reportName")
+            .status(ReportStatus.GENERATED)
+            .type(ReportType.STAKE_KEY)
+            .build())
         .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     Page<PoolReportProjection> poolReportProjections = new PageImpl<>(List.of(),
-                                                                      PageRequest.of(0, 1), 0);
+        PageRequest.of(0, 1), 0);
     when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(),
-                                                       any())).thenReturn(poolReportProjections);
+        any())).thenReturn(poolReportProjections);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
     var expect = new BaseFilterResponse<>(poolReportProjections, List.of());
 
@@ -231,12 +245,12 @@ public class PoolReportServiceTest {
         .beginEpoch(300)
         .endEpoch(410)
         .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.STAKE_KEY)
-                           .build())
+            .username(username)
+            .storageKey("storageKey")
+            .reportName("reportName")
+            .status(ReportStatus.GENERATED)
+            .type(ReportType.STAKE_KEY)
+            .build())
         .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<TabularRegisResponse> tabularRegisResponse = new BaseFilterResponse<>();
@@ -262,12 +276,12 @@ public class PoolReportServiceTest {
         .beginEpoch(300)
         .endEpoch(410)
         .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.STAKE_KEY)
-                           .build())
+            .username(username)
+            .storageKey("storageKey")
+            .reportName("reportName")
+            .status(ReportStatus.GENERATED)
+            .type(ReportType.STAKE_KEY)
+            .build())
         .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateDetailResponse = new BaseFilterResponse<>();
@@ -292,12 +306,12 @@ public class PoolReportServiceTest {
         .beginEpoch(300)
         .endEpoch(410)
         .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.STAKE_KEY)
-                           .build())
+            .username(username)
+            .storageKey("storageKey")
+            .reportName("reportName")
+            .status(ReportStatus.GENERATED)
+            .type(ReportType.STAKE_KEY)
+            .build())
         .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
@@ -305,7 +319,7 @@ public class PoolReportServiceTest {
         rewardResponse);
 
     var response = poolReportService.fetchRewardsDistribution(reportId, PageRequest.of(0, 1),
-                                                              username);
+        username);
     Assertions.assertEquals(rewardResponse, response);
   }
 
@@ -324,12 +338,12 @@ public class PoolReportServiceTest {
         .beginEpoch(300)
         .endEpoch(410)
         .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.STAKE_KEY)
-                           .build())
+            .username(username)
+            .storageKey("storageKey")
+            .reportName("reportName")
+            .status(ReportStatus.GENERATED)
+            .type(ReportType.STAKE_KEY)
+            .build())
         .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     BaseFilterResponse<DeRegistrationResponse> deRegistrationResponse = new BaseFilterResponse<>();
@@ -354,16 +368,16 @@ public class PoolReportServiceTest {
         .beginEpoch(300)
         .endEpoch(410)
         .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .createdAt(new Timestamp(System.currentTimeMillis()))
-                           .type(ReportType.STAKE_KEY)
-                           .build())
+            .username(username)
+            .storageKey("storageKey")
+            .reportName("reportName")
+            .status(ReportStatus.GENERATED)
+            .createdAt(new Timestamp(System.currentTimeMillis()))
+            .type(ReportType.STAKE_KEY)
+            .build())
         .build();
     when(poolReportRepository.getPoolReportHistoryByFilter(any(), any(), any(), any(),
-                                                           any())).thenReturn(
+        any())).thenReturn(
         new PageImpl<>(List.of(poolReport)));
 
     var response = poolReportService
@@ -392,12 +406,12 @@ public class PoolReportServiceTest {
         .beginEpoch(300)
         .endEpoch(410)
         .reportHistory(ReportHistory.builder()
-                           .username(username)
-                           .storageKey("storageKey")
-                           .reportName("reportName")
-                           .status(ReportStatus.GENERATED)
-                           .type(ReportType.STAKE_KEY)
-                           .build())
+            .username(username)
+            .storageKey("storageKey")
+            .reportName("reportName")
+            .status(ReportStatus.GENERATED)
+            .type(ReportType.STAKE_KEY)
+            .build())
         .build();
 
     when(poolReportRepository.findById(reportId)).thenReturn(Optional.of(poolReport));

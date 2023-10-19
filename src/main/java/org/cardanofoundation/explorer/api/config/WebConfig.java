@@ -2,8 +2,12 @@ package org.cardanofoundation.explorer.api.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
+import org.cardanofoundation.explorer.api.interceptor.auth.Request;
+import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.common.validation.date.param.DateValidArgumentResolver;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @Log4j2
@@ -20,6 +25,7 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
 
   private final AuthInterceptor authInterceptor;
+  private final RoleFilterMapper roleConf;
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
@@ -38,7 +44,8 @@ public class WebConfig implements WebMvcConfigurer {
   public void addInterceptors(InterceptorRegistry registry) {
     log.info("Authentication interceptor is adding to the service");
     registry.addInterceptor(authInterceptor)
-        .addPathPatterns("/api/v1/pool-report/**", "/api/v1/staking-lifecycle/report/**");
+        .addPathPatterns(
+            roleConf.getAuth().stream().map(Request::getUri).collect(Collectors.toList()));
   }
 
   @Bean
