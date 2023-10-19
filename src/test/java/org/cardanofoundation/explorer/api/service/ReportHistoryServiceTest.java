@@ -7,10 +7,14 @@ import static org.mockito.Mockito.when;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
-import org.cardanofoundation.explorer.api.repository.ReportHistoryRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
@@ -26,7 +30,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportHistoryServiceTest {
@@ -36,6 +39,9 @@ public class ReportHistoryServiceTest {
 
   @InjectMocks
   private ReportHistoryServiceImpl reportHistoryService;
+
+  @Mock
+  RoleService roleService;
 
   @Test
   void whenGetReportHistoryWithCondition_thenReturnReportHistory() {
@@ -75,32 +81,31 @@ public class ReportHistoryServiceTest {
 
   @Test
   void isLimitReached_shouldReturnTrueIfLimitIsReached() {
-    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
     when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(5);
-    Assertions.assertTrue(reportHistoryService.isLimitReached("username"));
+    Assertions.assertTrue(reportHistoryService.isLimitReached("username",5));
   }
 
   @Test
   void isLimitReached_shouldReturnFalseIfLimitIsNotReached() {
-    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
     when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(4);
-    Assertions.assertFalse(reportHistoryService.isLimitReached("username"));
+    Assertions.assertFalse(reportHistoryService.isLimitReached("username",5));
   }
 
   @Test
   void getReportLimitPer24Hours_shouldReturnLimit() {
-    ReflectionTestUtils.setField(reportHistoryService, "limitPer24Hours", 5);
+    Map<String, Map<String,Object>> roleDescriptions = new HashMap<>();
     when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
                                                                     any(Timestamp.class),
                                                                     any(Timestamp.class)))
         .thenReturn(4);
-    var reportLimit = reportHistoryService.getReportLimit("username");
+    when(roleService.getReportLimit(roleDescriptions)).thenReturn(5);
+    var reportLimit = reportHistoryService.getReportLimit(UserPrincipal.builder().username("username").roleDescription(roleDescriptions).build());
     Assertions.assertEquals(5, reportLimit.getLimitPer24hours());
     Assertions.assertEquals(Boolean.FALSE, reportLimit.getIsLimitReached());
   }

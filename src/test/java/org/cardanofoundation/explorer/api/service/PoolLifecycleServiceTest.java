@@ -19,14 +19,14 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReg
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
-import org.cardanofoundation.explorer.api.repository.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.EpochStakeRepository;
-import org.cardanofoundation.explorer.api.repository.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.PoolInfoRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolLifecycleServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
@@ -114,7 +114,6 @@ class PoolLifecycleServiceTest {
     when(rewardRepository.getRewardInfoByPool("poolViewNotFound", pageable)).thenReturn(
         Page.empty());
     when(poolHashRepository.getPoolInfo("poolViewNotFound")).thenReturn(null);
-    when(poolRetireRepository.findByPoolView("poolViewNotFound")).thenReturn(null);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(69));
     when(poolRetireRepository.getPoolDeRegistration("poolViewNotFound", null, null, null,
         pageable)).thenReturn(
@@ -698,8 +697,6 @@ class PoolLifecycleServiceTest {
     when(rewardRepository.getTotalRewardByPool(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(
         BigInteger.valueOf(10000));
-    when(poolRetireRepository.findByPoolView(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(List.of(69));
     when(fetchRewardDataService.useKoios()).thenReturn(false);
     Assertions.assertEquals("Test",
         poolLifecycleService.poolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")
@@ -972,8 +969,6 @@ class PoolLifecycleServiceTest {
     when(rewardRepository.getTotalRewardByPool(
         "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(
         BigInteger.valueOf(10000));
-    when(poolRetireRepository.findByPoolView(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(List.of(69));
     when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(100));
     when(poolInfoRepository.getActiveStakeByPoolAndEpoch(

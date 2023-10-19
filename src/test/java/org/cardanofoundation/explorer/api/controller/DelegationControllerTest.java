@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
+import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -41,7 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         SpringWebSecurityConfig.class,
         WebConfig.class,
         JacksonMapperDateConfig.class,
-        GlobalRestControllerExceptionHandler.class
+        GlobalRestControllerExceptionHandler.class,
+        RoleFilterMapper.class
 })
 @AutoConfigureMockMvc(addFilters = false)
 public class DelegationControllerTest {
@@ -114,7 +116,7 @@ public class DelegationControllerTest {
         BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
 
         // Mock the service method
-        when(delegationService.getDataForPoolTable(pageable, search)).thenReturn(response);
+        when(delegationService.getDataForPoolTable(pageable, search, true)).thenReturn(response);
 
         // Perform the GET request
         mockMvc.perform(get("/api/v1/delegations/pool-list")
@@ -126,7 +128,7 @@ public class DelegationControllerTest {
                 .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
 
         // Verify that the service method was called with the correct arguments
-        verify(delegationService).getDataForPoolTable(pageable, search);
+        verify(delegationService).getDataForPoolTable(pageable, search, true);
     }
 
     @Test
