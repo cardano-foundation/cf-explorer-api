@@ -31,6 +31,7 @@ import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxVkeyWitnessesRepository;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
@@ -155,6 +156,7 @@ public class TxServiceImpl implements TxService {
   private final TxContractMapper txContractMapper;
   private final TxMetadataRepository txMetadataRepository;
   private final TxVkeyWitnessesRepository txVkeyWitnessesRepository;
+  private final TxBootstrapWitnessesRepository txBootstrapWitnessesRepository;
   private final ProtocolParamService protocolParamService;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
@@ -575,16 +577,22 @@ public class TxServiceImpl implements TxService {
    */
   private void getSignersInformation(Tx tx, TxResponse txResponse) {
     List<TxVkeyWitness> txVkeyWitnesses = txVkeyWitnessesRepository.findAllByTx(tx);
+    List<TxBootstrapWitnesses> txBootstrapWitnesses = txBootstrapWitnessesRepository.findAllByTx(tx);
     if (!CollectionUtils.isEmpty(txVkeyWitnesses)) {
       Map<Integer, String> signersIndexMap = new HashMap<>();
       txVkeyWitnesses.forEach(txVkeyWitness ->
                                   Arrays.stream(txVkeyWitness.getIndexArr()).forEach(
                                       index -> signersIndexMap.put(index, txVkeyWitness.getKey())));
 
-      List<TxSignersResponse> txSignersResponses = signersIndexMap.entrySet().stream()
-          .sorted(Map.Entry.comparingByKey())
-          .map(entry -> TxSignersResponse.builder().publicKey(entry.getValue()).build())
-          .toList();
+      List<TxSignersResponse> txSignersResponses = Stream.concat(
+              signersIndexMap.entrySet().stream()
+                  .sorted(Map.Entry.comparingByKey())
+                  .map(entry -> TxSignersResponse.builder().publicKey(entry.getValue()).build()),
+              txBootstrapWitnesses.stream()
+                  .map(txBootstrapWitness -> TxSignersResponse.builder()
+                      .publicKey(txBootstrapWitness.getPublicKey())
+                      .build())
+          ).toList();
 
       if (!Objects.isNull(txResponse.getProtocols())) {
         Map<String, String> dKeyHash224Map = protocolParamService.getGenesisDelegateKeysMap();
