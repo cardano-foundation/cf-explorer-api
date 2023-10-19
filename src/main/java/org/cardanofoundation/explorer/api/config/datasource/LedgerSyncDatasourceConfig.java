@@ -42,7 +42,9 @@ public class LedgerSyncDatasourceConfig {
        @Qualifier("ledgerSyncDataSource") DataSource dataSource) {
     return builder
         .dataSource(dataSource)
-        .packages("org.cardanofoundation.explorer.consumercommon.entity")
+        .packages("org.cardanofoundation.explorer.consumercommon.entity",
+                  "org.cardanofoundation.explorer.consumercommon.enumeration",
+                  "org.cardanofoundation.explorer.consumercommon.validation")
         .build();
   }
 
