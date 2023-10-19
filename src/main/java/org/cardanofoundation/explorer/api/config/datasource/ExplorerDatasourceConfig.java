@@ -39,7 +39,9 @@ public class ExplorerDatasourceConfig {
        @Qualifier("explorerDataSource") DataSource dataSource) {
     return builder
         .dataSource(dataSource)
-        .packages("org.cardanofoundation.explorer.consumercommon.explorer.entity")
+        .packages("org.cardanofoundation.explorer.consumercommon.explorer.entity",
+                  "org.cardanofoundation.explorer.consumercommon.enumeration",
+                  "org.cardanofoundation.explorer.consumercommon.validation")
         .build();
   }
 
