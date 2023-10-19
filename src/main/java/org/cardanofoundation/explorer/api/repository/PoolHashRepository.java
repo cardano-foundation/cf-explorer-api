@@ -32,13 +32,11 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
       "SELECT ph.id AS poolId, ph.view AS poolView, po.pool_name AS poolName, pu.pledge AS pledge, pu.fixed_cost AS fee, "
           + "po.ticker_name as tickerName, pu.margin AS margin, LENGTH(po.pool_name) as poolNameLength, "
           + "COALESCE(ap.delegator_cnt, 0) as numberDelegators, COALESCE(ap.block_in_epoch, 0) as epochBlock, "
-          + "COALESCE(ap.block_life_time, 0) as lifetimeBlock, "
-          + "COALESCE(pi.active_stake, 0) AS poolSize, COALESCE(pi.live_saturation, 0) AS saturation "
+          + "COALESCE(ap.block_life_time, 0) as lifetimeBlock "
           + "FROM pool_hash ph "
           + "LEFT JOIN pool_offline_data po ON ph.id = po.pool_id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM pool_offline_data po2 WHERE po2.pool_id = ph.id)) "
           + "LEFT JOIN pool_update pu ON ph.id = pu.hash_id AND pu.id = (SELECT max(pu2.id) FROM pool_update pu2 WHERE pu2.hash_id = ph.id) "
           + "LEFT JOIN agg_pool_info ap ON ph.id = ap.pool_id "
-          + "LEFT JOIN pool_info pi ON ph.id = pi.pool_id AND pi.fetched_at_epoch = :epochNo "
           + "WHERE ph.id NOT IN :exceptPoolIds AND ( :param IS NULL OR ph.view = :param "
           + "OR ph.hash_raw = :param OR LOWER(po.pool_name) LIKE CONCAT('%', :param, '%') OR LOWER(po.ticker_name) LIKE CONCAT('%', :param, '%') )",
       countQuery = "SELECT COUNT(*) FROM "
@@ -47,12 +45,10 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "WHERE ph.id NOT IN :exceptPoolIds AND ( ph.view = :param "
           + "OR ph.hash_raw = :param "
           + "OR LOWER(po.pool_name) LIKE CONCAT('%', :param, '%') OR LOWER(po.ticker_name) LIKE CONCAT('%', :param, '%') ) "
-          + "AND :epochNo IS NOT NULL "
           + "LIMIT 1000) AS A",
       nativeQuery = true)
   Page<PoolListProjection> findAllByPoolViewOrPoolNameOrPoolHash(@Param("param") String param,
                                                                  @Param("exceptPoolIds") Collection<Long> exceptPoolIds,
-                                                                 @Param("epochNo") Integer epochNo,
                                                                  Pageable pageable);
 
   @Query(value =
@@ -60,17 +56,14 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
           + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
           + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength, "
           + "COALESCE(ap.delegatorCount, 0) as numberDelegators, COALESCE(ap.blockInEpoch, 0) as epochBlock, "
-          + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock, "
-          + "COALESCE(pi.activeStake, 0) AS poolSize, COALESCE(pi.liveSaturation, 0) AS saturation "
+          + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock "
           + "FROM PoolHash ph "
           + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
           + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
           + "LEFT JOIN AggregatePoolInfo ap ON ap.poolHash = ph "
-          + "LEFT JOIN PoolInfo pi ON pi.pool = ph AND pi.fetchedAtEpoch = :epochNo "
           + "WHERE ph.id NOT IN :exceptPoolIds ",
       countQuery = "SELECT COUNT(ph.id) FROM PoolHash ph WHERE ph.id NOT IN :exceptPoolIds AND :epochNo IS NOT NULL")
   Page<PoolListProjection> findAllWithoutQueryParam(@Param("exceptPoolIds") Collection<Long> exceptPoolIds,
-                                                    @Param("epochNo") Integer epochNo,
                                                     Pageable pageable);
 
   @Query(value = "SELECT ph.id FROM PoolHash ph "

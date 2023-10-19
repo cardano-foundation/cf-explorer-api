@@ -241,9 +241,9 @@ public class DelegationServiceImpl implements DelegationService {
     Boolean useKoios = fetchRewardDataService.useKoios();
     if (Boolean.TRUE.equals(useKoios)) {
       if (isQueryEmpty) {
-        poolIdPage = poolHashRepository.findAllWithoutQueryParam(poolRetiredIds, epochNo, pageable);
+        poolIdPage = poolHashRepository.findAllWithoutQueryParam(poolRetiredIds, pageable);
       } else {
-        poolIdPage = poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, poolRetiredIds, epochNo, pageable);
+        poolIdPage = poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, poolRetiredIds, pageable);
       }
       poolIdPage.stream().forEach(pool -> poolList.add(PoolResponse.builder()
           .poolId(pool.getPoolView())
@@ -262,9 +262,9 @@ public class DelegationServiceImpl implements DelegationService {
           .build()));
     } else {
       if (isQueryEmpty) {
-        poolIdPage = poolHashRepository.findAllWithoutQueryParam(poolRetiredIds, epochNo, pageable);
+        poolIdPage = poolHashRepository.findAllWithoutQueryParam(poolRetiredIds, pageable);
       } else {
-        poolIdPage = poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, poolRetiredIds, epochNo, pageable);
+        poolIdPage = poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(search, poolRetiredIds, pageable);
       }
       List<Object> poolViews = poolIdPage.stream().map(PoolListProjection::getPoolView)
           .collect(Collectors.toList());

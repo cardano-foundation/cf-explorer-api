@@ -317,7 +317,7 @@ class DelegationServiceTest {
     // Add mock data to poolIdPageContent
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), anyCollection(), any(),  any())).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), anyCollection(), any())).thenReturn(poolIdPage);
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search, true);
@@ -340,7 +340,7 @@ class DelegationServiceTest {
 
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllWithoutQueryParam(any(), anyInt(), any())).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllWithoutQueryParam(any(), any())).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
     // Call the method
@@ -375,7 +375,7 @@ class DelegationServiceTest {
 
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), any(), anyInt(), any())).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), any(), any())).thenReturn(poolIdPage);
     when(fetchRewardDataService.useKoios()).thenReturn(true);
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
@@ -399,7 +399,7 @@ class DelegationServiceTest {
 
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
-    when(poolHashRepository.findAllWithoutQueryParam(any(), anyInt(), any())).thenReturn(poolIdPage);
+    when(poolHashRepository.findAllWithoutQueryParam(any(), any())).thenReturn(poolIdPage);
     when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
     when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
 
