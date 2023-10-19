@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.TxVkeyWitness;
+import org.cardanofoundation.explorer.consumercommon.entity.TxWitness;
 
-public interface TxVkeyWitnessesRepository extends JpaRepository<TxVkeyWitness, Long> {
+public interface TxWitnessesRepository extends JpaRepository<TxWitness, Long> {
 
-  List<TxVkeyWitness> findAllByTx(@Param("tx") Tx tx);
+  List<TxWitness> findAllByTx(@Param("tx") Tx tx);
 }

@@ -32,7 +32,7 @@ import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxVkeyWitnessesRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
@@ -155,7 +155,7 @@ public class TxServiceImpl implements TxService {
   private final StakeAddressRepository stakeAddressRepository;
   private final TxContractMapper txContractMapper;
   private final TxMetadataRepository txMetadataRepository;
-  private final TxVkeyWitnessesRepository txVkeyWitnessesRepository;
+  private final TxWitnessesRepository txWitnessesRepository;
   private final TxBootstrapWitnessesRepository txBootstrapWitnessesRepository;
   private final ProtocolParamService protocolParamService;
 
@@ -576,7 +576,7 @@ public class TxServiceImpl implements TxService {
    * @param txResponse
    */
   private void getSignersInformation(Tx tx, TxResponse txResponse) {
-    List<TxVkeyWitness> txVkeyWitnesses = txVkeyWitnessesRepository.findAllByTx(tx);
+    List<TxWitness> txVkeyWitnesses = txWitnessesRepository.findAllByTx(tx);
     List<TxBootstrapWitnesses> txBootstrapWitnesses = txBootstrapWitnessesRepository.findAllByTx(tx);
     if (!CollectionUtils.isEmpty(txVkeyWitnesses)) {
       Map<Integer, String> signersIndexMap = new HashMap<>();
