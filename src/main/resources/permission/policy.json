@@ -1,0 +1,26 @@
+{
+  "auth": [
+    {
+      "uri": "/api/v1/pool-report/**",
+      "method": "*"
+    },
+    {
+      "uri": "/api/v1/staking-lifecycle/report/**",
+      "method": "*"
+    }
+  ],
+  "role": [
+    {
+      "name": "ROLE_ELEVATED",
+      "attributes": {
+        "reportLimitPer24Hours": -1
+      }
+    },
+    {
+      "name": "ROLE_PUBLIC",
+      "attributes": {
+        "reportLimitPer24Hours": 2
+      }
+    }
+  ]
+}

@@ -111,4 +111,7 @@ public interface BlockRepository
 
   @Query(value = "SELECT b from Block b WHERE b.id = (SELECT max(b2.id) FROM Block b2)")
   Block findCurrentBlockById();
+
+  @Query("SELECT b FROM Block b WHERE b.blockNo IS NOT NULL ORDER BY b.blockNo DESC LIMIT 1")
+  Optional<Block> findLatestBlock();
 }

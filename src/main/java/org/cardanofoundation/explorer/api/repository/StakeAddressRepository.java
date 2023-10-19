@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.math.BigInteger;
 import java.util.Set;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
@@ -38,4 +39,7 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
   List<String> getViewByAddressId(@Param("addressIds") Set<Long> addressIds);
 
   List<StakeAddress> findByIdIn(Collection<Long> ids);
+
+  @Query(value = "SELECT COALESCE(SUM(sa.balance), 0) FROM StakeAddress sa WHERE sa.view IN :views")
+  BigInteger getBalanceByView(@Param("views") List<String> views);
 }
