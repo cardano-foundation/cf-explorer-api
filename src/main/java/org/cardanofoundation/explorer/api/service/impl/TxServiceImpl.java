@@ -31,6 +31,7 @@ import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxVkeyWitnessesRepository;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;

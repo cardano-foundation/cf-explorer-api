@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.repository;
+package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.util.List;
 
