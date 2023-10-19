@@ -127,7 +127,7 @@ public class TxServiceImpl implements TxService {
   private final StakeAddressRepository stakeAddressRepository;
   private final TxContractMapper txContractMapper;
   private final TxMetadataRepository txMetadataRepository;
-  private final TxVkeyWitnessesRepository txVkeyWitnessesRepository;
+  private final TxWitnessesRepository txWitnessesRepository;
   private final TxBootstrapWitnessesRepository txBootstrapWitnessesRepository;
   private final ProtocolParamService protocolParamService;
 
@@ -548,7 +548,7 @@ public class TxServiceImpl implements TxService {
    * @param txResponse
    */
   private void getSignersInformation(Tx tx, TxResponse txResponse) {
-    List<TxVkeyWitness> txVkeyWitnesses = txVkeyWitnessesRepository.findAllByTx(tx);
+    List<TxWitness> txVkeyWitnesses = txWitnessesRepository.findAllByTx(tx);
     List<TxBootstrapWitnesses> txBootstrapWitnesses = txBootstrapWitnessesRepository.findAllByTx(tx);
     if (!CollectionUtils.isEmpty(txVkeyWitnesses)) {
       Map<Integer, String> signersIndexMap = new HashMap<>();
