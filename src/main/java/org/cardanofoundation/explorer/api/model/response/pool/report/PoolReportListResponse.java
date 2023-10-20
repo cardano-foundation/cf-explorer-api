@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 
 import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
