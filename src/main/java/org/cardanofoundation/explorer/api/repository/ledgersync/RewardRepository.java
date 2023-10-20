@@ -48,9 +48,10 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   List<StakeAnalyticRewardResponse> findRewardByStake(@Param("stakeAddress") String stakeAddress);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
-      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type)"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type, ph.hashRaw, ph.view)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
+      + " INNER JOIN PoolHash ph ON rw.pool.id = ph.id"
       + " WHERE rw.addr = :stakeAddress"
       + " AND (epoch.startTime >= :fromDate )"
       + " AND (epoch.startTime <= :toDate )"
@@ -62,9 +63,10 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
                                               Pageable pageable);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
-      + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type, ph.hashRaw, ph.view)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
+      + " INNER JOIN PoolHash ph ON rw.pool.id = ph.id"
       + " WHERE rw.addr = :stakeAddress")
   List<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress);
 
