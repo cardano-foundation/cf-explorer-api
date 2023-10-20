@@ -18,7 +18,7 @@ import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHisto
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.ReportLimitResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReportHistoryRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.RoleService;
 import org.cardanofoundation.explorer.api.util.DataUtil;

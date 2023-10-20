@@ -36,12 +36,12 @@ import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyRe
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeKeyReportHistoryRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.StakeKeyReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.ReportHistory;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.StakeKeyReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 import org.mockito.InjectMocks;
