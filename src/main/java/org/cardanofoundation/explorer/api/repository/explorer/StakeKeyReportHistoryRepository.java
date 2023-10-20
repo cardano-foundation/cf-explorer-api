@@ -1,8 +1,8 @@
-package org.cardanofoundation.explorer.api.repository.ledgersync;
+package org.cardanofoundation.explorer.api.repository.explorer;
 
 import java.sql.Timestamp;
 
-import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.StakeKeyReportHistory;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

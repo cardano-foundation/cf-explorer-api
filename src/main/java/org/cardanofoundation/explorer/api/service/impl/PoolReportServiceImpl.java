@@ -19,12 +19,12 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportL
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolReportRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.PoolReportRepository;
 import org.cardanofoundation.explorer.api.service.*;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
-import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.ReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 
