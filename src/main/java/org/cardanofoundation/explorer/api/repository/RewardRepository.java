@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -179,4 +178,10 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " WHERE r.spendableEpoch <= (SELECT max(no) FROM Epoch)"
       + " AND stakeAddress.view IN :addressList")
   BigInteger getAvailableRewardByAddressList(@Param("addressList") List<String> addressList);
+
+  @Query("SELECT COALESCE(SUM(r.amount), 0) FROM Reward r "
+      + " WHERE r.addr = :stakeAddress"
+      + " AND r.type = :type")
+  Optional<BigInteger> getTotalRewardByStakeAddressAndType(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                           @Param("type") RewardType type);
 }
