@@ -9,9 +9,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,8 +27,12 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import com.bloxbean.cardano.client.crypto.Blake2bUtil;
+import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
@@ -54,6 +60,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
@@ -148,6 +155,9 @@ public class TxServiceImpl implements TxService {
   private final StakeAddressRepository stakeAddressRepository;
   private final TxContractMapper txContractMapper;
   private final TxMetadataRepository txMetadataRepository;
+  private final TxWitnessesRepository txWitnessesRepository;
+  private final TxBootstrapWitnessesRepository txBootstrapWitnessesRepository;
+  private final ProtocolParamService protocolParamService;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -529,6 +539,8 @@ public class TxServiceImpl implements TxService {
     getProtocols(tx, txResponse);
     getInstantaneousRewards(tx, txResponse);
     getMetadata(tx, txResponse);
+    getSignersInformation(tx, txResponse);
+
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -555,6 +567,47 @@ public class TxServiceImpl implements TxService {
     }
 
     return txResponse;
+  }
+
+  /**
+   * Get signers (Delegate Keys) Information for MIR (instantaneous rewards) Transaction
+   *
+   * @param tx
+   * @param txResponse
+   */
+  private void getSignersInformation(Tx tx, TxResponse txResponse) {
+    List<TxWitness> txVkeyWitnesses = txWitnessesRepository.findAllByTx(tx);
+    List<TxBootstrapWitnesses> txBootstrapWitnesses = txBootstrapWitnessesRepository.findAllByTx(tx);
+    if (!CollectionUtils.isEmpty(txVkeyWitnesses)) {
+      Map<Integer, String> signersIndexMap = new HashMap<>();
+      txVkeyWitnesses.forEach(txVkeyWitness ->
+                                  Arrays.stream(txVkeyWitness.getIndexArr()).forEach(
+                                      index -> signersIndexMap.put(index, txVkeyWitness.getKey())));
+
+      List<TxSignersResponse> txSignersResponses = Stream.concat(
+              signersIndexMap.entrySet().stream()
+                  .sorted(Map.Entry.comparingByKey())
+                  .map(entry -> TxSignersResponse.builder().publicKey(entry.getValue()).build()),
+              txBootstrapWitnesses.stream()
+                  .map(txBootstrapWitness -> TxSignersResponse.builder()
+                      .publicKey(txBootstrapWitness.getPublicKey())
+                      .build())
+          ).toList();
+
+      if (!Objects.isNull(txResponse.getProtocols())) {
+        Map<String, String> dKeyHash224Map = protocolParamService.getGenesisDelegateKeysMap();
+        txSignersResponses.forEach(txSignersResponse -> {
+          byte[] pkeyHash224 = Blake2bUtil.blake2bHash224(
+              HexUtil.decodeHexString(txSignersResponse.getPublicKey()));
+          String pkeyHash224Hex = HexUtil.encodeHexString(pkeyHash224);
+          if (dKeyHash224Map.containsKey(pkeyHash224Hex)) {
+            txSignersResponse.setDelegateKey(dKeyHash224Map.get(pkeyHash224Hex));
+          }
+        });
+      }
+
+      txResponse.setSignersInformation(txSignersResponses);
+    }
   }
 
   /**
