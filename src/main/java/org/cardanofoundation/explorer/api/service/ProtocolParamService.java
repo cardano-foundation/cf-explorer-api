@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,4 +35,9 @@ public interface ProtocolParamService {
   @Transactional(readOnly = true)
   FixedProtocol getFixedProtocols();
 
+  /**
+   * Get genesis delegate keys hash and value
+   * @return
+   */
+  Map<String, String> getGenesisDelegateKeysMap();
 }
