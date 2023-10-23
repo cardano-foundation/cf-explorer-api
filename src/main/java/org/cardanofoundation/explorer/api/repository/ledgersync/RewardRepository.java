@@ -50,7 +50,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type, ph.view, ph.hashRaw)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
-      + " INNER JOIN PoolHash ph ON rw.pool.id = ph.id"
+      + " LEFT JOIN PoolHash ph ON rw.pool.id = ph.id"
       + " WHERE rw.addr = :stakeAddress"
       + " AND (epoch.startTime >= :fromDate )"
       + " AND (epoch.startTime <= :toDate )"
@@ -65,7 +65,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type, ph.view, ph.hashRaw)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
-      + " INNER JOIN PoolHash ph ON rw.pool.id = ph.id"
+      + " LEFT JOIN PoolHash ph ON rw.pool.id = ph.id"
       + " WHERE rw.addr = :stakeAddress")
   List<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress);
 
