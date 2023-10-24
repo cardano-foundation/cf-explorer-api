@@ -51,7 +51,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr2.id) FROM StakeRegistration sr2 WHERE sa.id = sr2.addr.id) "
           + "JOIN Tx tx ON sr.tx.id  = tx.id "
           + "JOIN Block bk ON tx.block.id = bk.id "
-          + "WHERE sa.id IN :addressIds")
+          + "WHERE sa.id IN :addressIds "
+          + "ORDER BY stakeAddressId DESC")
   List<PoolDetailDelegatorProjection> getDelegatorsByAddress(
       @Param("addressIds") Set<Long> addressIds);
 

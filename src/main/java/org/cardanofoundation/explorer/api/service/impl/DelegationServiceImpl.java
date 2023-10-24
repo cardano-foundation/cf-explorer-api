@@ -690,6 +690,10 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(
       Pageable pageable, String poolViewOrHash) {
+    if(pageable.getSort().isUnsorted()) {
+      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                                Sort.by(Sort.Direction.DESC, Delegation_.STAKE_ADDRESS_ID));
+    }
     BaseFilterResponse<PoolDetailDelegatorResponse> delegatorResponse = new BaseFilterResponse<>();
     Page<Long> addressIdPage = delegationRepository.liveDelegatorsList(poolViewOrHash, pageable);
     if (!addressIdPage.isEmpty()) {
