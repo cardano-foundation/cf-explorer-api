@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.cardanofoundation.explorer.api.mapper.*;
+import org.cardanofoundation.explorer.api.model.response.tx.*;
+import org.cardanofoundation.explorer.api.projection.ReferenceInputProjection;
+import org.cardanofoundation.explorer.api.repository.*;
+import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -17,15 +22,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
-import org.cardanofoundation.explorer.api.mapper.DelegationMapper;
-import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
-import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
-import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
-import org.cardanofoundation.explorer.api.mapper.TxMapper;
-import org.cardanofoundation.explorer.api.mapper.TxOutMapper;
-import org.cardanofoundation.explorer.api.mapper.WithdrawalMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
@@ -33,50 +29,9 @@ import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolRelayResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.CollateralResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.ProtocolParamResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.SummaryResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxDelegationResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxInfoResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxMetadataResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxMintingResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxOutResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxPoolCertificate;
-import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxStakeCertificate;
-import org.cardanofoundation.explorer.api.model.response.tx.UTxOResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.WithdrawalResponse;
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.FailedTxOutRepository;
-import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRelayRepository;
-import org.cardanofoundation.explorer.api.repository.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.TxMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
-import org.cardanofoundation.explorer.api.repository.UnconsumeTxInRepository;
-import org.cardanofoundation.explorer.api.repository.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.TxServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.PoolDeRegistrationProjectionImpl;
@@ -202,7 +157,10 @@ class TxServiceTest {
   private TxContractMapper txContractMapper;
   @Mock
   private TxMetadataRepository txMetadataRepository;
-
+  @Mock
+  private ReferenceTxInRepository referenceTxInRepository;
+  @Mock
+  private TxReferenceInputMapper txReferenceInputMapper;
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private RedisTemplate<String, TxGraph> redisTemplate;
 
@@ -846,12 +804,17 @@ class TxServiceTest {
     txMetadataHash.setHash("hash");
     tx1.setTxMetadataHash(txMetadataHash);
     final Optional<Tx> tx = Optional.of(tx1);
+    final ReferenceInputProjection referenceInputProjection = Mockito.mock(ReferenceInputProjection.class);
+
     when(txRepository.findByHash(anyString())).thenReturn(tx);
 
     // Configure RedeemerRepository.findContractByTx(...).
     when(redeemerRepository.findContractByTx(tx1)).thenReturn(List.of(
         TxContractProjectionImpl.builder().purpose(ScriptPurposeType.SPEND).build()
     ));
+    when(referenceTxInRepository.getReferenceInputByTx(tx1)).thenReturn(List.of(referenceInputProjection));
+    when(txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(any(ReferenceInputProjection.class)))
+        .thenReturn(new TxReferenceInput());
 
     // Configure TxContractMapper.fromTxContractProjectionToContractResponse(...).
     final ContractResponse contractResponse = ContractResponse.builder()
@@ -899,13 +862,16 @@ class TxServiceTest {
     txMetadataHash.setHash("hash");
     tx1.setTxMetadataHash(txMetadataHash);
     final Optional<Tx> tx = Optional.of(tx1);
+    final ReferenceInputProjection referenceInputProjection = Mockito.mock(ReferenceInputProjection.class);
     when(txRepository.findByHash(anyString())).thenReturn(tx);
 
     // Configure RedeemerRepository.findContractByTx(...).
     when(redeemerRepository.findContractByTxFail(tx1)).thenReturn(List.of(
         TxContractProjectionImpl.builder().purpose(ScriptPurposeType.SPEND).build()
     ));
-
+    when(referenceTxInRepository.getReferenceInputByTx(tx1)).thenReturn(List.of(referenceInputProjection));
+    when(txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(any(ReferenceInputProjection.class)))
+        .thenReturn(new TxReferenceInput());
     // Configure TxContractMapper.fromTxContractProjectionToContractResponse(...).
     final ContractResponse contractResponse = ContractResponse.builder()
         .address("address")
