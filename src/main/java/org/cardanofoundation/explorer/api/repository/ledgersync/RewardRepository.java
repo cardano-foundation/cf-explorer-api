@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -48,9 +47,10 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   List<StakeAnalyticRewardResponse> findRewardByStake(@Param("stakeAddress") String stakeAddress);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
-      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type)"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type, ph.view, ph.hashRaw)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
+      + " LEFT JOIN PoolHash ph ON rw.pool.id = ph.id"
       + " WHERE rw.addr = :stakeAddress"
       + " AND (epoch.startTime >= :fromDate )"
       + " AND (epoch.startTime <= :toDate )"
@@ -62,9 +62,10 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
                                               Pageable pageable);
 
   @Query("SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
-      + "(rw.spendableEpoch, epoch.startTime, rw.amount)"
+      + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type, ph.view, ph.hashRaw)"
       + " FROM Reward rw"
       + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
+      + " LEFT JOIN PoolHash ph ON rw.pool.id = ph.id"
       + " WHERE rw.addr = :stakeAddress")
   List<StakeRewardResponse> findRewardByStake(@Param("stakeAddress") StakeAddress stakeAddress);
 
@@ -177,4 +178,10 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       + " WHERE r.spendableEpoch <= (SELECT max(no) FROM Epoch)"
       + " AND stakeAddress.view IN :addressList")
   BigInteger getAvailableRewardByAddressList(@Param("addressList") List<String> addressList);
+
+  @Query("SELECT COALESCE(SUM(r.amount), 0) FROM Reward r "
+      + " WHERE r.addr = :stakeAddress"
+      + " AND r.type = :type")
+  Optional<BigInteger> getTotalRewardByStakeAddressAndType(@Param("stakeAddress") StakeAddress stakeAddress,
+                                                           @Param("type") RewardType type);
 }

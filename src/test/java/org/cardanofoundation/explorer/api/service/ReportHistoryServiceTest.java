@@ -14,7 +14,7 @@ import java.util.Map;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReportHistoryRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
