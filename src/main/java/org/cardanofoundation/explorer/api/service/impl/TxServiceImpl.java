@@ -29,8 +29,9 @@ import lombok.extern.log4j.Log4j2;
 
 import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
-import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
+import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
+import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
@@ -59,14 +60,6 @@ import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
-import org.cardanofoundation.explorer.api.mapper.DelegationMapper;
-import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
-import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
-import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.mapper.TxMapper;
-import org.cardanofoundation.explorer.api.mapper.TxOutMapper;
-import org.cardanofoundation.explorer.api.mapper.WithdrawalMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
@@ -130,6 +123,8 @@ public class TxServiceImpl implements TxService {
   private final TxWitnessesRepository txWitnessesRepository;
   private final TxBootstrapWitnessesRepository txBootstrapWitnessesRepository;
   private final ProtocolParamService protocolParamService;
+  private final ReferenceTxInRepository referenceTxInRepository;
+  private final TxReferenceInputMapper txReferenceInputMapper;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -512,7 +507,6 @@ public class TxServiceImpl implements TxService {
     getInstantaneousRewards(tx, txResponse);
     getMetadata(tx, txResponse);
     getSignersInformation(tx, txResponse);
-
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -740,8 +734,33 @@ public class TxServiceImpl implements TxService {
                                        Collectors.collectingAndThen(Collectors.toList(),
                                                                     list -> list.get(0))));
 
+    List<ReferenceInputProjection> referenceInputProjections = referenceTxInRepository.getReferenceInputByTx(tx);
+    List<TxReferenceInput> txReferenceInputsWithSmartContract = new ArrayList<>();
+    List<TxReferenceInput> txReferenceInputsWithoutSmartContract = new ArrayList<>();
+    referenceInputProjections.forEach(projection -> {
+      if (projection.getScriptHash() != null) {
+        txReferenceInputsWithSmartContract.add(
+            txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(projection)
+        );
+      } else {
+        txReferenceInputsWithoutSmartContract.add(
+            txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(projection)
+        );
+      }
+    });
+
+    Map<String, List<TxReferenceInput>> txReferenceInputSmartContractMap =
+        txReferenceInputsWithSmartContract.stream().collect(Collectors.groupingBy(TxReferenceInput::getScriptHash));
+
     contractResponses.parallelStream().forEach(contractResponse -> {
       TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
+      if (txReferenceInputSmartContractMap.containsKey(contractResponse.getScriptHash())) {
+        List<TxReferenceInput> txReferenceInputs = txReferenceInputSmartContractMap.get(contractResponse.getScriptHash());
+        txReferenceInputs.addAll(txReferenceInputsWithoutSmartContract);
+        contractResponse.setReferenceInputs(txReferenceInputSmartContractMap.get(contractResponse.getScriptHash()));
+      } else {
+        contractResponse.setReferenceInputs(txReferenceInputsWithoutSmartContract);
+      }
       if (txContractProjection != null) {
         contractResponse.setDatumBytesOut(
             txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));
