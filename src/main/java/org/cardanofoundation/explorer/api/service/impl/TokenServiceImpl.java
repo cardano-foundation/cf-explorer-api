@@ -47,7 +47,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TokenInfoRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -60,7 +60,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.TokenInfo;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 
 @Service
