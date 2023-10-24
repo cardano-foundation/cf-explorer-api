@@ -60,6 +60,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.DelegationServiceImpl;
+import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
@@ -956,7 +957,7 @@ class DelegationServiceTest {
 
   @Test
   void testGetDelegatorsForPoolDetail_thenReturn() {
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, Delegation_.STAKE_ADDRESS_ID));
     String poolView = "poolView";
     Timestamp timestamp = new Timestamp(Instant.now().toEpochMilli());
     PoolDetailDelegatorProjection pddp = Mockito.mock(PoolDetailDelegatorProjection.class);
@@ -989,7 +990,7 @@ class DelegationServiceTest {
 
   @Test
   void testGetDelegatorsForPoolDetail_thenReturnV2() {
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, Delegation_.STAKE_ADDRESS_ID));
     String poolView = "poolView";
     Timestamp timestamp = new Timestamp(Instant.now().toEpochMilli());
     int currentEpoch = 1;
@@ -1028,7 +1029,7 @@ class DelegationServiceTest {
 
   @Test
   void testGetDelegatorsForPoolDetail_thenReturnLiveDelegatorsListIsNull() {
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, Delegation_.STAKE_ADDRESS_ID));
     String poolView = "poolView";
 
     when(delegationRepository.liveDelegatorsList(poolView, pageable)).thenReturn(
