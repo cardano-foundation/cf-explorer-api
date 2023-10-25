@@ -72,12 +72,20 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
       }
     }
+    BigInteger totalOperatorReward =
+        rewardRepository.getTotalRewardByStakeAddressAndType(stakeAddress, RewardType.LEADER)
+            .orElse(BigInteger.ZERO);
+    BigInteger totalDelegatorReward =
+        rewardRepository.getTotalRewardByStakeAddressAndType(stakeAddress, RewardType.MEMBER)
+            .orElse(BigInteger.ZERO);
     return StakeLifecycleResponse.builder()
         .hasRegistration(stakeRegistrationRepository.existsByAddr(stakeAddress))
         .hasDeRegistration(stakeDeRegistrationRepository.existsByAddr(stakeAddress))
         .hasDelegation(delegationRepository.existsByAddress(stakeAddress))
         .hashRewards(rewardRepository.existsByAddr(stakeAddress))
         .hasWithdrawal(withdrawalRepository.existsByAddr(stakeAddress))
+        .totalOperatorRewards(totalOperatorReward)
+        .totalDelegatorRewards(totalDelegatorReward)
         .build();
   }
 
