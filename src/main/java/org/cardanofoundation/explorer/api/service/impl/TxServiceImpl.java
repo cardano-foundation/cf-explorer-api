@@ -738,7 +738,7 @@ public class TxServiceImpl implements TxService {
     List<TxReferenceInput> txReferenceInputsWithSmartContract = new ArrayList<>();
     List<TxReferenceInput> txReferenceInputsWithoutSmartContract = new ArrayList<>();
     referenceInputProjections.forEach(projection -> {
-      if (projection.getScriptHash() != null) {
+      if (Objects.nonNull(projection.getScriptHash())) {
         txReferenceInputsWithSmartContract.add(
             txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(projection)
         );
@@ -755,9 +755,10 @@ public class TxServiceImpl implements TxService {
     contractResponses.parallelStream().forEach(contractResponse -> {
       TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
       if (txReferenceInputSmartContractMap.containsKey(contractResponse.getScriptHash())) {
-        List<TxReferenceInput> txReferenceInputs = txReferenceInputSmartContractMap.get(contractResponse.getScriptHash());
+        List<TxReferenceInput> txReferenceInputs =
+            new ArrayList<>(txReferenceInputSmartContractMap.get(contractResponse.getScriptHash()));
         txReferenceInputs.addAll(txReferenceInputsWithoutSmartContract);
-        contractResponse.setReferenceInputs(txReferenceInputSmartContractMap.get(contractResponse.getScriptHash()));
+        contractResponse.setReferenceInputs(txReferenceInputs);
       } else {
         contractResponse.setReferenceInputs(txReferenceInputsWithoutSmartContract);
       }
