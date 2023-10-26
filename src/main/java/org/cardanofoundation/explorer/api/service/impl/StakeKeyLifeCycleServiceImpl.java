@@ -11,7 +11,16 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 
@@ -72,12 +81,20 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
       }
     }
+    BigInteger totalOperatorReward =
+        rewardRepository.getTotalRewardByStakeAddressAndType(stakeAddress, RewardType.LEADER)
+            .orElse(BigInteger.ZERO);
+    BigInteger totalDelegatorReward =
+        rewardRepository.getTotalRewardByStakeAddressAndType(stakeAddress, RewardType.MEMBER)
+            .orElse(BigInteger.ZERO);
     return StakeLifecycleResponse.builder()
         .hasRegistration(stakeRegistrationRepository.existsByAddr(stakeAddress))
         .hasDeRegistration(stakeDeRegistrationRepository.existsByAddr(stakeAddress))
         .hasDelegation(delegationRepository.existsByAddress(stakeAddress))
         .hashRewards(rewardRepository.existsByAddr(stakeAddress))
         .hasWithdrawal(withdrawalRepository.existsByAddr(stakeAddress))
+        .totalOperatorRewards(totalOperatorReward)
+        .totalDelegatorRewards(totalDelegatorReward)
         .build();
   }
 
