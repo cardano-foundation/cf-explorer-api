@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.model.response.healthcheck.SyncStatus;
-import org.cardanofoundation.explorer.api.repository.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.service.HealthCheckService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
