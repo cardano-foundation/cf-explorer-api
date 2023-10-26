@@ -299,12 +299,12 @@ public class TokenServiceImpl implements TokenService {
   }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
-    String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(multiAsset.getFingerprint());
-    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
-      tokenResponse.setTokenType(TokenType.FT);
-    } else {
+    if (multiAsset.getSupply().compareTo(BigInteger.ONE) == 0) {
       tokenResponse.setTokenType(TokenType.NFT);
-      tokenResponse.setMetadataJson(txMetadataNFTToken);
+    } else {
+      tokenResponse.setTokenType(TokenType.FT);
     }
+    tokenResponse.setMetadataJson(
+        maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint()));
   }
 }
