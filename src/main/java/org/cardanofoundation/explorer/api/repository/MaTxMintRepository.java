@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import java.util.List;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -22,12 +22,11 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
   @EntityGraph(attributePaths = {MaTxMint_.TX, "tx.block"})
   Page<MaTxMint> findByIdent(@Param("tokenId") String tokenId, Pageable pageable);
 
-  @Query(value = "SELECT tm.json from Tx tx"
+  @Query(value = "SELECT tm.json FROM Tx tx"
       + " JOIN MaTxMint mtm ON mtm.tx = tx"
       + " JOIN TxMetadata tm ON tm.tx = tx"
       + " JOIN MultiAsset ma ON ma = mtm.ident"
-      + " WHERE ma.supply = 1"
-      + " AND ma.fingerprint = :fingerprint"
+      + " WHERE ma.fingerprint = :fingerprint"
       + " ORDER BY mtm.id DESC LIMIT 1")
-  String getTxMetadataNFTToken(@Param("fingerprint") String fingerprint);
+  String getTxMetadataToken(@Param("fingerprint") String fingerprint);
 }

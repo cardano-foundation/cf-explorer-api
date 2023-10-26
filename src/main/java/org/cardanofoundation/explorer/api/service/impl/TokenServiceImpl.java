@@ -12,18 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
@@ -48,7 +38,6 @@ import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -63,6 +52,13 @@ import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -96,17 +92,19 @@ public class TokenServiceImpl implements TokenService {
     List<MultiAsset> dataContent;
     Page<MultiAsset> multiAssets;
     boolean isQueryEmpty = StringUtils.isEmpty(query);
-    if(isQueryEmpty){
-      pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
+    if (isQueryEmpty) {
+      pageable = createPageableWithSort(pageable,
+          Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
       dataContent = multiAssetRepository.findMultiAssets(pageable);
       multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
     } else {
       String lengthOfNameView = "nameViewLength";
-      if(MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()){
+      if (MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()) {
         throw new BusinessException(BusinessCode.OUT_OF_QUERY_LIMIT);
       }
-      pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
-          .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
+      pageable = createPageableWithSort(pageable,
+          Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
+              .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
       multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable).map(
           item -> {
             MultiAsset multiAsset = new MultiAsset();
@@ -136,7 +134,7 @@ public class TokenServiceImpl implements TokenService {
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
     Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList,
         AssetMetadata::getSubject);
-    var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     multiAssetResponsesList.forEach(ma -> {
       var tokenInfo = tokenInfoMap.getOrDefault(ma.getId(), null);
 
@@ -157,16 +155,18 @@ public class TokenServiceImpl implements TokenService {
       );
     });
 
-    if(isQueryEmpty){
+    if (isQueryEmpty) {
       return new BaseFilterResponse<>(multiAssetResponsesList);
     } else {
-      return new BaseFilterResponse<>(multiAssetResponsesList, multiAssets.getTotalElements() >= 1000);
+      return new BaseFilterResponse<>(multiAssetResponsesList,
+          multiAssets.getTotalElements() >= 1000);
     }
   }
 
   /**
    * Create pageable with sort, if sort is unsorted then use default sort
-   * @param pageable page information
+   *
+   * @param pageable    page information
    * @param defaultSort default sort condition
    * @return pageable with sort
    */
@@ -187,7 +187,7 @@ public class TokenServiceImpl implements TokenService {
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
 
     var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
-    var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
     if (tokenInfo.isEmpty()) {
       tokenResponse.setNumberOfHolders(0L);
@@ -228,7 +228,7 @@ public class TokenServiceImpl implements TokenService {
     var numberOfHoldersHaveStakeKey = addressTokenBalanceRepository
         .countAddressNotHaveStakeByMultiAsset(multiAsset)
         .orElse(0L);
-    var numberOfHoldersNotHaveStakeKe =  addressTokenBalanceRepository
+    var numberOfHoldersNotHaveStakeKe = addressTokenBalanceRepository
         .countStakeByMultiAsset(multiAsset)
         .orElse(0L);
     var numberOfHolder = numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe;
@@ -258,12 +258,14 @@ public class TokenServiceImpl implements TokenService {
       }
       tokenAddress.setAddressId(null);
     });
-    Page<TokenAddressResponse> response = new PageImpl<>(tokenAddressResponses, pageable, numberOfHolder);
+    Page<TokenAddressResponse> response = new PageImpl<>(tokenAddressResponses, pageable,
+        numberOfHolder);
     return new BaseFilterResponse<>(response);
   }
 
   @Override
-  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type) {
+  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId,
+      AnalyticType type) {
 
     MultiAsset multiAsset = multiAssetRepository.findByFingerprint(tokenId)
         .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
@@ -300,12 +302,12 @@ public class TokenServiceImpl implements TokenService {
   }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
-    String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(multiAsset.getFingerprint());
-    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
-      tokenResponse.setTokenType(TokenType.FT);
-    } else {
+    if (multiAsset.getSupply().compareTo(BigInteger.ONE) == 0) {
       tokenResponse.setTokenType(TokenType.NFT);
-      tokenResponse.setMetadataJson(txMetadataNFTToken);
+    } else {
+      tokenResponse.setTokenType(TokenType.FT);
     }
+    tokenResponse.setMetadataJson(
+        maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint()));
   }
 }
