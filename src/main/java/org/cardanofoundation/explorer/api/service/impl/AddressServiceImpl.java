@@ -49,6 +49,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressTxBalance;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -87,7 +88,27 @@ public class AddressServiceImpl implements AddressService {
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
     addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
+    addressResponse.setScriptHash(AddressUtils.getHexPaymentPart(address));
+    setAssociatedScript(addressResponse);
     return addressResponse;
+  }
+
+  /**
+   * Set associated script for address (native script or smart contract)
+   * @param addressResponse
+   */
+  private void setAssociatedScript(AddressResponse addressResponse) {
+    if(addressResponse.getScriptHash() != null) {
+      scriptRepository.findByHash(addressResponse.getScriptHash())
+          .ifPresent(script -> {
+            if(ScriptType.PLUTUSV1.equals(script.getType()) ||
+                ScriptType.PLUTUSV2.equals(script.getType())) {
+              addressResponse.setAssociatedSmartContract(Boolean.TRUE);
+            } else {
+              addressResponse.setAssociatedNativeScript(Boolean.TRUE);
+            }
+          });
+    }
   }
 
   /**
