@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
@@ -49,4 +50,18 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   @Query("SELECT ma.fingerprint as fingerprint, ma.name as tokenName, mtm.quantity as quantity FROM MultiAsset ma "
       + "JOIN MaTxMint mtm on (mtm.ident = ma and mtm.tx = :tx and ma.policy = :policy)")
   List<AddressTokenProjection> getMintingAssets(@Param("tx") Tx tx, @Param("policy") String policy);
+
+  @Query("SELECT COALESCE(count(multiAsset.id), 0) as numberOfTokens, multiAsset.policy as policy"
+      + " FROM MultiAsset multiAsset"
+      + " WHERE multiAsset.policy IN :policyList"
+      + " GROUP BY multiAsset.policy")
+  List<PolicyProjection> countMultiAssetByPolicyIn(@Param("policyList") List<String> policyList);
+
+  @Query("SELECT COALESCE(COUNT(DISTINCT atb.addressId), 0) as numberOfAssetHolders, ma.policy as policy "
+      + " FROM MultiAsset ma "
+      + " INNER JOIN AddressTokenBalance atb ON atb.multiAsset = ma"
+      + " WHERE ma.policy IN :policyList "
+      + " AND atb.balance > 0 "
+      + " GROUP BY ma.policy")
+  List<PolicyProjection> countAssetHoldersByPolicyIn(@Param("policyList") List<String> policyList);
 }
