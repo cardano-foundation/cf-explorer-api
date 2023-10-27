@@ -2,10 +2,10 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ScriptRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.TxOutRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
 import org.cardanofoundation.explorer.api.service.impl.ScriptServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
