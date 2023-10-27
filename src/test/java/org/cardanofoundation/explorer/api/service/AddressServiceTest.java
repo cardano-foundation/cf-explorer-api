@@ -14,7 +14,12 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
