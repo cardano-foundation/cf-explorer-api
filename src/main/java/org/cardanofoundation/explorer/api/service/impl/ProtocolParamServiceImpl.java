@@ -34,6 +34,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -64,6 +67,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 @Service
@@ -75,7 +79,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   public static final String SET = "set";
   public static final String PROPOSAL = "Proposal";
   public static final String PROTOCOL_HISTORY = "PROTOCOL_HISTORY_ALL";
-
+  private static final String DELEGATE_KEY = "delegate";
+  private static final String GENESIS_DELEG_KEYS = "GENESIS_DELEG_KEYS";
   public static final String FIXED_PROTOCOL = "FIXED_PROTOCOL";
 
   final ParamProposalRepository paramProposalRepository;
@@ -372,8 +377,36 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     return fixedProtocol;
   }
 
+  @Override
+  @Transactional
+  public Map<String, String> getGenesisDelegateKeysMap() {
+    Object genDelegsRedisMap = redisTemplate.opsForValue().get(getGenesisDelegRedisKeys());
+
+    if (Objects.isNull(genDelegsRedisMap)) {
+      Map<String, String> dKeyHash224Map = new HashMap<>();
+      ObjectMapper objectMapper = new ObjectMapper();
+
+      // get genesis delegate key from genesis file
+      JsonNode genDelegsNode = objectMapper.valueToTree(getFixedProtocols().getGenDelegs());
+      genDelegsNode.fields().forEachRemaining(entry -> {
+        String key = entry.getKey();
+        String value = entry.getValue().get(DELEGATE_KEY).asText();
+        dKeyHash224Map.put(value, key);
+      });
+
+      redisTemplate.opsForValue().set(getGenesisDelegRedisKeys(), dKeyHash224Map);
+      return  dKeyHash224Map;
+    } else {
+      return (Map<String, String>) genDelegsRedisMap;
+    }
+  }
+
   private String getFixedProtocolsKey(){
     return String.format("%s_%s", network, FIXED_PROTOCOL).toUpperCase();
+  }
+
+  private String getGenesisDelegRedisKeys(){
+    return String.format("%s_%s", network, GENESIS_DELEG_KEYS).toUpperCase();
   }
 
   private FixedProtocol loadFixedProtocols() {

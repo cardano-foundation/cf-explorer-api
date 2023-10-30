@@ -13,6 +13,8 @@ import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
+import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
@@ -40,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -60,6 +63,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(StakeKeyReportController.class)
+@Import(RoleFilterMapper.class)
 @AutoConfigureMockMvc(addFilters = false)
 class StakeKeyReportControllerTest {
 
@@ -99,14 +103,14 @@ class StakeKeyReportControllerTest {
         .build();
 
     BDDMockito.given(
-            stakeKeyReportService.generateStakeKeyReport(any(StakeKeyReportRequest.class), anyString()))
+            stakeKeyReportService.generateStakeKeyReport(any(StakeKeyReportRequest.class), any()))
         .willReturn(responseExpect);
 
     mockMvc.perform(post(END_POINT + "/stake-key")
             .contentType(MediaType.APPLICATION_JSON)
             .content(asJsonString(Map.of("fromDate", "2021/01/01 00:00:00", "toDate", "2021/02/01 00:00:00")))
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -132,7 +136,7 @@ class StakeKeyReportControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .param("exportType", ExportType.CSV.name())
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -158,7 +162,7 @@ class StakeKeyReportControllerTest {
     mockMvc.perform(get(END_POINT + "/stake-key/{reportId}/detail", reportId)
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -188,7 +192,7 @@ class StakeKeyReportControllerTest {
             .param("size", "1")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -221,7 +225,7 @@ class StakeKeyReportControllerTest {
             .param("reportName", "")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -252,7 +256,7 @@ class StakeKeyReportControllerTest {
             .param("size", "1")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -281,7 +285,7 @@ class StakeKeyReportControllerTest {
             .param("size", "1")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -309,7 +313,7 @@ class StakeKeyReportControllerTest {
             .param("size", "1")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -336,7 +340,7 @@ class StakeKeyReportControllerTest {
             .param("size", "1")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
 
@@ -361,7 +365,7 @@ class StakeKeyReportControllerTest {
             .param("size", "1")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -389,7 +393,7 @@ class StakeKeyReportControllerTest {
             .param("size", "1")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())
@@ -419,7 +423,7 @@ class StakeKeyReportControllerTest {
             .param("size", "1")
             .contentType(MediaType.APPLICATION_JSON)
             .with(request -> {
-              request.setAttribute("username", username);
+              request.setAttribute("user", UserPrincipal.builder().username(username).build());
               return request;
             }))
         .andExpect(status().isOk())

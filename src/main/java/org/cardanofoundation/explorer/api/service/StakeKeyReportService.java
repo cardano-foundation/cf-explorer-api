@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -27,7 +28,7 @@ public interface StakeKeyReportService {
    * @return StakeKeyReportHistoryResponse
    */
   StakeKeyReportHistoryResponse generateStakeKeyReport(StakeKeyReportRequest stakeKeyReportRequest,
-                                                       String username);
+                                                       UserPrincipal userPrincipal);
 
 
   /**

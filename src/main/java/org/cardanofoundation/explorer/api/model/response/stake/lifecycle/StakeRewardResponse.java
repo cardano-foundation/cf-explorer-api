@@ -20,10 +20,28 @@ public class StakeRewardResponse {
   private BigInteger amount;
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private RewardType type;
+  private String poolView;
+  private String poolHash;
 
   public StakeRewardResponse(Integer epoch, Date time, BigInteger amount) {
     this.epoch = epoch;
     this.time = time;
     this.amount = amount;
+  }
+
+  public StakeRewardResponse(Integer epoch, Date time, BigInteger amount, RewardType type) {
+    this.epoch = epoch;
+    this.time = time;
+    this.amount = amount;
+    this.type = type;
+  }
+
+
+  public StakeRewardResponse(Integer epoch, Date time, BigInteger amount, String poolView, String poolHash) {
+    this.epoch = epoch;
+    this.time = time;
+    this.amount = amount;
+    this.poolView = poolView;
+    this.poolHash = poolHash;
   }
 }
