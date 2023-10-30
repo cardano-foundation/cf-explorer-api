@@ -12,6 +12,9 @@ import org.cardanofoundation.explorer.api.service.SearchService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +34,7 @@ public class SearchServiceImpl implements SearchService {
   private final MultiAssetRepository multiAssetRepository;
   private final PoolHashRepository poolHashRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final ScriptRepository scriptRepository;
 
   @Value("${application.network}")
   private String network;
@@ -47,7 +51,7 @@ public class SearchServiceImpl implements SearchService {
     searchToken(query, searchResponse);
     searchAddress(rawQuery, searchResponse);
     searchPool(query, searchResponse);
-    searchPolicy(query, searchResponse);
+    searchScriptHash(query, searchResponse);
     return searchResponse;
   }
 
@@ -152,10 +156,13 @@ public class SearchServiceImpl implements SearchService {
     }
   }
 
-  public void searchPolicy(String query, SearchResponse searchResponse) {
-    Integer tokenCount = multiAssetRepository.countByPolicy(query);
-    if (Integer.valueOf(0).compareTo(tokenCount) < 0) {
-      searchResponse.setPolicy(query);
+  public void searchScriptHash(String query, SearchResponse searchResponse) {
+    Script script = scriptRepository.findByHash(query)
+        .orElse(null);
+
+    if(script != null) {
+      searchResponse.setScriptHash(query);
+      searchResponse.setIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
     }
   }
 }
