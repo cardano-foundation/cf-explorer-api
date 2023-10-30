@@ -24,9 +24,10 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
   Page<MaTxMint> findByIdent(@Param("tokenId") String tokenId, Pageable pageable);
 
   @Query(value = "SELECT tm.json FROM Tx tx"
-      + " JOIN MaTxMint mtm ON mtm.tx = tx AND mtm.id = (SELECT max(mtm2.id) FROM MaTxMint mtm2 WHERE mtm2.tx = tx)"
+      + " JOIN MaTxMint mtm ON mtm.tx = tx"
       + " JOIN TxMetadata tm ON tm.tx = tx"
       + " JOIN MultiAsset ma ON ma = mtm.ident"
-      + " WHERE ma.fingerprint = :fingerprint AND tm.key = :label")
+      + " WHERE ma.fingerprint = :fingerprint AND tm.key = :label"
+      + " ORDER BY mtm.id DESC LIMIT 1")
   String getTxMetadataToken(@Param("fingerprint") String fingerprint, @Param("label") BigInteger label);
 }
