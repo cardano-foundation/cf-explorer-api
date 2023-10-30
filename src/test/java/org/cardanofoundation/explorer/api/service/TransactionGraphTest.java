@@ -22,7 +22,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjectionImp;
-import org.cardanofoundation.explorer.api.repository.TxChartRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
 import org.cardanofoundation.explorer.api.service.impl.TxServiceImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

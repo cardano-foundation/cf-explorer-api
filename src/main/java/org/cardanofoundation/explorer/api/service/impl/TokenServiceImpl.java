@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.ledgersync.common.util.MetadataStandardUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -39,16 +41,15 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AggregateAddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
-import org.cardanofoundation.explorer.api.repository.TxRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -61,7 +62,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.TokenInfo;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 
 @Service
@@ -300,12 +301,13 @@ public class TokenServiceImpl implements TokenService {
   }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
-    String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(multiAsset.getFingerprint());
-    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
-      tokenResponse.setTokenType(TokenType.FT);
-    } else {
+    if (multiAsset.getSupply().compareTo(BigInteger.ONE) == 0) {
       tokenResponse.setTokenType(TokenType.NFT);
-      tokenResponse.setMetadataJson(txMetadataNFTToken);
+    } else {
+      tokenResponse.setTokenType(TokenType.FT);
     }
+    tokenResponse.setMetadataJson(MetadataStandardUtils.splitJsonMetadataByAssetName(
+        maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint(),
+            CommonConstant.METADATA_LABEL_721), multiAsset.getNameView()));
   }
 }
