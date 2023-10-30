@@ -78,7 +78,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   List<Long> findDelegationByAddressAndTxIn(@Param("stakeKey") StakeAddress stakeKey,
       @Param("txIds") Collection<Long> txIds);
 
-  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo, block.slotNo as slotNo,"
       + " block.blockNo as blockNo, block.epochNo as epochNo, poolHash.view as poolId,"
       + " poolOfflineData.json as poolData, poolOfflineData.tickerName as tickerName"
       + " FROM Delegation delegation"
@@ -173,7 +173,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       "SELECT dg1.address.id "
           + "FROM Delegation dg1 "
           + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
-          + "WHERE ph.view = :poolView "
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash) "
           + "AND NOT EXISTS "
           + "(SELECT TRUE "
           + "FROM Delegation dg2 "
@@ -184,7 +185,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "FROM StakeDeregistration sd "
           + "WHERE sd.addr.id = dg1.address.id "
           + "AND sd.tx.id > dg1.tx.id)")
-  Page<Long> liveDelegatorsList(@Param("poolView") String poolView, Pageable pageable);
+  Page<Long> liveDelegatorsList(@Param("poolViewOrHash") String poolViewOrHash, Pageable pageable);
 
   @Query(value = "SELECT DISTINCT delegation.txId FROM Delegation delegation",
       countQuery = "SELECT COUNT(DISTINCT delegation.txId) FROM Delegation delegation")

@@ -86,11 +86,12 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
           + "JOIN Block bk ON tx.blockId = bk.id AND (tx.deposit IS NULL OR tx.deposit < (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = bk.epochNo)) "
-          + "WHERE ph.view = :poolView "
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash) "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
-  Page<PoolUpdateProjection> findPoolUpdateByPool(@Param("poolView") String poolView,
+  Page<PoolUpdateProjection> findPoolUpdateByPool(@Param("poolViewOrHash") String poolViewOrHash,
       @Param("txHash") String txHash,
       @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate,
@@ -127,8 +128,9 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
           + "JOIN Block bk ON tx.block.id  = bk.id AND (tx.deposit IS NULL OR tx.deposit < (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = bk.epochNo)) "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id  = sa.id "
-          + "WHERE ph.view = :poolView ")
-  Page<PoolUpdateDetailProjection> findPoolUpdateByPool(@Param("poolView") String poolView, Pageable pageable);
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash) ")
+  Page<PoolUpdateDetailProjection> findPoolUpdateByPool(@Param("poolViewOrHash") String poolViewOrHash, Pageable pageable);
 
   @Query("SELECT poolHash.view FROM PoolUpdate poolUpdate "
       + "INNER JOIN PoolHash poolHash ON poolUpdate.poolHash = poolHash "
@@ -148,11 +150,12 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
           + "JOIN Block bk ON tx.blockId = bk.id "
           + "JOIN EpochParam ep ON ep.epochNo = bk.epochNo AND tx.deposit IS NOT NULL AND tx.deposit >= ep.poolDeposit "
-          + "WHERE ph.view = :poolView "
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash) "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
-  Page<PoolUpdateProjection> findPoolRegistrationByPool(@Param("poolView") String poolView,
+  Page<PoolUpdateProjection> findPoolRegistrationByPool(@Param("poolViewOrHash") String poolViewOrHash,
       @Param("txHash") String txHash,
       @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate,
@@ -174,9 +177,10 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       "SELECT sa.view FROM PoolHash ph "
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-          + "WHERE ph.view = :poolView "
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash) "
           + "GROUP BY sa.view")
-  List<String> findRewardAccountByPoolView(@Param("poolView") String poolView);
+  List<String> findRewardAccountByPoolView(@Param("poolViewOrHash") String poolViewOrHash);
 
   @Query(value =
       "SELECT sa.view FROM PoolHash ph "
@@ -189,6 +193,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   @Query(value =
       "SELECT COUNT(pu.id) FROM PoolUpdate pu "
           + "JOIN PoolHash ph ON pu.poolHash.id = ph.id "
-          + "WHERE ph.view = :poolView ")
-  Integer countPoolUpdateByPool(@Param("poolView") String poolView);
+          + "WHERE (ph.view = :poolViewOrHash "
+          + "OR ph.hashRaw = :poolViewOrHash)")
+  Integer countPoolUpdateByPool(@Param("poolViewOrHash") String poolViewOrHash);
 }

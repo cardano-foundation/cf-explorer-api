@@ -158,4 +158,16 @@ public class GlobalRestControllerExceptionHandler {
                 .errorMessage(e.getName() + " not valid")
                 .build());
   }
+
+  @ExceptionHandler({UnauthorizedException.class})
+  public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(UnauthorizedException e) {
+    log.warn("Argument type not valid: {}", e.getMessage());
+
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(
+            ErrorResponse.builder()
+                .errorCode(e.getErrorCode().getServiceErrorCode())
+                .errorMessage(e.getErrorCode().getDesc())
+                .build());
+  }
 }

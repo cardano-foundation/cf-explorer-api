@@ -33,44 +33,46 @@ public interface DelegationService {
   /**
    * Get list pool for delegate pools
    *
-   * @param pageable,search
+   * @param pageable page, size and sort parameters
+   * @param search query for search by pool name or ticker name
+   * @param showRetired show retired pool
    * @return BaseFilterResponse<PoolResponse>
    */
-  BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search);
+  BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search, boolean showRetired);
 
   /**
    * Get detail pool for delegate pools detail
    *
-   * @param poolView
+   * @param poolViewOrHash
    * @return PoolDetailHeaderResponse
    */
-  PoolDetailHeaderResponse getDataForPoolDetail(String poolView);
+  PoolDetailHeaderResponse getDataForPoolDetail(String poolViewOrHash);
 
   /**
    * Get detail pool epoch list for delegate pools detail
    *
-   * @param poolView
+   * @param poolViewOrHash
    * @return PoolDetailEpochResponse
    */
   BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
-      String poolView);
+      String poolViewOrHash);
 
   /**
    * Get detail pool analytics for delegate pools detail
    *
-   * @param poolView
+   * @param poolViewOrHash
    * @return PoolDetailAnalyticsResponse
    */
-  PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String poolView);
+  PoolDetailAnalyticsResponse getAnalyticsForPoolDetail(String poolViewOrHash);
 
   /**
    * Get detail pool delegator list for delegate pools detail
    *
-   * @param poolView,pageable
+   * @param poolViewOrHash, pageable
    * @return PoolDetailDelegatorsResponse
    */
   BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Pageable pageable,
-      String poolView);
+      String poolViewOrHash);
 
   /**
    * Find Top {number} (default 3) Pool Delegation

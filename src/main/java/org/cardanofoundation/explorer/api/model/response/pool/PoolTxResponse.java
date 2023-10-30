@@ -22,7 +22,9 @@ public class PoolTxResponse implements Serializable {
 
   private Long block;
 
-  private Long slotNo;
+  private Integer epochSlotNo;
+
+  private Integer slotNo;
 
   private String poolName;
 

@@ -23,7 +23,7 @@ public class CommonConstant {
 
   public static final String POOL_STATUS_ACTIVE = "ACTIVE";
 
-  public static final String POOL_STATUS_RETIRING = "RETIRING";
+  public static final String POOL_STATUS_RETIRED = "RETIRED";
 
   public static final String ADDRESS_PREFIX = "addr";
 
@@ -73,7 +73,19 @@ public class CommonConstant {
 
   public static final String PREVIEW_NETWORK = "preview";
 
+  public static final String POOL_IDS_INACTIVATE = "POOL_IDS_INACTIVATE_";
 
+  public static final String UNDERSCORE = "_";
+
+  public static final String DATA_IS_NOT_SYNCING = "Data is not syncing";
+
+  public static final String READY_TO_SERVE = "Ready to serve";
+
+  public static final String SYNCING_BUT_NOT_READY = "Data is syncing, but it isn't ready to serve yet";
+
+  public static final String REPORT_LIMIT_PER_24HOURS = "reportLimitPer24Hours";
+
+  public static final int UNLIMITED_REPORT = -1;
 
 
   public static int hashCode(Object... a) {

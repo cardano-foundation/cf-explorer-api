@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface TreasuryRepository extends JpaRepository<Treasury, Long> {
 
-  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo,"
+  @Query("SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo, block.slotNo as slotNo,"
       + " block.blockNo as blockNo, tx.blockIndex as blockIndex, block.epochNo as epochNo,"
       + " treasury.amount as amount"
       + " FROM Treasury treasury"
