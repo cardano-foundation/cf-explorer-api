@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.ledgersync.common.util.MetadataStandardUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -305,7 +306,8 @@ public class TokenServiceImpl implements TokenService {
     } else {
       tokenResponse.setTokenType(TokenType.FT);
     }
-    tokenResponse.setMetadataJson(
-        maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint(), CommonConstant.METADATA_LABEL_721));
+    tokenResponse.setMetadataJson(MetadataStandardUtils.splitJsonMetadataByAssetName(
+        maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint(),
+            CommonConstant.METADATA_LABEL_721), multiAsset.getNameView()));
   }
 }
