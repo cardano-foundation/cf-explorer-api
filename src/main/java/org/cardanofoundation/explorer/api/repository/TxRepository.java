@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository;
 
+import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
@@ -89,4 +90,18 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
       + " INNER JOIN Block b ON b.id = tx.blockId"
       + " WHERE b.time >= :time AND b.txCount > 0")
   Optional<Long> findMinTxByAfterTime(@Param("time") Timestamp time);
+
+  @Query("SELECT tx.id as txId, tx.hash as hash, b.time as time, b.blockNo as blockNo,  "
+      + " b.epochNo as epochNo, b.epochSlotNo as epochSlotNo, b.slotNo as absoluteSlot "
+      + " FROM Tx tx "
+      + " JOIN Block b ON tx.block = b"
+      + " WHERE tx.id IN :txIds")
+  List<SmartContractTxProjection> getSmartContractTxsByTxIds(@Param("txIds") Collection<Long> txIds);
+
+  @Query("SELECT DISTINCT(r.purpose) as scriptPurposeType, tx.id as txId FROM Tx tx"
+      + " JOIN Redeemer r ON r.tx = tx"
+      + " WHERE tx.id IN :txIds"
+      + " AND r.scriptHash = :scriptHash")
+  List<SmartContractTxProjection> getSmartContractTxsPurpose(@Param("txIds") Collection<Long> txIds,
+                                                             @Param("scriptHash") String scriptHash);
 }
