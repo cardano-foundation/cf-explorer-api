@@ -24,10 +24,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/scripts")
@@ -49,6 +46,15 @@ public class ScriptController {
   public ResponseEntity<NativeScriptResponse> getNativeScriptDetail(
       @PathVariable String scriptHash) {
     return ResponseEntity.ok(scriptService.getNativeScripts(scriptHash));
+  }
+
+  @PostMapping("/native-scripts/{scriptHash}/verify")
+  @LogMessage
+  @Operation(summary = "Verify native scrip contract")
+  public ResponseEntity<String> verifyContract(
+      @PathVariable String scriptHash,
+      @RequestBody String jsonScript) {
+    return ResponseEntity.ok(scriptService.verifyNativeScript(scriptHash, jsonScript));
   }
 
   @GetMapping("/native-scripts/{scriptHash}/tokens")

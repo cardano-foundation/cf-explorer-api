@@ -16,6 +16,8 @@ public interface ScriptService {
 
   NativeScriptResponse getNativeScripts(String scriptHash);
 
+  String verifyNativeScript(String scriptHash, String scriptJson);
+
   BaseFilterResponse<TokenFilterResponse> getNativeScriptTokens(String scriptHash, Pageable pageable);
 
   BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(String scriptHash, Pageable pageable);
