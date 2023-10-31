@@ -52,7 +52,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + "JOIN Tx tx ON sr.tx.id  = tx.id "
           + "JOIN Block bk ON tx.block.id = bk.id "
           + "WHERE sa.id IN :addressIds "
-          + "ORDER BY stakeAddressId DESC")
+          + "ORDER BY tx.id DESC")
   List<PoolDetailDelegatorProjection> getDelegatorsByAddress(
       @Param("addressIds") Set<Long> addressIds);
 
