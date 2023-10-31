@@ -21,4 +21,5 @@ public class NativeScriptResponse {
   private LocalDateTime before;
   private List <String> associatedAddress;
   private String script;
+  private Boolean verifiedContract;
 }

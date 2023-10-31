@@ -51,6 +51,15 @@ public class ScriptController {
     return ResponseEntity.ok(scriptService.getNativeScripts(scriptHash));
   }
 
+  @PostMapping("/native-scripts/{scriptHash}/verify")
+  @LogMessage
+  @Operation(summary = "Verify native scrip contract")
+  public ResponseEntity<String> verifyContract(
+      @PathVariable String scriptHash,
+      @RequestBody String jsonScript) {
+    return ResponseEntity.ok(scriptService.verifyNativeScript(scriptHash, jsonScript));
+  }
+
   @GetMapping("/native-scripts/{scriptHash}/tokens")
   @LogMessage
   @Operation(summary = "Get tokens of a policy", description = "Get all tokens of a policy")

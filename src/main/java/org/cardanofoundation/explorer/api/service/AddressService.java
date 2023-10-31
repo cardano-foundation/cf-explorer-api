@@ -56,21 +56,4 @@ public interface AddressService {
    * @return list token by display name
    */
   BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable, String address, String displayName);
-
-
-  /**
-   * Verify native script
-   *
-   * @param scriptVerifyRequest script verify request
-   * @return true if script is valid
-   */
-  Boolean verifyNativeScript(ScriptVerifyRequest scriptVerifyRequest);
-
-  /**
-   * Get json script
-   *
-   * @param address wallet address
-   * @return json script
-   */
-  ContractScript getJsonNativeScript(String address);
 }
