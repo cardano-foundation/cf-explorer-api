@@ -4,6 +4,7 @@ import com.bloxbean.cardano.client.exception.CborDeserializationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
@@ -27,6 +28,7 @@ import org.cardanofoundation.ledgersync.common.common.nativescript.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -149,7 +151,10 @@ public class ScriptServiceImpl implements ScriptService {
     try {
       String json = script.getJson();
       if (!StringUtils.isEmpty(json)) {
-        nativeScriptResponse.setScript(json);
+        if (Boolean.TRUE.equals(script.getVerifiedContract())) {
+          nativeScriptResponse.setScript(json);
+        }
+        nativeScriptResponse.setVerifiedContract(script.getVerifiedContract());
         NativeScript nativeScript = NativeScript.deserializeJson(json);
         setNativeScriptInfo(nativeScript, nativeScriptResponse, block.getTime());
       }
@@ -158,6 +163,32 @@ public class ScriptServiceImpl implements ScriptService {
     }
     return nativeScriptResponse;
   }
+
+
+  @Override
+  @Transactional
+  public String verifyNativeScript(String scriptHash, String scriptJson) {
+    try {
+      Script script = scriptRepository.findByHash(scriptHash).orElseThrow(
+          () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
+      );
+      Set<ScriptType> nativeScriptTypes = Set.of(ScriptType.TIMELOCK, ScriptType.MULTISIG);
+      if (!nativeScriptTypes.contains(script.getType())) {
+        throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
+      }
+      String hash = Hex.encodeHexString(NativeScript.deserializeJson(scriptJson).getScriptHash());
+      if (script.getHash().equals(hash)) {
+        script.setVerifiedContract(true);
+        scriptRepository.save(script);
+        return script.getJson();
+      } else {
+        throw new BusinessException(BusinessCode.VERIFY_SCRIPT_FAILED);
+      }
+    } catch (Exception e) {
+      throw new BusinessException(BusinessCode.VERIFY_SCRIPT_FAILED);
+    }
+  }
+
 
   @Override
   public BaseFilterResponse<TokenFilterResponse> getNativeScriptTokens(String scriptHash, Pageable pageable) {
