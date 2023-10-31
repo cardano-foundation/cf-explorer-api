@@ -43,23 +43,4 @@ public class ContractController {
           Address_.BALANCE}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(addressService.getContracts(pagination.toPageable()));
   }
-
-  @PostMapping("/verify/native")
-  @LogMessage
-  @Operation(summary = "Verify native scrip contract", tags = {"contract"})
-  public ResponseEntity<Boolean> verifyContract(@RequestBody ScriptVerifyRequest scriptVerifyRequest) {
-    return ResponseEntity.ok(addressService.verifyNativeScript(scriptVerifyRequest));
-  }
-
-  @GetMapping("/{address}/script")
-  @LogMessage
-  @Operation(
-      summary = "Get native script of contract",
-      description = "Check if the contract is native script contract and get the script of contract if it is native script contract.",
-      tags = {"contract"})
-  public ResponseEntity<ContractScript> getScriptOfContract(
-      @PathVariable @Parameter(description = "The human readable encoding of the output address."
-          + " Will be Base58 for Byron era addresses and Bech32 for Shelley era.") String address) {
-    return ResponseEntity.ok(addressService.getJsonNativeScript(address));
-  }
 }

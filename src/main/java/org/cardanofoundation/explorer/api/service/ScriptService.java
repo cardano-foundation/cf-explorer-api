@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.service;
 
-import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
@@ -14,6 +13,8 @@ public interface ScriptService {
   BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(Pageable pageable);
 
   NativeScriptResponse getNativeScripts(String scriptHash);
+
+  String verifyNativeScript(String scriptHash, String scriptJson);
 
   BaseFilterResponse<TokenFilterResponse> getNativeScriptTokens(String scriptHash, Pageable pageable);
 
