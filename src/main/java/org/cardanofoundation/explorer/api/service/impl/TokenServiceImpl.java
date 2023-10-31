@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -306,8 +307,10 @@ public class TokenServiceImpl implements TokenService {
     } else {
       tokenResponse.setTokenType(TokenType.FT);
     }
+    String assetName =
+        Objects.isNull(multiAsset.getNameView()) ? multiAsset.getName() : multiAsset.getNameView();
     tokenResponse.setMetadataJson(MetadataStandardUtils.splitJsonMetadataByAssetName(
         maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint(),
-            CommonConstant.METADATA_LABEL_721), multiAsset.getNameView()));
+            CommonConstant.METADATA_LABEL_721), assetName));
   }
 }
