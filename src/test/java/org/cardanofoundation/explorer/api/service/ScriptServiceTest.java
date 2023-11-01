@@ -83,6 +83,18 @@ class ScriptServiceTest {
   }
 
   @Test
+  void getSmartContractDetail_shouldThrowExceptionWhenScriptHashNotBelongToSC() {
+    String scriptHash = "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6";
+    when(scriptRepository.findByHash(scriptHash))
+        .thenReturn(Optional.of(Script.builder()
+                                    .hash("e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6")
+                                    .type(ScriptType.TIMELOCK)
+                                    .build()));
+    Assertions.assertThrows(BusinessException.class,
+                            () -> scriptService.getSmartContractDetail(scriptHash));
+  }
+
+  @Test
   void getSmartContractTxs_shouldReturnSmartContractTxResponse() {
     String scriptHash = "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6";
     Pageable pageable = PageRequest.of(0, 10);
