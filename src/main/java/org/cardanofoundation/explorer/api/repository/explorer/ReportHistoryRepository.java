@@ -1,7 +1,7 @@
-package org.cardanofoundation.explorer.api.repository.ledgersync;
+package org.cardanofoundation.explorer.api.repository.explorer;
 
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.ReportHistory;
 
 import java.sql.Timestamp;
 import java.util.List;

@@ -18,7 +18,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWa
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeKeyReportHistoryRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.StakeKeyReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.KafkaService;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
@@ -27,7 +27,7 @@ import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.StakeKeyReportHistory;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
