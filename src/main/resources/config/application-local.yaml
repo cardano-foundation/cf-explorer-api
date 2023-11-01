@@ -1,26 +1,20 @@
 # Infrastructure domain
-infrastructure:
-  host: ${POSTGRES_HOST:10.4.10.75}
-
-spring:
-  # Datasource specific configs
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://${infrastructure.host}:54322/explorer?currentSchema=mainnet
-    username: ${POSTGRES_USER:ducphung}
-    password: ${POSTGRES_PASSWORD:ducphung@pw}
-    driver-class-name: org.postgresql.Driver
-    # Hikari specific configs
-    hikari:
-      pool-name: explorer-api-pool
-      minimum-idle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: 20 #maximum pool size
-      idle-timeout: 300000 #maximum idle time for connection
-      max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
-      connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
-      auto-commit: false #default auto-commit behavior.
-      connection-init-sql: SELECT 1
-      data-source-properties:
+multi-datasource: #specified for HikariDataSource
+  datasourceLedgerSync:
+    hikariConfig:
+      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.112}:${LEDGER_SYNC_PORT:54323}/${LEDGER_SYNC_DB:explorer_api}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+      username: ${LEDGER_SYNC_USER:ducphung}
+      password: ${LEDGER_SYNC_PASSWORD:ducphung@pw}
+      driverClassName: org.postgresql.Driver
+      poolName: explorer-api-ledgersync-pool
+      minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximumPoolSize: ${MAXIMUM_POOL_SIZE:48} #maximum pool size
+      idleTimeout: 300000 #maximum idle time for connection
+      maxLifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connectionTimeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      autoCommit: false #default auto-commit behavior.
+      connectionInitSql: SELECT 1
+      dataSourceProperties:
         cachePrepStmts: true
         prepStmtCacheSize: 250
         prepStmtCacheSqlLimit: 2048
@@ -31,6 +25,34 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
+
+  datasourceExplorer:
+    hikariConfig:
+      jdbcUrl: jdbc:postgresql://${EXPLORER_HOST:10.4.10.112}:${EXPLORER_PORT:54323}/${EXPLORER_DB:explorer_api}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+      username: ${EXPLORER_USER:cardano-master}
+      password: ${EXPLORER_PASSWORD:Y2FyZGFuby1kYXRhYmFzZS1tYXN0ZXI=}
+      driverClassName: org.postgresql.Driver
+      poolName: explorer-api-explorer-pool
+      minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximumPoolSize: ${MAXIMUM_POOL_SIZE:48} #maximum pool size
+      idleTimeout: 300000 #maximum idle time for connection
+      maxLifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connectionTimeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      autoCommit: false #default auto-commit behavior.
+      connectionInitSql: SELECT 1
+      dataSourceProperties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+spring:
   # JPA specific configs
   jpa:
     open-in-view: false
