@@ -5,6 +5,7 @@ import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.search.AddressSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.PoolSearchResponse;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.SearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.TokenSearchResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
@@ -166,9 +167,20 @@ public class SearchServiceImpl implements SearchService {
     Script script = scriptRepository.findByHash(query)
         .orElse(null);
 
-    if(script != null) {
-      searchResponse.setScriptHash(query);
-      searchResponse.setIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
+    if(Objects.nonNull(script)) {
+      boolean isSmartContract = ScriptType.PLUTUSV1.equals(script.getType()) ||
+          ScriptType.PLUTUSV2.equals(script.getType());
+
+      ScriptSearchResponse scriptSearchResponse = ScriptSearchResponse.builder()
+          .scriptHash(script.getHash())
+          .build();
+
+      if(isSmartContract) {
+        scriptSearchResponse.setSmartContract(true);
+      } else {
+        scriptSearchResponse.setNativeScript(true);
+      }
+      searchResponse.setScript(scriptSearchResponse);
     }
   }
 }

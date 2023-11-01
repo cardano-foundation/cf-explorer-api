@@ -14,6 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -99,5 +100,13 @@ public class ScriptController {
           "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
         scriptService.getSmartContractTxs(scriptHash, pagination.toPageable()));
+  }
+
+  @GetMapping("/search/{scriptHash}")
+  @LogMessage
+  @Operation(summary = "Search script by script hash", tags = {"script"})
+  public ResponseEntity<ScriptSearchResponse> getScriptByHash(
+      @PathVariable @Parameter(description = "The script hash")  String scriptHash) {
+    return ResponseEntity.ok(scriptService.searchScript(scriptHash));
   }
 }

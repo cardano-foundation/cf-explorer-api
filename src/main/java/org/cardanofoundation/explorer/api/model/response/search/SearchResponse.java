@@ -14,6 +14,5 @@ public class SearchResponse {
   private AddressSearchResponse address;
   private PoolSearchResponse pool;
   private boolean validPoolName;
-  private String scriptHash;
-  private Boolean isNativeScript;
+  private ScriptSearchResponse script;
 }

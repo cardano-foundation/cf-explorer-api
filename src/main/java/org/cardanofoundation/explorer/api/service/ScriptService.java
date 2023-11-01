@@ -9,6 +9,7 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.springframework.data.domain.Pageable;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 
 public interface ScriptService {
 
@@ -27,4 +28,6 @@ public interface ScriptService {
   SmartContractDetailResponse getSmartContractDetail(String scriptHash);
 
   BaseFilterResponse<SmartContractTxResponse> getSmartContractTxs(String scriptHash, Pageable pageable);
+
+  ScriptSearchResponse searchScript(String scriptHash);
 }

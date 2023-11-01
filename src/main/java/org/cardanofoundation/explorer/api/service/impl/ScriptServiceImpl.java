@@ -19,6 +19,7 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.PolicyProjection;
@@ -362,5 +363,24 @@ public class ScriptServiceImpl implements ScriptService {
     });
 
     return new BaseFilterResponse<>(txIds, smartContractTxResponses);
+  }
+
+  @Override
+  public ScriptSearchResponse searchScript(String scriptHash) {
+    Script script = scriptRepository.findByHash(scriptHash).orElseThrow(
+        () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
+    );
+    boolean isSmartContract = ScriptType.PLUTUSV1.equals(script.getType()) ||
+        ScriptType.PLUTUSV2.equals(script.getType());
+    ScriptSearchResponse scriptSearchResponse = ScriptSearchResponse.builder()
+        .scriptHash(script.getHash())
+        .build();
+
+    if (isSmartContract) {
+      scriptSearchResponse.setSmartContract(true);
+    } else {
+      scriptSearchResponse.setNativeScript(true);
+    }
+    return scriptSearchResponse;
   }
 }
