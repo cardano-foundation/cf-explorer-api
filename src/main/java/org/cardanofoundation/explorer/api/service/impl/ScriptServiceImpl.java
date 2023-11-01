@@ -286,6 +286,10 @@ public class ScriptServiceImpl implements ScriptService {
         () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
     );
 
+    if(!script.getType().equals(ScriptType.PLUTUSV1) && !script.getType().equals(ScriptType.PLUTUSV2)) {
+      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
+    }
+
     List<String> associatedAddresses =
         Stream.concat(stakeAddressRepository.getAssociatedAddress(scriptHash).stream(),
                       txOutRepository.getAssociatedAddress(scriptHash).stream())
