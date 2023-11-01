@@ -30,6 +30,7 @@ import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 
 @Service
 @AllArgsConstructor
@@ -49,6 +50,10 @@ public class ScriptServiceImpl implements ScriptService {
     Script script = scriptRepository.findByHash(scriptHash).orElseThrow(
         () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
     );
+
+    if(!script.getType().equals(ScriptType.PLUTUSV1) && !script.getType().equals(ScriptType.PLUTUSV2)) {
+      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
+    }
 
     List<String> associatedAddresses =
         Stream.concat(stakeAddressRepository.getAssociatedAddress(scriptHash).stream(),
