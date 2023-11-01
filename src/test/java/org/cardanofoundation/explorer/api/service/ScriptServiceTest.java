@@ -150,4 +150,45 @@ class ScriptServiceTest {
                             List.of(ScriptPurposeType.SPEND));
     Assertions.assertEquals(response.getData().get(0).getAddresses(), Set.of("address1"));
   }
+
+  @Test
+  void searchScript_shouldThrowExceptionWhenScriptNotFound() {
+    when(scriptRepository.findByHash("76b329bc5a22b26a6a06bf9991edef04ef182bad35ee3a482da0dbed")).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class,
+                            () -> scriptService.searchScript("76b329bc5a22b26a6a06bf9991edef04ef182bad35ee3a482da0dbed"));
+  }
+
+  @Test
+  void searchScript_shouldReturnNativeScriptResponse() {
+    when(scriptRepository.findByHash("76b329bc5a22b26a6a06bf9991edef04ef182bad35ee3a482da0dbed"))
+        .thenReturn(Optional.of(Script.builder()
+                                    .hash(
+                                        "76b329bc5a22b26a6a06bf9991edef04ef182bad35ee3a482da0dbed")
+                                    .type(ScriptType.TIMELOCK)
+                                    .build()));
+
+    var response = scriptService.searchScript(
+        "76b329bc5a22b26a6a06bf9991edef04ef182bad35ee3a482da0dbed");
+    Assertions.assertEquals("76b329bc5a22b26a6a06bf9991edef04ef182bad35ee3a482da0dbed",
+                            response.getScriptHash());
+    Assertions.assertFalse(response.isSmartContract());
+    Assertions.assertTrue(response.isNativeScript());
+  }
+
+  @Test
+  void searchScript_shouldReturnSmartContractResponse() {
+    when(scriptRepository.findByHash("9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79"))
+        .thenReturn(Optional.of(Script.builder()
+                                    .hash(
+                                        "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79")
+                                    .type(ScriptType.PLUTUSV1)
+                                    .build()));
+
+    var response = scriptService.searchScript(
+        "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79");
+    Assertions.assertEquals("9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79",
+                            response.getScriptHash());
+    Assertions.assertTrue(response.isSmartContract());
+    Assertions.assertFalse(response.isNativeScript());
+  }
 }
