@@ -153,10 +153,10 @@ public class ScriptServiceImpl implements ScriptService {
       if (!StringUtils.isEmpty(json)) {
         if (Boolean.TRUE.equals(script.getVerifiedContract())) {
           nativeScriptResponse.setScript(json);
+          NativeScript nativeScript = NativeScript.deserializeJson(json);
+          setNativeScriptInfo(nativeScript, nativeScriptResponse, block.getTime());
         }
         nativeScriptResponse.setVerifiedContract(script.getVerifiedContract());
-        NativeScript nativeScript = NativeScript.deserializeJson(json);
-        setNativeScriptInfo(nativeScript, nativeScriptResponse, block.getTime());
       }
     } catch (JsonProcessingException | CborDeserializationException e) {
       log.warn("Error parsing script json: {}", e.getMessage());
