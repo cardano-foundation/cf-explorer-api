@@ -151,12 +151,12 @@ public class ScriptServiceImpl implements ScriptService {
     try {
       String json = script.getJson();
       if (!StringUtils.isEmpty(json)) {
-        if (Boolean.TRUE.equals(script.getVerifiedContract())) {
+        if (Boolean.TRUE.equals(script.getVerified())) {
           nativeScriptResponse.setScript(json);
           NativeScript nativeScript = NativeScript.deserializeJson(json);
           setNativeScriptInfo(nativeScript, nativeScriptResponse, block.getTime());
         }
-        nativeScriptResponse.setVerifiedContract(script.getVerifiedContract());
+        nativeScriptResponse.setVerifiedContract(script.getVerified());
       }
     } catch (JsonProcessingException | CborDeserializationException e) {
       log.warn("Error parsing script json: {}", e.getMessage());
@@ -178,7 +178,7 @@ public class ScriptServiceImpl implements ScriptService {
       }
       String hash = Hex.encodeHexString(NativeScript.deserializeJson(scriptJson).getScriptHash());
       if (script.getHash().equals(hash)) {
-        script.setVerifiedContract(true);
+        script.setVerified(true);
         scriptRepository.save(script);
         return script.getJson();
       } else {
