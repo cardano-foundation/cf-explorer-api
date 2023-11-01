@@ -28,15 +28,15 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AggregateAddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.TokenInfoRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
@@ -47,7 +47,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.TokenInfo;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.TokenInfo;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -237,6 +237,7 @@ class TokenServiceTest {
         .name("PARA0043")
         .nameView("PARA0043")
         .fingerprint("asset1kz0wkuzt8293x5jsz7tryyjdvs6mh7rcupf9nz")
+        .supply(BigInteger.ONE)
         .build();
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
@@ -271,7 +272,7 @@ class TokenServiceTest {
     final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0));
     when(multiAssetRepository.getLastActivityTimeOfToken(multiAsset)).thenReturn(timestamp);
 
-    when(maTxMintRepository.getTxMetadataNFTToken(anyString())).thenReturn(null);
+    when(maTxMintRepository.getTxMetadataToken(anyString(), any())).thenReturn(null);
 
     // Run the test
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
@@ -279,7 +280,7 @@ class TokenServiceTest {
     // Verify the results
     assertEquals(100, result.getNumberOfHolders());
     assertEquals("100", result.getVolumeIn24h());
-    assertEquals(TokenType.FT, result.getTokenType());
+    assertEquals(TokenType.NFT, result.getTokenType());
     assertNull(result.getMetadataJson());
     assertEquals(timestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
@@ -295,6 +296,7 @@ class TokenServiceTest {
         .name("456c657068616e7453656372657441766174617273323135")
         .nameView("ElephantSecretAvatars215")
         .fingerprint("asset109mk0p5zlrk2sd5qt93v602v7zjuzax07dga47")
+        .supply(BigInteger.ONE)
         .build();
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
@@ -329,7 +331,7 @@ class TokenServiceTest {
     final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0));
     when(multiAssetRepository.getLastActivityTimeOfToken(multiAsset)).thenReturn(timestamp);
 
-    when(maTxMintRepository.getTxMetadataNFTToken(anyString())).thenReturn(
+    when(maTxMintRepository.getTxMetadataToken(anyString(), any())).thenReturn(
         "{\"0495e7467b9f8285ef79fca99fe1ed85ca19faba5b7d4dd425c3d884\":{\"ElephantSecretAvatars215\":{\"image\":\"ipfs://QmNvjyj4o7p7UXMEbxnx9ZY5ZLFMJcy9sjMXaTiFRgC4nJ\",\"name\":\"ElephantSecretAvatars#0215\",\"files\":[{\"src\":\"ipfs://QmaRoAcJcHunUsEEE1FSiPm5SWe47PQbexwQpHZdbTLzde\",\"name\":\"ElephantSecretAvatars#0215\",\"mediaType\":\"model/gltf-binary\"}],\"Animation\":\"Idle\",\"Skin\":\"Pink\",\"mediaType\":\"image/png\"}}}");
     // Run the test
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
@@ -355,6 +357,7 @@ class TokenServiceTest {
         .name("50726f6d6973657332323339")
         .nameView("Promises2239")
         .fingerprint("asset1crku723fffqp4c6zmfmz8xc0cpwm6wugcwetmw")
+        .supply(BigInteger.ONE)
         .build();
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
@@ -389,7 +392,7 @@ class TokenServiceTest {
     final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0));
     when(multiAssetRepository.getLastActivityTimeOfToken(multiAsset)).thenReturn(timestamp);
 
-    when(maTxMintRepository.getTxMetadataNFTToken(anyString())).thenReturn(
+    when(maTxMintRepository.getTxMetadataToken(anyString(), any())).thenReturn(
         "{\"2aec93fa65aaedaf2fc0aa46c3ace89c0c8e091ed5f39b8f8127e664\":{\"Promises2239\":{\"Candidate\":\"RichardTrixson\",\"image\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"Series\":\"CampaignMaterials\",\"Promise\":\"Correct\",\"Number\":\"2239\",\"Banner\":\"Modern\",\"Asset\":\"Promises2239\",\"files\":[{\"src\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"},{\"src\":\"ipfs://QmTWuebKD7FC8kKh8tBoPsVedyhJg38g92dBopnb7fM98C\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"}],\"Collection\":\"OldMoney\",\"mediaType\":\"image/jpeg\",\"Name\":\"Promises\"}},\"version\":\"1.0\"}");
     // Run the test
     final TokenResponse result = tokenService.getTokenDetail("tokenId");

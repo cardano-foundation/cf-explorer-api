@@ -3,13 +3,12 @@ package org.cardanofoundation.explorer.api.service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.cardanofoundation.explorer.api.model.response.healthcheck.SyncStatus;
-import org.cardanofoundation.explorer.api.repository.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.HealthCheckServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
