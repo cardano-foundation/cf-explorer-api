@@ -25,6 +25,7 @@ public class AddressUtils {
         if (shelleyAddress.containStakeAddress()) {
           //TO-DO: Move to common
           byte[] addr = shelleyAddress.getStakeReference();
+          shelleyAddress.getHexPaymentPart();
           ShelleyAddress stakeShelley = new ShelleyAddress(addr);
           stakeAddress = stakeShelley.getAddress();
         }
@@ -37,5 +38,18 @@ public class AddressUtils {
       throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
     }
     return stakeAddress;
+  }
+
+  /**
+   * Get hex payment part (script hash) associated with the address
+   * @param address
+   * @return hex payment part
+   */
+  public static String getHexPaymentPart(String address) {
+    if (address.startsWith(CommonConstant.ADDRESS_PREFIX)) {
+      ShelleyAddress shelleyAddress = new ShelleyAddress(address);
+      return shelleyAddress.getHexPaymentPart();
+    }
+    return null;
   }
 }
