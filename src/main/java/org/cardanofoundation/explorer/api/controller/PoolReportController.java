@@ -23,7 +23,7 @@ import org.cardanofoundation.explorer.api.service.PoolReportService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
 
 import lombok.RequiredArgsConstructor;
 

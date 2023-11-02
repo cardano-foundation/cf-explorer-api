@@ -3,11 +3,11 @@ package org.cardanofoundation.explorer.api.service.impl;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.explorer.api.repository.AdaPotsRepository;
-import org.cardanofoundation.explorer.api.repository.EpochStakeCheckpointRepository;
-import org.cardanofoundation.explorer.api.repository.PoolHistoryCheckpointRepository;
-import org.cardanofoundation.explorer.api.repository.PoolInfoCheckpointRepository;
-import org.cardanofoundation.explorer.api.repository.RewardCheckpointRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeCheckpointRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryCheckpointRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoCheckpointRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
