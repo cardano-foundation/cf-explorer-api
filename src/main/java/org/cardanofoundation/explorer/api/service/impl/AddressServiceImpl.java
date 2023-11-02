@@ -253,50 +253,6 @@ public class AddressServiceImpl implements AddressService {
     return new BaseFilterResponse<>(tokenListResponse);
   }
 
-  @Override
-  public Boolean verifyNativeScript(ScriptVerifyRequest scriptVerifyRequest) {
-    try{
-      ShelleyAddress shelleyAddress = new ShelleyAddress(scriptVerifyRequest.getAddress());
-      String policyId = shelleyAddress.getHexPaymentPart();
-      String hash = Hex.encodeHexString(NativeScript.deserializeJson(scriptVerifyRequest.getScript())
-                                            .getScriptHash());
-      if(policyId.equals(hash)){
-        Address address = addressRepository.findFirstByAddress(scriptVerifyRequest.getAddress())
-            .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
-        address.setVerifiedContract(Boolean.TRUE);
-        addressRepository.save(address);
-        return Boolean.TRUE;
-      } else{
-        return Boolean.FALSE;
-      }
-    } catch (Exception e) {
-      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
-    }
-  }
-
-  @Override
-  public ContractScript getJsonNativeScript(String address) {
-    Address addr = addressRepository.findFirstByAddress(address).orElseThrow(
-        () -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND)
-    );
-
-    if(Boolean.FALSE.equals(addr.getVerifiedContract()) || Objects.isNull(addr.getVerifiedContract())){
-      return ContractScript.builder().isVerified(Boolean.FALSE).data(null).build();
-    }
-
-    ShelleyAddress shelleyAddress = new ShelleyAddress(addr.getAddress());
-    String policyId = shelleyAddress.getHexPaymentPart();
-    Script script = scriptRepository.findByHash(policyId).orElseThrow(
-        () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
-    );
-
-    if(Objects.isNull(script.getJson())){
-      return ContractScript.builder().isVerified(Boolean.FALSE).data(null).build();
-    }
-
-    return ContractScript.builder().isVerified(Boolean.TRUE).data(script.getJson()).build();
-  }
-
   private void setMetadata(List<TokenAddressResponse> tokenListResponse) {
     Set<String> subjects = tokenListResponse.stream()
         .map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
