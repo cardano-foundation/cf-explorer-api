@@ -5,18 +5,23 @@ import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.search.AddressSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.PoolSearchResponse;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.SearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.TokenSearchResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.SearchService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +41,7 @@ public class SearchServiceImpl implements SearchService {
   private final MultiAssetRepository multiAssetRepository;
   private final PoolHashRepository poolHashRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final ScriptRepository scriptRepository;
 
   @Value("${application.network}")
   private String network;
@@ -52,7 +58,7 @@ public class SearchServiceImpl implements SearchService {
     searchToken(query, searchResponse);
     searchAddress(rawQuery, searchResponse);
     searchPool(query, searchResponse);
-    searchPolicy(query, searchResponse);
+    searchScriptHash(query, searchResponse);
     return searchResponse;
   }
 
@@ -157,10 +163,24 @@ public class SearchServiceImpl implements SearchService {
     }
   }
 
-  public void searchPolicy(String query, SearchResponse searchResponse) {
-    Integer tokenCount = multiAssetRepository.countByPolicy(query);
-    if (Integer.valueOf(0).compareTo(tokenCount) < 0) {
-      searchResponse.setPolicy(query);
+  public void searchScriptHash(String query, SearchResponse searchResponse) {
+    Script script = scriptRepository.findByHash(query)
+        .orElse(null);
+
+    if(Objects.nonNull(script)) {
+      boolean isSmartContract = ScriptType.PLUTUSV1.equals(script.getType()) ||
+          ScriptType.PLUTUSV2.equals(script.getType());
+
+      ScriptSearchResponse scriptSearchResponse = ScriptSearchResponse.builder()
+          .scriptHash(script.getHash())
+          .build();
+
+      if(isSmartContract) {
+        scriptSearchResponse.setSmartContract(true);
+      } else {
+        scriptSearchResponse.setNativeScript(true);
+      }
+      searchResponse.setScript(scriptSearchResponse);
     }
   }
 }

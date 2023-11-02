@@ -4,6 +4,9 @@ import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Redeemer;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -51,4 +54,9 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " WHERE tx = :tx"
       + " ORDER BY re.id")
   List<TxContractProjection> findContractByTxFail(@Param("tx") Tx tx);
+
+  @Query(value = "SELECT DISTINCT(tx.id) FROM Tx tx"
+      + " JOIN Redeemer r ON r.tx = tx"
+      + " WHERE r.scriptHash = :scriptHash")
+  Page<Long> findTxIdsInteractWithContract(@Param("scriptHash") String scriptHash, Pageable pageable);
 }
