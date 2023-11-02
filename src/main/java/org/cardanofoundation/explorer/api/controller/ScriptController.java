@@ -76,7 +76,7 @@ public class ScriptController {
     return ResponseEntity.ok(scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
   }
 
-  @GetMapping("/smart-contracts")
+  @GetMapping("/contracts")
   public ResponseEntity<BaseFilterResponse<SmartContractFilterResponse>> getSmartContracts(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {Script_.TX},
           direction = Sort.Direction.DESC) @Valid Pagination pagination) {
