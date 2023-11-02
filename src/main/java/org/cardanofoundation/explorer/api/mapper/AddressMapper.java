@@ -12,7 +12,6 @@ public interface AddressMapper {
 
   ContractFilterResponse fromAddressToContractFilter(Address address);
 
-  @Mapping(target = "isContract", source = "addressHasScript")
   @Mapping(target = "stakeAddress", source = "stakeAddress.view")
   AddressResponse fromAddress(Address address);
 
