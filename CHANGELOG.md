@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.3.34](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.33...v0.3.34) (2023-10-30)
+
+
+### Features
+
+* [met-1514] implement sync-healthcheck endpoint ([32ce496](https://github.com/cardano-foundation/cf-explorer-api/commit/32ce49676614f9f518b4e3958b713e6b87394dd9))
+* add custom actuator endpoint sync-status ([4558334](https://github.com/cardano-foundation/cf-explorer-api/commit/45583344384cdd638ce8ec2b9154aca0bb7a5ff9))
+* add unauthorized exception ([a89436f](https://github.com/cardano-foundation/cf-explorer-api/commit/a89436f6ae544e5285c21ef61fc41334a1955555))
+* add unauthorized exception ([dca3bed](https://github.com/cardano-foundation/cf-explorer-api/commit/dca3bed3cb78ec7fa896ccacbc589d57047092d9))
+* dynamic author ([fdcf4f8](https://github.com/cardano-foundation/cf-explorer-api/commit/fdcf4f8d716d1febaea2534f9585421e697bd585))
+* dynamic author ([588a5b5](https://github.com/cardano-foundation/cf-explorer-api/commit/588a5b5cbaa16827caf7d9294b3fe954a86a1194))
+* handle signerKey in tx bootstrap witness ([7ca5803](https://github.com/cardano-foundation/cf-explorer-api/commit/7ca5803cf2d7d023656b888edfa4616c16f82ecd))
+* map delegateKey to pkey hash with blake2b224 ([8a157ec](https://github.com/cardano-foundation/cf-explorer-api/commit/8a157ec3a38839b5dd47a256440429419963b43d))
+* MET-1523 update postman collection fail asserts ([8d8e3da](https://github.com/cardano-foundation/cf-explorer-api/commit/8d8e3da6c2ccfb5facc961700a9278327b38e5a1))
+* MET-1635 add filter for show or hide retired pool and add sort fields ([d7ada25](https://github.com/cardano-foundation/cf-explorer-api/commit/d7ada25925d85f7c5c8aaf403667b47928758cfa))
+* MET-1666 handle null for fee in epoch list of pool detail ([25fbf82](https://github.com/cardano-foundation/cf-explorer-api/commit/25fbf8207b127bb9af2638372f2dc3c2ac50382a))
+* met-1669 add signers info to protocol update response ([889aed3](https://github.com/cardano-foundation/cf-explorer-api/commit/889aed3696d088ad9a2dfc9deffe42d0af4a2562))
+* MET-1700 use aggregated data for token detail and token list endpoint ([af5b8f9](https://github.com/cardano-foundation/cf-explorer-api/commit/af5b8f967de2448bb7b1b92b63a96b89d271c8f5))
+* MET-1705 add signers information for MIR tx ([9d3fca4](https://github.com/cardano-foundation/cf-explorer-api/commit/9d3fca41839da13ff8081a8050ea1f1f4c8a82e4))
+* MET-1706 add pool to reward list in stake lifecycle ([4b01dbe](https://github.com/cardano-foundation/cf-explorer-api/commit/4b01dbe1c358c84808ae8bb5cf0a8c3f72a34651))
+* MET-1706 add total operator reward and total delegator reward to stake lifecycle ([33d2826](https://github.com/cardano-foundation/cf-explorer-api/commit/33d2826e0825aea9a36d79ff755cbc68c788005f))
+* read config file from classpath ([c87518a](https://github.com/cardano-foundation/cf-explorer-api/commit/c87518acdb693e2fbc36e831904f5c0ea6fea25b))
+* read config file from classpath ([a185413](https://github.com/cardano-foundation/cf-explorer-api/commit/a185413d364a4af256236ae593e631fa45bc8ebe))
+* update report limit ([f20a03c](https://github.com/cardano-foundation/cf-explorer-api/commit/f20a03cd8654be062e60b5446f4fb69ae738de1a))
+* update response of sync status ([c6c3362](https://github.com/cardano-foundation/cf-explorer-api/commit/c6c3362697844f28ca88f0192cad0d798f13f5a5))
+* update unlimited report ([e5812e6](https://github.com/cardano-foundation/cf-explorer-api/commit/e5812e68dbf8cac593c6f19f4ec34f38a66a7191))
+* update unlimited report ([aa66231](https://github.com/cardano-foundation/cf-explorer-api/commit/aa66231750e5698fb1a992ddc6bdc3d1bb4b8a6e))
+* update unlimited report ([123f78e](https://github.com/cardano-foundation/cf-explorer-api/commit/123f78ee54741a2477ebb20599e3152a304692dc))
+* update unlimited report ([cfc6219](https://github.com/cardano-foundation/cf-explorer-api/commit/cfc6219e1a740372d78c77bcdfeb4ae4101c602b))
+
+
+### Bug Fixes
+
+* change project index ([838f154](https://github.com/cardano-foundation/cf-explorer-api/commit/838f15408d95c8904cea5f29b2589eacb7e49ac7))
+* conflict with develop ([9765e1c](https://github.com/cardano-foundation/cf-explorer-api/commit/9765e1cde83cccb234d2ef2128d0f1aba96029b4))
+* edit field name ([3eb1ace](https://github.com/cardano-foundation/cf-explorer-api/commit/3eb1aceb0660f5fa621e17a6e7130d825a25a25c))
+* MET-1706 update query to get pool data in reward ([6ece6e1](https://github.com/cardano-foundation/cf-explorer-api/commit/6ece6e1c5029b0922c8fd92c6fb21400fa829b3b))
+* rename TxVkeyWitness to TxWitness ([04b0bc3](https://github.com/cardano-foundation/cf-explorer-api/commit/04b0bc338e8e594f2e15afead5e09faf6ca52ce1))
+* update version common api ([63d3415](https://github.com/cardano-foundation/cf-explorer-api/commit/63d341591b70902cd45f66da86032a83195c3693))
+
 ## [0.3.33](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.32...v0.3.33) (2023-10-06)
 
 

@@ -20,12 +20,12 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ScriptRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DataUtil;
@@ -49,13 +49,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressTxBalance;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +87,27 @@ public class AddressServiceImpl implements AddressService {
     }
     AddressResponse addressResponse = addressMapper.fromAddress(addr);
     addressResponse.setStakeAddress(AddressUtils.checkStakeAddress(address));
+    addressResponse.setScriptHash(AddressUtils.getHexPaymentPart(address));
+    setAssociatedScript(addressResponse);
     return addressResponse;
+  }
+
+  /**
+   * Set associated script for address (native script or smart contract)
+   * @param addressResponse
+   */
+  private void setAssociatedScript(AddressResponse addressResponse) {
+    if(addressResponse.getScriptHash() != null) {
+      scriptRepository.findByHash(addressResponse.getScriptHash())
+          .ifPresent(script -> {
+            if(ScriptType.PLUTUSV1.equals(script.getType()) ||
+                ScriptType.PLUTUSV2.equals(script.getType())) {
+              addressResponse.setAssociatedSmartContract(Boolean.TRUE);
+            } else {
+              addressResponse.setAssociatedNativeScript(Boolean.TRUE);
+            }
+          });
+    }
   }
 
   /**
