@@ -71,7 +71,7 @@ public class ScriptControllerTest {
 
         when(scriptService.getSmartContracts(any(Pageable.class))).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/scripts/smart-contracts"))
+        mockMvc.perform(get("/api/v1/scripts/contracts"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").exists())
             .andExpect(jsonPath("$.data[0].associatedAddress[0]").value("addr1"))
