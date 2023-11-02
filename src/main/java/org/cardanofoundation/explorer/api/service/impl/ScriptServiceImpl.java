@@ -157,6 +157,8 @@ public class ScriptServiceImpl implements ScriptService {
     List<String> associatedAddressList = stakeAddressRepository.getStakeAssociatedAddress(scriptHash);
     associatedAddressList.addAll(txOutRepository.getAssociatedAddress(scriptHash));
     nativeScriptResponse.setAssociatedAddress(associatedAddressList);
+    nativeScriptResponse.setNumberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash));
+    nativeScriptResponse.setNumberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash));
     nativeScriptResponse.setKeyHashes(new ArrayList<>());
     try {
       String json = script.getJson();
