@@ -27,6 +27,7 @@ import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.cardanofoundation.ledgersync.common.common.address.ShelleyAddress;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,6 +101,34 @@ class AddressServiceTest {
 
     AddressResponse response = addressService.getAddressDetail(addr);
     Assertions.assertEquals(expect.getStakeAddress(), response.getStakeAddress());
+  }
+
+  @Test
+  void getAddressDetail_shouldAssociatedWithNativeScript() {
+    String addr = "addr1w9rerwzk0f5v4den9u2c7anv2d4dl88hq9cq0xgcmernsfsak7w6r";
+    Address address = Address.builder().build();
+    AddressResponse addressResponse = AddressResponse.builder().build();
+    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
+    when(addressMapper.fromAddress(address)).thenReturn(addressResponse);
+    when(scriptRepository.findByHash("4791b8567a68cab7332f158f766c536adf9cf70170079918de473826"))
+        .thenReturn(Optional.of(Script.builder().type(ScriptType.TIMELOCK).build()));
+    AddressResponse response = addressService.getAddressDetail(addr);
+    Assertions.assertTrue(response.isAssociatedNativeScript());
+    Assertions.assertEquals(response.getScriptHash(), "4791b8567a68cab7332f158f766c536adf9cf70170079918de473826");
+  }
+
+  @Test
+  void getAddressDetail_shouldAssociatedWithSmartContract() {
+    String addr = "addr1zyqzqk0uwkcr32zmxwaylhava4976yj8lwkjf3fcm4zjgkhqy02w7ayk0lyyrf080l5zusdpkg8se9x7fcke6vaz42lq6spmug";
+    Address address = Address.builder().build();
+    AddressResponse addressResponse = AddressResponse.builder().build();
+    when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
+    when(addressMapper.fromAddress(address)).thenReturn(addressResponse);
+    when(scriptRepository.findByHash("002059fc75b038a85b33ba4fdfaced4bed1247fbad24c538dd45245a"))
+        .thenReturn(Optional.of(Script.builder().type(ScriptType.PLUTUSV1).build()));
+    AddressResponse response = addressService.getAddressDetail(addr);
+    Assertions.assertTrue(response.isAssociatedSmartContract());
+    Assertions.assertEquals(response.getScriptHash(), "002059fc75b038a85b33ba4fdfaced4bed1247fbad24c538dd45245a");
   }
 
   @Test
