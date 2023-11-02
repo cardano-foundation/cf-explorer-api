@@ -83,7 +83,7 @@ public class ScriptController {
     return ResponseEntity.ok(scriptService.getSmartContracts(pagination.toPageable()));
   }
 
-  @GetMapping("/smart-contracts/{scriptHash}")
+  @GetMapping("/contracts/{scriptHash}")
   @LogMessage
   @Operation(summary = "Get smart contract detail", tags = {"script"})
   public ResponseEntity<SmartContractDetailResponse> getSmartContracts(
@@ -91,7 +91,7 @@ public class ScriptController {
     return ResponseEntity.ok(scriptService.getSmartContractDetail(scriptHash));
   }
 
-  @GetMapping("/smart-contracts/{scriptHash}/txs")
+  @GetMapping("/contracts/{scriptHash}/txs")
   @LogMessage
   @Operation(summary = "Get transactions interact with smart contract", tags = {"script"})
   public ResponseEntity<BaseFilterResponse<SmartContractTxResponse>> getSmartContractsTxs(
