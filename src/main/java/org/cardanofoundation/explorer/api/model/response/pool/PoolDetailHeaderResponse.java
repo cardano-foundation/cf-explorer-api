@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.*;
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.AggregatePoolInfo;
 
 @Getter
 @Setter
@@ -65,7 +66,7 @@ public class PoolDetailHeaderResponse implements Serializable {
 
   private Timestamp lastUpdate;
 
-  public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail) {
+  public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail, AggregatePoolInfo aggregatePoolInfo) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
     this.poolView = poolDetail.getPoolView();
@@ -73,9 +74,9 @@ public class PoolDetailHeaderResponse implements Serializable {
     this.pledge = poolDetail.getPledge();
     this.cost = poolDetail.getCost();
     this.margin = poolDetail.getMargin();
-    this.epochBlock = poolDetail.getEpochBlock();
-    this.lifetimeBlock = poolDetail.getLifetimeBlock();
-    this.delegators = poolDetail.getDelegators();
+    this.epochBlock = aggregatePoolInfo.getBlockInEpoch();
+    this.lifetimeBlock = aggregatePoolInfo.getBlockLifeTime();
+    this.delegators = aggregatePoolInfo.getDelegatorCount();
     this.lastUpdate = poolDetail.getLastUpdate();
     this.rewardAccounts = Collections.singletonList(poolDetail.getRewardAddress());
     this.logoUrl = poolDetail.getLogoUrl();
