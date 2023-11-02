@@ -64,7 +64,7 @@ public class DelegationController {
   @Operation(summary = "Get data for pool list", tags = {"delegation"})
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
       @ParameterObject @PaginationValid @Valid Pagination pagination,
-      @RequestParam("search")
+      @RequestParam(value = "search", required = false)
       @Parameter(description = "Query param for search pool by name or ticker name") String search,
       @RequestParam(value = "isShowRetired", defaultValue = "true")
       @Parameter(description = "Query param for show retired pool") boolean isShowRetired) {
