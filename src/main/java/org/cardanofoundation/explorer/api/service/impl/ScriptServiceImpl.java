@@ -20,7 +20,7 @@ import org.cardanofoundation.explorer.api.model.response.script.nativescript.Nat
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.ledgersync.common.common.nativescript.*;
@@ -40,12 +40,6 @@ import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResp
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
 import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
