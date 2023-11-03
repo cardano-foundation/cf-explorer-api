@@ -11,11 +11,14 @@ import org.springframework.data.domain.Pageable;
 
 import org.cardanofoundation.explorer.api.mapper.ScriptMapper;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
+import org.cardanofoundation.explorer.api.projection.PolicyProjection;
+import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.service.impl.ScriptServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.SmartContractTxProjectionImpl;
@@ -25,6 +28,7 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeTy
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.when;
@@ -48,8 +52,68 @@ class ScriptServiceTest {
   RedeemerRepository redeemerRepository;
   @Mock
   ScriptMapper scriptMapper;
+  @Mock
+  MultiAssetRepository multiAssetRepository;
+
   @InjectMocks
   ScriptServiceImpl scriptService;
+
+  @Test
+  void testGetNativeScripts() {
+    // Given
+    Pageable pageable = PageRequest.of(0, 1);
+    List<ScriptType> nativeScriptTypes = List.of(ScriptType.TIMELOCK, ScriptType.MULTISIG);
+    List<Script> scriptList = List.of(Script.builder().hash("hash").type(ScriptType.TIMELOCK).id(1L).build());
+    PolicyProjection projection = Mockito.mock(PolicyProjection.class);
+    // When and Then
+    when(projection.getPolicy()).thenReturn("hash");
+    when(projection.getNumberOfTokens()).thenReturn(2);
+    when(projection.getNumberOfAssetHolders()).thenReturn(3);
+    when(scriptRepository.findAllByTypeIn(nativeScriptTypes, pageable))
+        .thenReturn(new PageImpl<>(scriptList));
+    when(multiAssetRepository.countMultiAssetByPolicyIn(List.of("hash")))
+        .thenReturn(List.of(projection));
+    when(multiAssetRepository.countAssetHoldersByPolicyIn(List.of("hash")))
+        .thenReturn(List.of(projection));
+    var response = scriptService.getNativeScripts(pageable);
+    // Assert
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("hash", response.getData().get(0).getScriptHash());
+    Assertions.assertEquals(2, response.getData().get(0).getNumberOfTokens());
+    Assertions.assertEquals(3, response.getData().get(0).getNumberOfAssetHolders());
+  }
+
+  @Test
+  void testGetSmartContracts() {
+    // Given
+    Pageable pageable = PageRequest.of(0, 1);
+    List<ScriptType> nativeScriptTypes = List.of(ScriptType.PLUTUSV1, ScriptType.PLUTUSV2);
+    List<Script> scriptList = List.of(Script.builder().hash("hash").type(ScriptType.PLUTUSV1).id(1L).build());
+    SmartContractProjection paymentAddressProjection = Mockito.mock(SmartContractProjection.class);
+    SmartContractProjection stakeAddressProjection = Mockito.mock(SmartContractProjection.class);
+    // When and Then
+    when(paymentAddressProjection.getScriptHash()).thenReturn("hash");
+    when(paymentAddressProjection.getAddress()).thenReturn("address");
+    when(stakeAddressProjection.getScriptHash()).thenReturn("hash");
+    when(stakeAddressProjection.getAddress()).thenReturn("stake");
+    when(scriptRepository.findAllByTypeIn(nativeScriptTypes, pageable))
+        .thenReturn(new PageImpl<>(scriptList));
+    when(txOutRepository.findPaymentAssociatedAddressByHashIn(List.of("hash")))
+        .thenReturn(List.of(paymentAddressProjection));
+    when(stakeAddressRepository.findStakeAssociatedAddressByHashIn(List.of("hash")))
+        .thenReturn(List.of(stakeAddressProjection));
+    var response = scriptService.getSmartContracts(pageable);
+    // Assert
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("hash", response.getData().get(0).getScriptHash());
+    Assertions.assertEquals(2, response.getData().get(0).getAssociatedAddress().size());
+    Assertions.assertEquals("stake", response.getData().get(0).getAssociatedAddress().get(0));
+    Assertions.assertEquals("address", response.getData().get(0).getAssociatedAddress().get(1));
+  }
 
   @Test
   void getSmartContractDetail_shouldReturnSmartContractDetailResponse() {

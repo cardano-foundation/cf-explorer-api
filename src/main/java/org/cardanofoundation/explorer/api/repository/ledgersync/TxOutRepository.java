@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
+import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.TxOut;
@@ -78,6 +79,12 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + "WHERE tx.hash = :txHash AND stake.view = :stakeAddress")
   Optional<BigInteger> sumValueOutputByTxAndStakeAddress(@Param("txHash") String txHash,
                                                          @Param("stakeAddress") String stakeAddress);
+
+  @Query("SELECT DISTINCT txOut.address as address, txOut.paymentCred as scriptHash"
+      + " FROM TxOut txOut"
+      + " WHERE txOut.paymentCred IN :scriptHashList")
+  List<SmartContractProjection> findPaymentAssociatedAddressByHashIn(
+      @Param("scriptHashList") List<String> scriptHashList);
 
   @Query("SELECT COALESCE(sum(txOut.value), 0) "
       + "FROM TxOut txOut "
