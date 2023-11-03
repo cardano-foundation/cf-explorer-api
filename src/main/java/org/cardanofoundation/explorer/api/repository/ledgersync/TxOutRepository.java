@@ -98,8 +98,4 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + "WHERE tx.hash = :txHash AND stake.view = :stakeAddress")
   Optional<BigInteger> sumValueInputByTxAndStakeAddress(@Param("txHash") String txHash,
                                                   @Param("stakeAddress") String stakeAddress);
-
-  @Query(value = "SELECT DISTINCT(txo.address) FROM TxOut txo "
-      + "WHERE txo.paymentCred = :scriptHash")
-  List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
 }
