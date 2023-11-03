@@ -87,6 +87,7 @@ public class CommonConstant {
 
   public static final int UNLIMITED_REPORT = -1;
 
+  public static final BigInteger METADATA_LABEL_721 = BigInteger.valueOf(721);
 
   public static int hashCode(Object... a) {
     if (a == null) {
