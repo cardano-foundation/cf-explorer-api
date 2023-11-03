@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import java.math.BigInteger;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
@@ -22,15 +23,14 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
   @EntityGraph(attributePaths = {MaTxMint_.TX, "tx.block"})
   Page<MaTxMint> findByIdent(@Param("tokenId") String tokenId, Pageable pageable);
 
-  @Query(value = "SELECT tm.json from Tx tx"
+  @Query(value = "SELECT tm.json FROM Tx tx"
       + " JOIN MaTxMint mtm ON mtm.tx = tx"
       + " JOIN TxMetadata tm ON tm.tx = tx"
       + " JOIN MultiAsset ma ON ma = mtm.ident"
-      + " WHERE ma.supply = 1"
-      + " AND ma.fingerprint = :fingerprint"
+      + " WHERE ma.fingerprint = :fingerprint AND tm.key = :label"
       + " ORDER BY mtm.id DESC LIMIT 1")
-  String getTxMetadataNFTToken(@Param("fingerprint") String fingerprint);
-
+  String getTxMetadataToken(@Param("fingerprint") String fingerprint, @Param("label") BigInteger label);
+  
   @Query(value = "SELECT COALESCE(COUNT(DISTINCT mtm.tx), 0)"
       + " FROM MaTxMint mtm"
       + " INNER JOIN MultiAsset ma ON ma = mtm.ident"
