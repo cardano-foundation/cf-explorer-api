@@ -15,7 +15,7 @@ public interface ScriptService {
 
   BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(Pageable pageable);
 
-  NativeScriptResponse getNativeScripts(String scriptHash);
+  NativeScriptResponse getNativeScriptDetail(String scriptHash);
 
   String verifyNativeScript(String scriptHash, String scriptJson);
 
