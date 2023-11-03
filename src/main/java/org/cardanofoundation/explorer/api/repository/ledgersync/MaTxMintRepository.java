@@ -30,4 +30,10 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
       + " AND ma.fingerprint = :fingerprint"
       + " ORDER BY mtm.id DESC LIMIT 1")
   String getTxMetadataNFTToken(@Param("fingerprint") String fingerprint);
+
+  @Query(value = "SELECT COALESCE(COUNT(DISTINCT mtm.tx), 0)"
+      + " FROM MaTxMint mtm"
+      + " INNER JOIN MultiAsset ma ON ma = mtm.ident"
+      + " WHERE ma.policy = :policy")
+  Long countByPolicy(@Param("policy") String policy);
 }

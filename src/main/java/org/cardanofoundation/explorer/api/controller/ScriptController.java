@@ -45,7 +45,7 @@ public class ScriptController {
   @GetMapping("/native-scripts/{scriptHash}")
   public ResponseEntity<NativeScriptResponse> getNativeScriptDetail(
       @PathVariable String scriptHash) {
-    return ResponseEntity.ok(scriptService.getNativeScripts(scriptHash));
+    return ResponseEntity.ok(scriptService.getNativeScriptDetail(scriptHash));
   }
 
   @PostMapping("/native-scripts/{scriptHash}/verify")
