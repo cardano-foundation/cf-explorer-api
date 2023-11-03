@@ -12,16 +12,15 @@ import org.cardanofoundation.explorer.api.model.response.script.nativescript.Nat
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.consumercommon.entity.Script_;
 import org.springdoc.core.annotations.ParameterObject;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -46,7 +45,7 @@ public class ScriptController {
   @GetMapping("/native-scripts/{scriptHash}")
   public ResponseEntity<NativeScriptResponse> getNativeScriptDetail(
       @PathVariable String scriptHash) {
-    return ResponseEntity.ok(scriptService.getNativeScripts(scriptHash));
+    return ResponseEntity.ok(scriptService.getNativeScriptDetail(scriptHash));
   }
 
   @PostMapping("/native-scripts/{scriptHash}/verify")

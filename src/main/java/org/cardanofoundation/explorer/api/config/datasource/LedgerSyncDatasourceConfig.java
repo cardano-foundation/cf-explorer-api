@@ -50,7 +50,7 @@ public class LedgerSyncDatasourceConfig {
 
   @Primary
   @Bean(name = "ledgerSyncTransactionManager")
-  public PlatformTransactionManager todosTransactionManager(
+  public PlatformTransactionManager ledgerSyncTransactionManager(
       @Qualifier("ledgerSyncEntityManagerFactory") LocalContainerEntityManagerFactoryBean ledgerSyncEntityManagerFactory) {
     return new JpaTransactionManager(
         Objects.requireNonNull(ledgerSyncEntityManagerFactory.getObject()));

@@ -2,7 +2,8 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import com.bloxbean.cardano.client.exception.CborDeserializationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.AllArgsConstructor;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
@@ -37,32 +38,47 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Log4j2
 public class ScriptServiceImpl implements ScriptService {
 
   private final ScriptRepository scriptRepository;
-  private final MultiAssetRepository multiAssetRepository;
   private final TxOutRepository txOutRepository;
+  private final MultiAssetRepository multiAssetRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final RedeemerRepository redeemerRepository;
+  private final TxRepository txRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AddressRepository addressRepository;
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
+  private final MaTxMintRepository maTxMintRepository;
   private final BlockRepository blockRepository;
-  private final RedeemerRepository redeemerRepository;
-  private final TxRepository txRepository;
 
+  private final ScriptMapper scriptMapper;
   private final AssetMetadataMapper assetMetadataMapper;
   private final TokenMapper tokenMapper;
-  private final ScriptMapper scriptMapper;
+
+  private Block firstShellyBlock = null;
+  private Block firstBlock = null;
+
+  @PostConstruct
+  private void init() {
+    firstShellyBlock = blockRepository.findFirstShellyBlock().orElseThrow(
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+    );
+    firstBlock = blockRepository.findFirstBlock().orElseThrow(
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+    );
+  }
+
 
   @Override
   public BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(Pageable pageable) {
@@ -95,16 +111,13 @@ public class ScriptServiceImpl implements ScriptService {
         });
     return new BaseFilterResponse<>(nativeScriptPage);
   }
-
   /**
    * Explain native script
    * @param nativeScript native script
    * @param nativeScriptResponse native script response
-   * @param firstBlockTime time blockchain started
    */
   private void setNativeScriptInfo(NativeScript nativeScript,
-                                   NativeScriptResponse nativeScriptResponse,
-                                   Timestamp firstBlockTime) {
+                                   NativeScriptResponse nativeScriptResponse) {
     if (nativeScript.getClass().equals(ScriptPubkey.class)) {
       ScriptPubkey scriptPubkey = (ScriptPubkey) nativeScript;
       nativeScriptResponse.getKeyHashes().add(scriptPubkey.getKeyHash());
@@ -112,38 +125,36 @@ public class ScriptServiceImpl implements ScriptService {
       ScriptAll scriptAll = (ScriptAll) nativeScript;
       nativeScriptResponse.setConditionType(scriptAll.getType());
       for (NativeScript script : scriptAll.getScripts()) {
-        setNativeScriptInfo(script, nativeScriptResponse, firstBlockTime);
+        setNativeScriptInfo(script, nativeScriptResponse);
       }
     } else if (nativeScript.getClass().equals(ScriptAny.class)) {
       ScriptAny scriptAny = (ScriptAny) nativeScript;
       nativeScriptResponse.setConditionType(scriptAny.getType());
       for (NativeScript script : scriptAny.getScripts()) {
-        setNativeScriptInfo(script, nativeScriptResponse, firstBlockTime);
+        setNativeScriptInfo(script, nativeScriptResponse);
       }
     } else if (nativeScript.getClass().equals(ScriptAtLeast.class)) {
       ScriptAtLeast scriptAtLeast = (ScriptAtLeast) nativeScript;
       nativeScriptResponse.setConditionType(scriptAtLeast.getType());
       nativeScriptResponse.setRequired(scriptAtLeast.getRequired());
       for (NativeScript script : scriptAtLeast.getScripts()) {
-        setNativeScriptInfo(script, nativeScriptResponse, firstBlockTime);
+        setNativeScriptInfo(script, nativeScriptResponse);
       }
     } else if (nativeScript.getClass().equals(RequireTimeAfter.class)) {
       RequireTimeAfter requireTimeAfter = (RequireTimeAfter) nativeScript;
-      LocalDateTime after = firstBlockTime
-          .toLocalDateTime()
-          .plusSeconds(requireTimeAfter.getSlot().longValue());
+      LocalDateTime after
+          = slotToTime(requireTimeAfter.getSlot().longValue(), firstBlock, firstShellyBlock);
       nativeScriptResponse.setAfter(after);
     } else if (nativeScript.getClass().equals(RequireTimeBefore.class)) {
       RequireTimeBefore requireTimeBefore = (RequireTimeBefore) nativeScript;
-      LocalDateTime before = firstBlockTime
-          .toLocalDateTime()
-          .plusSeconds(requireTimeBefore.getSlot().longValue());
+      LocalDateTime before
+          = slotToTime(requireTimeBefore.getSlot().longValue(), firstBlock, firstShellyBlock);
       nativeScriptResponse.setBefore(before);
     }
   }
 
   @Override
-  public NativeScriptResponse getNativeScripts(String scriptHash) {
+  public NativeScriptResponse getNativeScriptDetail(String scriptHash) {
     NativeScriptResponse nativeScriptResponse = new NativeScriptResponse();
     Script script = scriptRepository.findByHash(scriptHash).orElseThrow(
         () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
@@ -153,28 +164,61 @@ public class ScriptServiceImpl implements ScriptService {
       throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
     }
     nativeScriptResponse.setScriptHash(scriptHash);
-    Block block = blockRepository.findFirstBlock().orElseThrow(
-        () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND));
     List<String> associatedAddressList = stakeAddressRepository.getStakeAssociatedAddress(scriptHash);
     associatedAddressList.addAll(txOutRepository.getAssociatedAddress(scriptHash));
     nativeScriptResponse.setAssociatedAddress(associatedAddressList);
     nativeScriptResponse.setNumberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash));
     nativeScriptResponse.setNumberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash));
     nativeScriptResponse.setKeyHashes(new ArrayList<>());
+    nativeScriptResponse.setVerifiedContract(script.getVerified());
     try {
       String json = script.getJson();
-      if (!StringUtils.isEmpty(json)) {
-        if (Boolean.TRUE.equals(script.getVerified())) {
-          nativeScriptResponse.setScript(json);
-          NativeScript nativeScript = NativeScript.deserializeJson(json);
-          setNativeScriptInfo(nativeScript, nativeScriptResponse, block.getTime());
+      if (!StringUtils.isEmpty(json) && Boolean.TRUE.equals(script.getVerified())) {
+        nativeScriptResponse.setScript(json);
+        NativeScript nativeScript = NativeScript.deserializeJson(json);
+        setNativeScriptInfo(nativeScript, nativeScriptResponse);
+        // One time mint is a native script that has a timelock before the current time
+        // and has only one mint transaction
+        Long countTxMint = maTxMintRepository.countByPolicy(scriptHash);
+        if (Long.valueOf(1L).equals(countTxMint)
+            && Objects.nonNull(nativeScriptResponse.getBefore())
+            && LocalDateTime.now(ZoneOffset.UTC).isAfter(nativeScriptResponse.getBefore())) {
+          if (Objects.isNull(nativeScriptResponse.getConditionType())) {
+            nativeScriptResponse.setIsOneTimeMint(true);
+          } else nativeScriptResponse.setIsOneTimeMint(
+              org.cardanofoundation.ledgersync.common.common.nativescript.ScriptType.all
+                  .equals(nativeScriptResponse.getConditionType()));
+        } else {
+          nativeScriptResponse.setIsOneTimeMint(false);
         }
-        nativeScriptResponse.setVerifiedContract(script.getVerified());
       }
     } catch (JsonProcessingException | CborDeserializationException e) {
       log.warn("Error parsing script json: {}", e.getMessage());
     }
     return nativeScriptResponse;
+  }
+
+  /**
+   * Convert slot to time
+   * @param slot input slot
+   * @param firstBlock first block
+   * @param firstShellyBlock first shelly block
+   * @return time in UTC
+   */
+  private LocalDateTime slotToTime(Long slot,
+                                   Block firstBlock,
+                                   Block firstShellyBlock) {
+    if (Objects.nonNull(firstShellyBlock)) {
+      return firstShellyBlock.getTime().toLocalDateTime()
+          .plusSeconds(slot - (firstShellyBlock.getSlotNo()))
+          .atZone(ZoneOffset.UTC)
+          .toLocalDateTime();
+    } else {
+      return firstBlock.getTime().toLocalDateTime()
+          .plusSeconds(slot)
+          .atZone(ZoneOffset.UTC)
+          .toLocalDateTime();
+    }
   }
 
 

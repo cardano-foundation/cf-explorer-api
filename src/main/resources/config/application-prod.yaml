@@ -112,7 +112,7 @@ application:
       base-url: ${API_CHECK_ADA_POTS_URL:http://localhost:8888/api/v1/ada-pots/fetch}
     check-epoch:
       base-url: ${API_CHECK_EPOCH_URL:http://localhost:8888/api/v1/epochs/fetch}
-  token-logo-endpoint: https://${TOKEN_LOGO_S3_BUCKET_NAME}.s3.${TOKEN_LOGO_S3_REGION}.amazonaws.com/
+  token-logo-endpoint: ${TOKEN_LOGO_ENDPOINT:http://minio:9001}
   healthcheck:
     block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
     inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
