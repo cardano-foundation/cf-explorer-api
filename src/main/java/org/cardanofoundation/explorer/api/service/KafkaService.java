@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
-import org.cardanofoundation.explorer.consumercommon.entity.ReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.ReportHistory;
 
 public interface KafkaService {
 

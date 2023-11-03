@@ -6,11 +6,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
+import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
@@ -73,11 +75,37 @@ public class ScriptController {
     return ResponseEntity.ok(scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
   }
 
-  @GetMapping("/smart-contracts")
+  @GetMapping("/contracts")
   public ResponseEntity<BaseFilterResponse<SmartContractFilterResponse>> getSmartContracts(
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {Script_.TX},
           direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(scriptService.getSmartContracts(pagination.toPageable()));
   }
 
+  @GetMapping("/contracts/{scriptHash}")
+  @LogMessage
+  @Operation(summary = "Get smart contract detail", tags = {"script"})
+  public ResponseEntity<SmartContractDetailResponse> getSmartContracts(
+      @PathVariable @Parameter(description = "The script hash")  String scriptHash) {
+    return ResponseEntity.ok(scriptService.getSmartContractDetail(scriptHash));
+  }
+
+  @GetMapping("/contracts/{scriptHash}/txs")
+  @LogMessage
+  @Operation(summary = "Get transactions interact with smart contract", tags = {"script"})
+  public ResponseEntity<BaseFilterResponse<SmartContractTxResponse>> getSmartContractsTxs(
+      @PathVariable @Parameter(description = "The script hash") String scriptHash,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
+          "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
+    return ResponseEntity.ok(
+        scriptService.getSmartContractTxs(scriptHash, pagination.toPageable()));
+  }
+
+  @GetMapping("/search/{scriptHash}")
+  @LogMessage
+  @Operation(summary = "Search script by script hash", tags = {"script"})
+  public ResponseEntity<ScriptSearchResponse> getScriptByHash(
+      @PathVariable @Parameter(description = "The script hash")  String scriptHash) {
+    return ResponseEntity.ok(scriptService.searchScript(scriptHash));
+  }
 }
