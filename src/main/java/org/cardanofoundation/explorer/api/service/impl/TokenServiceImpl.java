@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.ledgersync.common.util.MetadataStandardUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -299,12 +302,15 @@ public class TokenServiceImpl implements TokenService {
   }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
-    String txMetadataNFTToken = maTxMintRepository.getTxMetadataNFTToken(multiAsset.getFingerprint());
-    if (txMetadataNFTToken == null || txMetadataNFTToken.isEmpty()) {
-      tokenResponse.setTokenType(TokenType.FT);
-    } else {
+    if (multiAsset.getSupply().compareTo(BigInteger.ONE) == 0) {
       tokenResponse.setTokenType(TokenType.NFT);
-      tokenResponse.setMetadataJson(txMetadataNFTToken);
+    } else {
+      tokenResponse.setTokenType(TokenType.FT);
     }
+    String assetName =
+        Objects.isNull(multiAsset.getNameView()) ? multiAsset.getName() : multiAsset.getNameView();
+    tokenResponse.setMetadataJson(MetadataStandardUtils.splitJsonMetadataByAssetName(
+        maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint(),
+            CommonConstant.METADATA_LABEL_721), assetName));
   }
 }
