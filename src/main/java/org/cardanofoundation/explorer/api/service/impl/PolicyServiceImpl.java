@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,13 @@ public class PolicyServiceImpl implements PolicyService {
             }
           } else {
             policyResponse.policyScript(script.getJson());
+          }
+          if (ScriptType.TIMELOCK.equals(script.getType())) {
+            policyResponse.isNativeScript(true);
+            policyResponse.isSmartContract(false);
+          } else {
+            policyResponse.isSmartContract(true);
+            policyResponse.isNativeScript(false);
           }
         }
     );

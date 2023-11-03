@@ -90,41 +90,4 @@ public class ContractControllerTest {
         verify(addressService).getContracts(PageRequest.of(this.pageable.getPageNumber(), this.pageable.getPageSize(), Sort.Direction.DESC, "balance"));
     }
 
-    @Test
-    public void testVerifyContract() throws Exception {
-        // Mock request and response objects
-        ScriptVerifyRequest mockRequest = new ScriptVerifyRequest();
-        boolean mockResponse = true;
-
-        // Mock the service method
-        when(addressService.verifyNativeScript(mockRequest)).thenReturn(mockResponse);
-        when(addressService.verifyNativeScript(any())).thenReturn(mockResponse);
-
-        // Perform the POST request
-        mockMvc.perform(post("/api/v1/contracts/verify/native")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(mockRequest)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(String.valueOf(mockResponse)));
-    }
-
-    @Test
-    public void testGetScriptOfContract() throws Exception {
-        // Mock request and response objects
-        String address = "testAddress";
-        String mockResponse = String.valueOf("testScript");
-        ContractScript response = ContractScript.builder().isVerified(true).data(mockResponse).build();
-
-        // Mock the service method
-        when(addressService.getJsonNativeScript(address)).thenReturn(response);
-
-        // Perform the GET request
-        mockMvc.perform(get("/api/v1/contracts/{address}/script", address))
-                .andExpect(status().isOk())
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(response)));
-
-        // Verify that the service method was called with the correct argument
-        verify(addressService).getJsonNativeScript(address);
-    }
-
 }

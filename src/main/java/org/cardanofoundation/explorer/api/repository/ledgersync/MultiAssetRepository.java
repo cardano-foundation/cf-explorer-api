@@ -57,7 +57,19 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       + " GROUP BY multiAsset.policy")
   List<PolicyProjection> countMultiAssetByPolicyIn(@Param("policyList") List<String> policyList);
 
-  @Query("SELECT COALESCE(COUNT(DISTINCT atb.addressId), 0) as numberOfAssetHolders, ma.policy as policy "
+  @Query("SELECT COALESCE(count(multiAsset.id), 0)"
+      + " FROM MultiAsset multiAsset"
+      + " WHERE multiAsset.policy = :policy")
+  Integer countMultiAssetByPolicy(@Param("policy") String policy);
+
+  @Query("SELECT COALESCE(COUNT(DISTINCT(atb.addressId, atb.multiAssetId)), 0) "
+      + " FROM MultiAsset ma "
+      + " INNER JOIN AddressTokenBalance atb ON atb.multiAsset = ma"
+      + " WHERE ma.policy = :policy "
+      + " AND atb.balance > 0 ")
+  Integer countAssetHoldersByPolicy(@Param("policy") String policy);
+
+  @Query("SELECT COALESCE(COUNT(DISTINCT(atb.addressId, atb.multiAssetId)), 0) as numberOfAssetHolders, ma.policy as policy "
       + " FROM MultiAsset ma "
       + " INNER JOIN AddressTokenBalance atb ON atb.multiAsset = ma"
       + " WHERE ma.policy IN :policyList "

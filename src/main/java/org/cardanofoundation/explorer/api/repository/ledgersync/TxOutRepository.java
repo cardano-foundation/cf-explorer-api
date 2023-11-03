@@ -86,6 +86,10 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
   List<SmartContractProjection> findPaymentAssociatedAddressByHashIn(
       @Param("scriptHashList") List<String> scriptHashList);
 
+  @Query(value = "SELECT DISTINCT(txo.address) FROM TxOut txo "
+      + "WHERE txo.paymentCred = :scriptHash")
+  List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
+
   @Query("SELECT COALESCE(sum(txOut.value), 0) "
       + "FROM TxOut txOut "
       + "INNER JOIN TxIn txIn ON txOut.tx.id = txIn.txOut.id "
@@ -94,8 +98,4 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + "WHERE tx.hash = :txHash AND stake.view = :stakeAddress")
   Optional<BigInteger> sumValueInputByTxAndStakeAddress(@Param("txHash") String txHash,
                                                   @Param("stakeAddress") String stakeAddress);
-
-  @Query(value = "SELECT DISTINCT(txo.address) FROM TxOut txo "
-      + "WHERE txo.paymentCred = :scriptHash")
-  List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
 }

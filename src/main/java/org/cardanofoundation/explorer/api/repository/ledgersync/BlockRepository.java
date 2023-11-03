@@ -114,4 +114,13 @@ public interface BlockRepository
 
   @Query("SELECT b FROM Block b WHERE b.blockNo IS NOT NULL ORDER BY b.blockNo DESC LIMIT 1")
   Optional<Block> findLatestBlock();
+
+  @Query("SELECT b FROM Block b WHERE b.blockNo IS NOT NULL ORDER BY b.blockNo ASC LIMIT 1")
+  Optional<Block> findFirstBlock();
+
+  @Query("SELECT b FROM Block b"
+      + " INNER JOIN Epoch e ON e.no = b.epochNo"
+      + " WHERE e.era != org.cardanofoundation.explorer.consumercommon.enumeration.EraType.BYRON"
+      + " ORDER BY b.blockNo ASC LIMIT 1")
+  Optional<Block> findFirstShellyBlock();
 }

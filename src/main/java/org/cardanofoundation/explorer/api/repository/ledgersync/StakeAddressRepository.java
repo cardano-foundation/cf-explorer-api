@@ -48,6 +48,11 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
   List<SmartContractProjection> findStakeAssociatedAddressByHashIn(
       @Param("scriptHashList") List<String> scriptHashList);
 
+  @Query("SELECT stake.view"
+      + " FROM StakeAddress stake"
+      + " WHERE stake.scriptHash = :scriptHash")
+  List<String> getStakeAssociatedAddress(@Param("scriptHash") String scriptHash);
+
   @Query(value = "SELECT COALESCE(SUM(sa.balance), 0) FROM StakeAddress sa WHERE sa.view IN :views")
   BigInteger getBalanceByView(@Param("views") List<String> views);
 
