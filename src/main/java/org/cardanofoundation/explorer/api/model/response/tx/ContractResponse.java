@@ -38,4 +38,5 @@ public class ContractResponse {
   private Integer utxoIndex;
   private String utxoHash;
   private RedeemerCertType redeemerCertType;
+  private List<TxReferenceInput> referenceInputs;
 }
