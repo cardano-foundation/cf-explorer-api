@@ -1,24 +1,15 @@
 package org.cardanofoundation.explorer.api.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-
 import org.cardanofoundation.explorer.api.mapper.ScriptMapper;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.service.impl.ScriptServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.SmartContractTxProjectionImpl;
@@ -26,40 +17,38 @@ import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 @ExtendWith(MockitoExtension.class)
-class ScriptServiceTest {
-
-  @Mock
-  ScriptRepository scriptRepository;
-  @Mock
-  TxOutRepository txOutRepository;
-  @Mock
-  StakeAddressRepository stakeAddressRepository;
-  @Mock
-  TxRepository txRepository;
-  @Mock
-  RedeemerRepository redeemerRepository;
-  @Mock
-  ScriptMapper scriptMapper;
-  @Mock
-  MultiAssetRepository multiAssetRepository;
-
-  @InjectMocks
-  ScriptServiceImpl scriptService;
+public class ScriptServiceTest {
+  @InjectMocks private ScriptServiceImpl scriptService;
+  @Mock private ScriptRepository scriptRepository;
+  @Mock private MultiAssetRepository multiAssetRepository;
+  @Mock private TxOutRepository txOutRepository;
+  @Mock private StakeAddressRepository stakeAddressRepository;
+  @Mock private TxRepository txRepository;
+  @Mock private RedeemerRepository redeemerRepository;
+  @Mock private ScriptMapper scriptMapper;
 
   @Test
-  void testGetNativeScripts() {
+  public void testGetNativeScripts() {
     // Given
     Pageable pageable = PageRequest.of(0, 1);
     List<ScriptType> nativeScriptTypes = List.of(ScriptType.TIMELOCK, ScriptType.MULTISIG);
@@ -86,7 +75,7 @@ class ScriptServiceTest {
   }
 
   @Test
-  void testGetSmartContracts() {
+  public void testGetSmartContracts() {
     // Given
     Pageable pageable = PageRequest.of(0, 1);
     List<ScriptType> nativeScriptTypes = List.of(ScriptType.PLUTUSV1, ScriptType.PLUTUSV2);
