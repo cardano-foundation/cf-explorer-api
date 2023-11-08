@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.3.35](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.34...v0.3.35) (2023-11-08)
+
+
+### Features
+
+* MET-1742 add check native script and smart contract in policy detail ([f138725](https://github.com/cardano-foundation/cf-explorer-api/commit/f138725f357a29190bb6c097f78d4e4ae9e8def6))
+* MET-1742 add check one time mint type of script ([dcd24b3](https://github.com/cardano-foundation/cf-explorer-api/commit/dcd24b3e10c2fdf96b777154342b13e801dea28f))
+* MET-1742 add verify script api ([27685d6](https://github.com/cardano-foundation/cf-explorer-api/commit/27685d61ce7a1eb93307025edd4c7ae315ed68ed))
+* MET-1742 check display mint burn policy only when native script verified ([9eba4a6](https://github.com/cardano-foundation/cf-explorer-api/commit/9eba4a620f18dd5e99974846293a9f7fbee21ea7))
+* MET-1742 create native script detail and related api ([d949f6f](https://github.com/cardano-foundation/cf-explorer-api/commit/d949f6f33ebf5b138ca7996a83ddd4038135ea2f))
+* MET-1746 script hash search ([17b1e50](https://github.com/cardano-foundation/cf-explorer-api/commit/17b1e5005c618fe5a08670d3c5c477ff79b6e4d5))
+
+
+### Bug Fixes
+
+* default sort not order by time ([e038a15](https://github.com/cardano-foundation/cf-explorer-api/commit/e038a1503d2fda4c1eb56fead1ec93cd8aae222c))
+* MET-1742 add number tokens and number of asset holders to native script detail ([9ad2930](https://github.com/cardano-foundation/cf-explorer-api/commit/9ad2930dc338da5bd8af320614435e00bebd2ce9))
+* MET-1742 count number asset holder in native script by policy by address and token ([9a79980](https://github.com/cardano-foundation/cf-explorer-api/commit/9a799800d55c7b7e88a61c66f493501eec77bf9e))
+* MET-1742 rename verified in script ([dfbca12](https://github.com/cardano-foundation/cf-explorer-api/commit/dfbca12078d5dc2b8373f1f9493072b936034653))
+* slice json metadata by asset name ([fca76f0](https://github.com/cardano-foundation/cf-explorer-api/commit/fca76f0fb7e9fe1fa6a70970713510266e32375e))
+* verify script type belong to SC ([3f33c26](https://github.com/cardano-foundation/cf-explorer-api/commit/3f33c2612463c7af5bd88cb4b90fe5be51f9315e))
+
 ## [0.3.34](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.33...v0.3.34) (2023-10-30)
 
 
