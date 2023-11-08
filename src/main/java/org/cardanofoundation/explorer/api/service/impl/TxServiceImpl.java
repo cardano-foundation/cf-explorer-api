@@ -29,9 +29,39 @@ import lombok.extern.log4j.Log4j2;
 
 import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
-import org.cardanofoundation.explorer.api.mapper.TxContractMapper;
+import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
-import org.cardanofoundation.explorer.api.repository.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.FailedTxOutRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ParamProposalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRelayRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -59,14 +89,6 @@ import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
-import org.cardanofoundation.explorer.api.mapper.DelegationMapper;
-import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
-import org.cardanofoundation.explorer.api.mapper.ProtocolMapper;
-import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.mapper.TxMapper;
-import org.cardanofoundation.explorer.api.mapper.TxOutMapper;
-import org.cardanofoundation.explorer.api.mapper.WithdrawalMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
@@ -130,6 +152,8 @@ public class TxServiceImpl implements TxService {
   private final TxWitnessesRepository txWitnessesRepository;
   private final TxBootstrapWitnessesRepository txBootstrapWitnessesRepository;
   private final ProtocolParamService protocolParamService;
+  private final ReferenceTxInRepository referenceTxInRepository;
+  private final TxReferenceInputMapper txReferenceInputMapper;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -512,7 +536,6 @@ public class TxServiceImpl implements TxService {
     getInstantaneousRewards(tx, txResponse);
     getMetadata(tx, txResponse);
     getSignersInformation(tx, txResponse);
-
     /*
      * If the transaction is invalid, the collateral is the input and the output of the transaction.
      * Otherwise, the collateral is the input and the output of the collateral.
@@ -740,8 +763,34 @@ public class TxServiceImpl implements TxService {
                                        Collectors.collectingAndThen(Collectors.toList(),
                                                                     list -> list.get(0))));
 
+    List<ReferenceInputProjection> referenceInputProjections = referenceTxInRepository.getReferenceInputByTx(tx);
+    List<TxReferenceInput> txReferenceInputsWithSmartContract = new ArrayList<>();
+    List<TxReferenceInput> txReferenceInputsWithoutSmartContract = new ArrayList<>();
+    referenceInputProjections.forEach(projection -> {
+      if (Objects.nonNull(projection.getScriptHash())) {
+        txReferenceInputsWithSmartContract.add(
+            txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(projection)
+        );
+      } else {
+        txReferenceInputsWithoutSmartContract.add(
+            txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(projection)
+        );
+      }
+    });
+
+    Map<String, List<TxReferenceInput>> txReferenceInputSmartContractMap =
+        txReferenceInputsWithSmartContract.stream().collect(Collectors.groupingBy(TxReferenceInput::getScriptHash));
+
     contractResponses.parallelStream().forEach(contractResponse -> {
       TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
+      if (txReferenceInputSmartContractMap.containsKey(contractResponse.getScriptHash())) {
+        List<TxReferenceInput> txReferenceInputs =
+            new ArrayList<>(txReferenceInputSmartContractMap.get(contractResponse.getScriptHash()));
+        txReferenceInputs.addAll(txReferenceInputsWithoutSmartContract);
+        contractResponse.setReferenceInputs(txReferenceInputs);
+      } else {
+        contractResponse.setReferenceInputs(txReferenceInputsWithoutSmartContract);
+      }
       if (txContractProjection != null) {
         contractResponse.setDatumBytesOut(
             txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));
