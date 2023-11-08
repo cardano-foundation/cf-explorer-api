@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>StakeLifeCycleFilterRequest.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.model.request.stake;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Date;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import io.swagger.v3.oas.annotations.Parameter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.*;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.common.constant.CommonConstant;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.validation.date.DatePattern;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.validation.date.param.DateValid;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.validation.length.LengthValid;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Getter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@Setter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_14'/>
+14
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_14'>31</a>
+<span>
+1. equals : negated conditional &rarr; NO_COVERAGE<br/>
+2. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE<br/>
+3. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+4. equals : negated conditional &rarr; NO_COVERAGE<br/>
+5. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE<br/>
+6. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+7. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE<br/>
+8. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+9. hashCode : replaced int return with 0 for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::hashCode &rarr; NO_COVERAGE<br/>
+10. equals : negated conditional &rarr; NO_COVERAGE<br/>
+11. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE<br/>
+12. equals : negated conditional &rarr; SURVIVED<br/>
+13. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+14. equals : replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE<br/>
+15. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+16. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE<br/>
+17. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+18. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+19. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+20. canEqual : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::canEqual &rarr; SURVIVED<br/>
+21. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+22. equals : replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; KILLED<br/>
+23. equals : negated conditional &rarr; KILLED<br/>
+24. equals : negated conditional &rarr; KILLED<br/>
+25. equals : negated conditional &rarr; KILLED<br/>
+26. canEqual : replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::canEqual &rarr; KILLED<br/>
+27. equals : negated conditional &rarr; KILLED<br/>
+28. equals : negated conditional &rarr; KILLED<br/>
+29. equals : negated conditional &rarr; KILLED<br/>
+30. equals : negated conditional &rarr; KILLED<br/>
+31. equals : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@EqualsAndHashCode</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@AllArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@NoArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class StakeLifeCycleFilterRequest {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @LengthValid(CommonConstant.TX_HASH_LENGTH)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @Parameter(description = &#34;The hash identifier of the transaction.&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_21'/>
+21
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_21'>1</a>
+<span>
+1. getTxHash : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::getTxHash &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private String txHash;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @DateValid(pattern = DatePattern.YYYY_MM_DD)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @Parameter(description = &#34;The date from which the stake life cycle is considered.&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_25'/>
+25
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_25'>1</a>
+<span>
+1. getFromDate : replaced return value with null for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::getFromDate &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private Date fromDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @DateValid(pattern = DatePattern.YYYY_MM_DD)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @Parameter(description = &#34;The date to which the stake life cycle is considered.&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_29'/>
+29
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_29'>1</a>
+<span>
+1. getToDate : replaced return value with null for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::getToDate &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private Date toDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@49186754_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@49186754_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@49186754_14'>14</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@49186754_14'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> replaced int return with 0 for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::hashCode &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>17.<span><b>17</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>18.<span><b>18</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>19.<span><b>19</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>20.<span><b>20</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::canEqual &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>21.<span><b>21</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>22.<span><b>22</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>23.<span><b>23</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>24.<span><b>24</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>25.<span><b>25</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>26.<span><b>26</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>27.<span><b>27</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>28.<span><b>28</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>29.<span><b>29</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::canEqual &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>30.<span><b>30</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>31.<span><b>31</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@49186754_21'>21</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@49186754_21'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTxHash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressTxHashNull_showReturnDeRegistrations()]</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::getTxHash &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@49186754_25'>25</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@49186754_25'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getFromDate<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.StakeKeyReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyReportServiceTest]/[method:getStakeRewardsByReportId_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::getFromDate &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@49186754_29'>29</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@49186754_29'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getToDate<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.StakeKeyReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyReportServiceTest]/[method:getStakeRewardsByReportId_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/stake/StakeLifeCycleFilterRequest::getToDate &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:testGetStakeWalletActivitiesByDateRange_thenReturn()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressTxNull_showReturnDelegations()] (12 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressTxHashNull_showReturnRegistrations()] (12 ms)</li><li>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDelegations()] (44 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyReportServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyReportServiceTest]/[method:getStakeRewardsByReportId_shouldReturnResponse()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressHaveDelegationWithoutCondition_showReturnDelegations()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressHaveDelegationWithCondition_showReturnDelegations()] (1 ms)</li><li>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetRegistrations()] (16 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressTxHashNull_showReturnDeRegistrations()] (1 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressHaveRegistrationWithCondition_showReturnRegistrations()] (1 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressHaveDeRegistrationWithCondition_showReturnDeRegistrations()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressHaveWithdrawalWithoutCondition_showReturnWithdrawal()] (10 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressHaveWithdrawalWithCondition_showReturnWithdrawal()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressTxHashNull_showReturnWithdrawal()] (1 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressHaveRegistrationWithoutCondition_showReturnRegistrations()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleServiceTest]/[method:whenStakeAddressHaveDeRegistrationWithoutCondition_showReturnDeRegistrations()] (3 ms)</li><li>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetDeRegistrations()] (11 ms)</li><li>org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.StakeKeyLifeCycleControllerTest]/[method:shouldGetWithdrawals()] (15 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>

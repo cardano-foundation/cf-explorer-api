@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>SmartContractTxResponse.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.model.response.script.smartcontract;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.sql.Timestamp;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Set;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.AllArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Builder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Getter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.NoArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Setter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.annotation.JsonIgnore;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Getter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@Setter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_18'/>
+18
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_18'>12</a>
+<span>
+1. scriptPurposeTypes : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::scriptPurposeTypes &rarr; NO_COVERAGE<br/>
+2. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::toString &rarr; NO_COVERAGE<br/>
+3. addresses : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::addresses &rarr; NO_COVERAGE<br/>
+4. time : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::time &rarr; NO_COVERAGE<br/>
+5. blockNo : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::blockNo &rarr; KILLED<br/>
+6. absoluteSlot : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::absoluteSlot &rarr; KILLED<br/>
+7. txId : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::txId &rarr; KILLED<br/>
+8. hash : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::hash &rarr; KILLED<br/>
+9. build : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::build &rarr; KILLED<br/>
+10. epochNo : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::epochNo &rarr; KILLED<br/>
+11. epochSlotNo : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::epochSlotNo &rarr; KILLED<br/>
+12. builder : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::builder &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@Builder</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@AllArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@NoArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class SmartContractTxResponse {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @JsonIgnore</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_24'/>
+24
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_24'>1</a>
+<span>
+1. getTxId : replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getTxId &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private Long txId;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_25'/>
+25
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_25'>1</a>
+<span>
+1. getHash : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getHash &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private String hash;</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_26'/>
+26
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_26'>1</a>
+<span>
+1. getTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getTime &rarr; NO_COVERAGE<br/>
+
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>  private Timestamp time;</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_27'/>
+27
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_27'>1</a>
+<span>
+1. getBlockNo : replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getBlockNo &rarr; NO_COVERAGE<br/>
+
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>  private Long blockNo;</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_28'/>
+28
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_28'>1</a>
+<span>
+1. getEpochNo : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getEpochNo &rarr; NO_COVERAGE<br/>
+
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>  private Integer epochNo;</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_29'/>
+29
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_29'>1</a>
+<span>
+1. getEpochSlotNo : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getEpochSlotNo &rarr; NO_COVERAGE<br/>
+
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>  private Integer epochSlotNo;</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_30'/>
+30
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_30'>1</a>
+<span>
+1. getAbsoluteSlot : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getAbsoluteSlot &rarr; NO_COVERAGE<br/>
+
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>  private Integer absoluteSlot;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_31'/>
+31
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_31'>1</a>
+<span>
+1. getAddresses : replaced return value with Collections.emptySet for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getAddresses &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private Set&#60;String&#62; addresses;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_32'/>
+32
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_32'>1</a>
+<span>
+1. getScriptPurposeTypes : replaced return value with Collections.emptyList for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getScriptPurposeTypes &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private List&#60;ScriptPurposeType&#62; scriptPurposeTypes;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@5e2d0587_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_18'>18</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_18'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>blockNo<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::blockNo &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>absoluteSlot<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::absoluteSlot &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>txId<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::txId &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>hash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::hash &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>scriptPurposeTypes<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::scriptPurposeTypes &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::toString &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>build<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::build &rarr; KILLED</p> <p class='KILLED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>epochNo<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::epochNo &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>addresses<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::addresses &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>epochSlotNo<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::epochSlotNo &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>time<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse$SmartContractTxResponseBuilder::time &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>builder<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::builder &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_24'>24</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_24'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTxId<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getTxId &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_25'>25</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_25'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getHash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getHash &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_26'>26</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_26'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTime<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getTime &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_27'>27</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_27'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getBlockNo<br/><b>Killed by : </b>none</span></span> replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getBlockNo &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_28'>28</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_28'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEpochNo<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getEpochNo &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_29'>29</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_29'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEpochSlotNo<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getEpochSlotNo &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_30'>30</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_30'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAbsoluteSlot<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getAbsoluteSlot &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_31'>31</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_31'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAddresses<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with Collections.emptySet for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getAddresses &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@5e2d0587_32'>32</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@5e2d0587_32'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getScriptPurposeTypes<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()]</span></span> replaced return value with Collections.emptyList for org/cardanofoundation/explorer/api/model/response/script/smartcontract/SmartContractTxResponse::getScriptPurposeTypes &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.service.ScriptServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.ScriptServiceTest]/[method:getSmartContractTxs_shouldReturnSmartContractTxResponse()] (5 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>

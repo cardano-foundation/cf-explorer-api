@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>EpochSummary.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.model.response.dashboard;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.databind.annotation.JsonSerialize;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.math.BigInteger;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.LocalDateTime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.AllArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Builder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Data;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.NoArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.config.JackSonDateTimeSerializer;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_12'/>
+12
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_12'>67</a>
+<span>
+1. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+2. equals : negated conditional &rarr; NO_COVERAGE<br/>
+3. equals : negated conditional &rarr; NO_COVERAGE<br/>
+4. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+5. equals : negated conditional &rarr; NO_COVERAGE<br/>
+6. equals : negated conditional &rarr; NO_COVERAGE<br/>
+7. equals : negated conditional &rarr; NO_COVERAGE<br/>
+8. equals : negated conditional &rarr; NO_COVERAGE<br/>
+9. equals : negated conditional &rarr; NO_COVERAGE<br/>
+10. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+11. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+12. equals : negated conditional &rarr; NO_COVERAGE<br/>
+13. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+14. equals : negated conditional &rarr; NO_COVERAGE<br/>
+15. equals : negated conditional &rarr; NO_COVERAGE<br/>
+16. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+17. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+18. equals : negated conditional &rarr; NO_COVERAGE<br/>
+19. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+20. equals : negated conditional &rarr; NO_COVERAGE<br/>
+21. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+22. equals : negated conditional &rarr; NO_COVERAGE<br/>
+23. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+24. canEqual : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::canEqual &rarr; NO_COVERAGE<br/>
+25. equals : negated conditional &rarr; NO_COVERAGE<br/>
+26. equals : negated conditional &rarr; NO_COVERAGE<br/>
+27. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+28. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+29. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+30. equals : negated conditional &rarr; NO_COVERAGE<br/>
+31. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+32. equals : negated conditional &rarr; NO_COVERAGE<br/>
+33. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+34. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+35. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+36. hashCode : replaced int return with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::hashCode &rarr; NO_COVERAGE<br/>
+37. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+38. equals : negated conditional &rarr; NO_COVERAGE<br/>
+39. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+40. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+41. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+42. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+43. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+44. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+45. equals : negated conditional &rarr; NO_COVERAGE<br/>
+46. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+47. equals : negated conditional &rarr; NO_COVERAGE<br/>
+48. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+49. equals : negated conditional &rarr; NO_COVERAGE<br/>
+50. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+51. equals : negated conditional &rarr; NO_COVERAGE<br/>
+52. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::toString &rarr; NO_COVERAGE<br/>
+53. equals : negated conditional &rarr; NO_COVERAGE<br/>
+54. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+55. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+56. equals : negated conditional &rarr; NO_COVERAGE<br/>
+57. canEqual : replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::canEqual &rarr; NO_COVERAGE<br/>
+58. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+59. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+60. equals : negated conditional &rarr; NO_COVERAGE<br/>
+61. equals : negated conditional &rarr; NO_COVERAGE<br/>
+62. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+63. equals : replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+64. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+65. equals : replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+66. equals : negated conditional &rarr; NO_COVERAGE<br/>
+67. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE<br/>
+
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>@Data</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_13'/>
+13
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_13'>11</a>
+<span>
+1. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::toString &rarr; NO_COVERAGE<br/>
+2. startTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::startTime &rarr; KILLED<br/>
+3. builder : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::builder &rarr; KILLED<br/>
+4. slot : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::slot &rarr; KILLED<br/>
+5. totalSlot : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::totalSlot &rarr; KILLED<br/>
+6. account : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::account &rarr; KILLED<br/>
+7. no : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::no &rarr; KILLED<br/>
+8. blkCount : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::blkCount &rarr; KILLED<br/>
+9. circulatingSupply : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::circulatingSupply &rarr; KILLED<br/>
+10. endTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::endTime &rarr; KILLED<br/>
+11. build : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::build &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@Builder</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@AllArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@NoArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class EpochSummary {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_17'/>
+17
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_17'>1</a>
+<span>
+1. getNo : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getNo &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  protected Integer no;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_18'/>
+18
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_18'>1</a>
+<span>
+1. getSlot : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getSlot &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private Integer slot;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_19'/>
+19
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_19'>1</a>
+<span>
+1. getTotalSlot : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getTotalSlot &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private Integer totalSlot;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_20'/>
+20
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_20'>1</a>
+<span>
+1. getAccount : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getAccount &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private Integer account;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @JsonSerialize(using = JackSonDateTimeSerializer.class)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_23'/>
+23
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_23'>1</a>
+<span>
+1. getStartTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getStartTime &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private LocalDateTime startTime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @JsonSerialize(using = JackSonDateTimeSerializer.class)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_26'/>
+26
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_26'>1</a>
+<span>
+1. getEndTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getEndTime &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  private LocalDateTime endTime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_28'/>
+28
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_28'>1</a>
+<span>
+1. getCirculatingSupply : replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getCirculatingSupply &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private BigInteger circulatingSupply;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_29'/>
+29
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_29'>1</a>
+<span>
+1. getBlkCount : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getBlkCount &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private Integer blkCount;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_12'>12</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_12'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>17.<span><b>17</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>18.<span><b>18</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>19.<span><b>19</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>20.<span><b>20</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>21.<span><b>21</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>22.<span><b>22</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>23.<span><b>23</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>24.<span><b>24</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::canEqual &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>25.<span><b>25</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>26.<span><b>26</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>27.<span><b>27</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>28.<span><b>28</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>29.<span><b>29</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>30.<span><b>30</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>31.<span><b>31</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>32.<span><b>32</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>33.<span><b>33</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>34.<span><b>34</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>35.<span><b>35</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>36.<span><b>36</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> replaced int return with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::hashCode &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>37.<span><b>37</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>38.<span><b>38</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>39.<span><b>39</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>40.<span><b>40</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>41.<span><b>41</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>42.<span><b>42</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>43.<span><b>43</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>44.<span><b>44</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>45.<span><b>45</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>46.<span><b>46</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>47.<span><b>47</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>48.<span><b>48</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>49.<span><b>49</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>50.<span><b>50</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>51.<span><b>51</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>52.<span><b>52</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::toString &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>53.<span><b>53</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>54.<span><b>54</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>55.<span><b>55</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>56.<span><b>56</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>57.<span><b>57</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::canEqual &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>58.<span><b>58</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>59.<span><b>59</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>60.<span><b>60</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>61.<span><b>61</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>62.<span><b>62</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>63.<span><b>63</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>64.<span><b>64</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>65.<span><b>65</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>66.<span><b>66</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>67.<span><b>67</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::equals &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_13'>13</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_13'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>startTime<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturnRedisIsNull()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::startTime &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>builder<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::builder &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>slot<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::slot &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>totalSlot<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::totalSlot &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>account<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturnRedisIsNull()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::account &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>no<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::no &rarr; KILLED</p> <p class='KILLED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>blkCount<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.EpochServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.EpochServiceTest]/[method:testCurrentEpochSummary()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::blkCount &rarr; KILLED</p> <p class='KILLED'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>circulatingSupply<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::circulatingSupply &rarr; KILLED</p> <p class='KILLED'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>endTime<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturnRedisIsNull()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::endTime &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::toString &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>build<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturnRedisIsNull()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary$EpochSummaryBuilder::build &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_17'>17</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_17'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getNo<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturnRedisIsNull()]</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getNo &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_18'>18</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_18'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getSlot<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getSlot &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_19'>19</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_19'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTotalSlot<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.EpochServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.EpochServiceTest]/[method:testGetCurrentEpochSummary_thenReturn()]</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getTotalSlot &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_20'>20</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_20'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAccount<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.EpochServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.EpochServiceTest]/[method:testGetCurrentEpochSummary_thenReturn()]</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getAccount &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_23'>23</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_23'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getStartTime<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.EpochServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.EpochServiceTest]/[method:testGetCurrentEpochSummary_thenReturn()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getStartTime &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_26'>26</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_26'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEndTime<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturnRedisIsNull()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getEndTime &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_28'>28</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_28'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getCirculatingSupply<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getCirculatingSupply &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34ce8aa3_29'>29</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34ce8aa3_29'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getBlkCount<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/dashboard/EpochSummary::getBlkCount &rarr; SURVIVED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.controller.EpochControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.EpochControllerTest]/[method:testFindCurrentEpoch()] (15 ms)</li><li>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getBatchBlockInfoMessage_shouldReturnResponse()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()] (1 ms)</li><li>org.cardanofoundation.explorer.api.service.EpochServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.EpochServiceTest]/[method:testGetCurrentEpochSummary_thenReturn()] (16 ms)</li><li>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturnV2()] (24 ms)</li><li>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturnRedisIsNull()] (3 ms)</li><li>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForDelegationHeader_shouldReturn()] (7 ms)</li><li>org.cardanofoundation.explorer.api.service.EpochServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.EpochServiceTest]/[method:testCurrentEpochSummary()] (2 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
