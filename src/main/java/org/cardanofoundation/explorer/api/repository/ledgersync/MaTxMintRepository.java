@@ -36,4 +36,10 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
       + " INNER JOIN MultiAsset ma ON ma = mtm.ident"
       + " WHERE ma.policy = :policy")
   Long countByPolicy(@Param("policy") String policy);
+
+  @Query(value = "SELECT CASE WHEN count(mtm.id) >= 1 THEN TRUE ELSE FALSE END AS FLAG "
+      + "FROM MaTxMint mtm "
+      + "JOIN MultiAsset ma ON ma = mtm.ident "
+      + "WHERE ma.fingerprint = :fingerprint AND mtm.quantity = 1")
+  Boolean mintNumber(@Param("fingerprint") String fingerprint);
 }
