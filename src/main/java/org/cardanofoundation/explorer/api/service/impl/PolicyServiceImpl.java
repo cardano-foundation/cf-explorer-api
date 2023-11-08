@@ -10,11 +10,11 @@ import org.cardanofoundation.explorer.api.model.response.token.PolicyScriptRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ScriptRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.PolicyService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,13 @@ public class PolicyServiceImpl implements PolicyService {
             }
           } else {
             policyResponse.policyScript(script.getJson());
+          }
+          if (ScriptType.TIMELOCK.equals(script.getType())) {
+            policyResponse.isNativeScript(true);
+            policyResponse.isSmartContract(false);
+          } else {
+            policyResponse.isSmartContract(true);
+            policyResponse.isNativeScript(false);
           }
         }
     );

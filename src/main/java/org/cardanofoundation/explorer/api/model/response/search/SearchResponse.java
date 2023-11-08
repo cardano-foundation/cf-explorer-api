@@ -14,5 +14,5 @@ public class SearchResponse {
   private AddressSearchResponse address;
   private PoolSearchResponse pool;
   private boolean validPoolName;
-  private String policy;
+  private ScriptSearchResponse script;
 }

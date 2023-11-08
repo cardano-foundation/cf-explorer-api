@@ -17,6 +17,7 @@ public class AddressResponse {
   private Long txCount;
   private BigInteger balance;
   private String stakeAddress;
-  private Boolean isContract;
-  private Boolean verifiedContract;
+  private String scriptHash;
+  private boolean isAssociatedSmartContract;
+  private boolean isAssociatedNativeScript;
 }
