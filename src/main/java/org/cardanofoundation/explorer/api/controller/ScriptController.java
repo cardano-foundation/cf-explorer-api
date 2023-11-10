@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.Set;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -99,6 +101,15 @@ public class ScriptController {
           "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
         scriptService.getSmartContractTxs(scriptHash, pagination.toPageable()));
+  }
+
+  @GetMapping("/contract-executions/{txHash}/{scriptHash}")
+  @LogMessage
+  @Operation(summary = "Get smart contract execution detail", tags = {"script"})
+  public ResponseEntity<Set<String>> getSmartContractExecutionDetail(
+      @PathVariable @Parameter(description = "The transaction hash")  String txHash,
+      @PathVariable @Parameter(description = "The script hash")  String scriptHash) {
+    return ResponseEntity.ok(scriptService.getContractExecutions(txHash, scriptHash));
   }
 
   @GetMapping("/search/{scriptHash}")
