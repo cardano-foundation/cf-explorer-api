@@ -826,8 +826,8 @@ public class TxServiceImpl implements TxService {
         .forEach(tokenAddressResponse ->
                      tokenAddressResponse
                          .setMetadata(assetMetadataMapper.fromAssetMetadata(
-                             assetMetadataMap.get(tokenAddressResponse.getName()
-                                                      + contractResponse.getScriptHash()))));
+                             assetMetadataMap.get(contractResponse.getScriptHash() +
+                                                      tokenAddressResponse.getName()))));
 
     // set mint or burn tokens for contract response
     contractResponse
