@@ -8,10 +8,10 @@ import org.cardanofoundation.explorer.api.model.response.script.nativescript.Nat
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
-import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.springframework.data.domain.Pageable;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 
 public interface ScriptService {
 

@@ -302,7 +302,9 @@ public class TokenServiceImpl implements TokenService {
   }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
-    if (multiAsset.getSupply().compareTo(BigInteger.ONE) == 0) {
+    if (multiAsset.getSupply().equals(BigInteger.ONE) || (
+        multiAsset.getSupply().equals(BigInteger.ZERO) && maTxMintRepository.mintNumber(
+            multiAsset.getFingerprint()))) {
       tokenResponse.setTokenType(TokenType.NFT);
     } else {
       tokenResponse.setTokenType(TokenType.FT);
@@ -312,5 +314,6 @@ public class TokenServiceImpl implements TokenService {
     tokenResponse.setMetadataJson(MetadataStandardUtils.splitJsonMetadataByAssetName(
         maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint(),
             CommonConstant.METADATA_LABEL_721), assetName));
+    tokenResponse.setMetadataCIP25(MetadataStandardUtils.metadataStandardCIP25(tokenResponse.getMetadataJson()));
   }
 }
