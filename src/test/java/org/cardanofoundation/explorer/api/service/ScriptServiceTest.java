@@ -1,54 +1,68 @@
 package org.cardanofoundation.explorer.api.service;
 
-import org.cardanofoundation.explorer.api.mapper.ScriptMapper;
-import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
-import org.cardanofoundation.explorer.api.projection.PolicyProjection;
-import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.service.impl.ScriptServiceImpl;
-import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
-import org.cardanofoundation.explorer.api.test.projection.SmartContractTxProjectionImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import org.cardanofoundation.explorer.api.mapper.ScriptMapper;
+import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
+import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
+import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
+import org.cardanofoundation.explorer.api.projection.PolicyProjection;
+import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.service.impl.ScriptServiceImpl;
+import org.cardanofoundation.explorer.api.test.projection.SmartContractTxProjectionImpl;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 @ExtendWith(MockitoExtension.class)
-public class ScriptServiceTest {
-  @InjectMocks private ScriptServiceImpl scriptService;
-  @Mock private ScriptRepository scriptRepository;
-  @Mock private MultiAssetRepository multiAssetRepository;
-  @Mock private TxOutRepository txOutRepository;
-  @Mock private StakeAddressRepository stakeAddressRepository;
-  @Mock private TxRepository txRepository;
-  @Mock private RedeemerRepository redeemerRepository;
-  @Mock private ScriptMapper scriptMapper;
+class ScriptServiceTest {
+
+  @Mock
+  ScriptRepository scriptRepository;
+  @Mock
+  TxOutRepository txOutRepository;
+  @Mock
+  StakeAddressRepository stakeAddressRepository;
+  @Mock
+  TxRepository txRepository;
+  @Mock
+  RedeemerRepository redeemerRepository;
+  @Mock
+  ScriptMapper scriptMapper;
+  @Mock
+  MultiAssetRepository multiAssetRepository;
+
+  @Mock
+  TxService txService;
+
+  @InjectMocks
+  ScriptServiceImpl scriptService;
 
   @Test
-  public void testGetNativeScripts() {
+  void testGetNativeScripts() {
     // Given
     Pageable pageable = PageRequest.of(0, 1);
     List<ScriptType> nativeScriptTypes = List.of(ScriptType.TIMELOCK, ScriptType.MULTISIG);
@@ -75,7 +89,7 @@ public class ScriptServiceTest {
   }
 
   @Test
-  public void testGetSmartContracts() {
+  void testGetSmartContracts() {
     // Given
     Pageable pageable = PageRequest.of(0, 1);
     List<ScriptType> nativeScriptTypes = List.of(ScriptType.PLUTUSV1, ScriptType.PLUTUSV2);
@@ -179,15 +193,6 @@ public class ScriptServiceTest {
     when(redeemerRepository.findTxIdsInteractWithContract(scriptHash, pageable))
         .thenReturn(txIds);
 
-    AddressInputOutputProjectionImpl addressInputOutputProjection =
-        AddressInputOutputProjectionImpl.builder()
-            .address("address1")
-            .txId(1L)
-            .build();
-    when(txOutRepository.findAddressOutputListByTxId(txIds.getContent()))
-        .thenReturn(List.of(addressInputOutputProjection));
-    when(txOutRepository.findAddressOutputListByTxId(txIds.getContent()))
-        .thenReturn(List.of(addressInputOutputProjection));
     when(txRepository.getSmartContractTxsPurpose(txIds.getContent(), scriptHash))
         .thenReturn(List.of(SmartContractTxProjectionImpl.builder()
                                 .txId(1L)
@@ -201,7 +206,6 @@ public class ScriptServiceTest {
     Assertions.assertEquals(response.getData().get(0).getHash(), "hash1");
     Assertions.assertEquals(response.getData().get(0).getScriptPurposeTypes(),
                             List.of(ScriptPurposeType.SPEND));
-    Assertions.assertEquals(response.getData().get(0).getAddresses(), Set.of("address1"));
   }
 
   @Test
@@ -243,5 +247,34 @@ public class ScriptServiceTest {
                             response.getScriptHash());
     Assertions.assertTrue(response.isSmartContract());
     Assertions.assertFalse(response.isNativeScript());
+  }
+
+  @Test
+  void getContractExecutions_shouldReturnContractExecutions() {
+    String scriptHash = "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79";
+    String txHash = "3ea3cbbdb2db54df20031587896fbed1ae96d215060944b71b9508de9f3feb44";
+    ContractResponse contractResponse1 = ContractResponse
+        .builder()
+        .scriptHash("9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79")
+        .executionInputs(List.of("input1", "input2"))
+        .executionOutputs(List.of("output1", "output2"))
+        .build();
+
+    ContractResponse contractResponse2 = ContractResponse
+        .builder()
+        .scriptHash("scriptHash")
+        .executionInputs(List.of("input3", "input4"))
+        .executionOutputs(List.of("output3", "output4"))
+        .build();
+
+    TxResponse txResponse = new TxResponse();
+    txResponse.setContracts(List.of(contractResponse1, contractResponse2));
+    when(txService.getTxDetailByHash(txHash)).thenReturn(txResponse);
+    var response = scriptService.getContractExecutions(txHash, scriptHash);
+    Assertions.assertEquals(4, response.size());
+    Assertions.assertTrue(response.contains("input1"));
+    Assertions.assertTrue(response.contains("input2"));
+    Assertions.assertTrue(response.contains("output1"));
+    Assertions.assertTrue(response.contains("output2"));
   }
 }

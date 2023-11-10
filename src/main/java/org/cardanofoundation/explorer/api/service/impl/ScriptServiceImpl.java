@@ -1,49 +1,53 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import com.bloxbean.cardano.client.exception.CborDeserializationException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.StringUtils;
-import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
-import org.cardanofoundation.explorer.api.mapper.ScriptMapper;
-import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
-import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
-import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
-import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.projection.PolicyProjection;
-import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.*;
-import org.cardanofoundation.explorer.api.service.ScriptService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
-import org.cardanofoundation.ledgersync.common.common.nativescript.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.bloxbean.cardano.client.exception.CborDeserializationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
+import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
+import org.cardanofoundation.explorer.api.mapper.TokenMapper;
+import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
+import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
+import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.ledgersync.common.common.nativescript.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.mapper.ScriptMapper;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
+import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
+import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
+import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
+import org.cardanofoundation.explorer.api.projection.PolicyProjection;
+import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
+import org.cardanofoundation.explorer.api.service.ScriptService;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +65,8 @@ public class ScriptServiceImpl implements ScriptService {
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final BlockRepository blockRepository;
+
+  private final TxService txService;
 
   private final ScriptMapper scriptMapper;
   private final AssetMetadataMapper assetMetadataMapper;
@@ -361,18 +367,6 @@ public class ScriptServiceImpl implements ScriptService {
             .map(scriptMapper::fromSmartContractTxProjection)
             .collect(Collectors.toMap(SmartContractTxResponse::getTxId, Function.identity()));
 
-    // get address input map
-    Map<Long, List<AddressInputOutputProjection>> addressInMap =
-        txOutRepository.findAddressInputListByTxId(txIds.getContent())
-            .stream()
-            .collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
-
-    // get address output map
-    Map<Long, List<AddressInputOutputProjection>> addressOutMap =
-        txOutRepository.findAddressOutputListByTxId(txIds.getContent())
-            .stream()
-            .collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
-
     // get script purpose type map
     Map<Long, List<ScriptPurposeType>> scriptPurposeTypeMap =
         txRepository.getSmartContractTxsPurpose(txIds.getContent(), scriptHash)
@@ -387,21 +381,6 @@ public class ScriptServiceImpl implements ScriptService {
     List<SmartContractTxResponse> smartContractTxResponses = new ArrayList<>();
     txIds.stream().forEach(txId -> {
       SmartContractTxResponse smartContractTxResponse = smartContractTxMap.get(txId);
-      List<String> inputAddressList = addressInMap.getOrDefault(smartContractTxResponse.getTxId(),
-                                                                new ArrayList<>())
-          .stream()
-          .map(AddressInputOutputProjection::getAddress)
-          .toList();
-
-      List<String> outputAddressList = addressOutMap.getOrDefault(smartContractTxResponse.getTxId(),
-                                                                  new ArrayList<>())
-          .stream()
-          .map(AddressInputOutputProjection::getAddress)
-          .toList();
-
-      smartContractTxResponse.setAddresses(
-          Stream.concat(inputAddressList.stream(), outputAddressList.stream())
-              .collect(Collectors.toSet()));
       smartContractTxResponse.setScriptPurposeTypes(
           scriptPurposeTypeMap.get(smartContractTxResponse.getTxId()));
 
@@ -409,6 +388,26 @@ public class ScriptServiceImpl implements ScriptService {
     });
 
     return new BaseFilterResponse<>(txIds, smartContractTxResponses);
+  }
+
+  @Override
+  public Set<String> getContractExecutions(String txHash, String scriptHash) {
+    Set<String> contractExecutions = new HashSet<>();
+    List<ContractResponse> contractResponseList = txService
+        .getTxDetailByHash(txHash)
+        .getContracts();
+    contractResponseList.forEach(contractResponse -> {
+      if(contractResponse.getScriptHash().equals(scriptHash)) {
+        if(!CollectionUtils.isEmpty(contractResponse.getExecutionInputs())) {
+          contractExecutions.addAll(contractResponse.getExecutionInputs());
+        }
+        if(!CollectionUtils.isEmpty(contractResponse.getExecutionOutputs())) {
+          contractExecutions.addAll(contractResponse.getExecutionOutputs());
+        }
+      }
+    });
+    return contractExecutions.stream().sorted(Comparator.reverseOrder()).collect(
+        Collectors.toCollection(LinkedHashSet::new));
   }
 
   @Override
