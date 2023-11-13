@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b02a8080-4264-496d-93f1-22f17f9b19cd",
+		"_postman_id": "32ad857e-0a5f-450d-85db-d3b2af1358ba",
 		"name": "Cardano Explorer API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30990183",
-		"_collection_link": "https://universal-rocket-619215.postman.co/workspace/EXPLORER---AQA-by-Hoa~ee14584c-1849-4c92-9453-b565f6b83392/collection/30990183-b02a8080-4264-496d-93f1-22f17f9b19cd?action=share&source=collection_link&creator=30990183"
+		"_exporter_id": "30990183"
 	},
 	"item": [
 		{
@@ -50,7 +49,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "//Account mono site\n{\n  \"type\": 0,\n  \"email\": \"hanh.luu+2@sotatek.com\",\n  \"password\": \"Test1234@\"\n}\n//Acount dev site\n// {\n//   \"type\": 0,\n//   \"email\": \"chi.bui+2@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }"
+									"raw": "{\n  \"type\": 0,\n  \"email\": \"hanh.luu+2@sotatek.com\",\n  \"password\": \"Test1234@\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl-Auth}}/api/v1/auth/sign-in",
@@ -19116,10 +19115,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						},
@@ -19276,10 +19275,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						},
@@ -19708,10 +19707,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						},
@@ -19865,10 +19864,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						},
@@ -20020,10 +20019,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						},
@@ -20166,10 +20165,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						},
@@ -20536,10 +20535,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						},
@@ -20700,10 +20699,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						},
@@ -20813,10 +20812,10 @@
 											]
 										}
 									},
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
-									"body": null
+									"body": ""
 								}
 							]
 						}
