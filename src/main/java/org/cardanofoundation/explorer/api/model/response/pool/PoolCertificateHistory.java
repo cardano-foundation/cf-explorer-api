@@ -34,6 +34,7 @@ public class PoolCertificateHistory {
   @JsonIgnore
   private Long poolUpdateId;
   private String txHash;
+  @JsonProperty("createdAt")
   private Timestamp blockTime;
   private Long blockNo;
   private Integer epochSlotNo;
