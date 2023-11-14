@@ -207,7 +207,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN Block b on tx.block = b "
           + "WHERE pu.poolHash.view = :poolViewOrHash "
           + "OR pu.poolHash.hashRaw = :poolViewOrHash ")
-  List<PoolCertificateProjection> getPoolUpdatePoolViewOrHash(@Param("poolViewOrHash") String poolViewOrHash);
+  List<PoolCertificateProjection> getPoolUpdateByPoolViewOrHash(@Param("poolViewOrHash") String poolViewOrHash);
 
   @Query(value =
       "SELECT tx.id as txId, tx.hash as txHash, b.epochNo as txEpochNo,"
