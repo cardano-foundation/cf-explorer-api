@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCertificateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
@@ -71,4 +72,28 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
   List<Integer> findByPoolView(@Param("poolView") String poolView);
 
   Boolean existsByPoolHash(@Param("poolHash") PoolHash poolHash);
+
+  @Query(value =
+      "SELECT tx.id as txId, tx.hash as txHash, b.epochNo as txEpochNo,"
+          + "pr.retiringEpoch as certEpochNo, pr.certIndex as certIndex, pr.id as poolRetireId, "
+          + "b.time as blockTime, b.blockNo as blockNo, b.epochSlotNo as epochSlotNo, b.slotNo as slotNo "
+          + "FROM PoolRetire pr "
+          + "JOIN Tx tx on pr.announcedTx = tx "
+          + "JOIN Block b on tx.block = b "
+          + "WHERE pr.poolHash.view = :poolViewOrHash "
+          + "OR pr.poolHash.hashRaw = :poolViewOrHash ")
+  List<PoolCertificateProjection> getPoolRetireByPoolViewOrHash(@Param("poolViewOrHash") String poolViewOrHash);
+
+  @Query(value =
+      "SELECT tx.id as txId, tx.hash as txHash, b.epochNo as txEpochNo,"
+          + "pr.retiringEpoch as certEpochNo, pr.certIndex as certIndex, pr.id as poolRetireId, "
+          + "b.time as blockTime, b.blockNo as blockNo, b.epochSlotNo as epochSlotNo, b.slotNo as slotNo "
+          + "FROM PoolRetire pr "
+          + "JOIN Tx tx on pr.announcedTx = tx "
+          + "JOIN Block b on tx.block = b "
+          + "WHERE pr.poolHash.view = :poolViewOrHash "
+          + "OR pr.poolHash.hashRaw = :poolViewOrHash "
+          + "ORDER BY tx.id, pr.certIndex DESC "
+          + "LIMIT 1")
+  PoolCertificateProjection getLastPoolRetireByPoolHash(@Param("poolViewOrHash") String poolViewOrHash);
 }
