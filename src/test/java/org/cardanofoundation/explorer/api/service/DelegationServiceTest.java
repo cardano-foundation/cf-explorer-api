@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import org.cardanofoundation.explorer.api.common.enumeration.PoolStatus;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
@@ -138,6 +140,9 @@ class DelegationServiceTest {
 
   @Mock
   private AggregatePoolInfoRepository aggregatePoolInfoRepository;
+
+  @Mock
+  private PoolCertificateService poolCertificateService;
 
   @InjectMocks
   private DelegationServiceImpl delegationService;
@@ -455,6 +460,7 @@ class DelegationServiceTest {
                                                                       .delegatorCount(1)
                                                                       .blockInEpoch(1)
                                                                       .build());
+    when(poolCertificateService.getCurrentPoolStatus(anyString())).thenReturn(PoolStatus.ACTIVE);
     // Execute the function
     PoolDetailHeaderResponse result = delegationService.getDataForPoolDetail(poolView);
 
@@ -508,6 +514,7 @@ class DelegationServiceTest {
                                                                       .delegatorCount(1)
                                                                       .blockInEpoch(1)
                                                                       .build());
+    when(poolCertificateService.getCurrentPoolStatus(anyString())).thenReturn(PoolStatus.ACTIVE);
     // Execute the function
     PoolDetailHeaderResponse result = delegationService.getDataForPoolDetail(poolView);
 
@@ -562,6 +569,8 @@ class DelegationServiceTest {
                                                                       .delegatorCount(1)
                                                                       .blockInEpoch(1)
                                                                       .build());
+
+    when(poolCertificateService.getCurrentPoolStatus(anyString())).thenReturn(PoolStatus.ACTIVE);
     // Execute the function
     PoolDetailHeaderResponse result = delegationService.getDataForPoolDetail(poolView);
 
@@ -718,6 +727,8 @@ class DelegationServiceTest {
                                                                       .delegatorCount(1)
                                                                       .blockInEpoch(1)
                                                                       .build());
+
+    when(poolCertificateService.getCurrentPoolStatus(anyString())).thenReturn(PoolStatus.ACTIVE);
     // Call the method
     PoolDetailHeaderResponse result = delegationService.getDataForPoolDetail("pool_view");
 
