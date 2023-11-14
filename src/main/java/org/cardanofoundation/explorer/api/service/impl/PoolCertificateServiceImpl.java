@@ -67,7 +67,6 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
 
   @Override
   public PoolStatus getCurrentPoolStatus(String poolViewOrHash) {
-    Integer currentEpochNo = epochRepository.findCurrentEpochNo().orElse(0);
     PoolCertificateHistory latestPoolUpdate = poolCertificateMapper.fromPoolCertificateProjection(
         poolUpdateRepository.getLastPoolUpdateByPoolHash(poolViewOrHash));
 
@@ -86,6 +85,7 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
     } else if (latestPoolUpdateTxId < latestPoolRetireTxId ||
         (latestPoolUpdateTxId == latestPoolRetireTxId
             && latestPoolUpdateCertIndex < latestPoolRetireCertIndex)) {
+      Integer currentEpochNo = epochRepository.findCurrentEpochNo().orElse(0);
       poolStatus = latestPoolRetire.getCertEpochNo() > currentEpochNo ?
                    PoolStatus.RETIRING :
                    PoolStatus.RETIRED;
@@ -95,7 +95,7 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
 
   private List<PoolCertificateHistory> getAllPoolCertificateHistories(String poolViewOrHash) {
     List<PoolCertificateHistory> certificateHistories =
-        Stream.concat(poolUpdateRepository.getPoolUpdatePoolViewOrHash(poolViewOrHash).stream(),
+        Stream.concat(poolUpdateRepository.getPoolUpdateByPoolViewOrHash(poolViewOrHash).stream(),
                       poolRetireRepository.getPoolRetireByPoolViewOrHash(poolViewOrHash).stream())
             .sorted(Comparator
                         .comparing(PoolCertificateProjection::getTxId)
