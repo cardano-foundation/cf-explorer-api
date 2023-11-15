@@ -47,7 +47,7 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
           + "FROM PoolRetire pr "
           + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
           + "JOIN Block bk ON tx.block.id = bk.id "
-          + "WHERE tx.id IN :txIds "
+          + "WHERE pr.id IN :poolRetiredIds "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ",
@@ -55,11 +55,11 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
           + "FROM PoolRetire pr "
           + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
           + "JOIN Block bk ON tx.block.id = bk.id "
-          + "WHERE tx.id IN :txIds "
+          + "WHERE pr.id IN :poolRetiredIds "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate)")
-  Page<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("txIds") Set<Long> txIds,
+  Page<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("poolRetiredIds") Set<Long> poolRetiredIds,
                                                            @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
                                                            @Param("toDate") Timestamp toDate, Pageable pageable);
 
