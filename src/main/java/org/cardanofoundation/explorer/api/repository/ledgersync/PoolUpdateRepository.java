@@ -218,7 +218,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN Block b on tx.block = b "
           + "WHERE pu.poolHash.view = :poolViewOrHash "
           + "OR pu.poolHash.hashRaw = :poolViewOrHash "
-          + "ORDER BY tx.id, pu.certIndex DESC "
+          + "ORDER BY tx.id DESC, pu.certIndex DESC "
           + "LIMIT 1")
   PoolCertificateProjection getLastPoolUpdateByPoolHash(@Param("poolViewOrHash") String poolViewOrHash);
 }
