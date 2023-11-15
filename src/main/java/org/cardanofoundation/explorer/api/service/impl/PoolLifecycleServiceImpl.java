@@ -228,7 +228,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
         poolView, PoolActionType.POOL_DEREGISTRATION);
     Page<PoolDeRegistrationProjection> projections = poolRetireRepository.getPoolDeRegistration(
         poolRetire.isEmpty() ? Set.of(-1L)
-            : poolRetire.stream().map(PoolCertificateHistory::getTxId).collect(
+            : poolRetire.stream().map(PoolCertificateHistory::getPoolRetireId).collect(
                 Collectors.toSet()),
         txHash, fromTimestamp, toTimestamp, pageable);
     List<DeRegistrationResponse> deRegistrations = new ArrayList<>();
@@ -288,7 +288,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
         poolViewOrHash, PoolActionType.POOL_REGISTRATION);
     Page<PoolRegistrationProjection> projection = poolHashRepository.getPoolRegistrationByPool(
         poolRegistration.isEmpty() ? Set.of(-1L)
-            : poolRegistration.stream().map(PoolCertificateHistory::getTxId).collect(
+            : poolRegistration.stream().map(PoolCertificateHistory::getPoolUpdateId).collect(
                 Collectors.toSet()), pageable);
     if (Objects.nonNull(projection)) {
       Set<Long> poolUpdateIds = new HashSet<>();
@@ -320,7 +320,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
         poolViewOrHash, PoolActionType.POOL_UPDATE);
     Page<PoolUpdateDetailProjection> projection = poolUpdateRepository.findPoolUpdateByPool(
         poolUpdateCert.isEmpty() ? Set.of(-1L)
-            : poolUpdateCert.stream().map(PoolCertificateHistory::getTxId).collect(
+            : poolUpdateCert.stream().map(PoolCertificateHistory::getPoolUpdateId).collect(
                 Collectors.toSet()), pageable);
     if (Objects.nonNull(projection)) {
       projection.stream().forEach(poolUpdate -> {
@@ -419,7 +419,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
           poolViewOrHash, PoolActionType.POOL_REGISTRATION);
       projection = poolUpdateRepository.findPoolRegistrationByPool(
           poolRegistration.isEmpty() ? Set.of(-1L)
-              : poolRegistration.stream().map(PoolCertificateHistory::getTxId).collect(
+              : poolRegistration.stream().map(PoolCertificateHistory::getPoolUpdateId).collect(
                   Collectors.toSet()),
           txHash, fromTimestamp, toTimestamp, pageable);
     } else {
@@ -427,7 +427,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
           poolViewOrHash, PoolActionType.POOL_UPDATE);
       projection = poolUpdateRepository.findPoolUpdateByPool(
           poolUpdate.isEmpty() ? Set.of(-1L)
-              : poolUpdate.stream().map(PoolCertificateHistory::getTxId).collect(
+              : poolUpdate.stream().map(PoolCertificateHistory::getPoolUpdateId).collect(
                   Collectors.toSet()),
           txHash, fromTimestamp, toTimestamp, pageable);
     }
