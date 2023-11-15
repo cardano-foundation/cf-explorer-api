@@ -93,7 +93,7 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
           + "JOIN Block b on tx.block = b "
           + "WHERE pr.poolHash.view = :poolViewOrHash "
           + "OR pr.poolHash.hashRaw = :poolViewOrHash "
-          + "ORDER BY tx.id, pr.certIndex DESC "
+          + "ORDER BY tx.id DESC, pr.certIndex DESC "
           + "LIMIT 1")
   PoolCertificateProjection getLastPoolRetireByPoolHash(@Param("poolViewOrHash") String poolViewOrHash);
 }
