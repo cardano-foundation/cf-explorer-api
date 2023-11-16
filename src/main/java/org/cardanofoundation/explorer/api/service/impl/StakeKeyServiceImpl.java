@@ -275,6 +275,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     Pageable pageableDouble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
     var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageableDouble);
     Set<String> stakeAddressList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
+    if(!fetchRewardDataService.useKoios()) {
+      return new BaseFilterResponse<>();
+    }
+
     if (!fetchRewardDataService.checkRewardAvailable(stakeAddressList.stream().toList())) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeAddressList.stream().toList());
       if (!fetchRewardResponse) {
@@ -322,20 +326,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
     Boolean useKoios = fetchRewardDataService.useKoios();
-    BigInteger activeStake;
-    BigInteger liveStake;
+    BigInteger activeStake = null;
+    BigInteger liveStake = null;
     if (Boolean.TRUE.equals(useKoios)) {
       activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
       liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
-    } else {
-      Object activeStakeObj = redisTemplate.opsForValue()
-          .get(CommonConstant.REDIS_TOTAL_ACTIVATE_STAKE + network + "_" + currentEpoch);
-      activeStake = Objects.nonNull(activeStakeObj) ? new BigInteger(String.valueOf(activeStakeObj))
-          : BigInteger.ZERO;
-      Object liveStakeObj = redisTemplate.opsForValue()
-          .get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
-      liveStake = Objects.nonNull(liveStakeObj) ? new BigInteger(String.valueOf(liveStakeObj))
-          : BigInteger.ZERO;
     }
     response.setActiveStake(activeStake);
     response.setLiveStake(liveStake);
@@ -435,6 +430,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey) {
+    if(Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return null;
+    }
+
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
       if (!fetchRewardResponse) {
@@ -460,13 +459,17 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   public StakeAddressRewardDistribution getStakeAddressRewardDistributionInfo(String stakeKey) {
     StakeAddressRewardDistribution stakeAddressRewardDistribution = new StakeAddressRewardDistribution();
+    stakeAddressRewardDistribution.setStakeAddress(stakeKey);
+    if(Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return stakeAddressRewardDistribution;
+    }
+
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
       if (!fetchRewardResponse) {
         throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
       }
     }
-    stakeAddressRewardDistribution.setStakeAddress(stakeKey);
     BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
         stakeKey).orElse(BigInteger.ZERO);
     stakeAddressRewardDistribution.setRewardAvailable(stakeAvailableReward);
