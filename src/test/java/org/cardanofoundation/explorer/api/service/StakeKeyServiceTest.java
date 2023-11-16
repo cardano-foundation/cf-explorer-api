@@ -159,7 +159,7 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testGetStakeByAddress_thenReturn() {
+    void testGetStakeByAddressWhenRewardAvailable_thenReturn() {
         String address = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
         String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
         StakeAddress stakeAddress = StakeAddress.builder().balance(BigInteger.ONE).build();
@@ -170,6 +170,7 @@ public class StakeKeyServiceTest {
 
         when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
         when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(true);
+        when(fetchRewardDataService.useKoios()).thenReturn(true);
         when(withdrawalRepository.getRewardWithdrawnByStakeAddress(stakeKey)).thenReturn(Optional.of(BigInteger.ONE));
         when(rewardRepository.getAvailableRewardByStakeAddress(stakeKey)).thenReturn(Optional.of(BigInteger.ONE));
         when(delegationRepository.findPoolDataByAddress(any())).thenReturn(Optional.of(sdp));
@@ -183,6 +184,32 @@ public class StakeKeyServiceTest {
         assertEquals(response.getTotalStake(), BigInteger.ONE);
         assertEquals(response.getRewardAvailable(), BigInteger.ZERO);
         assertEquals(response.getRewardWithdrawn(), BigInteger.ONE);
+    }
+
+    @Test
+    void testGetStakeByAddressRewardNotAvailable_thenReturn() {
+        String address = "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
+        String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
+        StakeAddress stakeAddress = StakeAddress.builder().balance(BigInteger.ONE).build();
+        StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
+        when(sdp.getPoolId()).thenReturn("1");
+        when(sdp.getPoolData()).thenReturn("poolData");
+        when(sdp.getTickerName()).thenReturn("tickerName");
+
+        when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
+        when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(true);
+        when(fetchRewardDataService.useKoios()).thenReturn(false);
+        when(delegationRepository.findPoolDataByAddress(any())).thenReturn(Optional.of(sdp));
+        when(stakeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
+        when(stakeDeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
+        when(poolUpdateRepository.findPoolByRewardAccount(any())).thenReturn(List.of("pool"));
+
+        var response = stakeKeyService.getStakeByAddress(address);
+        assertEquals(response.getStatus(), StakeAddressStatus.DEACTIVATED);
+        assertEquals(response.getStakeAddress(), stakeKey);
+        assertEquals(response.getTotalStake(), BigInteger.ONE);
+        assertNull(response.getRewardAvailable());
+        assertNull(response.getRewardWithdrawn());
     }
 
     @Test
