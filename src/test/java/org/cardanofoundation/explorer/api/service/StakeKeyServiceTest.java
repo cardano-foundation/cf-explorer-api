@@ -331,7 +331,7 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testGetTopDelegators_thenReturn() {
+    void getTopDelegators_whenRewardDataAvailable_shouldReturnRewardData() {
         Pageable pageable = PageRequest.of(0, 10);
         StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
         when(sap.getStakeAddress()).thenReturn("address");
@@ -346,6 +346,7 @@ public class StakeKeyServiceTest {
         StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
         when(sdp.getStakeAddress()).thenReturn("address");
 
+        when(fetchRewardDataService.useKoios()).thenReturn(true);
         when(stakeAddressRepository.findStakeAddressOrderByBalance(pageable)).thenReturn(List.of(sap));
         when(fetchRewardDataService.checkRewardAvailable(List.of("address"))).thenReturn(true);
         when(withdrawalRepository.getRewardWithdrawnByAddrIn(any())).thenReturn(List.of(swp));
@@ -361,6 +362,18 @@ public class StakeKeyServiceTest {
     }
 
     @Test
+    void getTopDelegators_whenRewardDataNotAvailable_shouldReturnEmptyRewardData() {
+        Pageable pageable = PageRequest.of(0, 10);
+        StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
+
+        when(fetchRewardDataService.useKoios()).thenReturn(false);
+        when(stakeAddressRepository.findStakeAddressOrderByBalance(pageable)).thenReturn(List.of(sap));
+
+        var response = stakeKeyService.getTopDelegators(pageable);
+        assertNull(response.getData());
+    }
+
+    @Test
     void testGetTopDelegators_thenReturnKoios() {
         Pageable pageable = PageRequest.of(0, 10);
         StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
@@ -369,6 +382,7 @@ public class StakeKeyServiceTest {
         when(stakeAddressRepository.findStakeAddressOrderByBalance(pageable)).thenReturn(List.of(sap));
         when(fetchRewardDataService.checkRewardAvailable(List.of("address"))).thenReturn(false);
         when(fetchRewardDataService.fetchReward(List.of("address"))).thenReturn(false);
+        when(fetchRewardDataService.useKoios()).thenReturn(true);
 
         assertThrows(FetchRewardException.class, () -> stakeKeyService.getTopDelegators(pageable));
     }
@@ -392,17 +406,14 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testGetStakeAnalytics_thenReturn() {
+    void testGetStakeAnalytics_thenReturnRewardDataNull() {
         ReflectionTestUtils.setField(stakeKeyService, "network", "mainnet");
         when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(400));
         when(fetchRewardDataService.useKoios()).thenReturn(false);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("TOTAL_ACTIVATE_STAKE_mainnet_400")).thenReturn(BigInteger.ONE);
-        when(valueOperations.get("TOTAL_LIVE_STAKE_mainnet")).thenReturn(BigInteger.TWO);
 
         var response = stakeKeyService.getStakeAnalytics();
-        assertEquals(response.getActiveStake(), BigInteger.ONE);
-        assertEquals(response.getLiveStake(), BigInteger.TWO);
+        assertEquals(response.getActiveStake(), null);
+        assertEquals(response.getLiveStake(), null);
     }
 
     @Test
@@ -526,20 +537,18 @@ public class StakeKeyServiceTest {
 
         when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(false);
         when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(false);
+        when(fetchRewardDataService.useKoios()).thenReturn(true);
 
         assertThrows(FetchRewardException.class, () -> stakeKeyService.getStakeRewardAnalytics(stakeKey));
     }
 
     @Test
-    void testGetStakeRewardAnalytics_thenReturn() {
+    void getStakeRewardAnalytics_whenRewardNotAvailable_shouldReturnNull() {
         String stakeKey = "stake_key";
 
-        when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(true);
-        when(rewardRepository.findRewardByStake(stakeKey)).thenReturn(List.of(StakeAnalyticRewardResponse.builder().epoch(1).value(BigInteger.ONE).build()));
-        when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(400));
-
+        when(fetchRewardDataService.useKoios()).thenReturn(false);
         var response = stakeKeyService.getStakeRewardAnalytics(stakeKey);
-        assertNotNull(response);
+        assertNull(response);
     }
 
     @Test
@@ -550,10 +559,11 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testRewardDistribution_thenReturnMember(){
+    void getStakeAddressRewardDistributionInfo_whenRewardDataAvailable_shouldReturnRewardData(){
         String stakeKey = "stake_key";
 
         when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(true);
+        when(fetchRewardDataService.useKoios()).thenReturn(true);
         when(rewardRepository.getAvailableRewardByStakeAddress(stakeKey)).thenReturn(Optional.of(BigInteger.valueOf(10)));
         when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(Set.of(RewardType.MEMBER));
 
@@ -565,18 +575,13 @@ public class StakeKeyServiceTest {
     }
 
     @Test
-    void testRewardDistribution_thenReturnMemberAndLeader(){
+    void getStakeAddressRewardDistributionInfo_whenRewardDataNotAvailable_shouldNotReturnRewardData(){
         String stakeKey = "stake_key";
 
-        when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(true);
-        when(rewardRepository.getAvailableRewardByStakeAddress(stakeKey)).thenReturn(Optional.of(BigInteger.valueOf(10)));
-        when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(Set.of(RewardType.MEMBER,RewardType.LEADER));
-
+        when(fetchRewardDataService.useKoios()).thenReturn(false);
         var response = stakeKeyService.getStakeAddressRewardDistributionInfo(stakeKey);
         assertEquals(stakeKey,response.getStakeAddress());
-        assertEquals(BigInteger.valueOf(10),response.getRewardAvailable());
-        assertTrue(response.isHasMemberReward());
-        assertTrue(response.isHasLeaderReward());
+        assertNull(response.getRewardAvailable());
     }
 
     @Test
@@ -584,6 +589,7 @@ public class StakeKeyServiceTest {
         String stakeKey = "stake_key";
 
         when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(true);
+        when(fetchRewardDataService.useKoios()).thenReturn(true);
         when(rewardRepository.getAvailableRewardByStakeAddress(stakeKey)).thenReturn(Optional.of(BigInteger.valueOf(10)));
         when(rewardRepository.getAllRewardTypeOfAStakeKey(stakeKey)).thenReturn(new HashSet<>());
 
