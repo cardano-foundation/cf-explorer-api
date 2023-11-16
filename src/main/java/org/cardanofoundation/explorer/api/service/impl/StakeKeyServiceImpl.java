@@ -163,14 +163,24 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       }
     }
     stakeAddressResponse.setStakeAddress(stake);
-    BigInteger stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
-        stake).orElse(BigInteger.ZERO);
-    BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
-        stake).orElse(BigInteger.ZERO);
-    stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
-    stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
-    stakeAddressResponse.setTotalStake(stakeAddress.getBalance().add(stakeAvailableReward)
-            .subtract(stakeRewardWithdrawn));
+    if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
+      BigInteger stakeRewardWithdrawn = withdrawalRepository.getRewardWithdrawnByStakeAddress(
+          stake).orElse(BigInteger.ZERO);
+      BigInteger stakeAvailableReward = rewardRepository.getAvailableRewardByStakeAddress(
+          stake).orElse(BigInteger.ZERO);
+      stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
+      stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
+      stakeAddressResponse.setTotalStake(stakeAddress.getBalance().add(stakeAvailableReward)
+                                             .subtract(stakeRewardWithdrawn));
+    }
+
+    if (stakeAddressResponse.getRewardAvailable() == null) {
+      stakeAddressResponse.setTotalStake(stakeAddress.getBalance());
+    } else {
+      stakeAddressResponse.setTotalStake(stakeAddress.getBalance()
+                                             .add(stakeAddressResponse.getRewardAvailable()));
+    }
+
     StakeDelegationProjection poolData = delegationRepository.findPoolDataByAddress(stakeAddress)
         .orElse(null);
     if (poolData != null) {
