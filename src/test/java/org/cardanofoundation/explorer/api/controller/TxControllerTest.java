@@ -102,6 +102,7 @@ class TxControllerTest {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), result.getStatus());
+    assertEquals(asJsonString(response), result.getContentAsString());
   }
 
   @Test
@@ -123,6 +124,7 @@ class TxControllerTest {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+    assertEquals(asJsonString(txResponse), response.getContentAsString());
   }
 
   @Test
@@ -145,6 +147,7 @@ class TxControllerTest {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+    assertEquals(asJsonString(List.of(txSummary)), response.getContentAsString());
   }
 
   @Test
@@ -208,6 +211,7 @@ class TxControllerTest {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+    assertEquals(asJsonString(contractResponse), response.getContentAsString());
   }
 
   @Test
