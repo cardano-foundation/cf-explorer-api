@@ -452,7 +452,7 @@ class StakeKeyLifeCycleServiceTest {
   }
 
   @Test
-  void whenStakeAddressHaveRewards_showReturnRewards() {
+  void whenStakeAddressHaveRewardsAvailable_showReturnRewards() {
     Pageable pageable = PageRequest.of(0, 1);
     StakeRewardResponse rewardResponse = new StakeRewardResponse(333,
         Date.from(Instant.now()), BigInteger.valueOf(382916), RewardType.MEMBER);
@@ -462,6 +462,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(rewardRepository.findRewardByStake(stakeAddress, Timestamp.from(fromDate.toInstant()),
         Timestamp.from(toDate.toInstant()), null, pageable)).thenReturn(page);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeRewards(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", fromDate, toDate,null,  pageable);
@@ -471,6 +472,23 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertEquals(1, response.getData().size());
     Assertions.assertEquals(333, response.getData().get(0).getEpoch());
     Assertions.assertEquals(BigInteger.valueOf(382916), response.getData().get(0).getAmount());
+  }
+
+  @Test
+  void whenStakeAddressDoNotHaveRewardsAvailable_showReturnRewardNotAvailable() {
+    Pageable pageable = PageRequest.of(0, 1);
+    StakeRewardResponse rewardResponse = new StakeRewardResponse(333,
+                                                                 Date.from(Instant.now()),
+                                                                 BigInteger.valueOf(382916),
+                                                                 RewardType.MEMBER);
+    Date fromDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+    Date toDate = Date.from(Instant.now());
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    var response = stakeKeyLifeCycleService.getStakeRewards(
+        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", fromDate, toDate, null,
+        pageable);
+    Assertions.assertNull(response.getData());
   }
 
   @Test
@@ -543,6 +561,7 @@ class StakeKeyLifeCycleServiceTest {
     when(rewardRepository.getAvailableRewardByStakeAddressAndEpoch(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(4846486)));
     when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeWithdrawalDetail(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna",
         "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
@@ -553,6 +572,32 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertEquals(BigInteger.valueOf(102569063), response.getStakeTotalAmount());
     Assertions.assertEquals(BigInteger.valueOf(4846486), response.getStakeRewardAvailable());
 
+  }
+
+  @Test
+  void getStakeWithdrawalDetail_whenRewardNotAvailable_shouldReturnRewardDataNull() {
+    StakeWithdrawalProjection projection = Mockito.mock(StakeWithdrawalProjection.class);
+    when(projection.getTxHash()).thenReturn(
+        "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
+    when(projection.getFee()).thenReturn(BigInteger.valueOf(173157));
+    when(projection.getAmount()).thenReturn(BigInteger.valueOf(4846486));
+    when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(withdrawalRepository.getWithdrawalByAddressAndTx(any(), any()))
+        .thenReturn(Optional.of(projection));
+    when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any()))
+        .thenReturn(Optional.of(BigInteger.valueOf(102569063)));
+    when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    var response = stakeKeyLifeCycleService.getStakeWithdrawalDetail(
+        "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna",
+        "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
+    Assertions.assertEquals("91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381",
+                            response.getTxHash());
+    Assertions.assertEquals(BigInteger.valueOf(173157), response.getFee());
+    Assertions.assertEquals(BigInteger.valueOf(4846486), response.getAmount());
+    Assertions.assertEquals(BigInteger.valueOf(102569063), response.getStakeTotalAmount());
+    Assertions.assertNull(response.getStakeRewardAvailable());
   }
 
   @Test
@@ -725,7 +770,7 @@ class StakeKeyLifeCycleServiceTest {
   }
 
   @Test
-  void whenGetStakeRewardActivities_showReturnRewardActivities() {
+  void getStakeRewardActivities_whenRewardAvailable_shouldReturnRewardData() {
     Pageable pageable = PageRequest.of(0, 2);
     StakeRewardResponse stakeRewardResponse = new StakeRewardResponse(300, new Date(),
         BigInteger.valueOf(1000000), RewardType.MEMBER);
@@ -737,6 +782,7 @@ class StakeKeyLifeCycleServiceTest {
     when(rewardRepository.findRewardByStake(stakeAddress)).thenReturn(
         List.of(stakeRewardResponse));
     when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeRewardActivities(stakeAddress.getView(),
         pageable);
     Assertions.assertEquals(1, response.getTotalPages());
@@ -745,6 +791,16 @@ class StakeKeyLifeCycleServiceTest {
     Assertions.assertEquals(2, response.getData().size());
     Assertions.assertEquals(StakeRewardType.REWARD_WITHDRAWN, response.getData().get(0).getType());
     Assertions.assertEquals(StakeRewardType.REWARD_RECEIVED, response.getData().get(1).getType());
+  }
+
+  @Test
+  void getStakeRewardActivities_whenRewardNotAvailable_shouldReturnRewardNotAvailable() {
+    Pageable pageable = PageRequest.of(0, 2);
+    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    var response = stakeKeyLifeCycleService.getStakeRewardActivities(stakeAddress.getView(),
+                                                                     pageable);
+    Assertions.assertNull(response.getData());
   }
 
   @Test
@@ -824,6 +880,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(new StakeAddress()));
     when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(false);
     when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(false);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
 
     Assertions.assertThrows(FetchRewardException.class, () -> stakeKeyLifeCycleService.getStakeRewards(stakeKey, fromDate, toDate, type, pageable));
   }
@@ -912,34 +969,13 @@ class StakeKeyLifeCycleServiceTest {
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(new StakeAddress()));
     when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(false);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(false);
 
-    Assertions.assertThrows(FetchRewardException.class, () -> stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey, pageable));
+    Assertions.assertThrows(FetchRewardException.class,
+                            () -> stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey,
+                                                                                    pageable));
   }
-
-  @Test
-  void whenGetStakeRewardActivitiesSort_showReturnRewardActivities() {
-    Pageable pageable = PageRequest.of(0, 2, Sort.Direction.ASC, "time");
-    StakeRewardResponse stakeRewardResponse = new StakeRewardResponse(300, new Date(),
-            BigInteger.valueOf(1000000), RewardType.MEMBER);
-    StakeRewardResponse stakeWithdrawnResponse = new StakeRewardResponse(301, new Date(),
-            BigInteger.valueOf(1000000), RewardType.MEMBER);
-    when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
-    when(withdrawalRepository.findEpochWithdrawalByStake(stakeAddress)).thenReturn(
-            List.of(stakeWithdrawnResponse));
-    when(rewardRepository.findRewardByStake(stakeAddress)).thenReturn(
-            List.of(stakeRewardResponse));
-    when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
-    var response = stakeKeyLifeCycleService.getStakeRewardActivities(stakeAddress.getView(),
-            pageable);
-    Assertions.assertEquals(1, response.getTotalPages());
-    Assertions.assertEquals(2, response.getTotalItems());
-    Assertions.assertEquals(0, response.getCurrentPage());
-    Assertions.assertEquals(2, response.getData().size());
-    Assertions.assertEquals(StakeRewardType.REWARD_RECEIVED, response.getData().get(0).getType());
-    Assertions.assertEquals(StakeRewardType.REWARD_WITHDRAWN, response.getData().get(1).getType());
-  }
-
   @Test
   void testGetStakeWalletActivitiesByDateRange_thenReturn() {
     String stakeKey = "stake_key";
