@@ -114,7 +114,7 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
       } else if (!Objects.isNull(certificateHistory.getPoolUpdateId())) {
         PoolCertificateHistory previousCertificateHistory = certificateHistories.get(i - 1);
         if (previousCertificateHistory.getActionType().equals(PoolActionType.POOL_DEREGISTRATION) &&
-            certificateHistory.getTxEpochNo() > previousCertificateHistory.getCertEpochNo()) {
+            certificateHistory.getTxEpochNo() >= previousCertificateHistory.getCertEpochNo()) {
           certificateHistory.setActionType(PoolActionType.POOL_REGISTRATION);
         } else {
           certificateHistory.setActionType(PoolActionType.POOL_UPDATE);
