@@ -566,8 +566,6 @@ public class StakeKeyReportServiceTest {
     when(fetchRewardDataService.fetchReward(anyString()))
         .thenReturn(Boolean.TRUE);
 
-    when(fetchRewardDataService.useKoios()).thenReturn(Boolean.TRUE);
-
     var response = stakeKeyReportService.getStakeRewardsByReportId(reportId, username,
         pageable);
     Assertions.assertEquals(1, response.getTotalPages());
@@ -575,31 +573,6 @@ public class StakeKeyReportServiceTest {
     Assertions.assertEquals(0, response.getCurrentPage());
     Assertions.assertEquals(1, response.getData().size());
     Assertions.assertEquals(expect, response.getData().get(0));
-  }
-
-  @Test
-  void getStakeRewardsByReportId_shouldReturnRewardNotAvailable() {
-    Long reportId = 1L;
-    String username = "username";
-    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
-    Timestamp toDate = new Timestamp(System.currentTimeMillis());
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
-    Pageable pageable = PageRequest.of(0, 1);
-    when(stakeKeyReportHistoryRepository.findById(any(Long.class))).thenReturn(
-        Optional.of(StakeKeyReportHistory.builder()
-                        .reportHistory(ReportHistory.builder()
-                                           .username(username)
-                                           .build())
-                        .fromDate(fromDate)
-                        .stakeKey(stakeKey)
-                        .toDate(toDate)
-                        .build()));
-
-    when(fetchRewardDataService.useKoios()).thenReturn(Boolean.FALSE);
-
-    var response = stakeKeyReportService.getStakeRewardsByReportId(reportId, username,
-                                                                   pageable);
-    Assertions.assertNull(response.getData());
   }
 
   @Test
