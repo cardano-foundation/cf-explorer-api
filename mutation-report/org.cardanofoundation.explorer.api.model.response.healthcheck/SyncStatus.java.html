@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>SyncStatus.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.model.response.healthcheck;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.LocalDateTime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.AllArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Builder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Getter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.NoArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Setter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.annotation.JsonInclude;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Getter</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@Setter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@AllArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@NoArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_17'/>
+17
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_17'>6</a>
+<span>
+1. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::toString &rarr; NO_COVERAGE<br/>
+2. latestBlockInsertTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::latestBlockInsertTime &rarr; KILLED<br/>
+3. build : replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::build &rarr; KILLED<br/>
+4. isSyncing : replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::isSyncing &rarr; KILLED<br/>
+5. message : replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::message &rarr; KILLED<br/>
+6. builder : replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::builder &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@Builder</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@JsonInclude</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class SyncStatus {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_20'/>
+20
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_20'>2</a>
+<span>
+1. getIsSyncing : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::getIsSyncing &rarr; KILLED<br/>
+2. getIsSyncing : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::getIsSyncing &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  Boolean isSyncing;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_21'/>
+21
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_21'>1</a>
+<span>
+1. getMessage : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::getMessage &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  String message;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_22'/>
+22
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_22'>1</a>
+<span>
+1. getLatestBlockInsertTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::getLatestBlockInsertTime &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  LocalDateTime latestBlockInsertTime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_17'>17</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_17'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>latestBlockInsertTime<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::latestBlockInsertTime &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>build<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::build &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::toString &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>isSyncing<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::isSyncing &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>message<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus$SyncStatusBuilder::message &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>builder<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::builder &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_20'>20</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_20'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getIsSyncing<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()]</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::getIsSyncing &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getIsSyncing<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndNotSyncing()]</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::getIsSyncing &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_21'>21</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_21'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMessage<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()]</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::getMessage &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@1dad3ebd_22'>22</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@1dad3ebd_22'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getLatestBlockInsertTime<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/healthcheck/SyncStatus::getLatestBlockInsertTime &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeAvailableInRedisAndSyncOK()] (6 ms)</li><li>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndSyncOKAndReadyToSever()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeNotAvailableInRedisAndNotSyncing()] (2 ms)</li><li>org.cardanofoundation.explorer.api.service.HealthCheckServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.HealthCheckServiceTest]/[method:testGetSyncStatus_WhenLatestBlockTimeAvailableInRedisAndSyncOKButNotReadyToServe()] (19 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
