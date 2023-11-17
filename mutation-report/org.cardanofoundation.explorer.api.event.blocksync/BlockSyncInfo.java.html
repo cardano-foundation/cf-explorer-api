@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>BlockSyncInfo.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.event.blocksync;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Builder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Getter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Setter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Getter</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@Setter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_10'/>
+10
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_10'>7</a>
+<span>
+1. build : replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::build &rarr; SURVIVED<br/>
+2. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::toString &rarr; NO_COVERAGE<br/>
+3. builder : replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::builder &rarr; KILLED<br/>
+4. hasTx : replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::hasTx &rarr; KILLED<br/>
+5. blockHash : replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::blockHash &rarr; KILLED<br/>
+6. blockNo : replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::blockNo &rarr; KILLED<br/>
+7. epochSummary : replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::epochSummary &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@Builder</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class BlockSyncInfo {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_12'/>
+12
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_12'>1</a>
+<span>
+1. getBlockNo : replaced long return with 0 for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::getBlockNo &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private long blockNo;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_13'/>
+13
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_13'>1</a>
+<span>
+1. getBlockHash : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::getBlockHash &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private String blockHash;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_14'/>
+14
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_14'>1</a>
+<span>
+1. getEpochSummary : replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::getEpochSummary &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private EpochSummary epochSummary;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_15'/>
+15
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_15'>2</a>
+<span>
+1. isHasTx : replaced boolean return with true for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::isHasTx &rarr; SURVIVED<br/>
+2. isHasTx : replaced boolean return with false for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::isHasTx &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  private boolean hasTx;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@416598c0_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@416598c0_10'>10</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_10'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>build<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::build &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>builder<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::builder &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>hasTx<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::hasTx &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::toString &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>blockHash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::blockHash &rarr; KILLED</p> <p class='KILLED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>blockNo<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::blockNo &rarr; KILLED</p> <p class='KILLED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>epochSummary<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo$BlockSyncInfoBuilder::epochSummary &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@416598c0_12'>12</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_12'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getBlockNo<br/><b>Killed by : </b>none</span></span> replaced long return with 0 for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::getBlockNo &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@416598c0_13'>13</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_13'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getBlockHash<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::getBlockHash &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@416598c0_14'>14</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_14'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEpochSummary<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::getEpochSummary &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@416598c0_15'>15</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@416598c0_15'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isHasTx<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::isHasTx &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isHasTx<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/event/blocksync/BlockSyncInfo::isHasTx &rarr; SURVIVED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getBatchBlockInfoMessage_shouldReturnResponse()] (5 ms)</li><li>org.cardanofoundation.explorer.api.service.WebSocketServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.WebSocketServiceTest]/[method:getCurrentBlockInfoMessage_shouldReturnResponse()] (1 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
