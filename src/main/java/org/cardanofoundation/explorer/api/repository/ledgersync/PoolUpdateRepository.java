@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCertificateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
@@ -196,4 +197,28 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "WHERE (ph.view = :poolViewOrHash "
           + "OR ph.hashRaw = :poolViewOrHash)")
   Integer countPoolUpdateByPool(@Param("poolViewOrHash") String poolViewOrHash);
+
+  @Query(value =
+      "SELECT tx.id as txId, tx.hash as txHash, b.epochNo as txEpochNo,"
+          + "pu.activeEpochNo as certEpochNo, pu.certIndex as certIndex, pu.id as poolUpdateId, "
+          + "b.time as blockTime, b.blockNo as blockNo, b.epochSlotNo as epochSlotNo, b.slotNo as slotNo "
+          + "FROM PoolUpdate pu "
+          + "JOIN Tx tx on pu.registeredTx = tx "
+          + "JOIN Block b on tx.block = b "
+          + "WHERE pu.poolHash.view = :poolViewOrHash "
+          + "OR pu.poolHash.hashRaw = :poolViewOrHash ")
+  List<PoolCertificateProjection> getPoolUpdateByPoolViewOrHash(@Param("poolViewOrHash") String poolViewOrHash);
+
+  @Query(value =
+      "SELECT tx.id as txId, tx.hash as txHash, b.epochNo as txEpochNo,"
+          + "pu.activeEpochNo as certEpochNo, pu.certIndex as certIndex, pu.id as poolUpdateId, "
+          + "b.time as blockTime, b.blockNo as blockNo, b.epochSlotNo as epochSlotNo, b.slotNo as slotNo "
+          + "FROM PoolUpdate pu "
+          + "JOIN Tx tx on pu.registeredTx = tx "
+          + "JOIN Block b on tx.block = b "
+          + "WHERE pu.poolHash.view = :poolViewOrHash "
+          + "OR pu.poolHash.hashRaw = :poolViewOrHash "
+          + "ORDER BY tx.id DESC, pu.certIndex DESC "
+          + "LIMIT 1")
+  PoolCertificateProjection getLastPoolUpdateByPoolHash(@Param("poolViewOrHash") String poolViewOrHash);
 }
