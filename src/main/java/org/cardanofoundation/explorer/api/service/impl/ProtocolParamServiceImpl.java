@@ -333,10 +333,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                         ((boolean) latestParamHistoryMethods.get(protocolType).getSecond()
                             .invoke(changeHistory)) ? changeHistory.getBlockTime()
                             : changeHistory.getEpochTime();
-                    final var transactionHash =
-                        ((boolean) latestParamHistoryMethods.get(protocolType).getSecond()
-                            .invoke(changeHistory)) ? changeHistory.getHash()
-                            : null;
 
                     if (protocolType.equals(ProtocolType.COST_MODEL)) {
                       changeValue = costModelMap.get(changeValue);
@@ -344,7 +340,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
                     if (Objects.isNull(oldValue)) {
                       ProtocolHistory protocolHistory = ProtocolHistory.builder()
-                          .transactionHash(transactionHash)
                           .time(changeTime)
                           .epochNo(changeHistory.getEpochNo())
                           .value(changeValue)
@@ -355,7 +350,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
                     if (!String.valueOf(oldValue.getValue()).equals(String.valueOf(changeValue))) {
                       oldValue.setTime(changeTime);
-                      oldValue.setTransactionHash(transactionHash);
                       oldValue.setValue(changeValue);
                       oldValue.setEpochNo(changeHistory.getEpochNo());
                     }
@@ -432,18 +426,19 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * Mapping ProtocolHistory that change
    *
    * @param currentProtocol value of protocol param
-   * @param tx              transaction proposal  change
+   * @param txs             transactions proposal  change
    * @param timeChange      time proposal change
    * @return
    */
-  public static ProtocolHistory getChangeProtocol(Object currentProtocol, Tx tx,
+  public static ProtocolHistory getChangeProtocol(Object currentProtocol, List<Tx> txs,
       AtomicReference<LocalDateTime> timeChange) {
+    Tx latestTx = txs.get(txs.size() - 1);
 
-    timeChange.set(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
+    timeChange.set(LocalDateTime.ofInstant(latestTx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
     return ProtocolHistory.builder()
         .value(currentProtocol)
-        .time(tx.getBlock().getTime())
-        .transactionHash(tx.getHash())
+        .time(latestTx.getBlock().getTime())
+        .transactionHashs(txs.stream().map(Tx::getHash).collect(Collectors.toSet()))
         .build();
   }
 
@@ -462,7 +457,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     return ProtocolHistory.builder()
         .value(object)
         .time(null)
-        .transactionHash(null)
+        .transactionHashs(null)
         .build();
   }
 
@@ -557,6 +552,10 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   private void mapProtocols(List<ParamHistory> paramProposals, Protocols protocols,
       Map<Long, Tx> txs, List<ProtocolType> protocolTypes) {
 
+    List<Tx> txsUpdatePP = paramProposals.stream()
+        .map(paramProposal -> txs.get(paramProposal.getTx()))
+        .collect(Collectors.toList());
+
     paramProposals
         .stream()
         .sorted(Comparator.comparing(ParamHistory::getEpochNo).reversed()
@@ -583,14 +582,14 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                           .equals(paramProposalValue)) {
                         protocols.setCostModel(
                             getChangeCostModelProtocol(paramProposal.getCostModel(),
-                                txs.get(paramProposal.getTx()), timeChange));
+                                                       txsUpdatePP, timeChange));
                       }
                     } else {
                       if (Objects.isNull(protocolValue) || !protocolValue.getValue()
                           .equals(paramProposalValue)) {
                         protocolSet.invoke(protocols, getChangeProtocol(
                             paramProposalValue,
-                            txs.get(paramProposal.getTx()), timeChange));
+                            txsUpdatePP, timeChange));
                       }
                     }
                   }
@@ -617,20 +616,21 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
    * Mapping ProtocolHistory that cost model propose to change
    *
    * @param costModelId cost model id
-   * @param tx          transaction proposal change
+   * @param txs         transactions proposal change
    * @param timeChange  time proposal change
    * @return
    */
   private ProtocolHistory getChangeCostModelProtocol(Long costModelId,
-      Tx tx,
+      List<Tx> txs,
       AtomicReference<LocalDateTime> timeChange) {
 
+    Tx lastTx = txs.get(txs.size() - 1);
     Optional<CostModel> costModel = costModelRepository.findById(costModelId);
-    timeChange.set(LocalDateTime.ofInstant(tx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
+    timeChange.set(LocalDateTime.ofInstant(lastTx.getBlock().getTime().toInstant(), ZoneOffset.UTC));
     return costModel.map(model -> ProtocolHistory.builder()
         .value(model.getCosts())
-        .time(tx.getBlock().getTime())
-        .transactionHash(tx.getHash())
+        .time(lastTx.getBlock().getTime())
+        .transactionHashs(txs.stream().map(Tx::getHash).collect(Collectors.toSet()))
         .costModelId(costModelId)
         .build()).orElse(null);
   }

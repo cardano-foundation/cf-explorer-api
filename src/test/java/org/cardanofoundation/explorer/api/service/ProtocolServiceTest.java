@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.cardanofoundation.explorer.api.model.response.protocol.*;
 import org.cardanofoundation.explorer.api.projection.LatestParamHistory;
@@ -556,7 +557,7 @@ class ProtocolServiceTest {
     Assertions.assertEquals(ProtocolHistory
             .builder()
             .value(BigInteger.ONE)
-            .transactionHash("1")
+            .transactionHashs(Set.of("1"))
             .time(transaction.get(1).getBlock().getTime())
             .status(ProtocolStatus.UPDATED)
             .build().hashCode(), histories.get(0).hashCode());
@@ -619,7 +620,7 @@ class ProtocolServiceTest {
     Assertions.assertEquals(ProtocolHistory
             .builder()
             .value(BigInteger.ONE)
-            .transactionHash("1")
+            .transactionHashs(Set.of("1"))
             .time(transaction.get(1).getBlock().getTime())
             .status(ProtocolStatus.UPDATED)
             .build().hashCode(), histories.get(0).hashCode());
@@ -688,7 +689,7 @@ class ProtocolServiceTest {
     Assertions.assertEquals(ProtocolHistory
             .builder()
             .value(BigInteger.ONE)
-            .transactionHash("1")
+            .transactionHashs(Set.of("1"))
             .time(transaction.get(0).getBlock().getTime())
             .status(ProtocolStatus.UPDATED)
             .build().hashCode(), histories.get(0).hashCode());
@@ -755,7 +756,7 @@ class ProtocolServiceTest {
     Assertions.assertEquals(ProtocolHistory
             .builder()
             .value(BigInteger.ONE)
-            .transactionHash("1")
+            .transactionHashs(Set.of("1"))
             .time(transaction.get(0).getBlock().getTime())
             .status(ProtocolStatus.UPDATED)
             .build().hashCode(), histories.get(0).hashCode());
@@ -823,7 +824,7 @@ class ProtocolServiceTest {
     Assertions.assertEquals(ProtocolHistory
             .builder()
             .value(BigInteger.TWO)
-            .transactionHash("2")
+            .transactionHashs(Set.of("2"))
             .time(transaction.get(0).getBlock().getTime())
             .status(ProtocolStatus.UPDATED)
             .build(), histories.get(0));
@@ -831,7 +832,7 @@ class ProtocolServiceTest {
     Assertions.assertEquals(ProtocolHistory
             .builder()
             .value(BigInteger.ONE)
-            .transactionHash("1")
+            .transactionHashs(Set.of("1"))
             .time(transaction.get(1).getBlock().getTime())
             .status(ProtocolStatus.UPDATED)
             .build().hashCode(), histories.get(1).hashCode());
@@ -6519,7 +6520,7 @@ class ProtocolServiceTest {
             .maxTxExSteps(
                     List.of(
                             ProtocolHistory.builder()
-                                    .transactionHash(txTwo.getHash())
+                                    .transactionHashs(Set.of(txTwo.getHash()))
                                     .time(txOne.getBlock().getTime())
                                     .value(BigInteger.ONE)
                                     .status(ProtocolStatus.ADDED)
