@@ -83,21 +83,25 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     }
     BigInteger totalOperatorReward = null;
     BigInteger totalDelegatorReward = null;
-    if(Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
-       totalOperatorReward =
+    Boolean hasReward = null;
+    Boolean hasWithdrawal = null;
+    if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
+      totalOperatorReward =
           rewardRepository.getTotalRewardByStakeAddressAndType(stakeAddress, RewardType.LEADER)
               .orElse(BigInteger.ZERO);
-       totalDelegatorReward =
+      totalDelegatorReward =
           rewardRepository.getTotalRewardByStakeAddressAndType(stakeAddress, RewardType.MEMBER)
               .orElse(BigInteger.ZERO);
+      hasReward = rewardRepository.existsByAddr(stakeAddress);
+      hasWithdrawal = withdrawalRepository.existsByAddr(stakeAddress);
     }
 
     return StakeLifecycleResponse.builder()
         .hasRegistration(stakeRegistrationRepository.existsByAddr(stakeAddress))
         .hasDeRegistration(stakeDeRegistrationRepository.existsByAddr(stakeAddress))
         .hasDelegation(delegationRepository.existsByAddress(stakeAddress))
-        .hashRewards(rewardRepository.existsByAddr(stakeAddress))
-        .hasWithdrawal(withdrawalRepository.existsByAddr(stakeAddress))
+        .hashRewards(hasReward)
+        .hasWithdrawal(hasWithdrawal)
         .totalOperatorRewards(totalOperatorReward)
         .totalDelegatorRewards(totalDelegatorReward)
         .build();
@@ -244,6 +248,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
       StakeLifeCycleFilterRequest condition, Pageable pageable) {
     StakeAddress stakeAddress = stakeAddressRepository.findByView(stakeKey).orElseThrow(
         () -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+    if(Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return new BaseFilterResponse<>();
+    }
     Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
     Timestamp toDate = Timestamp.from(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
         .toInstant(ZoneOffset.UTC));
