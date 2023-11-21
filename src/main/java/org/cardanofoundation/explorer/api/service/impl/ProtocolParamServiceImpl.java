@@ -303,6 +303,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   private void deleteProtocolHistoryCache(){
     redisTemplate.delete(getHistoryProtocolParametersKey());
+    redisTemplate.delete(getGenesisDelegRedisKeys());
   }
 
   @Override
