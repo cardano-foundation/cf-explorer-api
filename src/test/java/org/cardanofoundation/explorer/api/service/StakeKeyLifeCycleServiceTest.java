@@ -129,6 +129,7 @@ class StakeKeyLifeCycleServiceTest {
     when(rewardRepository.existsByAddr(stakeAddress)).thenReturn(true);
     when(withdrawalRepository.existsByAddr(stakeAddress)).thenReturn(true);
     when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     var response = stakeKeyLifeCycleService
         .getStakeLifeCycle("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna");
     Assertions.assertNotNull(response);
@@ -510,6 +511,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.getWithdrawalByAddress(any(), any(), any(), any(), any()))
         .thenReturn(page);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeWithdrawals(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
     Assertions.assertEquals(1, response.getTotalPages());
@@ -533,6 +535,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.getWithdrawalByAddress(any(), any(), any(), any(), any()))
         .thenReturn(page);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeWithdrawals(
         "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
     Assertions.assertEquals(1, response.getTotalPages());
@@ -904,6 +907,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.getWithdrawalByAddress(any(), any(), any(), any(), any()))
             .thenReturn(page);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     var response = stakeKeyLifeCycleService.getStakeWithdrawals(
             "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna", condition, pageable);
     Assertions.assertEquals(1, response.getTotalPages());
