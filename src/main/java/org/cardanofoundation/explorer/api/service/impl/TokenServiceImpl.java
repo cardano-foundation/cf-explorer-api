@@ -314,5 +314,6 @@ public class TokenServiceImpl implements TokenService {
     tokenResponse.setMetadataJson(MetadataStandardUtils.splitJsonMetadataByAssetName(
         maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint(),
             CommonConstant.METADATA_LABEL_721), assetName));
+    tokenResponse.setMetadataCIP25(MetadataStandardUtils.metadataStandardCIP25(tokenResponse.getMetadataJson()));
   }
 }

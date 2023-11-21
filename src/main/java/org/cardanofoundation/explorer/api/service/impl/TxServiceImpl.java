@@ -31,41 +31,12 @@ import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.FailedTxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRelayRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
-import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.cardanofoundation.ledgersync.common.util.MetadataStandardUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -106,7 +77,6 @@ import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 
 @Service
 @RequiredArgsConstructor
@@ -300,23 +270,6 @@ public class TxServiceImpl implements TxService {
     List<TxFilterResponse> data = mapDataFromTxByStakeListToResponseList(txPage,
         stakeAddress.getId());
     return new BaseFilterResponse<>(txPage, data);
-  }
-
-  @Override
-  public List<ContractResponse> getTxContractDetail(String txHash, String address) {
-    Tx tx = txRepository.findByHash(txHash).orElseThrow(
-        () -> new BusinessException(BusinessCode.TRANSACTION_NOT_FOUND)
-    );
-    List<ContractResponse> contractResponses = getContractResponses(tx);
-
-    // if contract address is not null, filter contract response by address
-    if(!DataUtil.isNullOrEmpty(address)) {
-      contractResponses = contractResponses.stream()
-          .filter(contractResponse -> address.equals(contractResponse.getAddress()) ||
-              address.equals(contractResponse.getScriptHash()))
-          .collect(Collectors.toList());
-    }
-    return contractResponses;
   }
 
   /**
@@ -525,7 +478,6 @@ public class TxServiceImpl implements TxService {
 
     // get address input output
     getSummaryAndUTxOs(tx, txResponse);
-    getContracts(tx, txResponse);
     getCollaterals(tx, txResponse);
     getWithdrawals(tx, txResponse);
     getDelegations(tx, txResponse);
@@ -560,6 +512,7 @@ public class TxServiceImpl implements TxService {
       uTxOResponse.setOutputs(collateralOutputs);
       txResponse.setUTxOs(uTxOResponse);
     }
+    getContracts(tx, txResponse);
 
     return txResponse;
   }
@@ -613,7 +566,8 @@ public class TxServiceImpl implements TxService {
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
         txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
-            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).build()).toList();
+            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).metadataCIP25(
+                MetadataStandardUtils.metadataStandardCIP25(txMetadata.getJson())).build()).toList();
     if(!CollectionUtils.isEmpty(txMetadataList)) {
       txResponse.setMetadata(txMetadataList);
     }
@@ -739,13 +693,13 @@ public class TxServiceImpl implements TxService {
    * @param txResponse response data of transaction
    */
   private void getContracts(Tx tx, TxResponse txResponse) {
-    List<ContractResponse> contractResponses = getContractResponses(tx);
+    List<ContractResponse> contractResponses = getContractResponses(tx, txResponse);
     if(!CollectionUtils.isEmpty(contractResponses)) {
       txResponse.setContracts(contractResponses);
     }
   }
 
-  private List<ContractResponse> getContractResponses(Tx tx) {
+  private List<ContractResponse> getContractResponses(Tx tx, TxResponse txResponse) {
     List<ContractResponse> contractResponses;
     List<TxContractProjection> txContractProjections;
     if (Boolean.TRUE.equals(tx.getValidContract())) {
@@ -783,56 +737,126 @@ public class TxServiceImpl implements TxService {
 
     contractResponses.parallelStream().forEach(contractResponse -> {
       TxContractProjection txContractProjection = txContractMap.get(contractResponse.getAddress());
-      if (txReferenceInputSmartContractMap.containsKey(contractResponse.getScriptHash())) {
-        List<TxReferenceInput> txReferenceInputs =
-            new ArrayList<>(txReferenceInputSmartContractMap.get(contractResponse.getScriptHash()));
-        txReferenceInputs.addAll(txReferenceInputsWithoutSmartContract);
-        contractResponse.setReferenceInputs(txReferenceInputs);
-      } else {
-        contractResponse.setReferenceInputs(txReferenceInputsWithoutSmartContract);
-      }
+      setContractReferenceInput(contractResponse, txReferenceInputSmartContractMap,
+                                  txReferenceInputsWithoutSmartContract);
+
       if (txContractProjection != null) {
         contractResponse.setDatumBytesOut(
             txContractMapper.bytesToString(txContractProjection.getDatumBytesOut()));
         contractResponse.setDatumHashOut(txContractProjection.getDatumHashOut());
       }
-      if (contractResponse.getPurpose().equals(ScriptPurposeType.MINT)) {
-        List<TokenAddressResponse> addressTokenProjections =
-            multiAssetRepository.getMintingAssets(tx, contractResponse.getScriptHash())
-                .stream().map(tokenMapper::fromAddressTokenProjection).toList();
 
-        // set metadata for tokens
-        Set<String> subjects = addressTokenProjections.stream()
-            .map(tokenAddressResponse -> tokenAddressResponse.getName()
-                + contractResponse.getScriptHash())
-            .collect(Collectors.toSet());
-        Map<String, AssetMetadata> assetMetadataMap = assetMetadataRepository
-            .findBySubjectIn(subjects)
-            .stream()
-            .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-        addressTokenProjections
-            .forEach(tokenAddressResponse ->
-                         tokenAddressResponse
-                             .setMetadata(assetMetadataMapper.fromAssetMetadata(
-                                 assetMetadataMap.get(tokenAddressResponse.getName()
-                                                          + contractResponse.getScriptHash()))));
-
-        // set mint or burn tokens for contract response
-        contractResponse
-            .setMintingTokens(addressTokenProjections
-                                  .stream()
-                                  .filter(tokenAddressResponse ->
-                                              tokenAddressResponse.getQuantity().longValue() >= 0)
-                                  .toList());
-        contractResponse
-            .setBurningTokens(addressTokenProjections
-                                  .stream()
-                                  .filter(tokenAddressResponse ->
-                                              tokenAddressResponse.getQuantity().longValue() < 0)
-                                  .toList());
+      switch (contractResponse.getPurpose()) {
+        case MINT -> setMintContractResponse(tx, contractResponse, txResponse);
+        case SPEND -> setSpendContractResponse(contractResponse);
+        case REWARD -> setRewardContractResponse(txResponse, contractResponse);
+        case CERT -> setCertContractResponse(contractResponse);
       }
+
     });
     return contractResponses;
+  }
+
+  /**
+   * Set cert contract response:
+   * @param contractResponse
+   */
+  private void setCertContractResponse(ContractResponse contractResponse) {
+    contractResponse.setExecutionInputs(List.of(contractResponse.getStakeAddress()));
+    contractResponse.setExecutionOutputs(List.of(contractResponse.getStakeAddress()));
+  }
+
+  /**
+   * Set reward contract response
+   * @param txResponse
+   * @param contractResponse
+   */
+  private void setRewardContractResponse(TxResponse txResponse, ContractResponse contractResponse) {
+    contractResponse.setExecutionInputs(List.of(contractResponse.getStakeAddress()));
+    contractResponse.setExecutionOutputs(
+        txResponse.getUTxOs().getOutputs().stream().map(TxOutResponse::getAddress).toList());
+  }
+
+  /**
+   * Set spend contract response
+   * @param contractResponse
+   */
+  private void setSpendContractResponse(ContractResponse contractResponse) {
+    contractResponse.setExecutionInputs(List.of(contractResponse.getAddress()));
+  }
+
+  /**
+   * Set contract reference input
+   * @param contractResponse
+   * @param txReferenceInputSmartContractMap
+   * @param txReferenceInputsWithoutSmartContract
+   */
+  private void setContractReferenceInput(ContractResponse contractResponse,
+                                         Map<String, List<TxReferenceInput>> txReferenceInputSmartContractMap,
+                                         List<TxReferenceInput> txReferenceInputsWithoutSmartContract) {
+    if (txReferenceInputSmartContractMap.containsKey(contractResponse.getScriptHash())) {
+      List<TxReferenceInput> txReferenceInputs =
+          new ArrayList<>(txReferenceInputSmartContractMap.get(contractResponse.getScriptHash()));
+      txReferenceInputs.addAll(txReferenceInputsWithoutSmartContract);
+      contractResponse.setReferenceInputs(txReferenceInputs);
+    } else {
+      contractResponse.setReferenceInputs(txReferenceInputsWithoutSmartContract);
+    }
+  }
+
+  /**
+   * Set mint contract response
+   * @param tx
+   * @param contractResponse
+   */
+  private void setMintContractResponse(Tx tx, ContractResponse contractResponse, TxResponse txResponse) {
+    List<TokenAddressResponse> addressTokenProjections =
+        multiAssetRepository.getMintingAssets(tx, contractResponse.getScriptHash())
+            .stream().map(tokenMapper::fromAddressTokenProjection).toList();
+
+    // set metadata for tokens
+    Set<String> subjects = addressTokenProjections.stream()
+        .map(tokenAddressResponse -> contractResponse.getScriptHash() + tokenAddressResponse.getName())
+        .collect(Collectors.toSet());
+    Map<String, AssetMetadata> assetMetadataMap = assetMetadataRepository
+        .findBySubjectIn(subjects)
+        .stream()
+        .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+    addressTokenProjections
+        .forEach(tokenAddressResponse ->
+                     tokenAddressResponse
+                         .setMetadata(assetMetadataMapper.fromAssetMetadata(
+                             assetMetadataMap.get(contractResponse.getScriptHash() +
+                                                      tokenAddressResponse.getName()))));
+
+    // set mint or burn tokens for contract response
+    contractResponse
+        .setMintingTokens(addressTokenProjections
+                              .stream()
+                              .filter(tokenAddressResponse ->
+                                          tokenAddressResponse.getQuantity().longValue() >= 0)
+                              .toList());
+    contractResponse
+        .setBurningTokens(addressTokenProjections
+                              .stream()
+                              .filter(tokenAddressResponse ->
+                                          tokenAddressResponse.getQuantity().longValue() < 0)
+                              .toList());
+
+    List<String> tokenMintedByContract = addressTokenProjections.stream()
+        .map(TokenAddressResponse::getFingerprint).toList();
+
+    List<String> executionOutputs = txResponse.getUTxOs()
+        .getOutputs()
+        .stream()
+        .filter(txOutResponse -> !Collections.disjoint(tokenMintedByContract, txOutResponse.getTokens()
+            .stream()
+            .map(TxMintingResponse::getAssetId)
+            .toList()))
+        .map(TxOutResponse::getAddress)
+        .toList();
+
+    contractResponse.setExecutionOutputs(executionOutputs);
   }
 
   /**
