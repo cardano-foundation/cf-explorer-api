@@ -64,6 +64,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalReposi
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.api.util.MetadataStandardUtils;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -613,7 +614,8 @@ public class TxServiceImpl implements TxService {
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
         txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
-            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).build()).toList();
+            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).metadataCIP25(
+                MetadataStandardUtils.metadataStandardCIP25(txMetadata.getJson())).build()).toList();
     if(!CollectionUtils.isEmpty(txMetadataList)) {
       txResponse.setMetadata(txMetadataList);
     }
