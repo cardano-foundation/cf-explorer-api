@@ -64,9 +64,9 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalReposi
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.api.util.MetadataStandardUtils;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
-import org.cardanofoundation.ledgersync.common.util.MetadataStandardUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
