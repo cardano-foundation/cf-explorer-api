@@ -93,6 +93,14 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
     return poolStatus;
   }
 
+  @Override
+  public List<PoolCertificateHistory> getPoolCertificateByAction(
+      String poolViewOrHash, PoolActionType action) {
+    return getAllPoolCertificateHistories(poolViewOrHash).stream()
+        .filter(poolCertificate -> poolCertificate.getActionType().equals(action))
+        .sorted(Comparator.comparing(PoolCertificateHistory::getTxId)).toList();
+  }
+
   private List<PoolCertificateHistory> getAllPoolCertificateHistories(String poolViewOrHash) {
     List<PoolCertificateHistory> certificateHistories =
         Stream.concat(poolUpdateRepository.getPoolUpdateByPoolViewOrHash(poolViewOrHash).stream(),
