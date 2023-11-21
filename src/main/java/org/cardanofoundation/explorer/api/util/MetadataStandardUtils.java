@@ -15,9 +15,9 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.ledgersync.common.model.BaseProperty;
-import org.cardanofoundation.ledgersync.common.model.cip25.MetadataCIP25;
-import org.cardanofoundation.ledgersync.common.model.cip25.TokenCIP25;
+import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
+import org.cardanofoundation.explorer.api.model.metadatastandard.cip25.MetadataCIP25;
+import org.cardanofoundation.explorer.api.model.metadatastandard.cip25.TokenCIP25;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
