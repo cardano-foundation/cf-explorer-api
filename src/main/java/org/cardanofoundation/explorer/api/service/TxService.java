@@ -66,12 +66,4 @@ public interface TxService {
    * @return list transaction of stake in this page
    */
   BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable pageable);
-
-  /**
-   * Get TxContractDetail by txHash and contract address
-   * @param txHash hash value of transaction
-   * @param address wallet address (optional)
-   * @return list transaction information
-   */
-  List<ContractResponse> getTxContractDetail(String txHash, String address);
 }
