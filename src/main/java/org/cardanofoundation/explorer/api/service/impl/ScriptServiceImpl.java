@@ -171,7 +171,7 @@ public class ScriptServiceImpl implements ScriptService {
     }
     nativeScriptResponse.setScriptHash(scriptHash);
     List<String> associatedAddressList = stakeAddressRepository.getStakeAssociatedAddress(scriptHash);
-    associatedAddressList.addAll(txOutRepository.getAssociatedAddress(scriptHash));
+    associatedAddressList.addAll(addressRepository.getAssociatedAddress(scriptHash));
     nativeScriptResponse.setAssociatedAddress(associatedAddressList);
     nativeScriptResponse.setNumberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash));
     nativeScriptResponse.setNumberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash));
@@ -345,7 +345,7 @@ public class ScriptServiceImpl implements ScriptService {
 
     List<String> associatedAddresses =
         Stream.concat(stakeAddressRepository.getAssociatedAddress(scriptHash).stream(),
-                      txOutRepository.getAssociatedAddress(scriptHash).stream())
+                      addressRepository.getAssociatedAddress(scriptHash).stream())
             .toList();
 
     return SmartContractDetailResponse.builder()
