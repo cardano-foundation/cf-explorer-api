@@ -337,6 +337,10 @@ public class DelegationServiceImpl implements DelegationService {
     if (Objects.isNull(sort.getOrderFor(BaseEntity_.ID))) {
       sort = sort.and(Sort.by(Sort.Direction.ASC, BaseEntity_.ID));
     }
+    sort = sort.stream().filter(
+            order -> !order.getProperty().equals("saturation") && !order.getProperty()
+                .equals("poolSize")).map(Sort::by)
+        .findFirst().orElse(defaultSort);
     pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     return pageable;
   }
