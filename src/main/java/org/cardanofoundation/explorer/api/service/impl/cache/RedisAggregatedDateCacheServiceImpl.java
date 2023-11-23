@@ -61,6 +61,7 @@ public class RedisAggregatedDateCacheServiceImpl implements AggregatedDataCacheS
     HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
 
     String redisKey = getRedisKey(AGGREGATED_CACHE_KEY);
+    log.info("Redis key: {}, hash key: {}", redisKey, hashKey);
     return hashOperations.get(redisKey, hashKey);
   }
 
