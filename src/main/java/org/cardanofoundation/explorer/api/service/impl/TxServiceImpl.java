@@ -542,7 +542,8 @@ public class TxServiceImpl implements TxService {
                       .build())
           ).toList();
 
-      if (!Objects.isNull(txResponse.getProtocols())) {
+      if (Objects.nonNull(txResponse.getProtocols()) ||
+          !CollectionUtils.isEmpty(txResponse.getInstantaneousRewards())) {
         Map<String, String> dKeyHash224Map = protocolParamService.getGenesisDelegateKeysMap();
         txSignersResponses.forEach(txSignersResponse -> {
           byte[] pkeyHash224 = Blake2bUtil.blake2bHash224(
