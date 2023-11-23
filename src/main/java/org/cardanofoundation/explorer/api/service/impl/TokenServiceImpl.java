@@ -93,6 +93,7 @@ public class TokenServiceImpl implements TokenService {
     int tokenCount = aggregatedDataCacheService.getTokenCount();
 
     if (tokenCount == 0) {
+      log.warn("Can not get cached token count, get it from db");
       tokenCount = (int) multiAssetRepository.count();
     }
     List<MultiAsset> dataContent;

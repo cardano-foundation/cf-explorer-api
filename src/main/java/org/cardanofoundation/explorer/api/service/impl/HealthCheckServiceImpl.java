@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class HealthCheckServiceImpl implements HealthCheckService {
 
   private final AggregatedDataCacheService aggregatedDataCacheService;
@@ -41,7 +43,8 @@ public class HealthCheckServiceImpl implements HealthCheckService {
     LocalDateTime latestBlockTime = aggregatedDataCacheService.getLatestBlockTime();
     LocalDateTime latestBlockInsertTime = aggregatedDataCacheService.getLatestBlockInsertTime();
 
-    if(Objects.isNull(latestBlockInsertTime)){
+    if (Objects.isNull(latestBlockInsertTime)) {
+      log.warn("Latest block insert time is null");
       syncStatus.setMessage(DATA_IS_NOT_SYNCING);
       syncStatus.setIsSyncing(Boolean.FALSE);
       return syncStatus;
@@ -50,6 +53,7 @@ public class HealthCheckServiceImpl implements HealthCheckService {
     if (Objects.isNull(latestBlockTime)) {
       Optional<Block> latestBlock = blockRepository.findLatestBlock();
       if (latestBlock.isEmpty()) {
+        log.warn("Latest block time is null, latest block is not in the database");
         syncStatus.setMessage(DATA_IS_NOT_SYNCING);
         syncStatus.setIsSyncing(Boolean.FALSE);
         return syncStatus;
@@ -60,6 +64,8 @@ public class HealthCheckServiceImpl implements HealthCheckService {
     String message;
 
     if (isOutOfThreshold(insertedTimeThresholdInSecond, latestBlockInsertTime)) {
+      log.warn("Inserted time {} over inserted time threshold {}", latestBlockInsertTime,
+          insertedTimeThresholdInSecond);
       isSyncing = false;
       message = DATA_IS_NOT_SYNCING;
     } else {
@@ -69,6 +75,7 @@ public class HealthCheckServiceImpl implements HealthCheckService {
 
     if (isSyncing) {
       if (isOutOfThreshold(blockTimeThresholdInSecond, latestBlockTime)) {
+        log.warn("Inserted block time {} over block time threshold {}", latestBlockTime, blockTimeThresholdInSecond);
         message = SYNCING_BUT_NOT_READY;
       } else {
         message = READY_TO_SERVE;
