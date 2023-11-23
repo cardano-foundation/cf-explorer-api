@@ -172,10 +172,11 @@ public class ScriptServiceImpl implements ScriptService {
     nativeScriptResponse.setNumberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash));
     nativeScriptResponse.setNumberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash));
     nativeScriptResponse.setKeyHashes(new ArrayList<>());
-    nativeScriptResponse.setVerifiedContract(script.getVerified());
+    nativeScriptResponse.setVerifiedContract(false);
     try {
       String json = script.getJson();
-      if (!StringUtils.isEmpty(json) && Boolean.TRUE.equals(script.getVerified())) {
+      if (!StringUtils.isEmpty(json)) {
+        nativeScriptResponse.setVerifiedContract(true);
         nativeScriptResponse.setScript(json);
         NativeScript nativeScript = NativeScript.deserializeJson(json);
         setNativeScriptInfo(nativeScript, nativeScriptResponse);
@@ -236,8 +237,8 @@ public class ScriptServiceImpl implements ScriptService {
         throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
       }
       String hash = Hex.encodeHexString(NativeScript.deserializeJson(scriptJson).getScriptHash());
-      if (script.getHash().equals(hash)) {
-        script.setVerified(true);
+      if (script.getHash().equals(hash) && StringUtils.isEmpty(scriptJson)) {
+        script.setJson(scriptJson);
         scriptRepository.save(script);
         return script.getJson();
       } else {
