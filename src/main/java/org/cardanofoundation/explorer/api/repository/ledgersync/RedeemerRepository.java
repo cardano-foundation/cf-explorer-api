@@ -55,8 +55,7 @@ public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
       + " ORDER BY re.id")
   List<TxContractProjection> findContractByTxFail(@Param("tx") Tx tx);
 
-  @Query(value = "SELECT DISTINCT(tx.id) FROM Tx tx"
-      + " JOIN Redeemer r ON r.tx = tx"
+  @Query(value = "SELECT DISTINCT(r.tx.id) FROM Redeemer r "
       + " WHERE r.scriptHash = :scriptHash")
   Page<Long> findTxIdsInteractWithContract(@Param("scriptHash") String scriptHash, Pageable pageable);
 }

@@ -96,7 +96,7 @@ public class ScriptController {
   public ResponseEntity<BaseFilterResponse<SmartContractTxResponse>> getSmartContractsTxs(
       @PathVariable @Parameter(description = "The script hash") String scriptHash,
       @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {
-          "id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
+          "tx.id"}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(
         scriptService.getSmartContractTxs(scriptHash, pagination.toPageable()));
   }
