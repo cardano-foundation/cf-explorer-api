@@ -2,8 +2,6 @@ package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.Address_;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -31,4 +29,8 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   Page<Address> findByStakeAddress(@Param("stakeAddress") String stakeAddress, Pageable pageable);
 
   List<Address> findAddressByIdIn(@Param("idList") Collection<Long> idList);
+
+  @Query(value = "SELECT addr.address FROM Address addr "
+      + "WHERE addr.paymentCred = :scriptHash")
+  List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
 }
