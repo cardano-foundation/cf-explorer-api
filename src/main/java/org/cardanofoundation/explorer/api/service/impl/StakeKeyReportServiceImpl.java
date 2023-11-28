@@ -222,6 +222,10 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
                                                                            Pageable pageable) {
     StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
     String stakeKey = stakeKeyReportHistory.getStakeKey();
+    if(Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return new BaseFilterResponse<>();
+    }
+
     fetchReward(stakeKey);
     StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest = getStakeLifeCycleFilterRequest(
         stakeKeyReportHistory);

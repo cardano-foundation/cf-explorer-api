@@ -9,12 +9,12 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegist
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.repository.explorer.PoolReportRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
@@ -31,12 +31,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +69,9 @@ public class PoolReportServiceTest {
   KafkaService kafkaService;
   @Mock
   ReportHistoryService reportHistoryService;
+
+  @Mock
+  PoolHistoryRepository poolHistoryRepository;
 
   @Mock
   RoleService roleService;
@@ -217,12 +220,12 @@ public class PoolReportServiceTest {
             .build())
         .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
-    Page<PoolReportProjection> poolReportProjections = new PageImpl<>(List.of(),
-        PageRequest.of(0, 1), 0);
-    when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(),
-        any())).thenReturn(poolReportProjections);
-    when(fetchRewardDataService.useKoios()).thenReturn(false);
-    var expect = new BaseFilterResponse<>(poolReportProjections, List.of());
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.checkPoolHistoryForPool(anySet())).thenReturn(true);
+    when(poolHistoryRepository.getPoolHistoryKoios("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj"))
+        .thenReturn(Collections.emptyList());
+
+    var expect = new BaseFilterResponse<>(Collections.emptyList(), 0, 0, 0);
 
     var response = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 1), username);
 
@@ -231,6 +234,35 @@ public class PoolReportServiceTest {
     Assertions.assertEquals(expect.getCurrentPage(), response.getCurrentPage());
     Assertions.assertEquals(expect.getTotalPages(), response.getTotalPages());
   }
+
+  @Test
+  void fetchEpochSize_shouldReturnRewardNotAvailable() {
+    Long reportId = 1L;
+    String username = "username";
+    PoolReportHistory poolReport = PoolReportHistory.builder()
+        .poolView("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
+        .isPoolSize(true)
+        .eventRegistration(true)
+        .eventDeregistration(true)
+        .eventReward(true)
+        .eventPoolUpdate(true)
+        .isFeesPaid(true)
+        .beginEpoch(300)
+        .endEpoch(410)
+        .reportHistory(ReportHistory.builder()
+                           .username(username)
+                           .storageKey("storageKey")
+                           .reportName("reportName")
+                           .status(ReportStatus.GENERATED)
+                           .type(ReportType.STAKE_KEY)
+                           .build())
+        .build();
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    var response = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 1), username);
+    Assertions.assertNull(response.getData());
+  }
+
 
   @Test
   void fetchPoolRegistration_shouldReturnResponse() {
@@ -319,10 +351,40 @@ public class PoolReportServiceTest {
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.listRewardFilter(any(), any(), any(), any())).thenReturn(
         rewardResponse);
-
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     var response = poolReportService.fetchRewardsDistribution(reportId, PageRequest.of(0, 1),
         username);
     Assertions.assertEquals(rewardResponse, response);
+  }
+
+  @Test
+  void fetchRewardsDistribution_shouldReturnRewardNotAvailable() {
+    Long reportId = 1L;
+    String username = "username";
+    PoolReportHistory poolReport = PoolReportHistory.builder()
+        .poolView("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
+        .isPoolSize(true)
+        .eventRegistration(true)
+        .eventDeregistration(true)
+        .eventReward(true)
+        .eventPoolUpdate(true)
+        .isFeesPaid(true)
+        .beginEpoch(300)
+        .endEpoch(410)
+        .reportHistory(ReportHistory.builder()
+                           .username(username)
+                           .storageKey("storageKey")
+                           .reportName("reportName")
+                           .status(ReportStatus.GENERATED)
+                           .type(ReportType.STAKE_KEY)
+                           .build())
+        .build();
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+
+    var response = poolReportService.fetchRewardsDistribution(reportId, PageRequest.of(0, 1),
+        username);
+    Assertions.assertNull(response.getData());
   }
 
   @Test
