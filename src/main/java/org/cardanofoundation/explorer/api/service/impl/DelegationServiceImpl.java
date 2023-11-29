@@ -45,6 +45,8 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateReposi
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.EpochService;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -85,6 +87,8 @@ public class DelegationServiceImpl implements DelegationService {
   private final EpochService epochService;
 
   private final AggregatePoolInfoRepository aggregatePoolInfoRepository;
+
+  private final PoolCertificateService poolCertificateService;
 
   private static final int MAX_TOTAL_ELEMENTS = 1000;
 
@@ -417,6 +421,7 @@ public class DelegationServiceImpl implements DelegationService {
 
     poolDetailResponse.setTotalBalanceOfPoolOwners(null);
 
+    poolDetailResponse.setPoolStatus(poolCertificateService.getCurrentPoolStatus(poolViewOrHash));
     return poolDetailResponse;
   }
 

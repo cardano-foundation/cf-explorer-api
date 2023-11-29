@@ -21,6 +21,7 @@ import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
+import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ public class PoolControllerTest {
 
   @MockBean
   private PoolRegistrationService poolRegistrationService;
+
+  @MockBean
+  private PoolCertificateService poolCertificateService;
 
   @MockBean
   private AuthInterceptor authInterceptor;
