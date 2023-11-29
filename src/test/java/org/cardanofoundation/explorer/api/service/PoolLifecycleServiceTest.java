@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
+import org.cardanofoundation.explorer.api.model.response.pool.PoolCertificateHistory;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
@@ -57,6 +59,9 @@ class PoolLifecycleServiceTest {
   @Mock
   private EpochRepository epochRepository;
 
+  @Mock
+  private PoolCertificateService poolCertificateService;
+
   @InjectMocks
   private PoolLifecycleServiceImpl poolLifecycleService;
 
@@ -90,17 +95,20 @@ class PoolLifecycleServiceTest {
   @Test
   void whenPoolViewIsNotExist_returnEmptyOrNull() {
     Pageable pageable = PageRequest.of(0, 10);
-    when(poolUpdateRepository.findPoolUpdateByPool("poolViewNotFound", null, null, null,
+    when(poolCertificateService.getPoolCertificateByAction("poolViewNotFound", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of());
+    when(poolCertificateService.getPoolCertificateByAction("poolViewNotFound", PoolActionType.POOL_UPDATE)).thenReturn(List.of());
+    when(poolCertificateService.getPoolCertificateByAction("poolViewNotFound", PoolActionType.POOL_DEREGISTRATION)).thenReturn(List.of());
+    when(poolUpdateRepository.findPoolUpdateByPool(Set.of(-1L), null, null, null,
         pageable)).thenReturn(
         Page.empty());
     when(poolHashRepository.getPoolInfo("poolViewNotFound")).thenReturn(null);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(69));
-    when(poolRetireRepository.getPoolDeRegistration("poolViewNotFound", null, null, null,
+    when(poolRetireRepository.getPoolDeRegistration(Set.of(-1L), null, null, null,
         pageable)).thenReturn(
         Page.empty());
-    when(poolHashRepository.getPoolRegistrationByPool("poolViewNotFound", pageable)).thenReturn(
+    when(poolHashRepository.getPoolRegistrationByPool(Set.of(-1L), pageable)).thenReturn(
         Page.empty());
-    when(poolUpdateRepository.findPoolUpdateByPool("poolViewNotFound", pageable)).thenReturn(
+    when(poolUpdateRepository.findPoolUpdateByPool(Set.of(-1L), pageable)).thenReturn(
         Page.empty());
     Assertions.assertEquals(0,
         poolLifecycleService.registration("poolViewNotFound", null, null, null, pageable)
@@ -133,11 +141,15 @@ class PoolLifecycleServiceTest {
     when(projection.getMargin()).thenReturn(1.0);
     when(projection.getTxHash()).thenReturn(
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
+    PoolCertificateHistory poolCertificateHistory = new PoolCertificateHistory();
+    poolCertificateHistory.setPoolUpdateId(111L);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of(poolCertificateHistory));
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of(poolCertificateHistory));
     when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, null, null,
+        Set.of(111L), null, null, null,
         pageable)).thenReturn(new PageImpl<>(List.of(projection)));
     when(poolUpdateRepository.findPoolRegistrationByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, null, null,
+        Set.of(111L), null, null, null,
         pageable)).thenReturn(new PageImpl<>(List.of(projection)));
     Assertions.assertEquals(1,
         poolLifecycleService.registration(
@@ -152,8 +164,10 @@ class PoolLifecycleServiceTest {
   @Test
   void whenPoolViewIsExistAndTxHashIsNotExist_returnEmptyPage() {
     Pageable pageable = PageRequest.of(0, 10);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of());
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of());
     when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", "txHashNotFound", null,
+        Set.of(-1L), "txHashNotFound", null,
         null,
         pageable)).thenReturn(
         Page.empty());
@@ -179,12 +193,16 @@ class PoolLifecycleServiceTest {
     when(projection.getMargin()).thenReturn(1.0);
     when(projection.getTxHash()).thenReturn(
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
+    PoolCertificateHistory poolCertificateHistory = new PoolCertificateHistory();
+    poolCertificateHistory.setPoolUpdateId(111L);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of(poolCertificateHistory));
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of(poolCertificateHistory));
     when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        Set.of(111L),
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", null, null,
         pageable)).thenReturn(new PageImpl<>(List.of(projection)));
     when(poolUpdateRepository.findPoolRegistrationByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        Set.of(111L),
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", null, null,
         pageable)).thenReturn(new PageImpl<>(List.of(projection)));
     Assertions.assertEquals(1,
@@ -205,8 +223,10 @@ class PoolLifecycleServiceTest {
     Pageable pageable = PageRequest.of(0, 10);
     Timestamp fromDate = Timestamp.valueOf("2023-01-01 00:00:00");
     Timestamp toDate = Timestamp.valueOf("2023-04-01 00:00:00");
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of());
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of());
     when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, fromDate,
+        Set.of(-1L), null, fromDate,
         toDate,
         pageable)).thenReturn(
         Page.empty());
@@ -231,13 +251,17 @@ class PoolLifecycleServiceTest {
     when(projection.getMargin()).thenReturn(1.0);
     when(projection.getTxHash()).thenReturn(
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
+    PoolCertificateHistory poolCertificateHistory = new PoolCertificateHistory();
+    poolCertificateHistory.setPoolUpdateId(111L);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of(poolCertificateHistory));
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of(poolCertificateHistory));
     when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, fromDate,
+        Set.of(111L), null, fromDate,
         toDate,
         pageable)).thenReturn(
         new PageImpl<>(List.of(projection)));
     when(poolUpdateRepository.findPoolRegistrationByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", null, fromDate,
+        Set.of(111L), null, fromDate,
         toDate,
         pageable)).thenReturn(new PageImpl<>(List.of(projection)));
     Assertions.assertEquals(1, poolLifecycleService.registration(
@@ -254,8 +278,10 @@ class PoolLifecycleServiceTest {
     Pageable pageable = PageRequest.of(0, 10);
     Timestamp fromDate = Timestamp.valueOf("2023-01-01 00:00:00");
     Timestamp toDate = Timestamp.valueOf("2023-04-01 00:00:00");
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of());
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of());
     when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        Set.of(-1L),
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", fromDate,
         toDate,
         pageable)).thenReturn(
@@ -283,14 +309,18 @@ class PoolLifecycleServiceTest {
     when(projection.getMargin()).thenReturn(1.0);
     when(projection.getTxHash()).thenReturn(
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
+    PoolCertificateHistory poolCertificateHistory = new PoolCertificateHistory();
+    poolCertificateHistory.setPoolUpdateId(111L);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of(poolCertificateHistory));
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of(poolCertificateHistory));
     when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        Set.of(111L),
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", fromDate,
         toDate,
         pageable)).thenReturn(
         new PageImpl<>(List.of(projection)));
     when(poolUpdateRepository.findPoolRegistrationByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        Set.of(111L),
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e", fromDate,
         toDate,
         pageable)).thenReturn(new PageImpl<>(List.of(projection)));
@@ -310,8 +340,10 @@ class PoolLifecycleServiceTest {
     Pageable pageable = PageRequest.of(0, 10);
     Timestamp fromDate = Timestamp.valueOf("2023-01-01 00:00:00");
     Timestamp toDate = Timestamp.valueOf("2023-04-01 00:00:00");
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of());
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of());
     when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", "txHashNotForm", fromDate,
+        Set.of(-1L), "txHashNotForm", fromDate,
         toDate,
         pageable)).thenReturn(
         Page.empty());
@@ -670,8 +702,10 @@ class PoolLifecycleServiceTest {
     when(retireProjection.getTxHash()).thenReturn(
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
     when(retireProjection.getFee()).thenReturn(BigInteger.TEN);
-    when(poolRetireRepository.getPoolDeRegistration(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+    PoolCertificateHistory poolCertificateHistory = new PoolCertificateHistory();
+    poolCertificateHistory.setPoolRetireId(111L);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_DEREGISTRATION)).thenReturn(List.of(poolCertificateHistory));
+    when(poolRetireRepository.getPoolDeRegistration(Set.of(111L),
         null, null, null, pageable)).thenReturn(new PageImpl<>(List.of(retireProjection)));
     PoolInfoProjection projection = Mockito.mock(PoolInfoProjection.class);
     when(projection.getPoolView()).thenReturn(
@@ -705,8 +739,10 @@ class PoolLifecycleServiceTest {
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
     when(registrationProjection.getFee()).thenReturn(BigInteger.TEN);
     when(registrationProjection.getDeposit()).thenReturn(BigInteger.valueOf(500));
-    when(poolHashRepository.getPoolRegistrationByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", pageable)).thenReturn(
+    PoolCertificateHistory poolCertificateHistory = new PoolCertificateHistory();
+    poolCertificateHistory.setPoolUpdateId(111L);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of(poolCertificateHistory));
+    when(poolHashRepository.getPoolRegistrationByPool(Set.of(111L), pageable)).thenReturn(
         new PageImpl<>(List.of(registrationProjection)));
     StakeKeyProjection projection = Mockito.mock(StakeKeyProjection.class);
     when(projection.getPoolUpdateId()).thenReturn(69L);
@@ -742,8 +778,10 @@ class PoolLifecycleServiceTest {
     when(projection.getVrfKey()).thenReturn(
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
     when(projection.getPoolUpdateId()).thenReturn(69L);
-    when(poolUpdateRepository.findPoolUpdateByPool(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", pageable)).thenReturn(
+    PoolCertificateHistory poolCertificateHistory = new PoolCertificateHistory();
+    poolCertificateHistory.setPoolUpdateId(111L);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_UPDATE)).thenReturn(List.of(poolCertificateHistory));
+    when(poolUpdateRepository.findPoolUpdateByPool(Set.of(111L), pageable)).thenReturn(
         new PageImpl<>(List.of(projection)));
     when(poolUpdateRepository.findOwnerAccountByPoolUpdate(69L)).thenReturn(
         List.of("stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p"));
@@ -866,8 +904,11 @@ class PoolLifecycleServiceTest {
     when(retireProjection.getTxHash()).thenReturn(
         "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
     when(retireProjection.getFee()).thenReturn(BigInteger.TEN);
+    PoolCertificateHistory poolCertificateHistory = new PoolCertificateHistory();
+    poolCertificateHistory.setPoolRetireId(111L);
+    when(poolCertificateService.getPoolCertificateByAction("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", PoolActionType.POOL_DEREGISTRATION)).thenReturn(List.of(poolCertificateHistory));
     when(poolRetireRepository.getPoolDeRegistration(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s",
+        Set.of(111L),
         null, null, null, pageable)).thenReturn(new PageImpl<>(List.of(retireProjection)));
     PoolInfoProjection projection = Mockito.mock(PoolInfoProjection.class);
     when(projection.getPoolView()).thenReturn(
