@@ -244,6 +244,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(String stakeKey, Pageable pageable) {
     Page<StakeWithdrawalProjection> withdrawalHistories
         = withdrawalRepository.getWithdrawalByAddress(stakeKey, pageable);
+
+    if(withdrawalHistories.isEmpty() && Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return new BaseFilterResponse<>();
+    }
+
     return new BaseFilterResponse<>(withdrawalHistories);
   }
 
