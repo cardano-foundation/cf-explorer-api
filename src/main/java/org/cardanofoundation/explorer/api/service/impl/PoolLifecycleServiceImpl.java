@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,7 +13,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.PoolCertificateHistory;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolInfoResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
@@ -23,8 +24,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.Registra
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochRewardProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
@@ -33,18 +32,15 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpd
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,17 +58,13 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
 
   private final PoolUpdateRepository poolUpdateRepository;
 
-  private final RewardRepository rewardRepository;
-
   private final PoolRetireRepository poolRetireRepository;
 
   private final EpochRepository epochRepository;
 
-  private final FetchRewardDataService fetchRewardDataService;
-
-  private final PoolInfoRepository poolInfoRepository;
-
   private final RedisTemplate<String, Object> redisTemplate;
+
+  private final PoolCertificateService poolCertificateService;
 
   @Value("${application.network}")
   private String network;
@@ -186,8 +178,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     if (Objects.nonNull(txHash) && txHash.isBlank()) {
       txHash = null;
     }
+    List<PoolCertificateHistory> poolRetire = poolCertificateService.getPoolCertificateByAction(
+        poolView, PoolActionType.POOL_DEREGISTRATION);
     Page<PoolDeRegistrationProjection> projections = poolRetireRepository.getPoolDeRegistration(
-        poolView,
+        poolRetire.isEmpty() ? Set.of(-1L)
+            : poolRetire.stream().map(PoolCertificateHistory::getPoolRetireId).collect(
+                Collectors.toSet()),
         txHash, fromTimestamp, toTimestamp, pageable);
     List<DeRegistrationResponse> deRegistrations = new ArrayList<>();
     if (Objects.nonNull(projections)) {
@@ -216,8 +212,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       Pageable pageable) {
     BaseFilterResponse<TabularRegisResponse> res = new BaseFilterResponse<>();
     List<TabularRegisResponse> tabularRegisList = new ArrayList<>();
+    List<PoolCertificateHistory> poolRegistration = poolCertificateService.getPoolCertificateByAction(
+        poolViewOrHash, PoolActionType.POOL_REGISTRATION);
     Page<PoolRegistrationProjection> projection = poolHashRepository.getPoolRegistrationByPool(
-        poolViewOrHash, pageable);
+        poolRegistration.isEmpty() ? Set.of(-1L)
+            : poolRegistration.stream().map(PoolCertificateHistory::getPoolUpdateId).collect(
+                Collectors.toSet()), pageable);
     if (Objects.nonNull(projection)) {
       Set<Long> poolUpdateIds = new HashSet<>();
       projection.stream().forEach(tabularRegis -> {
@@ -244,8 +244,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       Pageable pageable) {
     BaseFilterResponse<PoolUpdateDetailResponse> res = new BaseFilterResponse<>();
     List<PoolUpdateDetailResponse> poolUpdateList = new ArrayList<>();
+    List<PoolCertificateHistory> poolUpdateCert = poolCertificateService.getPoolCertificateByAction(
+        poolViewOrHash, PoolActionType.POOL_UPDATE);
     Page<PoolUpdateDetailProjection> projection = poolUpdateRepository.findPoolUpdateByPool(
-        poolViewOrHash, pageable);
+        poolUpdateCert.isEmpty() ? Set.of(-1L)
+            : poolUpdateCert.stream().map(PoolCertificateHistory::getPoolUpdateId).collect(
+                Collectors.toSet()), pageable);
     if (Objects.nonNull(projection)) {
       projection.stream().forEach(poolUpdate -> {
         PoolUpdateDetailResponse poolUpdateRes = new PoolUpdateDetailResponse(poolUpdate);
@@ -311,10 +315,20 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     }
     Page<PoolUpdateProjection> projection;
     if (type == 0) {
-      projection = poolUpdateRepository.findPoolRegistrationByPool(poolViewOrHash,
+      List<PoolCertificateHistory> poolRegistration = poolCertificateService.getPoolCertificateByAction(
+          poolViewOrHash, PoolActionType.POOL_REGISTRATION);
+      projection = poolUpdateRepository.findPoolRegistrationByPool(
+          poolRegistration.isEmpty() ? Set.of(-1L)
+              : poolRegistration.stream().map(PoolCertificateHistory::getPoolUpdateId).collect(
+                  Collectors.toSet()),
           txHash, fromTimestamp, toTimestamp, pageable);
     } else {
-      projection = poolUpdateRepository.findPoolUpdateByPool(poolViewOrHash,
+      List<PoolCertificateHistory> poolUpdate = poolCertificateService.getPoolCertificateByAction(
+          poolViewOrHash, PoolActionType.POOL_UPDATE);
+      projection = poolUpdateRepository.findPoolUpdateByPool(
+          poolUpdate.isEmpty() ? Set.of(-1L)
+              : poolUpdate.stream().map(PoolCertificateHistory::getPoolUpdateId).collect(
+                  Collectors.toSet()),
           txHash, fromTimestamp, toTimestamp, pageable);
     }
     List<PoolUpdateResponse> poolUpdateResList = new ArrayList<>();

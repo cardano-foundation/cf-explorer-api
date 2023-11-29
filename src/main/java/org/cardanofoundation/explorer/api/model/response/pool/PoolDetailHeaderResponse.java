@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.*;
+
+import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
+import org.cardanofoundation.explorer.api.common.enumeration.PoolStatus;
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.AggregatePoolInfo;
@@ -65,6 +68,7 @@ public class PoolDetailHeaderResponse implements Serializable {
   private BigInteger totalBalanceOfPoolOwners;
 
   private Timestamp lastUpdate;
+  private PoolStatus poolStatus;
 
   public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail, AggregatePoolInfo aggregatePoolInfo) {
     this.poolName = poolDetail.getPoolName();
