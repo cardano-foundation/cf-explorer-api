@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -849,13 +850,17 @@ public class TxServiceImpl implements TxService {
         tx);
     Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputMap = addressInputInfo.stream()
         .collect(Collectors.groupingBy(
-            txOutMapper::fromAddressInputOutput
+            txOutMapper::fromAddressInputOutput,
+            LinkedHashMap::new,
+            Collectors.toList()
         ));
     List<AddressInputOutputProjection> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(
         tx);
     Map<TxOutResponse, List<AddressInputOutputProjection>> addressOutputMap = addressOutputInfo.stream()
         .collect(Collectors.groupingBy(
-            txOutMapper::fromAddressInputOutput
+            txOutMapper::fromAddressInputOutput,
+            LinkedHashMap::new,
+            Collectors.toList()
         ));
 
     //Get metadata
