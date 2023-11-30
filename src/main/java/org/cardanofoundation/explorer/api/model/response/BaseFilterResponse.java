@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @Getter
 @Setter
@@ -56,5 +58,12 @@ public class BaseFilterResponse<T> implements Serializable {
     this.isDataOverSize = isDataOverSize;
   }
 
-
+  public static <T> Page<T> getPageImpl(List<T> lst, Pageable pageable) {
+    final int start = (int) pageable.getOffset();
+    final int end = Math.min((start + pageable.getPageSize()), lst.size());
+    if(start > lst.size()) {
+      return Page.empty();
+    }
+    return new PageImpl<>(lst.subList(start, end), pageable, lst.size());
+  }
 }

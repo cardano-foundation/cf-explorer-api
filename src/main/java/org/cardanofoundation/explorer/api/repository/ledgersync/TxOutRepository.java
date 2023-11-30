@@ -42,7 +42,8 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN StakeAddress stake ON txOut.stakeAddress = stake "
       + " LEFT JOIN MaTxOut maTxOut ON maTxOut.txOut = txOut"
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
-      + " WHERE txOut.tx = :tx")
+      + " WHERE txOut.tx = :tx"
+      + " ORDER BY txOut.index ASC")
   List<AddressInputOutputProjection> getTxAddressOutputInfo(@Param("tx") Tx tx);
 
 
@@ -56,7 +57,8 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " LEFT JOIN StakeAddress stake ON txOut.stakeAddress = stake"
       + " LEFT JOIN MaTxOut maTxOut ON maTxOut.txOut = txOut"
       + " LEFT JOIN MultiAsset asset ON maTxOut.ident = asset"
-      + " WHERE txIn.txInput = :tx")
+      + " WHERE txIn.txInput = :tx"
+      + " ORDER BY txIn.id ASC")
   List<AddressInputOutputProjection> getTxAddressInputInfo(@Param("tx") Tx tx);
 
   @Query("SELECT txOut.id as txOutId, txOut.address as address, d.hash as datumHashOut, d.bytes as datumBytesOut"
@@ -85,10 +87,6 @@ public interface TxOutRepository extends JpaRepository<TxOut, Long> {
       + " WHERE txOut.paymentCred IN :scriptHashList")
   List<SmartContractProjection> findPaymentAssociatedAddressByHashIn(
       @Param("scriptHashList") List<String> scriptHashList);
-
-  @Query(value = "SELECT DISTINCT(txo.address) FROM TxOut txo "
-      + "WHERE txo.paymentCred = :scriptHash")
-  List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
 
   @Query("SELECT COALESCE(sum(txOut.value), 0) "
       + "FROM TxOut txOut "
