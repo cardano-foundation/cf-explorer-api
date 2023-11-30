@@ -28827,16 +28827,16 @@
                       "listen": "prerequest",
                       "script": {
                         "exec": [
-                          "pm.environment.set(\"pool-report_reportName\", \"Report1_pool1mv9jm887f4gdpr0f5p8rerewjsdgvd29lt2awtdnmj3ggkq973a\");\r",
-                          "pm.environment.set(\"pool-report_poolId\", \"pool1mv9jm887f4gdpr0f5p8rerewjsdgvd29lt2awtdnmj3ggkq973a\");\r",
-                          "pm.environment.set(\"pool-report_isPoolSize\",true);\r",
-                          "pm.environment.set(\"pool-report_isFeesPaid\", true);\r",
-                          "pm.environment.set(\"pool-report_eventRegistration\", true);\r",
-                          "pm.environment.set(\"pool-report_eventDeregistration\", true);\r",
-                          "pm.environment.set(\"pool-report_eventReward\", true);\r",
-                          "pm.environment.set(\"pool-report_eventPoolUpdate\", true);\r",
-                          "pm.environment.set(\"pool-report_epochRanges_first\", \"0\" );\r",
-                          "pm.environment.set(\"pool-report_epochRanges_last\", \"300\" );"
+                          "pm.environment.set(\"pool_report_reportName\", \"Report1_pool1mv9jm887f4gdpr0f5p8rerewjsdgvd29lt2awtdnmj3ggkq973a\");\r",
+                          "pm.environment.set(\"pool_report_poolId\", \"pool1mv9jm887f4gdpr0f5p8rerewjsdgvd29lt2awtdnmj3ggkq973a\");\r",
+                          "pm.environment.set(\"pool_report_isPoolSize\",true);\r",
+                          "pm.environment.set(\"pool_report_isFeesPaid\", true);\r",
+                          "pm.environment.set(\"pool_report_eventRegistration\", true);\r",
+                          "pm.environment.set(\"pool_report_eventDeregistration\", true);\r",
+                          "pm.environment.set(\"pool_report_eventReward\", true);\r",
+                          "pm.environment.set(\"pool_report_eventPoolUpdate\", true);\r",
+                          "pm.environment.set(\"pool_report_epochRanges_first\", \"0\" );\r",
+                          "pm.environment.set(\"pool_report_epochRanges_last\", \"300\" );"
                         ],
                         "type": "text/javascript"
                       }
@@ -28875,7 +28875,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\r\n  \"reportName\": \"{{pool-report_reportName}}\",\r\n  \"poolId\": \"{{pool-report_poolId}}\",\r\n  \"isPoolSize\": \"{{pool-report_isPoolSize}}\",\r\n  \"isFeesPaid\": \"{{pool-report_isFeesPaid}}\",\r\n  \"eventRegistration\": \"{{pool-report_eventRegistration}}\",\r\n  \"eventDeregistration\": \"{{pool-report_eventDeregistration}}\",\r\n  \"eventReward\": \"{{pool-report_eventReward}}\",\r\n  \"eventPoolUpdate\": \"{{pool-report_eventPoolUpdate}}\",\r\n  \"epochRanges\": [{{pool-report_epochRanges_first}}, {{pool-report_epochRanges_last}}]\r\n}",
+                      "raw": "{\r\n  \"reportName\": \"{{pool_report_reportName}}\",\r\n  \"poolId\": \"{{pool_report_poolId}}\",\r\n  \"isPoolSize\": \"{{pool_report_isPoolSize}}\",\r\n  \"isFeesPaid\": \"{{pool_report_isFeesPaid}}\",\r\n  \"eventRegistration\": \"{{pool_report_eventRegistration}}\",\r\n  \"eventDeregistration\": \"{{pool_report_eventDeregistration}}\",\r\n  \"eventReward\": \"{{pool_report_eventReward}}\",\r\n  \"eventPoolUpdate\": \"{{pool_report_eventPoolUpdate}}\",\r\n  \"epochRanges\": [{{pool_report_epochRanges_first}}, {{pool_report_epochRanges_last}}]\r\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
