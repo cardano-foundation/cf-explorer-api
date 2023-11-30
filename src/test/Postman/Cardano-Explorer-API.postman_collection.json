@@ -34691,7 +34691,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/api/v1/pool-lifecycle/registration-list?poolView={{pool-report_poolView}}&size=1",
+                  "raw": "{{baseUrl}}/api/v1/pool-lifecycle/registration-list?poolView={{pool_report_poolView}}&size=1",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -34704,7 +34704,7 @@
                   "query": [
                     {
                       "key": "poolView",
-                      "value": "{{pool-report_poolView}}",
+                      "value": "{{pool_report_poolView}}",
                       "description": "(Required)(From api: detail Pool Report - v1/pool-report/detail/{{pool-report_reportId}})"
                     },
                     {
@@ -34775,7 +34775,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/api/v1/pool-lifecycle/registration-list?poolView={{pool-report_poolView}}&size=-1",
+                  "raw": "{{baseUrl}}/api/v1/pool-lifecycle/registration-list?poolView={{pool_report_poolView}}&size=-1",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -34788,7 +34788,7 @@
                   "query": [
                     {
                       "key": "poolView",
-                      "value": "{{pool-report_poolView}}",
+                      "value": "{{pool_report_poolView}}",
                       "description": "(Required)(From api: detail Pool Report - v1/pool-report/detail/{{pool-report_reportId}})"
                     },
                     {
