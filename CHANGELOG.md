@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.5.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.35...v0.5.0) (2023-11-30)
+
+
+### Features
+
+* MET 1727 pool certificate history ([d4aaf19](https://github.com/cardano-foundation/cf-explorer-api/commit/d4aaf198a516f533591e030776f1d2b52afd85c2))
+* MET 1739 multiple txs update protocol params ([5eca4b2](https://github.com/cardano-foundation/cf-explorer-api/commit/5eca4b2b42b5bd3f729e99c0e43059149e37210c))
+* move metadata utils from common to api ([9c2edba](https://github.com/cardano-foundation/cf-explorer-api/commit/9c2edbaefb6a5c4ad41f31687a355fef313f0327))
+
+
+### Bug Fixes
+
+* current pool status is wrong ([4fb4435](https://github.com/cardano-foundation/cf-explorer-api/commit/4fb4435727fe7fcb7f99178d84b6bb9c0272ed75))
+* define pool retired, reactive, update ([715aa39](https://github.com/cardano-foundation/cf-explorer-api/commit/715aa39fe5b0aab2cd6e378ff8f14ab69c08092d))
+* edit package ([d473013](https://github.com/cardano-foundation/cf-explorer-api/commit/d4730136f469a32a95229ce7131fb66976669772))
+* improve perf smart contract detail api ([23d2128](https://github.com/cardano-foundation/cf-explorer-api/commit/23d2128f26561f16d515fd1c5d78ccc4a1789369))
+* MET-1805 update logic verify native script ([40ddf6e](https://github.com/cardano-foundation/cf-explorer-api/commit/40ddf6e3ddaceb91fff7aa49ae86088b31296188))
+* MET-1819 update order of UTxOs in tx detail ([d0bbf8f](https://github.com/cardano-foundation/cf-explorer-api/commit/d0bbf8f8372009dc38676af506033750ab8bdcd1))
+* missing genesis signer key for instantaneous reward txs ([b23b4de](https://github.com/cardano-foundation/cf-explorer-api/commit/b23b4dea55f40b877dced8a6b82168e09e16b10f))
+* model package ([1281cee](https://github.com/cardano-foundation/cf-explorer-api/commit/1281cee07607e7d94e6eb9d2bc1e02e81e34303c))
+* pool registration + update incorrect ([584b481](https://github.com/cardano-foundation/cf-explorer-api/commit/584b4818d741bf1b7b9e982c1c17e309b158cd8a))
+* prepare the incorrect value for the genesis key in shelly genesis file ([c5a8503](https://github.com/cardano-foundation/cf-explorer-api/commit/c5a8503cf89662554c90c76b040851002d113f77))
+* unit test ([56ca0db](https://github.com/cardano-foundation/cf-explorer-api/commit/56ca0db5a4a5b94e66c7731203ee3f23989ddfcb))
+* update redis standalone and cluster to synchronize with other services ([2471018](https://github.com/cardano-foundation/cf-explorer-api/commit/24710180c39ded65123aa13cb148286e4d32dfee))
+
 ## [0.3.35](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.34...v0.3.35) (2023-11-08)
 
 
