@@ -138,15 +138,13 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value =
       "SELECT pu.id AS poolUpdateId, pu.pledge AS pledge, pu.margin AS margin, pu.vrfKeyHash AS vrfKey, pu.fixedCost AS cost, tx.hash AS txHash, bk.time AS time, ep.poolDeposit AS deposit, tx.fee AS fee, sa.view AS rewardAccount "
-          + "FROM PoolHash ph "
-          + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
+          + "FROM PoolUpdate pu "
           + "JOIN Tx tx ON pu.registeredTx.id = tx.id "
           + "JOIN Block bk ON tx.block.id  = bk.id "
-          + "JOIN EpochParam ep ON ep.epochNo = bk.epochNo AND tx.deposit IS NOT NULL AND tx.deposit >= ep.poolDeposit "
+          + "JOIN EpochParam ep ON ep.epochNo = bk.epochNo "
           + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-          + "WHERE (ph.view = :poolViewOrHash "
-          + "OR ph.hashRaw = :poolViewOrHash) ")
-  Page<PoolRegistrationProjection> getPoolRegistrationByPool(@Param("poolViewOrHash") String poolViewOrHash,
+          + "WHERE pu.id IN :poolCertificateIds ")
+  Page<PoolRegistrationProjection> getPoolRegistrationByPool(@Param("poolCertificateIds") Set<Long> poolCertificateIds,
                                                              Pageable pageable);
 
   @Query(value = "SELECT ph.id AS id, pod.poolName AS poolName, ph.hashRaw AS poolId, ph.view AS poolView, pod.iconUrl as icon "
