@@ -873,13 +873,14 @@ public class TxServiceImpl implements TxService {
     List<String> tokenMintedByContract = addressTokenProjections.stream()
         .map(TokenAddressResponse::getFingerprint).toList();
 
-    List<String> executionOutputs = txResponse.getUTxOs()
-        .getOutputs()
-        .stream()
-        .filter(txOutResponse -> !Collections.disjoint(tokenMintedByContract, txOutResponse.getTokens()
-            .stream()
-            .map(TxMintingResponse::getAssetId)
-            .toList()))
+    List<String> executionOutputs = Stream.concat(
+            txResponse.getUTxOs().getInputs().stream(),
+            txResponse.getUTxOs().getOutputs().stream())
+        .filter(
+            txOutResponse -> !Collections.disjoint(tokenMintedByContract, txOutResponse.getTokens()
+                .stream()
+                .map(TxMintingResponse::getAssetId)
+                .toList()))
         .map(TxOutResponse::getAddress)
         .toList();
 
