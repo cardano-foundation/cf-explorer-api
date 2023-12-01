@@ -92,7 +92,7 @@ public class CommonConstant {
   public static final String[] FIELD_TYPE = {"string", "string | raw bytes", "uri | array",
       "image/<mime_sub_type>", "string | array", "mime_type", "1 or 2", "uri", "array",
       "raw bytes", "Single / Multiple", "uint", "string: iso8601 duration format", "array: string",
-      "bool", "map: <string, string>"};
+      "bool", "map: <string, string>", "1 or 2,v1 or v2"};
 
 
   public static int hashCode(Object... a) {
