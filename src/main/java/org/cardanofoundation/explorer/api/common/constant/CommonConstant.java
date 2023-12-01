@@ -94,6 +94,7 @@ public class CommonConstant {
       "raw bytes", "Single / Multiple", "uint", "string: iso8601 duration format", "array: string",
       "bool", "map: <string, string>"};
 
+
   public static int hashCode(Object... a) {
     if (a == null) {
       return -BigInteger.ONE.intValue();

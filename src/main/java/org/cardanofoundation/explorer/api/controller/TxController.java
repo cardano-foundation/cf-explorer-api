@@ -75,13 +75,4 @@ public class TxController {
       @PathVariable("range") @Parameter(description = "Type for chart") TxChartRange range) {
     return ResponseEntity.ok(txService.getTransactionChartByRange(range));
   }
-
-  @GetMapping("/{hash}/contract")
-  @LogMessage
-  @Operation(summary = "Get tx contract detail by txHash and contract address(optional) ")
-  public ResponseEntity<List<ContractResponse>> getTxContractDetailByTxHash(
-      @PathVariable("hash") @Parameter(description = "The hash identifier of the transaction.") String hash,
-      @RequestParam(required = false) @Parameter(description = "The view of contract") String address) {
-    return ResponseEntity.ok(txService.getTxContractDetail(hash, address));
-  }
 }
