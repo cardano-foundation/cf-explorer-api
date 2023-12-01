@@ -38,8 +38,8 @@ public class MetadataCIP60Utils {
           for (Entry<?, ?> assetEntry : assetMap.entrySet()) {
             TokenCIP token = new TokenCIP();
             Map<Object, Object> assetValMap = (Map<Object, Object>) assetEntry.getValue();
-            int musicVersion = (int) assetValMap.get(
-                MetadataField.MUSIC_METADATA_VERSION.getName());
+            int musicVersion = detectMusicVersion(assetValMap.get(
+                MetadataField.MUSIC_METADATA_VERSION.getName()));
             int version = MetadataCIP25Utils.detectVersion(
                 metadataMap.get(MetadataField.VERSION.getName()));
             //require
@@ -50,7 +50,8 @@ public class MetadataCIP60Utils {
                 MetadataCIP25Utils.name(assetValMap.get(MetadataField.NAME.getName()), version));
             requireProperties.add(
                 MetadataCIP25Utils.image(assetValMap.get(MetadataField.IMAGE.getName()), version));
-            requireProperties.add(musicMetadataVersion(musicVersion));
+            requireProperties.add(musicMetadataVersion(musicVersion, assetValMap.get(
+                MetadataField.MUSIC_METADATA_VERSION.getName())));
             requireProperties.add(
                 releaseType(assetValMap.get(MetadataField.RELEASE_TYPE.getName())));
             token.setRequireProperties(requireProperties);
@@ -93,6 +94,19 @@ public class MetadataCIP60Utils {
     }
     metadataCIP.setTokenMap(tokenMap);
     return metadataCIP;
+  }
+
+  public static int detectMusicVersion(Object musicVersion) {
+    if (Objects.isNull(musicVersion)) {
+      return 0;
+    } else if (musicVersion instanceof String musicVersionStr && musicVersionStr.equals("v1")) {
+      return 1;
+    } else if (musicVersion instanceof String musicVersionStr && musicVersionStr.equals("v2")) {
+      return 2;
+    } else if (musicVersion instanceof Integer musicVersionInt) {
+      return musicVersionInt;
+    }
+    return 0;
   }
 
   private static void setFieldsWithMusicVersionOne(Map<Object, Object> assetValMap,
@@ -1013,10 +1027,10 @@ public class MetadataCIP60Utils {
                 "Single", "Multiple").contains(releaseTypeStr)).build();
   }
 
-  private static BaseProperty musicMetadataVersion(int version) {
-    return BaseProperty.builder().value(version).format(CommonConstant.FIELD_TYPE[6])
+  private static BaseProperty musicMetadataVersion(int musicVersion, Object originMusicVersion) {
+    return BaseProperty.builder().value(originMusicVersion).format(CommonConstant.FIELD_TYPE[16])
         .property(MetadataField.MUSIC_METADATA_VERSION.getName()).index("5")
-        .valid(version == 1 || version == 2)
+        .valid(musicVersion == 1 || musicVersion == 2)
         .build();
   }
 
