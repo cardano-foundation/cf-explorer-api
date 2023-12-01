@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
-import org.cardanofoundation.explorer.api.model.metadatastandard.cip25.MetadataCIP25;
+import org.cardanofoundation.explorer.api.model.metadatastandard.cip.MetadataCIP;
 
 @Getter
 @Setter
@@ -26,5 +26,6 @@ public class TokenResponse {
   private Timestamp tokenLastActivity;
   private TokenType tokenType;
   private String metadataJson;
-  private MetadataCIP25 metadataCIP25;
+  private MetadataCIP metadataCIP25;
+  private MetadataCIP metadataCIP60;
 }
