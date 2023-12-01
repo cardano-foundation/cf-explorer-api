@@ -35,7 +35,8 @@ import org.cardanofoundation.explorer.api.model.response.tx.*;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
-import org.cardanofoundation.explorer.api.util.MetadataStandardUtils;
+import org.cardanofoundation.explorer.api.util.MetadataCIP25Utils;
+import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -568,12 +569,14 @@ public class TxServiceImpl implements TxService {
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
         txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
-            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).metadataCIP25(
-                MetadataStandardUtils.metadataStandardCIP25(txMetadata.getJson())).build()).toList();
-    if(!CollectionUtils.isEmpty(txMetadataList)) {
+            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson())
+                .metadataCIP25(
+                    MetadataCIP25Utils.standard(txMetadata.getJson()))
+                .metadataCIP60(MetadataCIP60Utils.standard(txMetadata.getJson())).build()).toList();
+    if (!CollectionUtils.isEmpty(txMetadataList)) {
       txResponse.setMetadata(txMetadataList);
     }
-    if(Objects.nonNull(tx.getTxMetadataHash())) {
+    if (Objects.nonNull(tx.getTxMetadataHash())) {
       txResponse.setMetadataHash(tx.getTxMetadataHash().getHash());
     }
   }
