@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import java.util.Set;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCertificateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
@@ -39,27 +41,25 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
   @Query(value =
       "SELECT tx.fee AS fee, pr.retiringEpoch AS retiringEpoch, tx.hash AS txHash, bk.time AS time, "
           + "CASE "
-              + "WHEN tx.id = (SELECT max(pr1.announcedTx.id) FROM PoolRetire pr1 WHERE pr1.poolHash.id = ph.id AND pr.retiringEpoch = pr1.retiringEpoch) THEN TRUE "
+              + "WHEN tx.id = (SELECT max(pr1.announcedTx.id) FROM PoolRetire pr1 WHERE pr1.announcedTx.id = tx.id AND pr.retiringEpoch = pr1.retiringEpoch) THEN TRUE "
               + "ELSE FALSE "
           + "END AS refundFlag "
           + "FROM PoolRetire pr "
-          + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
           + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
           + "JOIN Block bk ON tx.block.id = bk.id "
-          + "WHERE ph.view = :poolView "
+          + "WHERE pr.id IN :poolRetiredIds "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ",
       countQuery = "SELECT pr.id "
           + "FROM PoolRetire pr "
-          + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
           + "JOIN Tx tx ON pr.announcedTx.id  = tx.id "
           + "JOIN Block bk ON tx.block.id = bk.id "
-          + "WHERE ph.view = :poolView "
+          + "WHERE pr.id IN :poolRetiredIds "
           + "AND (:txHash IS NULL OR tx.hash = :txHash) "
           + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
           + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate)")
-  Page<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("poolView") String poolView,
+  Page<PoolDeRegistrationProjection> getPoolDeRegistration(@Param("poolRetiredIds") Set<Long> poolRetiredIds,
                                                            @Param("txHash") String txHash, @Param("fromDate") Timestamp fromDate,
                                                            @Param("toDate") Timestamp toDate, Pageable pageable);
 
@@ -71,4 +71,28 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
   List<Integer> findByPoolView(@Param("poolView") String poolView);
 
   Boolean existsByPoolHash(@Param("poolHash") PoolHash poolHash);
+
+  @Query(value =
+      "SELECT tx.id as txId, tx.hash as txHash, b.epochNo as txEpochNo,"
+          + "pr.retiringEpoch as certEpochNo, pr.certIndex as certIndex, pr.id as poolRetireId, "
+          + "b.time as blockTime, b.blockNo as blockNo, b.epochSlotNo as epochSlotNo, b.slotNo as slotNo "
+          + "FROM PoolRetire pr "
+          + "JOIN Tx tx on pr.announcedTx = tx "
+          + "JOIN Block b on tx.block = b "
+          + "WHERE pr.poolHash.view = :poolViewOrHash "
+          + "OR pr.poolHash.hashRaw = :poolViewOrHash ")
+  List<PoolCertificateProjection> getPoolRetireByPoolViewOrHash(@Param("poolViewOrHash") String poolViewOrHash);
+
+  @Query(value =
+      "SELECT tx.id as txId, tx.hash as txHash, b.epochNo as txEpochNo,"
+          + "pr.retiringEpoch as certEpochNo, pr.certIndex as certIndex, pr.id as poolRetireId, "
+          + "b.time as blockTime, b.blockNo as blockNo, b.epochSlotNo as epochSlotNo, b.slotNo as slotNo "
+          + "FROM PoolRetire pr "
+          + "JOIN Tx tx on pr.announcedTx = tx "
+          + "JOIN Block b on tx.block = b "
+          + "WHERE pr.poolHash.view = :poolViewOrHash "
+          + "OR pr.poolHash.hashRaw = :poolViewOrHash "
+          + "ORDER BY tx.id DESC, pr.certIndex DESC "
+          + "LIMIT 1")
+  PoolCertificateProjection getLastPoolRetireByPoolHash(@Param("poolViewOrHash") String poolViewOrHash);
 }

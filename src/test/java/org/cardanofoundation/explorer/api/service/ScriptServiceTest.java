@@ -14,6 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
@@ -50,6 +51,8 @@ class ScriptServiceTest {
   TxRepository txRepository;
   @Mock
   RedeemerRepository redeemerRepository;
+  @Mock
+  AddressRepository addressRepository;
   @Mock
   ScriptMapper scriptMapper;
   @Mock
@@ -124,7 +127,7 @@ class ScriptServiceTest {
     when(scriptRepository.findByHash(scriptHash))
         .thenReturn(
             Optional.of(Script.builder().hash(scriptHash).type(ScriptType.PLUTUSV1).build()));
-    when(txOutRepository.getAssociatedAddress(scriptHash))
+    when(addressRepository.getAssociatedAddress(scriptHash))
         .thenReturn(List.of(
             "addr1z9fvxytwm8dv0aht3x8cxetm3tu4f47kaqdgxney8mu6hjxy0sm24zwzyknar6v855calh3yvxzj8lu6q0ke9a3vejrsjhed7q"));
     when(stakeAddressRepository.getAssociatedAddress(scriptHash))

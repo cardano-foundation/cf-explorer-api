@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,6 +64,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
+import org.cardanofoundation.explorer.api.util.MetadataStandardUtils;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -570,7 +572,8 @@ public class TxServiceImpl implements TxService {
                       .build())
           ).toList();
 
-      if (!Objects.isNull(txResponse.getProtocols())) {
+      if (Objects.nonNull(txResponse.getProtocols()) ||
+          !CollectionUtils.isEmpty(txResponse.getInstantaneousRewards())) {
         Map<String, String> dKeyHash224Map = protocolParamService.getGenesisDelegateKeysMap();
         txSignersResponses.forEach(txSignersResponse -> {
           byte[] pkeyHash224 = Blake2bUtil.blake2bHash224(
@@ -594,7 +597,8 @@ public class TxServiceImpl implements TxService {
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
         txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
-            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).build()).toList();
+            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson()).metadataCIP25(
+                MetadataStandardUtils.metadataStandardCIP25(txMetadata.getJson())).build()).toList();
     if(!CollectionUtils.isEmpty(txMetadataList)) {
       txResponse.setMetadata(txMetadataList);
     }
@@ -898,13 +902,17 @@ public class TxServiceImpl implements TxService {
         tx);
     Map<TxOutResponse, List<AddressInputOutputProjection>> addressInputMap = addressInputInfo.stream()
         .collect(Collectors.groupingBy(
-            txOutMapper::fromAddressInputOutput
+            txOutMapper::fromAddressInputOutput,
+            LinkedHashMap::new,
+            Collectors.toList()
         ));
     List<AddressInputOutputProjection> addressOutputInfo = txOutRepository.getTxAddressOutputInfo(
         tx);
     Map<TxOutResponse, List<AddressInputOutputProjection>> addressOutputMap = addressOutputInfo.stream()
         .collect(Collectors.groupingBy(
-            txOutMapper::fromAddressInputOutput
+            txOutMapper::fromAddressInputOutput,
+            LinkedHashMap::new,
+            Collectors.toList()
         ));
 
     //Get metadata
