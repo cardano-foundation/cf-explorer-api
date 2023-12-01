@@ -294,7 +294,7 @@ public class DelegationServiceImpl implements DelegationService {
           .epochBlock(aggPoolInfo.getBlockInEpoch())
           .retired(retiredIds.contains(projection.getPoolId()))
           .build();
-    }).toList();
+    }).collect(Collectors.toList());
   }
 
   private List<PoolResponse> mapPoolInfoForPoolResponse(Set<Long> retiredIds,
@@ -323,7 +323,7 @@ public class DelegationServiceImpl implements DelegationService {
           .epochBlock(pool.getEpochBlock())
           .retired(retiredIds.contains(pool.getPoolId()))
           .build();
-    }).toList();
+    }).collect(Collectors.toList());
     return poolResponseList;
   }
 
