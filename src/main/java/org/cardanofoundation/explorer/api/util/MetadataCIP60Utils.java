@@ -74,13 +74,27 @@ public class MetadataCIP60Utils {
                 String.valueOf(currentIdx), optionalProperties);
             token.setOptionalProperties(optionalProperties);
             switch (musicVersion) {
+              case 0 -> {
+                log.warn("Metadata standard CIP-60 incorrect");
+                metadataCIP.setValid(null);
+                metadataCIP.setTokenMap(tokenMap);
+                return metadataCIP;
+              }
               case 1 ->
                   setFieldsWithMusicVersionOne(assetValMap, requireProperties, optionalProperties,
                       version);
               case 2 -> setFieldsWithMusicVersionTwo(assetValMap, requireProperties, version);
-              default -> {
+              case 3 -> {
+                log.warn("Metadata standard CIP-60 incorrect");
+                token.setTokenName(assetEntry.getKey());
+                token.setRequireProperties(List.of(musicMetadataVersion(musicVersion, assetValMap.get(
+                    MetadataField.MUSIC_METADATA_VERSION.getName()))));
+                token.setOptionalProperties(null);
+                tokenMap.put(assetEntry.getKey(), token);
+                metadataCIP.setTokenMap(tokenMap);
                 return metadataCIP;
               }
+              default -> log.warn("music version: " + musicVersion);
             }
             token.setTokenName(assetEntry.getKey());
             tokenMap.put(assetEntry.getKey(), token);
@@ -99,14 +113,11 @@ public class MetadataCIP60Utils {
   public static int detectMusicVersion(Object musicVersion) {
     if (Objects.isNull(musicVersion)) {
       return 0;
-    } else if (musicVersion instanceof String musicVersionStr && musicVersionStr.equals("v1")) {
-      return 1;
-    } else if (musicVersion instanceof String musicVersionStr && musicVersionStr.equals("v2")) {
-      return 2;
-    } else if (musicVersion instanceof Integer musicVersionInt) {
+    } else if (musicVersion instanceof Integer musicVersionInt && List.of(1, 2).contains(musicVersionInt)) {
       return musicVersionInt;
+    } else {
+      return 3;
     }
-    return 0;
   }
 
   private static void setFieldsWithMusicVersionOne(Map<Object, Object> assetValMap,
