@@ -38,8 +38,8 @@ public class MetadataCIP60Utils {
           for (Entry<?, ?> assetEntry : assetMap.entrySet()) {
             TokenCIP token = new TokenCIP();
             Map<Object, Object> assetValMap = (Map<Object, Object>) assetEntry.getValue();
-            int musicVersion = (int) assetValMap.get(
-                MetadataField.MUSIC_METADATA_VERSION.getName());
+            int musicVersion = detectMusicVersion(assetValMap.get(
+                MetadataField.MUSIC_METADATA_VERSION.getName()));
             int version = MetadataCIP25Utils.detectVersion(
                 metadataMap.get(MetadataField.VERSION.getName()));
             //require
@@ -50,7 +50,8 @@ public class MetadataCIP60Utils {
                 MetadataCIP25Utils.name(assetValMap.get(MetadataField.NAME.getName()), version));
             requireProperties.add(
                 MetadataCIP25Utils.image(assetValMap.get(MetadataField.IMAGE.getName()), version));
-            requireProperties.add(musicMetadataVersion(musicVersion));
+            requireProperties.add(musicMetadataVersion(musicVersion, assetValMap.get(
+                MetadataField.MUSIC_METADATA_VERSION.getName())));
             requireProperties.add(
                 releaseType(assetValMap.get(MetadataField.RELEASE_TYPE.getName())));
             token.setRequireProperties(requireProperties);
@@ -73,13 +74,27 @@ public class MetadataCIP60Utils {
                 String.valueOf(currentIdx), optionalProperties);
             token.setOptionalProperties(optionalProperties);
             switch (musicVersion) {
+              case 0 -> {
+                log.warn("Metadata standard CIP-60 incorrect");
+                metadataCIP.setValid(null);
+                metadataCIP.setTokenMap(tokenMap);
+                return metadataCIP;
+              }
               case 1 ->
                   setFieldsWithMusicVersionOne(assetValMap, requireProperties, optionalProperties,
                       version);
               case 2 -> setFieldsWithMusicVersionTwo(assetValMap, requireProperties, version);
-              default -> {
+              case 3 -> {
+                log.warn("Metadata standard CIP-60 incorrect");
+                token.setTokenName(assetEntry.getKey());
+                token.setRequireProperties(List.of(musicMetadataVersion(musicVersion, assetValMap.get(
+                    MetadataField.MUSIC_METADATA_VERSION.getName()))));
+                token.setOptionalProperties(null);
+                tokenMap.put(assetEntry.getKey(), token);
+                metadataCIP.setTokenMap(tokenMap);
                 return metadataCIP;
               }
+              default -> log.warn("music version: " + musicVersion);
             }
             token.setTokenName(assetEntry.getKey());
             tokenMap.put(assetEntry.getKey(), token);
@@ -93,6 +108,16 @@ public class MetadataCIP60Utils {
     }
     metadataCIP.setTokenMap(tokenMap);
     return metadataCIP;
+  }
+
+  public static int detectMusicVersion(Object musicVersion) {
+    if (Objects.isNull(musicVersion)) {
+      return 0;
+    } else if (musicVersion instanceof Integer musicVersionInt && List.of(1, 2).contains(musicVersionInt)) {
+      return musicVersionInt;
+    } else {
+      return 3;
+    }
   }
 
   private static void setFieldsWithMusicVersionOne(Map<Object, Object> assetValMap,
@@ -1013,8 +1038,8 @@ public class MetadataCIP60Utils {
                 "Single", "Multiple").contains(releaseTypeStr)).build();
   }
 
-  private static BaseProperty musicMetadataVersion(int musicVersion) {
-    return BaseProperty.builder().value(musicVersion).format(CommonConstant.FIELD_TYPE[6])
+  private static BaseProperty musicMetadataVersion(int musicVersion, Object originMusicVersion) {
+    return BaseProperty.builder().value(originMusicVersion).format(CommonConstant.FIELD_TYPE[6])
         .property(MetadataField.MUSIC_METADATA_VERSION.getName()).index("5")
         .valid(musicVersion == 1 || musicVersion == 2)
         .build();
