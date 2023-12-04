@@ -62,8 +62,12 @@ class PoolLifecycleServiceTest {
   @Mock
   private PoolCertificateService poolCertificateService;
 
+  @Mock
+  private FetchRewardDataService fetchRewardDataService;
+
   @InjectMocks
   private PoolLifecycleServiceImpl poolLifecycleService;
+
 
   @Test
   void whenStakeKeyIsNotExist_returnEmptyPage() {
@@ -98,6 +102,7 @@ class PoolLifecycleServiceTest {
     when(poolCertificateService.getPoolCertificateByAction("poolViewNotFound", PoolActionType.POOL_REGISTRATION)).thenReturn(List.of());
     when(poolCertificateService.getPoolCertificateByAction("poolViewNotFound", PoolActionType.POOL_UPDATE)).thenReturn(List.of());
     when(poolCertificateService.getPoolCertificateByAction("poolViewNotFound", PoolActionType.POOL_DEREGISTRATION)).thenReturn(List.of());
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
     when(poolUpdateRepository.findPoolUpdateByPool(Set.of(-1L), null, null, null,
         pageable)).thenReturn(
         Page.empty());
