@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.Set;
+
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
@@ -30,4 +32,6 @@ public interface ScriptService {
   BaseFilterResponse<SmartContractTxResponse> getSmartContractTxs(String scriptHash, Pageable pageable);
 
   ScriptSearchResponse searchScript(String scriptHash);
+
+  Set<String> getContractExecutions(String txHash, String scriptHash);
 }

@@ -8,10 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.cardanofoundation.explorer.api.mapper.*;
-import org.cardanofoundation.explorer.api.model.response.tx.*;
-import org.cardanofoundation.explorer.api.projection.ReferenceInputProjection;
+
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
-import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -25,10 +23,8 @@ import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxInfoResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
-import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
@@ -59,7 +55,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.TxServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
-import org.cardanofoundation.explorer.api.test.projection.TxContractProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.TxIOProjectionImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -72,13 +67,11 @@ import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
 import org.cardanofoundation.explorer.consumercommon.entity.TxMetadataHash;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -163,16 +156,7 @@ class TxServiceTest {
   private ReserveRepository reserveRepository;
   @Mock
   private StakeAddressRepository stakeAddressRepository;
-  @Mock
-  private TxContractMapper txContractMapper;
-  @Mock
-  private TxMetadataRepository txMetadataRepository;
-  @Mock
-  private ReferenceTxInRepository referenceTxInRepository;
-  @Mock
-  private TxReferenceInputMapper txReferenceInputMapper;
-  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-  private RedisTemplate<String, TxGraph> redisTemplate;
+
 
   @InjectMocks
   private TxServiceImpl txService;
@@ -795,131 +779,6 @@ class TxServiceTest {
     // Run the test
     assertThrows(NoContentException.class, () -> txService.getTransactionsByStake("stakeKey",
         PageRequest.of(0, 1)));
-  }
-
-  @Test
-  void testGetTxContractDetailForTxSuccess() {
-    // Setup
-    // Configure TxRepository.findByHash(...).
-    final Tx tx1 = new Tx();
-    tx1.setId(0L);
-    final Block block = new Block();
-    block.setId(0L);
-    block.setEpochNo(0);
-    tx1.setBlock(block);
-    tx1.setBlockId(0L);
-    tx1.setValidContract(true);
-    final TxMetadataHash txMetadataHash = new TxMetadataHash();
-    txMetadataHash.setId(0L);
-    txMetadataHash.setHash("hash");
-    tx1.setTxMetadataHash(txMetadataHash);
-    final Optional<Tx> tx = Optional.of(tx1);
-    final ReferenceInputProjection referenceInputProjection = Mockito.mock(ReferenceInputProjection.class);
-
-    when(txRepository.findByHash(anyString())).thenReturn(tx);
-
-    // Configure RedeemerRepository.findContractByTx(...).
-    when(redeemerRepository.findContractByTx(tx1)).thenReturn(List.of(
-        TxContractProjectionImpl.builder().purpose(ScriptPurposeType.SPEND).build()
-    ));
-    when(referenceTxInRepository.getReferenceInputByTx(tx1)).thenReturn(List.of(referenceInputProjection));
-    when(txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(any(ReferenceInputProjection.class)))
-        .thenReturn(new TxReferenceInput());
-
-    // Configure TxContractMapper.fromTxContractProjectionToContractResponse(...).
-    final ContractResponse contractResponse = ContractResponse.builder()
-        .address("address")
-        .scriptHash("scriptHash")
-        .purpose(ScriptPurposeType.SPEND)
-        .build();
-    when(txContractMapper.fromTxContractProjectionToContractResponse(
-        any(TxContractProjection.class))).thenReturn(contractResponse);
-
-    // Configure TxOutRepository.getContractDatumOutByTx(...).
-    when(txOutRepository.getContractDatumOutByTx(tx1)).thenReturn(List.of(
-        TxContractProjectionImpl.builder()
-            .address("address")
-            .datumBytesOut("datumBytesOut".getBytes())
-            .datumHashOut("datumHashOut")
-            .build()
-    ));
-
-    when(txContractMapper.bytesToString(any(byte[].class))).thenReturn("datumBytesOut");
-
-    // Run the test
-    final List<ContractResponse> result = txService.getTxContractDetail("txHash",
-        "address");
-
-    // Verify the results
-    assertEquals(contractResponse.getDatumBytesOut(), result.get(0).getDatumBytesOut());
-    assertEquals(contractResponse.getDatumHashOut(), result.get(0).getDatumHashOut());
-  }
-
-  @Test
-  void testGetTxContractDetailForTxFail() {
-    // Setup
-    // Configure TxRepository.findByHash(...).
-    final Tx tx1 = new Tx();
-    tx1.setId(0L);
-    final Block block = new Block();
-    block.setId(0L);
-    block.setEpochNo(0);
-    tx1.setBlock(block);
-    tx1.setBlockId(0L);
-    tx1.setValidContract(false);
-    final TxMetadataHash txMetadataHash = new TxMetadataHash();
-    txMetadataHash.setId(0L);
-    txMetadataHash.setHash("hash");
-    tx1.setTxMetadataHash(txMetadataHash);
-    final Optional<Tx> tx = Optional.of(tx1);
-    final ReferenceInputProjection referenceInputProjection = Mockito.mock(ReferenceInputProjection.class);
-    when(txRepository.findByHash(anyString())).thenReturn(tx);
-
-    // Configure RedeemerRepository.findContractByTx(...).
-    when(redeemerRepository.findContractByTxFail(tx1)).thenReturn(List.of(
-        TxContractProjectionImpl.builder().purpose(ScriptPurposeType.SPEND).build()
-    ));
-    when(referenceTxInRepository.getReferenceInputByTx(tx1)).thenReturn(List.of(referenceInputProjection));
-    when(txReferenceInputMapper.fromReferenceInputProjectionTxReferenceInput(any(ReferenceInputProjection.class)))
-        .thenReturn(new TxReferenceInput());
-    // Configure TxContractMapper.fromTxContractProjectionToContractResponse(...).
-    final ContractResponse contractResponse = ContractResponse.builder()
-        .address("address")
-        .scriptHash("scriptHash")
-        .purpose(ScriptPurposeType.SPEND)
-        .build();
-    when(txContractMapper.fromTxContractProjectionToContractResponse(
-        any(TxContractProjection.class))).thenReturn(contractResponse);
-
-    // Configure TxOutRepository.getContractDatumOutByTx(...).
-    when(txOutRepository.getContractDatumOutByTxFail(tx1)).thenReturn(List.of(
-        TxContractProjectionImpl.builder()
-            .address("address")
-            .datumBytesOut("datumBytesOut".getBytes())
-            .datumHashOut("datumHashOut")
-            .build()
-    ));
-
-    when(txContractMapper.bytesToString(any(byte[].class))).thenReturn("datumBytesOut");
-
-    // Run the test
-    final List<ContractResponse> result = txService.getTxContractDetail("txHash",
-                                                                        "address");
-
-    // Verify the results
-    assertEquals(contractResponse.getDatumBytesOut(), result.get(0).getDatumBytesOut());
-    assertEquals(contractResponse.getDatumHashOut(), result.get(0).getDatumHashOut());
-  }
-
-
-  @Test
-  void testGetTxContractDetail_TxRepositoryReturnsAbsent() {
-    // Setup
-    when(txRepository.findByHash("txHash")).thenReturn(Optional.empty());
-
-    // Run the test
-    assertThrows(BusinessException.class,
-        () -> txService.getTxContractDetail("txHash", "address"));
   }
 
   @Test
