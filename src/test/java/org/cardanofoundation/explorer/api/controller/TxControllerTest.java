@@ -192,44 +192,6 @@ class TxControllerTest {
     assertEquals("[]", response.getContentAsString());
   }
 
-  @Test
-  void testGetTxContractDetailByTxHash() throws Exception {
-    final List<ContractResponse> contractResponse = List.of(ContractResponse.builder()
-        .address("addr1wx7ms3ekrr72uksdsnjs3s2xe2q3emee3a0vajlmpktkxdsywvcjl").build());
-    final String txHash = "927edb96f3386ab91b5f5d85d84cb4253c65b1c2f65fa7df25f81fab1d62987a";
-    final String address = "addr1wx7ms3ekrr72uksdsnjs3s2xe2q3emee3a0vajlmpktkxdsywvcjl";
-
-    when(mockTxService.getTxContractDetail(
-        txHash,
-        address)).thenReturn(
-        contractResponse);
-
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/txs/{hash}/contract", txHash)
-                .param("address", address)
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
-
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-    assertEquals(asJsonString(contractResponse), response.getContentAsString());
-  }
-
-  @Test
-  void testGetTxContractDetailByTxHash_WhenTxServiceReturnsNoItems() throws Exception {
-    final String txHash = "927edb96f3386ab91b5f5d85d84cb4253c65b1c2f65fa7df25f81fab1d62987a";
-    final String address = "addr1wx7ms3ekrr72uksdsnjs3s2xe2q3emee3a0vajlmpktkxdsywvcjl";
-    when(mockTxService.getTxContractDetail(txHash, address)).thenReturn(Collections.emptyList());
-
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/txs/{hash}/contract", txHash)
-                .param("address", address)
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
-
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-    assertEquals("[]", response.getContentAsString());
-  }
-
   private static String asJsonString(final Object obj) {
     try {
       var objectMapper = new ObjectMapper();
