@@ -701,6 +701,9 @@ public class MetadataCIP60Utils {
             filesProperty.setValid(requirePropertiesInFile.stream()
                 .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
             requirePropertiesInFile.addAll(requirePropertiesInSong);
+          } else {
+            requirePropertiesInFile.add(songProp);
+            filesProperty.setValid(false);
           }
           indexInFile++;
         }
