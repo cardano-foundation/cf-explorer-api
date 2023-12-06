@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class MetadataCIP60Utils {
             Map<Object, Object> assetValMap = (Map<Object, Object>) assetEntry.getValue();
             int musicVersion = detectMusicVersion(assetValMap.get(
                 MetadataField.MUSIC_METADATA_VERSION.getName()));
-            int version = MetadataCIP25Utils.detectVersion(
+            int version = musicVersion == 3 ? 0 : MetadataCIP25Utils.detectVersion(
                 metadataMap.get(MetadataField.VERSION.getName()));
             //require
             List<BaseProperty> requireProperties = new ArrayList<>();
@@ -53,8 +54,7 @@ public class MetadataCIP60Utils {
             requireProperties.add(musicMetadataVersion(musicVersion, assetValMap.get(
                 MetadataField.MUSIC_METADATA_VERSION.getName())));
             requireProperties.add(
-                releaseType(assetValMap.get(MetadataField.RELEASE_TYPE.getName())));
-            token.setRequireProperties(requireProperties);
+                releaseType(assetValMap.get(MetadataField.RELEASE_TYPE.getName()), version));
             //optional
             List<BaseProperty> optionalProperties = new ArrayList<>();
             Object desc = assetValMap.get(MetadataField.DESCRIPTION.getName());
@@ -72,7 +72,6 @@ public class MetadataCIP60Utils {
             }
             MetadataCIP25Utils.version(metadataMap.get(MetadataField.VERSION.getName()),
                 String.valueOf(currentIdx), optionalProperties);
-            token.setOptionalProperties(optionalProperties);
             switch (musicVersion) {
               case 0 -> {
                 log.warn("Metadata standard CIP-60 incorrect");
@@ -86,18 +85,14 @@ public class MetadataCIP60Utils {
               case 2 -> setFieldsWithMusicVersionTwo(assetValMap, requireProperties, version);
               case 3 -> {
                 log.warn("Metadata standard CIP-60 incorrect");
-                token.setTokenName(assetEntry.getKey());
-                token.setRequireProperties(List.of(musicMetadataVersion(musicVersion, assetValMap.get(
-                    MetadataField.MUSIC_METADATA_VERSION.getName()))));
-                token.setOptionalProperties(null);
-                tokenMap.put(assetEntry.getKey(), token);
+                filesMusicVersionIncorrect(assetValMap.get(MetadataField.FILES.getName()), requireProperties);
+                setDataForToken(assetEntry, token, requireProperties, optionalProperties, tokenMap);
                 metadataCIP.setTokenMap(tokenMap);
                 return metadataCIP;
               }
               default -> log.warn("music version: " + musicVersion);
             }
-            token.setTokenName(assetEntry.getKey());
-            tokenMap.put(assetEntry.getKey(), token);
+            setDataForToken(assetEntry, token, requireProperties, optionalProperties, tokenMap);
           }
         }
       }
@@ -108,6 +103,15 @@ public class MetadataCIP60Utils {
     }
     metadataCIP.setTokenMap(tokenMap);
     return metadataCIP;
+  }
+
+  private static void setDataForToken(Entry<?, ?> assetEntry, TokenCIP token,
+      List<BaseProperty> requireProperties, List<BaseProperty> optionalProperties,
+      Map<Object, TokenCIP> tokenMap) {
+    token.setTokenName(assetEntry.getKey());
+    token.setRequireProperties(requireProperties);
+    token.setOptionalProperties(optionalProperties);
+    tokenMap.put(assetEntry.getKey(), token);
   }
 
   public static int detectMusicVersion(Object musicVersion) {
@@ -149,9 +153,12 @@ public class MetadataCIP60Utils {
         filesVerOneSingle(assetValMap.get(MetadataField.FILES.getName()), requireProperties,
             version);
         //optional
-        optionalProperties.add(
-            links(assetValMap.get(MetadataField.LINKS.getName()), null,
-                String.valueOf(optionalProperties.size() + 1), version));
+        Object links = assetValMap.get(MetadataField.LINKS.getName());
+        if (Objects.nonNull(links)) {
+          optionalProperties.add(
+              links(links, null,
+                  String.valueOf(optionalProperties.size() + 1), version));
+        }
         contributingArtists(
             assetValMap.get(MetadataField.CONTRIBUTING_ARTISTS.getName()), optionalProperties,
             String.valueOf((optionalProperties.size() + 1)),
@@ -182,8 +189,8 @@ public class MetadataCIP60Utils {
     BaseProperty releaseProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.RELEASE.getName()).index("7").build();
     List<BaseProperty> requirePropertiesInRelease = new ArrayList<>();
-    if (release instanceof HashMap<?, ?> releaseMap) {
-      String ind = releaseProperty.getIndex();
+    String ind = releaseProperty.getIndex();
+    if (Objects.nonNull(release) && release instanceof HashMap<?, ?> releaseMap) {
       requirePropertiesInRelease.add(
           metadataString(releaseMap.get(MetadataField.RELEASE_TITLE.getName()),
               MetadataField.RELEASE_TITLE.getName(), ind, "1", version));
@@ -268,11 +275,16 @@ public class MetadataCIP60Utils {
       releaseProperty.setValid(
           requirePropertiesInRelease.stream()
               .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
+    } else {
+      requirePropertiesInRelease.add(
+          metadataString(null,
+              MetadataField.RELEASE_TITLE.getName(), ind, "1", version));
+      requirePropertiesInRelease.add(
+          metadataString(null,
+              MetadataField.COPYRIGHT.getName(), ind, "2", version));
     }
     requireProperties.add(releaseProperty);
-    if (!requirePropertiesInRelease.isEmpty()) {
-      requireProperties.addAll(requirePropertiesInRelease);
-    }
+    requireProperties.addAll(requirePropertiesInRelease);
   }
 
   private static void basePropertiesPartThree(Map<?, ?> valMap,
@@ -481,7 +493,7 @@ public class MetadataCIP60Utils {
     Object lyrics = valMap.get(MetadataField.LYRICS.getName());
     if (Objects.nonNull(lyrics)) {
       baseProperties.add(
-          metadataString(lyrics, MetadataField.LYRICS.getName(), indexInSong,
+          metadataURL(lyrics, MetadataField.LYRICS.getName(), indexInSong,
               String.valueOf(index),
               version));
       index++;
@@ -564,10 +576,42 @@ public class MetadataCIP60Utils {
         filesProperty.setValid(requirePropertiesInFile.stream()
             .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
       }
-    }
-    requireProperties.add(filesProperty);
-    if (!requirePropertiesInFile.isEmpty()) {
+      requireProperties.add(filesProperty);
       requireProperties.addAll(requirePropertiesInFile);
+    } else {
+      requireProperties.add(filesProperty);
+      defaultFiles(version, requireProperties, filesProperty.getIndex(), false);
+    }
+  }
+
+  private static void filesMusicVersionIncorrect(Object files, List<BaseProperty> requireProperties) {
+    requireProperties.add(BaseProperty.builder().valid(null)
+        .property(MetadataField.FILES.getName())
+        .format(null)
+        .index("7")
+        .build());
+    if (Objects.nonNull(files) && files instanceof ArrayList<?> fileList && !fileList.isEmpty()) {
+      int indexInFile = 1;
+      for (Object file : fileList) {
+        if (file instanceof HashMap<?, ?> fileMap) {
+          String index = "7." + indexInFile;
+          BaseProperty nameFile = MetadataCIP25Utils.nameFile(
+              fileMap.get(MetadataField.NAME.getName()),
+              0);
+          nameFile.setIndex(index + ".1");
+          requireProperties.add(nameFile);
+          BaseProperty srcFile = MetadataCIP25Utils.srcFile(
+              fileMap.get(MetadataField.SRC.getName()),
+              0);
+          srcFile.setIndex(index + ".2");
+          requireProperties.add(srcFile);
+          BaseProperty mediaTypeFile = MetadataCIP25Utils.mediaTypeFile(
+              fileMap.get(MetadataField.MEDIA_TYPE.getName()), 0);
+          mediaTypeFile.setIndex(index + ".3");
+          requireProperties.add(mediaTypeFile);
+          indexInFile++;
+        }
+      }
     }
   }
 
@@ -630,10 +674,11 @@ public class MetadataCIP60Utils {
         filesProperty.setValid(requirePropertiesInFile.stream()
             .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
       }
-    }
-    requireProperties.add(filesProperty);
-    if (!requirePropertiesInFile.isEmpty()) {
+      requireProperties.add(filesProperty);
       requireProperties.addAll(requirePropertiesInFile);
+    } else {
+      requireProperties.add(filesProperty);
+      defaultFiles(version, requireProperties, filesProperty.getIndex(), true);
     }
   }
 
@@ -667,9 +712,9 @@ public class MetadataCIP60Utils {
           Object song = fileMap.get(MetadataField.SONG.getName());
           BaseProperty songProp = BaseProperty.builder().valid(false).index(index + ".4")
               .property(MetadataField.SONG.getName()).build();
-          if (Objects.nonNull(songProp) && song instanceof HashMap<?, ?> songMap) {
+          String indexInSong = songProp.getIndex();
+          if (Objects.nonNull(song) && song instanceof HashMap<?, ?> songMap) {
             List<BaseProperty> requirePropertiesInSong = new ArrayList<>();
-            String indexInSong = songProp.getIndex();
             artists(songMap.get(MetadataField.ARTISTS.getName()),
                 requirePropertiesInSong, indexInSong + ".1", version);
             requirePropertiesInSong.add(
@@ -702,7 +747,10 @@ public class MetadataCIP60Utils {
                 .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
             requirePropertiesInFile.addAll(requirePropertiesInSong);
           } else {
+            List<BaseProperty> requirePropertiesInSong = new ArrayList<>();
+            defaultSong(version, requirePropertiesInSong, indexInSong);
             requirePropertiesInFile.add(songProp);
+            requirePropertiesInFile.addAll(requirePropertiesInSong);
             filesProperty.setValid(false);
           }
           indexInFile++;
@@ -712,11 +760,66 @@ public class MetadataCIP60Utils {
         filesProperty.setValid(null);
         filesProperty.setFormat(null);
       }
-    }
-    requireProperties.add(filesProperty);
-    if (!requirePropertiesInFile.isEmpty()) {
+      requireProperties.add(filesProperty);
       requireProperties.addAll(requirePropertiesInFile);
+    } else {
+      requireProperties.add(filesProperty);
+      defaultFiles(version, requireProperties, filesProperty.getIndex(), false);
+      BaseProperty songProp = BaseProperty.builder().valid(false).index(filesProperty.getIndex() + ".1.4")
+          .property(MetadataField.SONG.getName()).build();
+      List<BaseProperty> requirePropertiesInSong = new ArrayList<>();
+      String indexInSong = songProp.getIndex();
+      defaultSong(version, requirePropertiesInSong, indexInSong);
+      requireProperties.add(songProp);
+      requireProperties.addAll(requirePropertiesInSong);
     }
+  }
+
+  private static void defaultFiles(int version, List<BaseProperty> requireProperties, String indexOfFile, boolean isSong) {
+    String index = indexOfFile + ".1";
+    BaseProperty nameFile = MetadataCIP25Utils.nameFile(null, version);
+    nameFile.setIndex(index + ".1");
+    requireProperties.add(nameFile);
+    BaseProperty srcFile = MetadataCIP25Utils.srcFile(null, version);
+    srcFile.setIndex(index + ".2");
+    requireProperties.add(srcFile);
+    BaseProperty mediaTypeFile = MetadataCIP25Utils.mediaTypeFile(null, version);
+    mediaTypeFile.setIndex(index + ".3");
+    requireProperties.add(mediaTypeFile);
+    if (isSong) {
+      artists(null, requireProperties, index + ".4", version);
+      requireProperties.add(
+          trackNumber(null, index + ".5", version));
+      requireProperties.add(
+          songTitle(null, index + ".6", version));
+      requireProperties.add(
+          songDuration(null, index + ".7", version));
+      requireProperties.add(
+          genres(null, index + ".8", version));
+      requireProperties.add(
+          copyright(null, index + ".9", version));
+    }
+  }
+
+  private static void defaultSong(int version, List<BaseProperty> requirePropertiesInSong,
+      String indexInSong) {
+    artists(null,
+        requirePropertiesInSong, indexInSong + ".1", version);
+    requirePropertiesInSong.add(
+        trackNumber(null,
+            indexInSong + ".2", version));
+    requirePropertiesInSong.add(
+        songTitle(null,
+            indexInSong + ".3", version));
+    requirePropertiesInSong.add(
+        songDuration(null,
+            indexInSong + ".4", version));
+    requirePropertiesInSong.add(
+        genres(null, indexInSong + ".5",
+            version));
+    requirePropertiesInSong.add(
+        copyright(null,
+            indexInSong + ".6", version));
   }
 
   private static BaseProperty links(Object links, String parentIndex, String index, int version) {
@@ -792,6 +895,23 @@ public class MetadataCIP60Utils {
     return baseProperty;
   }
 
+  private static BaseProperty metadataURL(Object val, String property, String parentIndex,
+      String index,
+      int version) {
+    BaseProperty baseProperty = BaseProperty.builder().value(val)
+        .format(CommonConstant.FIELD_TYPE[17])
+        .property(property)
+        .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
+        .valid(Objects.nonNull(val) && val instanceof String valStr && Arrays.stream(CommonConstant.IMAGE_PREFIX)
+            .anyMatch(valStr::startsWith))
+        .build();
+    if (version == 0) {
+      baseProperty.setValid(null);
+      baseProperty.setFormat(null);
+    }
+    return baseProperty;
+  }
+
   private static BaseProperty metadataArrayString(Object val, String property, String parentIndex,
       String index,
       int version) {
@@ -835,7 +955,7 @@ public class MetadataCIP60Utils {
     BaseProperty artistsProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.ARTISTS.getName())
         .index(ind)
-        .format(CommonConstant.FIELD_TYPE[8])
+        .format(CommonConstant.FIELD_TYPE[16])
         .build();
     if (Objects.nonNull(artists) && artists instanceof ArrayList<?> artistList
         && !artistList.isEmpty()) {
@@ -867,6 +987,11 @@ public class MetadataCIP60Utils {
       }
       requireProperties.add(artistsProperty);
       requireProperties.addAll(requirePropertiesInArtist);
+    } else {
+      requireProperties.add(artistsProperty);
+      BaseProperty nameArtist = metadataString(null, MetadataField.NAME.getName(),
+          ind + ".1", "1", version);
+      requireProperties.add(nameArtist);
     }
   }
 
@@ -916,7 +1041,7 @@ public class MetadataCIP60Utils {
     if (Objects.nonNull(featuredArtist) && featuredArtist instanceof HashMap<?, ?> artistMap) {
       BaseProperty artistsProperty = BaseProperty.builder().valid(false)
           .property(MetadataField.FEATURED_ARTIST.getName())
-          .format(CommonConstant.FIELD_TYPE[8])
+          .format(CommonConstant.FIELD_TYPE[18])
           .index(ind)
           .build();
       List<Boolean> validArtists = new ArrayList<>();
@@ -959,7 +1084,7 @@ public class MetadataCIP60Utils {
 
   private static BaseProperty genres(Object genres, String index, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(genres)
-        .format(CommonConstant.FIELD_TYPE[8])
+        .format(CommonConstant.FIELD_TYPE[13])
         .property(MetadataField.GENRES.getName())
         .index(index)
         .valid(Objects.nonNull(genres) && genres instanceof ArrayList<?> genresArr
@@ -1033,12 +1158,17 @@ public class MetadataCIP60Utils {
     return baseProperty;
   }
 
-  private static BaseProperty releaseType(Object releaseType) {
-    return BaseProperty.builder().value(releaseType).format(CommonConstant.FIELD_TYPE[0])
+  private static BaseProperty releaseType(Object releaseType, int version) {
+    BaseProperty baseProperty = BaseProperty.builder().value(releaseType).format(CommonConstant.FIELD_TYPE[0])
         .property(MetadataField.RELEASE_TYPE.getName())
         .index("6").valid(
             Objects.nonNull(releaseType) && releaseType instanceof String releaseTypeStr && List.of(
                 "Single", "Multiple").contains(releaseTypeStr)).build();
+    if (version == 0) {
+      baseProperty.setValid(null);
+      baseProperty.setFormat(null);
+    }
+    return baseProperty;
   }
 
   private static BaseProperty musicMetadataVersion(int musicVersion, Object originMusicVersion) {
