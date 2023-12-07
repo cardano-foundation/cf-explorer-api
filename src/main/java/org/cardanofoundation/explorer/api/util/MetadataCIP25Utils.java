@@ -25,7 +25,6 @@ import org.cardanofoundation.explorer.api.model.metadatastandard.cip.TokenCIP;
 @Slf4j
 public class MetadataCIP25Utils {
 
-  private static final String[] IMAGE_PREFIX = {"http://", "https://", "ipfs://", "ar://"};
   private static final String BASE64_PREFIX = "data:";
   private static final String RAW_BYTE_PREFIX = "0x";
   private static final String BASE64 = "base64";
@@ -235,13 +234,13 @@ public class MetadataCIP25Utils {
         .index("4")
         .property(MetadataField.IMAGE.getName()).valid(false).build();
     if (Objects.nonNull(image) && image instanceof String imageStr && (
-        Arrays.stream(IMAGE_PREFIX).anyMatch(imageStr::startsWith) || (
+        Arrays.stream(CommonConstant.IMAGE_PREFIX).anyMatch(imageStr::startsWith) || (
             imageStr.startsWith(BASE64_PREFIX) && imageStr.contains(BASE64)))) {
       checkImage.setValid(true);
     } else if (Objects.nonNull(image) && image instanceof ArrayList<?> imageList
         && imageList.size() >= 2) {
       checkImage.setValid(
-          Arrays.stream(IMAGE_PREFIX).anyMatch(imageList.get(0).toString()::startsWith));
+          Arrays.stream(CommonConstant.IMAGE_PREFIX).anyMatch(imageList.get(0).toString()::startsWith));
     }
     if (version == 0) {
       checkImage.setValid(null);
@@ -254,13 +253,13 @@ public class MetadataCIP25Utils {
     BaseProperty checkSrc = BaseProperty.builder().value(src).valid(false)
         .format(CommonConstant.FIELD_TYPE[2])
         .property(MetadataField.SRC.getName()).build();
-    if (Objects.nonNull(src) && src instanceof String imageStr && Arrays.stream(IMAGE_PREFIX)
+    if (Objects.nonNull(src) && src instanceof String imageStr && Arrays.stream(CommonConstant.IMAGE_PREFIX)
         .anyMatch(imageStr::startsWith)) {
       checkSrc.setValid(true);
     } else if (Objects.nonNull(src) && src instanceof ArrayList<?> imageList
         && imageList.size() >= 2) {
       checkSrc.setValid(
-          Arrays.stream(IMAGE_PREFIX).anyMatch(imageList.get(0).toString()::startsWith));
+          Arrays.stream(CommonConstant.IMAGE_PREFIX).anyMatch(imageList.get(0).toString()::startsWith));
     }
     if (version == 0) {
       checkSrc.setValid(null);
