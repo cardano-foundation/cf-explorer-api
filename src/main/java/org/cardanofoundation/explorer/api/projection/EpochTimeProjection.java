@@ -1,9 +1,14 @@
 package org.cardanofoundation.explorer.api.projection;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.sql.Timestamp;
 
-public interface EpochTimeProjection {
-  Integer getEpochNo();
-  Timestamp getStartTime();
-  Timestamp getEndTime();
+@Getter
+@AllArgsConstructor
+public class EpochTimeProjection {
+  Integer epochNo;
+  Timestamp startTime;
+  Timestamp endTime;
 }
