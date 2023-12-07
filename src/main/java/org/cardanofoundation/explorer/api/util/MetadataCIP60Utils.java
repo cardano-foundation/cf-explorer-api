@@ -33,6 +33,7 @@ public class MetadataCIP60Utils {
       ObjectMapper objectMapper = new ObjectMapper();
       Map<Object, Object> metadataMap = objectMapper.readValue(jsonMetadata, new TypeReference<>() {
       });
+      boolean musicVersionValid = true;
       for (Map.Entry<Object, Object> metadataEntry : metadataMap.entrySet()) {
         if (metadataEntry.getValue() instanceof HashMap<?, ?> assetMap) {
           Object policyId = metadataEntry.getKey();
@@ -87,9 +88,7 @@ public class MetadataCIP60Utils {
                 log.warn("Metadata standard CIP-60 incorrect");
                 filesMusicVersionIncorrect(assetValMap.get(MetadataField.FILES.getName()),
                     requireProperties);
-                setDataForToken(assetEntry, token, requireProperties, optionalProperties, tokenMap);
-                metadataCIP.setTokenMap(tokenMap);
-                return metadataCIP;
+                musicVersionValid = false;
               }
               default -> log.warn("music version: " + musicVersion);
             }
@@ -97,7 +96,9 @@ public class MetadataCIP60Utils {
           }
         }
       }
-      metadataCIP.setValid(valid(tokenMap));
+      if (musicVersionValid) {
+        metadataCIP.setValid(valid(tokenMap));
+      }
     } catch (Exception ex) {
       log.error("Error: structure incorrect, message=" + ex.getMessage());
       log.error("Check standard CIP-25 fail");
