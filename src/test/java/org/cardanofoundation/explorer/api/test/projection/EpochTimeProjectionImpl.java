@@ -7,24 +7,10 @@ import lombok.Builder;
 import org.cardanofoundation.explorer.api.projection.EpochTimeProjection;
 
 @Builder
-public class EpochTimeProjectionImpl implements EpochTimeProjection {
+public class EpochTimeProjectionImpl {
 
   private Timestamp startTime;
   private Timestamp endTime;
   private Integer epochNo;
 
-  @Override
-  public Integer getEpochNo() {
-    return epochNo;
-  }
-
-  @Override
-  public Timestamp getStartTime() {
-    return startTime;
-  }
-
-  @Override
-  public Timestamp getEndTime() {
-    return endTime;
-  }
 }
