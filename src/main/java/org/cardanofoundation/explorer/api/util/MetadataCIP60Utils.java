@@ -85,7 +85,8 @@ public class MetadataCIP60Utils {
               case 2 -> setFieldsWithMusicVersionTwo(assetValMap, requireProperties, version);
               case 3 -> {
                 log.warn("Metadata standard CIP-60 incorrect");
-                filesMusicVersionIncorrect(assetValMap.get(MetadataField.FILES.getName()), requireProperties);
+                filesMusicVersionIncorrect(assetValMap.get(MetadataField.FILES.getName()),
+                    requireProperties);
                 setDataForToken(assetEntry, token, requireProperties, optionalProperties, tokenMap);
                 metadataCIP.setTokenMap(tokenMap);
                 return metadataCIP;
@@ -117,7 +118,8 @@ public class MetadataCIP60Utils {
   public static int detectMusicVersion(Object musicVersion) {
     if (Objects.isNull(musicVersion)) {
       return 0;
-    } else if (musicVersion instanceof Integer musicVersionInt && List.of(1, 2).contains(musicVersionInt)) {
+    } else if (musicVersion instanceof Integer musicVersionInt && List.of(1, 2)
+        .contains(musicVersionInt)) {
       return musicVersionInt;
     } else {
       return 3;
@@ -127,7 +129,11 @@ public class MetadataCIP60Utils {
   private static void setFieldsWithMusicVersionOne(Map<Object, Object> assetValMap,
       List<BaseProperty> requireProperties, List<BaseProperty> optionalProperties, int version) {
 
-    String releaseType = (String) assetValMap.get(MetadataField.RELEASE_TYPE.getName());
+    String releaseType = "invalid";
+    Object val = assetValMap.get(MetadataField.RELEASE_TYPE.getName());
+    if (Objects.nonNull(val) && val instanceof String valStr) {
+      releaseType = valStr;
+    }
     switch (releaseType) {
       case "Single" -> {
         //require
@@ -584,7 +590,8 @@ public class MetadataCIP60Utils {
     }
   }
 
-  private static void filesMusicVersionIncorrect(Object files, List<BaseProperty> requireProperties) {
+  private static void filesMusicVersionIncorrect(Object files,
+      List<BaseProperty> requireProperties) {
     requireProperties.add(BaseProperty.builder().valid(null)
         .property(MetadataField.FILES.getName())
         .format(null)
@@ -765,7 +772,8 @@ public class MetadataCIP60Utils {
     } else {
       requireProperties.add(filesProperty);
       defaultFiles(version, requireProperties, filesProperty.getIndex(), false);
-      BaseProperty songProp = BaseProperty.builder().valid(false).index(filesProperty.getIndex() + ".1.4")
+      BaseProperty songProp = BaseProperty.builder().valid(false)
+          .index(filesProperty.getIndex() + ".1.4")
           .property(MetadataField.SONG.getName()).build();
       List<BaseProperty> requirePropertiesInSong = new ArrayList<>();
       String indexInSong = songProp.getIndex();
@@ -775,7 +783,8 @@ public class MetadataCIP60Utils {
     }
   }
 
-  private static void defaultFiles(int version, List<BaseProperty> requireProperties, String indexOfFile, boolean isSong) {
+  private static void defaultFiles(int version, List<BaseProperty> requireProperties,
+      String indexOfFile, boolean isSong) {
     String index = indexOfFile + ".1";
     BaseProperty nameFile = MetadataCIP25Utils.nameFile(null, version);
     nameFile.setIndex(index + ".1");
@@ -902,7 +911,8 @@ public class MetadataCIP60Utils {
         .format(CommonConstant.FIELD_TYPE[17])
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(Objects.nonNull(val) && val instanceof String valStr && Arrays.stream(CommonConstant.IMAGE_PREFIX)
+        .valid(Objects.nonNull(val) && val instanceof String valStr && Arrays.stream(
+                CommonConstant.IMAGE_PREFIX)
             .anyMatch(valStr::startsWith))
         .build();
     if (version == 0) {
@@ -1159,7 +1169,8 @@ public class MetadataCIP60Utils {
   }
 
   private static BaseProperty releaseType(Object releaseType, int version) {
-    BaseProperty baseProperty = BaseProperty.builder().value(releaseType).format(CommonConstant.FIELD_TYPE[0])
+    BaseProperty baseProperty = BaseProperty.builder().value(releaseType)
+        .format(CommonConstant.FIELD_TYPE[0])
         .property(MetadataField.RELEASE_TYPE.getName())
         .index("6").valid(
             Objects.nonNull(releaseType) && releaseType instanceof String releaseTypeStr && List.of(
