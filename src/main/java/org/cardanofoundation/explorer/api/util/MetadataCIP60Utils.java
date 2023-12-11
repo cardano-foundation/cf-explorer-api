@@ -166,15 +166,16 @@ public class MetadataCIP60Utils {
               links(links, null,
                   String.valueOf(optionalProperties.size() + 1), version));
         }
-        contributingArtists(
+        int subArtistOne = contributingArtists(
             assetValMap.get(MetadataField.CONTRIBUTING_ARTISTS.getName()), optionalProperties,
             String.valueOf((optionalProperties.size() + 1)),
             version);
-        featuredArtist(assetValMap.get(MetadataField.FEATURED_ARTIST.getName()),
+        int subArtistTwo = featuredArtist(assetValMap.get(MetadataField.FEATURED_ARTIST.getName()),
             optionalProperties, String.valueOf((optionalProperties.size() + 1)), version);
-        basePropertiesPartOne(assetValMap, optionalProperties, null, version);
-        basePropertiesPartTwo(assetValMap, optionalProperties, null, version);
-        basePropertiesPartThree(assetValMap, optionalProperties, null, version);
+        int subArtist = subArtistOne + subArtistTwo;
+        basePropertiesPartOne(assetValMap, optionalProperties, null, version, subArtist);
+        basePropertiesPartTwo(assetValMap, optionalProperties, null, version, subArtist);
+        basePropertiesPartThree(assetValMap, optionalProperties, null, version, subArtist);
       }
       case "Multiple" ->
           filesVerOneMultiple(assetValMap.get(MetadataField.FILES.getName()), requireProperties,
@@ -295,8 +296,8 @@ public class MetadataCIP60Utils {
   }
 
   private static void basePropertiesPartThree(Map<?, ?> valMap,
-      List<BaseProperty> baseProperties, String indexInSong, int version) {
-    int index = baseProperties.size() + 1;
+      List<BaseProperty> baseProperties, String indexInSong, int version, int subArtist) {
+    int index = baseProperties.size() + 1 - subArtist;
     Object explicit = valMap.get(MetadataField.EXPLICIT.getName());
     if (Objects.nonNull(explicit)) {
       baseProperties.add(
@@ -379,8 +380,8 @@ public class MetadataCIP60Utils {
   }
 
   private static void basePropertiesPartTwo(Map<?, ?> valMap,
-      List<BaseProperty> baseProperties, String indexInSong, int version) {
-    int index = baseProperties.size() + 1;
+      List<BaseProperty> baseProperties, String indexInSong, int version, int subArtist) {
+    int index = baseProperties.size() + 1 - subArtist;
     Object publicationDate = valMap.get(MetadataField.PUBLICATION_DATE.getName());
     if (Objects.nonNull(publicationDate)) {
       baseProperties.add(
@@ -463,9 +464,9 @@ public class MetadataCIP60Utils {
   }
 
   private static void basePropertiesPartOne(Map<?, ?> valMap, List<BaseProperty> baseProperties,
-      String indexInSong, int version) {
+      String indexInSong, int version, int subArtist) {
     Object series = valMap.get(MetadataField.SERIES.getName());
-    int index = baseProperties.size() + 1;
+    int index = baseProperties.size() + 1 - subArtist;
     if (Objects.nonNull(series)) {
       baseProperties.add(
           metadataString(series, MetadataField.SERIES.getName(), indexInSong,
@@ -633,45 +634,49 @@ public class MetadataCIP60Utils {
     List<BaseProperty> requirePropertiesInFile = new ArrayList<>();
     if (Objects.nonNull(files) && files instanceof ArrayList<?> fileList && !fileList.isEmpty()) {
       int indexInFile = 1;
+      List<BaseProperty> requirePropertiesPerFile;
       for (Object file : fileList) {
         if (file instanceof HashMap<?, ?> fileMap) {
+          requirePropertiesPerFile = new ArrayList<>();
           String index = filesProperty.getIndex() + "." + indexInFile;
           BaseProperty nameFile = MetadataCIP25Utils.nameFile(
               fileMap.get(MetadataField.NAME.getName()),
               version);
           nameFile.setIndex(index + ".1");
-          requirePropertiesInFile.add(nameFile);
+          requirePropertiesPerFile.add(nameFile);
           BaseProperty srcFile = MetadataCIP25Utils.srcFile(
               fileMap.get(MetadataField.SRC.getName()),
               version);
           srcFile.setIndex(index + ".2");
-          requirePropertiesInFile.add(srcFile);
+          requirePropertiesPerFile.add(srcFile);
           BaseProperty mediaTypeFile = MetadataCIP25Utils.mediaTypeFile(
               fileMap.get(MetadataField.MEDIA_TYPE.getName()), version);
           mediaTypeFile.setIndex(index + ".3");
-          requirePropertiesInFile.add(mediaTypeFile);
-          artists(fileMap.get(MetadataField.ARTISTS.getName()),
-              requirePropertiesInFile, index + ".4", version);
-          requirePropertiesInFile.add(
+          requirePropertiesPerFile.add(mediaTypeFile);
+          int subArtistOne = artists(fileMap.get(MetadataField.ARTISTS.getName()),
+              requirePropertiesPerFile, index + ".4", version);
+          requirePropertiesPerFile.add(
               trackNumber(fileMap.get(MetadataField.TRACK_NUMBER.getName()), index + ".5",
                   version));
-          requirePropertiesInFile.add(
+          requirePropertiesPerFile.add(
               songTitle(fileMap.get(MetadataField.SONG_TITLE.getName()), index + ".6", version));
-          requirePropertiesInFile.add(
+          requirePropertiesPerFile.add(
               songDuration(fileMap.get(MetadataField.SONG_DURATION.getName()), index + ".7",
                   version));
-          requirePropertiesInFile.add(
+          requirePropertiesPerFile.add(
               genres(fileMap.get(MetadataField.GENRES.getName()), index + ".8", version));
-          requirePropertiesInFile.add(
+          requirePropertiesPerFile.add(
               copyright(fileMap.get(MetadataField.COPYRIGHT.getName()), index + ".9", version));
-          contributingArtists(
-              fileMap.get(MetadataField.CONTRIBUTING_ARTISTS.getName()), requirePropertiesInFile,
+          int subArtistTwo = contributingArtists(
+              fileMap.get(MetadataField.CONTRIBUTING_ARTISTS.getName()), requirePropertiesPerFile,
               index + ".10", version);
-          featuredArtist(fileMap.get(MetadataField.FEATURED_ARTIST.getName()),
-              requirePropertiesInFile, index + ".11", version);
-          basePropertiesPartOne(fileMap, requirePropertiesInFile, index, version);
-          basePropertiesPartTwo(fileMap, requirePropertiesInFile, index, version);
-          basePropertiesPartThree(fileMap, requirePropertiesInFile, index, version);
+          int subArtistThree = featuredArtist(fileMap.get(MetadataField.FEATURED_ARTIST.getName()),
+              requirePropertiesPerFile, index + ".11", version);
+          int subArtist = subArtistOne + subArtistTwo + subArtistThree;
+          basePropertiesPartOne(fileMap, requirePropertiesPerFile, index, version, subArtist);
+          basePropertiesPartTwo(fileMap, requirePropertiesPerFile, index, version, subArtist);
+          basePropertiesPartThree(fileMap, requirePropertiesPerFile, index, version, subArtist);
+          requirePropertiesInFile.addAll(requirePropertiesPerFile);
           indexInFile++;
         }
       }
@@ -723,7 +728,7 @@ public class MetadataCIP60Utils {
           String indexInSong = songProp.getIndex();
           if (Objects.nonNull(song) && song instanceof HashMap<?, ?> songMap) {
             List<BaseProperty> requirePropertiesInSong = new ArrayList<>();
-            artists(songMap.get(MetadataField.ARTISTS.getName()),
+            int subArtistOne = artists(songMap.get(MetadataField.ARTISTS.getName()),
                 requirePropertiesInSong, indexInSong + ".1", version);
             requirePropertiesInSong.add(
                 trackNumber(songMap.get(MetadataField.TRACK_NUMBER.getName()),
@@ -740,14 +745,19 @@ public class MetadataCIP60Utils {
             requirePropertiesInSong.add(
                 copyright(songMap.get(MetadataField.COPYRIGHT.getName()),
                     indexInSong + ".6", version));
-            contributingArtists(
+            int subArtistTwo = contributingArtists(
                 songMap.get(MetadataField.CONTRIBUTING_ARTISTS.getName()), requirePropertiesInSong,
                 indexInSong + ".7", version);
-            featuredArtist(songMap.get(MetadataField.FEATURED_ARTIST.getName()),
+            int subArtistThree = featuredArtist(
+                songMap.get(MetadataField.FEATURED_ARTIST.getName()),
                 requirePropertiesInSong, indexInSong + ".8", version);
-            basePropertiesPartOne(songMap, requirePropertiesInSong, indexInSong + ".9", version);
-            basePropertiesPartTwo(songMap, requirePropertiesInSong, indexInSong + ".9", version);
-            basePropertiesPartThree(songMap, requirePropertiesInSong, indexInSong + ".9", version);
+            int subArtist = subArtistOne + subArtistTwo + subArtistThree;
+            basePropertiesPartOne(songMap, requirePropertiesInSong, indexInSong, version,
+                subArtist);
+            basePropertiesPartTwo(songMap, requirePropertiesInSong, indexInSong, version,
+                subArtist);
+            basePropertiesPartThree(songMap, requirePropertiesInSong, indexInSong, version,
+                subArtist);
             songProp.setValid(requirePropertiesInSong.stream()
                 .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
             requirePropertiesInFile.add(songProp);
@@ -960,7 +970,7 @@ public class MetadataCIP60Utils {
     return arr.stream().allMatch(String.class::isInstance);
   }
 
-  private static void artists(Object artists, List<BaseProperty> requireProperties,
+  private static int artists(Object artists, List<BaseProperty> requireProperties,
       String ind,
       int version) {
     BaseProperty artistsProperty = BaseProperty.builder().valid(false)
@@ -968,6 +978,7 @@ public class MetadataCIP60Utils {
         .index(ind)
         .format(CommonConstant.FIELD_TYPE[16])
         .build();
+    int subArtist = 0;
     if (Objects.nonNull(artists) && artists instanceof ArrayList<?> artistList
         && !artistList.isEmpty()) {
       List<BaseProperty> requirePropertiesInArtist = new ArrayList<>();
@@ -979,11 +990,13 @@ public class MetadataCIP60Utils {
               artistMap.get(MetadataField.NAME.getName()), MetadataField.NAME.getName(),
               index, "1", version);
           requirePropertiesInArtist.add(nameArtist);
+          subArtist++;
           Object image = artistMap.get(MetadataField.IMAGE.getName());
           if (Objects.nonNull(image)) {
             BaseProperty imageArtist = metadataArrayOrString(image,
                 MetadataField.IMAGE.getName(), index, "2", version);
             requirePropertiesInArtist.add(imageArtist);
+            subArtist++;
           }
           indexInArtist++;
         }
@@ -1003,11 +1016,14 @@ public class MetadataCIP60Utils {
       BaseProperty nameArtist = metadataString(null, MetadataField.NAME.getName(),
           ind + ".1", "1", version);
       requireProperties.add(nameArtist);
+      subArtist++;
     }
+    return subArtist;
   }
 
-  private static void contributingArtists(Object contributingArtists,
+  private static int contributingArtists(Object contributingArtists,
       List<BaseProperty> baseProperties, String ind, int version) {
+    int subArtist = 0;
     if (Objects.nonNull(contributingArtists)
         && contributingArtists instanceof ArrayList<?> artistList
         && !artistList.isEmpty()) {
@@ -1026,12 +1042,14 @@ public class MetadataCIP60Utils {
               index, "1", version);
           validArtists.add(nameArtist.getValid());
           baseProperties.add(nameArtist);
+          subArtist++;
           Object image = artistMap.get(MetadataField.IMAGE.getName());
           if (Objects.nonNull(image)) {
             BaseProperty imageArtist = metadataArrayOrString(image,
                 MetadataField.IMAGE.getName(), index, "2", version);
             validArtists.add(imageArtist.getValid());
             baseProperties.add(imageArtist);
+            subArtist++;
           }
           indexInArtist++;
         }
@@ -1045,10 +1063,12 @@ public class MetadataCIP60Utils {
       }
       baseProperties.add(artistsProperty);
     }
+    return subArtist;
   }
 
-  private static void featuredArtist(Object featuredArtist,
+  private static int featuredArtist(Object featuredArtist,
       List<BaseProperty> baseProperties, String ind, int version) {
+    int subArtist = 0;
     if (Objects.nonNull(featuredArtist) && featuredArtist instanceof HashMap<?, ?> artistMap) {
       BaseProperty artistsProperty = BaseProperty.builder().valid(false)
           .property(MetadataField.FEATURED_ARTIST.getName())
@@ -1061,12 +1081,14 @@ public class MetadataCIP60Utils {
           ind, "1", version);
       validArtists.add(nameArtist.getValid());
       baseProperties.add(nameArtist);
+      subArtist++;
       Object image = artistMap.get(MetadataField.IMAGE.getName());
       if (Objects.nonNull(image)) {
         BaseProperty imageArtist = metadataArrayOrString(image,
             MetadataField.IMAGE.getName(), ind, "2", version);
         validArtists.add(imageArtist.getValid());
         baseProperties.add(imageArtist);
+        subArtist++;
       }
       if (version == 0) {
         artistsProperty.setValid(null);
@@ -1077,6 +1099,7 @@ public class MetadataCIP60Utils {
       }
       baseProperties.add(artistsProperty);
     }
+    return subArtist;
   }
 
   private static BaseProperty copyright(Object copyright, String index, int version) {
