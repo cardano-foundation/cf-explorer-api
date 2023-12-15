@@ -188,7 +188,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
           }
         }
       } else {
-        res.setPoolSize(getStakeFromCache(poolView, epochNo));
+        res.setPoolSize(getStakeFromCache(projection.getPoolView(), epochNo));
       }
       res.setStakeKeys(poolUpdateRepository.findOwnerAccountByPoolView(poolView));
       res.setRewardAvailable(rewardRepository.getTotalRewardByPool(poolView));
