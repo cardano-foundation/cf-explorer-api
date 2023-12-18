@@ -2,7 +2,6 @@ package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -180,9 +179,4 @@ public interface ParamProposalRepository extends JpaRepository<ParamProposal, Lo
       + " ORDER BY ep.epochNo DESC ")
   List<LatestParamHistory> findProtocolsChange(@Param("epochNo") Integer epochNo);
 
-
-  @Query("SELECT DISTINCT pp.key "
-      + "FROM ParamProposal  pp "
-      + "WHERE pp.epochNo = :epochNo ")
-  Set<String> findKeysByEpochNo(@Param("epochNo") Integer epochNo);
 }

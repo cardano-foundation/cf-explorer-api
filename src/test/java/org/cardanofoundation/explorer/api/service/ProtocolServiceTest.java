@@ -13,7 +13,6 @@ import java.util.Set;
 import org.cardanofoundation.explorer.api.model.response.protocol.*;
 import org.cardanofoundation.explorer.api.projection.LatestParamHistory;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.ledgersync.common.model.ByronGenesis;
 import org.cardanofoundation.ledgersync.common.model.ShelleyGenesis;
 import org.mockito.Mockito;
@@ -33,6 +32,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ParamProposalRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.impl.ProtocolParamServiceImpl;
+import org.cardanofoundation.explorer.api.test.projection.EpochTimeProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.ParamHistoryProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
@@ -72,6 +72,7 @@ class ProtocolServiceTest {
   RedisTemplate<String, Object> redisTemplate;
   @Mock
   ValueOperations valueOperations;
+
   @Spy
   ProtocolMapper protocolMapper = Mappers.getMapper(ProtocolMapper.class);
 
@@ -137,35 +138,41 @@ class ProtocolServiceTest {
                          List<CostModel> costModels,
                          List<EpochTimeProjection> epoch) {
 
-    EpochTimeProjection epoch1 = new EpochTimeProjection(
-        1,
-        getTimeStampUTC(baseTime),
-        getTimeStampPlusDays(baseTime, 5, 0));
+    EpochTimeProjection epoch1 = EpochTimeProjectionImpl.builder()
+            .epochNo(1)
+            .startTime(getTimeStampUTC(baseTime))
+            .endTime(getTimeStampPlusDays(baseTime, 5, 0))
+            .build();
 
-    EpochTimeProjection epoch2 = new EpochTimeProjection(
-        2,
-        getTimeStampPlusDays(baseTime, 5, 1),
-        getTimeStampPlusDays(baseTime, 10, 0));
+    EpochTimeProjection epoch2 = EpochTimeProjectionImpl.builder()
+            .epochNo(2)
+            .startTime(getTimeStampPlusDays(baseTime, 5, 1))
+            .endTime(getTimeStampPlusDays(baseTime, 10, 0))
+            .build();
 
-    EpochTimeProjection epoch3 = new EpochTimeProjection(
-            3,
-            getTimeStampPlusDays(baseTime, 10, 1),
-            getTimeStampPlusDays(baseTime, 15, 0));
+    EpochTimeProjection epoch3 = EpochTimeProjectionImpl.builder()
+            .epochNo(3)
+            .startTime(getTimeStampPlusDays(baseTime, 10, 1))
+            .endTime(getTimeStampPlusDays(baseTime, 15, 0))
+            .build();
 
-    EpochTimeProjection epoch4 = new EpochTimeProjection(
-            4,
-            getTimeStampPlusDays(baseTime, 15, 1),
-            getTimeStampPlusDays(baseTime, 20, 0));
+    EpochTimeProjection epoch4 = EpochTimeProjectionImpl.builder()
+            .epochNo(4)
+            .startTime(getTimeStampPlusDays(baseTime, 15, 1))
+            .endTime(getTimeStampPlusDays(baseTime, 20, 0))
+            .build();
 
-    EpochTimeProjection epoch5 = new EpochTimeProjection(
-            5,
-            getTimeStampPlusDays(baseTime, 20, 1),
-            getTimeStampPlusDays(baseTime, 25, 0));
+    EpochTimeProjection epoch5 = EpochTimeProjectionImpl.builder()
+            .epochNo(5)
+            .startTime(getTimeStampPlusDays(baseTime, 20, 1))
+            .endTime(getTimeStampPlusDays(baseTime, 25, 0))
+            .build();
 
-    EpochTimeProjection epoch6 = new EpochTimeProjection(
-            6,
-            getTimeStampPlusDays(baseTime, 25, 1),
-            getTimeStampPlusDays(baseTime, 30, 0));
+    EpochTimeProjection epoch6 = EpochTimeProjectionImpl.builder()
+            .epochNo(6)
+            .startTime(getTimeStampPlusDays(baseTime, 25, 1))
+            .endTime(getTimeStampPlusDays(baseTime, 30, 0))
+            .build();
 
     epoch.add(epoch1);
     epoch.add(epoch2);
@@ -416,8 +423,6 @@ class ProtocolServiceTest {
     when(epochRepository.findEpochTime(any(), any()))
             .thenReturn(epochs);
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     var actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),
             startTime,
             endTime);
@@ -478,8 +483,6 @@ class ProtocolServiceTest {
     when(epochRepository.findEpochTime(any(), any()))
             .thenReturn(epochs);
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     var actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),
             startTime,
             endTime);
@@ -535,8 +538,6 @@ class ProtocolServiceTest {
 
     when(epochRepository.findEpochTime(any(), any()))
             .thenReturn(epochs);
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     var actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),
             startTime,
@@ -595,8 +596,6 @@ class ProtocolServiceTest {
 
     when(epochRepository.findEpochTime(any(), any()))
             .thenReturn(epochs);
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     var actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),
             startTime,
@@ -667,8 +666,6 @@ class ProtocolServiceTest {
     when(epochRepository.findEpochTime(any(), any()))
             .thenReturn(epochs);
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     var actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),
             startTime,
             endTime);
@@ -737,8 +734,6 @@ class ProtocolServiceTest {
     when(epochRepository.findEpochTime(any(), any()))
             .thenReturn(epochs);
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     var actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),
             startTime,
             endTime);
@@ -803,12 +798,9 @@ class ProtocolServiceTest {
     when(epochRepository.findEpochTime(any(), any()))
             .thenReturn(epochs);
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     var actual = protocolParamService.getHistoryProtocolParameters(List.of(ProtocolType.MIN_FEE_A),
             startTime,
             endTime);
-
 
     List<EpochChange> excpectEpochChanges = List.of(EpochChange.builder()
                     .startEpoch(6)
@@ -898,8 +890,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_FEE_A), null, null);
 
@@ -953,8 +943,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_FEE_B), null, null);
 
@@ -1007,8 +995,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_SIZE), null, null);
@@ -1064,8 +1050,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_SIZE), null, null);
 
@@ -1119,8 +1103,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BH_SIZE), null, null);
@@ -1176,8 +1158,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.KEY_DEPOSIT), null, null);
 
@@ -1231,8 +1211,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.POOL_DEPOSIT), null, null);
@@ -1288,8 +1266,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_EPOCH), null, null);
 
@@ -1342,8 +1318,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.OPTIMAL_POOL_COUNT), null, null);
@@ -1399,8 +1373,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_EX_MEM), null, null);
 
@@ -1454,8 +1426,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_EX_STEPS), null, null);
@@ -1511,8 +1481,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.INFLUENCE), null, null);
 
@@ -1566,8 +1534,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_EX_MEM), null, null);
@@ -1623,8 +1589,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_EX_STEPS), null, null);
 
@@ -1678,8 +1642,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_VAL_SIZE), null, null);
@@ -1735,8 +1697,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COINS_PER_UTXO_SIZE), null, null);
 
@@ -1790,8 +1750,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MONETARY_EXPAND_RATE), null, null);
@@ -1847,8 +1805,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.TREASURY_GROWTH_RATE), null, null);
 
@@ -1902,8 +1858,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.DECENTRALISATION), null, null);
@@ -1959,8 +1913,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PRICE_MEM), null, null);
 
@@ -2014,8 +1966,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PRICE_STEP), null, null);
@@ -2071,8 +2021,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PROTOCOL_MAJOR), null, null);
 
@@ -2126,8 +2074,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PROTOCOL_MINOR), null, null);
@@ -2183,8 +2129,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COLLATERAL_PERCENT), null, null);
 
@@ -2239,8 +2183,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_COLLATERAL_INPUTS), null, null);
 
@@ -2294,8 +2236,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.ENTROPY), null, null);
@@ -2357,8 +2297,6 @@ class ProtocolServiceTest {
                     .costs("2")
                     .build()));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COST_MODEL), null, null);
 
@@ -2412,8 +2350,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_UTXO_VALUE), null, null);
@@ -2469,8 +2405,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(tx));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_POOL_COST), null, null);
 
@@ -2502,8 +2436,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_FEE_A), null, null);
 
@@ -2530,8 +2462,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_FEE_B), null, null);
@@ -2563,8 +2493,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_SIZE), null, null);
 
@@ -2594,8 +2522,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_SIZE), null, null);
@@ -2627,8 +2553,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BH_SIZE), null, null);
 
@@ -2658,8 +2582,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.KEY_DEPOSIT), null, null);
@@ -2691,8 +2613,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.POOL_DEPOSIT), null, null);
 
@@ -2722,8 +2642,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_EPOCH), null, null);
@@ -2755,8 +2673,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.OPTIMAL_POOL_COUNT), null, null);
 
@@ -2786,8 +2702,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.INFLUENCE), null, null);
@@ -2819,8 +2733,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MONETARY_EXPAND_RATE), null, null);
 
@@ -2850,8 +2762,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.TREASURY_GROWTH_RATE), null, null);
@@ -2883,8 +2793,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.DECENTRALISATION), null, null);
 
@@ -2914,8 +2822,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.ENTROPY), null, null);
@@ -2947,8 +2853,6 @@ class ProtocolServiceTest {
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PROTOCOL_MAJOR), null, null);
 
@@ -2978,7 +2882,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PROTOCOL_MINOR), null, null);
@@ -3009,7 +2912,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_UTXO_VALUE), null, null);
@@ -3040,7 +2942,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_POOL_COST), null, null);
@@ -3071,7 +2972,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COST_MODEL), null, null);
@@ -3102,7 +3002,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PRICE_MEM), null, null);
@@ -3133,7 +3032,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PRICE_STEP), null, null);
@@ -3164,7 +3062,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_EX_MEM), null, null);
@@ -3195,7 +3092,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_EX_STEPS), null, null);
@@ -3226,7 +3122,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_EX_MEM), null, null);
@@ -3257,7 +3152,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_EX_STEPS), null, null);
@@ -3288,7 +3182,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_VAL_SIZE), null, null);
@@ -3319,7 +3212,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COLLATERAL_PERCENT), null, null);
@@ -3349,7 +3241,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_COLLATERAL_INPUTS), null, null);
@@ -3380,7 +3271,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(Collections.emptyList());
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COINS_PER_UTXO_SIZE), null, null);
@@ -3430,7 +3320,6 @@ class ProtocolServiceTest {
 
     when(paramProposalRepository.findProtocolsChange())
             .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     EpochParam epochParamOne = EpochParam.builder()
             .epochNo(1)
@@ -3525,7 +3414,7 @@ class ProtocolServiceTest {
     //epoch
     when(epochParamRepository.findAll())
             .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     // tx
     Tx txOne = Tx.builder()
             .id(BigInteger.ONE.longValue())
@@ -3615,7 +3504,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_FEE_B), null, null);
 
@@ -3690,7 +3579,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_FEE_B), null, null);
 
@@ -3761,7 +3650,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_SIZE), null, null);
 
@@ -3836,7 +3725,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_SIZE), null, null);
 
@@ -3907,7 +3796,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_SIZE), null, null);
 
@@ -3982,7 +3871,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_SIZE), null, null);
 
@@ -4053,7 +3942,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BH_SIZE), null, null);
 
@@ -4128,7 +4017,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BH_SIZE), null, null);
 
@@ -4199,7 +4088,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.KEY_DEPOSIT), null, null);
 
@@ -4274,7 +4163,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.KEY_DEPOSIT), null, null);
 
@@ -4345,7 +4234,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.POOL_DEPOSIT), null, null);
 
@@ -4420,7 +4309,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.POOL_DEPOSIT), null, null);
 
@@ -4491,7 +4380,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_EPOCH), null, null);
 
@@ -4566,7 +4455,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_EPOCH), null, null);
 
@@ -4637,7 +4526,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.OPTIMAL_POOL_COUNT), null, null);
 
@@ -4712,7 +4601,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.OPTIMAL_POOL_COUNT), null, null);
 
@@ -4783,7 +4672,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.INFLUENCE), null, null);
 
@@ -4858,7 +4747,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.INFLUENCE), null, null);
 
@@ -4929,7 +4818,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MONETARY_EXPAND_RATE), null, null);
 
@@ -5004,7 +4893,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MONETARY_EXPAND_RATE), null, null);
 
@@ -5075,7 +4964,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.TREASURY_GROWTH_RATE), null, null);
 
@@ -5150,7 +5039,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.TREASURY_GROWTH_RATE), null, null);
 
@@ -5221,7 +5110,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.DECENTRALISATION), null, null);
 
@@ -5296,7 +5185,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.DECENTRALISATION), null, null);
 
@@ -5367,7 +5256,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PROTOCOL_MAJOR), null, null);
 
@@ -5442,7 +5331,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PROTOCOL_MAJOR), null, null);
 
@@ -5513,7 +5402,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PROTOCOL_MINOR), null, null);
 
@@ -5588,7 +5477,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PROTOCOL_MINOR), null, null);
 
@@ -5659,7 +5548,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_UTXO_VALUE), null, null);
 
@@ -5734,7 +5623,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_UTXO_VALUE), null, null);
 
@@ -5805,7 +5694,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_POOL_COST), null, null);
 
@@ -5880,7 +5769,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MIN_POOL_COST), null, null);
 
@@ -5957,7 +5846,6 @@ class ProtocolServiceTest {
                     .id(2L)
                     .costs("2")
                     .build()));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COST_MODEL), null, null);
@@ -6015,7 +5903,6 @@ class ProtocolServiceTest {
     //epoch
     when(epochParamRepository.findAll())
             .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     // tx
     Tx txOne = Tx.builder()
@@ -6074,8 +5961,6 @@ class ProtocolServiceTest {
 
     when(paramProposalRepository.findProtocolsChange())
             .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     EpochParam epochParamOne = EpochParam.builder()
             .epochNo(1)
@@ -6189,7 +6074,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PRICE_MEM), null, null);
 
@@ -6222,8 +6107,6 @@ class ProtocolServiceTest {
 
     when(paramProposalRepository.findProtocolsChange())
             .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     EpochParam epochParamOne = EpochParam.builder()
             .epochNo(1)
@@ -6337,7 +6220,6 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.PRICE_STEP), null, null);
@@ -6390,8 +6272,6 @@ class ProtocolServiceTest {
     //epoch
     when(epochParamRepository.findAll())
             .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     // tx
     Tx txOne = Tx.builder()
@@ -6468,8 +6348,6 @@ class ProtocolServiceTest {
     when(epochParamRepository.findAll())
             .thenReturn(List.of(epochParamOne, epochParamTwo, epochParamThree));
 
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
-
     // tx
     Tx txOne = Tx.builder()
             .id(BigInteger.ONE.longValue())
@@ -6521,8 +6399,6 @@ class ProtocolServiceTest {
 
     when(paramProposalRepository.findProtocolsChange())
             .thenReturn(List.of(protocolChangeEpochOne, protocolChangeEpochTwo));
-
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
 
     EpochParam epochParamOne = EpochParam.builder()
             .epochNo(1)
@@ -6636,7 +6512,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_TX_EX_STEPS), null, null);
 
@@ -6709,7 +6585,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_EX_MEM), null, null);
 
@@ -6784,7 +6660,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_EX_MEM), null, null);
 
@@ -6855,7 +6731,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_EX_STEPS), null, null);
 
@@ -6930,7 +6806,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_BLOCK_EX_STEPS), null, null);
 
@@ -7001,7 +6877,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_VAL_SIZE), null, null);
 
@@ -7076,7 +6952,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_VAL_SIZE), null, null);
 
@@ -7147,7 +7023,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COLLATERAL_PERCENT), null, null);
 
@@ -7222,7 +7098,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COLLATERAL_PERCENT), null, null);
 
@@ -7293,7 +7169,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_COLLATERAL_INPUTS), null, null);
 
@@ -7368,7 +7244,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.MAX_COLLATERAL_INPUTS), null, null);
 
@@ -7439,7 +7315,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COINS_PER_UTXO_SIZE), null, null);
 
@@ -7514,7 +7390,7 @@ class ProtocolServiceTest {
 
     when(txRepository.findByIdIn(anyList()))
             .thenReturn(List.of(txOne, txTwo));
-    when(epochRepository.findByCurrentEpochNo()).thenReturn(Optional.of(Epoch.builder().no(100).build()));
+
     HistoriesProtocol actual = protocolParamService.getHistoryProtocolParameters(
             List.of(ProtocolType.COINS_PER_UTXO_SIZE), null, null);
 

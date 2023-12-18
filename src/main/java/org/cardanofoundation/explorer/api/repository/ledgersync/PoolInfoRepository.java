@@ -33,7 +33,7 @@ public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {
       Pageable pageable);
 
   @Query(value = "SELECT pi.activeStake FROM PoolInfo pi "
-      + "WHERE (pi.pool.view = :poolId OR pi.pool.hashRaw = :poolId) AND pi.fetchedAtEpoch = :epochNo")
+      + "WHERE pi.pool.view = :poolId AND pi.fetchedAtEpoch = :epochNo")
   BigInteger getActiveStakeByPoolAndEpoch(@Param("poolId") String poolId,
       @Param("epochNo") Integer epochNo);
 
