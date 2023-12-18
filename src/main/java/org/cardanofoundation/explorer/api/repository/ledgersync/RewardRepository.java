@@ -114,7 +114,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
   @Query(value = "SELECT sum(rw.amount) "
       + "FROM Reward rw "
       + "JOIN PoolHash ph ON rw.pool.id = ph.id "
-      + "WHERE (ph.view  = :poolView OR ph.hashRaw = :poolView) AND rw.type = 'leader' ")
+      + "WHERE ph.view  = :poolView AND rw.type = 'leader' ")
   BigInteger getTotalRewardByPool(@Param("poolView") String poolView);
 
   Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);

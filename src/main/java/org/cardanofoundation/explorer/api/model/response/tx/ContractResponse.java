@@ -19,7 +19,6 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeTy
 @AllArgsConstructor
 @Builder
 public class ContractResponse {
-  @JsonIgnore
   private String address;
   private String scriptHash;
   private ScriptPurposeType purpose;
@@ -33,7 +32,6 @@ public class ContractResponse {
   private String datumBytesOut;
   @JsonIgnore
   private Long txOutId;
-  @JsonIgnore
   private String stakeAddress;
   private List<TokenAddressResponse> mintingTokens;
   private List<TokenAddressResponse> burningTokens;
@@ -41,6 +39,4 @@ public class ContractResponse {
   private String utxoHash;
   private RedeemerCertType redeemerCertType;
   private List<TxReferenceInput> referenceInputs;
-  private List<String> executionInputs;
-  private List<String> executionOutputs;
 }
