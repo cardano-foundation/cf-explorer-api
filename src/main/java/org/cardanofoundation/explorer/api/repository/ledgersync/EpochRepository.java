@@ -45,8 +45,7 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
   List<UniqueAddressProjection> getTotalAccountsAtEpoch(@Param("epochNo") Integer epochNo, @Param("txId") Long txId);
 
 
-  @Query(value = "SELECT new org.cardanofoundation.explorer.api.projection.EpochTimeProjection( "
-      + "e.no, e.startTime, e.endTime) "
+  @Query(value = "SELECT  e.no AS epochNo , e.startTime AS startTime , e.endTime AS endTime "
       + "FROM Epoch e "
       + "WHERE e.no BETWEEN :min AND :max")
   List<EpochTimeProjection> findEpochTime(@Param("min") Integer min, @Param("max") Integer max);

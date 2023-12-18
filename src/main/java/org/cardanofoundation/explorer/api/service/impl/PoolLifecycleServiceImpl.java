@@ -180,7 +180,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
       res.setRewardAccounts(poolUpdateRepository.findRewardAccountByPoolId(projection.getId()));
       Integer epochNo = epochRepository.findCurrentEpochNo().orElse(null);
       if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
-        res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(projection.getPoolView(), epochNo));
+        res.setPoolSize(poolInfoRepository.getActiveStakeByPoolAndEpoch(poolView, epochNo));
         Boolean isReward = fetchRewardDataService.checkRewardForPool(res.getRewardAccounts());
         if (Boolean.FALSE.equals(isReward)) {
           fetchRewardDataService.fetchRewardForPool(res.getRewardAccounts());

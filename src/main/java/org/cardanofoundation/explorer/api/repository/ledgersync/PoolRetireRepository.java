@@ -66,7 +66,7 @@ public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {
 
   @Query(value = "SELECT pr.retiringEpoch FROM PoolRetire pr "
       + "JOIN PoolHash ph ON pr.poolHash.id  = ph.id "
-      + "WHERE ph.view = :poolView OR ph.hashRaw = :poolView "
+      + "WHERE ph.view = :poolView "
       + "ORDER BY pr.id DESC")
   List<Integer> findByPoolView(@Param("poolView") String poolView);
 

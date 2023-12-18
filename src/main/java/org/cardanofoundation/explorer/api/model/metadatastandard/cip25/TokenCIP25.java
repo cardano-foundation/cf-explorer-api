@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.model.metadatastandard.cip;
+package org.cardanofoundation.explorer.api.model.metadatastandard.cip25;
 
 import java.util.List;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
 
 @Getter
 @Setter
-public class TokenCIP {
+public class TokenCIP25 {
 
   private Object tokenName;
 

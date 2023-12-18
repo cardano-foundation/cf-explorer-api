@@ -18,8 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.util.MetadataCIP25Utils;
-import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
+import org.cardanofoundation.explorer.api.util.MetadataStandardUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -312,10 +311,9 @@ public class TokenServiceImpl implements TokenService {
     }
     String assetName =
         Objects.isNull(multiAsset.getNameView()) ? multiAsset.getName() : multiAsset.getNameView();
-    tokenResponse.setMetadataJson(MetadataCIP25Utils.splitJsonMetadataByAssetName(
+    tokenResponse.setMetadataJson(MetadataStandardUtils.splitJsonMetadataByAssetName(
         maTxMintRepository.getTxMetadataToken(multiAsset.getFingerprint(),
             CommonConstant.METADATA_LABEL_721), assetName));
-    tokenResponse.setMetadataCIP25(MetadataCIP25Utils.standard(tokenResponse.getMetadataJson()));
-    tokenResponse.setMetadataCIP60(MetadataCIP60Utils.standard(tokenResponse.getMetadataJson()));
+    tokenResponse.setMetadataCIP25(MetadataStandardUtils.metadataStandardCIP25(tokenResponse.getMetadataJson()));
   }
 }
