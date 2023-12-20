@@ -17,17 +17,21 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
+import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
 import org.cardanofoundation.ledgersync.common.common.nativescript.*;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +45,6 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
 import org.cardanofoundation.explorer.api.projection.PolicyProjection;
-import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
@@ -55,7 +58,6 @@ import org.springframework.util.CollectionUtils;
 public class ScriptServiceImpl implements ScriptService {
 
   private final ScriptRepository scriptRepository;
-  private final TxOutRepository txOutRepository;
   private final MultiAssetRepository multiAssetRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RedeemerRepository redeemerRepository;
@@ -65,6 +67,7 @@ public class ScriptServiceImpl implements ScriptService {
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final BlockRepository blockRepository;
+  private final SmartContractInfoRepository smartContractInfoRepository;
 
   private final TxService txService;
 
@@ -298,40 +301,21 @@ public class ScriptServiceImpl implements ScriptService {
   }
 
   @Override
-  public BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(Pageable pageable) {
-    List<ScriptType> smartContractTypes = List.of(ScriptType.PLUTUSV1, ScriptType.PLUTUSV2);
-    Page<Script> smartContracts = scriptRepository.findAllByTypeIn(smartContractTypes, pageable);
-    List<String> scriptHashList = smartContracts.getContent().stream().map(Script::getHash).toList();
-    List<SmartContractProjection> paymentAddressList =
-        txOutRepository.findPaymentAssociatedAddressByHashIn(scriptHashList);
-    Map<String, List<String>> paymentAddressMap = paymentAddressList.stream()
-        .collect(Collectors.groupingBy(
-            SmartContractProjection::getScriptHash,
-            Collectors.mapping(SmartContractProjection::getAddress, Collectors.toList())));
-    List<SmartContractProjection> stakeAddressList =
-        stakeAddressRepository.findStakeAssociatedAddressByHashIn(scriptHashList);
-    Map<String, List<String>> stakeAddressMap = stakeAddressList.stream()
-        .collect(Collectors.groupingBy(
-            SmartContractProjection::getScriptHash,
-            Collectors.mapping(SmartContractProjection::getAddress, Collectors.toList())));
-    Page<SmartContractFilterResponse> smartContractPage = smartContracts.map(
-        script ->  {
-          List<String> stakeAddress = stakeAddressMap.get(script.getHash());
-          if (Objects.isNull(stakeAddress)) {
-            stakeAddress = new ArrayList<>();
-          }
-          List<String> paymentAddress = paymentAddressMap.get(script.getHash());
-          if (Objects.isNull(paymentAddress)) {
-            paymentAddress = new ArrayList<>();
-          }
-          stakeAddress.addAll(paymentAddress);
-          return SmartContractFilterResponse.builder()
-              .scriptHash(script.getHash())
-              .version(script.getType())
-              .associatedAddress(stakeAddress)
-              .build();
-        });
-    return new BaseFilterResponse<>(smartContractPage);
+  public BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(
+      SmartContractFilterRequest filterRequest, Pageable pageable) {
+    scriptMapper.setScriptTxPurpose(filterRequest);
+    Page<SmartContractInfo> smartContractProjections =
+        smartContractInfoRepository
+            .findAllByFilterRequest(filterRequest.getScriptVersion(),
+                                    filterRequest.getIsScriptReward(),
+                                    filterRequest.getIsScriptCert(),
+                                    filterRequest.getIsScriptSpend(),
+                                    filterRequest.getIsScriptMint(),
+                                    filterRequest.getIsScriptAny(),
+                                    pageable);
+
+    return new BaseFilterResponse<>(
+        smartContractProjections.map(scriptMapper::fromSCInfoToSCFilterResponse));
   }
 
   @Override
@@ -360,7 +344,10 @@ public class ScriptServiceImpl implements ScriptService {
   public BaseFilterResponse<SmartContractTxResponse> getSmartContractTxs(String scriptHash,
                                                                          Pageable pageable) {
 
-    Page<Long> txIds = redeemerRepository.findTxIdsInteractWithContract(scriptHash, pageable);
+    long txCount = smartContractInfoRepository.getTxCountByScriptHash(scriptHash);
+    Page<Long> txIds = new PageImpl<>(
+        redeemerRepository.findTxIdsInteractWithContract(scriptHash, pageable), pageable, txCount);
+
     // get smart contract tx map
     Map<Long, SmartContractTxResponse> smartContractTxMap =
         txRepository.getSmartContractTxsByTxIds(txIds.getContent())
