@@ -120,10 +120,6 @@ public class DelegationServiceImpl implements DelegationService {
 
   private final StakeAddressRepository stakeAddressRepository;
 
-  private final AdaPotsRepository adaPotsRepository;
-
-  private final EpochParamRepository epochParamRepository;
-
   private final WithdrawalRepository withdrawalRepository;
 
   private final TxRepository txRepository;
@@ -350,8 +346,10 @@ public class DelegationServiceImpl implements DelegationService {
           .pledge(projection.getPledge())
           .feeAmount(projection.getFee())
           .feePercent(projection.getMargin())
-          .poolSize(projection.getPoolSize())
-          .saturation(projection.getSaturation())
+          .poolSize(BigInteger.valueOf(-1).equals(projection.getPoolSize()) ?
+                    null : projection.getPoolSize())
+          .saturation(Double.valueOf(-1).equals(projection.getSaturation()) ?
+                      null : projection.getSaturation())
           .numberDelegators(aggPoolInfo.getDelegatorCount())
           .lifetimeBlock(aggPoolInfo.getBlockLifeTime())
           .epochBlock(aggPoolInfo.getBlockInEpoch())
@@ -381,8 +379,10 @@ public class DelegationServiceImpl implements DelegationService {
           .pledge(poolListProjection.getPledge())
           .feeAmount(poolListProjection.getFee())
           .feePercent(poolListProjection.getMargin())
-          .poolSize(poolListProjection.getPoolSize())
-          .saturation(poolListProjection.getSaturation())
+          .poolSize(BigInteger.valueOf(-1).equals(poolListProjection.getPoolSize()) ?
+                    null : poolListProjection.getPoolSize())
+          .saturation(Double.valueOf(-1).equals(poolListProjection.getSaturation()) ?
+                      null : poolListProjection.getSaturation())
           .numberDelegators(pool.getNumberDelegators())
           .lifetimeBlock(pool.getLifetimeBlock())
           .epochBlock(pool.getEpochBlock())
