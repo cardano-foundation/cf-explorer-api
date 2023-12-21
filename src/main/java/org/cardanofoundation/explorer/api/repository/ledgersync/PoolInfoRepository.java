@@ -18,7 +18,7 @@ public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {
   BigInteger getTotalLiveStake(@Param("epochNo") Integer epochNo);
 
   @Query(value =
-      "SELECT pi.pool.view AS view, COALESCE(pi.activeStake, 0) AS activeStake, COALESCE(pi.liveSaturation, 0) AS saturation "
+      "SELECT pi.pool.view AS view, pi.activeStake AS activeStake, pi.liveSaturation AS saturation "
           + "FROM PoolInfo pi "
           + "WHERE pi.pool.view IN :poolIds AND pi.fetchedAtEpoch = :epochNo")
   List<PoolInfoKoiosProjection> getPoolInfoKoios(@Param("poolIds") Set<String> poolIds,
