@@ -343,6 +343,9 @@ public class MetadataCIP25Utils {
       } else {
         filesProperty.setValid(
             !optionalPropertiesInFile.isEmpty() && optionalPropertiesInFile.stream()
+                // the validation of "name" property won't affect the validation of "files" optional property
+                .filter(baseProperty -> Objects.nonNull(baseProperty) &&
+                        !baseProperty.getProperty().equals(MetadataField.NAME.getName()))
                 .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
       }
       filesProperty.setIndex(String.valueOf(indexOfFile));
@@ -360,7 +363,12 @@ public class MetadataCIP25Utils {
     List<Boolean> fields = new ArrayList<>();
     for (Map.Entry<Object, TokenCIP> tokenEntry : tokenMap.entrySet()) {
       fields.add(
-          tokenEntry.getValue().getOptionalProperties().stream().map(BaseProperty::getValid)
+          tokenEntry.getValue().getOptionalProperties().stream()
+              // the validation of files[<index>]."name" property of a token won't affect the validation of the tokens
+              .filter(baseProperty -> Objects.nonNull(baseProperty) &&
+                      !(baseProperty.getProperty().equals(MetadataField.NAME.getName()) && baseProperty.getIndex().equals("1.1.1"))
+              )
+              .map(BaseProperty::getValid)
               .allMatch(isValid -> isValid.equals(true)));
       fields.add(
           tokenEntry.getValue().getRequireProperties().stream().map(BaseProperty::getValid)
