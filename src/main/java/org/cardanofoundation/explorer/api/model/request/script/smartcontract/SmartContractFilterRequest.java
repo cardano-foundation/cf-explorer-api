@@ -1,0 +1,35 @@
+package org.cardanofoundation.explorer.api.model.request.script.smartcontract;
+
+import java.util.Set;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class SmartContractFilterRequest {
+
+  ScriptType scriptVersion;
+  Set<ScriptPurposeType> txPurpose;
+
+  @JsonIgnore
+  private Boolean isScriptReward;
+  @JsonIgnore
+  private Boolean isScriptCert;
+  @JsonIgnore
+  private Boolean isScriptSpend;
+  @JsonIgnore
+  private Boolean isScriptMint;
+  @JsonIgnore
+  private Boolean isScriptAny;
+}
