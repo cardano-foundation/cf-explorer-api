@@ -76,4 +76,6 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       + " AND atb.balance > 0 "
       + " GROUP BY ma.policy")
   List<PolicyProjection> countAssetHoldersByPolicyIn(@Param("policyList") List<String> policyList);
+
+  List<MultiAsset> findByPolicy(@Param("policy") String policy, Pageable pageable);
 }
