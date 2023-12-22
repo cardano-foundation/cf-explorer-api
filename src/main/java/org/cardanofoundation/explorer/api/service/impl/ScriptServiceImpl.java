@@ -17,22 +17,29 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
+import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.cache.NativeScriptTopMultiAssetsCacheRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.api.specification.NativeScriptInfoSpecification;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
 import org.cardanofoundation.ledgersync.common.common.nativescript.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -44,6 +51,7 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
+import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
 import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -58,6 +66,7 @@ import org.springframework.util.CollectionUtils;
 public class ScriptServiceImpl implements ScriptService {
 
   private final ScriptRepository scriptRepository;
+  private final NativeScriptInfoRepository nativeScriptInfoRepository;
   private final MultiAssetRepository multiAssetRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RedeemerRepository redeemerRepository;
@@ -67,8 +76,8 @@ public class ScriptServiceImpl implements ScriptService {
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final BlockRepository blockRepository;
+  private final NativeScriptTopMultiAssetsCacheRepository nativeScriptTopMultiAssetsCacheRepository;
   private final SmartContractInfoRepository smartContractInfoRepository;
-
   private final TxService txService;
 
   private final ScriptMapper scriptMapper;
@@ -90,36 +99,68 @@ public class ScriptServiceImpl implements ScriptService {
 
 
   @Override
-  public BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(Pageable pageable) {
-    // Native script is a script that is a timelock script
-    List<ScriptType> nativeScriptTypes = List.of(ScriptType.TIMELOCK, ScriptType.MULTISIG);
-    Page<Script> nativeScripts = scriptRepository.findAllByTypeIn(nativeScriptTypes, pageable);
-    List<String> scriptHashList = nativeScripts.getContent().stream().map(Script::getHash).toList();
-    List<PolicyProjection> numberOfTokenList = multiAssetRepository.countMultiAssetByPolicyIn(scriptHashList);
-    Map<String, Integer> numberOfTokenMap = numberOfTokenList.stream()
-        .collect(Collectors.toMap(PolicyProjection::getPolicy, PolicyProjection::getNumberOfTokens));
-    List<PolicyProjection> numberOfAssetHolderList =
-        multiAssetRepository.countAssetHoldersByPolicyIn(scriptHashList);
-    Map<String, Integer> numberOfAssetHolderMap = numberOfAssetHolderList.stream()
-        .collect(Collectors.toMap(PolicyProjection::getPolicy, PolicyProjection::getNumberOfAssetHolders));
-    Page<NativeScriptFilterResponse> nativeScriptPage = nativeScripts.map(
-        script ->  {
-          Integer numberOfTokens = numberOfTokenMap.get(script.getHash());
-          if (Objects.isNull(numberOfTokens)) {
-            numberOfTokens = 0;
+  public BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(NativeScriptFilterRequest filterRequest,
+                                                                         Pageable pageable) {
+    Block currrentBlock = blockRepository.findLatestBlock().orElseThrow(
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+    );
+    Page<NativeScriptInfo> nativeScriptPage = nativeScriptInfoRepository.findAll(
+        NativeScriptInfoSpecification.filter(currrentBlock.getSlotNo(), filterRequest), pageable);
+    Page<NativeScriptFilterResponse> nativeScriptPageResponse =
+        nativeScriptPage.map(item -> {
+          NativeScriptFilterResponse nativeScriptResponse = new NativeScriptFilterResponse();
+          nativeScriptResponse.setScriptHash(item.getScriptHash());
+          nativeScriptResponse.setNumberOfTokens(item.getNumberOfTokens());
+          nativeScriptResponse.setNumberOfAssetHolders(item.getNumberOfAssetHolders());
+          if (Objects.nonNull(item.getAfterSlot())) {
+            nativeScriptResponse.setAfter(slotToTime(item.getAfterSlot(), firstBlock, firstShellyBlock));
           }
-          Integer numberOfAssetHolders = numberOfAssetHolderMap.get(script.getHash());
-          if (Objects.isNull(numberOfAssetHolders)) {
-            numberOfAssetHolders = 0;
+          if (Objects.nonNull(item.getBeforeSlot())) {
+            nativeScriptResponse.setBefore(slotToTime(item.getBeforeSlot(), firstBlock, firstShellyBlock));
           }
-          return NativeScriptFilterResponse.builder()
-              .scriptHash(script.getHash())
-              .numberOfTokens(numberOfTokens)
-              .numberOfAssetHolders(numberOfAssetHolders)
-              .build();
+          if (Objects.nonNull(item.getNumberSig())) {
+            nativeScriptResponse.setIsMultiSig(Long.valueOf(1L).compareTo(item.getNumberSig()) < 0);
+          }
+          List<TokenFilterResponse> tokenResponses =
+              nativeScriptTopMultiAssetsCacheRepository.findByScriptHash(item.getScriptHash());
+          if (!CollectionUtils.isEmpty(tokenResponses)) {
+            nativeScriptResponse
+                .setTokens(tokenResponses);
+          } else {
+            List<MultiAsset> tokens = multiAssetRepository.findByPolicy(
+                item.getScriptHash(),
+                PageRequest.of(0, 5,
+                    Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
+            tokenResponses = createTokenResponse(tokens);
+            nativeScriptResponse.setTokens(tokenResponses);
+            nativeScriptTopMultiAssetsCacheRepository.save(item.getScriptHash(), tokenResponses);
+          }
+          return nativeScriptResponse;
         });
-    return new BaseFilterResponse<>(nativeScriptPage);
+    return new BaseFilterResponse<>(nativeScriptPageResponse);
   }
+
+  private List<TokenFilterResponse> createTokenResponse(List<MultiAsset> tokens) {
+    List<TokenFilterResponse> tokenResponses;
+    Set<String> subjects = tokens.stream().map(
+        ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
+    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
+    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
+        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+    tokenResponses = tokens.stream().map(
+        token -> {
+          TokenFilterResponse tokenFilterResponse = new TokenFilterResponse();
+          tokenFilterResponse.setPolicy(token.getPolicy());
+          tokenFilterResponse.setName(token.getName());
+          tokenFilterResponse.setFingerprint(token.getFingerprint());
+          tokenFilterResponse.setDisplayName(token.getNameView());
+          tokenFilterResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(
+              assetMetadataMap.get(token.getPolicy() + token.getName())));
+          return tokenFilterResponse;
+        }).toList();
+    return tokenResponses;
+  }
+
   /**
    * Explain native script
    * @param nativeScript native script

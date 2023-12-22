@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
@@ -23,6 +24,7 @@ import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.consumercommon.entity.Script_;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo_;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -39,10 +41,12 @@ public class ScriptController {
   private final ScriptService scriptService;
 
   @GetMapping("/native-scripts")
+  @LogMessage
   public ResponseEntity<BaseFilterResponse<NativeScriptFilterResponse>> getNativeScripts(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {Script_.TX},
-          direction = Sort.Direction.DESC) @Valid Pagination pagination) {
-    return ResponseEntity.ok(scriptService.getNativeScripts(pagination.toPageable()));
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {NativeScriptInfo_.NUMBER_OF_TOKENS},
+          direction = Sort.Direction.DESC) @Valid Pagination pagination,
+      @ParameterObject @Parameter(description = "filter condition") NativeScriptFilterRequest filterRequest) {
+    return ResponseEntity.ok(scriptService.getNativeScripts(filterRequest, pagination.toPageable()));
   }
 
   @GetMapping("/native-scripts/{scriptHash}")
