@@ -87,6 +87,8 @@ public class ScriptServiceImpl implements ScriptService {
   private Block firstShellyBlock = null;
   private Block firstBlock = null;
 
+  private static final Long MAX_SLOT = 365241780471L;
+
   @PostConstruct
   private void init() {
     firstShellyBlock = blockRepository.findFirstShellyBlock().orElseThrow(
@@ -213,12 +215,19 @@ public class ScriptServiceImpl implements ScriptService {
     if (!nativeScriptTypes.contains(script.getType())) {
       throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
     }
+    NativeScriptInfo nativeScriptInfo =
+        nativeScriptInfoRepository
+            .findByScriptHash(scriptHash)
+            .orElse(NativeScriptInfo.builder()
+                .numberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash))
+                .numberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
+                .build());
     nativeScriptResponse.setScriptHash(scriptHash);
     List<String> associatedAddressList = stakeAddressRepository.getStakeAssociatedAddress(scriptHash);
     associatedAddressList.addAll(addressRepository.getAssociatedAddress(scriptHash));
     nativeScriptResponse.setAssociatedAddress(associatedAddressList);
-    nativeScriptResponse.setNumberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash));
-    nativeScriptResponse.setNumberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash));
+    nativeScriptResponse.setNumberOfTokens(nativeScriptInfo.getNumberOfTokens());
+    nativeScriptResponse.setNumberOfAssetHolders(nativeScriptInfo.getNumberOfAssetHolders());
     nativeScriptResponse.setKeyHashes(new ArrayList<>());
     nativeScriptResponse.setVerifiedContract(false);
     try {
@@ -259,6 +268,9 @@ public class ScriptServiceImpl implements ScriptService {
   private LocalDateTime slotToTime(Long slot,
                                    Block firstBlock,
                                    Block firstShellyBlock) {
+    if (slot > MAX_SLOT) {
+      return LocalDateTime.MAX;
+    }
     if (Objects.nonNull(firstShellyBlock)) {
       return firstShellyBlock.getTime().toLocalDateTime()
           .plusSeconds(slot - (firstShellyBlock.getSlotNo()))
@@ -300,7 +312,14 @@ public class ScriptServiceImpl implements ScriptService {
 
   @Override
   public BaseFilterResponse<TokenFilterResponse> getNativeScriptTokens(String scriptHash, Pageable pageable) {
-    Page<MultiAsset> multiAssetPage = multiAssetRepository.findAllByPolicy(scriptHash, pageable);
+    NativeScriptInfo nativeScriptInfo =
+        nativeScriptInfoRepository
+            .findByScriptHash(scriptHash)
+            .orElse(NativeScriptInfo.builder()
+                .numberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash))
+                .build());
+    List<MultiAsset> multiAssetList = multiAssetRepository.findMultiAssetByPolicy(scriptHash, pageable);
+    Page<MultiAsset> multiAssetPage = new PageImpl<>(multiAssetList, pageable, nativeScriptInfo.getNumberOfTokens());
     Set<String> subjects = multiAssetPage.stream().map(
         ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
@@ -317,8 +336,16 @@ public class ScriptServiceImpl implements ScriptService {
 
   @Override
   public BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(String scriptHash, Pageable pageable) {
-    Page<AddressTokenProjection> multiAssetPage
-        = addressTokenBalanceRepository.findAddressAndBalanceByMultiAssetIn(scriptHash, pageable);
+    NativeScriptInfo nativeScriptInfo =
+        nativeScriptInfoRepository
+            .findByScriptHash(scriptHash)
+            .orElse(NativeScriptInfo.builder()
+                .numberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
+                .build());
+    List<AddressTokenProjection> multiAssetList =
+        addressTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable);
+    Page<AddressTokenProjection> multiAssetPage =
+        new PageImpl<>(multiAssetList, pageable, nativeScriptInfo.getNumberOfAssetHolders());
     Set<Long> addressIds = multiAssetPage.stream().map(AddressTokenProjection::getAddressId)
         .collect(Collectors.toSet());
     List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
