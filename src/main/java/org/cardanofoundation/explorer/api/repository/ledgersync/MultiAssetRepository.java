@@ -38,6 +38,8 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   Page<MultiAsset> findAllByPolicy(@Param("policy") String policy, Pageable pageable);
 
+  List<MultiAsset> findMultiAssetByPolicy(@Param("policy") String policy, Pageable pageable);
+
   List<MultiAsset> findAllByIdIn(@Param("ids") Collection<Long> ids);
 
   @Query("SELECT b.time FROM Tx tx JOIN Block b ON b.id = tx.blockId "
@@ -60,14 +62,14 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   @Query("SELECT COALESCE(count(multiAsset.id), 0)"
       + " FROM MultiAsset multiAsset"
       + " WHERE multiAsset.policy = :policy")
-  Integer countMultiAssetByPolicy(@Param("policy") String policy);
+  Long countMultiAssetByPolicy(@Param("policy") String policy);
 
   @Query("SELECT COALESCE(COUNT(DISTINCT(atb.addressId, atb.multiAssetId)), 0) "
       + " FROM MultiAsset ma "
       + " INNER JOIN AddressTokenBalance atb ON atb.multiAsset = ma"
       + " WHERE ma.policy = :policy "
       + " AND atb.balance > 0 ")
-  Integer countAssetHoldersByPolicy(@Param("policy") String policy);
+  Long countAssetHoldersByPolicy(@Param("policy") String policy);
 
   @Query("SELECT COALESCE(COUNT(DISTINCT(atb.addressId, atb.multiAssetId)), 0) as numberOfAssetHolders, ma.policy as policy "
       + " FROM MultiAsset ma "
