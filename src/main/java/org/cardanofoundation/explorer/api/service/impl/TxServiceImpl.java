@@ -32,40 +32,10 @@ import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.FailedTxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRelayRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
-import org.cardanofoundation.explorer.api.util.MetadataCIP25Utils;
-import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
+import org.cardanofoundation.explorer.api.util.*;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,7 +76,6 @@ import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.service.TxService;
-import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 
 @Service
@@ -601,7 +570,9 @@ public class TxServiceImpl implements TxService {
             TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson())
                 .metadataCIP25(
                     MetadataCIP25Utils.standard(txMetadata.getJson()))
-                .metadataCIP60(MetadataCIP60Utils.standard(txMetadata.getJson())).build()).toList();
+                .metadataCIP60(MetadataCIP60Utils.standard(txMetadata.getJson()))
+                .metadataCIP20(MetadataCIP20Utils.standard(txMetadata.getJson()))
+                .metadataCIP83(MetadataCIP83Utils.standard(txMetadata.getJson())).build()).toList();
     if (!CollectionUtils.isEmpty(txMetadataList)) {
       txResponse.setMetadata(txMetadataList);
     }

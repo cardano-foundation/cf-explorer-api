@@ -21,7 +21,9 @@ public enum MetadataField {
   LINKS("links"), NAME("name"), IMAGE("image"), MEDIA_TYPE("mediaType"),
   DESCRIPTION("description"), VERSION("version"), POLICY_ID("policy_id"), ASSET_NAME("asset_name"),
   SRC("src"), FILES("files"), CONTRIBUTING_ARTISTS("contributing_artists"), RELEASE("release"), RELEASE_TITLE("release_title"),
-  SONG("song")
+  SONG("song"),
+  // CIP 20, CIP 83
+  MSG("msg"), ENC("enc")
   ;
 
   private final String name;
