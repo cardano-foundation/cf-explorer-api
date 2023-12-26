@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
-import org.cardanofoundation.explorer.api.repository.cache.NativeScriptTopMultiAssetsCacheRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
@@ -72,8 +71,6 @@ class ScriptServiceTest {
   @Mock
   BlockRepository blockRepository;
   @Mock
-  NativeScriptTopMultiAssetsCacheRepository nativeScriptTopMultiAssetsCacheRepository;
-  @Mock
   AssetMetadataRepository assetMetadataRepository;
   @Mock
   SmartContractInfoRepository smartContractInfoRepository;
@@ -108,8 +105,6 @@ class ScriptServiceTest {
     when(nativeScriptInfoRepository
         .findAll(any(Specification.class), any(Pageable.class)))
         .thenReturn(new PageImpl<>(scriptList));
-    when(nativeScriptTopMultiAssetsCacheRepository.findByScriptHash("hash"))
-        .thenReturn(null);
     when(assetMetadataRepository.findBySubjectIn(any()))
         .thenReturn(List.of());
     var response = scriptService.getNativeScripts(request, pageable);
