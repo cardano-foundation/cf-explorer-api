@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
 import org.cardanofoundation.explorer.api.model.metadatastandard.cip.MetadataCIP;
@@ -128,7 +129,7 @@ public class MetadataCIP25Utils {
       return;
     }
     optionalProperties.add(
-        BaseProperty.builder().value(version).format(CommonConstant.FIELD_TYPE[6])
+        BaseProperty.builder().value(version).format(FormatFieldType.VERSION_1_OR_2.getValue())
             .property(MetadataField.VERSION.getName()).index(index)
             .valid(version instanceof Integer versionInt && (versionInt == 1 || versionInt == 2))
             .build());
@@ -146,7 +147,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty policy(Object policyId, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(policyId)
-        .format(CommonConstant.FIELD_TYPE[1])
+        .format(FormatFieldType.STRING_OR_RAW_BYTES.getValue())
         .index("1")
         .property(MetadataField.POLICY_ID.getName())
         .valid(false).build();
@@ -158,13 +159,13 @@ public class MetadataCIP25Utils {
       case 1 -> {
         if (Objects.nonNull(policyId) && policyId instanceof String policyIdStr) {
           baseProperty.setValid(!hexString(policyIdStr));
-          baseProperty.setFormat(CommonConstant.FIELD_TYPE[0]);
+          baseProperty.setFormat(FormatFieldType.STRING.getValue());
         }
       }
       case 2 -> {
         if (Objects.nonNull(policyId) && policyId instanceof String policyIdStr) {
           baseProperty.setValid(hexString(policyIdStr));
-          baseProperty.setFormat(CommonConstant.FIELD_TYPE[9]);
+          baseProperty.setFormat(FormatFieldType.RAW_BYTES.getValue());
         }
       }
       default -> log.warn("version is not define");
@@ -174,7 +175,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty assetName(Object assetName, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(assetName)
-        .format(CommonConstant.FIELD_TYPE[1])
+        .format(FormatFieldType.STRING_OR_RAW_BYTES.getValue())
         .index("2")
         .property(MetadataField.ASSET_NAME.getName())
         .valid(false).build();
@@ -187,13 +188,13 @@ public class MetadataCIP25Utils {
         if (Objects.nonNull(assetName) && assetName instanceof String assetNameStr) {
           baseProperty.setValid(!hexString(assetNameStr) && StandardCharsets.UTF_8.newEncoder()
               .canEncode(assetNameStr));
-          baseProperty.setFormat(CommonConstant.FIELD_TYPE[0]);
+          baseProperty.setFormat(FormatFieldType.STRING.getValue());
         }
       }
       case 2 -> {
         if (Objects.nonNull(assetName) && assetName instanceof String assetNameStr) {
           baseProperty.setValid(hexString(assetNameStr));
-          baseProperty.setFormat(CommonConstant.FIELD_TYPE[9]);
+          baseProperty.setFormat(FormatFieldType.RAW_BYTES.getValue());
         }
       }
       default -> log.warn("version is not define");
@@ -203,7 +204,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty name(Object name, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(name)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.NAME.getName())
         .index("3")
         .valid(Objects.nonNull(name) && name instanceof String)
@@ -217,7 +218,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty nameFile(Object name, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(name)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.NAME.getName())
         .valid(Objects.nonNull(name) && name instanceof String)
         .build();
@@ -230,7 +231,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty image(Object image, int version) {
     BaseProperty checkImage = BaseProperty.builder().value(image)
-        .format(CommonConstant.FIELD_TYPE[2])
+        .format(FormatFieldType.URI_OR_ARRAY.getValue())
         .index("4")
         .property(MetadataField.IMAGE.getName()).valid(false).build();
     if (Objects.nonNull(image) && image instanceof String imageStr && (
@@ -251,7 +252,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty srcFile(Object src, int version) {
     BaseProperty checkSrc = BaseProperty.builder().value(src).valid(false)
-        .format(CommonConstant.FIELD_TYPE[2])
+        .format(FormatFieldType.URI_OR_ARRAY.getValue())
         .property(MetadataField.SRC.getName()).build();
     if (Objects.nonNull(src) && src instanceof String imageStr && Arrays.stream(CommonConstant.IMAGE_PREFIX)
         .anyMatch(imageStr::startsWith)) {
@@ -270,7 +271,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty mediaType(Object mediaType, String index, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(mediaType)
-        .format(CommonConstant.FIELD_TYPE[3])
+        .format(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE.getValue())
         .property(MetadataField.MEDIA_TYPE.getName())
         .index(index)
         .valid(mediaType instanceof String mediaTypeStr && mediaTypeStr.startsWith(
@@ -284,7 +285,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty mediaTypeFile(Object mediaType, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(mediaType)
-        .format(CommonConstant.FIELD_TYPE[5])
+        .format(FormatFieldType.MIME_TYPE.getValue())
         .property(MetadataField.MEDIA_TYPE.getName())
         .valid(
             Objects.nonNull(mediaType) && mediaType instanceof String mediaTypeStr && Arrays.stream(
@@ -298,7 +299,7 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty description(Object desc, String index, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(desc)
-        .format(CommonConstant.FIELD_TYPE[4])
+        .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
         .property(MetadataField.DESCRIPTION.getName())
         .index(index)
         .valid(Objects.isNull(desc) || desc instanceof String || desc instanceof ArrayList<?>)
@@ -315,7 +316,7 @@ public class MetadataCIP25Utils {
     if (Objects.nonNull(files) && files instanceof ArrayList<?> fileList && !fileList.isEmpty()) {
       BaseProperty filesProperty = BaseProperty.builder().valid(false)
           .property(MetadataField.FILES.getName()).valid(true)
-          .format(CommonConstant.FIELD_TYPE[8])
+          .format(FormatFieldType.ARRAY.getValue())
           .build();
       List<BaseProperty> optionalPropertiesInFile = new ArrayList<>();
       int indexInFile = 1;

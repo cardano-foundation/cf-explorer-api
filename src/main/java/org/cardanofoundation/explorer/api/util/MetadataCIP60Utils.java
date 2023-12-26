@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
 import org.cardanofoundation.explorer.api.model.metadatastandard.cip.MetadataCIP;
@@ -551,7 +552,7 @@ public class MetadataCIP60Utils {
       int version) {
     BaseProperty filesProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.FILES.getName())
-        .format(CommonConstant.FIELD_TYPE[8])
+        .format(FormatFieldType.ARRAY.getValue())
         .index("14")
         .build();
     List<BaseProperty> requirePropertiesInFile = new ArrayList<>();
@@ -628,7 +629,7 @@ public class MetadataCIP60Utils {
       int version) {
     BaseProperty filesProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.FILES.getName())
-        .format(CommonConstant.FIELD_TYPE[8])
+        .format(FormatFieldType.ARRAY.getValue())
         .index("7")
         .build();
     List<BaseProperty> requirePropertiesInFile = new ArrayList<>();
@@ -699,7 +700,7 @@ public class MetadataCIP60Utils {
       int version) {
     BaseProperty filesProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.FILES.getName())
-        .format(CommonConstant.FIELD_TYPE[8])
+        .format(FormatFieldType.ARRAY.getValue())
         .index("8")
         .build();
     List<BaseProperty> requirePropertiesInFile = new ArrayList<>();
@@ -844,7 +845,7 @@ public class MetadataCIP60Utils {
 
   private static BaseProperty links(Object links, String parentIndex, String index, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(links)
-        .format(CommonConstant.FIELD_TYPE[15])
+        .format(FormatFieldType.MAP_STRING_STRING.getValue())
         .property(MetadataField.LINKS.getName())
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
         .valid(false)
@@ -870,7 +871,7 @@ public class MetadataCIP60Utils {
       String index,
       int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[14])
+        .format(FormatFieldType.BOOLEAN.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
         .valid(Objects.nonNull(val) && val instanceof Boolean)
@@ -887,7 +888,7 @@ public class MetadataCIP60Utils {
       int version) {
 
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[11])
+        .format(FormatFieldType.INTEGER.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
         .valid(Objects.nonNull(val) && val instanceof Integer)
@@ -903,7 +904,7 @@ public class MetadataCIP60Utils {
       String index,
       int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
         .valid(Objects.nonNull(val) && val instanceof String)
@@ -919,7 +920,7 @@ public class MetadataCIP60Utils {
       String index,
       int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[17])
+        .format(FormatFieldType.URL.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
         .valid(Objects.nonNull(val) && val instanceof String valStr && Arrays.stream(
@@ -937,7 +938,7 @@ public class MetadataCIP60Utils {
       String index,
       int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[13])
+        .format(FormatFieldType.ARRAY_STRING.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
         .valid(Objects.nonNull(val) && val instanceof ArrayList<?> valArr && isArrayString(valArr))
@@ -953,7 +954,7 @@ public class MetadataCIP60Utils {
       String index,
       int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[4])
+        .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
         .valid(Objects.nonNull(val) && (val instanceof String || (val instanceof ArrayList<?> valArr
@@ -976,7 +977,7 @@ public class MetadataCIP60Utils {
     BaseProperty artistsProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.ARTISTS.getName())
         .index(ind)
-        .format(CommonConstant.FIELD_TYPE[16])
+        .format(FormatFieldType.ARRAY_ARTIST.getValue())
         .build();
     int subArtist = 0;
     if (Objects.nonNull(artists) && artists instanceof ArrayList<?> artistList
@@ -1029,7 +1030,7 @@ public class MetadataCIP60Utils {
         && !artistList.isEmpty()) {
       BaseProperty artistsProperty = BaseProperty.builder().valid(false)
           .property(MetadataField.CONTRIBUTING_ARTISTS.getName())
-          .format(CommonConstant.FIELD_TYPE[8])
+          .format(FormatFieldType.ARRAY.getValue())
           .index(ind)
           .build();
       List<Boolean> validArtists = new ArrayList<>();
@@ -1072,7 +1073,7 @@ public class MetadataCIP60Utils {
     if (Objects.nonNull(featuredArtist) && featuredArtist instanceof HashMap<?, ?> artistMap) {
       BaseProperty artistsProperty = BaseProperty.builder().valid(false)
           .property(MetadataField.FEATURED_ARTIST.getName())
-          .format(CommonConstant.FIELD_TYPE[18])
+          .format(FormatFieldType.ARTIST.getValue())
           .index(ind)
           .build();
       List<Boolean> validArtists = new ArrayList<>();
@@ -1104,7 +1105,7 @@ public class MetadataCIP60Utils {
 
   private static BaseProperty copyright(Object copyright, String index, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(copyright)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.COPYRIGHT.getName())
         .index(index)
         .valid(Objects.nonNull(copyright) && copyright instanceof String)
@@ -1118,7 +1119,7 @@ public class MetadataCIP60Utils {
 
   private static BaseProperty genres(Object genres, String index, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(genres)
-        .format(CommonConstant.FIELD_TYPE[13])
+        .format(FormatFieldType.ARRAY_STRING.getValue())
         .property(MetadataField.GENRES.getName())
         .index(index)
         .valid(Objects.nonNull(genres) && genres instanceof ArrayList<?> genresArr
@@ -1134,7 +1135,7 @@ public class MetadataCIP60Utils {
   private static BaseProperty songDuration(Object songDuration, String index,
       int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(songDuration)
-        .format(CommonConstant.FIELD_TYPE[12])
+        .format(FormatFieldType.STRING_ISO8601_DURATION_FORMAT.getValue())
         .property(MetadataField.SONG_DURATION.getName())
         .index(index)
         .valid(Objects.nonNull(songDuration) && songDuration instanceof String songDurationStr
@@ -1149,7 +1150,7 @@ public class MetadataCIP60Utils {
 
   private static BaseProperty songTitle(Object songTitle, String index, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(songTitle)
-        .format(CommonConstant.FIELD_TYPE[4])
+        .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
         .property(MetadataField.SONG_TITLE.getName())
         .index(index)
         .valid(Objects.nonNull(songTitle) && (songTitle instanceof String
@@ -1165,7 +1166,7 @@ public class MetadataCIP60Utils {
   private static BaseProperty trackNumber(Object trackNumber, String index,
       int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(trackNumber)
-        .format(CommonConstant.FIELD_TYPE[11])
+        .format(FormatFieldType.INTEGER.getValue())
         .property(MetadataField.TRACK_NUMBER.getName())
         .index(index)
         .valid(Objects.nonNull(trackNumber) && trackNumber instanceof Integer)
@@ -1180,7 +1181,7 @@ public class MetadataCIP60Utils {
   private static BaseProperty albumTitleMetadataCIP60(Object albumTitle, String index,
       int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(albumTitle)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.ALBUM_TITLE.getName())
         .index(index)
         .valid(Objects.nonNull(albumTitle) && albumTitle instanceof String)
@@ -1194,7 +1195,7 @@ public class MetadataCIP60Utils {
 
   private static BaseProperty releaseType(Object releaseType, int version) {
     BaseProperty baseProperty = BaseProperty.builder().value(releaseType)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.RELEASE_TYPE.getName())
         .index("6").valid(
             Objects.nonNull(releaseType) && releaseType instanceof String releaseTypeStr && List.of(
@@ -1207,7 +1208,7 @@ public class MetadataCIP60Utils {
   }
 
   private static BaseProperty musicMetadataVersion(int musicVersion, Object originMusicVersion) {
-    return BaseProperty.builder().value(originMusicVersion).format(CommonConstant.FIELD_TYPE[6])
+    return BaseProperty.builder().value(originMusicVersion).format(FormatFieldType.VERSION_1_OR_2.getValue())
         .property(MetadataField.MUSIC_METADATA_VERSION.getName()).index("5")
         .valid(musicVersion == 1 || musicVersion == 2)
         .build();

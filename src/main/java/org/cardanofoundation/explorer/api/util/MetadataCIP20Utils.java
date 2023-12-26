@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
 
@@ -44,7 +44,7 @@ public class MetadataCIP20Utils {
       return BaseProperty.builder()
                       .index(index)
                       .property(MetadataField.MSG.getName())
-                      .format(CommonConstant.FIELD_TYPE[13])
+                      .format(FormatFieldType.ARRAY_STRING.getValue())
                       .valid(isMsgValid(msg))
                       .value(msg)
                       .build();
