@@ -24,7 +24,6 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.cache.NativeScriptTopMultiAssetsCacheRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.*;
@@ -37,9 +36,7 @@ import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContra
 import org.cardanofoundation.ledgersync.common.common.nativescript.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -76,7 +73,6 @@ public class ScriptServiceImpl implements ScriptService {
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final BlockRepository blockRepository;
-  private final NativeScriptTopMultiAssetsCacheRepository nativeScriptTopMultiAssetsCacheRepository;
   private final SmartContractInfoRepository smartContractInfoRepository;
   private final TxService txService;
 
@@ -108,6 +104,11 @@ public class ScriptServiceImpl implements ScriptService {
     );
     Page<NativeScriptInfo> nativeScriptPage = nativeScriptInfoRepository.findAll(
         NativeScriptInfoSpecification.filter(currrentBlock.getSlotNo(), filterRequest), pageable);
+    List<MultiAsset> multiAssetList = multiAssetRepository.findTopMultiAssetByScriptHashIn(
+        nativeScriptPage.stream().map(NativeScriptInfo::getScriptHash).toList());
+    List<TokenFilterResponse> tokenResponses = createTokenResponse(multiAssetList);
+    Map<String, List<TokenFilterResponse>> tokenResponseMap =
+        tokenResponses.stream().collect(Collectors.groupingBy(TokenFilterResponse::getPolicy));
     Page<NativeScriptFilterResponse> nativeScriptPageResponse =
         nativeScriptPage.map(item -> {
           NativeScriptFilterResponse nativeScriptResponse = new NativeScriptFilterResponse();
@@ -123,20 +124,7 @@ public class ScriptServiceImpl implements ScriptService {
           if (Objects.nonNull(item.getNumberSig())) {
             nativeScriptResponse.setIsMultiSig(Long.valueOf(1L).compareTo(item.getNumberSig()) < 0);
           }
-          List<TokenFilterResponse> tokenResponses =
-              nativeScriptTopMultiAssetsCacheRepository.findByScriptHash(item.getScriptHash());
-          if (!CollectionUtils.isEmpty(tokenResponses)) {
-            nativeScriptResponse
-                .setTokens(tokenResponses);
-          } else {
-            List<MultiAsset> tokens = multiAssetRepository.findByPolicy(
-                item.getScriptHash(),
-                PageRequest.of(0, 5,
-                    Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
-            tokenResponses = createTokenResponse(tokens);
-            nativeScriptResponse.setTokens(tokenResponses);
-            nativeScriptTopMultiAssetsCacheRepository.save(item.getScriptHash(), tokenResponses);
-          }
+          nativeScriptResponse.setTokens(tokenResponseMap.get(item.getScriptHash()));
           return nativeScriptResponse;
         });
     return new BaseFilterResponse<>(nativeScriptPageResponse);
