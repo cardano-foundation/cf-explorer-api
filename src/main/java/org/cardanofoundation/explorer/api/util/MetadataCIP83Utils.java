@@ -2,9 +2,11 @@ package org.cardanofoundation.explorer.api.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
@@ -14,6 +16,7 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class MetadataCIP83Utils {
+
   private static final String FIELD_REQUIRED_PROPERTIES = "requiredProperties";
   private static final String FIELD_VALID = "valid";
 
@@ -43,20 +46,26 @@ public class MetadataCIP83Utils {
     return metadataCIP;
   }
 
-  public static BaseProperty enc(Object enc, String index){
-      return BaseProperty.builder()
-              .index(index)
-              .property(MetadataField.ENC.getName())
-              .format(FormatFieldType.STRING.getValue())
-              .valid(Objects.nonNull(enc) && enc instanceof String)
-              .value(enc)
-              .build();
+  public static BaseProperty enc(Object enc, String index) {
+    FormatFieldType formatFieldType = MetadataFieldUtils.getFormatTypeByObject(enc);
+    boolean isValid = FormatFieldType.STRING.equals(formatFieldType)
+        || FormatFieldType.STRING.equals(formatFieldType.getParentType());
+    return BaseProperty.builder()
+        .index(index)
+        .property(MetadataField.ENC.getName())
+        .format(FormatFieldType.STRING.getValue())
+        .valid(isValid)
+        .valueFormat(isValid ? FormatFieldType.STRING.getValue()
+                             : formatFieldType.getValue())
+        .value(enc)
+        .build();
   }
 
-  public static boolean isCIPValid(List<BaseProperty> baseProperties){
-      if (baseProperties.isEmpty())
-          return false;
-      return baseProperties.stream().allMatch(baseProperty -> baseProperty.getValid().equals(Boolean.TRUE));
+  public static boolean isCIPValid(List<BaseProperty> baseProperties) {
+    if (baseProperties.isEmpty()) {
+      return false;
+    }
+    return baseProperties.stream()
+        .allMatch(baseProperty -> baseProperty.getValid().equals(Boolean.TRUE));
   }
-
 }
