@@ -6,14 +6,12 @@ import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
+import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.service.PolicyService;
 import org.cardanofoundation.explorer.api.service.ScriptService;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,11 +20,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -62,34 +60,39 @@ public class ScriptControllerTest {
     @Test
     void testGetSmartContracts_thenReturn() throws Exception {
         SmartContractFilterResponse smartContractFilterResponse = SmartContractFilterResponse.builder()
-            .associatedAddress(List.of("addr1"))
             .scriptHash("hash")
-            .version(ScriptType.PLUTUSV1)
+            .scriptVersion(ScriptType.PLUTUSV1)
+            .txPurposes(Set.of(ScriptPurposeType.MINT))
+            .txCount(1L)
             .build();
         BaseFilterResponse<SmartContractFilterResponse> response =
             new BaseFilterResponse<>(List.of(smartContractFilterResponse), 1);
 
-        when(scriptService.getSmartContracts(any(Pageable.class))).thenReturn(response);
+        when(scriptService
+                 .getSmartContracts(any(SmartContractFilterRequest.class), any(Pageable.class))).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/scripts/contracts"))
+        mockMvc.perform(get("/api/v1/scripts/contracts")
+                            .param("scriptVersion","PLUTUSV1")
+                            .param("txPurpose","MINT"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").exists())
-            .andExpect(jsonPath("$.data[0].associatedAddress[0]").value("addr1"))
             .andExpect(jsonPath("$.data[0].scriptHash").value("hash"))
-            .andExpect(jsonPath("$.data[0].version").value("PLUTUSV1"));
+            .andExpect(jsonPath("$.data[0].scriptVersion").value("PLUTUSV1"))
+            .andExpect(jsonPath("$.data[0].txPurposes[0]").value("MINT"))
+            .andExpect(jsonPath("$.data[0].txCount").value("1"));
     }
 
     @Test
     void testNativeScripts_thenReturn() throws Exception {
         NativeScriptFilterResponse nativeScriptFilterResponse = NativeScriptFilterResponse.builder()
             .scriptHash("hash")
-            .numberOfTokens(1)
-            .numberOfAssetHolders(1)
+            .numberOfTokens(1L)
+            .numberOfAssetHolders(1L)
             .build();
         BaseFilterResponse<NativeScriptFilterResponse> response =
             new BaseFilterResponse<>(List.of(nativeScriptFilterResponse), 1);
 
-        when(scriptService.getNativeScripts(any(Pageable.class))).thenReturn(response);
+        when(scriptService.getNativeScripts(any(), any(Pageable.class))).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/scripts/native-scripts"))
             .andExpect(status().isOk())
