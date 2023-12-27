@@ -2,11 +2,6 @@ package org.cardanofoundation.explorer.api.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.*;
 import java.util.Map.Entry;
 
