@@ -15,6 +15,7 @@ public enum FormatFieldType {
   STRING("String"),
   STRING_OR_RAW_BYTES("String | Raw Bytes"),
   URI_OR_ARRAY("URI | Array"),
+  URI_ARRAY_PARTS("URI Array Parts"),
   IMAGE_SLASH_MIME_SUB_TYPE("image/<mime_sub_type>"),
   STRING_OR_ARRAY_STRING("String | Array<String>"),
   MIME_TYPE("mime_type"),
@@ -30,7 +31,13 @@ public enum FormatFieldType {
   MAP_STRING_STRING("Map: <String, String>"),
   ARRAY_ARTIST("Array<Artist>"),
   URL("URL"),
-  ARTIST("Artist");
+  ARTIST("Artist"),
+  NEITHER_VERSION_1_OR_2("Neither version 1 or 2"),
+  LONG("Long"),
+  DOUBLE("Double"),
+  UNKNOWN("Unknown"),
+  NULL_OR_EMPTY("")
+  ;
 
   private static final Map<String, FormatFieldType> formatFieldTypeMap = new HashMap<>();
 
