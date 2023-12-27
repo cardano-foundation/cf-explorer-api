@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
+import java.util.Map.Entry;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
