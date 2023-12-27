@@ -2,13 +2,8 @@ package org.cardanofoundation.explorer.api.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
+import java.util.*;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -337,6 +332,9 @@ public class MetadataCIP25Utils {
       } else {
         filesProperty.setValid(
             !optionalPropertiesInFile.isEmpty() && optionalPropertiesInFile.stream()
+                // The validation of "name" property won't affect the validation of "files" optional property
+                .filter(baseProperty -> Objects.nonNull(baseProperty) &&
+                        !baseProperty.getProperty().equals(MetadataField.NAME.getName()))
                 .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
       }
       filesProperty.setIndex(String.valueOf(indexOfFile));
@@ -353,8 +351,24 @@ public class MetadataCIP25Utils {
     }
     List<Boolean> fields = new ArrayList<>();
     for (Map.Entry<Object, TokenCIP> tokenEntry : tokenMap.entrySet()) {
+      List<BaseProperty> optionalProperties = tokenEntry.getValue().getOptionalProperties();
+
+      // Find the index of the highest level "files" property (since "files" is an optional property this can be an empty optional)
+      Optional<String> filesIndex = optionalProperties.stream().filter(baseProperty -> {
+          String index = baseProperty.getIndex();
+          return index.matches("^[\\d]+") && baseProperty.getProperty().equals(MetadataField.FILES.getName());
+      }).findFirst().map(BaseProperty::getIndex);
+
+      // The validation of files[<index>]."name" property of a token won't affect the validation of the tokens
+      if (filesIndex.isPresent()){
+         optionalProperties = optionalProperties.stream()
+                    .filter(baseProperty -> Objects.nonNull(baseProperty) &&
+                            !(baseProperty.getProperty().equals(MetadataField.NAME.getName()) && baseProperty.getIndex().matches(filesIndex.get() + "\\.\\d+\\.1"))
+                    ).toList();
+      }
+
       fields.add(
-          tokenEntry.getValue().getOptionalProperties().stream().map(BaseProperty::getValid)
+              optionalProperties.stream().map(BaseProperty::getValid)
               .allMatch(isValid -> isValid.equals(true)));
       fields.add(
           tokenEntry.getValue().getRequireProperties().stream().map(BaseProperty::getValid)
