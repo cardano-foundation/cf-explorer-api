@@ -89,11 +89,6 @@ public class CommonConstant {
 
   public static final BigInteger METADATA_LABEL_721 = BigInteger.valueOf(721);
 
-  public static final String[] FIELD_TYPE = {"String", "String | Raw Bytes", "URI | Array",
-      "image/<mime_sub_type>", "String | Array<String>", "mime_type", "1 or 2", "URI", "Array",
-      "Raw Bytes", "Single / Multiple", "Integer", "String: ISO8601 Duration Format", "Array<String>",
-      "Boolean", "Map: <String, String>", "Array<Artist>", "URL", "Artist"};
-
   public static final String[] IMAGE_PREFIX = {"http://", "https://", "ipfs://", "ar://"};
 
   public static int hashCode(Object... a) {
