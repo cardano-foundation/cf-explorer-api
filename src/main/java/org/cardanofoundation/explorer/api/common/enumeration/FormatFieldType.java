@@ -12,31 +12,31 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @Getter
 public enum FormatFieldType {
-  STRING("String"),
-  STRING_OR_RAW_BYTES("String | Raw Bytes"),
-  URI_OR_ARRAY("URI | Array"),
-  URI_ARRAY_PARTS("URI Array Parts"),
-  IMAGE_SLASH_MIME_SUB_TYPE("image/<mime_sub_type>"),
-  STRING_OR_ARRAY_STRING("String | Array<String>"),
-  MIME_TYPE("mime_type"),
-  VERSION_1_OR_2("1 or 2"),
-  URI("URI"),
-  ARRAY("Array"),
-  RAW_BYTES("Raw Bytes"),
-  SINGLE_AND_MULTIPLE("Single / Multiple"),
-  INTEGER("Integer"),
-  STRING_ISO8601_DURATION_FORMAT("String: ISO8601 Duration Format"),
-  ARRAY_STRING("Array<String>"),
-  BOOLEAN("Boolean"),
-  MAP_STRING_STRING("Map: <String, String>"),
-  ARRAY_ARTIST("Array<Artist>"),
-  URL("URL"),
-  ARTIST("Artist"),
-  NEITHER_VERSION_1_OR_2("Neither version 1 or 2"),
-  LONG("Long"),
-  DOUBLE("Double"),
-  UNKNOWN("Unknown"),
-  NULL_OR_EMPTY("")
+  STRING(null, "String"),
+  ARRAY(null,"Array"),
+  STRING_OR_RAW_BYTES(STRING,"String | Raw Bytes"),
+  URI_OR_ARRAY(STRING,"URI | Array"),
+  URI_ARRAY_PARTS(ARRAY,"URI Array Parts"),
+  IMAGE_SLASH_MIME_SUB_TYPE(STRING,"image/<mime_sub_type>"),
+  STRING_OR_ARRAY_STRING(null,"String | Array<String>"),
+  MIME_TYPE(STRING,"mime_type"),
+  VERSION_1_OR_2(null,"1 or 2"),
+  URI(STRING,"URI"),
+  RAW_BYTES(STRING,"Raw Bytes"),
+  SINGLE_AND_MULTIPLE(null,"Single / Multiple"),
+  INTEGER(null,"Integer"),
+  STRING_ISO8601_DURATION_FORMAT(STRING,"String: ISO8601 Duration Format"),
+  ARRAY_STRING(ARRAY,"Array<String>"),
+  BOOLEAN(null,"Boolean"),
+  MAP_STRING_STRING(null,"Map: <String, String>"),
+  ARRAY_ARTIST(ARRAY,"Array<Artist>"),
+  URL(STRING,"URL"),
+  ARTIST(null,"Artist"),
+  NEITHER_VERSION_1_OR_2(null,"Neither version 1 or 2"),
+  LONG(null,"Long"),
+  DOUBLE(null,"Double"),
+  UNKNOWN(null,"Unknown"),
+  NULL_OR_EMPTY(null,"")
   ;
 
   private static final Map<String, FormatFieldType> formatFieldTypeMap = new HashMap<>();
@@ -47,6 +47,7 @@ public enum FormatFieldType {
     }
   }
 
+  FormatFieldType parentType;
   String value;
 
   public static FormatFieldType fromValue(String value) {
