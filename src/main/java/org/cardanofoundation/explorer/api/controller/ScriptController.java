@@ -22,6 +22,7 @@ import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
+import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
 import org.cardanofoundation.explorer.consumercommon.entity.Script_;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo_;
 import org.springdoc.core.annotations.ParameterObject;
@@ -68,7 +69,8 @@ public class ScriptController {
   @Operation(summary = "Get tokens of a policy", description = "Get all tokens of a policy")
   public ResponseEntity<BaseFilterResponse<TokenFilterResponse>> getTokens(
       @PathVariable @Parameter(description = "The native script hash") String scriptHash,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {MultiAsset_.TX_COUNT},
+          direction = Sort.Direction.DESC) @Valid Pagination pagination) {
     return ResponseEntity.ok(scriptService.getNativeScriptTokens(scriptHash, pagination.toPageable()));
   }
 
