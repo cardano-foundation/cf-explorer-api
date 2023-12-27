@@ -1,11 +1,8 @@
 package org.cardanofoundation.explorer.api.util;
 
-import com.bloxbean.cardano.client.util.HexUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +12,6 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
@@ -25,12 +21,6 @@ import org.cardanofoundation.explorer.api.model.metadatastandard.cip.TokenCIP;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class MetadataCIP25Utils {
-
-  private static final String BASE64_PREFIX = "data:";
-  private static final String RAW_BYTE_PREFIX = "0x";
-  private static final String BASE64 = "base64";
-  private static final String[] MEDIA_TYPE_PREFIX = {"image/", "application/", "audio/", "example/",
-      "font/", "model/", "text/", "video/"};
 
   public static String splitJsonMetadataByAssetName(String jsonMetadata, String assetName) {
     try {
@@ -128,10 +118,15 @@ public class MetadataCIP25Utils {
     if (Objects.isNull(version)) {
       return;
     }
+    boolean isValid = version instanceof Integer versionInt && (versionInt == 1 || versionInt == 2);
+
     optionalProperties.add(
-        BaseProperty.builder().value(version).format(FormatFieldType.VERSION_1_OR_2.getValue())
+        BaseProperty.builder().value(version)
+            .format(FormatFieldType.VERSION_1_OR_2.getValue())
             .property(MetadataField.VERSION.getName()).index(index)
-            .valid(version instanceof Integer versionInt && (versionInt == 1 || versionInt == 2))
+            .valid(isValid)
+            .valueFormat(isValid ? version.toString()
+                                 : FormatFieldType.NEITHER_VERSION_1_OR_2.getValue())
             .build());
   }
 
@@ -146,167 +141,165 @@ public class MetadataCIP25Utils {
   }
 
   public static BaseProperty policy(Object policyId, int version) {
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(policyId);
     BaseProperty baseProperty = BaseProperty.builder().value(policyId)
         .format(FormatFieldType.STRING_OR_RAW_BYTES.getValue())
         .index("1")
         .property(MetadataField.POLICY_ID.getName())
+        .valueFormat(format.getValue())
         .valid(false).build();
     switch (version) {
       case 0 -> {
         baseProperty.setValid(null);
         baseProperty.setFormat(null);
+        baseProperty.setValueFormat(null);
       }
-      case 1 -> {
-        if (Objects.nonNull(policyId) && policyId instanceof String policyIdStr) {
-          baseProperty.setValid(!hexString(policyIdStr));
-          baseProperty.setFormat(FormatFieldType.STRING.getValue());
-        }
-      }
-      case 2 -> {
-        if (Objects.nonNull(policyId) && policyId instanceof String policyIdStr) {
-          baseProperty.setValid(hexString(policyIdStr));
-          baseProperty.setFormat(FormatFieldType.RAW_BYTES.getValue());
-        }
-      }
+      case 1 -> baseProperty.setValid(format.equals(FormatFieldType.STRING));
+      case 2 -> baseProperty.setValid(format.equals(FormatFieldType.RAW_BYTES));
       default -> log.warn("version is not define");
     }
     return baseProperty;
   }
 
   public static BaseProperty assetName(Object assetName, int version) {
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(assetName);
     BaseProperty baseProperty = BaseProperty.builder().value(assetName)
         .format(FormatFieldType.STRING_OR_RAW_BYTES.getValue())
         .index("2")
         .property(MetadataField.ASSET_NAME.getName())
+        .valueFormat(format.getValue())
         .valid(false).build();
     switch (version) {
       case 0 -> {
         baseProperty.setValid(null);
         baseProperty.setFormat(null);
+        baseProperty.setValueFormat(null);
       }
-      case 1 -> {
-        if (Objects.nonNull(assetName) && assetName instanceof String assetNameStr) {
-          baseProperty.setValid(!hexString(assetNameStr) && StandardCharsets.UTF_8.newEncoder()
-              .canEncode(assetNameStr));
-          baseProperty.setFormat(FormatFieldType.STRING.getValue());
-        }
-      }
-      case 2 -> {
-        if (Objects.nonNull(assetName) && assetName instanceof String assetNameStr) {
-          baseProperty.setValid(hexString(assetNameStr));
-          baseProperty.setFormat(FormatFieldType.RAW_BYTES.getValue());
-        }
-      }
+      case 1 -> baseProperty.setValid(format.equals(FormatFieldType.STRING));
+      case 2 -> baseProperty.setValid(format.equals(FormatFieldType.RAW_BYTES));
       default -> log.warn("version is not define");
     }
     return baseProperty;
   }
 
   public static BaseProperty name(Object name, int version) {
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(name);
     BaseProperty baseProperty = BaseProperty.builder().value(name)
         .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.NAME.getName())
         .index("3")
-        .valid(Objects.nonNull(name) && name instanceof String)
+        .valid(format.equals(FormatFieldType.STRING))
+        .valueFormat(format.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   public static BaseProperty nameFile(Object name, int version) {
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(name);
     BaseProperty baseProperty = BaseProperty.builder().value(name)
         .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.NAME.getName())
-        .valid(Objects.nonNull(name) && name instanceof String)
+        .valid(format.equals(FormatFieldType.STRING))
+        .valueFormat(format.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   public static BaseProperty image(Object image, int version) {
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(image);
     BaseProperty checkImage = BaseProperty.builder().value(image)
         .format(FormatFieldType.URI_OR_ARRAY.getValue())
         .index("4")
-        .property(MetadataField.IMAGE.getName()).valid(false).build();
-    if (Objects.nonNull(image) && image instanceof String imageStr && (
-        Arrays.stream(CommonConstant.IMAGE_PREFIX).anyMatch(imageStr::startsWith) || (
-            imageStr.startsWith(BASE64_PREFIX) && imageStr.contains(BASE64)))) {
-      checkImage.setValid(true);
-    } else if (Objects.nonNull(image) && image instanceof ArrayList<?> imageList
-        && imageList.size() >= 2) {
-      checkImage.setValid(
-          Arrays.stream(CommonConstant.IMAGE_PREFIX).anyMatch(imageList.get(0).toString()::startsWith));
-    }
+        .valueFormat(format.getValue())
+        .valid(format.equals(FormatFieldType.URI) || format.equals(FormatFieldType.URI_ARRAY_PARTS))
+        .property(MetadataField.IMAGE.getName())
+        .build();
+
     if (version == 0) {
       checkImage.setValid(null);
       checkImage.setFormat(null);
+      checkImage.setValueFormat(null);
     }
     return checkImage;
   }
 
   public static BaseProperty srcFile(Object src, int version) {
-    BaseProperty checkSrc = BaseProperty.builder().value(src).valid(false)
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(src);
+    BaseProperty checkSrc = BaseProperty.builder().value(src)
         .format(FormatFieldType.URI_OR_ARRAY.getValue())
-        .property(MetadataField.SRC.getName()).build();
-    if (Objects.nonNull(src) && src instanceof String imageStr && Arrays.stream(CommonConstant.IMAGE_PREFIX)
-        .anyMatch(imageStr::startsWith)) {
-      checkSrc.setValid(true);
-    } else if (Objects.nonNull(src) && src instanceof ArrayList<?> imageList
-        && imageList.size() >= 2) {
-      checkSrc.setValid(
-          Arrays.stream(CommonConstant.IMAGE_PREFIX).anyMatch(imageList.get(0).toString()::startsWith));
-    }
+        .property(MetadataField.SRC.getName())
+        .valueFormat(format.getValue())
+        .valid(format.equals(FormatFieldType.URI) || format.equals(FormatFieldType.URI_ARRAY_PARTS))
+        .build();
+
     if (version == 0) {
       checkSrc.setValid(null);
       checkSrc.setFormat(null);
+      checkSrc.setValueFormat(null);
     }
     return checkSrc;
   }
 
   public static BaseProperty mediaType(Object mediaType, String index, int version) {
-    BaseProperty baseProperty = BaseProperty.builder().value(mediaType)
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(mediaType);
+    boolean isValid = format.equals(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE);
+    BaseProperty baseProperty = BaseProperty.builder()
+        .value(mediaType)
         .format(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE.getValue())
         .property(MetadataField.MEDIA_TYPE.getName())
         .index(index)
-        .valid(mediaType instanceof String mediaTypeStr && mediaTypeStr.startsWith(
-            MEDIA_TYPE_PREFIX[0])).build();
+        .valueFormat(isValid ? mediaType.toString() : format.getValue())
+        .valid(isValid)
+        .build();
+
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   public static BaseProperty mediaTypeFile(Object mediaType, int version) {
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(mediaType);
+    boolean isValid = format.equals(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE)
+        || format.equals(FormatFieldType.MIME_TYPE);
     BaseProperty baseProperty = BaseProperty.builder().value(mediaType)
         .format(FormatFieldType.MIME_TYPE.getValue())
         .property(MetadataField.MEDIA_TYPE.getName())
-        .valid(
-            Objects.nonNull(mediaType) && mediaType instanceof String mediaTypeStr && Arrays.stream(
-                MEDIA_TYPE_PREFIX).anyMatch(mediaTypeStr::startsWith)).build();
+        .valueFormat(isValid ? mediaType.toString() : format.getValue())
+        .valid(isValid).build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   public static BaseProperty description(Object desc, String index, int version) {
+    FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(desc);
     BaseProperty baseProperty = BaseProperty.builder().value(desc)
         .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
         .property(MetadataField.DESCRIPTION.getName())
         .index(index)
-        .valid(Objects.isNull(desc) || desc instanceof String || desc instanceof ArrayList<?>)
+        .valueFormat(format.getValue())
+        .valid(format.equals(FormatFieldType.STRING) || format.equals(FormatFieldType.ARRAY))
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
@@ -368,16 +361,5 @@ public class MetadataCIP25Utils {
               .allMatch(isValid -> isValid.equals(true)));
     }
     return !fields.isEmpty() && fields.stream().allMatch(field -> field.equals(true));
-  }
-
-  public static boolean hexString(String str) {
-    try {
-      HexUtil.decodeHexString(str);
-      return str.startsWith(RAW_BYTE_PREFIX);
-    } catch (Exception ex) {
-      log.error("String is not raw bytes");
-      log.error("Error: " + ex.getMessage());
-    }
-    return false;
   }
 }
