@@ -40,31 +40,34 @@ public class MetadataCIP20Utils {
     return metadataCIP;
   }
 
-  public static BaseProperty msg(Object msg, String index){
-      return BaseProperty.builder()
-                      .index(index)
-                      .property(MetadataField.MSG.getName())
-                      .format(FormatFieldType.ARRAY_STRING.getValue())
-                      .valid(isMsgValid(msg))
-                      .value(msg)
-                      .build();
+  public static BaseProperty msg(Object msg, String index) {
+    FormatFieldType formatFieldType = MetadataFieldUtils.getFormatTypeByObject(msg);
+    boolean isValid = FormatFieldType.ARRAY_STRING.equals(formatFieldType) && isMsgValid(msg);
+    return BaseProperty.builder()
+        .index(index)
+        .property(MetadataField.MSG.getName())
+        .format(FormatFieldType.ARRAY_STRING.getValue())
+        .valid(isValid)
+        .valueFormat(formatFieldType.getValue())
+        .value(msg)
+        .build();
   }
 
-  public static boolean isMsgValid(Object msg){
-      if (Objects.nonNull(msg) && msg instanceof ArrayList<?>){
-          List<?> messages = (ArrayList<?>) msg;
-          if (messages.stream().allMatch(m -> m instanceof String
-                  && ((String) m).length() <= 64)){
-              return true;
-          }
-      }
+  public static boolean isMsgValid(Object msg) {
+    if (Objects.nonNull(msg) && msg instanceof ArrayList<?>) {
+      List<?> messages = (ArrayList<?>) msg;
+      return messages.stream().allMatch(m -> m instanceof String
+          && ((String) m).length() <= 64);
+    }
+    return false;
+  }
+
+  public static boolean isCIPValid(List<BaseProperty> baseProperties) {
+    if (baseProperties.isEmpty()) {
       return false;
-  }
-
-  public static boolean isCIPValid(List<BaseProperty> baseProperties){
-      if (baseProperties.isEmpty())
-          return false;
-      return baseProperties.stream().allMatch(baseProperty -> baseProperty.getValid().equals(Boolean.TRUE));
+    }
+    return baseProperties.stream()
+        .allMatch(baseProperty -> baseProperty.getValid().equals(Boolean.TRUE));
   }
 
 }
