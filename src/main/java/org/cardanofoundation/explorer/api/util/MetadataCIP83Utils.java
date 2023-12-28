@@ -33,8 +33,9 @@ public class MetadataCIP83Utils {
       var enc = metadataMap.get(MetadataField.ENC.getName());
       var msg = metadataMap.get(MetadataField.MSG.getName());
 
-      requiredProperties.add(enc(enc, "1"));
-      requiredProperties.add(MetadataCIP20Utils.msg(msg, "2"));
+      requiredProperties.add(MetadataCIP20Utils.msg(msg, "1"));
+      requiredProperties.add(enc(enc, "2"));
+
 
     } catch (Exception ex) {
       log.error("Error: structure incorrect, message=" + ex.getMessage());
