@@ -896,13 +896,14 @@ public class MetadataCIP60Utils {
   private static BaseProperty metadataString(Object val, String property, String parentIndex,
                                              String index, int version) {
     FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(val);
+    boolean isValid = FormatFieldType.STRING.equals(valueFormat)
+        || FormatFieldType.STRING.equals(valueFormat.getParentType());
     BaseProperty baseProperty = BaseProperty.builder().value(val)
         .format(FormatFieldType.STRING.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(FormatFieldType.STRING.equals(valueFormat)
-                   || FormatFieldType.STRING.equals(valueFormat.getParentType()))
-        .valueFormat(valueFormat.getValue())
+        .valid(isValid)
+        .valueFormat(isValid ? FormatFieldType.STRING.getValue() : valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
@@ -954,13 +955,14 @@ public class MetadataCIP60Utils {
         .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(FormatFieldType.STRING.equals(valueFormat.getParentType()) || valueFormat.equals(
+        .valid(FormatFieldType.STRING.equals(valueFormat) || valueFormat.equals(
             FormatFieldType.ARRAY_STRING))
         .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
@@ -1099,13 +1101,14 @@ public class MetadataCIP60Utils {
 
   private static BaseProperty copyright(Object copyright, String index, int version) {
     FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(copyright);
+    boolean isValid = FormatFieldType.STRING.equals(valueFormat)
+        || FormatFieldType.STRING.equals(valueFormat.getParentType());
     BaseProperty baseProperty = BaseProperty.builder().value(copyright)
         .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.COPYRIGHT.getName())
         .index(index)
-        .valid(FormatFieldType.STRING.equals(valueFormat)
-                   || FormatFieldType.STRING.equals(valueFormat.getParentType()))
-        .valueFormat(valueFormat.getValue())
+        .valid(isValid)
+        .valueFormat(isValid ? FormatFieldType.STRING.getValue() : valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
@@ -1189,13 +1192,14 @@ public class MetadataCIP60Utils {
 
   private static BaseProperty albumTitleMetadataCIP60(Object albumTitle, String index, int version) {
     FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(albumTitle);
+    boolean isValid = FormatFieldType.STRING.equals(valueFormat)
+        || FormatFieldType.STRING.equals(valueFormat.getParentType());
     BaseProperty baseProperty = BaseProperty.builder().value(albumTitle)
         .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.ALBUM_TITLE.getName())
         .index(index)
-        .valid(FormatFieldType.STRING.equals(valueFormat)
-                   || FormatFieldType.STRING.equals(valueFormat.getParentType()))
-        .valueFormat(valueFormat.getValue())
+        .valid(isValid)
+        .valueFormat(isValid ? FormatFieldType.STRING.getValue() : valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
