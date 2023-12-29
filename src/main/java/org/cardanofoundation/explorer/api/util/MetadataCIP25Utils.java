@@ -101,7 +101,12 @@ public class MetadataCIP25Utils {
           }
         }
       }
-      metadataCIP.setValid(valid(tokenMap, version));
+      if(tokenMap.isEmpty()) {
+        tokenMap = getDefaultTokenMap(version);
+        metadataCIP.setValid(false);
+      } else {
+        metadataCIP.setValid(valid(tokenMap, version));
+      }
     } catch (Exception ex) {
       log.error("Error: structure incorrect, message=" + ex.getMessage());
       log.error("Check standard CIP-25 fail");
@@ -376,5 +381,21 @@ public class MetadataCIP25Utils {
               .allMatch(isValid -> isValid.equals(true)));
     }
     return !fields.isEmpty() && fields.stream().allMatch(field -> field.equals(true));
+  }
+
+  private static Map<Object, TokenCIP> getDefaultTokenMap(int version) {
+    Map<Object, TokenCIP> tokenMap = new HashMap<>();
+    TokenCIP token = new TokenCIP();
+    List<BaseProperty> requireProperties = new ArrayList<>();
+    requireProperties.add(policy(null, version));
+    requireProperties.add(assetName(null, version));
+    requireProperties.add(name(null, version));
+    requireProperties.add(image(null, version));
+    token.setRequireProperties(requireProperties);
+    token.setOptionalProperties(new ArrayList<>());
+    token.setTokenName("");
+
+    tokenMap.put("", token);
+    return tokenMap;
   }
 }
