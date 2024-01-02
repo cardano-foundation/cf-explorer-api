@@ -22,10 +22,12 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.VerifiedScript;
 import org.cardanofoundation.ledgersync.common.common.nativescript.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +67,7 @@ public class ScriptServiceImpl implements ScriptService {
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final BlockRepository blockRepository;
+  private final VerifiedScriptRepository verifiedScriptRepository;
 
   private final TxService txService;
 
@@ -177,8 +180,16 @@ public class ScriptServiceImpl implements ScriptService {
     nativeScriptResponse.setNumberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash));
     nativeScriptResponse.setKeyHashes(new ArrayList<>());
     nativeScriptResponse.setVerifiedContract(false);
+
+    String json = script.getJson();
+    if (StringUtils.isEmpty(json)) {
+      Optional<VerifiedScript> verifiedScript = verifiedScriptRepository.findByHash(scriptHash);
+      if (verifiedScript.isPresent() && StringUtils.isEmpty(json)) {
+        json = verifiedScript.get().getJson();
+      }
+    }
+
     try {
-      String json = script.getJson();
       if (!StringUtils.isEmpty(json)) {
         nativeScriptResponse.setVerifiedContract(true);
         nativeScriptResponse.setScript(json);
@@ -201,6 +212,7 @@ public class ScriptServiceImpl implements ScriptService {
       }
     } catch (JsonProcessingException | CborDeserializationException e) {
       log.warn("Error parsing script json: {}", e.getMessage());
+      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
     }
     return nativeScriptResponse;
   }
@@ -240,11 +252,17 @@ public class ScriptServiceImpl implements ScriptService {
       if (!nativeScriptTypes.contains(script.getType())) {
         throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
       }
+      if (Boolean.TRUE.equals(verifiedScriptRepository.existsVerifiedScriptByHash(scriptHash))) {
+        throw new BusinessException(BusinessCode.SCRIPT_ALREADY_VERIFIED);
+      }
       String hash = Hex.encodeHexString(NativeScript.deserializeJson(scriptJson).getScriptHash());
-      if (script.getHash().equals(hash) && StringUtils.isEmpty(scriptJson)) {
-        script.setJson(scriptJson);
-        scriptRepository.save(script);
-        return script.getJson();
+      if (script.getHash().equals(hash) && StringUtils.isEmpty(script.getJson())) {
+        VerifiedScript verifiedScript = VerifiedScript.builder()
+            .hash(scriptHash)
+            .json(scriptJson)
+            .build();
+        verifiedScriptRepository.save(verifiedScript);
+        return scriptJson;
       } else {
         throw new BusinessException(BusinessCode.VERIFY_SCRIPT_FAILED);
       }
