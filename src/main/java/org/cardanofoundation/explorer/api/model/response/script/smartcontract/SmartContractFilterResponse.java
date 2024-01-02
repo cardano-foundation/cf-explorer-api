@@ -2,7 +2,7 @@ package org.cardanofoundation.explorer.api.model.response.script.smartcontract;
 
 import lombok.*;
 
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.api.common.enumeration.TxPurposeType;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 
 import java.util.Set;
@@ -17,5 +17,5 @@ public class SmartContractFilterResponse {
   private String scriptHash;
   private ScriptType scriptVersion;
   private Long txCount;
-  private Set<ScriptPurposeType> txPurposes;
+  private Set<TxPurposeType> txPurposes;
 }

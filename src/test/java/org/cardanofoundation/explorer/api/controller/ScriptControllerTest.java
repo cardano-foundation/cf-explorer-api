@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import org.cardanofoundation.explorer.api.common.enumeration.TxPurposeType;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
@@ -11,7 +12,6 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ public class ScriptControllerTest {
         SmartContractFilterResponse smartContractFilterResponse = SmartContractFilterResponse.builder()
             .scriptHash("hash")
             .scriptVersion(ScriptType.PLUTUSV1)
-            .txPurposes(Set.of(ScriptPurposeType.MINT))
+            .txPurposes(Set.of(TxPurposeType.MINT))
             .txCount(1L)
             .build();
         BaseFilterResponse<SmartContractFilterResponse> response =

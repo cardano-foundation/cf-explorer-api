@@ -5,11 +5,11 @@ import java.util.Set;
 
 import org.springframework.util.CollectionUtils;
 
+import org.cardanofoundation.explorer.api.common.enumeration.TxPurposeType;
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,37 +24,32 @@ public interface ScriptMapper {
   @Mapping(target = "scriptVersion", source = "type")
   SmartContractFilterResponse fromSCInfoToSCFilterResponse(SmartContractInfo smartContractInfo);
 
-  default Set<ScriptPurposeType> getScriptTxPurpose(SmartContractInfo smartContractInfo) {
-    Set<ScriptPurposeType> scriptPurposeTypes = new HashSet<>();
+  default Set<TxPurposeType> getScriptTxPurpose(SmartContractInfo smartContractInfo) {
+    Set<TxPurposeType> scriptPurposeTypes = new HashSet<>();
     if (Boolean.TRUE.equals(smartContractInfo.getIsScriptCert())) {
-      scriptPurposeTypes.add(ScriptPurposeType.CERT);
+      scriptPurposeTypes.add(TxPurposeType.CERT);
     }
     if (Boolean.TRUE.equals(smartContractInfo.getIsScriptMint())) {
-      scriptPurposeTypes.add(ScriptPurposeType.MINT);
+      scriptPurposeTypes.add(TxPurposeType.MINT);
     }
     if (Boolean.TRUE.equals(smartContractInfo.getIsScriptReward())) {
-      scriptPurposeTypes.add(ScriptPurposeType.REWARD);
+      scriptPurposeTypes.add(TxPurposeType.REWARD);
     }
     if (Boolean.TRUE.equals(smartContractInfo.getIsScriptSpend())) {
-      scriptPurposeTypes.add(ScriptPurposeType.SPEND);
+      scriptPurposeTypes.add(TxPurposeType.SPEND);
     }
     return scriptPurposeTypes;
   }
 
   default void setScriptTxPurpose(SmartContractFilterRequest filterRequest) {
     if (!CollectionUtils.isEmpty(filterRequest.getTxPurpose())) {
-      if (filterRequest.getTxPurpose().contains(ScriptPurposeType.MINT)) {
-        filterRequest.setIsScriptMint(true);
-      }
-      if (filterRequest.getTxPurpose().contains(ScriptPurposeType.SPEND)) {
-        filterRequest.setIsScriptSpend(true);
-      }
-      if (filterRequest.getTxPurpose().contains(ScriptPurposeType.CERT)) {
-        filterRequest.setIsScriptCert(true);
-      }
-      if (filterRequest.getTxPurpose().contains(ScriptPurposeType.REWARD)) {
-        filterRequest.setIsScriptReward(true);
-      }
+      Set<TxPurposeType> txPurposeTypes = filterRequest.getTxPurpose();
+      filterRequest.setIsScriptNone(txPurposeTypes.contains(TxPurposeType.NO_TX_PURPOSE));
+      filterRequest.setIsScriptAny(txPurposeTypes.contains(TxPurposeType.ANY));
+      filterRequest.setIsScriptReward(txPurposeTypes.contains(TxPurposeType.REWARD));
+      filterRequest.setIsScriptCert(txPurposeTypes.contains(TxPurposeType.CERT));
+      filterRequest.setIsScriptSpend(txPurposeTypes.contains(TxPurposeType.SPEND));
+      filterRequest.setIsScriptMint(txPurposeTypes.contains(TxPurposeType.MINT));
     } else {
       filterRequest.setIsScriptAny(true);
     }
