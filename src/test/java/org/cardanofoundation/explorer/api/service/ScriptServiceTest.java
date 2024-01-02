@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import org.cardanofoundation.explorer.api.common.enumeration.TxPurposeType;
 import org.cardanofoundation.explorer.api.mapper.ScriptMapper;
 import org.cardanofoundation.explorer.api.mapper.ScriptMapperImpl;
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
@@ -122,10 +123,14 @@ class ScriptServiceTest {
     // Given
     Pageable pageable = PageRequest.of(0, 1);
     SmartContractFilterRequest filterRequest = SmartContractFilterRequest.builder()
-        .txPurpose(Set.of(ScriptPurposeType.SPEND, ScriptPurposeType.MINT))
+        .txPurpose(Set.of(TxPurposeType.SPEND, TxPurposeType.MINT))
         .scriptVersion(ScriptType.PLUTUSV1)
         .isScriptMint(true)
         .isScriptSpend(true)
+        .isScriptNone(false)
+        .isScriptAny(false)
+        .isScriptReward(false)
+        .isScriptCert(false)
         .build();
 
     SmartContractInfo smartContractInfo = SmartContractInfo.builder()
@@ -142,6 +147,7 @@ class ScriptServiceTest {
                                                             filterRequest.getIsScriptSpend(),
                                                             filterRequest.getIsScriptMint(),
                                                             filterRequest.getIsScriptAny(),
+                                                            filterRequest.getIsScriptNone(),
                                                             pageable))
         .thenReturn(new PageImpl<>(List.of(smartContractInfo)));
 
@@ -153,9 +159,9 @@ class ScriptServiceTest {
                             response.getData().get(0).getScriptHash());
     Assertions.assertEquals(10L, response.getData().get(0).getTxCount());
     Assertions.assertTrue(
-        response.getData().get(0).getTxPurposes().contains(ScriptPurposeType.SPEND));
+        response.getData().get(0).getTxPurposes().contains(TxPurposeType.SPEND));
     Assertions.assertTrue(
-        response.getData().get(0).getTxPurposes().contains(ScriptPurposeType.MINT));
+        response.getData().get(0).getTxPurposes().contains(TxPurposeType.MINT));
     Assertions.assertEquals(ScriptType.PLUTUSV1, response.getData().get(0).getScriptVersion());
 
   }

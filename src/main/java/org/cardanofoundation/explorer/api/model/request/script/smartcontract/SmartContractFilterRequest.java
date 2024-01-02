@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.api.common.enumeration.TxPurposeType;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 
 @Getter
@@ -20,7 +20,7 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 public class SmartContractFilterRequest {
 
   ScriptType scriptVersion;
-  Set<ScriptPurposeType> txPurpose;
+  Set<TxPurposeType> txPurpose;
 
   @JsonIgnore
   private Boolean isScriptReward;
@@ -32,4 +32,6 @@ public class SmartContractFilterRequest {
   private Boolean isScriptMint;
   @JsonIgnore
   private Boolean isScriptAny;
+  @JsonIgnore
+  private Boolean isScriptNone;
 }

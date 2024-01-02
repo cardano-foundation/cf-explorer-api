@@ -14,6 +14,7 @@ public interface SmartContractInfoRepository extends JpaRepository<SmartContract
   @Query("SELECT sci FROM SmartContractInfo sci "
       + "WHERE (:scriptType IS NULL OR sci.type = :scriptType) "
       + "AND (:isScriptAny = TRUE OR"
+      + "(:isScriptNone = TRUE AND sci.txCount = 0) OR "
       + "(:isScriptCert = sci.isScriptCert AND sci.isScriptCert = TRUE) OR "
       + "(:isScriptMint = sci.isScriptMint AND sci.isScriptMint = TRUE) OR "
       + "(:isScriptReward = sci.isScriptReward AND sci.isScriptReward = TRUE) OR "
@@ -25,6 +26,7 @@ public interface SmartContractInfoRepository extends JpaRepository<SmartContract
       @Param("isScriptSpend") Boolean isScriptSpend,
       @Param("isScriptMint") Boolean isScriptMint,
       @Param("isScriptAny") Boolean isScriptAny,
+      @Param("isScriptNone") Boolean isScriptNone,
       Pageable pageable);
 
   @Query("SELECT sci.txCount FROM SmartContractInfo sci WHERE sci.scriptHash = :scriptHash")

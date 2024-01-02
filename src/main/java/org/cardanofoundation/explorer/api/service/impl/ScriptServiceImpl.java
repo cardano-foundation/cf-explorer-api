@@ -368,6 +368,7 @@ public class ScriptServiceImpl implements ScriptService {
                                     filterRequest.getIsScriptSpend(),
                                     filterRequest.getIsScriptMint(),
                                     filterRequest.getIsScriptAny(),
+                                    filterRequest.getIsScriptNone(),
                                     pageable);
 
     return new BaseFilterResponse<>(
