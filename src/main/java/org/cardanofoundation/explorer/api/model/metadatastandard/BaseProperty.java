@@ -18,4 +18,6 @@ public class BaseProperty {
   private String property;
 
   private String format;
+
+  private String valueFormat;
 }
