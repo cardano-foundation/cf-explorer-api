@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
+import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
@@ -85,9 +86,11 @@ public class ScriptController {
 
   @GetMapping("/contracts")
   public ResponseEntity<BaseFilterResponse<SmartContractFilterResponse>> getSmartContracts(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {Script_.TX},
+      @ParameterObject @Parameter(description = "filter condition") SmartContractFilterRequest filterRequest,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {"txCount"},
           direction = Sort.Direction.DESC) @Valid Pagination pagination) {
-    return ResponseEntity.ok(scriptService.getSmartContracts(pagination.toPageable()));
+    return ResponseEntity.ok(
+        scriptService.getSmartContracts(filterRequest, pagination.toPageable()));
   }
 
   @GetMapping("/contracts/{scriptHash}")

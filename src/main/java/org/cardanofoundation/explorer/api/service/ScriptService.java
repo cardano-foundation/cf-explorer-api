@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.service;
 import java.util.Set;
 
 import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
+import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
@@ -27,7 +28,8 @@ public interface ScriptService {
 
   BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(String scriptHash, Pageable pageable);
 
-  BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(Pageable pageable);
+  BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(
+      SmartContractFilterRequest filterRequest, Pageable pageable);
 
   SmartContractDetailResponse getSmartContractDetail(String scriptHash);
 
