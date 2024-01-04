@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import java.util.Set;
 
+import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
@@ -16,7 +17,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface ScriptService {
 
-  BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(Pageable pageable);
+  BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(NativeScriptFilterRequest filterRequest,
+                                                                  Pageable pageable);
 
   NativeScriptResponse getNativeScriptDetail(String scriptHash);
 

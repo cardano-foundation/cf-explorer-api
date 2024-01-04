@@ -86,13 +86,13 @@ public class ScriptControllerTest {
     void testNativeScripts_thenReturn() throws Exception {
         NativeScriptFilterResponse nativeScriptFilterResponse = NativeScriptFilterResponse.builder()
             .scriptHash("hash")
-            .numberOfTokens(1)
-            .numberOfAssetHolders(1)
+            .numberOfTokens(1L)
+            .numberOfAssetHolders(1L)
             .build();
         BaseFilterResponse<NativeScriptFilterResponse> response =
             new BaseFilterResponse<>(List.of(nativeScriptFilterResponse), 1);
 
-        when(scriptService.getNativeScripts(any(Pageable.class))).thenReturn(response);
+        when(scriptService.getNativeScripts(any(), any(Pageable.class))).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/scripts/native-scripts"))
             .andExpect(status().isOk())
