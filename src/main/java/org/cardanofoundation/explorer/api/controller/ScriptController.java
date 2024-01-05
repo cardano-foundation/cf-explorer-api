@@ -44,7 +44,7 @@ public class ScriptController {
   @GetMapping("/native-scripts")
   @LogMessage
   public ResponseEntity<BaseFilterResponse<NativeScriptFilterResponse>> getNativeScripts(
-      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {NativeScriptInfo_.NUMBER_OF_TOKENS},
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20, sort = {NativeScriptInfo_.NUMBER_OF_ASSET_HOLDERS},
           direction = Sort.Direction.DESC) @Valid Pagination pagination,
       @ParameterObject @Parameter(description = "filter condition") NativeScriptFilterRequest filterRequest) {
     return ResponseEntity.ok(scriptService.getNativeScripts(filterRequest, pagination.toPageable()));
