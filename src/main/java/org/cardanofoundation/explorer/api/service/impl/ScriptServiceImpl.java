@@ -66,6 +66,7 @@ public class ScriptServiceImpl implements ScriptService {
 
   private final ScriptRepository scriptRepository;
   private final NativeScriptInfoRepository nativeScriptInfoRepository;
+  private final TxOutRepository txOutRepository;
   private final MultiAssetRepository multiAssetRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RedeemerRepository redeemerRepository;
@@ -77,6 +78,7 @@ public class ScriptServiceImpl implements ScriptService {
   private final BlockRepository blockRepository;
   private final VerifiedScriptRepository verifiedScriptRepository;
   private final SmartContractInfoRepository smartContractInfoRepository;
+  
   private final TxService txService;
 
   private final ScriptMapper scriptMapper;
