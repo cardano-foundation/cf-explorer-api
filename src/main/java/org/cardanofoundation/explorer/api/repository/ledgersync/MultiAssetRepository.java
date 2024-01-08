@@ -84,7 +84,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   @Query(value = "SELECT topMultiAsset.* "
       + " FROM script s "
       + " CROSS JOIN LATERAL "
-      + " (SELECT ma.* FROM multi_asset ma WHERE ma.policy = s.hash ORDER BY ma.tx_count LIMIT 5)"
+      + " (SELECT ma.* FROM multi_asset ma WHERE ma.policy = s.hash ORDER BY ma.tx_count DESC LIMIT 5)"
       + " AS topMultiAsset"
       + " WHERE s.hash IN :scriptHashes", nativeQuery = true)
   List<MultiAsset> findTopMultiAssetByScriptHashIn(@Param("scriptHashes") List<String> scriptHashes);
