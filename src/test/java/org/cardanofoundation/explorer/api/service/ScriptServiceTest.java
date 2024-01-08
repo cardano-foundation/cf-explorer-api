@@ -22,6 +22,7 @@ import org.cardanofoundation.explorer.api.mapper.ScriptMapperImpl;
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
+import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
 import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
