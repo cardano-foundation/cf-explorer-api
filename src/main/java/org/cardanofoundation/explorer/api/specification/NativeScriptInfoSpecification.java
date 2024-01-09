@@ -16,7 +16,7 @@ public class NativeScriptInfoSpecification {
     return (root, query, cb) -> {
       final List<Specification<NativeScriptInfo>> predicates = new ArrayList<>();
       if (filterRequest.getOpenTimeLocked() != null) {
-        predicates.add(filterByAfterSlot(currentSlot, filterRequest.getOpenTimeLocked()));
+        predicates.add(filterByTimeLock(currentSlot, filterRequest.getOpenTimeLocked()));
       }
       if (filterRequest.getIsMultiSig() != null) {
         predicates.add(filterByIsMultiSig(filterRequest.getIsMultiSig()));
@@ -25,7 +25,7 @@ public class NativeScriptInfoSpecification {
     };
   }
 
-  public static Specification<NativeScriptInfo> filterByAfterSlot(Long currentSlot, Boolean openTimeLocked) {
+  public static Specification<NativeScriptInfo> filterByTimeLock(Long currentSlot, Boolean openTimeLocked) {
     return (root, query, cb) -> {
       if (openTimeLocked == null) {
         return null;
@@ -44,10 +44,13 @@ public class NativeScriptInfoSpecification {
             cb.and(afterSlotIsNullPredicate, beforeSlotIsGreaterThanCurrentSlotPredicate);
         Predicate afterSlotIsLessThanCurrentSlotAndBeforeSlotIsNullPredicate =
             cb.and(afterSlotIsLessThanCurrentSlotPredicate, beforeSlotIsNullPredicate);
+        Predicate afterSlotIsNullAndBeforeSlotIsNullPredicate =
+            cb.and(afterSlotIsNullPredicate, beforeSlotIsNullPredicate);
         Predicate openTimeLockedPredicate =
             cb.or(afterSlotIsLessThanCurrentSlotAndBeforeSlotIsGreaterThanCurrentSlotPredicate,
                 afterSlotIsNullAndBeforeSlotIsGreaterThanCurrentSlotPredicate,
-                afterSlotIsLessThanCurrentSlotAndBeforeSlotIsNullPredicate);
+                afterSlotIsLessThanCurrentSlotAndBeforeSlotIsNullPredicate,
+                afterSlotIsNullAndBeforeSlotIsNullPredicate);
         if (openTimeLocked) {
           return openTimeLockedPredicate;
         } else {
