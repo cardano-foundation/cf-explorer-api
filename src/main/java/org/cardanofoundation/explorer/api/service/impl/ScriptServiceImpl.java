@@ -208,7 +208,7 @@ public class ScriptServiceImpl implements ScriptService {
     NativeScriptInfo nativeScriptInfo =
         nativeScriptInfoRepository
             .findByScriptHash(scriptHash)
-            .orElse(NativeScriptInfo.builder()
+            .orElseGet(() -> NativeScriptInfo.builder()
                 .numberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash))
                 .numberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
                 .build());
