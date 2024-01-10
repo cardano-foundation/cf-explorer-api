@@ -305,7 +305,7 @@ public class ScriptServiceImpl implements ScriptService {
     NativeScriptInfo nativeScriptInfo =
         nativeScriptInfoRepository
             .findByScriptHash(scriptHash)
-            .orElse(NativeScriptInfo.builder()
+            .orElseGet(() -> NativeScriptInfo.builder()
                 .numberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash))
                 .build());
     List<MultiAsset> multiAssetList = multiAssetRepository.findMultiAssetByPolicy(scriptHash, pageable);
@@ -329,7 +329,7 @@ public class ScriptServiceImpl implements ScriptService {
     NativeScriptInfo nativeScriptInfo =
         nativeScriptInfoRepository
             .findByScriptHash(scriptHash)
-            .orElse(NativeScriptInfo.builder()
+            .orElseGet(() -> NativeScriptInfo.builder()
                 .numberOfAssetHolders(multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
                 .build());
     List<AddressTokenProjection> multiAssetList =
