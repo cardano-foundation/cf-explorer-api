@@ -17,7 +17,7 @@ public class CidUtils {
     try {
       String json = new JsonCanonicalizer(jsonData).getEncodedString();
       return cid.equals(genarateCid(json));
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Error while verifying cid", e);
       return false;
     }

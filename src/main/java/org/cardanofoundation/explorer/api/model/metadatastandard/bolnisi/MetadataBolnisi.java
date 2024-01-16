@@ -12,5 +12,6 @@ import lombok.Setter;
 public class MetadataBolnisi {
   private String cid;
   private boolean isCidVerified;
+  private boolean isExternalApiAvailable;
   private List<WineryData> wineryData;
 }
