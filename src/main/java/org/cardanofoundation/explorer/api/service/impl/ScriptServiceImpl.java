@@ -24,6 +24,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
@@ -109,9 +110,10 @@ public class ScriptServiceImpl implements ScriptService {
     );
     Page<NativeScriptInfo> nativeScriptPage = nativeScriptInfoRepository.findAll(
         NativeScriptInfoSpecification.filter(currrentBlock.getSlotNo(), filterRequest), pageable);
-    List<MultiAsset> multiAssetList = multiAssetRepository.findTopMultiAssetByScriptHashIn(
+    List<TokenProjection> tokenProjectionList = multiAssetRepository.findTopMultiAssetByScriptHashIn(
         nativeScriptPage.stream().map(NativeScriptInfo::getScriptHash).toList());
-    List<TokenFilterResponse> tokenResponses = createTokenResponse(multiAssetList);
+    List<TokenFilterResponse> tokenResponses = tokenProjectionList.stream()
+        .map(assetMetadataMapper::fromTokenProjectionToFilterResponse).toList();
     Map<String, List<TokenFilterResponse>> tokenResponseMap =
         tokenResponses.stream().collect(Collectors.groupingBy(TokenFilterResponse::getPolicy));
     Page<NativeScriptFilterResponse> nativeScriptPageResponse =
@@ -134,28 +136,6 @@ public class ScriptServiceImpl implements ScriptService {
         });
     return new BaseFilterResponse<>(nativeScriptPageResponse);
   }
-
-  private List<TokenFilterResponse> createTokenResponse(List<MultiAsset> tokens) {
-    List<TokenFilterResponse> tokenResponses;
-    Set<String> subjects = tokens.stream().map(
-        ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-    tokenResponses = tokens.stream().map(
-        token -> {
-          TokenFilterResponse tokenFilterResponse = new TokenFilterResponse();
-          tokenFilterResponse.setPolicy(token.getPolicy());
-          tokenFilterResponse.setName(token.getName());
-          tokenFilterResponse.setFingerprint(token.getFingerprint());
-          tokenFilterResponse.setDisplayName(token.getNameView());
-          tokenFilterResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(
-              assetMetadataMap.get(token.getPolicy() + token.getName())));
-          return tokenFilterResponse;
-        }).toList();
-    return tokenResponses;
-  }
-
   /**
    * Explain native script
    * @param nativeScript native script
@@ -333,7 +313,7 @@ public class ScriptServiceImpl implements ScriptService {
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
     Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
         Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-    var multiAssetResponsesList = multiAssetPage.map(tokenMapper::fromMultiAssetToFilterResponse);
+    var multiAssetResponsesList = multiAssetPage.map(assetMetadataMapper::fromMultiAssetToFilterResponse);
     multiAssetResponsesList.forEach(
         ma -> ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
             assetMetadataMap.get(ma.getPolicy() + ma.getName()))

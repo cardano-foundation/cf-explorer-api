@@ -18,9 +18,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.util.MetadataCIP25Utils;
 import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +52,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
@@ -100,13 +101,11 @@ public class TokenServiceImpl implements TokenService {
     if (tokenCount == 0) {
       tokenCount = (int) multiAssetRepository.count();
     }
-    List<MultiAsset> dataContent;
-    Page<MultiAsset> multiAssets;
+    Page<TokenProjection> multiAssets;
     boolean isQueryEmpty = StringUtils.isEmpty(query);
     if(isQueryEmpty){
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
-      dataContent = multiAssetRepository.findMultiAssets(pageable);
-      multiAssets = new PageImpl<>(dataContent, pageable, tokenCount);
+      multiAssets = new PageImpl<>(multiAssetRepository.findMultiAssets(pageable), pageable, tokenCount);
     } else {
       String lengthOfNameView = "nameViewLength";
       if(MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()){
@@ -114,37 +113,16 @@ public class TokenServiceImpl implements TokenService {
       }
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
           .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
-      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable).map(
-          item -> {
-            MultiAsset multiAsset = new MultiAsset();
-            multiAsset.setId(item.getId());
-            multiAsset.setPolicy(item.getPolicy());
-            multiAsset.setName(item.getName());
-            multiAsset.setNameView(item.getNameView());
-            multiAsset.setFingerprint(item.getFingerprint());
-            multiAsset.setTxCount(item.getTxCount());
-            multiAsset.setSupply(item.getSupply());
-            multiAsset.setTotalVolume(item.getTotalVolume());
-            multiAsset.setTime(item.getTime());
-            return multiAsset;
-          }
-      );
+      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable);
     }
-
-    var multiAssetResponsesList = multiAssets.map(tokenMapper::fromMultiAssetToFilterResponse);
-    List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(),
-        MultiAsset::getId);
+    var multiAssetResponsesList = multiAssets.map(assetMetadataMapper::fromTokenProjectionToTokenFilterResponse);
+    List<Long> multiAssetIds = StreamUtil.mapApply(multiAssets.getContent(), TokenProjection::getId);
     var tokenInfos = tokenInfoRepository.findTokenInfosByMultiAssetIdIn(multiAssetIds);
     var tokenInfoMap = StreamUtil.toMap(tokenInfos, TokenInfo::getMultiAssetId,
         Function.identity());
 
-    Set<String> subjects = StreamUtil.mapApplySet(multiAssets.getContent(),
-        ma -> ma.getPolicy() + ma.getName());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList,
-        AssetMetadata::getSubject);
     Map<String, Script> scriptMap = scriptRepository.findAllByHashIn(
-         multiAssets.getContent().stream().map(MultiAsset::getPolicy).collect(Collectors.toList()))
+         multiAssets.getContent().stream().map(TokenProjection::getPolicy).collect(Collectors.toList()))
         .stream().collect(Collectors.toMap(Script::getHash, Function.identity()));
 
     var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
@@ -164,10 +142,6 @@ public class TokenServiceImpl implements TokenService {
         }
         ma.setNumberOfHolders(tokenInfo.getNumberOfHolders());
       }
-
-      ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
-          assetMetadataMap.get(ma.getPolicy() + ma.getName()))
-      );
     });
 
     if(isQueryEmpty){
