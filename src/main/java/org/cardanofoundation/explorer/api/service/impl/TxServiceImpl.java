@@ -124,6 +124,7 @@ public class TxServiceImpl implements TxService {
   private final ProtocolParamService protocolParamService;
   private final ReferenceTxInRepository referenceTxInRepository;
   private final TxReferenceInputMapper txReferenceInputMapper;
+  private final BolnisiMetadataService bolnisiMetadataService;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -567,12 +568,21 @@ public class TxServiceImpl implements TxService {
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
         txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
-            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson())
-                .metadataCIP25(
-                    MetadataCIP25Utils.standard(txMetadata.getJson()))
-                .metadataCIP60(MetadataCIP60Utils.standard(txMetadata.getJson()))
-                .metadataCIP20(MetadataCIP20Utils.standard(txMetadata.getJson()))
-                .metadataCIP83(MetadataCIP83Utils.standard(txMetadata.getJson())).build()).toList();
+            TxMetadataResponse.builder()
+                .label(txMetadata.getKey())
+                .value(txMetadata.getJson())
+                .metadataCIP25(txMetadata.getKey().equals(BigInteger.valueOf(721))
+                               ? MetadataCIP25Utils.standard(txMetadata.getJson()) : null)
+                .metadataCIP60(txMetadata.getKey().equals(BigInteger.valueOf(721))
+                               ? MetadataCIP60Utils.standard(txMetadata.getJson()) : null)
+                .metadataCIP20(txMetadata.getKey().equals(BigInteger.valueOf(674))
+                               ? MetadataCIP20Utils.standard(txMetadata.getJson()) : null)
+                .metadataCIP83(txMetadata.getKey().equals(BigInteger.valueOf(674))
+                               ? MetadataCIP83Utils.standard(txMetadata.getJson()) : null)
+                .metadataBolnisi(txMetadata.getKey().equals(BigInteger.valueOf(1904))
+                                 ? bolnisiMetadataService.getWineryData(txMetadata.getJson()) : null)
+                .build())
+            .toList();
     if (!CollectionUtils.isEmpty(txMetadataList)) {
       txResponse.setMetadata(txMetadataList);
     }
