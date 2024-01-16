@@ -631,22 +631,10 @@ public class TxServiceImpl implements TxService {
    * @param txResponse response data of transaction
    */
   private void getMints(Tx tx, TxResponse txResponse) {
-    List<MaTxMint> maTxMints = maTxMintRepository.findByTx(tx);
-    Set<String> subjects = maTxMints.stream().map(
-        ma -> ma.getIdent().getPolicy() + ma.getIdent().getName()).collect(Collectors.toSet());
-    var assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    var assetMetadataMap = assetMetadataList.stream().collect(Collectors.toMap(
-        AssetMetadata::getSubject, Function.identity()
-    ));
+    List<MintProjection> maTxMints = maTxMintRepository.findByTxId(tx.getId());
     if (!CollectionUtils.isEmpty(maTxMints)) {
       txResponse.setMints(maTxMints.stream().map(
-          ma -> {
-            TxMintingResponse txMintingResponse = maTxMintMapper.fromMaTxMint(ma);
-            String subject = ma.getIdent().getPolicy() + ma.getIdent().getName();
-            txMintingResponse.setMetadata(
-                assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
-            return txMintingResponse;
-          }).collect(Collectors.toList()));
+          maTxMintMapper::fromMintProjectionToTxMintingResponse).collect(Collectors.toList()));
     }
   }
 
