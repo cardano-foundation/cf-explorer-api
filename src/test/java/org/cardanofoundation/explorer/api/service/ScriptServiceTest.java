@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
+import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
 import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
@@ -22,7 +24,6 @@ import org.cardanofoundation.explorer.api.mapper.ScriptMapperImpl;
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
-import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
@@ -39,7 +40,6 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -78,6 +78,12 @@ class ScriptServiceTest {
   @Mock
   TxService txService;
 
+  @Mock
+  TokenMapper tokenMapper;
+
+  @Mock
+  AssetMetadataMapper assetMetadataMapper;
+
   @InjectMocks
   ScriptServiceImpl scriptService;
 
@@ -105,8 +111,7 @@ class ScriptServiceTest {
     when(nativeScriptInfoRepository
         .findAll(any(Specification.class), any(Pageable.class)))
         .thenReturn(new PageImpl<>(scriptList));
-    when(assetMetadataRepository.findBySubjectIn(any()))
-        .thenReturn(List.of());
+    when(multiAssetRepository.findTopMultiAssetByScriptHashIn(any())).thenReturn(List.of());
     var response = scriptService.getNativeScripts(request, pageable);
     // Assert
     Assertions.assertEquals(1, response.getTotalItems());
