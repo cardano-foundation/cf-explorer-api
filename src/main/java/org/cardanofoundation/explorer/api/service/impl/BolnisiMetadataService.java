@@ -49,13 +49,13 @@ public class BolnisiMetadataService {
   @SingletonCall(typeToken = TypeTokenGson.BOLNISI_METADATA, expireAfterSeconds = 200)
   public MetadataBolnisi getWineryData(String jsonMetadata) {
     MetadataBolnisi metadataBolnisi = getOnChainMetadata(jsonMetadata);
-    Map<String, List<Object>> offChainMetadata = getOffChainMetadata(
-        metadataBolnisi.getCid());
+    Map<String, List<Object>> offChainMetadata = getOffChainMetadata(metadataBolnisi);
     boolean isCidVerified = CidUtils.verifyCid(metadataBolnisi.getCid(),
                                                JsonUtil.getPrettyJson(offChainMetadata));
     if (!isCidVerified) {
       return metadataBolnisi;
     }
+    metadataBolnisi.setCidVerified(true);
 
     verifyPublicKey(metadataBolnisi);
 
@@ -84,7 +84,6 @@ public class BolnisiMetadataService {
     });
 
     metadataBolnisi.setWineryData(new ArrayList<>(wineryDataMap.values()));
-    metadataBolnisi.setCidVerified(true);
     return metadataBolnisi;
   }
 
@@ -97,7 +96,13 @@ public class BolnisiMetadataService {
                          callWebclient(publicKeyUrl, byte[].class, wineryData.getWineryId())
                              .map(bytes -> Map.of(wineryData.getWineryId(),
                                                   HexUtil.encodeHexString(bytes)))
-                             .toFuture()));
+                             .toFuture()
+                             .exceptionally(ex -> {
+                               log.error("Error while getting public key from external api", ex);
+                               metadataBolnisi.setExternalApiAvailable(false);
+                               metadataBolnisi.setCidVerified(false);
+                               return null;
+                             })));
 
     Map<String, String> wineryPkeyMap = completableFutures.stream()
         .map(CompletableFuture::join)
@@ -159,15 +164,22 @@ public class BolnisiMetadataService {
     return MetadataBolnisi.builder()
         .cid(cid)
         .wineryData(wineryDataList)
+        .isExternalApiAvailable(true)
         .build();
   }
 
 
   @SuppressWarnings("unchecked")
-  public Map<String, List<Object>> getOffChainMetadata(String cid) {
-    return callWebclient(offChainMetadataUrl, String.class, cid)
+  public Map<String, List<Object>> getOffChainMetadata(MetadataBolnisi metadataBolnisi) {
+    return callWebclient(offChainMetadataUrl, String.class, metadataBolnisi.getCid())
         .flatMap(actualOffChainURL ->
                      callWebclient(actualOffChainURL.replace("%2F", "/"), LinkedHashMap.class))
+        .onErrorComplete(throwable -> {
+          log.error("Error while getting bolnisi off-chain metadata", throwable);
+          metadataBolnisi.setExternalApiAvailable(false);
+          metadataBolnisi.setCidVerified(false);
+          return true;
+        })
         .block();
   }
 
