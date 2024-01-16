@@ -40,10 +40,10 @@ public class BolnisiMetadataService {
 
   private final WebClient webClient;
 
-  @Value("${application.api.bolnisi.offchain}")
+  @Value("${application.api.bolnisi.off-chain}")
   String offChainMetadataUrl;
 
-  @Value("${application.api.bolnisi.publicKey}")
+  @Value("${application.api.bolnisi.public-key}")
   String publicKeyUrl;
 
   @SingletonCall(typeToken = TypeTokenGson.BOLNISI_METADATA, expireAfterSeconds = 200)
