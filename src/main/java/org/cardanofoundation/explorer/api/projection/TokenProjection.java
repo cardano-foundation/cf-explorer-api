@@ -26,4 +26,14 @@ public interface TokenProjection {
   
   Integer getNameViewLength();
 
+  String getUrl();
+
+  String getTicker();
+
+  Integer getDecimals();
+
+  String getLogo();
+
+  String getDescription();
+
 }

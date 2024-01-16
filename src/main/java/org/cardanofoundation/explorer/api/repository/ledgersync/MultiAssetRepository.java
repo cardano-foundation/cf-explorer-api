@@ -21,16 +21,21 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   @Query(value = "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.name_view as nameView, ma.tx_count as txCount,"
       + " ma.fingerprint as fingerprint, ma.supply as supply, ma.total_volume as totalVolume, ma.time as time,"
-      + " LENGTH(ma.name_view) as nameViewLength"
-      + " FROM multi_asset ma "
+      + " LENGTH(ma.name_view) as nameViewLength, am.url as url, am.ticker as ticker, am.decimals as decimals, am.logo as logo, am.description as description"
+      + " FROM multi_asset ma"
+      + " LEFT JOIN asset_metadata am ON am.fingerprint = ma.fingerprint"
       + " WHERE ma.fingerprint = :query OR LOWER(ma.name_view) LIKE CONCAT('%', :query, '%')",
       countQuery = "SELECT COUNT(*) FROM (SELECT 1 FROM multi_asset ma "
           + "WHERE ma.fingerprint = :query OR LOWER(ma.name_view) LIKE CONCAT('%', :query, '%') limit 1000) as A",
       nativeQuery = true)
   Page<TokenProjection> findAll(@Param("query") String query, Pageable pageable);
 
-  @Query("select multiAsset from MultiAsset multiAsset")
-  List<MultiAsset> findMultiAssets(Pageable pageable);
+  @Query(value = "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ma.txCount as txCount,"
+      + " ma.fingerprint as fingerprint, ma.supply as supply, ma.totalVolume as totalVolume, ma.time as time,"
+      + " LENGTH(ma.nameView) as nameViewLength, am.url as url, am.ticker as ticker, am.decimals as decimals, am.logo as logo, am.description as description"
+      + " FROM MultiAsset ma"
+      + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint")
+  List<TokenProjection> findMultiAssets(Pageable pageable);
 
   Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
 
@@ -80,12 +85,17 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   List<PolicyProjection> countAssetHoldersByPolicyIn(@Param("policyList") List<String> policyList);
 
   List<MultiAsset> findByPolicy(@Param("policy") String policy, Pageable pageable);
-
-  @Query(value = "SELECT topMultiAsset.* "
-      + " FROM script s "
-      + " CROSS JOIN LATERAL "
-      + " (SELECT ma.* FROM multi_asset ma WHERE ma.policy = s.hash ORDER BY ma.tx_count DESC LIMIT 5)"
-      + " AS topMultiAsset"
-      + " WHERE s.hash IN :scriptHashes", nativeQuery = true)
-  List<MultiAsset> findTopMultiAssetByScriptHashIn(@Param("scriptHashes") List<String> scriptHashes);
+  @Query(value = "WITH firstResult AS ("
+      + " SELECT topMultiAsset.*"
+      + " FROM script s"
+      + " CROSS JOIN LATERAL"
+      + " (SELECT ma.name as name, ma.name_view as name_view, ma.policy as policy, ma.fingerprint as fingerprint"
+      + " FROM multi_asset ma "
+      + " WHERE ma.policy = s.hash ORDER BY ma.tx_count DESC LIMIT 5)"
+      + " AS topMultiAsset WHERE s.hash IN :scriptHashes)"
+      + " SELECT firstResult.policy as policy, firstResult.name as name, firstResult.name_view as nameView, firstResult.fingerprint as fingerprint,"
+      + " am.url as url, am.ticker as ticker, am.decimals as decimals, am.logo as logo, am.description as description"
+      + " FROM firstResult"
+      + " LEFT JOIN asset_metadata am ON am.fingerprint = firstResult.fingerprint",nativeQuery = true)
+  List<TokenProjection> findTopMultiAssetByScriptHashIn(@Param("scriptHashes") List<String> scriptHashes);
 }
