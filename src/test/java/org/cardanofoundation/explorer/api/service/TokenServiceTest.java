@@ -114,25 +114,23 @@ class TokenServiceTest {
     when(scriptRepository.findAllByHashIn(List.of("policy")))
         .thenReturn(List.of(Script.builder().type(ScriptType.TIMELOCK).hash("policy").build()));
 
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("policy")
-        .name("name")
-        .nameView("nameView")
-        .fingerprint("fingerprint")
-        .build();
+    final TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
+    when(tokenProjection.getId()).thenReturn(0L);
+    when(tokenProjection.getPolicy()).thenReturn("policy");
 
     when(multiAssetRepository.findMultiAssets(any(Pageable.class))).thenReturn(
-        List.of(multiAsset)
+        List.of(tokenProjection)
     );
     final TokenFilterResponse tokenFilterResponse = TokenFilterResponse.builder()
         .id(0L)
         .name("name")
         .policy("policy")
-        .metadata(TokenMetadataResponse.builder().build())
+        .metadata(TokenMetadataResponse.builder()
+            .url("url")
+            .build())
         .build();
 
-    when(tokenMapper.fromMultiAssetToFilterResponse(multiAsset))
+    when(assetMetadataMapper.fromTokenProjectionToTokenFilterResponse(tokenProjection))
         .thenReturn(tokenFilterResponse);
 
     final TokenInfo tokenInfo = TokenInfo.builder()
@@ -146,26 +144,12 @@ class TokenServiceTest {
     when(tokenInfoRepository.findTokenInfosByMultiAssetIdIn(anyCollection()))
         .thenReturn(tokenInfos);
 
-    final AssetMetadata metadata = AssetMetadata.builder()
-        .id(0L)
-        .subject("policyname")
-        .name("name")
-        .description("description")
-        .policy("policy")
-        .build();
-    when(assetMetadataRepository.findBySubjectIn(any())).thenReturn(List.of(metadata));
-
-    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
-        0, "logo", "description");
-
-    when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
-
     // Run the test
     final BaseFilterResponse<TokenFilterResponse> result = tokenService.filterToken(
         "", PageRequest.of(0, 1));
 
     // Verify the results
-    assertEquals(tokenMetadataResponse, result.getData().get(0).getMetadata());
+    assertEquals("url", result.getData().get(0).getMetadata().getUrl());
     assertEquals("100", result.getData().get(0).getVolumeIn24h());
     assertEquals(100, result.getData().get(0).getNumberOfHolders());
   }
@@ -177,12 +161,6 @@ class TokenServiceTest {
     TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
     when(tokenProjection.getId()).thenReturn(0L);
     when(tokenProjection.getPolicy()).thenReturn("policy");
-    when(tokenProjection.getName()).thenReturn("name");
-    when(tokenProjection.getNameView()).thenReturn("nameView");
-    when(tokenProjection.getFingerprint()).thenReturn("fingerprint");
-    when(tokenProjection.getTxCount()).thenReturn(0L);
-    when(tokenProjection.getSupply()).thenReturn(new BigInteger("0"));
-    when(tokenProjection.getTotalVolume()).thenReturn(new BigInteger("0"));
 
     final Page<TokenProjection> multiAssets = new PageImpl<>(List.of(tokenProjection));
     when(scriptRepository.findAllByHashIn(List.of("policy")))
@@ -196,10 +174,18 @@ class TokenServiceTest {
         .id(0L)
         .name("name")
         .policy("policy")
-        .metadata(TokenMetadataResponse.builder().build())
+        .fingerprint("fingerprint")
+        .metadata(TokenMetadataResponse.builder()
+            .logo("logo")
+            .url("url")
+            .decimals(0)
+            .ticker("ticker")
+            .description("description")
+            .build())
         .build();
 
-    when(tokenMapper.fromMultiAssetToFilterResponse(any())).thenReturn(tokenFilterResponse);
+    when(assetMetadataMapper.fromTokenProjectionToTokenFilterResponse(tokenProjection))
+        .thenReturn(tokenFilterResponse);
 
     final TokenInfo tokenInfo = TokenInfo.builder()
         .multiAssetId(0L)
@@ -212,26 +198,13 @@ class TokenServiceTest {
     when(tokenInfoRepository.findTokenInfosByMultiAssetIdIn(anyCollection()))
         .thenReturn(tokenInfos);
 
-    final AssetMetadata metadata = AssetMetadata.builder()
-        .id(0L)
-        .subject("policyname")
-        .name("name")
-        .description("description")
-        .policy("policy")
-        .build();
-    when(assetMetadataRepository.findBySubjectIn(any())).thenReturn(List.of(metadata));
-
-    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
-        0, "logo", "description");
-
-    when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Run the test
     final BaseFilterResponse<TokenFilterResponse> result = tokenService.filterToken(
         "name", PageRequest.of(0, 1));
 
     // Verify the results
-    assertEquals(tokenMetadataResponse, result.getData().get(0).getMetadata());
+    assertEquals("ticker", result.getData().get(0).getMetadata().getTicker());
     assertEquals("100", result.getData().get(0).getVolumeIn24h());
     assertEquals(100, result.getData().get(0).getNumberOfHolders());
   }
