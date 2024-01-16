@@ -5,6 +5,7 @@ import lombok.*;
 import java.math.BigInteger;
 import java.util.Map;
 
+import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
 import org.cardanofoundation.explorer.api.model.metadatastandard.cip.MetadataCIP;
 
 @Getter
@@ -19,4 +20,5 @@ public class TxMetadataResponse {
   private MetadataCIP metadataCIP60;
   private Map<String,Object> metadataCIP20;
   private Map<String,Object> metadataCIP83;
+  private MetadataBolnisi metadataBolnisi;
 }
