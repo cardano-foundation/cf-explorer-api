@@ -79,7 +79,7 @@ public class ScriptServiceImpl implements ScriptService {
   private final BlockRepository blockRepository;
   private final VerifiedScriptRepository verifiedScriptRepository;
   private final SmartContractInfoRepository smartContractInfoRepository;
-
+  
   private final TxService txService;
 
   private final ScriptMapper scriptMapper;

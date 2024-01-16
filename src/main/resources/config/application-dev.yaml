@@ -141,6 +141,10 @@ application:
   healthcheck:
     block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
     inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
+  api.bolnisi:
+    off-chain: ${API_BOLNISI_OFFCHAIN_URL:https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/{cid}}
+    public-key: ${API_BOLNISI_PUBLIC_KEY_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
+
 springdoc:
   api-docs.path: /apidocs
   show-actuator: true

@@ -32,37 +32,8 @@ import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.FailedTxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRelayRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.*;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -153,6 +124,7 @@ public class TxServiceImpl implements TxService {
   private final ProtocolParamService protocolParamService;
   private final ReferenceTxInRepository referenceTxInRepository;
   private final TxReferenceInputMapper txReferenceInputMapper;
+  private final BolnisiMetadataService bolnisiMetadataService;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -596,12 +568,21 @@ public class TxServiceImpl implements TxService {
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
         txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream().map(txMetadata ->
-            TxMetadataResponse.builder().label(txMetadata.getKey()).value(txMetadata.getJson())
-                .metadataCIP25(
-                    MetadataCIP25Utils.standard(txMetadata.getJson()))
-                .metadataCIP60(MetadataCIP60Utils.standard(txMetadata.getJson()))
-                .metadataCIP20(MetadataCIP20Utils.standard(txMetadata.getJson()))
-                .metadataCIP83(MetadataCIP83Utils.standard(txMetadata.getJson())).build()).toList();
+            TxMetadataResponse.builder()
+                .label(txMetadata.getKey())
+                .value(txMetadata.getJson())
+                .metadataCIP25(txMetadata.getKey().equals(BigInteger.valueOf(721))
+                               ? MetadataCIP25Utils.standard(txMetadata.getJson()) : null)
+                .metadataCIP60(txMetadata.getKey().equals(BigInteger.valueOf(721))
+                               ? MetadataCIP60Utils.standard(txMetadata.getJson()) : null)
+                .metadataCIP20(txMetadata.getKey().equals(BigInteger.valueOf(674))
+                               ? MetadataCIP20Utils.standard(txMetadata.getJson()) : null)
+                .metadataCIP83(txMetadata.getKey().equals(BigInteger.valueOf(674))
+                               ? MetadataCIP83Utils.standard(txMetadata.getJson()) : null)
+                .metadataBolnisi(txMetadata.getKey().equals(BigInteger.valueOf(1904))
+                                 ? bolnisiMetadataService.getWineryData(txMetadata.getJson()) : null)
+                .build())
+            .toList();
     if (!CollectionUtils.isEmpty(txMetadataList)) {
       txResponse.setMetadata(txMetadataList);
     }
