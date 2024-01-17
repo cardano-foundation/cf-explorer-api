@@ -32,37 +32,8 @@ import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
 import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.tx.*;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.FailedTxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRelayRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.*;
@@ -642,22 +613,10 @@ public class TxServiceImpl implements TxService {
    * @param txResponse response data of transaction
    */
   private void getMints(Tx tx, TxResponse txResponse) {
-    List<MaTxMint> maTxMints = maTxMintRepository.findByTx(tx);
-    Set<String> subjects = maTxMints.stream().map(
-        ma -> ma.getIdent().getPolicy() + ma.getIdent().getName()).collect(Collectors.toSet());
-    var assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    var assetMetadataMap = assetMetadataList.stream().collect(Collectors.toMap(
-        AssetMetadata::getSubject, Function.identity()
-    ));
+    List<MintProjection> maTxMints = maTxMintRepository.findByTxId(tx.getId());
     if (!CollectionUtils.isEmpty(maTxMints)) {
       txResponse.setMints(maTxMints.stream().map(
-          ma -> {
-            TxMintingResponse txMintingResponse = maTxMintMapper.fromMaTxMint(ma);
-            String subject = ma.getIdent().getPolicy() + ma.getIdent().getName();
-            txMintingResponse.setMetadata(
-                assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
-            return txMintingResponse;
-          }).collect(Collectors.toList()));
+          maTxMintMapper::fromMintProjectionToTxMintingResponse).collect(Collectors.toList()));
     }
   }
 
