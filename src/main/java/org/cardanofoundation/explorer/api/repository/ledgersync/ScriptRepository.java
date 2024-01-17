@@ -17,4 +17,6 @@ public interface ScriptRepository extends JpaRepository<Script, Long> {
 
   Page<Script> findAllByTypeIn(@Param("typeList") List<ScriptType> typeList, Pageable pageable);
 
+  List<Script> findAllByHashIn(@Param("hashList") List<String> hashList);
+
 }
