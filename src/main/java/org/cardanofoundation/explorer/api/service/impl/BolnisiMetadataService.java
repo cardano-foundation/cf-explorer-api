@@ -160,6 +160,7 @@ public class BolnisiMetadataService {
           });
 
       metadataBolnisiBuilder.cid(cid);
+      metadataBolnisiBuilder.isExternalApiAvailable(true);
       metadataBolnisiBuilder.wineryData(wineryDataList);
     } catch (Exception e) {
       metadataBolnisiBuilder.isCidVerified(false);
