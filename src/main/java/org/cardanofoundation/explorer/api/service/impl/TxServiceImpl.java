@@ -63,6 +63,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.*;
 import org.cardanofoundation.explorer.common.exceptions.NoContentException;
@@ -609,7 +610,7 @@ public class TxServiceImpl implements TxService {
                 .metadataCIP83(txMetadata.getKey().equals(BigInteger.valueOf(674))
                                ? MetadataCIP83Utils.standard(txMetadata.getJson()) : null)
                 .metadataBolnisi(txMetadata.getKey().equals(BigInteger.valueOf(1904))
-                                 ? bolnisiMetadataService.getWineryData(txMetadata.getJson()) : null)
+                                 ? bolnisiMetadataService.getBolnisiMetadata(txMetadata.getJson()) : null)
                 .build())
             .toList();
     if (!CollectionUtils.isEmpty(txMetadataList)) {
