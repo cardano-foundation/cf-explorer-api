@@ -19,7 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class MarketDataServiceImpl implements MarketDataService {
   @Value("${application.api.coin.gecko.market.base-url}")
   private String apiMarketDataUrl;
 
-  private final RestTemplate restTemplate;
+  private final WebClient webClient;
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -46,7 +46,11 @@ public class MarketDataServiceImpl implements MarketDataService {
     Object cachedData = redisTemplate.opsForValue().get(redisKey);
     if (cachedData == null) {
       cachedData =
-          restTemplate.getForObject(String.format(apiMarketDataUrl, currency), Object.class);
+          webClient.get()
+              .uri(String.format(apiMarketDataUrl,currency))
+              .retrieve()
+              .bodyToMono(Object.class)
+              .block();
       JsonNode marketDataNode = objectMapper.valueToTree(cachedData);
       ((ObjectNode) marketDataNode.get(0))
           .put(LAST_UPDATED_FIELD, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toString());
@@ -60,7 +64,11 @@ public class MarketDataServiceImpl implements MarketDataService {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
     Object marketDataCachedObject = redisTemplate.opsForValue().get(redisKey);
     Object marketDataObject =
-        restTemplate.getForObject(String.format(apiMarketDataUrl, currency), Object.class);
+        webClient.get()
+            .uri(String.format(apiMarketDataUrl,currency))
+            .retrieve()
+            .bodyToMono(Object.class)
+            .block();
     JsonNode marketDataNode = objectMapper.valueToTree(marketDataObject);
     JsonNode marketDataCachedNode = objectMapper.valueToTree(marketDataCachedObject);
 
