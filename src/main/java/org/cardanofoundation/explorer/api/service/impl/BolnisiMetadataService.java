@@ -101,6 +101,7 @@ public class BolnisiMetadataService {
                                log.error("Error while getting public key from external api", ex);
                                metadataBolnisi.setExternalApiAvailable(false);
                                metadataBolnisi.setCidVerified(false);
+                               metadataBolnisi.setWineryData(null);
                                return null;
                              })));
 
@@ -124,14 +125,13 @@ public class BolnisiMetadataService {
    * @return
    */
   private MetadataBolnisi getOnChainMetadata(String jsonMetadata) {
-    List<WineryData> wineryDataList = new ArrayList<>();
-    String cid = null;
+    MetadataBolnisi.MetadataBolnisiBuilder metadataBolnisiBuilder = MetadataBolnisi.builder();
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode metadataNode = objectMapper.readTree(jsonMetadata);
       // get value with key "cid"
-      cid = metadataNode.get("cid").asText();
-
+      String cid = metadataNode.get("cid").asText();
+      List<WineryData> wineryDataList = new ArrayList<>();
       // for each wineryId in the metadataNode of key "d"
       metadataNode.get("d").fieldNames()
           .forEachRemaining(wineryId -> {
@@ -158,14 +158,14 @@ public class BolnisiMetadataService {
                 .build();
             wineryDataList.add(wineryData);
           });
-    } catch (JsonProcessingException e) {
+
+      metadataBolnisiBuilder.cid(cid);
+      metadataBolnisiBuilder.wineryData(wineryDataList);
+    } catch (Exception e) {
+      metadataBolnisiBuilder.isCidVerified(false);
       log.error("Error while getting data from json", e);
     }
-    return MetadataBolnisi.builder()
-        .cid(cid)
-        .wineryData(wineryDataList)
-        .isExternalApiAvailable(true)
-        .build();
+    return metadataBolnisiBuilder.build();
   }
 
 
@@ -178,6 +178,7 @@ public class BolnisiMetadataService {
           log.error("Error while getting bolnisi off-chain metadata", throwable);
           metadataBolnisi.setExternalApiAvailable(false);
           metadataBolnisi.setCidVerified(false);
+          metadataBolnisi.setWineryData(null);
           return true;
         })
         .block();
