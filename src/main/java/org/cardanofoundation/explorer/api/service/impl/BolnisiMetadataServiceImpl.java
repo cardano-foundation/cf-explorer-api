@@ -1,11 +1,13 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -13,42 +15,65 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
-import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.LotData;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.WineryData;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
+import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.util.CidUtils;
 import org.cardanofoundation.explorer.api.util.JwsUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.entity.TxMetadata;
 import org.cardanofoundation.ledgersync.common.util.HexUtil;
 import org.cardanofoundation.ledgersync.common.util.JsonUtil;
 import reactor.core.publisher.Mono;
 
-@Component
+@Service
 @RequiredArgsConstructor
 @Log4j2
-public class BolnisiMetadataService {
+public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
+  private static final String BOLNISI_METADATA_KEY = "BOLNISI_METADATA:";
+  private final TxMetadataRepository txMetadataRepository;
   private final WebClient webClient;
-
+  private final RedisTemplate<String, Object> redisTemplate;
+  @Value("${application.network}")
+  private String network;
   @Value("${application.api.bolnisi.off-chain}")
-  String offChainMetadataUrl;
-
+  private String offChainMetadataUrl;
   @Value("${application.api.bolnisi.public-key}")
-  String publicKeyUrl;
+  private String publicKeyUrl;
 
-  @SingletonCall(typeToken = TypeTokenGson.BOLNISI_METADATA, expireAfterSeconds = 200)
-  public MetadataBolnisi getWineryData(String jsonMetadata) {
-    MetadataBolnisi metadataBolnisi = getOnChainMetadata(jsonMetadata);
+  @Override
+  public MetadataBolnisi getBolnisiMetadata(String jsonMetadata) {
+    String redisKey = getBolnisiMetadataKey(BOLNISI_METADATA_KEY + jsonMetadata.hashCode());
+    // get medata from redis
+    MetadataBolnisi metadataBolnisi = (MetadataBolnisi) redisTemplate.opsForValue().get(redisKey);
+    // if metadata is not null, return metadata
+    if (metadataBolnisi != null) {
+      return metadataBolnisi;
+    }
+
+    // if metadata is null, get metadata from on-chain and off-chain
+    metadataBolnisi = getMetadataBolnisi(jsonMetadata);
+    // set metadata to redis with expire time is 200 seconds
+    redisTemplate.opsForValue().set(redisKey, metadataBolnisi);
+    redisTemplate.expire(redisKey, 1, TimeUnit.HOURS);
+    return metadataBolnisi;
+  }
+
+  private MetadataBolnisi getMetadataBolnisi(String jsonMetadata) {
+    MetadataBolnisi metadataBolnisi;
+    metadataBolnisi = getOnChainMetadata(jsonMetadata);
     Map<String, List<Object>> offChainMetadata = getOffChainMetadata(metadataBolnisi);
     boolean isCidVerified = CidUtils.verifyCid(metadataBolnisi.getCid(),
                                                JsonUtil.getPrettyJson(offChainMetadata));
@@ -70,8 +95,8 @@ public class BolnisiMetadataService {
         for (int i = 0; i < lots.size(); i++) {
           boolean isSignatureVerified = wineryData.isPKeyVerified() &&
               JwsUtils.verifySignatureWithEd25519(
-                  removePrefixHexString(wineryData.getPublicKey()),
-                  removePrefixHexString(lots.get(i).getSignature()),
+                  wineryData.getPublicKey(),
+                  lots.get(i).getSignature(),
                   JsonUtil.getPrettyJson(value.get(i)));
 
           LotData lotData = lots.get(i);
@@ -85,6 +110,22 @@ public class BolnisiMetadataService {
 
     metadataBolnisi.setWineryData(new ArrayList<>(wineryDataMap.values()));
     return metadataBolnisi;
+  }
+
+  @Override
+  public WineryData getWineryData(String txHash, String wineryId) {
+    List<TxMetadata> txMetadataList = txMetadataRepository.findAllByTxHash(txHash)
+        .stream()
+        .filter(txMetadata -> txMetadata.getKey().equals(BigInteger.valueOf(1904)))
+        .collect(Collectors.toList());
+
+    return txMetadataList.stream()
+        .map(txMetadata -> getBolnisiMetadata(txMetadata.getJson()))
+        .map(MetadataBolnisi::getWineryData)
+        .flatMap(List::stream)
+        .filter(wineryData -> wineryData.getWineryId().equals(wineryId))
+        .findFirst()
+        .orElse(null);
   }
 
 
@@ -144,7 +185,7 @@ public class BolnisiMetadataService {
               // put all signatures into lots
               wineryNode.get("s").forEach(signature -> {
                 LotData lotData = LotData.builder()
-                    .signature(signature.asText())
+                    .signature(removePrefixHexString(signature.asText()))
                     .build();
                 lots.add(lotData);
               });
@@ -152,8 +193,8 @@ public class BolnisiMetadataService {
 
             WineryData wineryData = WineryData.builder()
                 .wineryId(wineryId)
-                .publicKey(wineryNode.get("pk").asText())
-                .header(wineryNode.get("h").asText())
+                .publicKey(removePrefixHexString(wineryNode.get("pk").asText()))
+                .header(removePrefixHexString(wineryNode.get("h").asText()))
                 .lots(lots)
                 .build();
             wineryDataList.add(wineryData);
@@ -190,13 +231,17 @@ public class BolnisiMetadataService {
         .uri(url, vars)
         .acceptCharset(StandardCharsets.UTF_8)
         .retrieve()
-        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                  clientResponse -> Mono.error(
-                      new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+        .onStatus(HttpStatusCode::is5xxServerError, clientResponse ->
+            Mono.error(new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+        .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.empty())
         .bodyToMono(clazz);
   }
 
   private String removePrefixHexString(String hexString) {
     return hexString.startsWith("0x") ? hexString.substring(2) : hexString;
+  }
+
+  private String getBolnisiMetadataKey(String value) {
+    return String.format("%s_%s", network, value).toUpperCase();
   }
 }
