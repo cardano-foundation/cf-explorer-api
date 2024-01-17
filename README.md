@@ -5,6 +5,7 @@
 <img alt="Coverage" src="https://cardano-foundation.github.io/cf-explorer-api/badges/jacoco.svg" />
 <img alt="Release" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/release.yaml/badge.svg?branch=main" />
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
+<a href="https://conventionalcommits.org"><img alt="conventionalcommits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits" /></a>
 </p>
 
 This service provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the explorer frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
