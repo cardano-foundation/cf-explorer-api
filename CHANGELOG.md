@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.6.0...v0.7.0) (2024-01-17)
+
+
+### Bug Fixes
+
+* force creating the next version ([0a91c3a](https://github.com/cardano-foundation/cf-explorer-api/commit/0a91c3a380a93d2392aeeb4361bbb9c9bfc593ef))
+
 ## [0.6.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.5.0...v0.6.0) (2024-01-17)
 
 
