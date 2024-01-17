@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.6.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.5.0...v0.6.0) (2024-01-17)
+
+
+### Features
+
+* check CIP-60 for json metadata ([0c69036](https://github.com/cardano-foundation/cf-explorer-api/commit/0c6903605a5fe3187178445d611ed40f7f01d3a2))
+* MET-1740 fix test end2end ([be460b9](https://github.com/cardano-foundation/cf-explorer-api/commit/be460b9e795a921e1dba02be9d7d573accd4d204))
+* MET-1740 show protocol parameters upcoming ([be3a34a](https://github.com/cardano-foundation/cf-explorer-api/commit/be3a34a113ee9e3935a6448550dd56bf27d7e0c1))
+* pass with music version v1 or v2 ([37d4863](https://github.com/cardano-foundation/cf-explorer-api/commit/37d4863a8f50e0831d2910b64af18d8bc2325ba2))
+
+
+### Bug Fixes
+
+* conflict ([73632f6](https://github.com/cardano-foundation/cf-explorer-api/commit/73632f60b29b13dc83551bc0195d815496d39830))
+* index of the properties ([b5bc133](https://github.com/cardano-foundation/cf-explorer-api/commit/b5bc133af22a6390e8099cac0f546626f83bf728))
+* MET-1853 add pool hash raw to query in pool info ([73adb4f](https://github.com/cardano-foundation/cf-explorer-api/commit/73adb4fe8d475af340af38d548e1d6a2fdff9d96))
+* no pass with music version v1,v2 ([91bb1c2](https://github.com/cardano-foundation/cf-explorer-api/commit/91bb1c26b28f9343c26f7d8b94f1f3419ac22211))
+* output CIP-60 ([d18e1a2](https://github.com/cardano-foundation/cf-explorer-api/commit/d18e1a28627c0a0fdbe663372732b6ef5bbe8255))
+* update logic get execution output of mint contract ([b0082d2](https://github.com/cardano-foundation/cf-explorer-api/commit/b0082d2eac4df7006a8e5512420372ded180991e))
+
 ## [0.5.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.35...v0.5.0) (2023-11-30)
 
 
