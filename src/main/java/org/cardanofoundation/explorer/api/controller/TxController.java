@@ -5,12 +5,13 @@ import jakarta.validation.Valid;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.WineryData;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
+import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TxController {
 
   private final TxService txService;
+  private final BolnisiMetadataService bolnisiMetadataService;
 
   @GetMapping
   @LogMessage
@@ -59,6 +61,16 @@ public class TxController {
       @PathVariable @Parameter(description = "The hash identifier of the transaction.")
       @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash) {
     return ResponseEntity.ok(txService.getTxDetailByHash(hash));
+  }
+
+  @GetMapping("/{hash}/{wineryId}")
+  @LogMessage
+  @Operation(summary = "Get winery data by tx hash detail")
+  public ResponseEntity<WineryData> getWineryDataByTxHash(
+      @PathVariable @Parameter(description = "The hash identifier of the transaction.")
+      @LengthValid(CommonConstant.TX_HASH_LENGTH) String hash,
+      @PathVariable @Parameter(description = "The winery id") String wineryId) {
+    return ResponseEntity.ok(bolnisiMetadataService.getWineryData(hash, wineryId));
   }
 
   @GetMapping("/current")
