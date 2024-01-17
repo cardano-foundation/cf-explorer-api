@@ -9,12 +9,13 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryCheck
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.api.service.WebClientService;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Profile("koios")
 @Service
@@ -39,7 +40,6 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Value("${application.api.check-epoch.base-url}")
   private String apiCheckEpochUrl;
 
-  private final RestTemplate restTemplate;
   private final RewardCheckpointRepository rewardCheckpointRepository;
 
   private final PoolHistoryCheckpointRepository poolHistoryCheckpointRepository;
@@ -50,6 +50,8 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   private final AdaPotsRepository adaPotsRepository;
 
+  private final WebClientService webClientService;
+
   @Override
   public boolean checkRewardAvailable(String stakeKey) {
     return rewardCheckpointRepository.checkRewardByStakeAddressAndEpoch(stakeKey);
@@ -57,8 +59,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(String stakeKey) {
-    return restTemplate.postForObject(apiCheckRewardUrl, Collections.singleton(stakeKey),
-        Boolean.class);
+    return webClientService.postWebClient(apiCheckRewardUrl,Boolean.class,stakeKey).block();
   }
 
   @Override
@@ -71,8 +72,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(List<String> stakeAddressList) {
-    return restTemplate.postForObject(apiCheckRewardUrl, stakeAddressList,
-        Boolean.class);
+    return webClientService.postWebClient(apiCheckRewardUrl,Boolean.class,stakeAddressList).block();
   }
 
   @Override
@@ -94,7 +94,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
     boolean isFetch = false;
     while (i < 2) {
       isFetch = Boolean.TRUE.equals(
-          restTemplate.postForObject(apiCheckPoolHistoryUrl, poolIds, Boolean.class));
+          webClientService.postWebClient(apiCheckPoolHistoryUrl, Boolean.class, poolIds).block());
       if (isFetch) {
         break;
       }
@@ -122,7 +122,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
     boolean isFetch = false;
     while (i < 2) {
       isFetch = Boolean.TRUE.equals(
-          restTemplate.postForObject(apiCheckPoolInfoUrl, poolIds, Boolean.class));
+          webClientService.postWebClient(apiCheckPoolInfoUrl, Boolean.class, poolIds).block());
       if (isFetch) {
         break;
       }
@@ -141,8 +141,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchEpochStakeForPool(List<String> rewardAccounts) {
-    return restTemplate.postForObject(apiCheckEpochStakeUrl, rewardAccounts,
-        Boolean.class);
+    return webClientService.postWebClient(apiCheckEpochStakeUrl, Boolean.class,rewardAccounts).block();
   }
 
   @Override
@@ -155,8 +154,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchRewardForPool(List<String> rewardAccounts) {
-    return restTemplate.postForObject(apiCheckRewardUrl, rewardAccounts,
-        Boolean.class);
+    return webClientService.postWebClient(apiCheckRewardUrl,Boolean.class,rewardAccounts).block();
   }
 
   @Override
@@ -166,8 +164,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchAdaPots(List<Integer> epochNo) {
-    return restTemplate.postForObject(apiCheckAdaPotsUrl, epochNo,
-        Boolean.class);
+    return webClientService.postWebClient(apiCheckAdaPotsUrl,Boolean.class,epochNo).block();
   }
 
   @Override
@@ -180,8 +177,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Override
   public List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNoList) {
     try {
-      Epoch[] epoch = restTemplate.postForObject(apiCheckEpochUrl, epochNoList,
-          Epoch[].class);
+      Epoch[] epoch = webClientService.postWebClient(apiCheckEpochUrl, Epoch[].class, epochNoList).block();
       if (Objects.nonNull(epoch)) {
         return Arrays.asList(epoch);
       }

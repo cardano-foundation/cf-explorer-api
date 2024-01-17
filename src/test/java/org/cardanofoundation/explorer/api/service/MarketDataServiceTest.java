@@ -12,19 +12,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.cardanofoundation.ledgersync.common.util.JsonUtil;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @ExtendWith(MockitoExtension.class)
 public class MarketDataServiceTest {
-
-  @Mock private RestTemplate restTemplate;
+  @Mock
+  private WebClient webClient;
+  @Mock
+  private WebClient.RequestHeadersSpec requestHeadersMock;
+  @Mock
+  private WebClient.RequestHeadersUriSpec requestHeadersUriMock;
+  @Mock
+  private WebClient.ResponseSpec responseMock;
 
   @InjectMocks private MarketDataServiceImpl marketDataService;
   @Mock RedisTemplate<String, Object> redisTemplate;
@@ -43,8 +50,10 @@ public class MarketDataServiceTest {
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     when(valueOperations.get(any())).thenReturn(null);
     ReflectionTestUtils.setField(marketDataService, "apiMarketDataUrl", "localhost:8080");
-    when(restTemplate.getForObject(String.format("localhost:8080", currency), Object.class))
-        .thenReturn(prepareMarketData());
+    when(webClient.get()).thenReturn(requestHeadersUriMock);
+    when(requestHeadersUriMock.uri(String.format("localhost:8080", currency))).thenReturn(requestHeadersMock);
+    when(requestHeadersMock.retrieve()).thenReturn(responseMock);
+    when(responseMock.bodyToMono(Object.class)).thenReturn(Mono.just(prepareMarketData()));
 
     var response = marketDataService.getMarketData(currency);
     JsonNode jsonNode = objectMapper.valueToTree(response);
