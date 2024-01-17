@@ -19,5 +19,3 @@ jobs:
         with:
           release-type: maven
           release-as: 0.7.0
-          bump-minor-pre-major: true
-          bump-patch-for-minor-pre-major: true
