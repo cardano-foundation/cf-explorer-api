@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -230,6 +231,28 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
               .toMap(EpochTimeProjection::getEpochNo, Function.identity())));
     }
 
+    // check protocol change upcoming
+    var currentEpoch = epochRepository.findByCurrentEpochNo().orElseThrow(
+        () -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND)
+    );
+
+    if (historiesChangeByEpoch.containsKey(currentEpoch.getNo())
+        && isConfirmedProtocolParameterUpdate(currentEpoch.getNo())) {
+      Protocols protocols = getEpochProtocol(currentEpoch.getNo() + BigInteger.ONE.intValue());
+      getProtocolChangeInOneEpoch(historiesChangeByEpoch.get(currentEpoch.getNo()), txs, protocols,
+          protocolTypes);
+      if (Objects.nonNull(startFilterTime)) {
+        Integer epochNo = currentEpoch.getNo() + BigInteger.ONE.intValue();
+        Timestamp startEpochUpcomingTime = currentEpoch.getEndTime();
+        Timestamp endEpochUpcomingTime =
+            Timestamp.valueOf(currentEpoch.getEndTime().toLocalDateTime().plusDays(epochDays));
+        epochTime
+            .put(epochNo, new EpochTimeProjection(epochNo, startEpochUpcomingTime, endEpochUpcomingTime));
+      }
+      unprocessedProtocols.put(currentEpoch.getNo() + BigInteger.ONE.intValue(), protocols);
+      epochParams.put(currentEpoch.getNo() + BigInteger.ONE.intValue(), null);
+    }
+
     AtomicReference<Protocols> currentMarkProtocols = new AtomicReference<>();
 
     // check unprocessedProtocols data
@@ -290,7 +313,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     }
 
     if (isGetAll) {
-      var currentEpoch = epochRepository.findByCurrentEpochNo().get();
       var redisKeyExpireTime = currentEpoch.getStartTime().toLocalDateTime().plusDays(epochDays);
       final var seconds = ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC),
           redisKeyExpireTime);
@@ -299,6 +321,29 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     }
 
     return historiesProtocol;
+  }
+
+  /**
+   * Check if protocol proposal is confirmed
+   * @param epochNo epoch number
+   * @return true if protocol proposal have enough quorum to update
+   */
+  private boolean isConfirmedProtocolParameterUpdate(Integer epochNo) {
+    try {
+      FixedProtocol fixedProtocol = getFixedProtocols();
+      Map<String, Object> genDelegs = (Map<String, Object>) fixedProtocol.getGenDelegs();
+      var keyList = paramProposalRepository.findKeysByEpochNo(epochNo);
+      int countKey = 0;
+      for (var key : keyList) {
+        if (genDelegs.containsKey(key)) {
+          countKey++;
+        }
+      }
+      return fixedProtocol.getUpdateQuorum().compareTo(countKey) <= BigInteger.ZERO.intValue();
+    } catch (Exception e) {
+      log.error(e.getMessage());
+      return false;
+    }
   }
 
   private void deleteProtocolHistoryCache(){
@@ -651,7 +696,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
         .forEach(entry -> {
           var methods = protocolsMethods.get(entry.getKey());
           try {
-            if (Objects.isNull(entry.getValue().getSecond().invoke(protocols))) {
+            if (Objects.isNull(entry.getValue().getSecond().invoke(protocols))
+                && Objects.nonNull(epochParam)) {
               methods.getFirst()
                   .invoke(protocols,
                       getChangeProtocol(epochParamMethods.get(entry.getKey()).invoke(epochParam)));

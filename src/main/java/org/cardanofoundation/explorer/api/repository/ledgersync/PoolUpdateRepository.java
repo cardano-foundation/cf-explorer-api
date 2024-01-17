@@ -43,7 +43,7 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
           + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
           + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
           + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
-          + "WHERE ph.view  = :poolView "
+          + "WHERE (ph.view  = :poolView OR ph.hashRaw = :poolView) "
           + "GROUP BY sa.view")
   List<String> findOwnerAccountByPoolView(@Param("poolView") String poolView);
 
