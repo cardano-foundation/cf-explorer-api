@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.util.MetadataCIP25Utils;
 import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
 import org.springframework.data.domain.Page;
@@ -63,7 +64,9 @@ import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
+import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.TokenInfo;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 
@@ -79,6 +82,7 @@ public class TokenServiceImpl implements TokenService {
   private final AddressRepository addressRepository;
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final ScriptRepository scriptRepository;
 
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
@@ -139,9 +143,15 @@ public class TokenServiceImpl implements TokenService {
     List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
     Map<String, AssetMetadata> assetMetadataMap = StreamUtil.toMap(assetMetadataList,
         AssetMetadata::getSubject);
+    Map<String, Script> scriptMap = scriptRepository.findAllByHashIn(
+         multiAssets.getContent().stream().map(MultiAsset::getPolicy).collect(Collectors.toList()))
+        .stream().collect(Collectors.toMap(Script::getHash, Function.identity()));
+
     var now =  LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     multiAssetResponsesList.forEach(ma -> {
       var tokenInfo = tokenInfoMap.getOrDefault(ma.getId(), null);
+      var script = scriptMap.get(ma.getPolicy());
+      ma.setPolicyIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
 
       if (tokenInfo == null) {
         ma.setNumberOfHolders(0L);
