@@ -301,8 +301,6 @@ class AddressServiceTest {
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTokenBalanceRepository.findTokenAndBalanceByAddress(address, pageable)).thenReturn(new PageImpl<>(addressTokenProjections));
     when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class))).thenReturn(TokenAddressResponse.builder().addressId(1L).policy("sub").name("ject").build());
-    when(assetMetadataRepository.findBySubjectIn(anySet())).thenReturn(List.of(AssetMetadata.builder().id(1L).subject("subject").build()));
-    when(assetMetadataMapper.fromAssetMetadata(any())).thenReturn(TokenMetadataResponse.builder().build());
 
     var response = addressService.getTokenByDisplayName(pageable, addr, "");
     Assertions.assertNotNull(response);
