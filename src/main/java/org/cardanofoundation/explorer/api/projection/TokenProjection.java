@@ -24,7 +24,7 @@ public interface TokenProjection {
 
   Timestamp getTime();
   
-  Integer getNameViewLength();
+  String getSubject();
 
   String getUrl();
 
