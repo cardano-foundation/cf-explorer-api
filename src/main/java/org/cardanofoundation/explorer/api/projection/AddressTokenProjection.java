@@ -16,4 +16,5 @@ public interface AddressTokenProjection {
   Integer getDecimals();
   String getLogo();
   String getDescription();
+  String getSubject();
 }
