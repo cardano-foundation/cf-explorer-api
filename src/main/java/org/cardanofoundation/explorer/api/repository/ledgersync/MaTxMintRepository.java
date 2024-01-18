@@ -16,10 +16,10 @@ import org.springframework.data.repository.query.Param;
 public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
 
   @Query("SELECT ma.name as name, ma.policy as policy, mtm.quantity as assetQuantity,"
-      + " am.fingerprint as fingerprint, am.url as url, am.ticker as ticker,"
+      + " ma.fingerprint as fingerprint, am.url as url, am.ticker as ticker,"
       + " am.decimals as decimals, am.logo as logo, am.description as description"
       + " FROM MaTxMint mtm "
-      + " LEFT JOIN MultiAsset ma ON ma.id = mtm.ident.id"
+      + " JOIN MultiAsset ma ON ma.id = mtm.ident.id"
       + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint"
       + " WHERE mtm.tx.id=:txId")
   List<MintProjection> findByTxId(@Param("txId") Long txId);
