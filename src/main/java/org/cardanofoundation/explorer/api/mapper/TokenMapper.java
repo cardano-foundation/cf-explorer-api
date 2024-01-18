@@ -41,13 +41,6 @@ public abstract class TokenMapper {
   @Mapping(target = "metadata", expression = "java(getMetadata(projection))")
   public abstract TokenAddressResponse fromAddressTokenProjection(AddressTokenProjection projection);
 
-
-  @Mapping(target = "displayName",
-      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
-  @Mapping(target = "policy", source = "multiAsset.policy")
-  @Mapping(target = "fingerprint", source = "multiAsset.fingerprint")
-  public abstract TokenAddressResponse fromMultiAssetAndAddressToken(MultiAsset multiAsset, AddressTokenProjection projection);
-
   @Mapping(target = "displayName",
       expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
   @Mapping(target = "policy", source = "multiAsset.policy")
@@ -73,6 +66,9 @@ public abstract class TokenMapper {
     return Objects.isNull(logo) ? null : (tokenLogoEndpoint + logo);
   }
   TokenMetadataResponse getMetadata(AddressTokenProjection projection) {
+    if(StringUtils.isEmpty(projection.getSubject())) {
+      return null;
+    }
     TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse();
     tokenMetadataResponse.setUrl(projection.getUrl());
     tokenMetadataResponse.setTicker(projection.getTicker());

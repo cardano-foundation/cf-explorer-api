@@ -9,7 +9,6 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenFilterRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -19,10 +18,6 @@ public abstract class AssetMetadataMapper {
 
   @Value("${application.token-logo-endpoint}")
   protected String tokenLogoEndpoint;
-
-  @Mapping(target = "displayName", expression = "java(getDisplayName(multiAsset.getNameView(), multiAsset.getFingerprint()))")
-  @Mapping(target = "createdOn", source = "time")
-  public abstract TokenFilterResponse fromMultiAssetToFilterResponse(MultiAsset multiAsset);
 
   @Mapping(target = "createdOn", source = "time")
   @Mapping(target = "displayName", expression = "java(getDisplayName(tokenProjection.getNameView(), tokenProjection.getFingerprint()))")
@@ -44,6 +39,9 @@ public abstract class AssetMetadataMapper {
   }
 
   TokenMetadataResponse getMetadata(TokenProjection tokenProjection) {
+    if(StringUtils.isEmpty(tokenProjection.getSubject())) {
+      return null;
+    }
     TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse();
     tokenMetadataResponse.setUrl(tokenProjection.getUrl());
     tokenMetadataResponse.setTicker(tokenProjection.getTicker());
