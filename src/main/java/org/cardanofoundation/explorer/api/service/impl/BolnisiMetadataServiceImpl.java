@@ -167,11 +167,13 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
    */
   private MetadataBolnisi getOnChainMetadata(String jsonMetadata) {
     MetadataBolnisi.MetadataBolnisiBuilder metadataBolnisiBuilder = MetadataBolnisi.builder();
+    metadataBolnisiBuilder.isExternalApiAvailable(true);
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode metadataNode = objectMapper.readTree(jsonMetadata);
       // get value with key "cid"
       String cid = metadataNode.get("cid").asText();
+      metadataBolnisiBuilder.cid(cid);
       List<WineryData> wineryDataList = new ArrayList<>();
       // for each wineryId in the metadataNode of key "d"
       metadataNode.get("d").fieldNames()
@@ -200,8 +202,6 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
             wineryDataList.add(wineryData);
           });
 
-      metadataBolnisiBuilder.cid(cid);
-      metadataBolnisiBuilder.isExternalApiAvailable(true);
       metadataBolnisiBuilder.wineryData(wineryDataList);
     } catch (Exception e) {
       metadataBolnisiBuilder.isCidVerified(false);
