@@ -36,6 +36,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.TxMetadata;
 import org.cardanofoundation.ledgersync.common.util.HexUtil;
 import org.cardanofoundation.ledgersync.common.util.JsonUtil;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 @RequiredArgsConstructor
@@ -216,12 +217,17 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
     return callWebclient(offChainMetadataUrl, String.class, metadataBolnisi.getCid())
         .flatMap(actualOffChainURL ->
                      callWebclient(actualOffChainURL.replace("%2F", "/"), LinkedHashMap.class))
-        .onErrorComplete(throwable -> {
+        .doOnSuccess(linkedHashMap -> {
+          if (linkedHashMap == null || linkedHashMap.isEmpty()) {
+            metadataBolnisi.setCidVerified(false);
+            metadataBolnisi.setWineryData(null);
+          }
+        })
+        .doOnError(throwable -> {
           log.error("Error while getting bolnisi off-chain metadata", throwable);
           metadataBolnisi.setExternalApiAvailable(false);
           metadataBolnisi.setCidVerified(false);
           metadataBolnisi.setWineryData(null);
-          return true;
         })
         .block();
   }
@@ -231,8 +237,17 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
         .uri(url, vars)
         .acceptCharset(StandardCharsets.UTF_8)
         .retrieve()
-        .onStatus(HttpStatusCode::is5xxServerError, clientResponse ->
-            Mono.error(new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+        .onStatus(HttpStatusCode::is5xxServerError,
+                  clientResponse -> clientResponse
+                      .bodyToMono(String.class)
+                      .flatMap(s -> {
+                        if (s == null || s.isEmpty() || !s.contains("703")) {
+                          return Mono.error(
+                              new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE));
+                        } else {
+                          return Mono.empty();
+                        }
+                      }))
         .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.empty())
         .bodyToMono(clazz);
   }
