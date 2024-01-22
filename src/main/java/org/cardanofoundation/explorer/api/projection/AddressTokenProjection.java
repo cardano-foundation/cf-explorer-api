@@ -11,4 +11,10 @@ public interface AddressTokenProjection {
   Long getAddressId();
   String getPolicy();
   Long getMultiAssetId();
+  String getUrl();
+  String getTicker();
+  Integer getDecimals();
+  String getLogo();
+  String getDescription();
+  String getSubject();
 }
