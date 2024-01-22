@@ -1,10 +1,12 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +14,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.service.MarketDataService;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,6 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class MarketDataServiceImpl implements MarketDataService {
 
   @Value("${application.api.coin.gecko.market.base-url}")
@@ -48,7 +54,11 @@ public class MarketDataServiceImpl implements MarketDataService {
       cachedData =
           webClient.get()
               .uri(String.format(apiMarketDataUrl,currency))
+              .acceptCharset(StandardCharsets.UTF_8)
               .retrieve()
+              .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                  clientResponse -> Mono.error(
+                      new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
               .bodyToMono(Object.class)
               .block();
       JsonNode marketDataNode = objectMapper.valueToTree(cachedData);
@@ -60,13 +70,17 @@ public class MarketDataServiceImpl implements MarketDataService {
     return cachedData;
   }
 
-  private void publishMarketData(String currency) {
+  private void publishMarketData(String currency) throws BusinessException {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
     Object marketDataCachedObject = redisTemplate.opsForValue().get(redisKey);
     Object marketDataObject =
         webClient.get()
             .uri(String.format(apiMarketDataUrl,currency))
+            .acceptCharset(StandardCharsets.UTF_8)
             .retrieve()
+            .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                clientResponse -> Mono.error(
+                    new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
             .bodyToMono(Object.class)
             .block();
     JsonNode marketDataNode = objectMapper.valueToTree(marketDataObject);
