@@ -223,11 +223,12 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
             metadataBolnisi.setWineryData(null);
           }
         })
-        .doOnError(throwable -> {
+        .onErrorComplete(throwable -> {
           log.error("Error while getting bolnisi off-chain metadata", throwable);
           metadataBolnisi.setExternalApiAvailable(false);
           metadataBolnisi.setCidVerified(false);
           metadataBolnisi.setWineryData(null);
+          return true;
         })
         .block();
   }
