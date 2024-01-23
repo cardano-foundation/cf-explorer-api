@@ -1,10 +1,12 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,23 +14,27 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.service.MarketDataService;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class MarketDataServiceImpl implements MarketDataService {
 
   @Value("${application.api.coin.gecko.market.base-url}")
   private String apiMarketDataUrl;
 
-  private final RestTemplate restTemplate;
+  private final WebClient webClient;
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -45,8 +51,7 @@ public class MarketDataServiceImpl implements MarketDataService {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
     Object cachedData = redisTemplate.opsForValue().get(redisKey);
     if (cachedData == null) {
-      cachedData =
-          restTemplate.getForObject(String.format(apiMarketDataUrl, currency), Object.class);
+      cachedData = getWebClient(String.format(apiMarketDataUrl,currency),Object.class).block();
       JsonNode marketDataNode = objectMapper.valueToTree(cachedData);
       ((ObjectNode) marketDataNode.get(0))
           .put(LAST_UPDATED_FIELD, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toString());
@@ -59,8 +64,7 @@ public class MarketDataServiceImpl implements MarketDataService {
   private void publishMarketData(String currency) {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
     Object marketDataCachedObject = redisTemplate.opsForValue().get(redisKey);
-    Object marketDataObject =
-        restTemplate.getForObject(String.format(apiMarketDataUrl, currency), Object.class);
+    Object marketDataObject = getWebClient(String.format(apiMarketDataUrl,currency),Object.class).block();
     JsonNode marketDataNode = objectMapper.valueToTree(marketDataObject);
     JsonNode marketDataCachedNode = objectMapper.valueToTree(marketDataCachedObject);
 
@@ -105,5 +109,16 @@ public class MarketDataServiceImpl implements MarketDataService {
   public void publishMarketData() {
     publishMarketData("usd");
     publishMarketData("btc");
+  }
+
+  public <T> Mono<T> getWebClient(String url, Class<T> clazz, Object... vars){
+    return webClient.get()
+        .uri(url,vars)
+        .acceptCharset(StandardCharsets.UTF_8)
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse -> Mono.error(
+                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+        .bodyToMono(clazz);
   }
 }
