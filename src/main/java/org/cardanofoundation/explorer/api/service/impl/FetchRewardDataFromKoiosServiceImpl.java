@@ -1,20 +1,25 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
+
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryCheckpointRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
+import reactor.core.publisher.Mono;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Profile("koios")
 @Service
@@ -27,9 +32,6 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Value("${application.api.check-pool-history.base-url}")
   private String apiCheckPoolHistoryUrl;
 
-  @Value("${application.api.check-pool-info.base-url}")
-  private String apiCheckPoolInfoUrl;
-
   @Value("${application.api.check-epoch-stake.base-url}")
   private String apiCheckEpochStakeUrl;
 
@@ -39,16 +41,15 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Value("${application.api.check-epoch.base-url}")
   private String apiCheckEpochUrl;
 
-  private final RestTemplate restTemplate;
   private final RewardCheckpointRepository rewardCheckpointRepository;
 
   private final PoolHistoryCheckpointRepository poolHistoryCheckpointRepository;
 
-  private final PoolInfoCheckpointRepository poolInfoCheckpointRepository;
-
   private final EpochStakeCheckpointRepository epochStakeCheckpointRepository;
 
   private final AdaPotsRepository adaPotsRepository;
+
+  private final WebClient webClient;
 
   @Override
   public boolean checkRewardAvailable(String stakeKey) {
@@ -57,8 +58,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(String stakeKey) {
-    return restTemplate.postForObject(apiCheckRewardUrl, Collections.singleton(stakeKey),
-        Boolean.class);
+    return postWebClient(apiCheckRewardUrl,Boolean.class,Collections.singleton(stakeKey)).block();
   }
 
   @Override
@@ -71,8 +71,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(List<String> stakeAddressList) {
-    return restTemplate.postForObject(apiCheckRewardUrl, stakeAddressList,
-        Boolean.class);
+    return postWebClient(apiCheckRewardUrl,Boolean.class,stakeAddressList).block();
   }
 
   @Override
@@ -84,51 +83,8 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   }
 
   @Override
-  public Set<String> checkAllPoolHistoryForPool(Set<String> poolIds) {
-    return poolHistoryCheckpointRepository.checkPoolHistoryByPoolViewAndEpoch(poolIds);
-  }
-
-  @Override
   public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
-    int i = 0;
-    boolean isFetch = false;
-    while (i < 2) {
-      isFetch = Boolean.TRUE.equals(
-          restTemplate.postForObject(apiCheckPoolHistoryUrl, poolIds, Boolean.class));
-      if (isFetch) {
-        break;
-      }
-      i++;
-    }
-    return isFetch;
-  }
-
-  @Override
-  public Boolean checkPoolInfoForPool(Set<String> poolIds) {
-    Integer countCheckPoint = poolInfoCheckpointRepository.checkRewardByPoolViewAndEpoch(
-        poolIds);
-    Integer sizeCheck = poolIds.size();
-    return Objects.equals(countCheckPoint, sizeCheck);
-  }
-
-  @Override
-  public Set<String> checkAllPoolInfoForPool() {
-    return poolInfoCheckpointRepository.checkPoolInfoByPoolViewAndEpoch();
-  }
-
-  @Override
-  public Boolean fetchPoolInfoForPool(Set<String> poolIds) {
-    int i = 0;
-    boolean isFetch = false;
-    while (i < 2) {
-      isFetch = Boolean.TRUE.equals(
-          restTemplate.postForObject(apiCheckPoolInfoUrl, poolIds, Boolean.class));
-      if (isFetch) {
-        break;
-      }
-      i++;
-    }
-    return isFetch;
+     return postWebClient(apiCheckPoolHistoryUrl,Boolean.class,poolIds).block();
   }
 
   @Override
@@ -141,8 +97,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchEpochStakeForPool(List<String> rewardAccounts) {
-    return restTemplate.postForObject(apiCheckEpochStakeUrl, rewardAccounts,
-        Boolean.class);
+    return postWebClient(apiCheckEpochStakeUrl,Boolean.class,rewardAccounts).block();
   }
 
   @Override
@@ -155,8 +110,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchRewardForPool(List<String> rewardAccounts) {
-    return restTemplate.postForObject(apiCheckRewardUrl, rewardAccounts,
-        Boolean.class);
+    return postWebClient(apiCheckRewardUrl, Boolean.class,rewardAccounts).block();
   }
 
   @Override
@@ -166,8 +120,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchAdaPots(List<Integer> epochNo) {
-    return restTemplate.postForObject(apiCheckAdaPotsUrl, epochNo,
-        Boolean.class);
+    return postWebClient(apiCheckAdaPotsUrl,Boolean.class,epochNo).block();
   }
 
   @Override
@@ -180,8 +133,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Override
   public List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNoList) {
     try {
-      Epoch[] epoch = restTemplate.postForObject(apiCheckEpochUrl, epochNoList,
-          Epoch[].class);
+      Epoch[] epoch = postWebClient(apiCheckEpochUrl,Epoch[].class,epochNoList).block();
       if (Objects.nonNull(epoch)) {
         return Arrays.asList(epoch);
       }
@@ -194,5 +146,16 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Override
   public Boolean useKoios() {
     return true;
+  }
+  public <T> Mono<T> postWebClient(String url, Class<T> clazz, Object body){
+    return webClient.post()
+        .uri(url)
+        .bodyValue(body)
+        .acceptCharset(StandardCharsets.UTF_8)
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse -> Mono.error(
+                new BusinessException(BusinessCode.FETCH_REWARD_ERROR)))
+        .bodyToMono(clazz);
   }
 }
