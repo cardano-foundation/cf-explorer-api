@@ -64,16 +64,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(String stakeKey) {
-    return webClient.post()
-        .uri(apiCheckRewardUrl)
-        .acceptCharset(StandardCharsets.UTF_8)
-        .bodyValue(Collections.singleton(stakeKey))
-        .retrieve()
-        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-            clientResponse -> Mono.error(
-                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-        .bodyToMono(Boolean.class)
-        .block();
+    return postWebClient(apiCheckRewardUrl,Boolean.class,Collections.singleton(stakeKey)).block();
   }
 
   @Override
@@ -86,16 +77,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(List<String> stakeAddressList) {
-    return webClient.post()
-        .uri(apiCheckRewardUrl)
-        .acceptCharset(StandardCharsets.UTF_8)
-        .bodyValue(stakeAddressList)
-        .retrieve()
-        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-            clientResponse -> Mono.error(
-                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-        .bodyToMono(Boolean.class)
-        .block();
+    return postWebClient(apiCheckRewardUrl,Boolean.class,stakeAddressList).block();
   }
 
   @Override
@@ -117,17 +99,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
     boolean isFetch = false;
     while (i < 2) {
       isFetch = Boolean.TRUE.equals(
-          webClient.post()
-              .uri(apiCheckPoolHistoryUrl)
-              .acceptCharset(StandardCharsets.UTF_8)
-              .bodyValue(poolIds)
-              .retrieve()
-              .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                  clientResponse -> Mono.error(
-                      new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-              .bodyToMono(Boolean.class)
-              .block()
-          );
+          postWebClient(apiCheckPoolHistoryUrl,Boolean.class,poolIds).block());
       if (isFetch) {
         break;
       }
@@ -155,16 +127,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
     boolean isFetch = false;
     while (i < 2) {
       isFetch = Boolean.TRUE.equals(
-          webClient.post()
-              .uri(apiCheckPoolInfoUrl)
-              .acceptCharset(StandardCharsets.UTF_8)
-              .bodyValue(poolIds)
-              .retrieve()
-              .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                  clientResponse -> Mono.error(
-                      new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-              .bodyToMono(Boolean.class)
-              .block());
+          postWebClient(apiCheckPoolInfoUrl,Boolean.class,poolIds).block());
       if (isFetch) {
         break;
       }
@@ -183,16 +146,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchEpochStakeForPool(List<String> rewardAccounts) {
-    return webClient.post()
-        .uri(apiCheckEpochStakeUrl)
-        .acceptCharset(StandardCharsets.UTF_8)
-        .bodyValue(rewardAccounts)
-        .retrieve()
-        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-            clientResponse -> Mono.error(
-                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-        .bodyToMono(Boolean.class)
-        .block();
+    return postWebClient(apiCheckEpochStakeUrl,Boolean.class,rewardAccounts).block();
   }
 
   @Override
@@ -205,16 +159,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchRewardForPool(List<String> rewardAccounts) {
-    return webClient.post()
-        .uri(apiCheckRewardUrl)
-        .acceptCharset(StandardCharsets.UTF_8)
-        .bodyValue(rewardAccounts)
-        .retrieve()
-        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-            clientResponse -> Mono.error(
-                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-        .bodyToMono(Boolean.class)
-        .block();
+    return postWebClient(apiCheckRewardUrl, Boolean.class,rewardAccounts).block();
   }
 
   @Override
@@ -224,16 +169,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchAdaPots(List<Integer> epochNo) {
-    return webClient.post()
-        .uri(apiCheckAdaPotsUrl)
-        .acceptCharset(StandardCharsets.UTF_8)
-        .bodyValue(epochNo)
-        .retrieve()
-        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-            clientResponse -> Mono.error(
-                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-        .bodyToMono(Boolean.class)
-        .block();
+    return postWebClient(apiCheckAdaPotsUrl,Boolean.class,epochNo).block();
   }
 
   @Override
@@ -246,17 +182,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Override
   public List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNoList) {
     try {
-      Epoch[] epoch =
-          webClient.post()
-              .uri(apiCheckEpochUrl)
-              .acceptCharset(StandardCharsets.UTF_8)
-              .bodyValue(epochNoList)
-              .retrieve()
-              .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                  clientResponse -> Mono.error(
-                      new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-              .bodyToMono(Epoch[].class)
-              .block();
+      Epoch[] epoch = postWebClient(apiCheckEpochUrl,Epoch[].class,epochNoList).block();
       if (Objects.nonNull(epoch)) {
         return Arrays.asList(epoch);
       }
@@ -269,5 +195,16 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Override
   public Boolean useKoios() {
     return true;
+  }
+  public <T> Mono<T> postWebClient(String url, Class<T> clazz, Object body){
+    return webClient.post()
+        .uri(url)
+        .bodyValue(body)
+        .acceptCharset(StandardCharsets.UTF_8)
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse -> Mono.error(
+                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+        .bodyToMono(clazz);
   }
 }
