@@ -51,16 +51,7 @@ public class MarketDataServiceImpl implements MarketDataService {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
     Object cachedData = redisTemplate.opsForValue().get(redisKey);
     if (cachedData == null) {
-      cachedData =
-          webClient.get()
-              .uri(String.format(apiMarketDataUrl,currency))
-              .acceptCharset(StandardCharsets.UTF_8)
-              .retrieve()
-              .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                  clientResponse -> Mono.error(
-                      new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-              .bodyToMono(Object.class)
-              .block();
+      cachedData = getWebClient(String.format(apiMarketDataUrl,currency),Object.class).block();
       JsonNode marketDataNode = objectMapper.valueToTree(cachedData);
       ((ObjectNode) marketDataNode.get(0))
           .put(LAST_UPDATED_FIELD, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toString());
@@ -73,16 +64,7 @@ public class MarketDataServiceImpl implements MarketDataService {
   private void publishMarketData(String currency) throws BusinessException {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
     Object marketDataCachedObject = redisTemplate.opsForValue().get(redisKey);
-    Object marketDataObject =
-        webClient.get()
-            .uri(String.format(apiMarketDataUrl,currency))
-            .acceptCharset(StandardCharsets.UTF_8)
-            .retrieve()
-            .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                clientResponse -> Mono.error(
-                    new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
-            .bodyToMono(Object.class)
-            .block();
+    Object marketDataObject = getWebClient(String.format(apiMarketDataUrl,currency),Object.class).block();
     JsonNode marketDataNode = objectMapper.valueToTree(marketDataObject);
     JsonNode marketDataCachedNode = objectMapper.valueToTree(marketDataCachedObject);
 
@@ -127,5 +109,16 @@ public class MarketDataServiceImpl implements MarketDataService {
   public void publishMarketData() {
     publishMarketData("usd");
     publishMarketData("btc");
+  }
+
+  public <T> Mono<T> getWebClient(String url, Class<T> clazz, Object... vars){
+    return webClient.get()
+        .uri(url,vars)
+        .acceptCharset(StandardCharsets.UTF_8)
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse -> Mono.error(
+                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+        .bodyToMono(clazz);
   }
 }
