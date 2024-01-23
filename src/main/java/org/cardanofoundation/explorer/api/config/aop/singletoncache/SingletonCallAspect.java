@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +14,8 @@ import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.CodeSignature;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +26,8 @@ import org.springframework.stereotype.Component;
 public class SingletonCallAspect {
 
   private static final String LOCKED = "LOCKED";
-  private static final String PREFIX_KEY = "CACHE_API:";
+  private static final String PREFIX_KEY = "METHOD_CACHE:";
 
-  private final HttpServletRequest httpRequest;
   private final RedisTemplate<String, Object> redisTemplate;
 
   /* Config Gson for working with LocalDate/LocalDateTime */
@@ -70,8 +70,12 @@ public class SingletonCallAspect {
   public Object aroundAdvice(ProceedingJoinPoint joinPoint,
                              SingletonCall singletonCall) throws Throwable {
 
-    String url = httpRequest.getRequestURL() + "?" + httpRequest.getQueryString();
-    String cacheKey = PREFIX_KEY + url;
+    CodeSignature methodSignature = (CodeSignature) joinPoint.getSignature();
+    methodSignature.getName();
+    String[] sigParamNames = methodSignature.getParameterNames();
+    Object[] sigParamValues = joinPoint.getArgs();
+    String cacheKey = generateCacheKey(methodSignature.getName(), sigParamNames, sigParamValues);
+
     var opValuesRedis = redisTemplate.opsForValue();
     try {
       Object cacheResult = redisTemplate.opsForValue().get(cacheKey);
@@ -101,5 +105,15 @@ public class SingletonCallAspect {
     } finally {
       //do nothing
     }
+  }
+
+  private String generateCacheKey(String methodName, String[] sigParamNames, Object[] sigParamValues) {
+    StringBuilder str = new StringBuilder();
+    for (int i = 0; i < sigParamNames.length; i++) {
+      str.append(sigParamNames[i]).append(":").append(sigParamValues[i]);
+      if(i < sigParamNames.length - 1)
+        str.append("_");
+    }
+    return PREFIX_KEY + methodName + ":" + str.toString().hashCode();
   }
 }
