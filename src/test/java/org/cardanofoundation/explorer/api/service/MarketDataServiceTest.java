@@ -1,5 +1,9 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -12,19 +16,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.cardanofoundation.ledgersync.common.util.JsonUtil;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @ExtendWith(MockitoExtension.class)
 public class MarketDataServiceTest {
-
-  @Mock private RestTemplate restTemplate;
+  @Mock
+  private WebClient webClient;
+  @Mock
+  private WebClient.RequestHeadersSpec requestHeadersMock;
+  @Mock
+  private WebClient.RequestHeadersUriSpec requestHeadersUriMock;
+  @Mock
+  private CustomMinimalForTestResponseSpec responseMock;
 
   @InjectMocks private MarketDataServiceImpl marketDataService;
   @Mock RedisTemplate<String, Object> redisTemplate;
@@ -43,9 +57,13 @@ public class MarketDataServiceTest {
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     when(valueOperations.get(any())).thenReturn(null);
     ReflectionTestUtils.setField(marketDataService, "apiMarketDataUrl", "localhost:8080");
-    when(restTemplate.getForObject(String.format("localhost:8080", currency), Object.class))
-        .thenReturn(prepareMarketData());
-
+    when(webClient.get()).thenReturn(requestHeadersUriMock);
+    when(requestHeadersUriMock.uri(String.format("localhost:8080", currency))).thenReturn(requestHeadersMock);
+    when(requestHeadersMock.acceptCharset(StandardCharsets.UTF_8)).thenReturn(requestHeadersMock);
+    when(requestHeadersMock.retrieve()).thenReturn(responseMock);
+    when(responseMock.getStatusCode()).thenReturn(HttpStatusCode.valueOf(200));
+    when(responseMock.onStatus(any(Predicate.class),any(Function.class))).thenCallRealMethod();
+    when(responseMock.bodyToMono(Object.class)).thenReturn(Mono.just(prepareMarketData()));
     var response = marketDataService.getMarketData(currency);
     JsonNode jsonNode = objectMapper.valueToTree(response);
     Assertions.assertEquals(jsonNode.get(0).get("current_price").asText(), "0.250666");
@@ -82,5 +100,14 @@ public class MarketDataServiceTest {
         + "        }\n"
         + "    ]";
     return objectMapper.readValue(marketDataString, Object.class);
+  }
+
+  abstract class CustomMinimalForTestResponseSpec implements WebClient.ResponseSpec {
+    public abstract HttpStatusCode getStatusCode();
+
+    public WebClient.ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate, Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+      if (statusPredicate.test(this.getStatusCode())) exceptionFunction.apply(ClientResponse.create(HttpStatus.OK).build()).block();
+      return this;
+    }
   }
 }

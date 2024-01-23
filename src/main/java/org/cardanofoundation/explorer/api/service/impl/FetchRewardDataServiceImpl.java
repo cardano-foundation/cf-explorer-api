@@ -39,27 +39,7 @@ public class FetchRewardDataServiceImpl implements FetchRewardDataService {
   }
 
   @Override
-  public Set<String> checkAllPoolHistoryForPool(Set<String> poolIds) {
-    return new HashSet<>();
-  }
-
-  @Override
-  public Boolean checkPoolInfoForPool(Set<String> poolIds) {
-    return true;
-  }
-
-  @Override
-  public Set<String> checkAllPoolInfoForPool() {
-    return new HashSet<>();
-  }
-
-  @Override
   public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
-    return true;
-  }
-
-  @Override
-  public Boolean fetchPoolInfoForPool(Set<String> poolIds) {
     return true;
   }
 
