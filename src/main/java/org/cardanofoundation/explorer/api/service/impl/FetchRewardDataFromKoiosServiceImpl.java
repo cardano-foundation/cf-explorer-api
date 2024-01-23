@@ -9,7 +9,6 @@ import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryCheckpointRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -33,9 +32,6 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Value("${application.api.check-pool-history.base-url}")
   private String apiCheckPoolHistoryUrl;
 
-  @Value("${application.api.check-pool-info.base-url}")
-  private String apiCheckPoolInfoUrl;
-
   @Value("${application.api.check-epoch-stake.base-url}")
   private String apiCheckEpochStakeUrl;
 
@@ -48,8 +44,6 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   private final RewardCheckpointRepository rewardCheckpointRepository;
 
   private final PoolHistoryCheckpointRepository poolHistoryCheckpointRepository;
-
-  private final PoolInfoCheckpointRepository poolInfoCheckpointRepository;
 
   private final EpochStakeCheckpointRepository epochStakeCheckpointRepository;
 
@@ -89,51 +83,8 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   }
 
   @Override
-  public Set<String> checkAllPoolHistoryForPool(Set<String> poolIds) {
-    return poolHistoryCheckpointRepository.checkPoolHistoryByPoolViewAndEpoch(poolIds);
-  }
-
-  @Override
   public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
-    int i = 0;
-    boolean isFetch = false;
-    while (i < 2) {
-      isFetch = Boolean.TRUE.equals(
-          postWebClient(apiCheckPoolHistoryUrl,Boolean.class,poolIds).block());
-      if (isFetch) {
-        break;
-      }
-      i++;
-    }
-    return isFetch;
-  }
-
-  @Override
-  public Boolean checkPoolInfoForPool(Set<String> poolIds) {
-    Integer countCheckPoint = poolInfoCheckpointRepository.checkRewardByPoolViewAndEpoch(
-        poolIds);
-    Integer sizeCheck = poolIds.size();
-    return Objects.equals(countCheckPoint, sizeCheck);
-  }
-
-  @Override
-  public Set<String> checkAllPoolInfoForPool() {
-    return poolInfoCheckpointRepository.checkPoolInfoByPoolViewAndEpoch();
-  }
-
-  @Override
-  public Boolean fetchPoolInfoForPool(Set<String> poolIds) {
-    int i = 0;
-    boolean isFetch = false;
-    while (i < 2) {
-      isFetch = Boolean.TRUE.equals(
-          postWebClient(apiCheckPoolInfoUrl,Boolean.class,poolIds).block());
-      if (isFetch) {
-        break;
-      }
-      i++;
-    }
-    return isFetch;
+     return postWebClient(apiCheckPoolHistoryUrl,Boolean.class,poolIds).block();
   }
 
   @Override
@@ -204,7 +155,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
         .retrieve()
         .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
             clientResponse -> Mono.error(
-                new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+                new BusinessException(BusinessCode.FETCH_REWARD_ERROR)))
         .bodyToMono(clazz);
   }
 }

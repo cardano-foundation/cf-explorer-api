@@ -61,7 +61,7 @@ public class MarketDataServiceImpl implements MarketDataService {
     return cachedData;
   }
 
-  private void publishMarketData(String currency) throws BusinessException {
+  private void publishMarketData(String currency) {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
     Object marketDataCachedObject = redisTemplate.opsForValue().get(redisKey);
     Object marketDataObject = getWebClient(String.format(apiMarketDataUrl,currency),Object.class).block();
