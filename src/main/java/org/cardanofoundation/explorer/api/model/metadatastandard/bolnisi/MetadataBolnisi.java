@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -16,4 +18,6 @@ public class MetadataBolnisi {
   private boolean isCidVerified;
   private boolean isExternalApiAvailable;
   private List<WineryData> wineryData;
+  @JsonIgnore
+  private boolean isOnChainMetadataValid;
 }
