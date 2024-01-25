@@ -1,10 +1,14 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigInteger;
@@ -20,6 +24,7 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.TxPoolCertificateHistory;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
@@ -32,6 +37,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(PoolController.class)
@@ -116,5 +123,31 @@ public class PoolControllerTest {
             .param("size", "1"))
         .andDo(print())
         .andExpect(status().isOk());
+  }
+  @Test
+  void testGetTxPoolCertificatesHistory() throws Exception {
+    String poolView = "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s";
+    TxPoolCertificateHistory txPoolCertificateHistory = new TxPoolCertificateHistory();
+    txPoolCertificateHistory.setTxHash("a151dbcfa201c1980d112809531e2a82e941895839460ba2efdfe905015eacdc");
+    txPoolCertificateHistory.setBlockNo(5699952L);
+    txPoolCertificateHistory.setEpochSlotNo(403614);
+    txPoolCertificateHistory.setSlotNo(29088414);
+    txPoolCertificateHistory.setTxEpochNo(264);
+    PageRequest pageable = PageRequest.of(0,1, Sort.by("createdAt").descending());
+
+    when(poolCertificateService.getTxPoolCertificateHistory(poolView,pageable))
+        .thenReturn(new BaseFilterResponse<>(List.of(txPoolCertificateHistory),1));
+
+    mockMvc.perform(get("/api/v1/pools/certificates-history/{poolViewOrHash}",poolView)
+            .param("page", "0")
+            .param("size", "1")
+            .param("sort","createdAt,DESC")
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string(
+            containsString("a151dbcfa201c1980d112809531e2a82e941895839460ba2efdfe905015eacdc")))
+        .andExpect(jsonPath("$.data[0].blockNo").value(5699952L));
+
+    verify(poolCertificateService).getTxPoolCertificateHistory(poolView,pageable);
   }
 }
