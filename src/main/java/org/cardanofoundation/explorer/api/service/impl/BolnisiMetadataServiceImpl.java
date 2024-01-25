@@ -61,9 +61,12 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   public MetadataBolnisi getBolnisiMetadata(String jsonMetadata) {
     MetadataBolnisi metadataBolnisi = getOnChainMetadata(jsonMetadata);
 
+    if(!metadataBolnisi.isOnChainMetadataValid()) {
+      return metadataBolnisi;
+    }
+
     Map<String, List<Object>> offChainMetadata = getOffChainMetadata(metadataBolnisi);
-    boolean isCidVerified = CidUtils.verifyCid(metadataBolnisi.getCid(),
-                                               JsonUtil.getPrettyJson(offChainMetadata));
+    boolean isCidVerified = CidUtils.verifyCid(metadataBolnisi.getCid(), JsonUtil.getPrettyJson(offChainMetadata));
     if (!isCidVerified) {
       return metadataBolnisi;
     }
@@ -156,7 +159,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       redisTemplate.opsForHash().putIfAbsent(publicKeyRedisKey,
                                              wineryData.getWineryId(),
                                              pKeyOnChain);
-      redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.HOURS);
+      redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.DAYS);
       boolean isPKeyVerified = pKeyOnChain != null &&
           removePrefixHexString(wineryData.getPublicKey()).equals(
               removePrefixHexString(pKeyOnChain));
@@ -171,6 +174,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   private MetadataBolnisi getOnChainMetadata(String jsonMetadata) {
     MetadataBolnisi.MetadataBolnisiBuilder metadataBolnisiBuilder = MetadataBolnisi.builder();
     metadataBolnisiBuilder.isExternalApiAvailable(true);
+    metadataBolnisiBuilder.isOnChainMetadataValid(true);
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode metadataNode = objectMapper.readTree(jsonMetadata);
@@ -208,6 +212,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       metadataBolnisiBuilder.wineryData(wineryDataList);
     } catch (Exception e) {
       metadataBolnisiBuilder.isCidVerified(false);
+      metadataBolnisiBuilder.isOnChainMetadataValid(false);
       log.error("Error while getting data from json", e);
     }
     return metadataBolnisiBuilder.build();
@@ -250,7 +255,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
     if (offChainMetadata != null) {
       redisTemplate.opsForHash().put(offChainRedisKey, metadataBolnisi.getCid(), offChainMetadata);
-      redisTemplate.expire(offChainRedisKey, 1, TimeUnit.HOURS);
+      redisTemplate.expire(offChainRedisKey, 1, TimeUnit.DAYS);
     }
 
     return offChainMetadata;
