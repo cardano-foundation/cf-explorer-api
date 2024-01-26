@@ -17,6 +17,7 @@ public class TokenFilterResponse{
   private String name;
   private String displayName;
   private String policy;
+  private boolean policyIsNativeScript;
   private String fingerprint;
   private Integer txCount;
   private String supply;

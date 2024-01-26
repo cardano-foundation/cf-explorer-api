@@ -35,6 +35,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddress
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
@@ -46,7 +47,9 @@ import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.TokenInfo;
 import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
 import org.mockito.InjectMocks;
@@ -98,6 +101,8 @@ class TokenServiceTest {
   private StakeAddressRepository stakeAddressRepository;
   @Mock
   private AggregatedDataCacheService aggregatedDataCacheService;
+  @Mock
+  private ScriptRepository scriptRepository;
 
   @InjectMocks
   private TokenServiceImpl tokenService;
@@ -106,6 +111,8 @@ class TokenServiceTest {
   void testFilterToken_WhenQueryEmpty() {
     // Setup
     when(aggregatedDataCacheService.getTokenCount()).thenReturn(1);
+    when(scriptRepository.findAllByHashIn(List.of("policy")))
+        .thenReturn(List.of(Script.builder().type(ScriptType.TIMELOCK).hash("policy").build()));
 
     final MultiAsset multiAsset = MultiAsset.builder()
         .id(0L)
@@ -178,6 +185,8 @@ class TokenServiceTest {
     when(tokenProjection.getTotalVolume()).thenReturn(new BigInteger("0"));
 
     final Page<TokenProjection> multiAssets = new PageImpl<>(List.of(tokenProjection));
+    when(scriptRepository.findAllByHashIn(List.of("policy")))
+        .thenReturn(List.of(Script.builder().type(ScriptType.TIMELOCK).hash("policy").build()));
 
     when(multiAssetRepository.findAll(anyString(), any(Pageable.class))).thenReturn(
         multiAssets
