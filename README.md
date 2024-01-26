@@ -2,9 +2,11 @@
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/tests.yaml/badge.svg?branch=main" />
-<img alt="Coverage" src="https://github.com/cardano-foundation/cf-explorer-api/blob/gh-pages/badges/jacoco.svg?raw=true" />
+<img alt="Coverage" src="https://cardano-foundation.github.io/cf-explorer-api/badges/jacoco.svg" />
 <img alt="Release" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/release.yaml/badge.svg?branch=main" />
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
+<a href="https://app.fossa.com/projects/custom%2B41588%2Fgit%40github.com%3Acardano-foundation%2Fcf-explorer-api.git?ref=badge_small"><img alt="FOSSA Status" src="https://app.fossa.com/api/projects/custom%2B41588%2Fgit%40github.com%3Acardano-foundation%2Fcf-explorer-api.git.svg?type=small"/></a>
+<a href="https://conventionalcommits.org"><img alt="conventionalcommits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits" /></a>
 </p>
 
 This service provides access to blockchain data that is compatible with the PostgreSQL database of DBSync. It serves as a data source for the explorer frontend, enabling users and developers to gain valuable insights into the Cardano blockchain.
@@ -23,7 +25,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 
 📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-api/mutation-report/)
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -39,9 +41,9 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - Run `docker-compose -f docker-compose-local.yml up -d` to start the containers
 
 
-### Environment variables
+## 🌱 Environment Variables
 
-- `SPRING_PROFILES_ACTIVE`: Spring profiles (dev, prod, test, local), plus Redis Profiles, plus Koios service, See Below. Default is dev. In your case, you should use local
+- `SPRING_PROFILES_ACTIVE`: Spring profiles are `dev`, `prod`, `test` and `local`. There are more profiles managing the rewards and redis configurations (scroll down for . Default is `dev`. The `local` profile should match the most use-cases.
 
 - `PORT`: Port of application. Default is 8080.
 - `DB_SCHEMA`: Schema of database
@@ -56,7 +58,6 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `EXPLORER_USER`: Explorer database username
 - `EXPLORER_PASSWORD`: Explorer database password
 - `EXPLORER_DB`: Explorer database name
-
 
 - `JACKSON_INCLUSION`: Jackson inclusion. Default is NON_NULL for ignore null value. Using USE_DEFAULTS for not ignore null value.
 
@@ -91,14 +92,14 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `INSERTED_TIME_THRESHOLD_IN_SECOND`: The maximum allowable time difference, in seconds, between the timestamp of the latest inserted block and the current time (for sync status)
 - `AUTH_FILE_PATH`: path file of authenticate configuration
 
-### Two options for token logo storage with profiles:
+### Options for the token logo storage with profiles:
 - For profile: `prod`
     - `TOKEN_LOGO_S3_REGION`: token logo aws s3 region
     - `TOKEN_LOGO_S3_BUCKET_NAME`: token logo aws s3 bucket name
 - For profile: `dev`
     - `TOKEN_LOGO_ENDPOINT`: token logo endpoint
 
-### We have 3 options for redis cache:
+### Options to configure the redis cache:
 - `redis standalone`
     - `REDIS_STANDALONE_HOST` : Redis hostname eg. `127.0.0.1`.
     - `REDIS_STANDALONE_PORT` : Redis ort, eg. `6379`.
@@ -124,13 +125,13 @@ To ensure the stability and reliability of this project, unit and mutation tests
     - `API_CHECK_EPOCH_STAKE_URL`: URL for get epoch stake data from koios service. Default is `http://localhost:8888/api/v1/epoch-stake/fetch`.
     - `API_CHECK_ADA_POTS_URL`: URL for get ada pots data from koios service. Default is `http://localhost:8888/api/v1/ada-pots/fetch`.
     - `API_CHECK_EPOCH_URL`: URL for get epoch data from koios service. Default is `http://localhost:8888/api/v1/epochs/fetch`.
-- without `koios`: We will use database to get data.
+- without `koios`: A pre-filled database will be used to serve the data
 
 ### Configuration of the genesis file path:
   - `SHELLEY_GENESIS_FILE`: Shelley file path
   - `BYRON_GENESIS_FILE`: Byron file path
 
-## Local environments tests
+## 🍀 Local Environments Tests
 
 ### Execute postman collection using docker - newman
 
