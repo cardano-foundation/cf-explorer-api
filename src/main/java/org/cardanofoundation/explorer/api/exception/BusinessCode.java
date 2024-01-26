@@ -23,6 +23,7 @@ public enum BusinessCode implements ErrorCode {
   PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support"),
   SCRIPT_NOT_FOUND("404-SCRIPT_NOT_FOUND", "Script not found"),
   VERIFY_SCRIPT_FAILED("400-VERIFY_SCRIPT_FAILED", "Verify script failed"),
+  SCRIPT_ALREADY_VERIFIED("400-SCRIPT_ALREADY_VERIFIED", "Script already verified"),
   FETCH_REWARD_ERROR("500-FETCH_REWARD_ERROR", "Fetch reward error"),
   TIME_RANGE_ILLEGAL("400-TIME_RANGE_ILLEGAL", "Time range is illegal"),
   REPORT_LIMIT_REACHED("400-REPORT_LIMIT_REACHED", "Report limit reached"),

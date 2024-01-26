@@ -1896,6 +1896,8 @@
                       "// var stt = \"200\";\r",
                       "// stt = pm.variables.get(\"stt\");\r",
                       "var jsonData = pm.response.json();\r",
+                      "var metadataCIP20 = pm.response.json().metadata[0].metadataCIP20;\r",
+                      "var metadataCIP83 = pm.response.json().metadata[0].metadataCIP83;\r",
                       "\r",
                       "pm.test(\"Status code is 200\", function () {\r",
                       "    pm.response.to.have.status(200);\r",
@@ -2170,6 +2172,33 @@
                       "    }\r",
                       "})\r",
                       "\r",
+                      "//CIP20\r",
+                      "pm.test(\"Check metadata CIP 20\", function () {\r",
+                      "    pm.expect(metadataCIP20.valid).to.be.a(\"boolean\",\"metadataCIP20.valid\")\r",
+                      "    if (metadataCIP20.valid.requireProperties && metadataCIP20.valid.requireProperties.length > 0) {\r",
+                      "        metadataCIP20.valid.requireProperties.map(require => {\r",
+                      "            pm.expect(require.index).to.be.a(\"string\", \"require.index\")\r",
+                      "            pm.expect(require.valid).to.be.a(\"boolean\", \"require.valid\")\r",
+                      "            pm.expect(require.value).to.be.a(\"string\", \"require.value\")\r",
+                      "            pm.expect(require.property).to.be.a(\"string\", \"require.property\")\r",
+                      "            pm.expect(require.format).to.be.a(\"string\", \"require.format\")\r",
+                      "        })\r",
+                      "    }\r",
+                      "});\r",
+                      "\r",
+                      "//CIP83\r",
+                      "pm.test(\"Check metadata CIP 83\", function () {\r",
+                      "    pm.expect(metadataCIP83.valid).to.be.a(\"boolean\",\"metadataCIP83.valid\")\r",
+                      "    if (metadataCIP83.valid.requireProperties && metadataCIP83.valid.requireProperties.length > 0) {\r",
+                      "        metadataCIP83.valid.requireProperties.map(require => {\r",
+                      "            pm.expect(require.index).to.be.a(\"string\", \"require.index\")\r",
+                      "            pm.expect(require.valid).to.be.a(\"boolean\", \"require.valid\")\r",
+                      "            pm.expect(require.value).to.be.a(\"string\", \"require.value\")\r",
+                      "            pm.expect(require.property).to.be.a(\"string\", \"require.property\")\r",
+                      "            pm.expect(require.format).to.be.a(\"string\", \"require.format\")\r",
+                      "        })\r",
+                      "    }\r",
+                      "});\r",
                       "\r",
                       "// Scenario Compare api: Filter transaction with api: Get transaction detail by hash\r",
                       "pm.test(\"Check blockNo value\", function () {\r",
@@ -2324,6 +2353,8 @@
                       "        }\r",
                       "    })\r",
                       "});\r",
+                      "\r",
+                      "\r",
                       ""
                     ],
                     "type": "text/javascript"
@@ -2353,6 +2384,133 @@
                     {
                       "key": "hash",
                       "value": "5c84b84a9a47f2976c0c377c20319c98c28d4db9739340b0d21314b916d082de",
+                      "description": "{From api Get current transactions - api/v1/txs/current)"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer <token>",
+                        "description": "Added as a part of security scheme: bearer"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/txs/:hash",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "txs",
+                        ":hash"
+                      ],
+                      "variable": [
+                        {
+                          "key": "hash",
+                          "value": "enim voluptate Excepteur ullamco",
+                          "description": "(Required) Hash value of transaction"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "*/*"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"tx\": {\n    \"hash\": \"nostrud laborum laboris\",\n    \"time\": \"2018-02-24T03:08:11.583Z\",\n    \"blockNo\": 39000018,\n    \"blockHash\": \"deserunt ex irure ullamco\",\n    \"epochSlot\": 25921623,\n    \"maxEpochSlot\": 14816159,\n    \"epochNo\": -58822797,\n    \"status\": \"PENDING\",\n    \"confirmation\": 45560009,\n    \"fee\": -86651620,\n    \"totalOutput\": 91690877\n  },\n  \"summary\": {\n    \"stakeAddress\": [\n      {\n        \"address\": \"non nulla \",\n        \"index\": \"laboris laborum\",\n        \"txHash\": \"est sed\",\n        \"value\": -12356699,\n        \"assetId\": \"dolore sit laboris\",\n        \"tokens\": [\n          {\n            \"assetName\": \"non quis\",\n            \"assetQuantity\": 76901813,\n            \"assetId\": \"sint cillum nisi deserunt\",\n            \"policy\": \"in nisi ut\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"officia ex sit ea\",\n            \"assetQuantity\": 64780161,\n            \"assetId\": \"officia Ut culpa\",\n            \"policy\": \"ex\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"dolor sint\"\n      },\n      {\n        \"address\": \"dolor et ut laboris\",\n        \"index\": \"aute ad\",\n        \"txHash\": \"fugiat officia nostrud\",\n        \"value\": -52906994,\n        \"assetId\": \"tempor deserunt\",\n        \"tokens\": [\n          {\n            \"assetName\": \"sit elit\",\n            \"assetQuantity\": 26318873,\n            \"assetId\": \"Lorem proident dolor id Excepteur\",\n            \"policy\": \"veniam ut \",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"et minim Ut elit officia\",\n            \"assetQuantity\": -68478910,\n            \"assetId\": \"cillum\",\n            \"policy\": \"anim proident\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"velit nisi\"\n      }\n    ]\n  },\n  \"contracts\": [\n    {\n      \"contract\": \"do elit\"\n    },\n    {\n      \"contract\": \"minim irure quis commodo exercitation\"\n    }\n  ],\n  \"collaterals\": {\n    \"collateralInputResponses\": [\n      {\n        \"address\": \"incididunt officia Ut sunt\",\n        \"index\": \"cillum ut Excepteur magna\",\n        \"txHash\": \"deserunt\",\n        \"value\": 80710282,\n        \"assetId\": \"est nostrud\",\n        \"tokens\": [\n          {\n            \"assetName\": \"dolore dolor est sunt\",\n            \"assetQuantity\": -99598700,\n            \"assetId\": \"minim Lorem\",\n            \"policy\": \"exercitation ipsum\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"officia\",\n            \"assetQuantity\": 94856757,\n            \"assetId\": \"cupidatat sint\",\n            \"policy\": \"dolore occaecat et\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"dolor\"\n      },\n      {\n        \"address\": \"Ut est\",\n        \"index\": \"cupidatat velit consectetur eiusmod laboris\",\n        \"txHash\": \"dolor non commodo incididunt\",\n        \"value\": -37550852,\n        \"assetId\": \"et dolor esse aute sit\",\n        \"tokens\": [\n          {\n            \"assetName\": \"eu\",\n            \"assetQuantity\": -95341916,\n            \"assetId\": \"est non labore ad nisi\",\n            \"policy\": \"magna cillum esse\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"est elit sint ipsum\",\n            \"assetQuantity\": 14308195,\n            \"assetId\": \"labore dolor id\",\n            \"policy\": \"ex dolor officia anim commodo\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"magna laborum\"\n      }\n    ],\n    \"collateralOutputResponses\": [\n      {\n        \"address\": \"deserunt qui Duis\",\n        \"index\": \"labor\",\n        \"txHash\": \"cupidatat sunt ea\",\n        \"value\": -69141579,\n        \"assetId\": \"proident\",\n        \"tokens\": [\n          {\n            \"assetName\": \"labore adipisicing in dolor do\",\n            \"assetQuantity\": -65262883,\n            \"assetId\": \"ut tempor minim esse sunt\",\n            \"policy\": \"nisi\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"ullamco sunt\",\n            \"assetQuantity\": -67540790,\n            \"assetId\": \"do reprehenderit Excepteur\",\n            \"policy\": \"sint commodo\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"commodo culpa\"\n      },\n      {\n        \"address\": \"ipsum cupidatat incididunt\",\n        \"index\": \"cupidatat exercitation aliquip nisi\",\n        \"txHash\": \"Duis aute\",\n        \"value\": -20447685,\n        \"assetId\": \"labore Ut mollit ea\",\n        \"tokens\": [\n          {\n            \"assetName\": \"anim pariatur\",\n            \"assetQuantity\": 49199255,\n            \"assetId\": \"magna Excepteur laborum\",\n            \"policy\": \"eiusmod sit\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"eiusmod amet ut\",\n            \"assetQuantity\": 13419767,\n            \"assetId\": \"commodo\",\n            \"policy\": \"consequat id dolor aliqua nulla\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"dolo\"\n      }\n    ]\n  },\n  \"notes\": [\n    {\n      \"note\": \"veniam magna qui ipsum dolor\"\n    },\n    {\n      \"note\": \"nostrud sed incididunt id ea\"\n    }\n  ],\n  \"withdrawals\": [\n    {\n      \"stakeAddressFrom\": \"nisi ipsum\",\n      \"addressTo\": [\n        \"occaecat irure fugiat incididunt\",\n        \"et in nulla\"\n      ],\n      \"amount\": -24647262\n    },\n    {\n      \"stakeAddressFrom\": \"ex laborum dolor dolore\",\n      \"addressTo\": [\n        \"dolor deserunt\",\n        \"anim ipsum enim\"\n      ],\n      \"amount\": 76401435\n    }\n  ],\n  \"delegations\": [\n    {\n      \"address\": \"eiusmod occaecat\",\n      \"poolId\": \"ut ipsum cupidatat\"\n    },\n    {\n      \"address\": \"aute ex\",\n      \"poolId\": \"minim quis dolor ad\"\n    }\n  ],\n  \"mints\": [\n    {\n      \"assetName\": \"et dolore\",\n      \"assetQuantity\": 37808196,\n      \"assetId\": \"culpa commodo ipsum Excepteur\",\n      \"policy\": \"mollit est cillum magna non\",\n      \"metadata\": {\n        \"url\": \"velit Excepteur dolor\",\n        \"ticker\": \"consequat esse officia\",\n        \"decimals\": 69670843,\n        \"logo\": \"officia voluptate\",\n        \"description\": \"elit voluptate proident\"\n      }\n    },\n    {\n      \"assetName\": \"cillum\",\n      \"assetQuantity\": 84682726,\n      \"assetId\": \"aliquip occaecat exercitation\",\n      \"policy\": \"ex laboris i\",\n      \"metadata\": {\n        \"url\": \"in sit dolore velit\",\n        \"ticker\": \"elit i\",\n        \"decimals\": 60143156,\n        \"logo\": \"laborum\",\n        \"description\": \"reprehenderit aliquip irure dolor\"\n      }\n    }\n  ],\n  \"protocols\": {\n    \"minFeeA\": {},\n    \"minFeeB\": {},\n    \"maxBlockSize\": {},\n    \"maxTxSize\": {},\n    \"maxBhSize\": {},\n    \"keyDeposit\": {},\n    \"poolDeposit\": {},\n    \"maxEpoch\": {},\n    \"optimalPoolCount\": {},\n    \"minUtxoValue\": {},\n    \"minPoolCost\": {},\n    \"maxTxExMem\": {},\n    \"maxTxExSteps\": {},\n    \"maxBlockExMem\": {},\n    \"maxBlockExSteps\": {},\n    \"maxValSize\": {},\n    \"coinsPerUtxoSize\": {},\n    \"influence\": {},\n    \"monetaryExpandRate\": {},\n    \"treasuryGrowthRate\": {},\n    \"decentralisation\": {},\n    \"priceMem\": {},\n    \"priceStep\": {},\n    \"protocolMajor\": {},\n    \"protocolMinor\": {},\n    \"collateralPercent\": {},\n    \"maxCollateralInputs\": {},\n    \"entropy\": {},\n    \"costModel\": {}\n  },\n  \"stakeCertificates\": [\n    {\n      \"stakeAddress\": \"enim esse labore\",\n      \"type\": \"STAKE_DEREGISTRATION\"\n    },\n    {\n      \"stakeAddress\": \"tempor quis exer\",\n      \"type\": \"STAKE_DEREGISTRATION\"\n    }\n  ],\n  \"poolCertificates\": [\n    {\n      \"poolId\": \"dolor nostrud ipsum sit\",\n      \"epoch\": 39992826,\n      \"vrfKey\": \"Lorem cupidatat id eiusmod voluptate\",\n      \"rewardAccount\": \"veniam\",\n      \"poolOwners\": [\n        \"in nulla\",\n        \"eiusmod\"\n      ],\n      \"metadataHash\": \"fugiat dolor enim irure\",\n      \"metadataUrl\": \"qu\",\n      \"margin\": 73906917.11426273,\n      \"cost\": -28342474,\n      \"pledge\": 3626040,\n      \"relays\": [\n        {\n          \"dnsName\": \"irure in deserunt\",\n          \"dnsSrvName\": \"cillum do\",\n          \"ipv4\": \"fugiat esse\",\n          \"ipv6\": \"fugiat sunt \",\n          \"port\": -63030067\n        },\n        {\n          \"dnsName\": \"adipisicing laboris ipsum\",\n          \"dnsSrvName\": \"et\",\n          \"ipv4\": \"est laboris ut dolore enim\",\n          \"ipv6\": \"ullamco\",\n          \"port\": 51604860\n        }\n      ],\n      \"type\": \"STAKE_DEREGISTRATION\"\n    },\n    {\n      \"poolId\": \"amet est occaecat\",\n      \"epoch\": 3052835,\n      \"vrfKey\": \"voluptate in ipsum ex\",\n      \"rewardAccount\": \"quis tempor proident\",\n      \"poolOwners\": [\n        \"ea aliqua enim\",\n        \"aliqua Duis \"\n      ],\n      \"metadataHash\": \"in aliqua est ex\",\n      \"metadataUrl\": \"tempor reprehenderit\",\n      \"margin\": -83052879.53952156,\n      \"cost\": 62567059,\n      \"pledge\": -88260869,\n      \"relays\": [\n        {\n          \"dnsName\": \"cupidatat quis culpa\",\n          \"dnsSrvName\": \"non Lorem ut amet\",\n          \"ipv4\": \"consectetur est in\",\n          \"ipv6\": \"veniam nulla\",\n          \"port\": -99901569\n        },\n        {\n          \"dnsName\": \"velit id in occaecat\",\n          \"dnsSrvName\": \"deserunt consectetur fugiat qui\",\n          \"ipv4\": \"labore Ut laborum ea\",\n          \"ipv6\": \"incididunt\",\n          \"port\": 2713541\n        }\n      ],\n      \"type\": \"STAKE_REGISTRATION\"\n    }\n  ],\n  \"previousProtocols\": {\n    \"minFeeA\": {},\n    \"minFeeB\": {},\n    \"maxBlockSize\": {},\n    \"maxTxSize\": {},\n    \"maxBhSize\": {},\n    \"keyDeposit\": {},\n    \"poolDeposit\": {},\n    \"maxEpoch\": {},\n    \"optimalPoolCount\": {},\n    \"minUtxoValue\": {},\n    \"minPoolCost\": {},\n    \"maxTxExMem\": {},\n    \"maxTxExSteps\": {},\n    \"maxBlockExMem\": {},\n    \"maxBlockExSteps\": {},\n    \"maxValSize\": {},\n    \"coinsPerUtxoSize\": {},\n    \"influence\": {},\n    \"monetaryExpandRate\": {},\n    \"treasuryGrowthRate\": {},\n    \"decentralisation\": {},\n    \"priceMem\": {},\n    \"priceStep\": {},\n    \"protocolMajor\": {},\n    \"protocolMinor\": {},\n    \"collateralPercent\": {},\n    \"maxCollateralInputs\": {},\n    \"entropy\": {},\n    \"costModel\": {}\n  },\n  \"utxOs\": {\n    \"inputs\": [\n      {\n        \"address\": \"incididunt Duis cillum\",\n        \"index\": \"velit anim\",\n        \"txHash\": \"reprehenderit exercitation labore dolor\",\n        \"value\": 86452714,\n        \"assetId\": \"aute ad magna nulla occaecat\",\n        \"tokens\": [\n          {\n            \"assetName\": \"veniam\",\n            \"assetQuantity\": 6023488,\n            \"assetId\": \"consequat dolor labore ad\",\n            \"policy\": \"minim laborum non\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"laboris mollit consectetur occaecat\",\n            \"assetQuantity\": -45385830,\n            \"assetId\": \"sunt commodo Ut\",\n            \"policy\": \"cillum consectetur aliqua\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"culpa dolore\"\n      },\n      {\n        \"address\": \"ipsum consequat Ut\",\n        \"index\": \"proident eu\",\n        \"txHash\": \"consequat\",\n        \"value\": -65452743,\n        \"assetId\": \"irure do\",\n        \"tokens\": [\n          {\n            \"assetName\": \"ex proident\",\n            \"assetQuantity\": 25606998,\n            \"assetId\": \"repreh\",\n            \"policy\": \"dolor nostrud in non esse\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"esse\",\n            \"assetQuantity\": -45066563,\n            \"assetId\": \"Lorem minim nulla exercitation\",\n            \"policy\": \"Excepteur labore amet ut\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"officia aliquip\"\n      }\n    ],\n    \"outputs\": [\n      {\n        \"address\": \"Ut Duis\",\n        \"index\": \"in laboris esse\",\n        \"txHash\": \"culpa\",\n        \"value\": 68557611,\n        \"assetId\": \"eu fugiat\",\n        \"tokens\": [\n          {\n            \"assetName\": \"ipsum officia incididunt mollit eiusmod\",\n            \"assetQuantity\": -92989460,\n            \"assetId\": \"tempor\",\n            \"policy\": \"adipisicing consequat labore quis fugiat\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"nulla\",\n            \"assetQuantity\": -40828233,\n            \"assetId\": \"deserunt officia proident\",\n            \"policy\": \"tempor consectetur\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"laborum sint ad tempor\"\n      },\n      {\n        \"address\": \"nulla elit in Lorem\",\n        \"index\": \"mollit\",\n        \"txHash\": \"Lorem anim \",\n        \"value\": 4564961,\n        \"assetId\": \"sed adipisicing\",\n        \"tokens\": [\n          {\n            \"assetName\": \"incididunt\",\n            \"assetQuantity\": 50993765,\n            \"assetId\": \"esse fugiat\",\n            \"policy\": \"anim consectetur eu\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          },\n          {\n            \"assetName\": \"aliqua enim eiusmod\",\n            \"assetQuantity\": 29044517,\n            \"assetId\": \"nulla\",\n            \"policy\": \"cillum in ea\",\n            \"metadata\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        ],\n        \"stakeAddress\": \"fugiat ut\"\n      }\n    ]\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "Get transaction detail by hash metadata of CIP60",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var metadataCIP60 = pm.response.json().metadata[0].metadataCIP60.tokenMap;\r",
+                      "\r",
+                      "const token = 'NEWM_7';\r",
+                      "\r",
+                      "pm.test('Status code is 200', function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "})\r",
+                      "\r",
+                      "pm.test('Response time is less than 5000ms', function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+                      "})\r",
+                      "\r",
+                      "pm.test(\"Check metadata CIP 60\", function () {\r",
+                      "    pm.expect(metadataCIP60[token].tokenName).to.be.a(\"string\", \"metadataCIP60.tokenMap[token].tokenName\")\r",
+                      "\r",
+                      "    if (metadataCIP60[token].tokenName.requireProperties && metadataCIP60[token].tokenName.requireProperties.length > 0) {\r",
+                      "        metadataCIP60[token].tokenName.requireProperties.map(require => {\r",
+                      "            pm.expect(require.index).to.be.a(\"string\", \"require.index\")\r",
+                      "            pm.expect(require.valid).to.be.a(\"boolean\", \"require.valid\")\r",
+                      "            pm.expect(require.value).to.be.a(\"string\", \"require.value\")\r",
+                      "            pm.expect(require.property).to.be.a(\"string\", \"require.property\")\r",
+                      "            pm.expect(require.format).to.be.a(\"string\", \"require.format\")\r",
+                      "        })\r",
+                      "    }\r",
+                      "    if (metadataCIP60[token].tokenName.optionalProperties && metadataCIP60[token].tokenName.optionalProperties.length > 0) {\r",
+                      "        metadataCIP60[token].tokenName.optionalProperties.map(require => {\r",
+                      "            pm.expect(require.index).to.be.a(\"string\", \"require.index\")\r",
+                      "            pm.expect(require.valid).to.be.a(\"boolean\", \"require.valid\")\r",
+                      "            pm.expect(require.value).to.be.a(\"string\", \"require.value\")\r",
+                      "            pm.expect(require.property).to.be.a(\"string\", \"require.property\")\r",
+                      "            pm.expect(require.format).to.be.a(\"string\", \"require.format\")\r",
+                      "        })\r",
+                      "    }\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/txs/:hash",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "txs",
+                    ":hash"
+                  ],
+                  "variable": [
+                    {
+                      "key": "hash",
+                      "value": "a3cadb4efb2844ccffb0463ff90a289f47dad19c81c9a1a1e79a48fa743aefc4",
                       "description": "{From api Get current transactions - api/v1/txs/current)"
                     }
                   ]
@@ -18546,8 +18704,18 @@
                       "    pm.expect(jsonData.currentPage).to.be.a(\"number\");\r",
                       "    pm.expect(jsonData.data).to.be.an(\"array\");\r",
                       "    pm.expect(jsonData.data[0].scriptHash).to.be.a(\"string\");\r",
+                      "    if(jsonData.data[0].before){\r",
+                      "        let moment = require ('moment');\r",
+                      "        pm.expect(jsonData.data[0].before).to.include(moment(jsonData.data[0].before).format('YYYY/MM/DD HH:mm:ss'));\r",
+                      "    }\r",
+                      "    if(jsonData.data[0].after){\r",
+                      "        let moment = require ('moment');\r",
+                      "        pm.expect(jsonData.data[0].after).to.include(moment(jsonData.data[0].after).format('YYYY/MM/DD HH:mm:ss'));\r",
+                      "    }\r",
+                      "    pm.expect(jsonData.data[0].isMultiSig).to.be.a(\"boolean\");\r",
                       "    pm.expect(jsonData.data[0].numberOfTokens).to.be.a(\"number\");\r",
                       "    pm.expect(jsonData.data[0].numberOfAssetHolders).to.be.a(\"number\");\r",
+                      "    pm.expect(jsonData.data[0].tokens).to.be.an(\"array\");\r",
                       "});\r",
                       "\r",
                       "//Random value\r",
@@ -19590,17 +19758,22 @@
                       "    pm.expect(jsonData.totalPages).to.be.a(\"number\");\r",
                       "    pm.expect(jsonData.currentPage).to.be.a(\"number\");\r",
                       "    pm.expect(jsonData.data).to.be.an(\"array\");\r",
-                      "    pm.expect(jsonData.data[0].scriptHash).to.be.a(\"string\");\r",
-                      "    pm.expect(jsonData.data[0].version).to.be.a(\"string\");\r",
-                      "    pm.expect(jsonData.data[0].associatedAddress).to.be.an(\"array\");\r",
+                      "    pm.expect(jsonData.data[0].scriptHash).to.be.a(\"string\", \"scriptHash\");\r",
+                      "    pm.expect(jsonData.data[0].scriptVersion).to.be.a(\"string\", \"scriptVersion\");\r",
+                      "    pm.expect(jsonData.data[0].txCount).to.be.a(\"number\", \"txCount\")\r",
+                      "    if (jsonData.data[0].scriptPurposeTypes) {\r",
+                      "        pm.expect(jsonData.data[0].txPurposes).to.be.an(\"array\", \"txPurposes\");\r",
+                      "        pm.expect(jsonData.data[0].txPurposes).to.contain.oneOf([\"SPEND\", \"MINT\", \"CERT\", \"REWARD\"]);\r",
+                      "\r",
+                      "    }\r",
                       "});\r",
                       "\r",
                       "//Random value\r",
-                      "pm.test(\"Get random data\",function(){\r",
-                      "    var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));\r",
-                      "    pm.environment.set(\"contract_scriptHash\", jsonData.data[randomIndex].scriptHash);\r",
-                      "    pm.environment.set(\"contract_version\", jsonData.data[randomIndex].version);\r",
-                      "    pm.environment.set(\"contract_associatedAddress\", jsonData.data[randomIndex].associatedAddress);\r",
+                      "pm.test(\"Get random data\", function () {\r",
+                      "    var randomIndex = Math.floor(Math.random() * (jsonData.data.length - 1));\r",
+                      "    pm.environment.set(\"contract_scriptHash\", jsonData.data[randomIndex].scriptHash);\r",
+                      "    pm.environment.set(\"contract_scriptVersion\", jsonData.data[randomIndex].scriptVersion);\r",
+                      "    // pm.environment.set(\"contract_associatedAddress\", jsonData.data[randomIndex].associatedAddress);\r",
                       "});"
                     ],
                     "type": "text/javascript"
@@ -20283,10 +20456,10 @@
                       "\r",
                       "//Scenario: compare data api get Smart Contracts and get Get smart contract detail\r",
                       "//all variable get from API /api/v1/scripts/contracts (get Smart Contracts)\r",
-                      "pm.test(\"Check Others value\", function (){\r",
+                      "pm.test(\"Check Others value\", function () {\r",
                       "    pm.expect(jsonData.scriptHash).to.include(pm.environment.get(\"contract_scriptHash\"));\r",
-                      "    pm.expect(jsonData.scriptType).to.include(pm.environment.get(\"contract_version\"));\r",
-                      "    pm.expect(jsonData.associatedAddresses).to.deep.equal(pm.environment.get(\"contract_associatedAddress\"));\r",
+                      "    pm.expect(jsonData.scriptType).to.include(pm.environment.get(\"contract_scriptVersion\"));\r",
+                      "    // pm.expect(jsonData.associatedAddresses).to.deep.equal(pm.environment.get(\"contract_associatedAddress\"));\r",
                       "});\r",
                       "\r",
                       "\r",
