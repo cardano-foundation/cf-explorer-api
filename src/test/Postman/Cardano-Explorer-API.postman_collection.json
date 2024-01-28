@@ -1,9 +1,9 @@
 {
   "info": {
-    "_postman_id": "6266f780-e892-4f54-bf46-b15c4e73fdfb",
+    "_postman_id": "6c0b7e7f-5c73-4dbd-bce9-61367f5bb286",
     "name": "Cardano Explorer API",
     "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
-    "_exporter_id": "18938521"
+    "_exporter_id": "25962442"
   },
   "item": [
     {
@@ -45,7 +45,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "//Acount dev site\n{\n  \"type\": 0,\n  \"email\": \"hanh.luu+2@sotatek.com\",\n  \"password\": \"Test1234@\"\n}\n\n//mono site\n// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu+2@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n"
+                  "raw": "//Acount dev site\n// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n\n// mono site\n{\n  \"type\": 0,\n  \"email\": \"hanh.luu+2@sotatek.com\",\n  \"password\": \"Test1234@\"\n}\n"
                 },
                 "url": "{{baseUrl-Auth}}/api/v1/auth/sign-in"
               },
@@ -1896,9 +1896,11 @@
                       "// var stt = \"200\";\r",
                       "// stt = pm.variables.get(\"stt\");\r",
                       "var jsonData = pm.response.json();\r",
-                      "var metadataCIP20 = pm.response.json().metadata[0].metadataCIP20;\r",
-                      "var metadataCIP83 = pm.response.json().metadata[0].metadataCIP83;\r",
-                      "var metadataBolnisi = pm.response.json().metadata[0].metadataBolnisi;\r",
+                      "var metadataLst = pm.response.json().metadata;\r",
+                      "\r",
+                      "var metadataCIP20 = metadataLst ? metadataLst.shift() : undefined;\r",
+                      "var metadataCIP83 = metadataLst ? metadataLst.shift() : undefined;\r",
+                      "var metadataBolnisi = metadataLst ? metadataLst.shift() : undefined;\r",
                       "var wineryData = metadataBolnisi?.wineryData;\r",
                       "\r",
                       "pm.test(\"Status code is 200\", function () {\r",
@@ -2301,7 +2303,8 @@
                   "variable": [
                     {
                       "key": "hash",
-                      "value": "{{tx_hash}}"
+                      "value": "{{tx_hash}}",
+                      "description": "{From api Get current transactions - api/v1/txs/current)"
                     }
                   ]
                 }
