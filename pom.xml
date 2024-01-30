@@ -51,7 +51,7 @@
         <version.sonarcube-maven-plugin>3.9.1.2184</version.sonarcube-maven-plugin>
         <version.maven-project-info-reports-plugin>3.3.0</version.maven-project-info-reports-plugin>
         <version.maven-site-plugin>4.0.0-M2</version.maven-site-plugin>
-        <version.spring-boot>3.0.5</version.spring-boot>
+        <version.spring-boot>3.1.6</version.spring-boot>
         <version.bloxbean>0.4.3</version.bloxbean>
         <version.lombok>1.18.26</version.lombok>
         <version.springdoc-starter>2.1.0</version.springdoc-starter>
@@ -69,7 +69,7 @@
         <version.lombok-mapstruct-binding>0.2.0</version.lombok-mapstruct-binding>
         <version.ledgersync-common>0.1.11-SNAPSHOT</version.ledgersync-common>
         <version.explorer-common>0.1.3-SNAPSHOT</version.explorer-common>
-        <version.explorer-consumer-common>0.1.15-SNAPSHOT-PR162</version.explorer-consumer-common>
+        <version.explorer-consumer-common>0.1.15-PR162</version.explorer-consumer-common>
         <sonar.coverage.jacoco.xmlReportPaths>../cardano-explorer-api/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
