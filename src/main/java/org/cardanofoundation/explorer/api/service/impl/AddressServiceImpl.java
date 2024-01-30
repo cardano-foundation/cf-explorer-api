@@ -244,7 +244,7 @@ public class AddressServiceImpl implements AddressService {
           .findTokenAndBalanceByAddress(addr, pageable)
           .map(tokenMapper::fromAddressTokenProjection);
     } else {
-      displayName = "%" + displayName.trim().toLowerCase() + "%";
+      displayName = displayName.trim().toLowerCase();
       tokenListResponse = addressTokenBalanceRepository
           .findTokenAndBalanceByAddressAndNameView(addr, displayName, pageable)
           .map(tokenMapper::fromAddressTokenProjection);

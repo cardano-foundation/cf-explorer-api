@@ -14,8 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 public class NativeScriptResponse {
   private String scriptHash;
-  private Integer numberOfTokens;
-  private Integer numberOfAssetHolders;
+  private Long numberOfTokens;
+  private Long numberOfAssetHolders;
   private ScriptType conditionType;
   private BigInteger required;
   private List<String> keyHashes;

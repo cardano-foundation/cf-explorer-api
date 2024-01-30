@@ -3,7 +3,6 @@ package org.cardanofoundation.explorer.api.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,7 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
 import org.cardanofoundation.explorer.api.model.metadatastandard.cip.MetadataCIP;
@@ -21,8 +20,6 @@ import org.cardanofoundation.explorer.api.model.metadatastandard.cip.TokenCIP;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class MetadataCIP60Utils {
-
-  private static final String SONG_DURATION_REGEX = "^P(?!$)(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+S)?)$";
 
   @SuppressWarnings("unchecked")
   public static MetadataCIP standard(String jsonMetadata) {
@@ -551,7 +548,7 @@ public class MetadataCIP60Utils {
       int version) {
     BaseProperty filesProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.FILES.getName())
-        .format(CommonConstant.FIELD_TYPE[8])
+        .format(FormatFieldType.ARRAY.getValue())
         .index("14")
         .build();
     List<BaseProperty> requirePropertiesInFile = new ArrayList<>();
@@ -628,7 +625,7 @@ public class MetadataCIP60Utils {
       int version) {
     BaseProperty filesProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.FILES.getName())
-        .format(CommonConstant.FIELD_TYPE[8])
+        .format(FormatFieldType.ARRAY.getValue())
         .index("7")
         .build();
     List<BaseProperty> requirePropertiesInFile = new ArrayList<>();
@@ -699,7 +696,7 @@ public class MetadataCIP60Utils {
       int version) {
     BaseProperty filesProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.FILES.getName())
-        .format(CommonConstant.FIELD_TYPE[8])
+        .format(FormatFieldType.ARRAY.getValue())
         .index("8")
         .build();
     List<BaseProperty> requirePropertiesInFile = new ArrayList<>();
@@ -843,131 +840,131 @@ public class MetadataCIP60Utils {
   }
 
   private static BaseProperty links(Object links, String parentIndex, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(links);
     BaseProperty baseProperty = BaseProperty.builder().value(links)
-        .format(CommonConstant.FIELD_TYPE[15])
+        .format(FormatFieldType.MAP_STRING_STRING.getValue())
         .property(MetadataField.LINKS.getName())
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(false)
+        .valid(valueFormat.equals(FormatFieldType.MAP_STRING_STRING))
+        .valueFormat(valueFormat.getValue())
         .build();
-    if (links instanceof HashMap<?, ?> linkMap) {
-      boolean valid = true;
-      for (Entry<?, ?> linkEntry : linkMap.entrySet()) {
-        if (!(linkEntry.getKey() instanceof String && linkEntry.getValue() instanceof String)) {
-          valid = false;
-          break;
-        }
-      }
-      baseProperty.setValid(valid);
-    }
+
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   private static BaseProperty metadataBool(Object val, String property, String parentIndex,
-      String index,
-      int version) {
+                                           String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(val);
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[14])
+        .format(FormatFieldType.BOOLEAN.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(Objects.nonNull(val) && val instanceof Boolean)
+        .valid(valueFormat.equals(FormatFieldType.BOOLEAN))
+        .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   private static BaseProperty metadataInt(Object val, String property, String parentIndex,
-      String index,
-      int version) {
-
+                                          String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(val);
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[11])
+        .format(FormatFieldType.INTEGER.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(Objects.nonNull(val) && val instanceof Integer)
+        .valid(valueFormat.equals(FormatFieldType.INTEGER))
+        .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   private static BaseProperty metadataString(Object val, String property, String parentIndex,
-      String index,
-      int version) {
+                                             String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(val);
+    boolean isValid = FormatFieldType.STRING.equals(valueFormat)
+        || FormatFieldType.STRING.equals(valueFormat.getParentType());
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(Objects.nonNull(val) && val instanceof String)
+        .valid(isValid)
+        .valueFormat(isValid ? FormatFieldType.STRING.getValue() : valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
-  private static BaseProperty metadataURL(Object val, String property, String parentIndex,
-      String index,
-      int version) {
+  private static BaseProperty metadataURL(Object val, String property, String parentIndex, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(val);
+    boolean isValid = valueFormat.equals(FormatFieldType.URI);
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[17])
+        .format(FormatFieldType.URL.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(Objects.nonNull(val) && val instanceof String valStr && Arrays.stream(
-                CommonConstant.IMAGE_PREFIX)
-            .anyMatch(valStr::startsWith))
+        .valid(isValid)
+        .valueFormat(isValid ? FormatFieldType.URL.getValue() : valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
-  private static BaseProperty metadataArrayString(Object val, String property, String parentIndex,
-      String index,
-      int version) {
+  private static BaseProperty metadataArrayString(Object val, String property, String parentIndex, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(val);
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[13])
+        .format(FormatFieldType.ARRAY_STRING.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(Objects.nonNull(val) && val instanceof ArrayList<?> valArr && isArrayString(valArr))
+        .valid(valueFormat.equals(FormatFieldType.ARRAY_STRING))
+        .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   private static BaseProperty metadataArrayOrString(Object val, String property, String parentIndex,
-      String index,
-      int version) {
+                                                    String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(val);
     BaseProperty baseProperty = BaseProperty.builder().value(val)
-        .format(CommonConstant.FIELD_TYPE[4])
+        .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
         .property(property)
         .index(Objects.isNull(parentIndex) ? index : parentIndex + "." + index)
-        .valid(Objects.nonNull(val) && (val instanceof String || (val instanceof ArrayList<?> valArr
-            && isArrayString(valArr))))
+        .valid(FormatFieldType.STRING.equals(valueFormat) || valueFormat.equals(
+            FormatFieldType.ARRAY_STRING))
+        .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
-  }
-
-  private static boolean isArrayString(ArrayList<?> arr) {
-    return arr.stream().allMatch(String.class::isInstance);
   }
 
   private static int artists(Object artists, List<BaseProperty> requireProperties,
@@ -976,7 +973,7 @@ public class MetadataCIP60Utils {
     BaseProperty artistsProperty = BaseProperty.builder().valid(false)
         .property(MetadataField.ARTISTS.getName())
         .index(ind)
-        .format(CommonConstant.FIELD_TYPE[16])
+        .format(FormatFieldType.ARRAY_ARTIST.getValue())
         .build();
     int subArtist = 0;
     if (Objects.nonNull(artists) && artists instanceof ArrayList<?> artistList
@@ -1029,7 +1026,7 @@ public class MetadataCIP60Utils {
         && !artistList.isEmpty()) {
       BaseProperty artistsProperty = BaseProperty.builder().valid(false)
           .property(MetadataField.CONTRIBUTING_ARTISTS.getName())
-          .format(CommonConstant.FIELD_TYPE[8])
+          .format(FormatFieldType.ARRAY.getValue())
           .index(ind)
           .build();
       List<Boolean> validArtists = new ArrayList<>();
@@ -1072,7 +1069,7 @@ public class MetadataCIP60Utils {
     if (Objects.nonNull(featuredArtist) && featuredArtist instanceof HashMap<?, ?> artistMap) {
       BaseProperty artistsProperty = BaseProperty.builder().valid(false)
           .property(MetadataField.FEATURED_ARTIST.getName())
-          .format(CommonConstant.FIELD_TYPE[18])
+          .format(FormatFieldType.ARTIST.getValue())
           .index(ind)
           .build();
       List<Boolean> validArtists = new ArrayList<>();
@@ -1103,113 +1100,143 @@ public class MetadataCIP60Utils {
   }
 
   private static BaseProperty copyright(Object copyright, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(copyright);
+    boolean isValid = FormatFieldType.STRING.equals(valueFormat)
+        || FormatFieldType.STRING.equals(valueFormat.getParentType());
     BaseProperty baseProperty = BaseProperty.builder().value(copyright)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.COPYRIGHT.getName())
         .index(index)
-        .valid(Objects.nonNull(copyright) && copyright instanceof String)
+        .valid(isValid)
+        .valueFormat(isValid ? FormatFieldType.STRING.getValue() : valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   private static BaseProperty genres(Object genres, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(genres);
     BaseProperty baseProperty = BaseProperty.builder().value(genres)
-        .format(CommonConstant.FIELD_TYPE[13])
+        .format(FormatFieldType.ARRAY_STRING.getValue())
         .property(MetadataField.GENRES.getName())
         .index(index)
-        .valid(Objects.nonNull(genres) && genres instanceof ArrayList<?> genresArr
-            && genresArr.size() <= 3 && isArrayString(genresArr))
+        .valid(valueFormat.equals(FormatFieldType.ARRAY_STRING)
+                   && genres instanceof ArrayList<?> genresArr
+                   && genresArr.size() <= 3)
+        .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
-  private static BaseProperty songDuration(Object songDuration, String index,
-      int version) {
+  private static BaseProperty songDuration(Object songDuration, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(songDuration);
     BaseProperty baseProperty = BaseProperty.builder().value(songDuration)
-        .format(CommonConstant.FIELD_TYPE[12])
+        .format(FormatFieldType.STRING_ISO8601_DURATION_FORMAT.getValue())
         .property(MetadataField.SONG_DURATION.getName())
         .index(index)
-        .valid(Objects.nonNull(songDuration) && songDuration instanceof String songDurationStr
-            && songDurationStr.matches(SONG_DURATION_REGEX))
+        .valid(valueFormat.equals(FormatFieldType.STRING_ISO8601_DURATION_FORMAT))
+        .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   private static BaseProperty songTitle(Object songTitle, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(songTitle);
     BaseProperty baseProperty = BaseProperty.builder().value(songTitle)
-        .format(CommonConstant.FIELD_TYPE[4])
+        .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
         .property(MetadataField.SONG_TITLE.getName())
         .index(index)
-        .valid(Objects.nonNull(songTitle) && (songTitle instanceof String
-            || (songTitle instanceof ArrayList<?> songTitleArr && isArrayString(songTitleArr))))
+        .valid(FormatFieldType.STRING.equals(valueFormat)
+                   || FormatFieldType.STRING.equals(valueFormat.getParentType())
+                   || valueFormat.equals(FormatFieldType.ARRAY_STRING))
+        .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
-  private static BaseProperty trackNumber(Object trackNumber, String index,
-      int version) {
+  private static BaseProperty trackNumber(Object trackNumber, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(trackNumber);
     BaseProperty baseProperty = BaseProperty.builder().value(trackNumber)
-        .format(CommonConstant.FIELD_TYPE[11])
+        .format(FormatFieldType.INTEGER.getValue())
         .property(MetadataField.TRACK_NUMBER.getName())
         .index(index)
-        .valid(Objects.nonNull(trackNumber) && trackNumber instanceof Integer)
+        .valid(valueFormat.equals(FormatFieldType.INTEGER))
+        .valueFormat(valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
-  private static BaseProperty albumTitleMetadataCIP60(Object albumTitle, String index,
-      int version) {
+  private static BaseProperty albumTitleMetadataCIP60(Object albumTitle, String index, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(albumTitle);
+    boolean isValid = FormatFieldType.STRING.equals(valueFormat)
+        || FormatFieldType.STRING.equals(valueFormat.getParentType());
     BaseProperty baseProperty = BaseProperty.builder().value(albumTitle)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.ALBUM_TITLE.getName())
         .index(index)
-        .valid(Objects.nonNull(albumTitle) && albumTitle instanceof String)
+        .valid(isValid)
+        .valueFormat(isValid ? FormatFieldType.STRING.getValue() : valueFormat.getValue())
         .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   private static BaseProperty releaseType(Object releaseType, int version) {
+    FormatFieldType valueFormat = MetadataFieldUtils.getFormatTypeByObject(releaseType);
     BaseProperty baseProperty = BaseProperty.builder().value(releaseType)
-        .format(CommonConstant.FIELD_TYPE[0])
+        .format(FormatFieldType.STRING.getValue())
         .property(MetadataField.RELEASE_TYPE.getName())
-        .index("6").valid(
-            Objects.nonNull(releaseType) && releaseType instanceof String releaseTypeStr && List.of(
-                "Single", "Multiple").contains(releaseTypeStr)).build();
+        .index("6")
+        .valid(FormatFieldType.STRING.equals(valueFormat)
+                   && List.of("Single", "Multiple").contains(releaseType.toString()))
+        .valueFormat(valueFormat.getValue())
+        .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
+      baseProperty.setValueFormat(null);
     }
     return baseProperty;
   }
 
   private static BaseProperty musicMetadataVersion(int musicVersion, Object originMusicVersion) {
-    return BaseProperty.builder().value(originMusicVersion).format(CommonConstant.FIELD_TYPE[6])
-        .property(MetadataField.MUSIC_METADATA_VERSION.getName()).index("5")
-        .valid(musicVersion == 1 || musicVersion == 2)
+    boolean isValid = musicVersion == 1 || musicVersion == 2;
+    return BaseProperty.builder()
+        .value(originMusicVersion)
+        .format(FormatFieldType.VERSION_1_OR_2.getValue())
+        .property(MetadataField.MUSIC_METADATA_VERSION.getName())
+        .index("5")
+        .valid(isValid)
+        .valueFormat(isValid ? String.valueOf(musicVersion)
+                             : FormatFieldType.NEITHER_VERSION_1_OR_2.getValue())
         .build();
   }
 
