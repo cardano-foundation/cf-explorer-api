@@ -1,10 +1,11 @@
 package org.cardanofoundation.explorer.api.repository.explorer;
 
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.VerifiedScript;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.VerifiedScript;
 
 public interface VerifiedScriptRepository extends JpaRepository<VerifiedScript, Long> {
 

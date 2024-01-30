@@ -1,32 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
-import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
-import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
-import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepository;
-import org.cardanofoundation.explorer.api.repository.explorer.PoolReportRepository;
-import org.cardanofoundation.explorer.api.service.*;
-import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.ReportHistory;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
+import static org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl.MIN_TIME;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
@@ -48,7 +22,33 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl.MIN_TIME;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
+import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
+import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
+import org.cardanofoundation.explorer.api.repository.explorer.PoolReportRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepository;
+import org.cardanofoundation.explorer.api.service.*;
+import org.cardanofoundation.explorer.api.util.DataUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.ReportHistory;
 
 @Service
 @RequiredArgsConstructor
@@ -75,8 +75,8 @@ public class PoolReportServiceImpl implements PoolReportService {
   private final RoleService roleService;
 
   @Override
-  public Boolean create(PoolReportCreateRequest poolReportCreateRequest,
-                        UserPrincipal userPrincipal) {
+  public Boolean create(
+      PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal) {
     PoolReportHistory poolReportHistory = saveToDb(poolReportCreateRequest, userPrincipal);
 
     Boolean isSuccess = kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
@@ -89,19 +89,20 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Transactional
-  public PoolReportHistory saveToDb(PoolReportCreateRequest poolReportCreateRequest,
-                                    UserPrincipal userPrincipal) {
-    poolHashRepository.findByViewOrHashRaw(poolReportCreateRequest.getPoolId())
+  public PoolReportHistory saveToDb(
+      PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal) {
+    poolHashRepository
+        .findByViewOrHashRaw(poolReportCreateRequest.getPoolId())
         .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
     int reportLimit = roleService.getReportLimit(userPrincipal.getRoleDescription());
-    if (reportLimit != CommonConstant.UNLIMITED_REPORT) { //"-1" it's mean unlimited report
+    if (reportLimit != CommonConstant.UNLIMITED_REPORT) { // "-1" it's mean unlimited report
       if (Boolean.TRUE.equals(
           reportHistoryService.isLimitReached(userPrincipal.getUsername(), reportLimit))) {
         throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
       }
     }
-    ReportHistory reportHistory = initReportHistory(poolReportCreateRequest,
-        userPrincipal.getUsername());
+    ReportHistory reportHistory =
+        initReportHistory(poolReportCreateRequest, userPrincipal.getUsername());
     return poolReportRepository.saveAndFlush(poolReportCreateRequest.toEntity(reportHistory));
   }
 
@@ -128,8 +129,8 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
-  public BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username,
-                                                         ReportHistoryFilterRequest filterRequest) {
+  public BaseFilterResponse<PoolReportListResponse> list(
+      Pageable pageable, String username, ReportHistoryFilterRequest filterRequest) {
 
     Timestamp timeAt7DayAgo = new Timestamp(Instant.now().minus(Duration.ofDays(7)).toEpochMilli());
     String reportName = DataUtil.makeLikeQuery(filterRequest.getReportName());
@@ -142,20 +143,23 @@ public class PoolReportServiceImpl implements PoolReportService {
       toDate = Timestamp.from(filterRequest.getToDate().toInstant());
     }
 
-    Page<PoolReportHistory> poolReportPage = poolReportRepository
-        .getPoolReportHistoryByFilter(reportName, fromDate, toDate, username, pageable);
+    Page<PoolReportHistory> poolReportPage =
+        poolReportRepository.getPoolReportHistoryByFilter(
+            reportName, fromDate, toDate, username, pageable);
     List<PoolReportHistory> poolReports = poolReportPage.getContent();
-    List<PoolReportListResponse> poolReportListResponses = poolReports.stream()
-        .map(poolReportHistory -> {
-          PoolReportListResponse response = PoolReportListResponse
-              .toDomain(poolReportHistory);
+    List<PoolReportListResponse> poolReportListResponses =
+        poolReports.stream()
+            .map(
+                poolReportHistory -> {
+                  PoolReportListResponse response =
+                      PoolReportListResponse.toDomain(poolReportHistory);
 
-          if (response.getCreatedAt().before(timeAt7DayAgo)) {
-            response.setStatus(ReportStatus.EXPIRED);
-          }
-          return response;
-        })
-        .toList();
+                  if (response.getCreatedAt().before(timeAt7DayAgo)) {
+                    response.setStatus(ReportStatus.EXPIRED);
+                  }
+                  return response;
+                })
+            .toList();
     return new BaseFilterResponse<>(poolReportPage, poolReportListResponses);
   }
 
@@ -165,9 +169,8 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
-  public BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(Long reportId,
-                                                                               Pageable pageable,
-                                                                               String username) {
+  public BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(
+      Long reportId, Pageable pageable, String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
 
     boolean useKoios = fetchRewardDataService.useKoios();
@@ -176,34 +179,43 @@ public class PoolReportServiceImpl implements PoolReportService {
       boolean isHistory = fetchRewardDataService.checkPoolHistoryForPool(poolReportSet);
       List<PoolHistoryKoiosProjection> poolHistoryProjections = new ArrayList<>();
       if (!isHistory) {
-        boolean isFetch = fetchRewardDataService.fetchPoolHistoryForPool(
-            Set.of(poolReport.getPoolView()));
+        boolean isFetch =
+            fetchRewardDataService.fetchPoolHistoryForPool(Set.of(poolReport.getPoolView()));
         if (isFetch) {
-          poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoios(
-              poolReport.getPoolView());
+          poolHistoryProjections =
+              poolHistoryRepository.getPoolHistoryKoios(poolReport.getPoolView());
         }
       } else {
-        poolHistoryProjections = poolHistoryRepository.getPoolHistoryKoios(
-            poolReport.getPoolView());
+        poolHistoryProjections =
+            poolHistoryRepository.getPoolHistoryKoios(poolReport.getPoolView());
       }
 
       if (Objects.nonNull(poolHistoryProjections)) {
-        List<PoolReportDetailResponse.EpochSize> epochSizeList = poolHistoryProjections.stream()
-            .filter(t ->
-                ValueRange.of(poolReport.getBeginEpoch(), poolReport.getEndEpoch())
-                    .isValidIntValue(t.getEpochNo()))
-            .map(PoolReportDetailResponse.EpochSize::toDomain).toList();
+        List<PoolReportDetailResponse.EpochSize> epochSizeList =
+            poolHistoryProjections.stream()
+                .filter(
+                    t ->
+                        ValueRange.of(poolReport.getBeginEpoch(), poolReport.getEndEpoch())
+                            .isValidIntValue(t.getEpochNo()))
+                .map(PoolReportDetailResponse.EpochSize::toDomain)
+                .toList();
         return new BaseFilterResponse<>(this.convertListToPage(epochSizeList, pageable));
       } else {
         return new BaseFilterResponse<>(null);
       }
 
     } else {
-      Page<PoolReportProjection> epochSizeProjectionPage = epochStakeRepository.getEpochSizeByPoolReport(
-          poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
+      Page<PoolReportProjection> epochSizeProjectionPage =
+          epochStakeRepository.getEpochSizeByPoolReport(
+              poolReport.getPoolView(),
+              poolReport.getBeginEpoch(),
+              poolReport.getEndEpoch(),
+              pageable);
       List<PoolReportProjection> epochSizeProjections = epochSizeProjectionPage.getContent();
-      List<PoolReportDetailResponse.EpochSize> epochSizes = epochSizeProjections.stream()
-          .map(PoolReportDetailResponse.EpochSize::toDomain).collect(Collectors.toList());
+      List<PoolReportDetailResponse.EpochSize> epochSizes =
+          epochSizeProjections.stream()
+              .map(PoolReportDetailResponse.EpochSize::toDomain)
+              .collect(Collectors.toList());
       return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
     }
   }
@@ -222,57 +234,55 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   @Override
-  public BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(Long reportId,
-                                                                        Pageable pageable,
-                                                                        String username) {
+  public BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(
+      Long reportId, Pageable pageable, String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     return poolLifecycleService.registrationList(poolReport.getPoolView(), pageable);
   }
 
   @Override
-  public BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(Long reportId,
-                                                                      Pageable pageable,
-                                                                      String username) {
+  public BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(
+      Long reportId, Pageable pageable, String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
     return poolLifecycleService.poolUpdateList(poolReport.getPoolView(), pageable);
   }
 
   @Override
-  public BaseFilterResponse<RewardResponse> fetchRewardsDistribution(Long reportId,
-                                                                     Pageable pageable,
-                                                                     String username) {
+  public BaseFilterResponse<RewardResponse> fetchRewardsDistribution(
+      Long reportId, Pageable pageable, String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
-    return poolLifecycleService.listRewardFilter(poolReport.getPoolView(),
-        poolReport.getBeginEpoch(),
-        poolReport.getEndEpoch(), pageable);
+    return poolLifecycleService.listRewardFilter(
+        poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
   }
 
   @Override
-  public BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(Long reportId,
-                                                                       Pageable pageable,
-                                                                       String username) {
+  public BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(
+      Long reportId, Pageable pageable, String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
-    return poolLifecycleService.deRegistration(poolReport.getPoolView(), null, null,
-        null, pageable);
+    return poolLifecycleService.deRegistration(
+        poolReport.getPoolView(), null, null, null, pageable);
   }
 
   private PoolReportHistory getPoolReportHistory(Long reportId, String username) {
-    PoolReportHistory poolReportHistory = poolReportRepository.findById(reportId)
-        .orElseThrow(() -> new BusinessException(BusinessCode.POOL_REPORT_HISTORY_NOT_FOUND));
+    PoolReportHistory poolReportHistory =
+        poolReportRepository
+            .findById(reportId)
+            .orElseThrow(() -> new BusinessException(BusinessCode.POOL_REPORT_HISTORY_NOT_FOUND));
 
-    if (DataUtil.isNullOrEmpty(username) || !username.equals(
-        poolReportHistory.getReportHistory().getUsername())) {
+    if (DataUtil.isNullOrEmpty(username)
+        || !username.equals(poolReportHistory.getReportHistory().getUsername())) {
       throw new BusinessException(BusinessCode.POOL_REPORT_HISTORY_NOT_FOUND);
     }
     return poolReportHistory;
   }
 
-  private ReportHistory initReportHistory(PoolReportCreateRequest poolReportCreateRequest,
-                                          String username) {
+  private ReportHistory initReportHistory(
+      PoolReportCreateRequest poolReportCreateRequest, String username) {
     return ReportHistory.builder()
-        .reportName(DataUtil.isNullOrEmpty(poolReportCreateRequest.getReportName())
-                    ? generateReportName(poolReportCreateRequest)
-                    : poolReportCreateRequest.getReportName())
+        .reportName(
+            DataUtil.isNullOrEmpty(poolReportCreateRequest.getReportName())
+                ? generateReportName(poolReportCreateRequest)
+                : poolReportCreateRequest.getReportName())
         .status(ReportStatus.IN_PROGRESS)
         .type(ReportType.POOL_ID)
         .username(username)
@@ -281,8 +291,11 @@ public class PoolReportServiceImpl implements PoolReportService {
   }
 
   private String generateReportName(PoolReportCreateRequest poolReportCreateRequest) {
-    return "report_pool_" + poolReportCreateRequest.getPoolId() + "_"
-        + poolReportCreateRequest.getEpochRanges()[0] + "_"
+    return "report_pool_"
+        + poolReportCreateRequest.getPoolId()
+        + "_"
+        + poolReportCreateRequest.getEpochRanges()[0]
+        + "_"
         + poolReportCreateRequest.getEpochRanges()[1];
   }
 }

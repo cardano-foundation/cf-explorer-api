@@ -1,7 +1,5 @@
 package org.cardanofoundation.explorer.api.util;
 
-import java.io.IOException;
-
 import lombok.extern.log4j.Log4j2;
 
 import com.bloxbean.cardano.client.crypto.Blake2bUtil;

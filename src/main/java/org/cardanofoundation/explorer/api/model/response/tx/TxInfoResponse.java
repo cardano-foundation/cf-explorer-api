@@ -1,13 +1,15 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
-import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 
 @Getter
 @Setter
@@ -28,5 +30,4 @@ public class TxInfoResponse {
   private Integer confirmation;
   private BigInteger fee;
   private BigInteger totalOutput;
-
 }

@@ -1,8 +1,10 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.util.List;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
+
 import org.springframework.data.domain.Sort.Direction;
+
+import org.cardanofoundation.explorer.consumercommon.entity.Block;
 
 public interface CustomBlockRepository {
 

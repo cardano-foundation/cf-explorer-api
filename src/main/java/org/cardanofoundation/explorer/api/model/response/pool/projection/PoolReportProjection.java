@@ -4,11 +4,11 @@ import java.math.BigInteger;
 import java.util.Date;
 
 public interface PoolReportProjection {
-    Integer getEpochNo();
+  Integer getEpochNo();
 
-    BigInteger  getSize();
+  BigInteger getSize();
 
-    Date getTimestamp();
+  Date getTimestamp();
 
-    BigInteger getFee();
+  BigInteger getFee();
 }

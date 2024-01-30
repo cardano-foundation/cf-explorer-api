@@ -1,5 +1,9 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.Date;
+
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolInfoResponse;
@@ -9,8 +13,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.Registra
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.SPOStatusResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
-import java.util.Date;
-import org.springframework.data.domain.Pageable;
 
 public interface PoolLifecycleService {
 
@@ -28,9 +30,8 @@ public interface PoolLifecycleService {
    * @param
    * @return BaseFilterResponse<PoolUpdateResponse>
    */
-  BaseFilterResponse<PoolUpdateResponse> registration(String poolViewOrHash, String txHash,
-      Date fromDate, Date toDate,
-      Pageable pageable);
+  BaseFilterResponse<PoolUpdateResponse> registration(
+      String poolViewOrHash, String txHash, Date fromDate, Date toDate, Pageable pageable);
 
   /**
    * Get pool lifecycle registration detail
@@ -46,9 +47,8 @@ public interface PoolLifecycleService {
    * @param
    * @return BaseFilterResponse<PoolUpdateResponse>
    */
-  BaseFilterResponse<PoolUpdateResponse> poolUpdate(String poolView, String txHash,
-      Date fromDate, Date toDate,
-      Pageable pageable);
+  BaseFilterResponse<PoolUpdateResponse> poolUpdate(
+      String poolView, String txHash, Date fromDate, Date toDate, Pageable pageable);
 
   /**
    * Get pool lifecycle pool update detail
@@ -80,9 +80,8 @@ public interface PoolLifecycleService {
    * @param
    * @return BaseFilterResponse<DeRegistrationResponse>
    */
-  BaseFilterResponse<DeRegistrationResponse> deRegistration(String poolView, String txHash,
-      Date fromDate, Date toDate,
-      Pageable pageable);
+  BaseFilterResponse<DeRegistrationResponse> deRegistration(
+      String poolView, String txHash, Date fromDate, Date toDate, Pageable pageable);
 
   /**
    * Get pool lifecycle registration list
@@ -92,14 +91,14 @@ public interface PoolLifecycleService {
    */
   BaseFilterResponse<TabularRegisResponse> registrationList(String poolView, Pageable pageable);
 
-
   /**
    * Get pool lifecycle pool update list
    *
    * @param
    * @return BaseFilterResponse<PoolUpdateDetailResponse>
    */
-  BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(String poolViewOrHash, Pageable pageable);
+  BaseFilterResponse<PoolUpdateDetailResponse> poolUpdateList(
+      String poolViewOrHash, Pageable pageable);
 
   /**
    * Get status pool lifecycle
@@ -118,6 +117,6 @@ public interface PoolLifecycleService {
    * @param pageable
    * @return BaseFilterResponse<RewardResponse>
    */
-  BaseFilterResponse<RewardResponse> listRewardFilter(String poolView, Integer beginEpoch,
-                                                Integer endEpoch, Pageable pageable);
+  BaseFilterResponse<RewardResponse> listRewardFilter(
+      String poolView, Integer beginEpoch, Integer endEpoch, Pageable pageable);
 }

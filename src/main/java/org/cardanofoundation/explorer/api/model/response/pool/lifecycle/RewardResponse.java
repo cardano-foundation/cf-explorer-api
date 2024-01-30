@@ -1,12 +1,14 @@
 package org.cardanofoundation.explorer.api.model.response.pool.lifecycle;
 
-import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
 
 @Getter
 @Setter

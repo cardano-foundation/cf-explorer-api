@@ -1,13 +1,13 @@
 package org.cardanofoundation.explorer.api.controller.advice;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.util.Strings;
-import org.cardanofoundation.explorer.api.exception.FetchRewardException;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.common.exceptions.*;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -16,15 +16,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.Arrays;
-import java.util.Objects;
+import org.apache.logging.log4j.util.Strings;
+
+import org.cardanofoundation.explorer.api.exception.FetchRewardException;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.common.exceptions.*;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 
 @Log4j2
 @RestControllerAdvice
 public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+  public ResponseEntity<ErrorResponse> handleValidationExceptions(
+      MethodArgumentNotValidException ex) {
     FieldError fieldError = ex.getBindingResult().getFieldError();
     String errorMessage = "Invalid parameter";
     if (Objects.nonNull(fieldError)) {
@@ -117,15 +122,19 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({NoContentException.class})
   public ResponseEntity<BaseFilterResponse<?>> handleNoContent(NoContentException e) {
-    return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseFilterResponse<>());
+    return ResponseEntity.status(HttpStatus.OK).body(new BaseFilterResponse<>());
   }
 
   @ExceptionHandler({ConstraintViolationException.class})
-  public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+  public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+      ConstraintViolationException e) {
     log.warn("constraint not valid: {}", e.getMessage());
 
-    String[] errors = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).filter(Strings::isNotBlank).toArray(String[]::new);
+    String[] errors =
+        e.getConstraintViolations().stream()
+            .map(ConstraintViolation::getMessage)
+            .filter(Strings::isNotBlank)
+            .toArray(String[]::new);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
@@ -148,7 +157,8 @@ public class GlobalRestControllerExceptionHandler {
   }
 
   @ExceptionHandler({MethodArgumentTypeMismatchException.class})
-  public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
+  public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
+      MethodArgumentTypeMismatchException e) {
     log.warn("Argument type not valid: {}", e.getMessage());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)

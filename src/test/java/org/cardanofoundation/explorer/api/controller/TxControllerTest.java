@@ -1,5 +1,10 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -24,6 +29,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
@@ -32,7 +41,6 @@ import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.model.response.tx.CollateralResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.SummaryResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxInfoResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
@@ -40,31 +48,18 @@ import org.cardanofoundation.explorer.api.model.response.tx.UTxOResponse;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.TxService;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @WebMvcTest(TxController.class)
 @Import(RoleFilterMapper.class)
 @AutoConfigureMockMvc(addFilters = false)
 class TxControllerTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockBean
-  private TxService mockTxService;
+  @MockBean private TxService mockTxService;
 
-  @MockBean
-  private AuthInterceptor authInterceptor;
+  @MockBean private AuthInterceptor authInterceptor;
 
-  @MockBean
-  private BolnisiMetadataService bolnisiMetadataService;
+  @MockBean private BolnisiMetadataService bolnisiMetadataService;
 
   @BeforeEach
   void preControllerTest() throws Exception {
@@ -84,26 +79,28 @@ class TxControllerTest {
     txFilterResponse.setEpochNo(426);
     txFilterResponse.setEpochSlotNo(292728);
     txFilterResponse.setSlot(98961528);
-    txFilterResponse.setAddressesInput(List.of(
-        "addr1q8a93gl3y6x6znttql04tsypq9z639zsg92vjtg8zsph99c7a3tcm47sf26y374klwh989vg9rfh6a7c7rp8lqm8zzws4vuqg3",
-        "addr1zxgx3far7qygq0k6epa0zcvcvrevmn0ypsnfsue94nsn3tvpw288a4x0xf8pxgcntelxmyclq83s0ykeehchz2wtspks905plm"
-    ));
-    txFilterResponse.setAddressesOutput(List.of(
-        "addr1zxgx3far7qygq0k6epa0zcvcvrevmn0ypsnfsue94nsn3tvpw288a4x0xf8pxgcntelxmyclq83s0ykeehchz2wtspks905plm",
-        "addr1q8a93gl3y6x6znttql04tsypq9z639zsg92vjtg8zsph99c7a3tcm47sf26y374klwh989vg9rfh6a7c7rp8lqm8zzws4vuqg3"
-    ));
+    txFilterResponse.setAddressesInput(
+        List.of(
+            "addr1q8a93gl3y6x6znttql04tsypq9z639zsg92vjtg8zsph99c7a3tcm47sf26y374klwh989vg9rfh6a7c7rp8lqm8zzws4vuqg3",
+            "addr1zxgx3far7qygq0k6epa0zcvcvrevmn0ypsnfsue94nsn3tvpw288a4x0xf8pxgcntelxmyclq83s0ykeehchz2wtspks905plm"));
+    txFilterResponse.setAddressesOutput(
+        List.of(
+            "addr1zxgx3far7qygq0k6epa0zcvcvrevmn0ypsnfsue94nsn3tvpw288a4x0xf8pxgcntelxmyclq83s0ykeehchz2wtspks905plm",
+            "addr1q8a93gl3y6x6znttql04tsypq9z639zsg92vjtg8zsph99c7a3tcm47sf26y374klwh989vg9rfh6a7c7rp8lqm8zzws4vuqg3"));
     txFilterResponse.setFee(BigInteger.valueOf(315142));
     txFilterResponse.setTotalOutput(BigInteger.valueOf(24451790));
     txFilterResponse.setTokens(new ArrayList<>());
     txFilterResponse.setTime(LocalDateTime.parse("2007-12-03T10:15:30"));
-    final BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>(
-        new PageImpl<>(List.of(txFilterResponse)));
+    final BaseFilterResponse<TxFilterResponse> response =
+        new BaseFilterResponse<>(new PageImpl<>(List.of(txFilterResponse)));
 
     when(mockTxService.getAll(any(Pageable.class))).thenReturn(response);
 
-    var result = mockMvc.perform(get("/api/v1/txs")
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    var result =
+        mockMvc
+            .perform(get("/api/v1/txs").accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     assertEquals(HttpStatus.OK.value(), result.getStatus());
     assertEquals(asJsonString(response), result.getContentAsString());
@@ -114,8 +111,10 @@ class TxControllerTest {
     final String hash = "847e7236454aea46714b07c4b299e2567940cd23c508db777f17a0d9a85d60a6";
     final TxResponse txResponse = new TxResponse();
 
-    txResponse.setTx(TxInfoResponse.builder()
-        .hash("847e7236454aea46714b07c4b299e2567940cd23c508db777f17a0d9a85d60a6").build());
+    txResponse.setTx(
+        TxInfoResponse.builder()
+            .hash("847e7236454aea46714b07c4b299e2567940cd23c508db777f17a0d9a85d60a6")
+            .build());
     txResponse.setSummary(SummaryResponse.builder().build());
     txResponse.setUTxOs(UTxOResponse.builder().build());
     txResponse.setContracts(null);
@@ -123,9 +122,11 @@ class TxControllerTest {
 
     when(mockTxService.getTxDetailByHash(hash)).thenReturn(txResponse);
 
-    final MockHttpServletResponse response = mockMvc.perform(get("/api/v1/txs/{hash}", hash)
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(get("/api/v1/txs/{hash}", hash).accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertEquals(asJsonString(txResponse), response.getContentAsString());
@@ -133,22 +134,27 @@ class TxControllerTest {
 
   @Test
   void testFindCurrentTransaction() throws Exception {
-    TxSummary txSummary = TxSummary.builder()
-        .hash("5d43c58bd68758cae8efe75a2c3099736260d29bc46b90371069245c8e9d3f7f")
-        .blockNo(9086598L)
-        .slot(98972043)
-        .amount(209644042.0)
-        .time(LocalDateTime.parse("2023-07-28T10:15:30"))
-        .fromAddress(List.of(
-            "addr1qxg4eahp6lt8hdj0asv0tyxkkh3zsj9jxkykx5fc8pscarc22wrtjv4lxs8slf94fcvv7ecpguatkza5h2p3qvuug8qql9hxzr"))
-        .toAddress(List.of(
-            "addr1qxg4eahp6lt8hdj0asv0tyxkkh3zsj9jxkykx5fc8pscarc22wrtjv4lxs8slf94fcvv7ecpguatkza5h2p3qvuug8qql9hxzr"))
-        .build();
+    TxSummary txSummary =
+        TxSummary.builder()
+            .hash("5d43c58bd68758cae8efe75a2c3099736260d29bc46b90371069245c8e9d3f7f")
+            .blockNo(9086598L)
+            .slot(98972043)
+            .amount(209644042.0)
+            .time(LocalDateTime.parse("2023-07-28T10:15:30"))
+            .fromAddress(
+                List.of(
+                    "addr1qxg4eahp6lt8hdj0asv0tyxkkh3zsj9jxkykx5fc8pscarc22wrtjv4lxs8slf94fcvv7ecpguatkza5h2p3qvuug8qql9hxzr"))
+            .toAddress(
+                List.of(
+                    "addr1qxg4eahp6lt8hdj0asv0tyxkkh3zsj9jxkykx5fc8pscarc22wrtjv4lxs8slf94fcvv7ecpguatkza5h2p3qvuug8qql9hxzr"))
+            .build();
     when(mockTxService.findLatestTxSummary()).thenReturn(List.of(txSummary));
 
-    final MockHttpServletResponse response = mockMvc.perform(get("/api/v1/txs/current")
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(get("/api/v1/txs/current").accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertEquals(asJsonString(List.of(txSummary)), response.getContentAsString());
@@ -158,9 +164,11 @@ class TxControllerTest {
   void testFindCurrentTransaction_WhenTxServiceReturnsNoItems() throws Exception {
     when(mockTxService.findLatestTxSummary()).thenReturn(Collections.emptyList());
 
-    final MockHttpServletResponse response = mockMvc.perform(get("/api/v1/txs/current")
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(get("/api/v1/txs/current").accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertEquals("[]", response.getContentAsString());
@@ -168,15 +176,22 @@ class TxControllerTest {
 
   @Test
   void testGetTransactionChart() throws Exception {
-    final List<TxGraph> txGraphs = List.of(
-        new TxGraph(new GregorianCalendar(2020, Calendar.JANUARY, 1).getTime(),
-            new BigInteger("100"), new BigInteger("100"), new BigInteger("100")));
+    final List<TxGraph> txGraphs =
+        List.of(
+            new TxGraph(
+                new GregorianCalendar(2020, Calendar.JANUARY, 1).getTime(),
+                new BigInteger("100"),
+                new BigInteger("100"),
+                new BigInteger("100")));
     when(mockTxService.getTransactionChartByRange(TxChartRange.ONE_DAY)).thenReturn(txGraphs);
 
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/txs/graph/{range}", TxChartRange.ONE_DAY)
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get("/api/v1/txs/graph/{range}", TxChartRange.ONE_DAY)
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertEquals(asJsonString(txGraphs), response.getContentAsString());
@@ -187,10 +202,13 @@ class TxControllerTest {
     when(mockTxService.getTransactionChartByRange(TxChartRange.ONE_DAY))
         .thenReturn(Collections.emptyList());
 
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/txs/graph/{range}", TxChartRange.ONE_DAY)
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get("/api/v1/txs/graph/{range}", TxChartRange.ONE_DAY)
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertEquals("[]", response.getContentAsString());

@@ -83,6 +83,8 @@
         <version.com.google.crypto.tink>1.9.0</version.com.google.crypto.tink>
         <version.json-canonicalization>1.1</version.json-canonicalization>
         <version.java-cid>v1.3.3</version.java-cid>
+        <version.spotless-maven-plugin>2.36.0</version.spotless-maven-plugin>
+        <version.google-java-format>1.15.0</version.google-java-format>
     </properties>
 
     <repositories>
@@ -441,6 +443,39 @@
                     <targetTests>
                         <param>org.cardanofoundation.explorer.api.*</param>
                     </targetTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${version.spotless-maven-plugin}</version>
+                <configuration>
+                    <java>
+                        <excludes>
+                            <exclude>build/**/*.java</exclude>
+                        </excludes>
+                        <removeUnusedImports/>
+                        <replaceRegex>
+                            <name>Remove wildcard imports</name>
+                            <searchRegex>import\\s+[^\\*\\s]+\\*;(\\r\\n|\\r|\\n)</searchRegex>
+                            <replacement>$1</replacement>
+                        </replaceRegex>
+                        <googleJavaFormat>
+                            <version>${version.google-java-format}</version>
+                            <style>GOOGLE</style>
+                        </googleJavaFormat>
+                        <importOrder>
+                            <order>
+                                java,jakarta,javax,lombok,org.springframework,,\\#,org.junit,\\#org.junit,org.cardanofoundation,\\#org.cardanofoundation
+                            </order>
+                        </importOrder>
+                        <indent>
+                            <spaces>true</spaces>
+                            <spacesPerTab>2</spacesPerTab>
+                        </indent>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
+                    </java>
                 </configuration>
             </plugin>
         </plugins>

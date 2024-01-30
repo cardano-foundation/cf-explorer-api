@@ -12,15 +12,18 @@ public enum BusinessCode implements ErrorCode {
   TOKEN_NOT_FOUND("404-TOKEN_NOT_FOUND", "Token not found"),
   POLICY_NOT_FOUND("404-POLICY_NOT_FOUND", "Policy not found"),
   STAKE_REGISTRATION_NOT_FOUND("404-STAKE_REGISTRATION_NOT_FOUND", "Stake registration not found"),
-  STAKE_DE_REGISTRATION_NOT_FOUND("404-STAKE_DEREGISTRATION_NOT_FOUND", "Stake de-registration not found"),
+  STAKE_DE_REGISTRATION_NOT_FOUND(
+      "404-STAKE_DEREGISTRATION_NOT_FOUND", "Stake de-registration not found"),
   STAKE_DELEGATION_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
   STAKE_WITHDRAWAL_NOT_FOUND("404-STAKE_DELEGATION_NOT_FOUND", "Stake delegation not found"),
-  STAKE_REPORT_HISTORY_NOT_FOUND("404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found"),
-  POOL_REPORT_HISTORY_NOT_FOUND("404-POOL_REPORT_HISTORY_NOT_FOUND", "Pool report history not found"),
+  STAKE_REPORT_HISTORY_NOT_FOUND(
+      "404-STAKE_REPORT_HISTORY_NOT_FOUND", "Stake report history not found"),
+  POOL_REPORT_HISTORY_NOT_FOUND(
+      "404-POOL_REPORT_HISTORY_NOT_FOUND", "Pool report history not found"),
   REPORT_IS_IN_PROGRESS("404-REPORT_IS_IN_PROGRESS", "Report is in progress"),
   POOL_NOT_FOUND("404-POOL_NOT_FOUND", "PoolId not found"),
   EXPORT_TYPE_NOT_SUPPORTED("404-EXPORT_TYPE_NOT_SUPPORTED", "Export type not supported"),
-  PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND","this field is not support"),
+  PROTOCOL_FIELD_NOT_FOUND("404-PROTOCOL_FIELD_NOT_FOUND", "this field is not support"),
   SCRIPT_NOT_FOUND("404-SCRIPT_NOT_FOUND", "Script not found"),
   VERIFY_SCRIPT_FAILED("400-VERIFY_SCRIPT_FAILED", "Verify script failed"),
   SCRIPT_ALREADY_VERIFIED("400-SCRIPT_ALREADY_VERIFIED", "Script already verified"),
@@ -28,7 +31,8 @@ public enum BusinessCode implements ErrorCode {
   TIME_RANGE_ILLEGAL("400-TIME_RANGE_ILLEGAL", "Time range is illegal"),
   REPORT_LIMIT_REACHED("400-REPORT_LIMIT_REACHED", "Report limit reached"),
   OUT_OF_QUERY_LIMIT("400-OUT_OF_QUERY_LIMIT", "Out of query limit"),
-  EXTERNAL_API_IS_NOT_AVAILABLE("500-EXTERNAL_API_IS_NOT_AVAILABLE", "External API is not available");
+  EXTERNAL_API_IS_NOT_AVAILABLE(
+      "500-EXTERNAL_API_IS_NOT_AVAILABLE", "External API is not available");
 
   private final String code;
   private final String desc;
@@ -49,5 +53,4 @@ public enum BusinessCode implements ErrorCode {
   public String getServicePrefix() {
     return "BC";
   }
-
 }

@@ -1,11 +1,13 @@
 package org.cardanofoundation.explorer.api.model.response.pool.lifecycle;
 
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+
 import lombok.Getter;
 import lombok.Setter;
+
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 
 @Getter
 @Setter

@@ -3,10 +3,12 @@ package org.cardanofoundation.explorer.api.service.impl;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 
 @Profile("!koios")
 @Service
