@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserPrincipal {
-  Map<String, Map<String,Object>> roleDescription;
+  Map<String, Map<String, Object>> roleDescription;
   String username;
 }

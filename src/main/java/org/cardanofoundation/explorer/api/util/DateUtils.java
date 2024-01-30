@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.experimental.UtilityClass;
+
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 
 @UtilityClass
@@ -29,20 +30,19 @@ public class DateUtils {
     LocalDate currentDate = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
     LocalDateTime startOfToday = currentDate.atStartOfDay();
     return switch (analyticType) {
-      case ONE_WEEK ->
-          getDateAnalytics(startOfToday.minus(ONE_WEEK), currentDate.atStartOfDay(), ONE_WEEK_TIME_SEGMENT);
-      case ONE_MONTH ->
-          getDateAnalytics(startOfToday.minus(ONE_MONTH), currentDate.atStartOfDay(), ONE_MONTH_TIME_SEGMENT);
-      case THREE_MONTH ->
-          getDateAnalytics(startOfToday.minus(THREE_MONTH), currentDate.atStartOfDay(), THREE_MONTH_TIME_SEGMENT);
-      default ->
-          getDateAnalytics(startOfToday.minus(ONE_DAY), currentDate.atStartOfDay(), ONE_DAY_TIME_SEGMENT);
+      case ONE_WEEK -> getDateAnalytics(
+          startOfToday.minus(ONE_WEEK), currentDate.atStartOfDay(), ONE_WEEK_TIME_SEGMENT);
+      case ONE_MONTH -> getDateAnalytics(
+          startOfToday.minus(ONE_MONTH), currentDate.atStartOfDay(), ONE_MONTH_TIME_SEGMENT);
+      case THREE_MONTH -> getDateAnalytics(
+          startOfToday.minus(THREE_MONTH), currentDate.atStartOfDay(), THREE_MONTH_TIME_SEGMENT);
+      default -> getDateAnalytics(
+          startOfToday.minus(ONE_DAY), currentDate.atStartOfDay(), ONE_DAY_TIME_SEGMENT);
     };
   }
 
-  private List<LocalDateTime> getDateAnalytics(LocalDateTime start,
-                                               LocalDateTime end,
-                                               TemporalAmount amountToSubtract) {
+  private List<LocalDateTime> getDateAnalytics(
+      LocalDateTime start, LocalDateTime end, TemporalAmount amountToSubtract) {
     List<LocalDateTime> dateAnalytics = new ArrayList<>();
     while (!start.isAfter(end)) {
       dateAnalytics.add(start);
@@ -50,5 +50,4 @@ public class DateUtils {
     }
     return dateAnalytics;
   }
-
 }

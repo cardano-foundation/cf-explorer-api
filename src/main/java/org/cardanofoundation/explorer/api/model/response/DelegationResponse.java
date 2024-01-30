@@ -1,9 +1,11 @@
 package org.cardanofoundation.explorer.api.model.response;
 
-import lombok.*;
-import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.*;
+
+import org.cardanofoundation.explorer.api.model.response.address.DelegationPoolResponse;
 
 @Getter
 @Setter

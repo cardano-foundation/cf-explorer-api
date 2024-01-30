@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.projection;
 
+import java.sql.Timestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.sql.Timestamp;
 
 @Getter
 @AllArgsConstructor

@@ -3,6 +3,8 @@ package org.cardanofoundation.explorer.api.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.springframework.stereotype.Service;
+
 import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.blocksync.BlockSyncInfo;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
@@ -10,10 +12,8 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.MarketDataService;
 import org.cardanofoundation.explorer.api.service.WebSocketService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

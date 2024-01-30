@@ -1,13 +1,15 @@
 package org.cardanofoundation.explorer.api.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.Map.Entry;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
@@ -21,8 +23,8 @@ public class MetadataCIP25Utils {
   public static String splitJsonMetadataByAssetName(String jsonMetadata, String assetName) {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
-      Map<Object, Object> metadataMap = objectMapper.readValue(jsonMetadata, new TypeReference<>() {
-      });
+      Map<Object, Object> metadataMap =
+          objectMapper.readValue(jsonMetadata, new TypeReference<>() {});
       Map<Object, Object> finalMap = new HashMap<>();
       boolean isAsset = false;
       for (Map.Entry<Object, Object> metadataEntry : metadataMap.entrySet()) {
@@ -31,10 +33,10 @@ public class MetadataCIP25Utils {
         if (val instanceof HashMap<?, ?> assetMap) {
           for (Entry<?, ?> assetEntry : assetMap.entrySet()) {
             Object assetKey = assetEntry.getKey();
-            if (assetKey instanceof String assetKeyStr && (
-                assetKeyStr.replaceAll("\\s+", "").equals(assetName.replaceAll("\\s+", ""))
-                    || (assetKeyStr.startsWith("0x") && assetKeyStr.replace("0x", "")
-                    .equals(assetName)))) {
+            if (assetKey instanceof String assetKeyStr
+                && (assetKeyStr.replaceAll("\\s+", "").equals(assetName.replaceAll("\\s+", ""))
+                    || (assetKeyStr.startsWith("0x")
+                        && assetKeyStr.replace("0x", "").equals(assetName)))) {
               isAsset = true;
               Map<Object, Object> subMap = new HashMap<>();
               subMap.put(assetKey, assetEntry.getValue());
@@ -60,8 +62,8 @@ public class MetadataCIP25Utils {
     Map<Object, TokenCIP> tokenMap = new HashMap<>();
     try {
       ObjectMapper objectMapper = new ObjectMapper();
-      Map<Object, Object> metadataMap = objectMapper.readValue(jsonMetadata, new TypeReference<>() {
-      });
+      Map<Object, Object> metadataMap =
+          objectMapper.readValue(jsonMetadata, new TypeReference<>() {});
       int version = detectVersion(metadataMap.get(MetadataField.VERSION.getName()));
       for (Map.Entry<Object, Object> metadataEntry : metadataMap.entrySet()) {
         if (metadataEntry.getValue() instanceof HashMap<?, ?> assetMap) {
@@ -72,10 +74,8 @@ public class MetadataCIP25Utils {
             List<BaseProperty> requireProperties = new ArrayList<>();
             requireProperties.add(policy(policyId, version));
             requireProperties.add(assetName(assetEntry.getKey(), version));
-            requireProperties.add(
-                name(assetValMap.get(MetadataField.NAME.getName()), version));
-            requireProperties.add(
-                image(assetValMap.get(MetadataField.IMAGE.getName()), version));
+            requireProperties.add(name(assetValMap.get(MetadataField.NAME.getName()), version));
+            requireProperties.add(image(assetValMap.get(MetadataField.IMAGE.getName()), version));
             requireProperties.sort(Comparator.comparing(BaseProperty::getIndex));
             token.setRequireProperties(requireProperties);
             List<BaseProperty> optionalProperties = new ArrayList<>();
@@ -90,9 +90,15 @@ public class MetadataCIP25Utils {
               optionalProperties.add(mediaType(mediaType, String.valueOf(index), version));
               index++;
             }
-            index = files(assetValMap.get(MetadataField.FILES.getName()), optionalProperties, index,
-                version);
-            version(metadataMap.get(MetadataField.VERSION.getName()), String.valueOf(index),
+            index =
+                files(
+                    assetValMap.get(MetadataField.FILES.getName()),
+                    optionalProperties,
+                    index,
+                    version);
+            version(
+                metadataMap.get(MetadataField.VERSION.getName()),
+                String.valueOf(index),
                 optionalProperties);
             optionalProperties.sort(Comparator.comparing(BaseProperty::getIndex));
             token.setOptionalProperties(optionalProperties);
@@ -101,7 +107,7 @@ public class MetadataCIP25Utils {
           }
         }
       }
-      if(tokenMap.isEmpty()) {
+      if (tokenMap.isEmpty()) {
         tokenMap = getDefaultTokenMap(version);
         metadataCIP.setValid(false);
       } else {
@@ -122,12 +128,14 @@ public class MetadataCIP25Utils {
     boolean isValid = version instanceof Integer versionInt && (versionInt == 1 || versionInt == 2);
 
     optionalProperties.add(
-        BaseProperty.builder().value(version)
+        BaseProperty.builder()
+            .value(version)
             .format(FormatFieldType.VERSION_1_OR_2.getValue())
-            .property(MetadataField.VERSION.getName()).index(index)
+            .property(MetadataField.VERSION.getName())
+            .index(index)
             .valid(isValid)
-            .valueFormat(isValid ? version.toString()
-                                 : FormatFieldType.NEITHER_VERSION_1_OR_2.getValue())
+            .valueFormat(
+                isValid ? version.toString() : FormatFieldType.NEITHER_VERSION_1_OR_2.getValue())
             .build());
   }
 
@@ -143,12 +151,15 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty policy(Object policyId, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(policyId);
-    BaseProperty baseProperty = BaseProperty.builder().value(policyId)
-        .format(FormatFieldType.STRING_OR_RAW_BYTES.getValue())
-        .index("1")
-        .property(MetadataField.POLICY_ID.getName())
-        .valueFormat(format.getValue())
-        .valid(false).build();
+    BaseProperty baseProperty =
+        BaseProperty.builder()
+            .value(policyId)
+            .format(FormatFieldType.STRING_OR_RAW_BYTES.getValue())
+            .index("1")
+            .property(MetadataField.POLICY_ID.getName())
+            .valueFormat(format.getValue())
+            .valid(false)
+            .build();
     switch (version) {
       case 0 -> {
         baseProperty.setValid(null);
@@ -164,12 +175,15 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty assetName(Object assetName, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(assetName);
-    BaseProperty baseProperty = BaseProperty.builder().value(assetName)
-        .format(FormatFieldType.STRING_OR_RAW_BYTES.getValue())
-        .index("2")
-        .property(MetadataField.ASSET_NAME.getName())
-        .valueFormat(format.getValue())
-        .valid(false).build();
+    BaseProperty baseProperty =
+        BaseProperty.builder()
+            .value(assetName)
+            .format(FormatFieldType.STRING_OR_RAW_BYTES.getValue())
+            .index("2")
+            .property(MetadataField.ASSET_NAME.getName())
+            .valueFormat(format.getValue())
+            .valid(false)
+            .build();
     switch (version) {
       case 0 -> {
         baseProperty.setValid(null);
@@ -185,13 +199,15 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty name(Object name, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(name);
-    BaseProperty baseProperty = BaseProperty.builder().value(name)
-        .format(FormatFieldType.STRING.getValue())
-        .property(MetadataField.NAME.getName())
-        .index("3")
-        .valid(format.equals(FormatFieldType.STRING))
-        .valueFormat(format.getValue())
-        .build();
+    BaseProperty baseProperty =
+        BaseProperty.builder()
+            .value(name)
+            .format(FormatFieldType.STRING.getValue())
+            .property(MetadataField.NAME.getName())
+            .index("3")
+            .valid(format.equals(FormatFieldType.STRING))
+            .valueFormat(format.getValue())
+            .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
@@ -202,12 +218,14 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty nameFile(Object name, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(name);
-    BaseProperty baseProperty = BaseProperty.builder().value(name)
-        .format(FormatFieldType.STRING.getValue())
-        .property(MetadataField.NAME.getName())
-        .valid(format.equals(FormatFieldType.STRING))
-        .valueFormat(format.getValue())
-        .build();
+    BaseProperty baseProperty =
+        BaseProperty.builder()
+            .value(name)
+            .format(FormatFieldType.STRING.getValue())
+            .property(MetadataField.NAME.getName())
+            .valid(format.equals(FormatFieldType.STRING))
+            .valueFormat(format.getValue())
+            .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
@@ -218,13 +236,17 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty image(Object image, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(image);
-    BaseProperty checkImage = BaseProperty.builder().value(image)
-        .format(FormatFieldType.URI_OR_ARRAY.getValue())
-        .index("4")
-        .valueFormat(format.getValue())
-        .valid(format.equals(FormatFieldType.URI) || format.equals(FormatFieldType.URI_ARRAY_PARTS))
-        .property(MetadataField.IMAGE.getName())
-        .build();
+    BaseProperty checkImage =
+        BaseProperty.builder()
+            .value(image)
+            .format(FormatFieldType.URI_OR_ARRAY.getValue())
+            .index("4")
+            .valueFormat(format.getValue())
+            .valid(
+                format.equals(FormatFieldType.URI)
+                    || format.equals(FormatFieldType.URI_ARRAY_PARTS))
+            .property(MetadataField.IMAGE.getName())
+            .build();
 
     if (version == 0) {
       checkImage.setValid(null);
@@ -236,12 +258,16 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty srcFile(Object src, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(src);
-    BaseProperty checkSrc = BaseProperty.builder().value(src)
-        .format(FormatFieldType.URI_OR_ARRAY.getValue())
-        .property(MetadataField.SRC.getName())
-        .valueFormat(format.getValue())
-        .valid(format.equals(FormatFieldType.URI) || format.equals(FormatFieldType.URI_ARRAY_PARTS))
-        .build();
+    BaseProperty checkSrc =
+        BaseProperty.builder()
+            .value(src)
+            .format(FormatFieldType.URI_OR_ARRAY.getValue())
+            .property(MetadataField.SRC.getName())
+            .valueFormat(format.getValue())
+            .valid(
+                format.equals(FormatFieldType.URI)
+                    || format.equals(FormatFieldType.URI_ARRAY_PARTS))
+            .build();
 
     if (version == 0) {
       checkSrc.setValid(null);
@@ -254,14 +280,15 @@ public class MetadataCIP25Utils {
   public static BaseProperty mediaType(Object mediaType, String index, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(mediaType);
     boolean isValid = format.equals(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE);
-    BaseProperty baseProperty = BaseProperty.builder()
-        .value(mediaType)
-        .format(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE.getValue())
-        .property(MetadataField.MEDIA_TYPE.getName())
-        .index(index)
-        .valueFormat(isValid ? mediaType.toString() : format.getValue())
-        .valid(isValid)
-        .build();
+    BaseProperty baseProperty =
+        BaseProperty.builder()
+            .value(mediaType)
+            .format(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE.getValue())
+            .property(MetadataField.MEDIA_TYPE.getName())
+            .index(index)
+            .valueFormat(isValid ? mediaType.toString() : format.getValue())
+            .valid(isValid)
+            .build();
 
     if (version == 0) {
       baseProperty.setValid(null);
@@ -273,13 +300,17 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty mediaTypeFile(Object mediaType, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(mediaType);
-    boolean isValid = format.equals(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE)
-        || format.equals(FormatFieldType.MIME_TYPE);
-    BaseProperty baseProperty = BaseProperty.builder().value(mediaType)
-        .format(FormatFieldType.MIME_TYPE.getValue())
-        .property(MetadataField.MEDIA_TYPE.getName())
-        .valueFormat(isValid ? mediaType.toString() : format.getValue())
-        .valid(isValid).build();
+    boolean isValid =
+        format.equals(FormatFieldType.IMAGE_SLASH_MIME_SUB_TYPE)
+            || format.equals(FormatFieldType.MIME_TYPE);
+    BaseProperty baseProperty =
+        BaseProperty.builder()
+            .value(mediaType)
+            .format(FormatFieldType.MIME_TYPE.getValue())
+            .property(MetadataField.MEDIA_TYPE.getName())
+            .valueFormat(isValid ? mediaType.toString() : format.getValue())
+            .valid(isValid)
+            .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
@@ -290,13 +321,15 @@ public class MetadataCIP25Utils {
 
   public static BaseProperty description(Object desc, String index, int version) {
     FormatFieldType format = MetadataFieldUtils.getFormatTypeByObject(desc);
-    BaseProperty baseProperty = BaseProperty.builder().value(desc)
-        .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
-        .property(MetadataField.DESCRIPTION.getName())
-        .index(index)
-        .valueFormat(format.getValue())
-        .valid(format.equals(FormatFieldType.STRING) || format.equals(FormatFieldType.ARRAY))
-        .build();
+    BaseProperty baseProperty =
+        BaseProperty.builder()
+            .value(desc)
+            .format(FormatFieldType.STRING_OR_ARRAY_STRING.getValue())
+            .property(MetadataField.DESCRIPTION.getName())
+            .index(index)
+            .valueFormat(format.getValue())
+            .valid(format.equals(FormatFieldType.STRING) || format.equals(FormatFieldType.ARRAY))
+            .build();
     if (version == 0) {
       baseProperty.setValid(null);
       baseProperty.setFormat(null);
@@ -305,28 +338,29 @@ public class MetadataCIP25Utils {
     return baseProperty;
   }
 
-  public static int files(Object files, List<BaseProperty> optionalProperties, int indexOfFile,
-      int version) {
+  public static int files(
+      Object files, List<BaseProperty> optionalProperties, int indexOfFile, int version) {
     if (Objects.nonNull(files) && files instanceof ArrayList<?> fileList && !fileList.isEmpty()) {
-      BaseProperty filesProperty = BaseProperty.builder().valid(false)
-          .property(MetadataField.FILES.getName()).valid(true)
-          .format(FormatFieldType.ARRAY.getValue())
-          .build();
+      BaseProperty filesProperty =
+          BaseProperty.builder()
+              .valid(false)
+              .property(MetadataField.FILES.getName())
+              .valid(true)
+              .format(FormatFieldType.ARRAY.getValue())
+              .build();
       List<BaseProperty> optionalPropertiesInFile = new ArrayList<>();
       int indexInFile = 1;
       for (Object file : fileList) {
         if (file instanceof HashMap<?, ?> fileMap) {
           String index = indexOfFile + "." + indexInFile;
-          BaseProperty nameFile = nameFile(fileMap.get(MetadataField.NAME.getName()),
-              version);
+          BaseProperty nameFile = nameFile(fileMap.get(MetadataField.NAME.getName()), version);
           nameFile.setIndex(index + ".1");
           optionalPropertiesInFile.add(nameFile);
-          BaseProperty srcFile = srcFile(fileMap.get(MetadataField.SRC.getName()),
-              version);
+          BaseProperty srcFile = srcFile(fileMap.get(MetadataField.SRC.getName()), version);
           srcFile.setIndex(index + ".2");
           optionalPropertiesInFile.add(srcFile);
-          BaseProperty mediaTypeFile = mediaTypeFile(
-              fileMap.get(MetadataField.MEDIA_TYPE.getName()), version);
+          BaseProperty mediaTypeFile =
+              mediaTypeFile(fileMap.get(MetadataField.MEDIA_TYPE.getName()), version);
           mediaTypeFile.setIndex(index + ".3");
           optionalPropertiesInFile.add(mediaTypeFile);
           indexInFile++;
@@ -337,11 +371,15 @@ public class MetadataCIP25Utils {
         filesProperty.setFormat(null);
       } else {
         filesProperty.setValid(
-            !optionalPropertiesInFile.isEmpty() && optionalPropertiesInFile.stream()
-                // The validation of "name" property won't affect the validation of "files" optional property
-                .filter(baseProperty -> Objects.nonNull(baseProperty) &&
-                        !baseProperty.getProperty().equals(MetadataField.NAME.getName()))
-                .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
+            !optionalPropertiesInFile.isEmpty()
+                && optionalPropertiesInFile.stream()
+                    // The validation of "name" property won't affect the validation of "files"
+                    // optional property
+                    .filter(
+                        baseProperty ->
+                            Objects.nonNull(baseProperty)
+                                && !baseProperty.getProperty().equals(MetadataField.NAME.getName()))
+                    .allMatch(baseProperty -> baseProperty.getValid().equals(true)));
       }
       filesProperty.setIndex(String.valueOf(indexOfFile));
       optionalProperties.add(filesProperty);
@@ -359,25 +397,41 @@ public class MetadataCIP25Utils {
     for (Map.Entry<Object, TokenCIP> tokenEntry : tokenMap.entrySet()) {
       List<BaseProperty> optionalProperties = tokenEntry.getValue().getOptionalProperties();
 
-      // Find the index of the highest level "files" property (since "files" is an optional property this can be an empty optional)
-      Optional<String> filesIndex = optionalProperties.stream().filter(baseProperty -> {
-          String index = baseProperty.getIndex();
-          return index.matches("^[\\d]+") && baseProperty.getProperty().equals(MetadataField.FILES.getName());
-      }).findFirst().map(BaseProperty::getIndex);
+      // Find the index of the highest level "files" property (since "files" is an optional property
+      // this can be an empty optional)
+      Optional<String> filesIndex =
+          optionalProperties.stream()
+              .filter(
+                  baseProperty -> {
+                    String index = baseProperty.getIndex();
+                    return index.matches("^[\\d]+")
+                        && baseProperty.getProperty().equals(MetadataField.FILES.getName());
+                  })
+              .findFirst()
+              .map(BaseProperty::getIndex);
 
-      // The validation of files[<index>]."name" property of a token won't affect the validation of the tokens
-      if (filesIndex.isPresent()){
-         optionalProperties = optionalProperties.stream()
-                    .filter(baseProperty -> Objects.nonNull(baseProperty) &&
-                            !(baseProperty.getProperty().equals(MetadataField.NAME.getName()) && baseProperty.getIndex().matches(filesIndex.get() + "\\.\\d+\\.1"))
-                    ).toList();
+      // The validation of files[<index>]."name" property of a token won't affect the validation of
+      // the tokens
+      if (filesIndex.isPresent()) {
+        optionalProperties =
+            optionalProperties.stream()
+                .filter(
+                    baseProperty ->
+                        Objects.nonNull(baseProperty)
+                            && !(baseProperty.getProperty().equals(MetadataField.NAME.getName())
+                                && baseProperty
+                                    .getIndex()
+                                    .matches(filesIndex.get() + "\\.\\d+\\.1")))
+                .toList();
       }
 
       fields.add(
-              optionalProperties.stream().map(BaseProperty::getValid)
+          optionalProperties.stream()
+              .map(BaseProperty::getValid)
               .allMatch(isValid -> isValid.equals(true)));
       fields.add(
-          tokenEntry.getValue().getRequireProperties().stream().map(BaseProperty::getValid)
+          tokenEntry.getValue().getRequireProperties().stream()
+              .map(BaseProperty::getValid)
               .allMatch(isValid -> isValid.equals(true)));
     }
     return !fields.isEmpty() && fields.stream().allMatch(field -> field.equals(true));

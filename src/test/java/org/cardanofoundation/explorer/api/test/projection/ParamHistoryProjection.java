@@ -1,12 +1,10 @@
 package org.cardanofoundation.explorer.api.test.projection;
 
-
 import java.math.BigInteger;
 import java.util.Date;
+
 import lombok.Builder;
 import lombok.Setter;
-
-import org.cardanofoundation.explorer.api.projection.ParamHistory;
 
 import org.cardanofoundation.explorer.api.projection.ParamHistory;
 
@@ -161,9 +159,7 @@ public class ParamHistoryProjection implements ParamHistory {
 
   @Override
   public Double getPriceMem() {
-    return
-
-        this.priceMem;
+    return this.priceMem;
   }
 
   @Override
@@ -193,8 +189,7 @@ public class ParamHistoryProjection implements ParamHistory {
 
   @Override
   public String getEntropy() {
-    return
-        this.extraEntropy;
+    return this.extraEntropy;
   }
 
   @Override
@@ -221,6 +216,4 @@ public class ParamHistoryProjection implements ParamHistory {
   public Integer getEpochNo() {
     return this.epochNo;
   }
-
-
 }
