@@ -1,5 +1,79 @@
 # Changelog
 
+## [0.7.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.6.0...v0.7.0) (2024-01-17)
+
+
+### Bug Fixes
+
+* force creating the next version ([0a91c3a](https://github.com/cardano-foundation/cf-explorer-api/commit/0a91c3a380a93d2392aeeb4361bbb9c9bfc593ef))
+
+## [0.6.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.5.0...v0.6.0) (2024-01-17)
+
+
+### Features
+
+* check CIP-60 for json metadata ([0c69036](https://github.com/cardano-foundation/cf-explorer-api/commit/0c6903605a5fe3187178445d611ed40f7f01d3a2))
+* MET-1740 fix test end2end ([be460b9](https://github.com/cardano-foundation/cf-explorer-api/commit/be460b9e795a921e1dba02be9d7d573accd4d204))
+* MET-1740 show protocol parameters upcoming ([be3a34a](https://github.com/cardano-foundation/cf-explorer-api/commit/be3a34a113ee9e3935a6448550dd56bf27d7e0c1))
+* pass with music version v1 or v2 ([37d4863](https://github.com/cardano-foundation/cf-explorer-api/commit/37d4863a8f50e0831d2910b64af18d8bc2325ba2))
+
+
+### Bug Fixes
+
+* conflict ([73632f6](https://github.com/cardano-foundation/cf-explorer-api/commit/73632f60b29b13dc83551bc0195d815496d39830))
+* index of the properties ([b5bc133](https://github.com/cardano-foundation/cf-explorer-api/commit/b5bc133af22a6390e8099cac0f546626f83bf728))
+* MET-1853 add pool hash raw to query in pool info ([73adb4f](https://github.com/cardano-foundation/cf-explorer-api/commit/73adb4fe8d475af340af38d548e1d6a2fdff9d96))
+* no pass with music version v1,v2 ([91bb1c2](https://github.com/cardano-foundation/cf-explorer-api/commit/91bb1c26b28f9343c26f7d8b94f1f3419ac22211))
+* output CIP-60 ([d18e1a2](https://github.com/cardano-foundation/cf-explorer-api/commit/d18e1a28627c0a0fdbe663372732b6ef5bbe8255))
+* update logic get execution output of mint contract ([b0082d2](https://github.com/cardano-foundation/cf-explorer-api/commit/b0082d2eac4df7006a8e5512420372ded180991e))
+
+## [0.5.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.35...v0.5.0) (2023-11-30)
+
+
+### Features
+
+* MET 1727 pool certificate history ([d4aaf19](https://github.com/cardano-foundation/cf-explorer-api/commit/d4aaf198a516f533591e030776f1d2b52afd85c2))
+* MET 1739 multiple txs update protocol params ([5eca4b2](https://github.com/cardano-foundation/cf-explorer-api/commit/5eca4b2b42b5bd3f729e99c0e43059149e37210c))
+* move metadata utils from common to api ([9c2edba](https://github.com/cardano-foundation/cf-explorer-api/commit/9c2edbaefb6a5c4ad41f31687a355fef313f0327))
+
+
+### Bug Fixes
+
+* current pool status is wrong ([4fb4435](https://github.com/cardano-foundation/cf-explorer-api/commit/4fb4435727fe7fcb7f99178d84b6bb9c0272ed75))
+* define pool retired, reactive, update ([715aa39](https://github.com/cardano-foundation/cf-explorer-api/commit/715aa39fe5b0aab2cd6e378ff8f14ab69c08092d))
+* edit package ([d473013](https://github.com/cardano-foundation/cf-explorer-api/commit/d4730136f469a32a95229ce7131fb66976669772))
+* improve perf smart contract detail api ([23d2128](https://github.com/cardano-foundation/cf-explorer-api/commit/23d2128f26561f16d515fd1c5d78ccc4a1789369))
+* MET-1805 update logic verify native script ([40ddf6e](https://github.com/cardano-foundation/cf-explorer-api/commit/40ddf6e3ddaceb91fff7aa49ae86088b31296188))
+* MET-1819 update order of UTxOs in tx detail ([d0bbf8f](https://github.com/cardano-foundation/cf-explorer-api/commit/d0bbf8f8372009dc38676af506033750ab8bdcd1))
+* missing genesis signer key for instantaneous reward txs ([b23b4de](https://github.com/cardano-foundation/cf-explorer-api/commit/b23b4dea55f40b877dced8a6b82168e09e16b10f))
+* model package ([1281cee](https://github.com/cardano-foundation/cf-explorer-api/commit/1281cee07607e7d94e6eb9d2bc1e02e81e34303c))
+* pool registration + update incorrect ([584b481](https://github.com/cardano-foundation/cf-explorer-api/commit/584b4818d741bf1b7b9e982c1c17e309b158cd8a))
+* prepare the incorrect value for the genesis key in shelly genesis file ([c5a8503](https://github.com/cardano-foundation/cf-explorer-api/commit/c5a8503cf89662554c90c76b040851002d113f77))
+* unit test ([56ca0db](https://github.com/cardano-foundation/cf-explorer-api/commit/56ca0db5a4a5b94e66c7731203ee3f23989ddfcb))
+* update redis standalone and cluster to synchronize with other services ([2471018](https://github.com/cardano-foundation/cf-explorer-api/commit/24710180c39ded65123aa13cb148286e4d32dfee))
+
+## [0.3.35](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.34...v0.3.35) (2023-11-08)
+
+
+### Features
+
+* MET-1742 add check native script and smart contract in policy detail ([f138725](https://github.com/cardano-foundation/cf-explorer-api/commit/f138725f357a29190bb6c097f78d4e4ae9e8def6))
+* MET-1742 add check one time mint type of script ([dcd24b3](https://github.com/cardano-foundation/cf-explorer-api/commit/dcd24b3e10c2fdf96b777154342b13e801dea28f))
+* MET-1742 add verify script api ([27685d6](https://github.com/cardano-foundation/cf-explorer-api/commit/27685d61ce7a1eb93307025edd4c7ae315ed68ed))
+* MET-1742 check display mint burn policy only when native script verified ([9eba4a6](https://github.com/cardano-foundation/cf-explorer-api/commit/9eba4a620f18dd5e99974846293a9f7fbee21ea7))
+* MET-1742 create native script detail and related api ([d949f6f](https://github.com/cardano-foundation/cf-explorer-api/commit/d949f6f33ebf5b138ca7996a83ddd4038135ea2f))
+* MET-1746 script hash search ([17b1e50](https://github.com/cardano-foundation/cf-explorer-api/commit/17b1e5005c618fe5a08670d3c5c477ff79b6e4d5))
+
+
+### Bug Fixes
+
+* default sort not order by time ([e038a15](https://github.com/cardano-foundation/cf-explorer-api/commit/e038a1503d2fda4c1eb56fead1ec93cd8aae222c))
+* MET-1742 add number tokens and number of asset holders to native script detail ([9ad2930](https://github.com/cardano-foundation/cf-explorer-api/commit/9ad2930dc338da5bd8af320614435e00bebd2ce9))
+* MET-1742 count number asset holder in native script by policy by address and token ([9a79980](https://github.com/cardano-foundation/cf-explorer-api/commit/9a799800d55c7b7e88a61c66f493501eec77bf9e))
+* MET-1742 rename verified in script ([dfbca12](https://github.com/cardano-foundation/cf-explorer-api/commit/dfbca12078d5dc2b8373f1f9493072b936034653))
+* slice json metadata by asset name ([fca76f0](https://github.com/cardano-foundation/cf-explorer-api/commit/fca76f0fb7e9fe1fa6a70970713510266e32375e))
+* verify script type belong to SC ([3f33c26](https://github.com/cardano-foundation/cf-explorer-api/commit/3f33c2612463c7af5bd88cb4b90fe5be51f9315e))
+
 ## [0.3.34](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.3.33...v0.3.34) (2023-10-30)
 
 
