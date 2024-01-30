@@ -1,6 +1,11 @@
 package org.cardanofoundation.explorer.api.model.response.script.nativescript;
 
 import lombok.*;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -9,6 +14,10 @@ import lombok.*;
 @NoArgsConstructor
 public class NativeScriptFilterResponse {
   private String scriptHash;
-  private Integer numberOfTokens;
-  private Integer numberOfAssetHolders;
+  private LocalDateTime after;
+  private LocalDateTime before;
+  private Boolean isMultiSig = false;
+  private Long numberOfTokens = 0L;
+  private Long numberOfAssetHolders = 0L;
+  private List<TokenFilterResponse> tokens = new ArrayList<>();
 }
