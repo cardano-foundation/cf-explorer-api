@@ -105,7 +105,7 @@ public class MarketDataServiceImpl implements MarketDataService {
     return marketDataNode.get(0).get(field).asText().equals(marketDataCachedNode.get(0).get(field).asText());
   }
 
-//  @Scheduled(fixedDelayString = "${application.api.coin.gecko.market.delay-time}")
+  @Scheduled(fixedDelayString = "${application.api.coin.gecko.market.delay-time}")
   public void publishMarketData() {
     publishMarketData("usd");
     publishMarketData("btc");

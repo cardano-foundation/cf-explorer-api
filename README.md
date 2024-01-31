@@ -5,7 +5,7 @@
 <img alt="Coverage" src="https://cardano-foundation.github.io/cf-explorer-api/badges/jacoco.svg" />
 <img alt="Release" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/release.yaml/badge.svg?branch=main" />
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-api/actions/workflows/publish.yaml/badge.svg?branch=main" />
-<a href="https://app.fossa.com/projects/custom%2B41588%2Fgit%40github.com%3Acardano-foundation%2Fcf-explorer-api.git?ref=badge_small"><img alt="FOSSA Status" src="https://app.fossa.com/api/projects/custom%2B41588%2Fgit%40github.com%3Acardano-foundation%2Fcf-explorer-api.git.svg?type=small"/></a>
+<a href="https://app.fossa.com/reports/ea0c65ee-d23b-4ad6-8c5f-1777d0b38339"><img alt="FOSSA Status" src="https://app.fossa.com/api/projects/custom%2B41588%2Fgit%40github.com%3Acardano-foundation%2Fcf-explorer-api.git.svg?type=small"/></a>
 <a href="https://conventionalcommits.org"><img alt="conventionalcommits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits" /></a>
 </p>
 
