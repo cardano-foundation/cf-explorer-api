@@ -279,6 +279,35 @@ public class PoolReportServiceTest {
   }
 
   @Test
+  void fetchEpochSize_shouldReturnRewardNotAvailable() {
+    Long reportId = 1L;
+    String username = "username";
+    PoolReportHistory poolReport = PoolReportHistory.builder()
+        .poolView("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
+        .isPoolSize(true)
+        .eventRegistration(true)
+        .eventDeregistration(true)
+        .eventReward(true)
+        .eventPoolUpdate(true)
+        .isFeesPaid(true)
+        .beginEpoch(300)
+        .endEpoch(410)
+        .reportHistory(ReportHistory.builder()
+                           .username(username)
+                           .storageKey("storageKey")
+                           .reportName("reportName")
+                           .status(ReportStatus.GENERATED)
+                           .type(ReportType.STAKE_KEY)
+                           .build())
+        .build();
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    var response = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 1), username);
+    Assertions.assertNull(response.getData());
+  }
+
+
+  @Test
   void fetchPoolRegistration_shouldReturnResponse() {
     Long reportId = 1L;
     String username = "username";
