@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -66,6 +67,8 @@ import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
 import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
 import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -307,11 +310,13 @@ class DelegationServiceTest {
     verify(fetchRewardDataService).useKoios();
   }
 
-//  @Test
+  @Test
   void testGetDataForPoolTable_withSearch() {
     // Mocked input data
     Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
     String search = "example";
+    AggregatePoolInfo aggregatePoolInfo = new AggregatePoolInfo(1L,10
+        ,10,2,2L,Timestamp.from(Instant.now()));
     List<Object> poolRetiredIds = new ArrayList<>();
     poolRetiredIds.add(-1L);
     // Mocked repository responses
@@ -323,13 +328,15 @@ class DelegationServiceTest {
     when(projection.getPledge()).thenReturn(BigInteger.ONE);
     when(projection.getFee()).thenReturn(BigInteger.ONE);
     when(projection.getMargin()).thenReturn(1D);
-    when(redisTemplate.opsForHash().values(any())).thenReturn(poolRetiredIds);
-    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(100));
     poolIdPageContent.add(projection);
     // Add mock data to poolIdPageContent
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
-
-    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), anyCollection(), any(),  any())).thenReturn(poolIdPage);
+    when(redisTemplate.opsForHash().values(any())).thenReturn(poolRetiredIds);
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(100));
+    when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), anyCollection(), any(),  any()))
+        .thenReturn(poolIdPage);
+    when(aggregatePoolInfoRepository.getAllByPoolIdIn(anyList()))
+        .thenReturn(Collections.singletonList(aggregatePoolInfo));
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search, true);
@@ -337,28 +344,27 @@ class DelegationServiceTest {
     // Perform assertions
     assertNotNull(response);
     assertEquals(poolIdPageContent.size(), response.getData().size());
+    Assertions.assertEquals(poolIdPage.getTotalElements(),response.getTotalItems());
+    Assertions.assertEquals("name",response.getData().get(0).getPoolName());
+    Assertions.assertEquals(BigInteger.ONE,response.getData().get(0).getFeeAmount());
     // Add more assertions as needed
   }
 
-//  @Test
+  @Test
   void testGetDataForPoolTable_withoutSearch() {
     // Mocked input data
     Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
     String search = "";
-
     // Mocked repository responses
     List<PoolListProjection> poolIdPageContent = new ArrayList<>();
     // Add mock data to poolIdPageContent
-
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
+    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(100));
     when(poolHashRepository.findAllWithoutQueryParam(any(), anyInt(), any())).thenReturn(poolIdPage);
-    when(adaPotsRepository.getReservesByEpochNo(0)).thenReturn(BigInteger.ONE);
-    when(epochParamRepository.getOptimalPoolCountByEpochNo(0)).thenReturn(1);
     // Call the method
     BaseFilterResponse<PoolResponse> response = delegationService.getDataForPoolTable(pageable,
         search, true);
-
     // Perform assertions
     assertNotNull(response);
     assertEquals(poolIdPageContent.size(), response.getData().size());

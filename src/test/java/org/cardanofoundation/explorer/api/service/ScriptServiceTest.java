@@ -1,15 +1,27 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
+import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapperImpl;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
+import org.cardanofoundation.explorer.api.mapper.TokenMapperImpl;
 import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
+import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
+import org.cardanofoundation.explorer.consumercommon.entity.Address;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo;
 import org.springframework.data.domain.Page;
@@ -38,11 +50,14 @@ import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.VerifiedScript;
+import org.cardanofoundation.ledgersync.common.common.nativescript.NativeScript;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
@@ -74,27 +89,42 @@ class ScriptServiceTest {
   AssetMetadataRepository assetMetadataRepository;
   @Mock
   SmartContractInfoRepository smartContractInfoRepository;
-
+  @Mock
+  AddressTokenBalanceRepository addressTokenBalanceRepository;
+  @Mock
+  VerifiedScriptRepository verifiedScriptRepository;
   @Mock
   TxService txService;
-
   @Mock
-  TokenMapper tokenMapper;
-
+  NativeScript nativeScript;
   @Mock
-  AssetMetadataMapper assetMetadataMapper;
-
+  MaTxMintRepository maTxMintRepository;
   @InjectMocks
   ScriptServiceImpl scriptService;
 
   @BeforeEach
-  void setup() {
+  void setup() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     ScriptMapper scriptMapper = new ScriptMapperImpl();
+    AssetMetadataMapper assetMetadataMapper = new AssetMetadataMapperImpl();
+    TokenMapper tokenMapper = new TokenMapperImpl();
     ReflectionTestUtils.setField(scriptService, "scriptMapper", scriptMapper);
+    ReflectionTestUtils.setField(scriptService,"assetMetadataMapper",assetMetadataMapper);
+    ReflectionTestUtils.setField(scriptService,"tokenMapper",tokenMapper);
+    when(blockRepository.findFirstShellyBlock()).thenReturn(Optional.of(Block.builder()
+        .blockNo(1L)
+        .slotNo(1L)
+        .time(Timestamp.valueOf("2020-07-29 21:44:51")).build()));
+    when(blockRepository.findFirstBlock()).thenReturn(Optional.of(Block.builder()
+        .blockNo(2L)
+        .slotNo(2L)
+        .time(Timestamp.valueOf("2017-09-23 21:44:51")).build()));
+    Method postConstruct =  ScriptServiceImpl.class.getDeclaredMethod("init"); // methodName,parameters
+    postConstruct.setAccessible(true);
+    postConstruct.invoke(scriptService);
   }
 
   @Test
-  void testGetNativeScripts() {
+  void testGetNativeScripts_thenReturn() {
     // Given
     Pageable pageable = PageRequest.of(0, 1);
     List<NativeScriptInfo> scriptList = List.of(
@@ -120,6 +150,17 @@ class ScriptServiceTest {
     Assertions.assertEquals("hash", response.getData().get(0).getScriptHash());
     Assertions.assertEquals(2, response.getData().get(0).getNumberOfTokens());
     Assertions.assertEquals(3, response.getData().get(0).getNumberOfAssetHolders());
+  }
+
+  @Test
+  void testGetNativeScripts_shouldThrowExceptionNotFoundLastestBlock(){
+    Pageable pageable = PageRequest.of(0, 1);
+    NativeScriptFilterRequest request = new NativeScriptFilterRequest();
+
+    when(blockRepository.findLatestBlock()).thenReturn(Optional.empty());
+
+    Assertions.assertThrows(BusinessException.class,()->
+        scriptService.getNativeScripts(request,pageable));
   }
 
   @Test
@@ -318,5 +359,216 @@ class ScriptServiceTest {
     Assertions.assertTrue(response.contains("input2"));
     Assertions.assertTrue(response.contains("output1"));
     Assertions.assertTrue(response.contains("output2"));
+  }
+
+  @Test
+  void testGetNativeScriptTokens_thenReturn(){
+    String scriptHash = "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79";
+    NativeScriptInfo nativeScriptInfo = NativeScriptInfo.builder()
+        .scriptHash(scriptHash)
+        .numberOfTokens(2L)
+        .build();
+    Pageable pageable = PageRequest.of(0,2);
+    TokenProjection projection1 = mock(TokenProjection.class);
+    when(projection1.getPolicy()).thenReturn(scriptHash);
+    TokenProjection projection2 = mock(TokenProjection.class);
+    when(projection2.getPolicy()).thenReturn("scriptHash");
+
+    when(nativeScriptInfoRepository.findByScriptHash(scriptHash)).thenReturn(Optional.of(nativeScriptInfo));
+    when(multiAssetRepository.findTokenInfoByScriptHash(scriptHash,pageable)).thenReturn(List.of(projection1,projection2));
+
+    var actual = scriptService.getNativeScriptTokens(scriptHash,pageable);
+
+    Assertions.assertEquals(2,actual.getTotalItems());
+    Assertions.assertTrue(actual.getData().get(0).getPolicy().equals(scriptHash));
+    Assertions.assertTrue(actual.getData().get(1).getPolicy().equals("scriptHash"));
+  }
+
+  @Test
+  void testGetNativeScriptTokens_whenNotFoundNativeScriptByScriptHash_thenReturn(){
+    String scriptHash = "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79";
+    Pageable pageable = PageRequest.of(0,2);
+    TokenProjection projection1 = mock(TokenProjection.class);
+    when(projection1.getPolicy()).thenReturn(scriptHash);
+
+    when(nativeScriptInfoRepository.findByScriptHash(scriptHash)).thenReturn(Optional.empty());
+    when(multiAssetRepository.countMultiAssetByPolicy(scriptHash)).thenReturn(Long.valueOf(1));
+    when(multiAssetRepository.findTokenInfoByScriptHash(scriptHash,pageable)).thenReturn(List.of(projection1));
+
+    var actual = scriptService.getNativeScriptTokens(scriptHash,pageable);
+
+    Assertions.assertEquals(1,actual.getTotalItems());
+    Assertions.assertTrue(actual.getData().get(0).getPolicy().equals(scriptHash));
+  }
+
+  @Test
+  void testGetNativeScriptHolders_thenReturn(){
+    String scriptHash = "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79";
+    Pageable pageable = PageRequest.of(0,2);
+    Long addressId = 1L;
+    NativeScriptInfo nativeScriptInfo = NativeScriptInfo.builder()
+        .scriptHash(scriptHash)
+        .numberOfTokens(2L)
+        .build();
+    Address address = Address.builder()
+        .id(addressId)
+        .address("address")
+        .build();
+    AddressTokenProjection projection = mock(AddressTokenProjection.class);
+    when(projection.getPolicy()).thenReturn(scriptHash);
+    when(projection.getAddressId()).thenReturn(addressId);
+    when(addressTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash,pageable)).thenReturn(List.of(projection));
+    when(addressRepository.findAddressByIdIn(Set.of(addressId))).thenReturn(List.of(address));
+
+    var actual = scriptService.getNativeScriptHolders(scriptHash,pageable);
+
+    Assertions.assertTrue(actual.getData().get(0).getPolicy().equals(scriptHash));
+    Assertions.assertEquals(1,actual.getTotalItems());
+    Assertions.assertNull(actual.getData().get(0).getAddressId());
+  }
+
+  @Test
+  void testVerifyNativeScript_thenReturn() throws BusinessException {
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson = "{\n"
+        + "    \"type\": \"all\",\n"
+        + "    \"scripts\": [\n"
+        + "        {\n"
+        + "            \"type\": \"sig\",\n"
+        + "            \"keyHash\": \"26bacc7b88e2b40701387c521cd0c50d5c0cfa4c6c6d7f0901395757\"\n"
+        + "        },\n"
+        + "        {\n"
+        + "            \"type\": \"before\",\n"
+        + "            \"slot\": 23069343\n"
+        + "        }\n"
+        + "    ]\n"
+        + "}";
+    Script script = Script.builder()
+        .hash(scriptHash)
+        .type(ScriptType.TIMELOCK)
+        .json(null)
+        .build();
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
+    when(verifiedScriptRepository.existsVerifiedScriptByHash(scriptHash)).thenReturn(false);
+    when(verifiedScriptRepository.save(any(VerifiedScript.class))).thenAnswer(i -> i.getArguments()[0]);
+    String actual = scriptService.verifyNativeScript(scriptHash,scriptJson);
+
+    Assertions.assertEquals(scriptJson,actual);
+  }
+
+  @Test
+  void testVerifyNativeScript_shouldThrowExceptionWhenScriptHashNotFound(){
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson = "json";
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class, () ->
+        scriptService.verifyNativeScript(scriptHash,scriptJson));
+  }
+
+  @Test
+  void testVerifyNativeScript_shouldThrowExceptionWhenFoundScriptNotMatchType(){
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson = "json";
+    Script script = Script.builder()
+        .hash(scriptHash)
+        .type(ScriptType.PLUTUSV1)
+        .json(null)
+        .build();
+
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
+
+    Assertions.assertThrows(BusinessException.class,()->
+        scriptService.verifyNativeScript(scriptHash,scriptJson));
+  }
+
+  @Test
+  void testVerifyNativeScript_shouldThrowExceptionWhenExistVerifiedScript(){
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson = "json";
+    Script script = Script.builder()
+        .hash(scriptHash)
+        .type(ScriptType.TIMELOCK)
+        .json(null)
+        .build();
+
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
+    when(verifiedScriptRepository.existsVerifiedScriptByHash(scriptHash)).thenReturn(true);
+
+    Assertions.assertThrows(BusinessException.class,()->
+        scriptService.verifyNativeScript(scriptHash,scriptJson));
+  }
+
+  @Test
+  void testGetNativeScriptDetail_shouldReturnNativeScriptResponse(){
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson = getScripJson();
+    Script script = Script.builder()
+        .hash(scriptHash)
+        .type(ScriptType.TIMELOCK)
+        .json(null)
+        .build();
+
+    VerifiedScript verifiedScript = VerifiedScript.builder()
+        .hash(scriptHash)
+        .json(scriptJson)
+        .build();
+
+    NativeScriptInfo nativeScriptInfo = NativeScriptInfo.builder()
+            .scriptHash(scriptHash)
+            .id(1L)
+            .numberOfTokens(2L)
+            .numberOfAssetHolders(3L)
+            .build();
+
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
+    when(nativeScriptInfoRepository.findByScriptHash(scriptHash)).thenReturn(Optional.of(nativeScriptInfo));
+    when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
+    when(maTxMintRepository.countByPolicy(scriptHash)).thenReturn(2L);
+    var actual = scriptService.getNativeScriptDetail(scriptHash);
+
+    Assertions.assertEquals(nativeScriptInfo.getNumberOfTokens(),actual.getNumberOfTokens());
+    Assertions.assertEquals(nativeScriptInfo.getNumberOfAssetHolders(),actual.getNumberOfAssetHolders());
+    Assertions.assertTrue(actual.getVerifiedContract());
+    Assertions.assertFalse(actual.getIsOneTimeMint());
+    Assertions.assertEquals(actual.getConditionType(),
+        org.cardanofoundation.ledgersync.common.common.nativescript.ScriptType.atLeast);
+    Assertions.assertEquals(actual.getScriptHash(),scriptHash);
+    Assertions.assertEquals(BigInteger.TWO,actual.getRequired());
+  }
+
+  @Test
+  void testGetNativeScriptDetail_shouldThrowExceptionScriptHashNotFound(){
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson = "json";
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(BusinessException.class, () ->
+        scriptService.verifyNativeScript(scriptHash,scriptJson));
+  }
+
+  String getScripJson(){
+    return "{\n"
+        + "  \"type\": \"any\",\n"
+        + "  \"scripts\": [\n"
+        + "    {\n"
+        + "      \"type\": \"all\",\n"
+        + "      \"scripts\": [\n"
+        + "        {\n"
+        + "          \"type\": \"after\",\n"
+        + "          \"slot\": 25732159\n"
+        + "        },\n"
+        + "        {\n"
+        + "          \"type\": \"atLeast\",\n"
+        + "          \"required\": 2,\n"
+        + "          \"scripts\": [\n"
+        + "            {\n"
+        + "              \"type\": \"sig\",\n"
+        + "              \"keyHash\": \"eaeb848139b224cd0c2eaba28ef17d788989d2ec4da3cda54281bbb8\"\n"
+        + "            }\n"
+        + "          ]\n"
+        + "        }\n"
+        + "      ]\n"
+        + "    }\n"
+        + "  ]\n"
+        + "}";
   }
 }
