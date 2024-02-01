@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -34,7 +33,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
@@ -201,22 +199,11 @@ public class PoolReportServiceImpl implements PoolReportService {
                 .toList();
         return new BaseFilterResponse<>(this.convertListToPage(epochSizeList, pageable));
       } else {
-        return new BaseFilterResponse<>(null);
+        return new BaseFilterResponse<>();
       }
 
     } else {
-      Page<PoolReportProjection> epochSizeProjectionPage =
-          epochStakeRepository.getEpochSizeByPoolReport(
-              poolReport.getPoolView(),
-              poolReport.getBeginEpoch(),
-              poolReport.getEndEpoch(),
-              pageable);
-      List<PoolReportProjection> epochSizeProjections = epochSizeProjectionPage.getContent();
-      List<PoolReportDetailResponse.EpochSize> epochSizes =
-          epochSizeProjections.stream()
-              .map(PoolReportDetailResponse.EpochSize::toDomain)
-              .collect(Collectors.toList());
-      return new BaseFilterResponse<>(epochSizeProjectionPage, epochSizes);
+      return new BaseFilterResponse<>();
     }
   }
 
@@ -251,6 +238,10 @@ public class PoolReportServiceImpl implements PoolReportService {
   public BaseFilterResponse<RewardResponse> fetchRewardsDistribution(
       Long reportId, Pageable pageable, String username) {
     PoolReportHistory poolReport = getPoolReportHistory(reportId, username);
+    if (Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return new BaseFilterResponse<>();
+    }
+
     return poolLifecycleService.listRewardFilter(
         poolReport.getPoolView(), poolReport.getBeginEpoch(), poolReport.getEndEpoch(), pageable);
   }

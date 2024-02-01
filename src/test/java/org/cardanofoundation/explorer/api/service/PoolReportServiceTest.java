@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.junit.jupiter.api.Assertions;
@@ -32,12 +35,14 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegist
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpdateDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.repository.explorer.PoolReportRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.*;
@@ -60,6 +65,7 @@ public class PoolReportServiceTest {
 
   @Mock KafkaService kafkaService;
   @Mock ReportHistoryService reportHistoryService;
+  @Mock PoolHistoryRepository poolHistoryRepository;
 
   @Mock RoleService roleService;
 
@@ -223,17 +229,87 @@ public class PoolReportServiceTest {
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     Page<PoolReportProjection> poolReportProjections =
         new PageImpl<>(List.of(), PageRequest.of(0, 1), 0);
-    when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(), any()))
-        .thenReturn(poolReportProjections);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
     var expect = new BaseFilterResponse<>(poolReportProjections, List.of());
 
     var response = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 1), username);
 
-    Assertions.assertEquals(expect.getData(), response.getData());
+    Assertions.assertNull(response.getData());
     Assertions.assertEquals(expect.getTotalItems(), response.getTotalItems());
     Assertions.assertEquals(expect.getCurrentPage(), response.getCurrentPage());
     Assertions.assertEquals(expect.getTotalPages(), response.getTotalPages());
+  }
+
+  @Test
+  void testFetchEpochSize_useKoios_thenReturnResponse() {
+    Long reportId = 1L;
+    String username = "username";
+    PoolReportHistory poolReport =
+        PoolReportHistory.builder()
+            .poolView("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
+            .isPoolSize(true)
+            .eventRegistration(true)
+            .eventDeregistration(true)
+            .eventReward(true)
+            .eventPoolUpdate(true)
+            .isFeesPaid(true)
+            .beginEpoch(300)
+            .endEpoch(410)
+            .reportHistory(
+                ReportHistory.builder()
+                    .username(username)
+                    .storageKey("storageKey")
+                    .reportName("reportName")
+                    .status(ReportStatus.GENERATED)
+                    .type(ReportType.STAKE_KEY)
+                    .build())
+            .build();
+    PoolHistoryKoiosProjection projection = Mockito.mock(PoolHistoryKoiosProjection.class);
+    when(projection.getPoolFees()).thenReturn(BigInteger.ONE);
+    when(projection.getEpochNo()).thenReturn(350);
+    when(projection.getActiveStake()).thenReturn(BigInteger.valueOf(100L));
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.checkPoolHistoryForPool(anySet())).thenReturn(false);
+    when(fetchRewardDataService.fetchPoolHistoryForPool(anySet())).thenReturn(true);
+    when(poolHistoryRepository.getPoolHistoryKoios(poolReport.getPoolView()))
+        .thenReturn(List.of(projection));
+
+    var actual = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 2), username);
+
+    Assertions.assertEquals("350", actual.getData().get(0).getEpoch());
+    Assertions.assertEquals(BigDecimal.valueOf(100L), actual.getData().get(0).getSize());
+    Assertions.assertEquals(1, actual.getTotalItems());
+  }
+
+  @Test
+  void fetchEpochSize_shouldReturnRewardNotAvailable() {
+    Long reportId = 1L;
+    String username = "username";
+    PoolReportHistory poolReport =
+        PoolReportHistory.builder()
+            .poolView("pool1c8k78ny3xvsfgenhf4yzvpzwgzxmz0t0um0h2xnn2q83vjdr5dj")
+            .isPoolSize(true)
+            .eventRegistration(true)
+            .eventDeregistration(true)
+            .eventReward(true)
+            .eventPoolUpdate(true)
+            .isFeesPaid(true)
+            .beginEpoch(300)
+            .endEpoch(410)
+            .reportHistory(
+                ReportHistory.builder()
+                    .username(username)
+                    .storageKey("storageKey")
+                    .reportName("reportName")
+                    .status(ReportStatus.GENERATED)
+                    .type(ReportType.STAKE_KEY)
+                    .build())
+            .build();
+    when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    var response = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 1), username);
+    Assertions.assertNull(response.getData());
   }
 
   @Test
@@ -327,6 +403,7 @@ public class PoolReportServiceTest {
                     .build())
             .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.listRewardFilter(any(), any(), any(), any()))
         .thenReturn(rewardResponse);
