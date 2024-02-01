@@ -6,6 +6,8 @@ import java.time.LocalDate;
 public interface AggregateAddressBalanceProjection {
 
   LocalDate getDay();
+
   BigInteger getBalance();
+
   Long getAddressId();
 }

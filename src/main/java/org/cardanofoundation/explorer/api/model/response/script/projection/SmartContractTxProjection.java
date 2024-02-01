@@ -6,11 +6,18 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeTy
 
 public interface SmartContractTxProjection {
   String getHash();
+
   Timestamp getTime();
+
   Long getBlockNo();
+
   Integer getEpochNo();
+
   Integer getEpochSlotNo();
+
   Integer getAbsoluteSlot();
+
   Long getTxId();
+
   ScriptPurposeType getScriptPurposeType();
 }

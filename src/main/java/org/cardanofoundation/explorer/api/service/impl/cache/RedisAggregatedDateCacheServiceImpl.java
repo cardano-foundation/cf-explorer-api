@@ -27,8 +27,8 @@ public class RedisAggregatedDateCacheServiceImpl implements AggregatedDataCacheS
   private static final String BLOCK_INSERT_TIME_HASH_KEY = "LATEST_BLOCK_INSERT_TIME";
   private final RedisTemplate<String, String> redisTemplate;
 
-  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-      "yyyy-MM-dd HH:mm:ss");
+  private static final DateTimeFormatter DATE_TIME_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   @Value("${application.network}")
   private String network;
@@ -67,5 +67,4 @@ public class RedisAggregatedDateCacheServiceImpl implements AggregatedDataCacheS
   private String getRedisKey(String key) {
     return String.join(CommonConstant.UNDERSCORE, network.toUpperCase(), key);
   }
-
 }

@@ -5,11 +5,7 @@ import lombok.Setter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/**
- * Class stored kafka topic name
- */
-
-
+/** Class stored kafka topic name */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "spring.kafka.topics")

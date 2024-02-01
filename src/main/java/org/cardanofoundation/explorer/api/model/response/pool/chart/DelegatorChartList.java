@@ -1,8 +1,9 @@
 package org.cardanofoundation.explorer.api.model.response.pool.chart;
 
-import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
 import lombok.Getter;
 import lombok.Setter;
+
+import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
 
 @Getter
 @Setter

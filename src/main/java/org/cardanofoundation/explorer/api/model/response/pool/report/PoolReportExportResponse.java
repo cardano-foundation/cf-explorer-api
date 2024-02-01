@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.model.response.pool.report;
 
+import java.io.ByteArrayInputStream;
+
 import lombok.Builder;
 import lombok.Data;
-
-import java.io.ByteArrayInputStream;
 
 @Data
 @Builder

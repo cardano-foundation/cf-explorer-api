@@ -9,14 +9,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-//@EnableJpaAuditing
+// @EnableJpaAuditing
 @EnableCaching
-@EntityScan( {"org.cardanofoundation.explorer.*", "org.cardanofoundation.*"})
+@EntityScan({"org.cardanofoundation.explorer.*", "org.cardanofoundation.*"})
 @EnableScheduling
 public class ExplorerApiApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(ExplorerApiApplication.class, args);
   }
-
 }

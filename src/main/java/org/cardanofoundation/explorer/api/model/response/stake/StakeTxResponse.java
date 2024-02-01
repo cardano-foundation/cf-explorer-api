@@ -3,9 +3,11 @@ package org.cardanofoundation.explorer.api.model.response.stake;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.cardanofoundation.explorer.consumercommon.entity.StakeDeregistration;
 import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
 
@@ -13,8 +15,7 @@ import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
 @Setter
 public class StakeTxResponse implements Serializable {
 
-  @JsonIgnore
-  private Long txId;
+  @JsonIgnore private Long txId;
 
   private String txHash;
 
@@ -28,13 +29,11 @@ public class StakeTxResponse implements Serializable {
 
   private Integer epochSlotNo;
 
-  @JsonIgnore
-  private Long stakeAddressId;
+  @JsonIgnore private Long stakeAddressId;
 
   private String stakeKey;
 
-  public StakeTxResponse() {
-  }
+  public StakeTxResponse() {}
 
   public StakeTxResponse(StakeRegistration stakeRegistration) {
     this.txId = stakeRegistration.getTxId();
@@ -45,5 +44,4 @@ public class StakeTxResponse implements Serializable {
     this.txId = stakeDeRegistration.getTxId();
     this.stakeAddressId = stakeDeRegistration.getStakeAddressId();
   }
-
 }

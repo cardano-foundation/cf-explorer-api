@@ -46,6 +46,7 @@ public class HistoriesProtocol {
   List<ProtocolHistory> maxValSize;
   List<ProtocolHistory> collateralPercent;
   List<ProtocolHistory> maxCollateralInputs;
+
   @JsonProperty("coinsPerUTxOByte")
   List<ProtocolHistory> coinsPerUtxoSize;
 }

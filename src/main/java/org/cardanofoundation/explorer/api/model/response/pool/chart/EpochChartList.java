@@ -1,10 +1,11 @@
 package org.cardanofoundation.explorer.api.model.response.pool.chart;
 
-import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
 import java.math.BigInteger;
+
 import lombok.Getter;
 import lombok.Setter;
 
+import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
 
 @Getter
 @Setter

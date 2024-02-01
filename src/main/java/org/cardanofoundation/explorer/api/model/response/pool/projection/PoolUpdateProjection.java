@@ -5,15 +5,15 @@ import java.sql.Timestamp;
 
 public interface PoolUpdateProjection {
 
-   Long getPoolUpdateId();
+  Long getPoolUpdateId();
 
-   String getTxHash();
+  String getTxHash();
 
-   BigInteger getFee();
+  BigInteger getFee();
 
-   Timestamp getTime();
+  Timestamp getTime();
 
-   Double getMargin();
+  Double getMargin();
 
-   BigInteger getDeposit();
+  BigInteger getDeposit();
 }

@@ -18,11 +18,13 @@ public interface AggregatePoolInfoRepository extends JpaRepository<AggregatePool
 
   AggregatePoolInfo findByPoolId(Long poolId);
 
-  @Query(value = "SELECT ap.poolId as poolId, COALESCE(ap.delegatorCount, 0) as numberDelegators, "
-      + "COALESCE(ap.blockInEpoch, 0) as epochBlock, "
-      + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock "
-      + "from AggregatePoolInfo ap "
-      + "WHERE ap.poolId NOT IN :exceptPoolIds")
-  Page<PoolListProjection> findAllByPoolIdNotIn(@Param("exceptPoolIds") Collection<Long> exceptPoolIds,
-                                             Pageable pageable);
+  @Query(
+      value =
+          "SELECT ap.poolId as poolId, COALESCE(ap.delegatorCount, 0) as numberDelegators, "
+              + "COALESCE(ap.blockInEpoch, 0) as epochBlock, "
+              + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock "
+              + "from AggregatePoolInfo ap "
+              + "WHERE ap.poolId NOT IN :exceptPoolIds")
+  Page<PoolListProjection> findAllByPoolIdNotIn(
+      @Param("exceptPoolIds") Collection<Long> exceptPoolIds, Pageable pageable);
 }
