@@ -54,7 +54,6 @@ public class MarketDataServiceTest {
     String currency = "usd";
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     when(valueOperations.get(any())).thenReturn(null);
-    ReflectionTestUtils.setField(marketDataService, "apiMarketDataUrl", "localhost:8080");
     when(webClient.get()).thenReturn(requestHeadersUriMock);
     when(requestHeadersUriMock.uri(String.format("localhost:8080", currency)))
         .thenReturn(requestHeadersMock);

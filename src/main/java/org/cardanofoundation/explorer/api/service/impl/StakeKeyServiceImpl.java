@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -168,14 +167,24 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       }
     }
     stakeAddressResponse.setStakeAddress(stake);
-    BigInteger stakeRewardWithdrawn =
-        withdrawalRepository.getRewardWithdrawnByStakeAddress(stake).orElse(BigInteger.ZERO);
-    BigInteger stakeAvailableReward =
-        rewardRepository.getAvailableRewardByStakeAddress(stake).orElse(BigInteger.ZERO);
-    stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
-    stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
-    stakeAddressResponse.setTotalStake(
-        stakeAddress.getBalance().add(stakeAvailableReward).subtract(stakeRewardWithdrawn));
+    if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
+      BigInteger stakeRewardWithdrawn =
+          withdrawalRepository.getRewardWithdrawnByStakeAddress(stake).orElse(BigInteger.ZERO);
+      BigInteger stakeAvailableReward =
+          rewardRepository.getAvailableRewardByStakeAddress(stake).orElse(BigInteger.ZERO);
+      stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
+      stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
+      stakeAddressResponse.setTotalStake(
+          stakeAddress.getBalance().add(stakeAvailableReward).subtract(stakeRewardWithdrawn));
+    }
+
+    if (stakeAddressResponse.getRewardAvailable() == null) {
+      stakeAddressResponse.setTotalStake(stakeAddress.getBalance());
+    } else {
+      stakeAddressResponse.setTotalStake(
+          stakeAddress.getBalance().add(stakeAddressResponse.getRewardAvailable()));
+    }
+
     StakeDelegationProjection poolData =
         delegationRepository.findPoolDataByAddress(stakeAddress).orElse(null);
     if (poolData != null) {
@@ -242,6 +251,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       String stakeKey, Pageable pageable) {
     Page<StakeWithdrawalProjection> withdrawalHistories =
         withdrawalRepository.getWithdrawalByAddress(stakeKey, pageable);
+
+    if (withdrawalHistories.isEmpty() && Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return new BaseFilterResponse<>();
+    }
+
     return new BaseFilterResponse<>(withdrawalHistories);
   }
 
@@ -277,6 +291,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageableDouble);
     Set<String> stakeAddressList =
         StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
+    if (!fetchRewardDataService.useKoios()) {
+      return new BaseFilterResponse<>();
+    }
+
     if (!fetchRewardDataService.checkRewardAvailable(stakeAddressList.stream().toList())) {
       boolean fetchRewardResponse =
           fetchRewardDataService.fetchReward(stakeAddressList.stream().toList());
@@ -335,26 +353,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     StakeAnalyticResponse response = new StakeAnalyticResponse();
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElse(0);
     Boolean useKoios = fetchRewardDataService.useKoios();
-    BigInteger activeStake;
-    BigInteger liveStake;
+    BigInteger activeStake = null;
+    BigInteger liveStake = null;
     if (Boolean.TRUE.equals(useKoios)) {
       activeStake = poolInfoRepository.getTotalActiveStake(currentEpoch);
       liveStake = poolInfoRepository.getTotalLiveStake(currentEpoch);
-    } else {
-      Object activeStakeObj =
-          redisTemplate
-              .opsForValue()
-              .get(CommonConstant.REDIS_TOTAL_ACTIVATE_STAKE + network + "_" + currentEpoch);
-      activeStake =
-          Objects.nonNull(activeStakeObj)
-              ? new BigInteger(String.valueOf(activeStakeObj))
-              : BigInteger.ZERO;
-      Object liveStakeObj =
-          redisTemplate.opsForValue().get(CommonConstant.REDIS_TOTAL_LIVE_STAKE + network);
-      liveStake =
-          Objects.nonNull(liveStakeObj)
-              ? new BigInteger(String.valueOf(liveStakeObj))
-              : BigInteger.ZERO;
     }
     response.setActiveStake(activeStake);
     response.setLiveStake(liveStake);
@@ -476,6 +479,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey) {
+    if (Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return null;
+    }
+
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
       if (!fetchRewardResponse) {
@@ -504,13 +511,17 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   public StakeAddressRewardDistribution getStakeAddressRewardDistributionInfo(String stakeKey) {
     StakeAddressRewardDistribution stakeAddressRewardDistribution =
         new StakeAddressRewardDistribution();
+    stakeAddressRewardDistribution.setStakeAddress(stakeKey);
+    if (Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
+      return stakeAddressRewardDistribution;
+    }
+
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
       if (!fetchRewardResponse) {
         throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
       }
     }
-    stakeAddressRewardDistribution.setStakeAddress(stakeKey);
     BigInteger stakeAvailableReward =
         rewardRepository.getAvailableRewardByStakeAddress(stakeKey).orElse(BigInteger.ZERO);
     stakeAddressRewardDistribution.setRewardAvailable(stakeAvailableReward);

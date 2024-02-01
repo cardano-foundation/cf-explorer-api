@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -120,8 +121,6 @@ class PoolLifecycleServiceTest {
             "poolViewNotFound", PoolActionType.POOL_DEREGISTRATION))
         .thenReturn(List.of());
     when(poolUpdateRepository.findPoolUpdateByPool(Set.of(-1L), null, null, null, pageable))
-        .thenReturn(Page.empty());
-    when(rewardRepository.getRewardInfoByPool("poolViewNotFound", pageable))
         .thenReturn(Page.empty());
     when(poolHashRepository.getPoolInfo("poolViewNotFound")).thenReturn(null);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(69));
@@ -830,6 +829,8 @@ class PoolLifecycleServiceTest {
     when(projection.getAmount()).thenReturn(BigInteger.TWO);
     when(projection.getEpochNo()).thenReturn(69);
     when(projection.getTime()).thenReturn(time);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.fetchRewardForPool(any())).thenReturn(true);
     when(rewardRepository.getRewardInfoByPool(
             "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", pageable))
         .thenReturn(new PageImpl<>(List.of(projection)));
@@ -860,9 +861,9 @@ class PoolLifecycleServiceTest {
     when(poolUpdateRepository.findOwnerAccountByPoolView(
             "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s"))
         .thenReturn(List.of("stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p"));
-    when(rewardRepository.getTotalRewardByPool(
-            "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s"))
-        .thenReturn(BigInteger.valueOf(10000));
+    //    when(rewardRepository.getTotalRewardByPool(
+    //        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(
+    //        BigInteger.valueOf(10000));
     when(fetchRewardDataService.useKoios()).thenReturn(false);
     Assertions.assertEquals(
         "Test",
@@ -902,11 +903,11 @@ class PoolLifecycleServiceTest {
     when(poolHashRepository.getPoolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s"))
         .thenReturn(projection);
     EpochRewardProjection rewardProjection = Mockito.mock(EpochRewardProjection.class);
-    when(rewardProjection.getEpochNo()).thenReturn(69);
-    when(rewardProjection.getAmount()).thenReturn(BigInteger.valueOf(1001));
-    when(rewardRepository.getRewardRefundByEpoch(
-            "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", Set.of(69)))
-        .thenReturn(List.of(rewardProjection));
+    //    when(rewardProjection.getEpochNo()).thenReturn(69);
+    //    when(rewardProjection.getAmount()).thenReturn(BigInteger.valueOf(1001));
+    //    when(rewardRepository.getRewardRefundByEpoch(
+    //        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", Set.of(69))).thenReturn(
+    //        List.of(rewardProjection));
     Assertions.assertEquals(
         1,
         poolLifecycleService
@@ -1049,6 +1050,7 @@ class PoolLifecycleServiceTest {
     when(poolHashRepository.findByViewOrHashRaw(poolView)).thenReturn(Optional.of(poolHash));
     when(rewardRepository.existsByPoolAndType(poolHash, RewardType.LEADER)).thenReturn(false);
     when(poolRetireRepository.existsByPoolHash(poolHash)).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     Assertions.assertEquals(
         true, poolLifecycleService.poolLifecycleStatus(poolView).getIsRegistration());
     Assertions.assertEquals(
@@ -1065,6 +1067,7 @@ class PoolLifecycleServiceTest {
     when(poolHashRepository.findByViewOrHashRaw(poolView)).thenReturn(Optional.of(poolHash));
     when(rewardRepository.existsByPoolAndType(poolHash, RewardType.LEADER)).thenReturn(true);
     when(poolRetireRepository.existsByPoolHash(poolHash)).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     Assertions.assertEquals(
         true, poolLifecycleService.poolLifecycleStatus(poolView).getIsRegistration());
     Assertions.assertEquals(true, poolLifecycleService.poolLifecycleStatus(poolView).getIsReward());
@@ -1080,6 +1083,7 @@ class PoolLifecycleServiceTest {
     when(poolHashRepository.findByViewOrHashRaw(poolView)).thenReturn(Optional.of(poolHash));
     when(rewardRepository.existsByPoolAndType(poolHash, RewardType.LEADER)).thenReturn(true);
     when(poolRetireRepository.existsByPoolHash(poolHash)).thenReturn(false);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     Assertions.assertEquals(
         true, poolLifecycleService.poolLifecycleStatus(poolView).getIsRegistration());
     Assertions.assertEquals(true, poolLifecycleService.poolLifecycleStatus(poolView).getIsReward());
@@ -1095,6 +1099,7 @@ class PoolLifecycleServiceTest {
     when(poolHashRepository.findByViewOrHashRaw(poolView)).thenReturn(Optional.of(poolHash));
     when(rewardRepository.existsByPoolAndType(poolHash, RewardType.LEADER)).thenReturn(true);
     when(poolRetireRepository.existsByPoolHash(poolHash)).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     Assertions.assertEquals(
         true, poolLifecycleService.poolLifecycleStatus(poolView).getIsRegistration());
     Assertions.assertEquals(true, poolLifecycleService.poolLifecycleStatus(poolView).getIsReward());
@@ -1110,6 +1115,7 @@ class PoolLifecycleServiceTest {
     when(poolHashRepository.findByViewOrHashRaw(poolView)).thenReturn(Optional.of(poolHash));
     when(rewardRepository.existsByPoolAndType(poolHash, RewardType.LEADER)).thenReturn(true);
     when(poolRetireRepository.existsByPoolHash(poolHash)).thenReturn(true);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     Assertions.assertEquals(
         false, poolLifecycleService.poolLifecycleStatus(poolView).getIsUpdate());
     Assertions.assertEquals(true, poolLifecycleService.poolLifecycleStatus(poolView).getIsReward());
