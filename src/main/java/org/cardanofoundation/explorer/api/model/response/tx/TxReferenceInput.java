@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
-import lombok.*;
-
 import java.math.BigInteger;
 import java.util.List;
+
+import lombok.*;
 
 @Getter
 @Setter
@@ -21,5 +21,4 @@ public class TxReferenceInput {
   private String scriptHash;
   private String scriptType;
   private String script;
-
 }

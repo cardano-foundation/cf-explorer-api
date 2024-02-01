@@ -1,11 +1,11 @@
 package org.cardanofoundation.explorer.api.model.response.script.smartcontract;
 
+import java.util.Set;
+
 import lombok.*;
 
 import org.cardanofoundation.explorer.api.common.enumeration.TxPurposeType;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
-
-import java.util.Set;
 
 @Getter
 @Setter

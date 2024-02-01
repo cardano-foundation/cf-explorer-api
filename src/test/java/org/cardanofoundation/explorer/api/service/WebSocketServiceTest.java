@@ -3,6 +3,15 @@ package org.cardanofoundation.explorer.api.service;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.blocksync.BlockSyncInfo;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
@@ -12,12 +21,6 @@ import org.cardanofoundation.explorer.api.service.impl.WebSocketServiceImpl;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
 import org.cardanofoundation.ledgersync.common.util.JsonUtil;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class WebSocketServiceTest {

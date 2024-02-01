@@ -1,8 +1,10 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
 import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.cardanofoundation.explorer.api.projection.TxInstantaneousRewardsProjection;
 
 @Getter

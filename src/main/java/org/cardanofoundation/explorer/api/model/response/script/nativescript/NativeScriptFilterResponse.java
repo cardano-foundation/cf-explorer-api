@@ -1,11 +1,12 @@
 package org.cardanofoundation.explorer.api.model.response.script.nativescript;
 
-import lombok.*;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.*;
+
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 
 @Getter
 @Setter
