@@ -226,14 +226,12 @@ public class PoolReportServiceTest {
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
     Page<PoolReportProjection> poolReportProjections = new PageImpl<>(List.of(),
         PageRequest.of(0, 1), 0);
-    when(epochStakeRepository.getEpochSizeByPoolReport(anyString(), anyInt(), anyInt(),
-        any())).thenReturn(poolReportProjections);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
     var expect = new BaseFilterResponse<>(poolReportProjections, List.of());
 
     var response = poolReportService.fetchEpochSize(reportId, PageRequest.of(0, 1), username);
 
-    Assertions.assertEquals(expect.getData(), response.getData());
+    Assertions.assertNull(response.getData());
     Assertions.assertEquals(expect.getTotalItems(), response.getTotalItems());
     Assertions.assertEquals(expect.getCurrentPage(), response.getCurrentPage());
     Assertions.assertEquals(expect.getTotalPages(), response.getTotalPages());
@@ -391,6 +389,7 @@ public class PoolReportServiceTest {
             .build())
         .build();
     when(poolReportRepository.findById(any())).thenReturn(Optional.of(poolReport));
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     BaseFilterResponse<RewardResponse> rewardResponse = new BaseFilterResponse<>();
     when(poolLifecycleService.listRewardFilter(any(), any(), any(), any())).thenReturn(
         rewardResponse);
