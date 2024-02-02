@@ -11,14 +11,15 @@ import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContra
 
 public interface SmartContractInfoRepository extends JpaRepository<SmartContractInfo, Long> {
 
-  @Query("SELECT sci FROM SmartContractInfo sci "
-      + "WHERE (:scriptType IS NULL OR sci.type = :scriptType) "
-      + "AND (:isScriptAny = TRUE OR"
-      + "(:isScriptNone = TRUE AND sci.txCount = 0) OR "
-      + "(:isScriptCert = sci.isScriptCert AND sci.isScriptCert = TRUE) OR "
-      + "(:isScriptMint = sci.isScriptMint AND sci.isScriptMint = TRUE) OR "
-      + "(:isScriptReward = sci.isScriptReward AND sci.isScriptReward = TRUE) OR "
-      + "(:isScriptSpend= sci.isScriptSpend AND sci.isScriptSpend = TRUE)) ")
+  @Query(
+      "SELECT sci FROM SmartContractInfo sci "
+          + "WHERE (:scriptType IS NULL OR sci.type = :scriptType) "
+          + "AND (:isScriptAny = TRUE OR"
+          + "(:isScriptNone = TRUE AND sci.txCount = 0) OR "
+          + "(:isScriptCert = sci.isScriptCert AND sci.isScriptCert = TRUE) OR "
+          + "(:isScriptMint = sci.isScriptMint AND sci.isScriptMint = TRUE) OR "
+          + "(:isScriptReward = sci.isScriptReward AND sci.isScriptReward = TRUE) OR "
+          + "(:isScriptSpend= sci.isScriptSpend AND sci.isScriptSpend = TRUE)) ")
   Page<SmartContractInfo> findAllByFilterRequest(
       @Param("scriptType") ScriptType scriptType,
       @Param("isScriptReward") Boolean isScriptReward,

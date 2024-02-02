@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.model.response;
 
-import lombok.*;
-
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
+import lombok.*;
 
 @Getter
 @Setter

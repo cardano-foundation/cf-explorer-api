@@ -33,5 +33,4 @@ public class BlockResponse {
   private String slotLeader;
 
   private Integer confirmation;
-
 }

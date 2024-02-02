@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.controller.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 
 public class PageZeroValidator implements ConstraintValidator<PageZeroValid, Pagination> {

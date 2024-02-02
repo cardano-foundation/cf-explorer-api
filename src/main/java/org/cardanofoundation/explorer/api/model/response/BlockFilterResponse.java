@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.model.response;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,5 +30,4 @@ public class BlockFilterResponse implements Serializable {
   private BigInteger totalOutput;
 
   private String slotLeader;
-
 }

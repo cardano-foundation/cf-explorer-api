@@ -1,15 +1,15 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
-import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
-import java.util.List;
-import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
+import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 
 public interface TxService {
 
@@ -47,12 +47,13 @@ public interface TxService {
    *
    * @param address wallet address
    * @param pageable page information
-   * @return  list transaction information in this page
+   * @return list transaction information in this page
    */
   BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address, Pageable pageable);
 
-
-  /** Get transaction by token
+  /**
+   * Get transaction by token
+   *
    * @param tokenId fingerprint of token
    * @param pageable page information
    * @return list transaction of token in this page
@@ -60,7 +61,6 @@ public interface TxService {
   BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId, Pageable pageable);
 
   /**
-   *
    * @param stakeKey stake key view value
    * @param pageable page information
    * @return list transaction of stake in this page
