@@ -127,13 +127,15 @@ class ScriptServiceTest {
                 .scriptHash("hash")
                 .type(ScriptType.TIMELOCK)
                 .id(1L)
+                .beforeSlot(101L)
+                .afterSlot(99L)
                 .numberOfTokens(2L)
                 .numberOfAssetHolders(3L)
                 .build());
     NativeScriptFilterRequest request = new NativeScriptFilterRequest();
     // When and The
     when(blockRepository.findLatestBlock())
-        .thenReturn(Optional.of(Block.builder().slotNo(1000L).build()));
+        .thenReturn(Optional.of(Block.builder().slotNo(100L).build()));
     when(nativeScriptInfoRepository.findAll(any(Specification.class), any(Pageable.class)))
         .thenReturn(new PageImpl<>(scriptList));
     when(multiAssetRepository.findTopMultiAssetByScriptHashIn(any())).thenReturn(List.of());
@@ -145,6 +147,7 @@ class ScriptServiceTest {
     Assertions.assertEquals("hash", response.getData().get(0).getScriptHash());
     Assertions.assertEquals(2, response.getData().get(0).getNumberOfTokens());
     Assertions.assertEquals(3, response.getData().get(0).getNumberOfAssetHolders());
+    Assertions.assertTrue(response.getData().get(0).getIsOpen());
   }
 
   @Test
@@ -504,10 +507,13 @@ class ScriptServiceTest {
         NativeScriptInfo.builder()
             .scriptHash(scriptHash)
             .id(1L)
+            .afterSlot(99L)
+            .beforeSlot(101L)
             .numberOfTokens(2L)
             .numberOfAssetHolders(3L)
             .build();
-
+    Block currentBlock = Block.builder().slotNo(100L).build();
+    when(blockRepository.findLatestBlock()).thenReturn(Optional.of(currentBlock));
     when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
     when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
         .thenReturn(Optional.of(nativeScriptInfo));
@@ -525,6 +531,7 @@ class ScriptServiceTest {
         org.cardanofoundation.ledgersync.common.common.nativescript.ScriptType.atLeast);
     Assertions.assertEquals(actual.getScriptHash(), scriptHash);
     Assertions.assertEquals(BigInteger.TWO, actual.getRequired());
+    Assertions.assertTrue(actual.getIsOpen());
   }
 
   @Test
