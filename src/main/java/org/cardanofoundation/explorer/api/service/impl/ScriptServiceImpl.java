@@ -128,6 +128,7 @@ public class ScriptServiceImpl implements ScriptService {
             nativeScriptResponse.setIsMultiSig(Long.valueOf(1L).compareTo(item.getNumberSig()) < 0);
           }
           nativeScriptResponse.setTokens(tokenResponseMap.get(item.getScriptHash()));
+          nativeScriptResponse.setIsOpen(setStatus(item,currrentBlock.getSlotNo()));
           return nativeScriptResponse;
         });
     return new BaseFilterResponse<>(nativeScriptPageResponse);
@@ -174,8 +175,27 @@ public class ScriptServiceImpl implements ScriptService {
     }
   }
 
+  private boolean setStatus(NativeScriptInfo nativeScriptInfo,Long currentSlot){
+    boolean isOpen = false;
+    boolean isNullBefore = Objects.isNull(nativeScriptInfo.getBeforeSlot());
+    boolean isNullAfter = Objects.isNull(nativeScriptInfo.getAfterSlot());
+    if(!isNullBefore&&!isNullAfter){
+      isOpen = Long.compare(nativeScriptInfo.getAfterSlot(),currentSlot)==-1 && Long.compare(nativeScriptInfo.getBeforeSlot(),currentSlot)==1;
+    } else if(isNullAfter&&!isNullBefore){
+      isOpen = Long.compare(nativeScriptInfo.getBeforeSlot(),currentSlot)==1;
+    } else if(isNullBefore&&!isNullAfter){
+      isOpen = Long.compare(nativeScriptInfo.getAfterSlot(),currentSlot)==-1;
+    } else if(isNullAfter&&isNullBefore){
+      isOpen = true;
+    }
+    return isOpen;
+  }
+
   @Override
   public NativeScriptResponse getNativeScriptDetail(String scriptHash) {
+    Block currrentBlock = blockRepository.findLatestBlock().orElseThrow(
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+    );
     NativeScriptResponse nativeScriptResponse = new NativeScriptResponse();
     Script script = scriptRepository.findByHash(scriptHash).orElseThrow(
         () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
@@ -199,6 +219,7 @@ public class ScriptServiceImpl implements ScriptService {
     nativeScriptResponse.setNumberOfAssetHolders(nativeScriptInfo.getNumberOfAssetHolders());
     nativeScriptResponse.setKeyHashes(new ArrayList<>());
     nativeScriptResponse.setVerifiedContract(false);
+    nativeScriptResponse.setIsOpen(setStatus(nativeScriptInfo,currrentBlock.getSlotNo()));
 
     String json = script.getJson();
     if (StringUtils.isEmpty(json)) {
