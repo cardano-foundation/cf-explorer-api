@@ -18,6 +18,5 @@ public class MetadataBolnisi {
   private boolean isCidVerified;
   private boolean isExternalApiAvailable;
   private List<WineryData> wineryData;
-  @JsonIgnore
-  private boolean isOnChainMetadataValid;
+  @JsonIgnore private boolean isOnChainMetadataValid;
 }

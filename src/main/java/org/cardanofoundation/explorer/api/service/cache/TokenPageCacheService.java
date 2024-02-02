@@ -1,10 +1,11 @@
 package org.cardanofoundation.explorer.api.service.cache;
 
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import java.util.Optional;
+
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 
 public interface TokenPageCacheService {
 

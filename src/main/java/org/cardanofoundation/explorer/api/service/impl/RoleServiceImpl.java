@@ -1,5 +1,8 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.REPORT_LIMIT_PER_24HOURS;
+import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.UNLIMITED_REPORT;
+
 import java.util.Map;
 import java.util.Objects;
 
@@ -8,10 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.service.RoleService;
-
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.REPORT_LIMIT_PER_24HOURS;
-import static org.cardanofoundation.explorer.api.common.constant.CommonConstant.UNLIMITED_REPORT;
-
 
 @Service
 @RequiredArgsConstructor

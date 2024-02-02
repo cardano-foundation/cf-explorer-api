@@ -1,6 +1,10 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
@@ -15,9 +19,6 @@ import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 public interface StakeKeyService {
 
@@ -59,7 +60,8 @@ public interface StakeKeyService {
    * @param stakeKey stake address
    * @return stake key delegation history
    */
-  BaseFilterResponse<StakeDelegationProjection> getDelegationHistories(String stakeKey, Pageable pageable);
+  BaseFilterResponse<StakeDelegationProjection> getDelegationHistories(
+      String stakeKey, Pageable pageable);
 
   /**
    * Get stake key stake history
@@ -75,7 +77,8 @@ public interface StakeKeyService {
    * @param stakeKey stake address
    * @return stake key withdrawal history
    */
-  BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(String stakeKey, Pageable pageable);
+  BaseFilterResponse<StakeWithdrawalProjection> getWithdrawalHistories(
+      String stakeKey, Pageable pageable);
 
   /**
    * Get stake key instantaneous rewards
@@ -83,8 +86,8 @@ public interface StakeKeyService {
    * @param stakeKey stake address
    * @return stake key instantaneous rewards
    */
-  BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(String stakeKey, Pageable pageable);
-
+  BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
+      String stakeKey, Pageable pageable);
 
   /**
    * Get top delegators
@@ -96,6 +99,7 @@ public interface StakeKeyService {
 
   /**
    * Get all address of stake key
+   *
    * @param stakeKey stake address
    * @return list address of stake address in this page
    */
@@ -110,6 +114,7 @@ public interface StakeKeyService {
 
   /**
    * Get stake balance analytics
+   *
    * @param stakeKey stake address
    * @param type type of analytics (day, week, month, 3month)
    * @return list balance value by stake
@@ -119,13 +124,13 @@ public interface StakeKeyService {
 
   /**
    * Get stake reward analytics
+   *
    * @param stakeKey stake address
    * @return list reward value by stake
    */
   List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey);
 
   /**
-   *
    * @param stakeKey stake address
    * @return stake reward of a stake key. Total reward and which reward this address has
    */

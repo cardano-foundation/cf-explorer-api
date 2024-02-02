@@ -1,11 +1,13 @@
 package org.cardanofoundation.explorer.api.model.response.stake.report;
 
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 import java.time.LocalDateTime;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
 
 @Getter
 @Setter

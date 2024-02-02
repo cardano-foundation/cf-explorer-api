@@ -21,6 +21,7 @@ public interface ReportHistoryService {
 
   /**
    * Check if the limit is reached
+   *
    * @param username
    * @return True if the limit is reached. Otherwise, return false
    */
@@ -28,6 +29,7 @@ public interface ReportHistoryService {
 
   /**
    * Get report limit information
+   *
    * @param username
    * @return ReportLimitResponse
    */

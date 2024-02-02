@@ -6,6 +6,7 @@ public interface KafkaService {
 
   /**
    * Send report history to kafka
+   *
    * @param reportHistory
    * @return true if send success, false if send failure
    */

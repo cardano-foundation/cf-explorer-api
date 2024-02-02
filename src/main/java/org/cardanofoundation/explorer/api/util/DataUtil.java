@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.util;
 
-
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;

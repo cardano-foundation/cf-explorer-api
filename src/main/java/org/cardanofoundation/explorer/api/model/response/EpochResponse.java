@@ -1,11 +1,13 @@
 package org.cardanofoundation.explorer.api.model.response;
 
-import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 
 @Getter
 @Setter

@@ -1,11 +1,17 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,6 +28,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
@@ -36,33 +46,18 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyt
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @WebMvcTest(TokenController.class)
 @Import(RoleFilterMapper.class)
 @AutoConfigureMockMvc(addFilters = false)
 class TokenControllerTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockBean
-  private TokenService tokenService;
+  @MockBean private TokenService tokenService;
 
-  @MockBean
-  private TxService txService;
+  @MockBean private TxService txService;
 
-  @MockBean
-  private AuthInterceptor authInterceptor;
+  @MockBean private AuthInterceptor authInterceptor;
 
   public static final String DATE_TIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
 
@@ -74,31 +69,33 @@ class TokenControllerTest {
   @Test
   void testFilter() throws Exception {
     // Setup
-    final TokenFilterResponse tokenFilterResponse = TokenFilterResponse.builder()
-        .id(1746535L)
-        .name("484f534b59")
-        .displayName("HOSKY")
-        .numberOfHolders(93233L)
-        .volumeIn24h("38874867596070")
-        .totalVolume("1276294773633720287")
-        .fingerprint("asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
-        .txCount(5959388)
-        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-        .supply("1000000000000001")
-        .createdOn(LocalDateTime.of(2021, 11, 5, 22, 15, 13))
-        .build();
+    final TokenFilterResponse tokenFilterResponse =
+        TokenFilterResponse.builder()
+            .id(1746535L)
+            .name("484f534b59")
+            .displayName("HOSKY")
+            .numberOfHolders(93233L)
+            .volumeIn24h("38874867596070")
+            .totalVolume("1276294773633720287")
+            .fingerprint("asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
+            .txCount(5959388)
+            .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
+            .supply("1000000000000001")
+            .createdOn(LocalDateTime.of(2021, 11, 5, 22, 15, 13))
+            .build();
 
-    final BaseFilterResponse<TokenFilterResponse> filter = new BaseFilterResponse<>(
-        new PageImpl<>(List.of(tokenFilterResponse)));
+    final BaseFilterResponse<TokenFilterResponse> filter =
+        new BaseFilterResponse<>(new PageImpl<>(List.of(tokenFilterResponse)));
 
-    when(tokenService.filterToken(anyString(), any(Pageable.class)))
-        .thenReturn(filter);
+    when(tokenService.filterToken(anyString(), any(Pageable.class))).thenReturn(filter);
 
     // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(get("/api/v1/tokens")
-            .param("query", "HOSKY")
-            .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get("/api/v1/tokens").param("query", "HOSKY").accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     // Verify the results
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -116,10 +113,13 @@ class TokenControllerTest {
     when(tokenService.getTokenDetail(anyString())).thenReturn(tokenResponse);
 
     // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/tokens/{tokenId}", "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get("/api/v1/tokens/{tokenId}", "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     // Verify the results
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -134,16 +134,20 @@ class TokenControllerTest {
     tokenMintTxResponse.setAmount("595990264");
     tokenMintTxResponse.setTime(LocalDateTime.of(2020, 1, 1, 0, 0, 0));
 
-    final BaseFilterResponse<TokenMintTxResponse> filterResponse = new BaseFilterResponse<>(
-        new PageImpl<>(List.of(tokenMintTxResponse)));
-    when(tokenService.getMintTxs(anyString(), any(Pageable.class)))
-        .thenReturn(filterResponse);
+    final BaseFilterResponse<TokenMintTxResponse> filterResponse =
+        new BaseFilterResponse<>(new PageImpl<>(List.of(tokenMintTxResponse)));
+    when(tokenService.getMintTxs(anyString(), any(Pageable.class))).thenReturn(filterResponse);
 
     // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/tokens/{tokenId}/mints", "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get(
+                        "/api/v1/tokens/{tokenId}/mints",
+                        "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     // Verify the results
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -158,23 +162,30 @@ class TokenControllerTest {
     metadataResponse.setDecimals(1000);
     metadataResponse.setTicker("ticker");
 
-    final BaseFilterResponse<TokenAddressResponse> filterResponse = new BaseFilterResponse<>(
-        new PageImpl<>(List.of(TokenAddressResponse.builder()
-            .name("484f534b59")
-            .displayName("HOSKY")
-            .address("Ae2tdPwUPEYxA9ADeqSQkY9jAa9PJSTQVczRrVi68PsViqvdsWVLvVMJTQh")
-            .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-            .quantity(BigInteger.valueOf(100L))
-            .metadata(metadataResponse)
-            .build())));
-    when(tokenService.getTopHolders(anyString(), any(Pageable.class)))
-        .thenReturn(filterResponse);
+    final BaseFilterResponse<TokenAddressResponse> filterResponse =
+        new BaseFilterResponse<>(
+            new PageImpl<>(
+                List.of(
+                    TokenAddressResponse.builder()
+                        .name("484f534b59")
+                        .displayName("HOSKY")
+                        .address("Ae2tdPwUPEYxA9ADeqSQkY9jAa9PJSTQVczRrVi68PsViqvdsWVLvVMJTQh")
+                        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
+                        .quantity(BigInteger.valueOf(100L))
+                        .metadata(metadataResponse)
+                        .build())));
+    when(tokenService.getTopHolders(anyString(), any(Pageable.class))).thenReturn(filterResponse);
 
     // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/tokens/{tokenId}/top_holders", "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get(
+                        "/api/v1/tokens/{tokenId}/top_holders",
+                        "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     // Verify the results
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -191,16 +202,19 @@ class TokenControllerTest {
         "67f852c0d4214d8291e3c887c180b105c6cf859d79284de6aea4cdcfb186d4e5");
     txFilterResponse.setEpochNo(1000);
 
-    final BaseFilterResponse<TxFilterResponse> filterResponse = new BaseFilterResponse<>(
-        new PageImpl<>(List.of(txFilterResponse)));
+    final BaseFilterResponse<TxFilterResponse> filterResponse =
+        new BaseFilterResponse<>(new PageImpl<>(List.of(txFilterResponse)));
     when(txService.getTransactionsByToken(anyString(), any(Pageable.class)))
         .thenReturn(filterResponse);
 
     // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/tokens/{tokenId}/txs", "asset1tgpj6sgc33av38fdrnsry6s8p0zv7k5yv0xzam")
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get("/api/v1/tokens/{tokenId}/txs", "asset1tgpj6sgc33av38fdrnsry6s8p0zv7k5yv0xzam")
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     // Verify the results
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -209,18 +223,24 @@ class TokenControllerTest {
   @Test
   void testGetTokenVolumeAnalytics() throws Exception {
     // Setup
-    final List<TokenVolumeAnalyticsResponse> tokenVolumeAnalyticsResponses = List.of(
-        new TokenVolumeAnalyticsResponse(LocalDateTime.of(2020, 1, 1, 0, 0, 0),
-            new BigInteger("100")));
+    final List<TokenVolumeAnalyticsResponse> tokenVolumeAnalyticsResponses =
+        List.of(
+            new TokenVolumeAnalyticsResponse(
+                LocalDateTime.of(2020, 1, 1, 0, 0, 0), new BigInteger("100")));
     when(tokenService.getTokenVolumeAnalytic(anyString(), eq(AnalyticType.ONE_DAY)))
         .thenReturn(tokenVolumeAnalyticsResponses);
 
     // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/tokens/analytics/{tokenId}/{type}",
-                "asset1ccfemzcyzlmg9r6mu7hs92y97cxm3utavs93ld", AnalyticType.ONE_DAY)
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get(
+                        "/api/v1/tokens/analytics/{tokenId}/{type}",
+                        "asset1ccfemzcyzlmg9r6mu7hs92y97cxm3utavs93ld",
+                        AnalyticType.ONE_DAY)
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     // Verify the results
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -230,16 +250,21 @@ class TokenControllerTest {
   @Test
   void testGetTokenVolumeAnalytics_WhenTokenServiceReturnsNoItems() throws Exception {
     // Setup
-    when(tokenService.getTokenVolumeAnalytic("asset1nfetquxh86tjthzs6prsrstm8ts8gcpuxd8x0z",
-        AnalyticType.ONE_DAY))
+    when(tokenService.getTokenVolumeAnalytic(
+            "asset1nfetquxh86tjthzs6prsrstm8ts8gcpuxd8x0z", AnalyticType.ONE_DAY))
         .thenReturn(Collections.emptyList());
 
     // Run the test
-    final MockHttpServletResponse response = mockMvc.perform(
-            get("/api/v1/tokens/analytics/{tokenId}/{type}",
-                "asset1nfetquxh86tjthzs6prsrstm8ts8gcpuxd8x0z", AnalyticType.ONE_DAY)
-                .accept(MediaType.APPLICATION_JSON))
-        .andReturn().getResponse();
+    final MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get(
+                        "/api/v1/tokens/analytics/{tokenId}/{type}",
+                        "asset1nfetquxh86tjthzs6prsrstm8ts8gcpuxd8x0z",
+                        AnalyticType.ONE_DAY)
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
 
     // Verify the results
     assertEquals(HttpStatus.OK.value(), response.getStatus());

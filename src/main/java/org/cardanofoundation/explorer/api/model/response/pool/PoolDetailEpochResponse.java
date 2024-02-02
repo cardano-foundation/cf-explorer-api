@@ -1,10 +1,12 @@
 package org.cardanofoundation.explorer.api.model.response.pool;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigInteger;
 
 import lombok.*;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolActiveStakeProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
