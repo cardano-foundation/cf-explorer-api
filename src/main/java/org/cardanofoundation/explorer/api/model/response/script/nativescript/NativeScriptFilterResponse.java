@@ -17,6 +17,7 @@ public class NativeScriptFilterResponse {
   private LocalDateTime after;
   private LocalDateTime before;
   private Boolean isMultiSig = false;
+  private Boolean isOpen = false;
   private Long numberOfTokens = 0L;
   private Long numberOfAssetHolders = 0L;
   private List<TokenFilterResponse> tokens = new ArrayList<>();

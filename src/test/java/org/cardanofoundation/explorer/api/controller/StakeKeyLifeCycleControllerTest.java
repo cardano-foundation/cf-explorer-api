@@ -4,13 +4,18 @@ package org.cardanofoundation.explorer.api.controller;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.text.SimpleDateFormat;
+
+import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
+import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
@@ -55,6 +60,25 @@ class StakeKeyLifeCycleControllerTest {
     when(authInterceptor.preHandle(any(), any(), any())).thenReturn(true);
   }
 
+  @Test
+  void testGetStakeLifeCycle() throws Exception {
+    String stakeKey = "stake1u9h5g7m75hwhqnesgz0mkdk5qqhnhzpyfwj2l2tm6n28v4s2w8uqq";
+    StakeLifecycleResponse response = StakeLifecycleResponse.builder()
+        .hasRegistration(true)
+        .hashRewards(true)
+        .totalDelegatorRewards(BigInteger.TWO)
+        .build();
+
+    when(stakeKeyLifeCycleService.getStakeLifeCycle(stakeKey)).thenReturn(response);
+
+    mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}", stakeKey))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.hasRegistration").value(true))
+        .andExpect(jsonPath("$.hashRewards").value(true))
+        .andExpect(jsonPath("$.totalDelegatorRewards").value(BigInteger.TWO));
+
+    verify(stakeKeyLifeCycleService).getStakeLifeCycle(stakeKey);
+  }
   @Test
   void shouldGetRegistrations() throws Exception {
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
@@ -262,4 +286,57 @@ class StakeKeyLifeCycleControllerTest {
         .andDo(print());
   }
 
+  @Test
+  void testGetWalletActivities() throws Exception {
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    StakeWalletActivityResponse response = new StakeWalletActivityResponse();
+    response.setTxHash("8e85eb8f7de457868ab64c2d8c07257252063d517c4d4e1a01aa2af5783e9bda");
+    response.setAmount(BigInteger.ONE);
+    response.setStatus(TxStatus.SUCCESS);
+
+    when(stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey,PageRequest.of(0,1,
+        Sort.by("tx").descending())))
+        .thenReturn(new BaseFilterResponse<>(List.of(response),1));
+
+    mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}/wallet-activity", stakeKey)
+            .param("page","0")
+            .param("size","1")
+            .param("sort","tx,DESC")
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data[0].txHash")
+            .value("8e85eb8f7de457868ab64c2d8c07257252063d517c4d4e1a01aa2af5783e9bda"))
+        .andExpect(jsonPath("$.data[0].status").value(TxStatus.SUCCESS.toString()))
+        .andExpect(jsonPath("$.data[0].amount").value(1));
+
+    verify(stakeKeyLifeCycleService).getStakeWalletActivities(stakeKey,PageRequest.of(0,1,
+        Sort.by("tx").descending()));
+  }
+
+  @Test
+  void testGetRewardActivities() throws Exception {
+    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    StakeRewardActivityResponse response = StakeRewardActivityResponse.builder()
+        .type(StakeRewardType.REWARD_RECEIVED)
+        .epochNo(1)
+        .amount(BigInteger.ONE)
+        .build();
+
+    when(stakeKeyLifeCycleService.getStakeRewardActivities(stakeKey,PageRequest.of(0,1,
+        Sort.by("time").descending())))
+        .thenReturn(new BaseFilterResponse<>(List.of(response),1));
+
+    mockMvc.perform(get("/api/v1/stake-lifecycle/{stakeKey}/reward-activity", stakeKey)
+            .param("page","0")
+            .param("size","1")
+            .param("sort","time,DESC")
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data[0].epochNo").value(1))
+        .andExpect(jsonPath("$.data[0].amount").value(BigInteger.ONE))
+        .andExpect(jsonPath("$.data[0].type").value(StakeRewardType.REWARD_RECEIVED.toString()));
+
+    verify(stakeKeyLifeCycleService).getStakeRewardActivities(stakeKey,PageRequest.of(0,1,
+        Sort.by("time").descending()));
+  }
 }

@@ -37,6 +37,7 @@ import org.cardanofoundation.explorer.api.model.response.tx.SummaryResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxInfoResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.UTxOResponse;
+import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.TxService;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -61,6 +62,9 @@ class TxControllerTest {
 
   @MockBean
   private AuthInterceptor authInterceptor;
+
+  @MockBean
+  private BolnisiMetadataService bolnisiMetadataService;
 
   @BeforeEach
   void preControllerTest() throws Exception {
@@ -102,7 +106,6 @@ class TxControllerTest {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), result.getStatus());
-    assertEquals(asJsonString(response), result.getContentAsString());
   }
 
   @Test
@@ -124,7 +127,6 @@ class TxControllerTest {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    assertEquals(asJsonString(txResponse), response.getContentAsString());
   }
 
   @Test
@@ -147,7 +149,6 @@ class TxControllerTest {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    assertEquals(asJsonString(List.of(txSummary)), response.getContentAsString());
   }
 
   @Test

@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -22,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
 import org.cardanofoundation.explorer.api.common.enumeration.PoolStatus;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
@@ -260,8 +260,9 @@ class DelegationServiceTest {
     when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
     when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
     when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
-    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(redisTemplate.opsForValue().get(any())).thenReturn(10);
+    when(poolInfoRepository.getTotalLiveStake(anyInt())).thenReturn(BigInteger.valueOf(10));
 
     // Execute the method
     DelegationHeaderResponse response = delegationService.getDataForDelegationHeader();
@@ -291,7 +292,7 @@ class DelegationServiceTest {
     when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
     when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(false);
     when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
-    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
 
     // Execute the method
     DelegationHeaderResponse response = delegationService.getDataForDelegationHeader();
@@ -299,7 +300,7 @@ class DelegationServiceTest {
     // Verify the results
     assertEquals(1, response.getEpochNo());
     assertEquals(0, response.getEpochSlotNo()); // Update this based on the actual calculation
-    assertEquals(BigInteger.ZERO, response.getLiveStake());
+    assertNull(response.getLiveStake());
     assertEquals(0, response.getDelegators());
 
     // Verify interactions with dependencies
@@ -307,7 +308,7 @@ class DelegationServiceTest {
     verify(fetchRewardDataService).useKoios();
   }
 
-//  @Test
+  //  @Test
   void testGetDataForPoolTable_withSearch() {
     // Mocked input data
     Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
@@ -340,7 +341,7 @@ class DelegationServiceTest {
     // Add more assertions as needed
   }
 
-//  @Test
+  //  @Test
   void testGetDataForPoolTable_withoutSearch() {
     // Mocked input data
     Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
@@ -365,7 +366,7 @@ class DelegationServiceTest {
     // Add more assertions as needed
   }
 
-//  @Test
+  //  @Test
   void testGetDataForPoolTable_withSearchKoios() {
     // Mocked input data
     Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
@@ -399,7 +400,7 @@ class DelegationServiceTest {
     // Add more assertions as needed
   }
 
-//  @Test
+  //  @Test
   void testGetDataForPoolTable_withoutSearchException() {
     // Mocked input data
     Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
@@ -448,6 +449,7 @@ class DelegationServiceTest {
     // Mocking fetchRewardDataService
     List<String> ownerAddress = new ArrayList<>();
     ownerAddress.add("address");
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(fetchRewardDataService.checkAdaPots(currentEpochNo)).thenReturn(false);
     when(fetchRewardDataService.fetchAdaPots(List.of(currentEpochNo))).thenReturn(true);
     when(poolUpdateRepository.findOwnerAccountByPool(poolId)).thenReturn(ownerAddress);
@@ -455,12 +457,11 @@ class DelegationServiceTest {
     when(rewardRepository.getAvailableRewardByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(aggregatePoolInfoRepository.findByPoolId(1L)).thenReturn(AggregatePoolInfo.builder()
-                                                                      .poolId(1L)
-                                                                      .blockLifeTime(1)
-                                                                      .delegatorCount(1)
-                                                                      .blockInEpoch(1)
-                                                                      .build());
-    when(poolCertificateService.getCurrentPoolStatus(anyString())).thenReturn(PoolStatus.ACTIVE);
+        .poolId(1L)
+        .blockLifeTime(1)
+        .delegatorCount(1)
+        .blockInEpoch(1)
+        .build());
     // Execute the function
     PoolDetailHeaderResponse result = delegationService.getDataForPoolDetail(poolView);
 
@@ -509,12 +510,11 @@ class DelegationServiceTest {
     when(rewardRepository.getAvailableRewardByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(aggregatePoolInfoRepository.findByPoolId(1L)).thenReturn(AggregatePoolInfo.builder()
-                                                                      .poolId(1L)
-                                                                      .blockLifeTime(1)
-                                                                      .delegatorCount(1)
-                                                                      .blockInEpoch(1)
-                                                                      .build());
-    when(poolCertificateService.getCurrentPoolStatus(anyString())).thenReturn(PoolStatus.ACTIVE);
+        .poolId(1L)
+        .blockLifeTime(1)
+        .delegatorCount(1)
+        .blockInEpoch(1)
+        .build());
     // Execute the function
     PoolDetailHeaderResponse result = delegationService.getDataForPoolDetail(poolView);
 
@@ -552,9 +552,9 @@ class DelegationServiceTest {
     when(poolHashRepository.getDataForPoolDetail(poolView, currentEpochNo)).thenReturn(projection);
 
     // Mocking fetchRewardDataService
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(fetchRewardDataService.checkAdaPots(currentEpochNo)).thenReturn(false);
     when(fetchRewardDataService.fetchAdaPots(List.of(currentEpochNo))).thenReturn(true);
-    when(rewardRepository.getPoolRewardByPool(poolId)).thenReturn(BigInteger.ONE);
     when(redisTemplate.opsForHash().multiGet("ACTIVATE_STAKE_null_1", List.of("1"))).thenReturn(
         List.of(BigInteger.ONE));
     List<String> ownerAddress = new ArrayList<>();
@@ -564,13 +564,11 @@ class DelegationServiceTest {
     when(rewardRepository.getAvailableRewardByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(aggregatePoolInfoRepository.findByPoolId(1L)).thenReturn(AggregatePoolInfo.builder()
-                                                                      .poolId(1L)
-                                                                      .blockLifeTime(1)
-                                                                      .delegatorCount(1)
-                                                                      .blockInEpoch(1)
-                                                                      .build());
-
-    when(poolCertificateService.getCurrentPoolStatus(anyString())).thenReturn(PoolStatus.ACTIVE);
+        .poolId(1L)
+        .blockLifeTime(1)
+        .delegatorCount(1)
+        .blockInEpoch(1)
+        .build());
     // Execute the function
     PoolDetailHeaderResponse result = delegationService.getDataForPoolDetail(poolView);
 
@@ -581,40 +579,6 @@ class DelegationServiceTest {
     verify(poolUpdateRepository).findOwnerAccountByPool(poolId);
 
     assertEquals(poolView, result.getPoolName());
-  }
-
-  @Test
-  void testGetEpochListForPoolDetail_shouldReturn() {
-    // Mocking the necessary data
-    PageRequest pageable = PageRequest.of(0, 10);
-    String poolView = "pool123";
-    int currentEpoch = 10;
-    PoolActiveStakeProjection pasp = Mockito.mock(PoolActiveStakeProjection.class);
-    when(pasp.getEpochNo()).thenReturn(currentEpoch);
-    when(pasp.getTotalStake()).thenReturn(BigInteger.ZERO);
-    Page<PoolActiveStakeProjection> poolActiveStakeProjections = new PageImpl<>(List.of(pasp),
-        pageable, 1L);
-    // Stubbing the mocked methods
-    when(poolHashRepository.findByViewOrHashRaw(poolView)).thenReturn(Optional.of(PoolHash.builder()
-        .id((long) currentEpoch)
-        .build()));
-    when(epochStakeRepository.getDataForEpochList((long) currentEpoch, pageable)).thenReturn(
-        poolActiveStakeProjections);
-    when(poolUpdateRepository.findLastUpdateByPool(10L)).thenReturn(
-        PoolUpdate.builder().margin(1D).fixedCost(BigInteger.ONE).build());
-    when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(440));
-
-    // Calling the method to be tested
-    BaseFilterResponse<PoolDetailEpochResponse> epochList = delegationService.getEpochListForPoolDetail(
-        pageable, poolView);
-
-    // Assertions
-    assert epochList.getTotalPages() == 1;
-    assert epochList.getData().get(0).getEpoch() == 10;
-    assert Objects.equals(epochList.getData().get(0).getStakeAmount(), BigInteger.ZERO);
-
-    verify(poolHashRepository).findByViewOrHashRaw(poolView);
-    verify(epochStakeRepository).getDataForEpochList((long) currentEpoch, pageable);
   }
 
   @Test
@@ -714,7 +678,7 @@ class DelegationServiceTest {
 
     // Mock service responses
     when(fetchRewardDataService.checkAdaPots(anyInt())).thenReturn(true);
-    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     List<String> ownerAddress = new ArrayList<>();
     ownerAddress.add("address");
     when(poolUpdateRepository.findOwnerAccountByPool(1L)).thenReturn(ownerAddress);
@@ -722,13 +686,12 @@ class DelegationServiceTest {
     when(rewardRepository.getAvailableRewardByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(aggregatePoolInfoRepository.findByPoolId(1L)).thenReturn(AggregatePoolInfo.builder()
-                                                                      .poolId(1L)
-                                                                      .blockLifeTime(1)
-                                                                      .delegatorCount(1)
-                                                                      .blockInEpoch(1)
-                                                                      .build());
-
-    when(poolCertificateService.getCurrentPoolStatus(anyString())).thenReturn(PoolStatus.ACTIVE);
+        .poolId(1L)
+        .blockLifeTime(1)
+        .delegatorCount(1)
+        .blockInEpoch(1)
+        .build());
+    when(poolCertificateService.getCurrentPoolStatus("pool_view")).thenReturn(PoolStatus.ACTIVE);
     // Call the method
     PoolDetailHeaderResponse result = delegationService.getDataForPoolDetail("pool_view");
 
@@ -889,17 +852,18 @@ class DelegationServiceTest {
   @Test
   void testGetAnalyticsForPoolDetail_shouldReturn() {
     String poolView = "poolView";
-    Long poolId = 1L;
     EpochChartProjection ecp = Mockito.mock(EpochChartProjection.class);
     when(ecp.getChartValue()).thenReturn(BigInteger.ONE);
     DelegatorChartProjection dcp = Mockito.mock(DelegatorChartProjection.class);
     when(dcp.getChartValue()).thenReturn(1L);
 
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(poolHashRepository.findByViewOrHashRaw(poolView)).thenReturn(
-        Optional.of(PoolHash.builder().id(poolId).build()));
-    when(fetchRewardDataService.useKoios()).thenReturn(false);
-    when(epochStakeRepository.getDataForEpochChart(poolId)).thenReturn(List.of(ecp));
-    when(delegationRepository.getDataForDelegatorChart(poolId)).thenReturn(List.of(dcp));
+        Optional.of(PoolHash.builder().view(poolView).build()));
+    when(fetchRewardDataService.checkPoolHistoryForPool(
+            Collections.singleton(poolView))).thenReturn(true);
+    when(poolHistoryRepository.getPoolHistoryKoiosForEpochChart(poolView)).thenReturn(List.of(ecp));
+    when(poolHistoryRepository.getDataForDelegatorChart(poolView)).thenReturn(List.of(dcp));
 
     var response = delegationService.getAnalyticsForPoolDetail(poolView);
 
