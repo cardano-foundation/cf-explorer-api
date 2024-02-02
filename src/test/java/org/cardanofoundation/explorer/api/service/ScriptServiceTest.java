@@ -512,9 +512,7 @@ class ScriptServiceTest {
             .numberOfTokens(2L)
             .numberOfAssetHolders(3L)
             .build();
-    Block currentBlock = Block.builder()
-        .slotNo(100L)
-        .build();
+    Block currentBlock = Block.builder().slotNo(100L).build();
     when(blockRepository.findLatestBlock()).thenReturn(Optional.of(currentBlock));
     when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
     when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
