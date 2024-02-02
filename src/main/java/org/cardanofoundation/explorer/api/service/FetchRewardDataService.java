@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.service;
 
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-
 import java.util.List;
 import java.util.Set;
+
+import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
 
 public interface FetchRewardDataService {
 

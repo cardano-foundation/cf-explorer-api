@@ -1,17 +1,21 @@
 package org.cardanofoundation.explorer.api.event.blocksync;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
-import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
-import org.cardanofoundation.explorer.api.service.WebSocketService;
-import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
+import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
+import org.cardanofoundation.explorer.api.service.WebSocketService;
+import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
 
 @Service
 @Log4j2

@@ -1,6 +1,16 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.search.AddressSearchResponse;
@@ -22,15 +32,6 @@ import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
 import org.cardanofoundation.explorer.consumercommon.entity.Script;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.util.Objects;
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
@@ -45,7 +46,6 @@ public class SearchServiceImpl implements SearchService {
 
   @Value("${application.network}")
   private String network;
-
 
   @Override
   public SearchResponse search(String query) {
@@ -97,15 +97,17 @@ public class SearchServiceImpl implements SearchService {
   private void searchToken(String query, SearchResponse searchResponse) {
     var token = multiAssetRepository.findByFingerprint(query);
     if (token.isPresent()) {
-        searchResponse.setToken(new TokenSearchResponse(token.get().getNameView(), token.get().getFingerprint()));
+      searchResponse.setToken(
+          new TokenSearchResponse(token.get().getNameView(), token.get().getFingerprint()));
     } else {
       Pageable pageable = PageRequest.of(0, 2);
       var tokenList = multiAssetRepository.findByNameViewLike(query, pageable);
       if (tokenList.size() == 1) {
         MultiAsset multiAsset = tokenList.get(0);
-        searchResponse.setToken(new TokenSearchResponse(multiAsset.getNameView(), multiAsset.getFingerprint()));
+        searchResponse.setToken(
+            new TokenSearchResponse(multiAsset.getNameView(), multiAsset.getFingerprint()));
       }
-      if(!CollectionUtils.isEmpty(tokenList)) {
+      if (!CollectionUtils.isEmpty(tokenList)) {
         searchResponse.setValidTokenName(true);
       }
     }
@@ -114,8 +116,9 @@ public class SearchServiceImpl implements SearchService {
   private void searchAddress(String query, SearchResponse searchResponse) {
     if (query.startsWith(CommonConstant.STAKE_ADDRESS_PREFIX)) {
       var stakeAddress = stakeAddressRepository.findByView(query);
-      stakeAddress.ifPresent(address
-          -> searchResponse.setAddress(new AddressSearchResponse(address.getView(), false, true)));
+      stakeAddress.ifPresent(
+          address ->
+              searchResponse.setAddress(new AddressSearchResponse(address.getView(), false, true)));
     } else {
       final int ADDRESS_MIN_LENGTH = 56;
       if (query.length() < ADDRESS_MIN_LENGTH) {
@@ -139,7 +142,7 @@ public class SearchServiceImpl implements SearchService {
    * @return true if valid and false if not
    */
   private boolean checkNetworkAddress(String address) {
-    if(address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
+    if (address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
       return !network.equals(CommonConstant.MAINNET_NETWORK);
     } else {
       return network.equals(CommonConstant.MAINNET_NETWORK);
@@ -149,33 +152,35 @@ public class SearchServiceImpl implements SearchService {
   private void searchPool(String query, SearchResponse searchResponse) {
     var pool = poolHashRepository.getPoolInfo(query);
     if (Objects.nonNull(pool)) {
-      searchResponse.setPool(new PoolSearchResponse(pool.getPoolName(), pool.getPoolView(), pool.getIcon()));
+      searchResponse.setPool(
+          new PoolSearchResponse(pool.getPoolName(), pool.getPoolView(), pool.getIcon()));
     } else {
       Pageable pageable = PageRequest.of(0, 2);
       var poolList = poolHashRepository.findByPoolNameLike(query, pageable);
       if (poolList.size() == 1) {
         PoolInfoProjection poolInfo = poolList.get(0);
-        searchResponse.setPool(new PoolSearchResponse(poolInfo.getPoolName(), poolInfo.getPoolView(), poolInfo.getIcon()));
+        searchResponse.setPool(
+            new PoolSearchResponse(
+                poolInfo.getPoolName(), poolInfo.getPoolView(), poolInfo.getIcon()));
       }
-      if(!CollectionUtils.isEmpty(poolList)) {
+      if (!CollectionUtils.isEmpty(poolList)) {
         searchResponse.setValidPoolName(true);
       }
     }
   }
 
   public void searchScriptHash(String query, SearchResponse searchResponse) {
-    Script script = scriptRepository.findByHash(query)
-        .orElse(null);
+    Script script = scriptRepository.findByHash(query).orElse(null);
 
-    if(Objects.nonNull(script)) {
-      boolean isSmartContract = ScriptType.PLUTUSV1.equals(script.getType()) ||
-          ScriptType.PLUTUSV2.equals(script.getType());
+    if (Objects.nonNull(script)) {
+      boolean isSmartContract =
+          ScriptType.PLUTUSV1.equals(script.getType())
+              || ScriptType.PLUTUSV2.equals(script.getType());
 
-      ScriptSearchResponse scriptSearchResponse = ScriptSearchResponse.builder()
-          .scriptHash(script.getHash())
-          .build();
+      ScriptSearchResponse scriptSearchResponse =
+          ScriptSearchResponse.builder().scriptHash(script.getHash()).build();
 
-      if(isSmartContract) {
+      if (isSmartContract) {
         scriptSearchResponse.setSmartContract(true);
       } else {
         scriptSearchResponse.setNativeScript(true);

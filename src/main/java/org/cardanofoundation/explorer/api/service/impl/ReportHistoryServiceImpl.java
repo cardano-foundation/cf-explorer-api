@@ -40,7 +40,7 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
    *
    * @param filterRequest
    * @param username
-   * @param pageable      pageable
+   * @param pageable pageable
    * @return BaseFilterResponse<StakeKeyReportHistoryResponse>
    */
   @Override
@@ -58,35 +58,38 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
 
     LocalDateTime timeAt7DayAgo = LocalDateTime.now().minus(Duration.ofDays(7));
 
-    Page<ReportHistoryResponse> reportHistoryProjections = reportHistoryRepository.getRecordHistoryByFilter(
-            reportName, fromDate, toDate, username, pageable)
-        .map(reportHistoryProjection -> {
-          ReportHistoryResponse response = ReportHistoryResponse.builder()
-              .stakeKeyReportId(reportHistoryProjection.getStakeKeyReportId())
-              .poolReportId(reportHistoryProjection.getPoolReportId())
-              .reportName(reportHistoryProjection.getReportName())
-              .status(reportHistoryProjection.getStatus())
-              .type(reportHistoryProjection.getType())
-              .createdAt(reportHistoryProjection.getCreatedAt())
-              .build();
-          if(response.getCreatedAt().isBefore(timeAt7DayAgo)) {
-            response.setStatus(ReportStatus.EXPIRED);
-          }
-          return response;
-        });
+    Page<ReportHistoryResponse> reportHistoryProjections =
+        reportHistoryRepository
+            .getRecordHistoryByFilter(reportName, fromDate, toDate, username, pageable)
+            .map(
+                reportHistoryProjection -> {
+                  ReportHistoryResponse response =
+                      ReportHistoryResponse.builder()
+                          .stakeKeyReportId(reportHistoryProjection.getStakeKeyReportId())
+                          .poolReportId(reportHistoryProjection.getPoolReportId())
+                          .reportName(reportHistoryProjection.getReportName())
+                          .status(reportHistoryProjection.getStatus())
+                          .type(reportHistoryProjection.getType())
+                          .createdAt(reportHistoryProjection.getCreatedAt())
+                          .build();
+                  if (response.getCreatedAt().isBefore(timeAt7DayAgo)) {
+                    response.setStatus(ReportStatus.EXPIRED);
+                  }
+                  return response;
+                });
 
     return new BaseFilterResponse<>(reportHistoryProjections);
   }
 
   @Override
   public Boolean isLimitReached(String username, int limit) {
-    if(limit == CommonConstant.UNLIMITED_REPORT)
-      return false;
+    if (limit == CommonConstant.UNLIMITED_REPORT) return false;
     Instant currentTime = Instant.now();
-    Integer reportCount = reportHistoryRepository
-        .countByUsernameAndCreatedAtBetween(username,
-                                            Timestamp.from(currentTime.minus(Duration.ofDays(1))),
-                                            Timestamp.from(currentTime));
+    Integer reportCount =
+        reportHistoryRepository.countByUsernameAndCreatedAtBetween(
+            username,
+            Timestamp.from(currentTime.minus(Duration.ofDays(1))),
+            Timestamp.from(currentTime));
     return reportCount >= limit;
   }
 
@@ -95,7 +98,7 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
     int limit = roleService.getReportLimit(userPrincipal.getRoleDescription());
     return ReportLimitResponse.builder()
         .limitPer24hours(limit)
-        .isLimitReached(isLimitReached(userPrincipal.getUsername(),limit))
+        .isLimitReached(isLimitReached(userPrincipal.getUsername(), limit))
         .build();
   }
 }

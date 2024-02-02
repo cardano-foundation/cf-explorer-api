@@ -24,8 +24,9 @@ public class ExplorerDatasourceConfig {
 
   private final MultiDataSourceProperties multiDataSourceProperties;
 
-  public ExplorerDatasourceConfig(
-      MultiDataSourceProperties multiDataSourceProperties) {this.multiDataSourceProperties = multiDataSourceProperties;}
+  public ExplorerDatasourceConfig(MultiDataSourceProperties multiDataSourceProperties) {
+    this.multiDataSourceProperties = multiDataSourceProperties;
+  }
 
   @Bean(name = "explorerDataSource")
   public DataSource ledgerSyncDataSource() {
@@ -34,20 +35,21 @@ public class ExplorerDatasourceConfig {
   }
 
   @Bean(name = "explorerEntityManagerFactory")
-  public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean
-      (EntityManagerFactoryBuilder builder,
-       @Qualifier("explorerDataSource") DataSource dataSource) {
+  public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean(
+      EntityManagerFactoryBuilder builder, @Qualifier("explorerDataSource") DataSource dataSource) {
     return builder
         .dataSource(dataSource)
-        .packages("org.cardanofoundation.explorer.consumercommon.explorer.entity",
-                  "org.cardanofoundation.explorer.consumercommon.enumeration",
-                  "org.cardanofoundation.explorer.consumercommon.validation")
+        .packages(
+            "org.cardanofoundation.explorer.consumercommon.explorer.entity",
+            "org.cardanofoundation.explorer.consumercommon.enumeration",
+            "org.cardanofoundation.explorer.consumercommon.validation")
         .build();
   }
 
   @Bean(name = "explorerTransactionManager")
   public PlatformTransactionManager explorerTransactionManager(
-      @Qualifier("explorerEntityManagerFactory") LocalContainerEntityManagerFactoryBean ledgerSyncEntityManagerFactory) {
+      @Qualifier("explorerEntityManagerFactory")
+          LocalContainerEntityManagerFactoryBean ledgerSyncEntityManagerFactory) {
     return new JpaTransactionManager(
         Objects.requireNonNull(ledgerSyncEntityManagerFactory.getObject()));
   }

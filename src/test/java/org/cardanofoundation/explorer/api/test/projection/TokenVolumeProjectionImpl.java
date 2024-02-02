@@ -13,6 +13,7 @@ import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 public class TokenVolumeProjectionImpl implements TokenVolumeProjection {
   Long ident;
   BigInteger volume;
+
   @Override
   public Long getIdent() {
     return this.ident;
