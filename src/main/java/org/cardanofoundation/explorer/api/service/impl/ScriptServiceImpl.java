@@ -175,17 +175,18 @@ public class ScriptServiceImpl implements ScriptService {
     }
   }
 
-  private boolean setStatus(NativeScriptInfo nativeScriptInfo,Long currentSlot){
+  private boolean setStatus(NativeScriptInfo nativeScriptInfo, Long currentSlot) {
     boolean isOpen = false;
     boolean isNullBefore = Objects.isNull(nativeScriptInfo.getBeforeSlot());
     boolean isNullAfter = Objects.isNull(nativeScriptInfo.getAfterSlot());
-    if(!isNullBefore&&!isNullAfter){
-      isOpen = Long.compare(nativeScriptInfo.getAfterSlot(),currentSlot)==-1 && Long.compare(nativeScriptInfo.getBeforeSlot(),currentSlot)==1;
-    } else if(isNullAfter&&!isNullBefore){
-      isOpen = Long.compare(nativeScriptInfo.getBeforeSlot(),currentSlot)==1;
-    } else if(isNullBefore&&!isNullAfter){
-      isOpen = Long.compare(nativeScriptInfo.getAfterSlot(),currentSlot)==-1;
-    } else if(isNullAfter&&isNullBefore){
+    if (!isNullBefore && !isNullAfter) {
+      isOpen = Long.compare(nativeScriptInfo.getAfterSlot(), currentSlot) == -1
+          && Long.compare(nativeScriptInfo.getBeforeSlot(), currentSlot) == 1;
+    } else if (isNullAfter && !isNullBefore) {
+      isOpen = Long.compare(nativeScriptInfo.getBeforeSlot(), currentSlot) == 1;
+    } else if (isNullBefore && !isNullAfter) {
+      isOpen = Long.compare(nativeScriptInfo.getAfterSlot(), currentSlot) == -1;
+    } else if (isNullAfter && isNullBefore) {
       isOpen = true;
     }
     return isOpen;
