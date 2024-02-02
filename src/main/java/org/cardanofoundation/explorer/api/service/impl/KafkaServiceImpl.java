@@ -25,22 +25,26 @@ public class KafkaServiceImpl implements KafkaService {
   @Override
   public Boolean sendReportHistory(ReportHistory reportHistory) {
     AtomicBoolean isSendSuccess = new AtomicBoolean(false);
-    try{
-      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
-          topic.getReports(),
-          String.valueOf(reportHistory.getId()), reportHistory);
+    try {
+      CompletableFuture<SendResult<String, Object>> future =
+          kafkaTemplate.send(
+              topic.getReports(), String.valueOf(reportHistory.getId()), reportHistory);
       isSendSuccess.set(future.get().getRecordMetadata().hasOffset());
     } catch (Exception e) {
       log.error(e);
       isSendSuccess.set(false);
     }
 
-    if(Boolean.TRUE.equals(isSendSuccess.get())) {
-      log.info("Send ReportHistory {} with type {} successfully", reportHistory.getId(),
-                reportHistory.getType());
-    } else{
-      log.error("Send ReportHistory {} with type {} failure", reportHistory.getId(),
-                reportHistory.getType());
+    if (Boolean.TRUE.equals(isSendSuccess.get())) {
+      log.info(
+          "Send ReportHistory {} with type {} successfully",
+          reportHistory.getId(),
+          reportHistory.getType());
+    } else {
+      log.error(
+          "Send ReportHistory {} with type {} failure",
+          reportHistory.getId(),
+          reportHistory.getType());
     }
 
     return isSendSuccess.get();

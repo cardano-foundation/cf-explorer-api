@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.model.response.pool;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -10,7 +9,8 @@ import java.util.List;
 
 import lombok.*;
 
-import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import org.cardanofoundation.explorer.api.common.enumeration.PoolStatus;
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
@@ -70,7 +70,8 @@ public class PoolDetailHeaderResponse implements Serializable {
   private Timestamp lastUpdate;
   private PoolStatus poolStatus;
 
-  public PoolDetailHeaderResponse(PoolDetailUpdateProjection poolDetail, AggregatePoolInfo aggregatePoolInfo) {
+  public PoolDetailHeaderResponse(
+      PoolDetailUpdateProjection poolDetail, AggregatePoolInfo aggregatePoolInfo) {
     this.poolName = poolDetail.getPoolName();
     this.tickerName = poolDetail.getTickerName();
     this.poolView = poolDetail.getPoolView();

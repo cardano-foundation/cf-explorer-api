@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.model.response.token;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 

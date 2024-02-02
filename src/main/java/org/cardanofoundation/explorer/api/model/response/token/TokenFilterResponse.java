@@ -1,10 +1,11 @@
 package org.cardanofoundation.explorer.api.model.response.token;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.time.LocalDateTime;
 
 import lombok.*;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @Getter
 @Setter
@@ -12,7 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(Include.NON_NULL)
-public class TokenFilterResponse{
+public class TokenFilterResponse {
   private Long id;
   private String name;
   private String displayName;

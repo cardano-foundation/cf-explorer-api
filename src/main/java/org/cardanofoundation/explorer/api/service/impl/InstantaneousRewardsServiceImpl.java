@@ -1,6 +1,20 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.InstantaneousRewardsResponse;
 import org.cardanofoundation.explorer.api.projection.InstantaneousRewardsProjection;
@@ -9,18 +23,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepositor
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.InstantaneousRewardsService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,54 +44,71 @@ public class InstantaneousRewardsServiceImpl implements InstantaneousRewardsServ
     final int start = (int) pageable.getOffset();
     final int end = Math.min((start + pageable.getPageSize()), totalElements);
     instantaneousRewards = instantaneousRewards.subList(start, end);
-    Set<Long> txIds = instantaneousRewards.stream().map(InstantaneousRewardsProjection::getTxId).collect(
-        Collectors.toSet());
+    Set<Long> txIds =
+        instantaneousRewards.stream()
+            .map(InstantaneousRewardsProjection::getTxId)
+            .collect(Collectors.toSet());
     List<TxIOProjection> txs = txRepository.findTxIn(txIds);
-    Map<Long, TxIOProjection> txMap
-        = txs.stream().collect(Collectors.toMap(TxIOProjection::getId, Function.identity()));
-    List<InstantaneousRewardsResponse> response = instantaneousRewards.stream().map(
-        item -> InstantaneousRewardsResponse.builder()
-            .txHash(txMap.get(item.getTxId()).getHash())
-            .blockNo(txMap.get(item.getTxId()).getBlockNo())
-            .epochNo(txMap.get(item.getTxId()).getEpochNo())
-            .epochSlotNo(txMap.get(item.getTxId()).getEpochSlotNo())
-            .time(txMap.get(item.getTxId()).getTime())
-            .epochSlotNo(txMap.get(item.getTxId()).getEpochSlotNo())
-            .slotNo(txMap.get(item.getTxId()).getSlot())
-            .numberOfStakes(item.getNumberOfStakes())
-            .rewards(item.getRewards())
-            .build()).collect(Collectors.toList());
-    Page<InstantaneousRewardsResponse> page = new PageImpl<>(response,
-        pageable, totalElements);
+    Map<Long, TxIOProjection> txMap =
+        txs.stream().collect(Collectors.toMap(TxIOProjection::getId, Function.identity()));
+    List<InstantaneousRewardsResponse> response =
+        instantaneousRewards.stream()
+            .map(
+                item ->
+                    InstantaneousRewardsResponse.builder()
+                        .txHash(txMap.get(item.getTxId()).getHash())
+                        .blockNo(txMap.get(item.getTxId()).getBlockNo())
+                        .epochNo(txMap.get(item.getTxId()).getEpochNo())
+                        .epochSlotNo(txMap.get(item.getTxId()).getEpochSlotNo())
+                        .time(txMap.get(item.getTxId()).getTime())
+                        .epochSlotNo(txMap.get(item.getTxId()).getEpochSlotNo())
+                        .slotNo(txMap.get(item.getTxId()).getSlot())
+                        .numberOfStakes(item.getNumberOfStakes())
+                        .rewards(item.getRewards())
+                        .build())
+            .collect(Collectors.toList());
+    Page<InstantaneousRewardsResponse> page = new PageImpl<>(response, pageable, totalElements);
     return new BaseFilterResponse<>(page);
   }
 
   /**
    * Sorts the list of instantaneous rewards based on the sortable parameter
+   *
    * @param sortable the sortable parameter
    * @param instantaneousRewards the list of instantaneous rewards
    */
-  private void sortInstantaneousRewards(Sort sortable, List<InstantaneousRewardsProjection> instantaneousRewards) {
+  private void sortInstantaneousRewards(
+      Sort sortable, List<InstantaneousRewardsProjection> instantaneousRewards) {
     String sortField = sortable.stream().findFirst().map(Sort.Order::getProperty).orElse(TX_ID);
-    String sortOrder = sortable.stream().findFirst().map(Sort.Order::getDirection).map(Enum::name).orElse(Sort.Direction.DESC.name());
+    String sortOrder =
+        sortable.stream()
+            .findFirst()
+            .map(Sort.Order::getDirection)
+            .map(Enum::name)
+            .orElse(Sort.Direction.DESC.name());
     switch (sortField) {
       case NUMBER_OF_STAKES -> {
         if (sortOrder.equals(Sort.Direction.ASC.name()))
-          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getNumberOfStakes));
+          instantaneousRewards.sort(
+              Comparator.comparing(InstantaneousRewardsProjection::getNumberOfStakes));
         else
-          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getNumberOfStakes).reversed());
+          instantaneousRewards.sort(
+              Comparator.comparing(InstantaneousRewardsProjection::getNumberOfStakes).reversed());
       }
       case REWARDS -> {
         if (sortOrder.equals(Sort.Direction.ASC.name()))
-          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getRewards));
+          instantaneousRewards.sort(
+              Comparator.comparing(InstantaneousRewardsProjection::getRewards));
         else
-          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getRewards).reversed());
+          instantaneousRewards.sort(
+              Comparator.comparing(InstantaneousRewardsProjection::getRewards).reversed());
       }
       default -> {
         if (sortOrder.equals(Sort.Direction.ASC.name()))
           instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getTxId));
         else
-          instantaneousRewards.sort(Comparator.comparing(InstantaneousRewardsProjection::getTxId).reversed());
+          instantaneousRewards.sort(
+              Comparator.comparing(InstantaneousRewardsProjection::getTxId).reversed());
       }
     }
   }

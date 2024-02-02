@@ -1,25 +1,29 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.service.PolicyService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
-import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
-import org.springdoc.core.annotations.ParameterObject;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
+
+import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.service.PolicyService;
+import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 
 @RestController
 @RequestMapping("/api/v1/policies")
@@ -32,7 +36,9 @@ public class PolicyController {
 
   @GetMapping("/{policyId}")
   @LogMessage
-  @Operation(summary = "Get detail information of policy", tags = {"policies"} )
+  @Operation(
+      summary = "Get detail information of policy",
+      tags = {"policies"})
   public ResponseEntity<PolicyResponse> getPolicyDetail(
       @PathVariable @Parameter(description = "The policy hash") String policyId) {
     return ResponseEntity.ok(policyService.getPolicyDetail(policyId));
@@ -61,5 +67,4 @@ public class PolicyController {
       @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(policyService.getHolders(policyId, pagination.toPageable()));
   }
-
 }

@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.model.response.address;
 
-import lombok.*;
-
 import java.math.BigInteger;
 import java.util.List;
+
+import lombok.*;
 
 @Getter
 @Setter

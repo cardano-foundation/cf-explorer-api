@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.model.response.stake;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,5 +21,4 @@ public class StakeFilterResponse implements Serializable {
   private String tickerName;
 
   private String poolName;
-
 }
