@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.pool.chart;
 
 import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 

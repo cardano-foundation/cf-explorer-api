@@ -1,15 +1,18 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
-import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
-import org.cardanofoundation.explorer.api.model.response.pool.PoolRelayResponse;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.math.BigInteger;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
+import org.cardanofoundation.explorer.api.model.response.pool.PoolRelayResponse;
 
 @Getter
 @Setter

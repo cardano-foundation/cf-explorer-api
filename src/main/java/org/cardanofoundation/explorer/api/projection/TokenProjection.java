@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.projection;
 
-
 import java.math.BigInteger;
 import java.sql.Timestamp;
 
@@ -23,7 +22,7 @@ public interface TokenProjection {
   BigInteger getTotalVolume();
 
   Timestamp getTime();
-  
+
   String getSubject();
 
   String getUrl();
@@ -35,5 +34,4 @@ public interface TokenProjection {
   String getLogo();
 
   String getDescription();
-
 }

@@ -16,9 +16,6 @@ public class EpochChange implements Cloneable {
 
   @Override
   public EpochChange clone() {
-      return EpochChange.builder()
-          .startEpoch(this.startEpoch)
-          .endEpoch(this.endEpoch)
-          .build();
+    return EpochChange.builder().startEpoch(this.startEpoch).endEpoch(this.endEpoch).build();
   }
 }

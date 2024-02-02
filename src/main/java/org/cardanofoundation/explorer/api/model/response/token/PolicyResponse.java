@@ -3,7 +3,6 @@ package org.cardanofoundation.explorer.api.model.response.token;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
 
 @Getter
 @Setter

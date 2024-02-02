@@ -7,6 +7,21 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolOwnerProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
@@ -16,60 +31,42 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireReposi
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolRegistrationServiceImpl;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class PoolRegistrationServiceTest {
 
-  @InjectMocks
-  private PoolRegistrationServiceImpl poolRegistrationService;
+  @InjectMocks private PoolRegistrationServiceImpl poolRegistrationService;
 
-  @Mock
-  private PoolUpdateRepository poolUpdateRepository;
+  @Mock private PoolUpdateRepository poolUpdateRepository;
 
-  @Mock
-  private PoolOwnerRepository poolOwnerRepository;
+  @Mock private PoolOwnerRepository poolOwnerRepository;
 
-  @Mock
-  private PoolRetireRepository poolRetireRepository;
+  @Mock private PoolRetireRepository poolRetireRepository;
 
-  @Mock
-  private TxRepository txRepository;
+  @Mock private TxRepository txRepository;
 
   @Test
   void whenPoolRegistrationIsEmpty_returnEmptyPage() {
     Pageable pageable = PageRequest.of(0, 10);
-    when(poolUpdateRepository.getDataForPoolRegistration(pageable)).thenReturn(
-        Page.empty());
+    when(poolUpdateRepository.getDataForPoolRegistration(pageable)).thenReturn(Page.empty());
     when(poolOwnerRepository.getStakeKeyList(Collections.emptySet())).thenReturn(List.of());
     when(txRepository.findTxIn(Collections.emptySet())).thenReturn(List.of());
-    Assertions.assertEquals(0,
-        poolRegistrationService.getDataForPoolRegistration(pageable).getTotalItems());
-    Assertions.assertEquals(List.of(),
-        poolRegistrationService.getDataForPoolRegistration(pageable).getData());
+    Assertions.assertEquals(
+        0, poolRegistrationService.getDataForPoolRegistration(pageable).getTotalItems());
+    Assertions.assertEquals(
+        List.of(), poolRegistrationService.getDataForPoolRegistration(pageable).getData());
   }
 
   @Test
   void whenPoolDeRegistrationIsEmpty_returnEmptyPage() {
     Pageable pageable = PageRequest.of(0, 10);
-    when(poolRetireRepository.getDataForPoolDeRegistration(pageable)).thenReturn(
-        Page.empty());
+    when(poolRetireRepository.getDataForPoolDeRegistration(pageable)).thenReturn(Page.empty());
     when(poolOwnerRepository.getStakeKeyList(Collections.emptySet())).thenReturn(List.of());
     when(txRepository.findTxIn(Collections.emptySet())).thenReturn(List.of());
-    Assertions.assertEquals(0,
-        poolRegistrationService.getDataForPoolDeRegistration(pageable).getTotalItems());
-    Assertions.assertEquals(List.of(),
-        poolRegistrationService.getDataForPoolDeRegistration(pageable).getData());
+    Assertions.assertEquals(
+        0, poolRegistrationService.getDataForPoolDeRegistration(pageable).getTotalItems());
+    Assertions.assertEquals(
+        List.of(), poolRegistrationService.getDataForPoolDeRegistration(pageable).getData());
   }
 
   @Test
@@ -84,20 +81,20 @@ class PoolRegistrationServiceTest {
 
     TxIOProjection tx = Mockito.mock(TxIOProjection.class);
     when(tx.getId()).thenReturn(1L);
-    when(tx.getHash()).thenReturn(
-        "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
+    when(tx.getHash())
+        .thenReturn("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
     when(tx.getTime()).thenReturn(LocalDateTime.now());
     when(tx.getEpochNo()).thenReturn(420);
     when(txRepository.findTxIn(new HashSet<>(List.of(1L)))).thenReturn(List.of(tx));
-    when(projection.getPoolView()).thenReturn(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
-    when(poolUpdateRepository.getDataForPoolRegistration(pageable)).thenReturn(
-        new PageImpl<>(Collections.singletonList(projection)));
+    when(projection.getPoolView())
+        .thenReturn("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
+    when(poolUpdateRepository.getDataForPoolRegistration(pageable))
+        .thenReturn(new PageImpl<>(Collections.singletonList(projection)));
     when(poolOwnerRepository.getStakeKeyList(new HashSet<>(List.of(1L)))).thenReturn(List.of());
-    Assertions.assertEquals(1,
-        poolRegistrationService.getDataForPoolRegistration(pageable).getTotalItems());
-    List<PoolTxResponse> data = poolRegistrationService.getDataForPoolRegistration(pageable)
-        .getData();
+    Assertions.assertEquals(
+        1, poolRegistrationService.getDataForPoolRegistration(pageable).getTotalItems());
+    List<PoolTxResponse> data =
+        poolRegistrationService.getDataForPoolRegistration(pageable).getData();
     Assertions.assertNull(data.get(0).getStakeKey());
   }
 
@@ -110,23 +107,23 @@ class PoolRegistrationServiceTest {
     when(projection.getMargin()).thenReturn(0.1);
     when(projection.getCost()).thenReturn(BigInteger.TWO);
     when(projection.getPoolId()).thenReturn(1L);
-    when(projection.getPoolView()).thenReturn(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
+    when(projection.getPoolView())
+        .thenReturn("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
 
     TxIOProjection tx = Mockito.mock(TxIOProjection.class);
     when(tx.getId()).thenReturn(1L);
-    when(tx.getHash()).thenReturn(
-        "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
+    when(tx.getHash())
+        .thenReturn("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
     when(tx.getTime()).thenReturn(LocalDateTime.now());
     when(tx.getEpochNo()).thenReturn(420);
     when(txRepository.findTxIn(new HashSet<>(List.of(1L)))).thenReturn(List.of(tx));
-    when(poolRetireRepository.getDataForPoolDeRegistration(pageable)).thenReturn(
-        new PageImpl<>(Collections.singletonList(projection)));
+    when(poolRetireRepository.getDataForPoolDeRegistration(pageable))
+        .thenReturn(new PageImpl<>(Collections.singletonList(projection)));
     when(poolOwnerRepository.getStakeKeyList(new HashSet<>(List.of(1L)))).thenReturn(List.of());
-    Assertions.assertEquals(1,
-        poolRegistrationService.getDataForPoolDeRegistration(pageable).getTotalItems());
-    List<PoolTxResponse> data = poolRegistrationService.getDataForPoolDeRegistration(pageable)
-        .getData();
+    Assertions.assertEquals(
+        1, poolRegistrationService.getDataForPoolDeRegistration(pageable).getTotalItems());
+    List<PoolTxResponse> data =
+        poolRegistrationService.getDataForPoolDeRegistration(pageable).getData();
     Assertions.assertNull(data.get(0).getStakeKey());
   }
 
@@ -139,30 +136,31 @@ class PoolRegistrationServiceTest {
     when(projection.getMargin()).thenReturn(0.1);
     when(projection.getCost()).thenReturn(BigInteger.TWO);
     when(projection.getPoolId()).thenReturn(1L);
-    when(projection.getPoolView()).thenReturn(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
+    when(projection.getPoolView())
+        .thenReturn("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
     PoolOwnerProjection poolOwnerProjection = Mockito.mock(PoolOwnerProjection.class);
     when(poolOwnerProjection.getPoolId()).thenReturn(1L);
-    when(poolOwnerProjection.getAddress()).thenReturn(
-        "stake1uyas69dqgnjnsk02jdklxedqane4xxag7ezgguymdqdra3s3cuydh");
+    when(poolOwnerProjection.getAddress())
+        .thenReturn("stake1uyas69dqgnjnsk02jdklxedqane4xxag7ezgguymdqdra3s3cuydh");
 
     TxIOProjection tx = Mockito.mock(TxIOProjection.class);
     when(tx.getId()).thenReturn(1L);
-    when(tx.getHash()).thenReturn(
-        "d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
+    when(tx.getHash())
+        .thenReturn("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
     when(tx.getTime()).thenReturn(LocalDateTime.now());
     when(tx.getEpochNo()).thenReturn(420);
     when(txRepository.findTxIn(new HashSet<>(List.of(1L)))).thenReturn(List.of(tx));
 
-    when(poolUpdateRepository.getDataForPoolRegistration(pageable)).thenReturn(
-        new PageImpl<>(Collections.singletonList(projection)));
-    when(poolOwnerRepository.getStakeKeyList(new HashSet<>(List.of(1L)))).thenReturn(
-        List.of(poolOwnerProjection));
-    Assertions.assertEquals(1,
-        poolRegistrationService.getDataForPoolRegistration(pageable).getTotalItems());
-    List<PoolTxResponse> data = poolRegistrationService.getDataForPoolRegistration(pageable)
-        .getData();
-    Assertions.assertEquals("stake1uyas69dqgnjnsk02jdklxedqane4xxag7ezgguymdqdra3s3cuydh",
+    when(poolUpdateRepository.getDataForPoolRegistration(pageable))
+        .thenReturn(new PageImpl<>(Collections.singletonList(projection)));
+    when(poolOwnerRepository.getStakeKeyList(new HashSet<>(List.of(1L))))
+        .thenReturn(List.of(poolOwnerProjection));
+    Assertions.assertEquals(
+        1, poolRegistrationService.getDataForPoolRegistration(pageable).getTotalItems());
+    List<PoolTxResponse> data =
+        poolRegistrationService.getDataForPoolRegistration(pageable).getData();
+    Assertions.assertEquals(
+        "stake1uyas69dqgnjnsk02jdklxedqane4xxag7ezgguymdqdra3s3cuydh",
         data.get(0).getStakeKey().get(0));
   }
 
@@ -174,7 +172,8 @@ class PoolRegistrationServiceTest {
 
     TxIOProjection tx = Mockito.mock(TxIOProjection.class);
     when(tx.getId()).thenReturn(1L);
-    when(tx.getHash()).thenReturn("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
+    when(tx.getHash())
+        .thenReturn("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60b7e");
     when(tx.getTime()).thenReturn(LocalDateTime.now());
     when(tx.getEpochNo()).thenReturn(420);
     when(txRepository.findTxIn(new HashSet<>(List.of(1L)))).thenReturn(List.of(tx));
@@ -183,21 +182,22 @@ class PoolRegistrationServiceTest {
     when(projection.getMargin()).thenReturn(0.1);
     when(projection.getCost()).thenReturn(BigInteger.TWO);
     when(projection.getPoolId()).thenReturn(1L);
-    when(projection.getPoolView()).thenReturn(
-        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
+    when(projection.getPoolView())
+        .thenReturn("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s");
     PoolOwnerProjection poolOwnerProjection = Mockito.mock(PoolOwnerProjection.class);
     when(poolOwnerProjection.getPoolId()).thenReturn(1L);
-    when(poolOwnerProjection.getAddress()).thenReturn(
-        "stake1uyas69dqgnjnsk02jdklxedqane4xxag7ezgguymdqdra3s3cuydh");
-    when(poolRetireRepository.getDataForPoolDeRegistration(pageable)).thenReturn(
-        new PageImpl<>(Collections.singletonList(projection)));
-    when(poolOwnerRepository.getStakeKeyList(new HashSet<>(List.of(1L)))).thenReturn(
-        List.of(poolOwnerProjection));
-    Assertions.assertEquals(1,
-        poolRegistrationService.getDataForPoolDeRegistration(pageable).getTotalItems());
-    List<PoolTxResponse> data = poolRegistrationService.getDataForPoolDeRegistration(pageable)
-        .getData();
-    Assertions.assertEquals("stake1uyas69dqgnjnsk02jdklxedqane4xxag7ezgguymdqdra3s3cuydh",
+    when(poolOwnerProjection.getAddress())
+        .thenReturn("stake1uyas69dqgnjnsk02jdklxedqane4xxag7ezgguymdqdra3s3cuydh");
+    when(poolRetireRepository.getDataForPoolDeRegistration(pageable))
+        .thenReturn(new PageImpl<>(Collections.singletonList(projection)));
+    when(poolOwnerRepository.getStakeKeyList(new HashSet<>(List.of(1L))))
+        .thenReturn(List.of(poolOwnerProjection));
+    Assertions.assertEquals(
+        1, poolRegistrationService.getDataForPoolDeRegistration(pageable).getTotalItems());
+    List<PoolTxResponse> data =
+        poolRegistrationService.getDataForPoolDeRegistration(pageable).getData();
+    Assertions.assertEquals(
+        "stake1uyas69dqgnjnsk02jdklxedqane4xxag7ezgguymdqdra3s3cuydh",
         data.get(0).getStakeKey().get(0));
   }
 }

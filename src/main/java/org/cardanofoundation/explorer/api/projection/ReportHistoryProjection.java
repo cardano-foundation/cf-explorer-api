@@ -1,8 +1,9 @@
 package org.cardanofoundation.explorer.api.projection;
 
+import java.time.LocalDateTime;
+
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
-import java.time.LocalDateTime;
 
 public interface ReportHistoryProjection {
 

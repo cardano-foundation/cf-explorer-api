@@ -1,18 +1,20 @@
 package org.cardanofoundation.explorer.api.specification;
 
-import jakarta.persistence.criteria.Predicate;
-import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo_;
-import org.springframework.data.jpa.domain.Specification;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.criteria.Predicate;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo;
+import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo_;
+
 public class NativeScriptInfoSpecification {
 
-  public static Specification<NativeScriptInfo> filter(Long currentSlot,
-                                                       NativeScriptFilterRequest filterRequest) {
+  public static Specification<NativeScriptInfo> filter(
+      Long currentSlot, NativeScriptFilterRequest filterRequest) {
     return (root, query, cb) -> {
       final List<Specification<NativeScriptInfo>> predicates = new ArrayList<>();
       if (filterRequest.getOpenTimeLocked() != null) {
@@ -21,25 +23,29 @@ public class NativeScriptInfoSpecification {
       if (filterRequest.getIsMultiSig() != null) {
         predicates.add(filterByIsMultiSig(filterRequest.getIsMultiSig()));
       }
-      return cb.and(predicates.stream().map(item -> item.toPredicate(root, query, cb)).toArray(Predicate[]::new));
+      return cb.and(
+          predicates.stream()
+              .map(item -> item.toPredicate(root, query, cb))
+              .toArray(Predicate[]::new));
     };
   }
 
-  public static Specification<NativeScriptInfo> filterByTimeLock(Long currentSlot, Boolean openTimeLocked) {
+  public static Specification<NativeScriptInfo> filterByTimeLock(
+      Long currentSlot, Boolean openTimeLocked) {
     return (root, query, cb) -> {
       if (openTimeLocked == null) {
         return null;
       } else {
-        Predicate afterSlotIsNullPredicate =
-            cb.isNull(root.get(NativeScriptInfo_.AFTER_SLOT));
-        Predicate beforeSlotIsNullPredicate =
-            cb.isNull(root.get(NativeScriptInfo_.BEFORE_SLOT));
+        Predicate afterSlotIsNullPredicate = cb.isNull(root.get(NativeScriptInfo_.AFTER_SLOT));
+        Predicate beforeSlotIsNullPredicate = cb.isNull(root.get(NativeScriptInfo_.BEFORE_SLOT));
         Predicate afterSlotIsLessThanCurrentSlotPredicate =
             cb.lessThan(root.get(NativeScriptInfo_.AFTER_SLOT), currentSlot);
         Predicate beforeSlotIsGreaterThanCurrentSlotPredicate =
             cb.greaterThan(root.get(NativeScriptInfo_.BEFORE_SLOT), currentSlot);
         Predicate afterSlotIsLessThanCurrentSlotAndBeforeSlotIsGreaterThanCurrentSlotPredicate =
-            cb.and(afterSlotIsLessThanCurrentSlotPredicate, beforeSlotIsGreaterThanCurrentSlotPredicate);
+            cb.and(
+                afterSlotIsLessThanCurrentSlotPredicate,
+                beforeSlotIsGreaterThanCurrentSlotPredicate);
         Predicate afterSlotIsNullAndBeforeSlotIsGreaterThanCurrentSlotPredicate =
             cb.and(afterSlotIsNullPredicate, beforeSlotIsGreaterThanCurrentSlotPredicate);
         Predicate afterSlotIsLessThanCurrentSlotAndBeforeSlotIsNullPredicate =
@@ -47,7 +53,8 @@ public class NativeScriptInfoSpecification {
         Predicate afterSlotIsNullAndBeforeSlotIsNullPredicate =
             cb.and(afterSlotIsNullPredicate, beforeSlotIsNullPredicate);
         Predicate openTimeLockedPredicate =
-            cb.or(afterSlotIsLessThanCurrentSlotAndBeforeSlotIsGreaterThanCurrentSlotPredicate,
+            cb.or(
+                afterSlotIsLessThanCurrentSlotAndBeforeSlotIsGreaterThanCurrentSlotPredicate,
                 afterSlotIsNullAndBeforeSlotIsGreaterThanCurrentSlotPredicate,
                 afterSlotIsLessThanCurrentSlotAndBeforeSlotIsNullPredicate,
                 afterSlotIsNullAndBeforeSlotIsNullPredicate);

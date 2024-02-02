@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.model.response.stake.lifecycle;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,5 +21,4 @@ public class StakeDelegationDetailResponse {
   private String poolName;
   private LocalDateTime time;
   private BigInteger stakeTotalAmount;
-
 }
