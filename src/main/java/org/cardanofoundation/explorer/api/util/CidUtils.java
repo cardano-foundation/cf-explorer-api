@@ -14,14 +14,14 @@ public class CidUtils {
   public static boolean verifyCid(String cid, String jsonData) {
     try {
       String json = new JsonCanonicalizer(jsonData).getEncodedString();
-      return cid.equals(genarateCid(json));
+      return cid.equals(generateCid(json));
     } catch (Exception e) {
       log.error("Error while verifying cid", e);
       return false;
     }
   }
 
-  private static String genarateCid(String canonicalized) {
+  private static String generateCid(String canonicalized) {
     // Get bytes to hash.
     byte[] canonicalizedBytes = canonicalized.getBytes();
 
