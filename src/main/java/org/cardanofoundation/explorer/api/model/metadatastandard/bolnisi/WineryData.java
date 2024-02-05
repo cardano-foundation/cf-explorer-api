@@ -17,6 +17,7 @@ public class WineryData {
   private String wineryId;
   private boolean isPKeyVerified;
   private List<LotData> lots;
+  private boolean isExternalApiAvailable = true;
   @JsonIgnore private String publicKey;
   @JsonIgnore private String header;
 }
