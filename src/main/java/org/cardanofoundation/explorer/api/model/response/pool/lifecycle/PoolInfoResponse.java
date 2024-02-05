@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.model.response.pool.lifecycle;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 

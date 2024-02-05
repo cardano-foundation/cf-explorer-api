@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi;
 
-
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -19,8 +18,6 @@ public class WineryData {
   private boolean isPKeyVerified;
   private List<LotData> lots;
   private boolean isExternalApiAvailable = true;
-  @JsonIgnore
-  private String publicKey;
-  @JsonIgnore
-  private String header;
+  @JsonIgnore private String publicKey;
+  @JsonIgnore private String header;
 }

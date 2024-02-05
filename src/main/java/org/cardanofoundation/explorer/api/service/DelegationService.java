@@ -1,6 +1,9 @@
 package org.cardanofoundation.explorer.api.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -9,10 +12,8 @@ import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailEpochRes
 import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;
-import org.springframework.data.domain.Pageable;
 
 public interface DelegationService {
-
 
   /**
    * Get list of delegations
@@ -38,7 +39,8 @@ public interface DelegationService {
    * @param showRetired show retired pool
    * @return BaseFilterResponse<PoolResponse>
    */
-  BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, String search, boolean showRetired);
+  BaseFilterResponse<PoolResponse> getDataForPoolTable(
+      Pageable pageable, String search, boolean showRetired);
 
   /**
    * Get detail pool for delegate pools detail
@@ -54,8 +56,8 @@ public interface DelegationService {
    * @param poolViewOrHash
    * @return PoolDetailEpochResponse
    */
-  BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(Pageable pageable,
-      String poolViewOrHash);
+  BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(
+      Pageable pageable, String poolViewOrHash);
 
   /**
    * Get detail pool analytics for delegate pools detail
@@ -71,8 +73,8 @@ public interface DelegationService {
    * @param poolViewOrHash, pageable
    * @return PoolDetailDelegatorsResponse
    */
-  BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(Pageable pageable,
-      String poolViewOrHash);
+  BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(
+      Pageable pageable, String poolViewOrHash);
 
   /**
    * Find Top {number} (default 3) Pool Delegation

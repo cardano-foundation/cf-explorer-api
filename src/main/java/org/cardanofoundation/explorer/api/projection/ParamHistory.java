@@ -3,8 +3,9 @@ package org.cardanofoundation.explorer.api.projection;
 import java.math.BigInteger;
 import java.util.Date;
 
-public interface ParamHistory   {
+public interface ParamHistory {
   Long getId();
+
   BigInteger getMinFeeA();
 
   BigInteger getMinFeeB();

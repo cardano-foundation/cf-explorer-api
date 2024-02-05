@@ -1,12 +1,14 @@
 package org.cardanofoundation.explorer.api.mapper;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface BlockMapper {
@@ -20,5 +22,4 @@ public interface BlockMapper {
   default LocalDateTime fromTimestamp(Timestamp timestamp) {
     return timestamp == null ? null : timestamp.toLocalDateTime();
   }
-
 }
