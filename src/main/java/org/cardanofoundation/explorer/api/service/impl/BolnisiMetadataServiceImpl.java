@@ -59,13 +59,17 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
   @Override
   public MetadataBolnisi getBolnisiMetadata(String jsonMetadata) {
+    // Processes JSON metadata to generate a MetadataBolnisi object
     MetadataBolnisi metadataBolnisi = getOnChainMetadata(jsonMetadata);
 
     if(!metadataBolnisi.isOnChainMetadataValid()) {
       return metadataBolnisi;
     }
 
+    // retrieves off-chain metadata using getOffChainMetadata
     Map<String, List<Object>> offChainMetadata = getOffChainMetadata(metadataBolnisi);
+
+    // Verify the CID against the pretty-printed JSON of the off-chain metadata.
     boolean isCidVerified = CidUtils.verifyCid(metadataBolnisi.getCid(), JsonUtil.getPrettyJson(offChainMetadata));
     if (!isCidVerified) {
       return metadataBolnisi;
@@ -77,6 +81,8 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
     Map<String, WineryData> wineryDataMap = metadataBolnisi.getWineryData().stream()
         .collect(Collectors.toMap(WineryData::getWineryId, Function.identity()));
 
+    // For each piece of off-chain metadata,
+    // it verifies the signature of each lot against the public key and updates the LotData objects accordingly.
     offChainMetadata.forEach((key, value) -> {
       WineryData wineryData = wineryDataMap.get(key);
 
@@ -118,7 +124,16 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
         .orElse(null);
   }
 
-
+  /**
+   * Verifies the public keys associated with each winery in the provided MetadataBolnisi object.
+   * The method retrieves cached public keys from Redis and compares them with the public keys on-chain.
+   * If a public key is not found in the cache, it is fetched from an external API using WebClient.
+   * Any errors encountered during the API call are logged, and the availability flags on the MetadataBolnisi and WineryData objects are updated accordingly.
+   * The verified public keys are then stored back in Redis with an expiration time of 1 day.
+   * Finally, the verification status of each winery's public key is updated within the MetadataBolnisi object.
+   *
+   * @param metadataBolnisi The MetadataBolnisi object containing the winery data to be verified.
+   */
   private void verifyPublicKey(MetadataBolnisi metadataBolnisi) {
     String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyUrl);
     Map<String, String> pKeyRedisCachedMap = new HashMap<>();
@@ -138,8 +153,8 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
                     .toFuture()
                     .exceptionally(ex -> {
                       log.error("Error while getting public key from external api", ex);
-                      metadataBolnisi.setExternalApiAvailable(false);
                       metadataBolnisi.setCidVerified(false);
+                      wineryData.setExternalApiAvailable(false);
                       return null;
                     }));
           }
@@ -230,6 +245,19 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   }
 
 
+  /**
+   * Retrieves off-chain metadata associated with a given MetadataBolnisi object.
+   * The method first checks if the CID (Content Identifier) of the MetadataBolnisi object is empty.
+   * If it is not empty, it attempts to retrieve the metadata from Redis using the CID as the key.
+   * If the metadata is found in Redis, it is returned immediately.
+   * Otherwise, the method makes a call to an external API to fetch the metadata.
+   * The fetched metadata is then stored in Redis for future use and set to expire after 1 day.
+   * If any errors occur during the process, they are logged, and the MetadataBolnisi object is updated accordingly.
+   *
+   * @param metadataBolnisi The MetadataBolnisi object containing the CID and other related data.
+   * @return A map where the keys are strings and the values are lists of objects representing the off-chain metadata.
+   *         Returns null if the CID is empty or if no metadata could be retrieved.
+   */
   @SuppressWarnings("unchecked")
   public Map<String, List<Object>> getOffChainMetadata(MetadataBolnisi metadataBolnisi) {
     if(StringUtils.isEmpty(metadataBolnisi.getCid())) {
@@ -272,6 +300,21 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
     return offChainMetadata;
   }
 
+  /**
+   * Executes a GET request using WebClient to retrieve data from a specified URL.
+   * The response body is deserialized into an instance of the provided class type.
+   * This method handles HTTP status codes and performs custom actions based on them:
+   * - For server errors (5xx), it checks if the response body contains the string "703".
+   *   If it does not, a BusinessException with code EXTERNAL_API_IS_NOT_AVAILABLE is thrown.
+   * - For client errors (4xx), it simply returns an empty Mono without throwing an exception.
+   *
+   * @param <T> The type of object to which the response body should be converted.
+   * @param url The URL to send the GET request to.
+   * @param clazz The class type to which the response body should be converted.
+   * @param vars Optional URI variables to replace placeholders in the URL template.
+   * @return A Mono containing the deserialized response body of the specified type T.
+   * @throws BusinessException If a server error occurs and the response body does not contain "703".
+   */
   private <T> Mono<T> callWebclient(String url, Class<T> clazz, Object... vars) {
     return webClient.get()
         .uri(url, vars)
