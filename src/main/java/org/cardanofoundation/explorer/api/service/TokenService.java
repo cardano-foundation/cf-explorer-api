@@ -1,12 +1,13 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
-import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 public interface TokenService {
 
@@ -37,8 +38,7 @@ public interface TokenService {
   BaseFilterResponse<TokenMintTxResponse> getMintTxs(String tokenId, Pageable pageable);
 
   /**
-   *
-   * Get top holders  by token
+   * Get top holders by token
    *
    * @param tokenId token id (fingerprint)
    * @param pageable page information

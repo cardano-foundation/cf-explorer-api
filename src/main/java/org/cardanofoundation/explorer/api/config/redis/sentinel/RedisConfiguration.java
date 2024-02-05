@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachingConfigurer;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +37,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.cardanofoundation.explorer.api.config.redis.sentinel.RedisProperties.SentinelNode;
+
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -52,14 +51,11 @@ import redis.clients.jedis.JedisPoolConfig;
 @RequiredArgsConstructor
 public class RedisConfiguration implements CachingConfigurer {
 
-  /**
-   * Redis properties config
-   */
+  /** Redis properties config */
   private final RedisProperties redisProperties;
 
   @Value("${application.api.coin.gecko.market.interval-time}")
   private int apiMarketIntervalTime;
-
 
   @Bean
   @Primary
@@ -74,7 +70,6 @@ public class RedisConfiguration implements CachingConfigurer {
     return jedisPoolConfig;
   }
 
-
   @Bean
   @Primary
   RedisSentinelConfiguration sentinelConfig() {
@@ -83,16 +78,17 @@ public class RedisConfiguration implements CachingConfigurer {
     sentinelConfig.master(redisProperties.getMaster());
     sentinelConfig.setSentinelPassword(RedisPassword.of(redisProperties.getPassword()));
     sentinelConfig.setDatabase(redisProperties.getDatabaseIndex());
-    var sentinels = redisProperties.getSentinels()
-        .stream()
-        .map(getSentinelNodeRedisNodeFunction())
-        .collect(Collectors.toSet());
+    var sentinels =
+        redisProperties.getSentinels().stream()
+            .map(getSentinelNodeRedisNodeFunction())
+            .collect(Collectors.toSet());
 
     sentinelConfig.setSentinels(sentinels);
     return sentinelConfig;
   }
 
-  private static Function<RedisProperties.SentinelNode, RedisNode> getSentinelNodeRedisNodeFunction() {
+  private static Function<RedisProperties.SentinelNode, RedisNode>
+      getSentinelNodeRedisNodeFunction() {
     return sentinel -> new RedisNode(sentinel.getHost(), sentinel.getPort());
   }
 
@@ -126,8 +122,8 @@ public class RedisConfiguration implements CachingConfigurer {
    */
   @Bean
   @Autowired
-  RedisTemplate<String, ?> redisTemplate(//NOSONAR
-                                         final LettuceConnectionFactory lettuceConnectionFactory) {
+  RedisTemplate<String, ?> redisTemplate( // NOSONAR
+      final LettuceConnectionFactory lettuceConnectionFactory) {
     var redisTemplate = new RedisTemplate<String, Object>();
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
     redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -141,13 +137,13 @@ public class RedisConfiguration implements CachingConfigurer {
    * Config bean hashOperations
    *
    * @param redisTemplate bean
-   * @param <HK>          hash key type
-   * @param <V>           value type
+   * @param <HK> hash key type
+   * @param <V> value type
    * @return bean hashOperations
    */
   @Bean
   <HK, V> HashOperations<String, HK, V> hashOperations(
-      final RedisTemplate<String, V> redisTemplate) { //NOSONAR
+      final RedisTemplate<String, V> redisTemplate) { // NOSONAR
     return redisTemplate.opsForHash();
   }
 
@@ -155,7 +151,7 @@ public class RedisConfiguration implements CachingConfigurer {
    * ListOperations bean configuration
    *
    * @param redisTemplate inject bean
-   * @param <V>           value type
+   * @param <V> value type
    * @return listOperations
    */
   @Bean
@@ -167,7 +163,7 @@ public class RedisConfiguration implements CachingConfigurer {
    * ZSetOperations configuration
    *
    * @param redisTemplate inject bean
-   * @param <V>           value type
+   * @param <V> value type
    * @return ZSetOperations<String, V>
    */
   @Bean
@@ -179,7 +175,7 @@ public class RedisConfiguration implements CachingConfigurer {
    * SetOperations configuration
    *
    * @param redisTemplate inject bean
-   * @param <V>           value type
+   * @param <V> value type
    * @return SetOperations<String, V>
    */
   @Bean
@@ -191,7 +187,7 @@ public class RedisConfiguration implements CachingConfigurer {
    * ValueOperations configuration
    *
    * @param redisTemplate inject bean
-   * @param <V>           value type
+   * @param <V> value type
    * @return ValueOperations<String, V>
    */
   @Bean
@@ -219,11 +215,13 @@ public class RedisConfiguration implements CachingConfigurer {
   @Bean(name = "cacheManager")
   public RedisCacheManager cacheManager(
       @Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
-    RedisCacheConfiguration coinPriceConf = RedisCacheConfiguration.defaultCacheConfig()
-        .entryTtl(Duration.ofSeconds(apiMarketIntervalTime));
+    RedisCacheConfiguration coinPriceConf =
+        RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofSeconds(apiMarketIntervalTime));
     Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
     cacheConfigurations.put("market", coinPriceConf);
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(connectionFactory)
-        .withInitialCacheConfigurations(cacheConfigurations).build();
+        .withInitialCacheConfigurations(cacheConfigurations)
+        .build();
   }
 }

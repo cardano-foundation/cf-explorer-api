@@ -1,11 +1,12 @@
- package org.cardanofoundation.explorer.api.model.response.script.nativescript;
-
-import org.cardanofoundation.ledgersync.common.common.nativescript.ScriptType;
-import lombok.*;
+package org.cardanofoundation.explorer.api.model.response.script.nativescript;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.*;
+
+import org.cardanofoundation.ledgersync.common.common.nativescript.ScriptType;
 
 @Getter
 @Setter
@@ -21,7 +22,7 @@ public class NativeScriptResponse {
   private List<String> keyHashes;
   private LocalDateTime after;
   private LocalDateTime before;
-  private List <String> associatedAddress;
+  private List<String> associatedAddress;
   private String script;
   private Boolean isOneTimeMint;
   private Boolean verifiedContract;

@@ -5,11 +5,18 @@ import java.sql.Timestamp;
 public interface StakeInstantaneousRewardsProjection {
 
   String getTxHash();
+
   Timestamp getTime();
+
   Long getBlockNo();
+
   Integer getBlockIndex();
+
   Integer getEpochNo();
+
   Integer getEpochSlotNo();
+
   Integer getSlotNo();
+
   String getAmount();
 }
