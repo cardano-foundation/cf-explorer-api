@@ -264,6 +264,8 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
                   wineryDataList.add(wineryData);
                 });
         metadataBolnisiBuilder.wineryData(wineryDataList);
+      } else {
+        metadataBolnisiBuilder.isOnChainMetadataValid(false);
       }
 
     } catch (Exception e) {
