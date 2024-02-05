@@ -1,11 +1,11 @@
 package org.cardanofoundation.explorer.api.model.response.stake;
 
+import java.math.BigInteger;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.math.BigInteger;
 
 @Getter
 @AllArgsConstructor

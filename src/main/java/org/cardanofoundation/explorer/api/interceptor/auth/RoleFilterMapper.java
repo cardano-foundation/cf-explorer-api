@@ -16,6 +16,7 @@ public class RoleFilterMapper {
 
   @JsonProperty("role")
   private List<RoleConfigurationMapper> roles;
+
   @JsonProperty("auth")
   private List<Request> auth;
 
@@ -27,4 +28,3 @@ public class RoleFilterMapper {
     this.auth = auth;
   }
 }
-

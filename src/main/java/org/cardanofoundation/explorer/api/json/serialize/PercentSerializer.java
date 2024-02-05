@@ -1,13 +1,14 @@
 package org.cardanofoundation.explorer.api.json.serialize;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 
 public class PercentSerializer extends JsonSerializer<Double> {
 

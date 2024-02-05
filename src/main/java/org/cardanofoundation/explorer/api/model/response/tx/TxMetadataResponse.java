@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
-import lombok.*;
-
 import java.math.BigInteger;
 import java.util.Map;
+
+import lombok.*;
 
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
 import org.cardanofoundation.explorer.api.model.metadatastandard.cip.MetadataCIP;
@@ -18,7 +18,7 @@ public class TxMetadataResponse {
   private String value;
   private MetadataCIP metadataCIP25;
   private MetadataCIP metadataCIP60;
-  private Map<String,Object> metadataCIP20;
-  private Map<String,Object> metadataCIP83;
+  private Map<String, Object> metadataCIP20;
+  private Map<String, Object> metadataCIP83;
   private MetadataBolnisi metadataBolnisi;
 }

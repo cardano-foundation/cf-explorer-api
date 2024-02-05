@@ -1,10 +1,11 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.springframework.data.domain.Pageable;
 
 public interface PolicyService {
 
@@ -24,7 +25,6 @@ public interface PolicyService {
    * @return list token in this page
    */
   BaseFilterResponse<TokenFilterResponse> getTokens(String policyId, Pageable pageable);
-
 
   /**
    * Get list holder by policy

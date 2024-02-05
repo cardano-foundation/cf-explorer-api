@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
 
 @Getter
@@ -19,26 +20,23 @@ import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
 @NoArgsConstructor
 public class PoolCertificateHistory {
 
-  @JsonIgnore
-  private Long txId;
-  @JsonIgnore
-  private Long poolHashId;
+  @JsonIgnore private Long txId;
+  @JsonIgnore private Long poolHashId;
+
   @JsonProperty("epochNo")
   private Integer txEpochNo; // epoch of the tx
-  @JsonIgnore
-  private Integer certEpochNo; // epoch of the cert
-  @JsonIgnore
-  private Integer certIndex;
-  @JsonIgnore
-  private Long poolRetireId;
-  @JsonIgnore
-  private Long poolUpdateId;
+
+  @JsonIgnore private Integer certEpochNo; // epoch of the cert
+  @JsonIgnore private Integer certIndex;
+  @JsonIgnore private Long poolRetireId;
+  @JsonIgnore private Long poolUpdateId;
   private String txHash;
+
   @JsonProperty("createdAt")
   private Timestamp blockTime;
+
   private Long blockNo;
   private Integer epochSlotNo;
   private Integer slotNo;
-  @JsonIgnore
-  private PoolActionType actionType;
+  @JsonIgnore private PoolActionType actionType;
 }

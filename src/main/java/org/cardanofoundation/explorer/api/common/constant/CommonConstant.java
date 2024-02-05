@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.common.constant;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -81,7 +82,8 @@ public class CommonConstant {
 
   public static final String READY_TO_SERVE = "Ready to serve";
 
-  public static final String SYNCING_BUT_NOT_READY = "Data is syncing, but it isn't ready to serve yet";
+  public static final String SYNCING_BUT_NOT_READY =
+      "Data is syncing, but it isn't ready to serve yet";
 
   public static final String REPORT_LIMIT_PER_24HOURS = "reportLimitPer24Hours";
 
@@ -99,23 +101,24 @@ public class CommonConstant {
     int result = BigInteger.ONE.intValue();
 
     for (Object element : a) {
-      result = HASH_LENGTH * result + (element == null ? -BigInteger.ONE.intValue()
-          : element.hashCode());
+      result =
+          HASH_LENGTH * result
+              + (element == null ? -BigInteger.ONE.intValue() : element.hashCode());
     }
 
     return result;
   }
 
   /**
-   * check timestamp in range of startTime and  endTime or not startTime < endTime
+   * check timestamp in range of startTime and endTime or not startTime < endTime
    *
    * @param timestamp
    * @param startFilterTime
    * @param endFilterTime
    * @return
    */
-  public static boolean isWithinRange(Timestamp timestamp,
-      Timestamp startFilterTime, Timestamp endFilterTime) {
+  public static boolean isWithinRange(
+      Timestamp timestamp, Timestamp startFilterTime, Timestamp endFilterTime) {
     return !(timestamp.before(startFilterTime) || timestamp.after(endFilterTime));
   }
 }

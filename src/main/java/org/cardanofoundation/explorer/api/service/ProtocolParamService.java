@@ -15,14 +15,15 @@ public interface ProtocolParamService {
 
   /**
    * Find history change of protocol parameters
+   *
    * @param protocolTypes
    * @param startTime
    * @param endTime
    * @return
    */
   @Transactional(readOnly = true)
-  HistoriesProtocol getHistoryProtocolParameters(List<ProtocolType> protocolTypes,
-                                                 BigInteger startTime, BigInteger endTime);
+  HistoriesProtocol getHistoryProtocolParameters(
+      List<ProtocolType> protocolTypes, BigInteger startTime, BigInteger endTime);
 
   /**
    * Find latest protocol param have changed
@@ -37,6 +38,7 @@ public interface ProtocolParamService {
 
   /**
    * Get genesis delegate keys hash and value
+   *
    * @return
    */
   Map<String, String> getGenesisDelegateKeysMap();

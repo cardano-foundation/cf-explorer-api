@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.model.response.address;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

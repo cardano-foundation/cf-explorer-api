@@ -1,12 +1,14 @@
 package org.cardanofoundation.explorer.api.model.response.stake.lifecycle;
 
-import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
-import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
+
+import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
+import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 
 @Getter
 @Setter
