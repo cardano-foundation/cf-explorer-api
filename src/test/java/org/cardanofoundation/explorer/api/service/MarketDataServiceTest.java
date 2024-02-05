@@ -67,6 +67,19 @@ public class MarketDataServiceTest {
     Assertions.assertEquals(jsonNode.get(0).get("current_price").asText(), "0.250666");
   }
 
+  @Test
+  void testGetMarketData_useRedisCache_thenReturn() throws JsonProcessingException {
+    // given
+    String currency = "usd";
+    // when
+    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    when(valueOperations.get(any())).thenReturn(prepareMarketData());
+    var actual = marketDataService.getMarketData(currency);
+    JsonNode jsonNode = objectMapper.valueToTree(actual);
+    // assertions
+    Assertions.assertEquals(jsonNode.get(0).get("current_price").asText(), "0.250666");
+  }
+
   Object prepareMarketData() throws JsonProcessingException {
     String marketDataString =
         "[\n"

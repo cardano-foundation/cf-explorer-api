@@ -5,8 +5,6 @@ import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
 
 public interface WebSocketService {
 
-  WebSocketMessage getMarketDataMessage(String currency);
-
   WebSocketMessage getCurrentBlockInfoMessage();
 
   WebSocketMessage getBatchBlockInfoMessage(BlockSyncMessage blockSyncMessage);
