@@ -168,8 +168,16 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   }
 
   /**
-   * @param jsonMetadata
-   * @return
+   * Parses JSON metadata and constructs a MetadataBolnisi object based on the parsed data.
+   * This method assumes that the input JSON contains a field named "st" which indicates the type of metadata.
+   * If the "st" field has the value "georgianWine", the method proceeds to extract additional fields such as "cid" and "d".
+   * The "d" field is expected to contain winery data, which is processed to create a list of WineryData objects.
+   * Each WineryData object includes a list of LotData objects, which are constructed from the signatures present in the JSON.
+   * If any exceptions occur during parsing or processing, the method logs the error and sets the appropriate flags on the MetadataBolnisi builder.
+   *
+   * @param jsonMetadata The JSON string containing the on-chain metadata.
+   * @return A MetadataBolnisi object populated with the parsed data. If an exception occurs, the object will have its verification flags set to false.
+   * @throws Exception If there is an issue with parsing the JSON or processing the extracted data.
    */
   private MetadataBolnisi getOnChainMetadata(String jsonMetadata) {
     MetadataBolnisi.MetadataBolnisiBuilder metadataBolnisiBuilder = MetadataBolnisi.builder();
@@ -181,35 +189,38 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       // get value with key "cid"
       String cid = metadataNode.get("cid").asText();
       metadataBolnisiBuilder.cid(cid);
-      List<WineryData> wineryDataList = new ArrayList<>();
-      // for each wineryId in the metadataNode of key "d"
-      metadataNode.get("d").fieldNames()
-          .forEachRemaining(wineryId -> {
-            // get wineryNode from the metadataNode of key "d" with wineryId
-            JsonNode wineryNode = metadataNode.get("d").get(wineryId);
-            List<LotData> lots = new ArrayList<>();
+      String st = metadataNode.get("st").asText();
+      if (st.equals("georgianWine")) {
+          List<WineryData> wineryDataList = new ArrayList<>();
+        // for each wineryId in the metadataNode of key "d"
+        metadataNode.get("d").fieldNames()
+            .forEachRemaining(wineryId -> {
+              // get wineryNode from the metadataNode of key "d" with wineryId
+              JsonNode wineryNode = metadataNode.get("d").get(wineryId);
+              List<LotData> lots = new ArrayList<>();
 
-            // get signature from the wineryNode of key "s"
-            if (wineryNode.get("s").isArray()) {
-              // put all signatures into lots
-              wineryNode.get("s").forEach(signature -> {
-                LotData lotData = LotData.builder()
-                    .signature(removePrefixHexString(signature.asText()))
-                    .build();
-                lots.add(lotData);
-              });
-            }
+              // get signature from the wineryNode of key "s"
+              if (wineryNode.get("s").isArray()) {
+                // put all signatures into lots
+                wineryNode.get("s").forEach(signature -> {
+                  LotData lotData = LotData.builder()
+                      .signature(removePrefixHexString(signature.asText()))
+                      .build();
+                  lots.add(lotData);
+                });
+              }
 
-            WineryData wineryData = WineryData.builder()
-                .wineryId(wineryId)
-                .publicKey(removePrefixHexString(wineryNode.get("pk").asText()))
-                .header(removePrefixHexString(wineryNode.get("h").asText()))
-                .lots(lots)
-                .build();
-            wineryDataList.add(wineryData);
-          });
+              WineryData wineryData = WineryData.builder()
+                  .wineryId(wineryId)
+                  .publicKey(removePrefixHexString(wineryNode.get("pk").asText()))
+                  .header(removePrefixHexString(wineryNode.get("h").asText()))
+                  .lots(lots)
+                  .build();
+              wineryDataList.add(wineryData);
+            });
+        metadataBolnisiBuilder.wineryData(wineryDataList);
+      }
 
-      metadataBolnisiBuilder.wineryData(wineryDataList);
     } catch (Exception e) {
       metadataBolnisiBuilder.isCidVerified(false);
       metadataBolnisiBuilder.isOnChainMetadataValid(false);
