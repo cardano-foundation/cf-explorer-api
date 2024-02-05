@@ -1,35 +1,32 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 
-import org.springframework.data.domain.Pageable;
-
-/**
- * StakeKeyReportService interface for stake key report
- */
+/** StakeKeyReportService interface for stake key report */
 public interface StakeKeyReportService {
 
   /**
    * Generate stake key report of current user
    *
    * @param stakeKeyReportRequest request
-   * @param username              username of current request user
+   * @param username username of current request user
    * @return StakeKeyReportHistoryResponse
    */
-  StakeKeyReportHistoryResponse generateStakeKeyReport(StakeKeyReportRequest stakeKeyReportRequest,
-                                                       UserPrincipal userPrincipal);
-
+  StakeKeyReportHistoryResponse generateStakeKeyReport(
+      StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal);
 
   /**
    * Get stake key report history by username and stake key
@@ -40,9 +37,7 @@ public interface StakeKeyReportService {
    * @return BaseFilterResponse<StakeKeyReportHistoryResponse>
    */
   BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistoryByStakeKey(
-      String stakeKey, String username,
-      Pageable pageable);
-
+      String stakeKey, String username, Pageable pageable);
 
   /**
    * Get all stake key report history by username and filter by {@link ReportHistoryFilterRequest}
@@ -52,20 +47,19 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeKeyReportHistoryResponse>
    */
-  BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(String username,
-                                                                             ReportHistoryFilterRequest filterRequest,
-                                                                             Pageable pageable);
+  BaseFilterResponse<StakeKeyReportHistoryResponse> getStakeKeyReportHistory(
+      String username, ReportHistoryFilterRequest filterRequest, Pageable pageable);
 
   /**
    * Download the export file of stake key report from storage of current user
    *
-   * @param reportId   report id
+   * @param reportId report id
    * @param exportType export type
-   * @param username   username
+   * @param username username
    * @return StakeKeyReportResponse
    */
-  StakeKeyReportResponse exportStakeKeyReport(Long reportId, String username,
-                                              ExportType exportType);
+  StakeKeyReportResponse exportStakeKeyReport(
+      Long reportId, String username, ExportType exportType);
 
   /**
    * Get stake key report history by report id
@@ -84,9 +78,8 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeRegistrationLifeCycle>
    */
-  BaseFilterResponse<StakeRegistrationFilterResponse> getStakeRegistrationsByReportId(Long reportId,
-                                                                                      String username,
-                                                                                      Pageable pageable);
+  BaseFilterResponse<StakeRegistrationFilterResponse> getStakeRegistrationsByReportId(
+      Long reportId, String username, Pageable pageable);
 
   /**
    * Get stake de-registrations by report id
@@ -96,9 +89,8 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeRegistrationLifeCycle>
    */
-  BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrationsByReportId(Long reportId,
-                                                                                        String username,
-                                                                                        Pageable pageable);
+  BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrationsByReportId(
+      Long reportId, String username, Pageable pageable);
 
   /**
    * Get stake delegations by report id
@@ -108,9 +100,8 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeDelegationFilterResponse>
    */
-  BaseFilterResponse<StakeDelegationFilterResponse> getStakeDelegationsByReportId(Long reportId,
-                                                                                  String username,
-                                                                                  Pageable pageable);
+  BaseFilterResponse<StakeDelegationFilterResponse> getStakeDelegationsByReportId(
+      Long reportId, String username, Pageable pageable);
 
   /**
    * Get stake rewards by report id
@@ -120,8 +111,8 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeRewardResponse>
    */
-  BaseFilterResponse<StakeRewardResponse> getStakeRewardsByReportId(Long reportId, String username,
-                                                                    Pageable pageable);
+  BaseFilterResponse<StakeRewardResponse> getStakeRewardsByReportId(
+      Long reportId, String username, Pageable pageable);
 
   /**
    * Get stake withdrawals by report id
@@ -131,9 +122,8 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeWithdrawalFilterResponse>
    */
-  BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawalsByReportId(Long reportId,
-                                                                                  String username,
-                                                                                  Pageable pageable);
+  BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawalsByReportId(
+      Long reportId, String username, Pageable pageable);
 
   /**
    * Get stake wallet activities by report id
@@ -143,7 +133,6 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeWalletActivityResponse>
    */
-  BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(Long reportId,
-                                                                                String username,
-                                                                                Pageable pageable);
+  BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(
+      Long reportId, String username, Pageable pageable);
 }

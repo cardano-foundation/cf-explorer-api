@@ -1,15 +1,17 @@
 package org.cardanofoundation.explorer.api.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
-
-import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
@@ -24,8 +26,8 @@ public class MetadataCIP20Utils {
 
     try {
       ObjectMapper objectMapper = new ObjectMapper();
-      Map<Object, Object> metadataMap = objectMapper.readValue(jsonMetadata, new TypeReference<>() {
-      });
+      Map<Object, Object> metadataMap =
+          objectMapper.readValue(jsonMetadata, new TypeReference<>() {});
 
       var msg = metadataMap.get(MetadataField.MSG.getName());
       requiredProperties.add(msg(msg, "1"));
@@ -56,8 +58,7 @@ public class MetadataCIP20Utils {
   public static boolean isMsgValid(Object msg) {
     if (Objects.nonNull(msg) && msg instanceof ArrayList<?>) {
       List<?> messages = (ArrayList<?>) msg;
-      return messages.stream().allMatch(m -> m instanceof String
-          && ((String) m).length() <= 64);
+      return messages.stream().allMatch(m -> m instanceof String && ((String) m).length() <= 64);
     }
     return false;
   }
@@ -69,5 +70,4 @@ public class MetadataCIP20Utils {
     return baseProperties.stream()
         .allMatch(baseProperty -> baseProperty.getValid().equals(Boolean.TRUE));
   }
-
 }

@@ -16,16 +16,18 @@ public class RoleFunction {
 
   @JsonProperty("uri")
   private String uri;
+
   @JsonProperty("method")
   private String method;
+
   @JsonProperty("description")
   private Map<String, Object> description;
 
-
   @JsonCreator
-  public RoleFunction(@JsonProperty("uri") String uri,
-                      @JsonProperty("method") String method,
-                      @JsonProperty("description") Map<String, Object> description) {
+  public RoleFunction(
+      @JsonProperty("uri") String uri,
+      @JsonProperty("method") String method,
+      @JsonProperty("description") Map<String, Object> description) {
     this.uri = uri;
     this.method = method;
     this.description = description;

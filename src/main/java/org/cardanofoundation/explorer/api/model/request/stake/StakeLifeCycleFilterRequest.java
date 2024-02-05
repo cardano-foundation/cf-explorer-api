@@ -2,8 +2,10 @@ package org.cardanofoundation.explorer.api.model.request.stake;
 
 import java.util.Date;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.*;
+
+import io.swagger.v3.oas.annotations.Parameter;
+
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.common.validation.date.DatePattern;
 import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
@@ -27,5 +29,4 @@ public class StakeLifeCycleFilterRequest {
   @DateValid(pattern = DatePattern.YYYY_MM_DD)
   @Parameter(description = "The date to which the stake life cycle is considered.")
   private Date toDate;
-
 }

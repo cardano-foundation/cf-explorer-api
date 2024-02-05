@@ -4,6 +4,10 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxMintingResponse;
@@ -11,16 +15,17 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.MintProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-@Mapper(componentModel = "spring",imports={HexUtils.class})
+
+@Mapper(
+    componentModel = "spring",
+    imports = {HexUtils.class})
 public abstract class MaTxMintMapper {
 
   @Value("${application.token-logo-endpoint}")
   protected String tokenLogoEndpoint;
 
-  @Mapping(target = "assetName",
+  @Mapping(
+      target = "assetName",
       expression = "java(HexUtils.fromHex(input.getAssetName(), input.getAssetId()))")
   @Mapping(target = "assetId", expression = "java(input.getAssetId())")
   public abstract TxMintingResponse fromAddressInputOutputProjection(
@@ -31,14 +36,16 @@ public abstract class MaTxMintMapper {
   @Mapping(target = "time", source = "tx.block.time")
   public abstract TokenMintTxResponse fromMaTxMintToTokenMintTx(MaTxMint maTxMint);
 
-  @Mapping(target = "assetName", expression = "java(HexUtils.fromHex(mintProjection.getName(), mintProjection.getFingerprint()))")
+  @Mapping(
+      target = "assetName",
+      expression =
+          "java(HexUtils.fromHex(mintProjection.getName(), mintProjection.getFingerprint()))")
   @Mapping(target = "policy", source = "policy")
   @Mapping(target = "assetQuantity", source = "assetQuantity")
   @Mapping(target = "assetId", source = "fingerprint")
   @Mapping(target = "metadata", expression = "java(getMetadata(mintProjection))")
   public abstract TxMintingResponse fromMintProjectionToTxMintingResponse(
       MintProjection mintProjection);
-
 
   @Named("getTokenLogoURL")
   String getTokenLogoEndpoint(String logo) {
