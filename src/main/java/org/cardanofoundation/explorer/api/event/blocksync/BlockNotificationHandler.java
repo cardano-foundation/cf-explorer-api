@@ -12,10 +12,8 @@ import org.postgresql.PGNotification;
 
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
-import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.service.WebSocketService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.entity.Block;
 import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
 
@@ -36,17 +34,18 @@ public class BlockNotificationHandler implements Consumer<PGNotification> {
         t.getPID(),
         t.getName(),
         t.getParameter());
-    Long blockId = Long.parseLong(t.getParameter());
-    Block block =
-        blockRepository
-            .findById(blockId)
-            .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
+    String hash = t.getParameter();
+    Block currentBlock = blockRepository.findCurrentBlockById();
+
+    if (!hash.equals(currentBlock.getHash())) {
+      return;
+    }
 
     BlockSyncMessage blockSyncMessage =
         BlockSyncMessage.builder()
-            .lastBlockNo(block.getBlockNo())
-            .lastBlockHash(block.getHash())
-            .hasTx(block.getTxCount() > 0)
+            .lastBlockNo(currentBlock.getBlockNo())
+            .lastBlockHash(currentBlock.getHash())
+            .hasTx(currentBlock.getTxCount() > 0)
             .build();
 
     WebSocketMessage webSocketMessage = webSocketService.getBatchBlockInfoMessage(blockSyncMessage);
