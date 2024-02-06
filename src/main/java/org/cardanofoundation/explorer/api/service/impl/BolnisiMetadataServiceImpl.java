@@ -168,8 +168,8 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
                         .exceptionally(
                             ex -> {
                               log.error("Error while getting public key from external api", ex);
-                              wineryData.setExternalApiAvailable(false);
                               wineryData.setPKeyVerified(false);
+                              wineryData.setExternalApiAvailable(false);
                               return null;
                             }));
               }
@@ -257,6 +257,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
                   WineryData wineryData =
                       WineryData.builder()
                           .wineryId(wineryId)
+                          .isExternalApiAvailable(true)
                           .publicKey(removePrefixHexString(wineryNode.get("pk").asText()))
                           .header(removePrefixHexString(wineryNode.get("h").asText()))
                           .lots(lots)
