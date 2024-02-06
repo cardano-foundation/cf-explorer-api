@@ -1,10 +1,10 @@
 package org.cardanofoundation.explorer.api.event.websocket;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.explorer.api.service.WebSocketService;
-import org.cardanofoundation.ledgersync.common.util.JsonUtil;
+
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -12,6 +12,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import org.cardanofoundation.explorer.api.service.WebSocketService;
+import org.cardanofoundation.ledgersync.common.util.JsonUtil;
 
 @Log4j2
 @Component
@@ -34,11 +37,6 @@ public class WebSocketEventHandler extends TextWebSocketHandler {
     sessions.add(session);
     session.sendMessage(
         new TextMessage(JsonUtil.getPrettyJson(webSocketService.getCurrentBlockInfoMessage())));
-    session.sendMessage(
-        new TextMessage(JsonUtil.getPrettyJson(webSocketService.getMarketDataMessage("btc"))));
-    session.sendMessage(
-        new TextMessage(JsonUtil.getPrettyJson(webSocketService.getMarketDataMessage("usd"))));
-
     super.afterConnectionEstablished(session);
   }
 

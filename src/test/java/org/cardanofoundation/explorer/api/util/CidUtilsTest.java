@@ -1,8 +1,8 @@
 package org.cardanofoundation.explorer.api.util;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class CidUtilsTest {
 
@@ -17,6 +17,7 @@ class CidUtilsTest {
     String cid = "invalidCid";
     assertFalse(CidUtils.verifyCid(cid, preparedJsonData()));
   }
+
   @Test
   void verifyCid_shouldReturnFalse_whenExceptionIsThrown() {
     String cid = "zCT5htke8Cp6yxJzyJYP1jGRzf7FCZBaxfz6rVDMrKhGsChq9ZuY";

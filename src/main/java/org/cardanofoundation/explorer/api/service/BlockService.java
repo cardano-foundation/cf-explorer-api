@@ -1,9 +1,10 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
-import org.springframework.data.domain.Pageable;
 
 public interface BlockService {
 

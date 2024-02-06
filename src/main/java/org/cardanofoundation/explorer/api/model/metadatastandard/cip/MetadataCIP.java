@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.model.metadatastandard.cip;
 
 import java.util.Map;
+
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,9 +1,22 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
+
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -18,15 +31,6 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationDef
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/tokens")
@@ -51,9 +55,11 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Detail token")
   public ResponseEntity<TokenResponse> getTokenDetail(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-      @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-      @Parameter(description = "The CIP14 fingerprint for the MultiAsset.") String tokenId) {
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
+          String tokenId) {
     return ResponseEntity.ok(tokenService.getTokenDetail(tokenId));
   }
 
@@ -61,9 +67,17 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter token mint transaction")
   public ResponseEntity<BaseFilterResponse<TokenMintTxResponse>> getTokenMintTx(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT) @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH) String tokenId,
-      @ParameterObject @PaginationValid @PaginationDefault(sort = {
-      BaseEntity_.ID}, direction = Sort.Direction.DESC) @Valid Pagination pagination) {
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+          String tokenId,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              sort = {BaseEntity_.ID},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
     return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pagination.toPageable()));
   }
 
@@ -71,9 +85,11 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter holders by token")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-      @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-      @Parameter(description = "The CIP14 fingerprint for the MultiAsset.") String tokenId,
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
+          String tokenId,
       @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pagination.toPageable()));
   }
@@ -82,9 +98,11 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-      @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-      @Parameter(description = "The CIP14 fingerprint for the MultiAsset.") String tokenId,
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
+          String tokenId,
       @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pagination.toPageable()));
   }
@@ -93,9 +111,11 @@ public class TokenController {
   @LogMessage
   @Operation(summary = "Filter transaction by token")
   public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
-      @PathVariable @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-      @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-      @Parameter(description = "The CIP14 fingerprint for the MultiAsset.") String tokenId,
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
+          String tokenId,
       @PathVariable @Parameter(description = "Type analytics") AnalyticType type) {
     return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
   }

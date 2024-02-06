@@ -18,8 +18,8 @@ import org.erdtman.jcs.JsonCanonicalizer;
 @Log4j2
 public class JwsUtils {
 
-  public static boolean verifySignatureWithEd25519(String publicKey, String signature,
-                                                   String jsonData) {
+  public static boolean verifySignatureWithEd25519(
+      String publicKey, String signature, String jsonData) {
     try {
       Base64URL pubKeyBase64URL = Base64URL.encode(Hex.decodeHex(publicKey));
       Base64URL sigBase64URL = Base64URL.encode(Hex.decodeHex(signature));
@@ -27,19 +27,19 @@ public class JwsUtils {
       JsonCanonicalizer jc = new JsonCanonicalizer(jsonData);
       Base64URL offchainBase64url = Base64URL.encode(jc.getEncodedString());
 
-      OctetKeyPair publicJWK = new OctetKeyPair.Builder(Curve.Ed25519, pubKeyBase64URL)
-          .build()
-          .toPublicJWK();
+      OctetKeyPair publicJWK =
+          new OctetKeyPair.Builder(Curve.Ed25519, pubKeyBase64URL).build().toPublicJWK();
       JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.EdDSA);
       JWSVerifier verifier = new Ed25519Verifier(publicJWK);
-      return verifier.verify(jwsHeader,
-                             composeSigningInput(jwsHeader, new Payload(offchainBase64url))
-                                 .getBytes(StandardCharsets.UTF_8), sigBase64URL);
+      return verifier.verify(
+          jwsHeader,
+          composeSigningInput(jwsHeader, new Payload(offchainBase64url))
+              .getBytes(StandardCharsets.UTF_8),
+          sigBase64URL);
     } catch (Exception e) {
       log.error("Error while verifying signature", e);
       return false;
     }
-
   }
 
   private static String composeSigningInput(JWSHeader jwsHeader, Payload payload) {

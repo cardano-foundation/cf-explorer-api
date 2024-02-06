@@ -3,6 +3,7 @@ package org.cardanofoundation.explorer.api.model.request.stake.report;
 import java.util.Date;
 
 import lombok.*;
+
 import org.cardanofoundation.explorer.common.validation.date.DatePattern;
 import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 

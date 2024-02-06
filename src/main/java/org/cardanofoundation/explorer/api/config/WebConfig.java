@@ -1,22 +1,17 @@
 package org.cardanofoundation.explorer.api.config;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import io.netty.channel.ChannelOption;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
-import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
-import org.cardanofoundation.explorer.api.interceptor.auth.Request;
-import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
-import org.cardanofoundation.explorer.common.validation.date.param.DateValidArgumentResolver;
-import reactor.netty.http.client.HttpClient;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -25,10 +20,15 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
+import reactor.netty.http.client.HttpClient;
+
+import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
+import org.cardanofoundation.explorer.api.interceptor.auth.Request;
+import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
+import org.cardanofoundation.explorer.common.validation.date.param.DateValidArgumentResolver;
 
 @Configuration
 @Log4j2
@@ -57,7 +57,8 @@ public class WebConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     log.info("Authentication interceptor is adding to the service");
-    registry.addInterceptor(authInterceptor)
+    registry
+        .addInterceptor(authInterceptor)
         .addPathPatterns(
             roleConf.getAuth().stream().map(Request::getUri).collect(Collectors.toList()));
   }

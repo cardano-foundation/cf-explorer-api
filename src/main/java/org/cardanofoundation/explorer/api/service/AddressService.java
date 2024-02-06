@@ -1,15 +1,14 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
-import org.cardanofoundation.explorer.api.model.request.ScriptVerifyRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.contract.ContractScript;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.springframework.data.domain.Pageable;
 
 public interface AddressService {
 
@@ -46,7 +45,6 @@ public interface AddressService {
    */
   BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable);
 
-
   /**
    * Get list token by display name
    *
@@ -55,5 +53,6 @@ public interface AddressService {
    * @param displayName display name of token
    * @return list token by display name
    */
-  BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(Pageable pageable, String address, String displayName);
+  BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(
+      Pageable pageable, String address, String displayName);
 }

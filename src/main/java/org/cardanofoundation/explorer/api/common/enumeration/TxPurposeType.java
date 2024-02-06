@@ -1,4 +1,5 @@
 package org.cardanofoundation.explorer.api.common.enumeration;
+
 public enum TxPurposeType {
   // Four types of tx purpose
   SPEND,
@@ -7,5 +8,4 @@ public enum TxPurposeType {
   REWARD,
   ANY, // all types above
   NO_TX_PURPOSE // no tx purpose
-
 }
