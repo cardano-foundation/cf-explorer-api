@@ -82,6 +82,9 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `API_NEWS_CACHE_TIME`: Cache time for news data. Default is 120s.
 - `API_MARKET_URL`: URL for get market data. Default is `https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s`
 - `API_MARKET_CACHE_TIME` : Cache time for market data. Default is 120s.
+- `API_BOLNISI_OFFCHAIN_URL`: URL for get bolnisi offchain data by cid.
+- `API_BOLNISI_PUBLIC_KEY_URL`: URL for get bolnisi public key data by wineryId.
+
 - `WEB_SOCKET_MARKET_PUBLISH_DELAY_TIME`: Delay time for publish market data to websocket. Default is 20s.
 - `EPOCH_DAYS` : Number of days in an epoch. Default is 5.
 - `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.

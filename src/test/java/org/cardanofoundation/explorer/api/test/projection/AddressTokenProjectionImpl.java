@@ -19,6 +19,12 @@ public class AddressTokenProjectionImpl implements AddressTokenProjection {
   Long addressId;
   String policy;
   Long multiAssetId;
+  String url;
+  String ticker;
+  Integer decimals;
+  String logo;
+  String description;
+  String subject;
 
   @Override
   public BigInteger getQuantity() {
@@ -53,5 +59,35 @@ public class AddressTokenProjectionImpl implements AddressTokenProjection {
   @Override
   public Long getMultiAssetId() {
     return this.multiAssetId;
+  }
+
+  @Override
+  public String getUrl() {
+    return this.url;
+  }
+
+  @Override
+  public String getTicker() {
+    return this.ticker;
+  }
+
+  @Override
+  public Integer getDecimals() {
+    return this.decimals;
+  }
+
+  @Override
+  public String getLogo() {
+    return this.logo;
+  }
+
+  @Override
+  public String getDescription() {
+    return this.description;
+  }
+
+  @Override
+  public String getSubject() {
+    return this.subject;
   }
 }

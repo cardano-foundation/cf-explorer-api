@@ -14,6 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressChartBal
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
+import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
@@ -276,5 +277,25 @@ public class StakeKeyControllerTest {
         mockMvc.perform(get("/api/v1/stakes/analytics-reward/{stakeKey}", stakeKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists());
+    }
+
+    @Test
+    void testGetStakeAddressRewardDistributionInfo() throws Exception {
+        String stakeKey = "stake1u9h5g7m75hwhqnesgz0mkdk5qqhnhzpyfwj2l2tm6n28v4s2w8uqq";
+        StakeAddressRewardDistribution response = StakeAddressRewardDistribution.builder()
+            .stakeAddress(stakeKey)
+            .hasMemberReward(true)
+            .hasLeaderReward(false)
+            .build();
+
+        when(stakeService.getStakeAddressRewardDistributionInfo(stakeKey)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/stakes/reward-distribution/{stakeKey}", stakeKey))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").exists())
+            .andExpect(jsonPath("$.hasMemberReward").value(true))
+            .andExpect(jsonPath("$.hasLeaderReward").value(false));
+
+        verify(stakeService).getStakeAddressRewardDistributionInfo(stakeKey);
     }
 }

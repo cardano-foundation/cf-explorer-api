@@ -19,6 +19,7 @@ import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHisto
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.ReportLimitResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
@@ -55,11 +56,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(StakeKeyReportController.class)
@@ -430,6 +433,30 @@ class StakeKeyReportControllerTest {
         .andExpect(content().string(
             containsString("91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381")))
         .andDo(print());
+  }
+
+  @Test
+  void testGetReportLimit() throws Exception {
+    UserPrincipal userPrincipal = UserPrincipal.builder()
+          .username("username")
+          .build();
+    ReportLimitResponse response = ReportLimitResponse.builder()
+        .isLimitReached(true)
+        .limitPer24hours(1)
+        .build();
+
+    when(reportHistoryService.getReportLimit(userPrincipal)).thenReturn(response);
+
+    mockMvc.perform(get(END_POINT + "/report-limit")
+            .with(request -> {
+              request.setAttribute("user", userPrincipal);
+              return request;
+            }))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.isLimitReached").value(true))
+        .andExpect(jsonPath("$.limitPer24hours").value(1));
+
+    verify(reportHistoryService).getReportLimit(userPrincipal);
   }
 
   private StakeKeyReportHistoryResponse getStakeKeyReportHistoryResponse(Long reportId,

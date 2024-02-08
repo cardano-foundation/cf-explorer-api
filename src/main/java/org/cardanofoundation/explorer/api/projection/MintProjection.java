@@ -1,30 +1,16 @@
 package org.cardanofoundation.explorer.api.projection;
 
-
 import java.math.BigInteger;
-import java.sql.Timestamp;
 
-public interface TokenProjection {
-
-  Long getId();
-
-  String getPolicy();
+public interface MintProjection {
 
   String getName();
 
-  String getNameView();
+  String getPolicy();
+
+  BigInteger getAssetQuantity();
 
   String getFingerprint();
-
-  Long getTxCount();
-
-  BigInteger getSupply();
-
-  BigInteger getTotalVolume();
-
-  Timestamp getTime();
-  
-  String getSubject();
 
   String getUrl();
 
@@ -35,5 +21,4 @@ public interface TokenProjection {
   String getLogo();
 
   String getDescription();
-
 }
