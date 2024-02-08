@@ -25,4 +25,5 @@ public class NativeScriptResponse {
   private String script;
   private Boolean isOneTimeMint;
   private Boolean verifiedContract;
+  private Boolean isOpen;
 }

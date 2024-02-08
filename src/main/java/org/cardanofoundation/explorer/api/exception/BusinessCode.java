@@ -27,7 +27,8 @@ public enum BusinessCode implements ErrorCode {
   FETCH_REWARD_ERROR("500-FETCH_REWARD_ERROR", "Fetch reward error"),
   TIME_RANGE_ILLEGAL("400-TIME_RANGE_ILLEGAL", "Time range is illegal"),
   REPORT_LIMIT_REACHED("400-REPORT_LIMIT_REACHED", "Report limit reached"),
-  OUT_OF_QUERY_LIMIT("400-OUT_OF_QUERY_LIMIT", "Out of query limit");
+  OUT_OF_QUERY_LIMIT("400-OUT_OF_QUERY_LIMIT", "Out of query limit"),
+  EXTERNAL_API_IS_NOT_AVAILABLE("500-EXTERNAL_API_IS_NOT_AVAILABLE", "External API is not available");
 
   private final String code;
   private final String desc;

@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
+import org.cardanofoundation.explorer.api.projection.MintProjection;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
 import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint_;
 import org.cardanofoundation.explorer.consumercommon.entity.Tx;
@@ -13,6 +14,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
+
+  @Query("SELECT ma.name as name, ma.policy as policy, mtm.quantity as assetQuantity,"
+      + " ma.fingerprint as fingerprint, am.url as url, am.ticker as ticker,"
+      + " am.decimals as decimals, am.logo as logo, am.description as description"
+      + " FROM MaTxMint mtm "
+      + " JOIN MultiAsset ma ON ma.id = mtm.ident.id"
+      + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint"
+      + " WHERE mtm.tx.id=:txId")
+  List<MintProjection> findByTxId(@Param("txId") Long txId);
 
   @EntityGraph(attributePaths = {MaTxMint_.IDENT})
   List<MaTxMint> findByTx(@Param("tx") Tx tx);

@@ -24,6 +24,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
@@ -50,8 +51,6 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
-import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
-import org.cardanofoundation.explorer.api.projection.PolicyProjection;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
@@ -66,12 +65,10 @@ public class ScriptServiceImpl implements ScriptService {
 
   private final ScriptRepository scriptRepository;
   private final NativeScriptInfoRepository nativeScriptInfoRepository;
-  private final TxOutRepository txOutRepository;
   private final MultiAssetRepository multiAssetRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RedeemerRepository redeemerRepository;
   private final TxRepository txRepository;
-  private final AssetMetadataRepository assetMetadataRepository;
   private final AddressRepository addressRepository;
   private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final MaTxMintRepository maTxMintRepository;
@@ -109,9 +106,10 @@ public class ScriptServiceImpl implements ScriptService {
     );
     Page<NativeScriptInfo> nativeScriptPage = nativeScriptInfoRepository.findAll(
         NativeScriptInfoSpecification.filter(currrentBlock.getSlotNo(), filterRequest), pageable);
-    List<MultiAsset> multiAssetList = multiAssetRepository.findTopMultiAssetByScriptHashIn(
+    List<TokenProjection> tokenProjectionList = multiAssetRepository.findTopMultiAssetByScriptHashIn(
         nativeScriptPage.stream().map(NativeScriptInfo::getScriptHash).toList());
-    List<TokenFilterResponse> tokenResponses = createTokenResponse(multiAssetList);
+    List<TokenFilterResponse> tokenResponses = tokenProjectionList.stream()
+        .map(assetMetadataMapper::fromTokenProjectionToFilterResponse).toList();
     Map<String, List<TokenFilterResponse>> tokenResponseMap =
         tokenResponses.stream().collect(Collectors.groupingBy(TokenFilterResponse::getPolicy));
     Page<NativeScriptFilterResponse> nativeScriptPageResponse =
@@ -130,32 +128,11 @@ public class ScriptServiceImpl implements ScriptService {
             nativeScriptResponse.setIsMultiSig(Long.valueOf(1L).compareTo(item.getNumberSig()) < 0);
           }
           nativeScriptResponse.setTokens(tokenResponseMap.get(item.getScriptHash()));
+          nativeScriptResponse.setIsOpen(setStatus(item,currrentBlock.getSlotNo()));
           return nativeScriptResponse;
         });
     return new BaseFilterResponse<>(nativeScriptPageResponse);
   }
-
-  private List<TokenFilterResponse> createTokenResponse(List<MultiAsset> tokens) {
-    List<TokenFilterResponse> tokenResponses;
-    Set<String> subjects = tokens.stream().map(
-        ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-    tokenResponses = tokens.stream().map(
-        token -> {
-          TokenFilterResponse tokenFilterResponse = new TokenFilterResponse();
-          tokenFilterResponse.setPolicy(token.getPolicy());
-          tokenFilterResponse.setName(token.getName());
-          tokenFilterResponse.setFingerprint(token.getFingerprint());
-          tokenFilterResponse.setDisplayName(token.getNameView());
-          tokenFilterResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(
-              assetMetadataMap.get(token.getPolicy() + token.getName())));
-          return tokenFilterResponse;
-        }).toList();
-    return tokenResponses;
-  }
-
   /**
    * Explain native script
    * @param nativeScript native script
@@ -198,8 +175,28 @@ public class ScriptServiceImpl implements ScriptService {
     }
   }
 
+  private boolean setStatus(NativeScriptInfo nativeScriptInfo, Long currentSlot) {
+    boolean isOpen = false;
+    boolean isNullBefore = Objects.isNull(nativeScriptInfo.getBeforeSlot());
+    boolean isNullAfter = Objects.isNull(nativeScriptInfo.getAfterSlot());
+    if (!isNullBefore && !isNullAfter) {
+      isOpen = Long.compare(nativeScriptInfo.getAfterSlot(), currentSlot) == -1
+          && Long.compare(nativeScriptInfo.getBeforeSlot(), currentSlot) == 1;
+    } else if (isNullAfter && !isNullBefore) {
+      isOpen = Long.compare(nativeScriptInfo.getBeforeSlot(), currentSlot) == 1;
+    } else if (isNullBefore && !isNullAfter) {
+      isOpen = Long.compare(nativeScriptInfo.getAfterSlot(), currentSlot) == -1;
+    } else if (isNullAfter && isNullBefore) {
+      isOpen = true;
+    }
+    return isOpen;
+  }
+
   @Override
   public NativeScriptResponse getNativeScriptDetail(String scriptHash) {
+    Block currrentBlock = blockRepository.findLatestBlock().orElseThrow(
+        () -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND)
+    );
     NativeScriptResponse nativeScriptResponse = new NativeScriptResponse();
     Script script = scriptRepository.findByHash(scriptHash).orElseThrow(
         () -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND)
@@ -223,6 +220,7 @@ public class ScriptServiceImpl implements ScriptService {
     nativeScriptResponse.setNumberOfAssetHolders(nativeScriptInfo.getNumberOfAssetHolders());
     nativeScriptResponse.setKeyHashes(new ArrayList<>());
     nativeScriptResponse.setVerifiedContract(false);
+    nativeScriptResponse.setIsOpen(setStatus(nativeScriptInfo,currrentBlock.getSlotNo()));
 
     String json = script.getJson();
     if (StringUtils.isEmpty(json)) {
@@ -319,27 +317,22 @@ public class ScriptServiceImpl implements ScriptService {
 
 
   @Override
-  public BaseFilterResponse<TokenFilterResponse> getNativeScriptTokens(String scriptHash, Pageable pageable) {
+  public BaseFilterResponse<TokenFilterResponse> getNativeScriptTokens(String scriptHash,
+                                                                       Pageable pageable) {
     NativeScriptInfo nativeScriptInfo =
         nativeScriptInfoRepository
             .findByScriptHash(scriptHash)
             .orElseGet(() -> NativeScriptInfo.builder()
                 .numberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash))
                 .build());
-    List<MultiAsset> multiAssetList = multiAssetRepository.findMultiAssetByPolicy(scriptHash, pageable);
-    Page<MultiAsset> multiAssetPage = new PageImpl<>(multiAssetList, pageable, nativeScriptInfo.getNumberOfTokens());
-    Set<String> subjects = multiAssetPage.stream().map(
-        ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-    var multiAssetResponsesList = multiAssetPage.map(tokenMapper::fromMultiAssetToFilterResponse);
-    multiAssetResponsesList.forEach(
-        ma -> ma.setMetadata(assetMetadataMapper.fromAssetMetadata(
-            assetMetadataMap.get(ma.getPolicy() + ma.getName()))
-        )
-    );
-    return new BaseFilterResponse<>(multiAssetResponsesList);
+    List<TokenFilterResponse> tokenFilterResponses = multiAssetRepository
+        .findTokenInfoByScriptHash(scriptHash, pageable)
+        .stream()
+        .map(assetMetadataMapper::fromTokenProjectionToFilterResponse)
+        .toList();
+    Page<TokenFilterResponse> tokenPage =
+        new PageImpl<>(tokenFilterResponses, pageable, nativeScriptInfo.getNumberOfTokens());
+    return new BaseFilterResponse<>(tokenPage);
   }
 
   @Override
@@ -354,23 +347,23 @@ public class ScriptServiceImpl implements ScriptService {
         addressTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable);
     Page<AddressTokenProjection> multiAssetPage =
         new PageImpl<>(multiAssetList, pageable, nativeScriptInfo.getNumberOfAssetHolders());
-    Set<Long> addressIds = multiAssetPage.stream().map(AddressTokenProjection::getAddressId)
+
+    Set<Long> addressIds = multiAssetPage
+        .stream()
+        .map(AddressTokenProjection::getAddressId)
         .collect(Collectors.toSet());
-    List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
-    Map<Long, Address> addressMap = addressList.stream().collect(
-        Collectors.toMap(Address::getId, Function.identity()));
+
+    Map<Long, String> addressMap = addressRepository
+        .findAddressByIdIn(addressIds)
+        .stream()
+        .collect(Collectors.toMap(Address::getId, Address::getAddress));
+
     Page<TokenAddressResponse> tokenAddressResponses = multiAssetPage.map(
         tokenMapper::fromAddressTokenProjection);
-    Set<String> subjects = multiAssetPage.stream().map(
-        ma -> ma.getPolicy() + ma.getTokenName()).collect(Collectors.toSet());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
+
     tokenAddressResponses.forEach(tokenAddress -> {
       tokenAddress.setAddress(
-          addressMap.get(tokenAddress.getAddressId()).getAddress());
-      tokenAddress.setMetadata(assetMetadataMapper.fromAssetMetadata(
-          assetMetadataMap.get(tokenAddress.getPolicy() + tokenAddress.getName())));
+          addressMap.get(tokenAddress.getAddressId()));
       tokenAddress.setAddressId(null);
     });
     return new BaseFilterResponse<>(tokenAddressResponses);

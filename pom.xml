@@ -79,6 +79,10 @@
         <version.pitest>1.14.2</version.pitest>
         <version.pitest-junit5>1.1.1</version.pitest-junit5>
         <version.spring.websocket>6.0.11</version.spring.websocket>
+        <version.nimbus-jose-jwt>9.24.4</version.nimbus-jose-jwt>
+        <version.com.google.crypto.tink>1.9.0</version.com.google.crypto.tink>
+        <version.json-canonicalization>1.1</version.json-canonicalization>
+        <version.java-cid>v1.3.3</version.java-cid>
     </properties>
 
     <repositories>
@@ -92,6 +96,10 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -141,6 +149,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -290,6 +302,28 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-websocket</artifactId>
             <version>${version.spring.websocket}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>${version.nimbus-jose-jwt}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.crypto.tink</groupId>
+            <artifactId>tink</artifactId>
+            <version>${version.com.google.crypto.tink}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.erdtman</groupId>
+            <artifactId>java-json-canonicalization</artifactId>
+            <version>${version.json-canonicalization}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ipld</groupId>
+            <artifactId>java-cid</artifactId>
+            <version>${version.java-cid}</version>
         </dependency>
     </dependencies>
 

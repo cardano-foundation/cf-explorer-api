@@ -249,22 +249,6 @@ public class AddressServiceImpl implements AddressService {
           .findTokenAndBalanceByAddressAndNameView(addr, displayName, pageable)
           .map(tokenMapper::fromAddressTokenProjection);
     }
-    setMetadata(tokenListResponse.getContent());
     return new BaseFilterResponse<>(tokenListResponse);
-  }
-
-  private void setMetadata(List<TokenAddressResponse> tokenListResponse) {
-    Set<String> subjects = tokenListResponse.stream()
-        .map(ma -> ma.getPolicy() + ma.getName()).collect(Collectors.toSet());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap = assetMetadataList.stream().collect(
-        Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-
-    tokenListResponse.forEach(token -> {
-      AssetMetadata assetMetadata = assetMetadataMap.get(token.getPolicy() + token.getName());
-      if (Objects.nonNull(assetMetadata)) {
-        token.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
-      }
-    });
   }
 }
