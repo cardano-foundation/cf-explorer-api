@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.7.0...v0.8.0) (2024-02-09)
+
+
+### Bug Fixes
+
+* add current timelock status in nativescript response ([37560a9](https://github.com/cardano-foundation/cf-explorer-api/commit/37560a9665e3c5f9b3a6e19a7ae81ea3d44ca25f))
+* checking for Bolnisi type “st”: “georgianWine” ([b31721b](https://github.com/cardano-foundation/cf-explorer-api/commit/b31721b3bff0a635d76eb45306b11b73cbe119f6))
+* handle case Public key API service is unavailable ([9399933](https://github.com/cardano-foundation/cf-explorer-api/commit/939993375cd868e61e138974a6b3dfef1c4032ef))
+* handle status 500 server error ([d5df002](https://github.com/cardano-foundation/cf-explorer-api/commit/d5df002863a995a18dec96b57b23161d7c572069))
+* missing fingerprint when get token metadata in tx-mints ([9bb7c75](https://github.com/cardano-foundation/cf-explorer-api/commit/9bb7c75918ce725a0b1ac59e16f238cc252cc6a7))
+* not map token_metadata when asset_metadata.subject is null ([51688c9](https://github.com/cardano-foundation/cf-explorer-api/commit/51688c93be01e42008f6717dc1b4cc686dbc0114))
+* update postman collection ([f058b5d](https://github.com/cardano-foundation/cf-explorer-api/commit/f058b5d9a494f335746a844b064c39b8b53579d3))
+* wrong handle on error ([c0835b6](https://github.com/cardano-foundation/cf-explorer-api/commit/c0835b6375fd1f1ddf15e1c28d0f91114cbfc502))
+
 ## [0.7.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.6.0...v0.7.0) (2024-01-17)
 
 
