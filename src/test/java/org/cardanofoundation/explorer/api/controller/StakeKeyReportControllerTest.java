@@ -94,7 +94,7 @@ class StakeKeyReportControllerTest {
 
     StakeKeyReportHistoryResponse responseExpect =
         StakeKeyReportHistoryResponse.builder()
-            .stakeKey("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")
+            .stakeKey("stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")
             .fromDate(fromDateTimestamp)
             .toDate(toDateTimestamp)
             .isADATransfer(Boolean.TRUE)
@@ -124,7 +124,8 @@ class StakeKeyReportControllerTest {
         .andExpect(
             content()
                 .string(
-                    containsString("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")))
+                    containsString(
+                        "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")))
         .andDo(print());
   }
 
@@ -191,7 +192,8 @@ class StakeKeyReportControllerTest {
         .andExpect(
             content()
                 .string(
-                    containsString("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")))
+                    containsString(
+                        "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")))
         .andDo(print());
   }
 
@@ -199,7 +201,7 @@ class StakeKeyReportControllerTest {
   void shouldGetStakeKeyReportHistoriesByStakeKey() throws Exception {
     Long reportId = 1L;
     String username = "username";
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeKeyReportHistoryResponse stakeKeyReportHistoryResponse =
         getStakeKeyReportHistoryResponse(reportId, username);
 
@@ -227,7 +229,8 @@ class StakeKeyReportControllerTest {
         .andExpect(
             content()
                 .string(
-                    containsString("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")))
+                    containsString(
+                        "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")))
         .andDo(print());
   }
 
@@ -265,7 +268,8 @@ class StakeKeyReportControllerTest {
         .andExpect(
             content()
                 .string(
-                    containsString("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")))
+                    containsString(
+                        "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")))
         .andDo(print());
   }
 
@@ -547,7 +551,7 @@ class StakeKeyReportControllerTest {
     StakeKeyReportHistoryResponse stakeKeyReportHistoryResponse =
         StakeKeyReportHistoryResponse.builder()
             .id(reportId)
-            .stakeKey("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")
+            .stakeKey("stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")
             .username(username)
             .reportName("test")
             .fromDate(new Timestamp(System.currentTimeMillis()))
