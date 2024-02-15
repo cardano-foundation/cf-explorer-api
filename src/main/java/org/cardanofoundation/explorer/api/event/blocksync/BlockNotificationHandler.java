@@ -12,7 +12,6 @@ import org.postgresql.PGNotification;
 
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
-import org.cardanofoundation.explorer.api.model.redis.BlockSyncMessage;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.service.WebSocketService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
