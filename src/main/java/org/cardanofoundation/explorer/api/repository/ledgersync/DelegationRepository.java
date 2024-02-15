@@ -20,7 +20,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDet
 import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
+import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 
 @Repository
 public interface DelegationRepository extends JpaRepository<Delegation, Long> {

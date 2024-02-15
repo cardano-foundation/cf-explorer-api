@@ -18,9 +18,9 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeCheckp
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
+import org.cardanofoundation.explorer.common.entity.enumeration.EraType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Profile("koios")
 @Service

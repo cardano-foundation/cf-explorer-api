@@ -31,11 +31,11 @@ import org.cardanofoundation.explorer.api.model.response.pool.PoolDetailHeaderRe
 import org.cardanofoundation.explorer.api.model.response.pool.PoolResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.chart.PoolDetailAnalyticsResponse;
 import org.cardanofoundation.explorer.api.service.DelegationService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Delegation_;
 import org.cardanofoundation.explorer.common.validation.length.LengthValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
 
 @RestController
 @RequestMapping("/api/v1/delegations")

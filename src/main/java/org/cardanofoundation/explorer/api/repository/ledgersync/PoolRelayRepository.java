@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRelayProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolRelay;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolRelay;
 
 @Repository
 public interface PoolRelayRepository extends JpaRepository<PoolRelay, Long> {

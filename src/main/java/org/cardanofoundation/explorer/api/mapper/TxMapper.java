@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 @Mapper(componentModel = "spring")
 public interface TxMapper {

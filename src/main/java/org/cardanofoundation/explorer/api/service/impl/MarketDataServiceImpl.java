@@ -25,7 +25,7 @@ import org.cardanofoundation.explorer.api.event.websocket.WebSocketEvent;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.service.MarketDataService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor

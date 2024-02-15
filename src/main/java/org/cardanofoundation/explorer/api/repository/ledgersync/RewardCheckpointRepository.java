@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.explorer.consumercommon.entity.RewardCheckpoint;
+import org.cardanofoundation.explorer.common.entity.ledgersync.RewardCheckpoint;
 
 public interface RewardCheckpointRepository extends JpaRepository<RewardCheckpoint, Long> {
 

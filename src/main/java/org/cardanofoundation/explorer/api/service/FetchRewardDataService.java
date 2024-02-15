@@ -3,7 +3,7 @@ package org.cardanofoundation.explorer.api.service;
 import java.util.List;
 import java.util.Set;
 
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 
 public interface FetchRewardDataService {
 

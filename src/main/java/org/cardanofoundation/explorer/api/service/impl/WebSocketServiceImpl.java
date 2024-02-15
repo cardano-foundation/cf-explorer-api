@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.explorer.api.common.enumeration.WebSocketEventType;
 import org.cardanofoundation.explorer.api.event.blocksync.BlockSyncInfo;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
+import org.cardanofoundation.explorer.api.model.redis.BlockSyncMessage;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.MarketDataService;
 import org.cardanofoundation.explorer.api.service.WebSocketService;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 
 @Service
 @RequiredArgsConstructor

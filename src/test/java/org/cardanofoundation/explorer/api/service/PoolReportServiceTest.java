@@ -44,12 +44,12 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeReposi
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.ReportHistory;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
+import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
+import org.cardanofoundation.explorer.common.entity.explorer.ReportHistory;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 public class PoolReportServiceTest {

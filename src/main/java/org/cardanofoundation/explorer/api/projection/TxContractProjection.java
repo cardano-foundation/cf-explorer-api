@@ -2,7 +2,7 @@ package org.cardanofoundation.explorer.api.projection;
 
 import java.math.BigInteger;
 
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptPurposeType;
 
 public interface TxContractProjection {
   String getScriptHash();

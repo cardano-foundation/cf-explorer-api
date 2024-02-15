@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolCertificateHistory;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochRewardProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.LifeCycleRewardProjection;
@@ -46,11 +47,10 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateReposi
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolLifecycleServiceImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolUpdate;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class PoolLifecycleServiceTest {
@@ -1039,7 +1039,7 @@ class PoolLifecycleServiceTest {
               poolLifecycleService.poolLifecycleStatus(poolView);
             });
     Assertions.assertEquals(
-        CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode(), exception.getErrorCode());
+        BusinessCode.POOL_NOT_FOUND.getServiceErrorCode(), exception.getErrorCode());
   }
 
   @Test

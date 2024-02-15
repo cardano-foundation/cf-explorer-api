@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.TxBootstrapWitnesses;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TxBootstrapWitnesses;
 
 public interface TxBootstrapWitnessesRepository extends JpaRepository<TxBootstrapWitnesses, Long> {
 

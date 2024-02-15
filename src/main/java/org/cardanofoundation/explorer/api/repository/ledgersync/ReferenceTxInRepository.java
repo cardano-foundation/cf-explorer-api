@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.ReferenceInputProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.ReferenceTxIn;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.ReferenceTxIn;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface ReferenceTxInRepository extends JpaRepository<ReferenceTxIn, Long> {
   @Query(

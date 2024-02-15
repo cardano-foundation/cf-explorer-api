@@ -42,10 +42,11 @@ import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
 import org.cardanofoundation.explorer.api.service.StorageService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
+import org.cardanofoundation.explorer.common.entity.explorer.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +72,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     Boolean isSuccess = kafkaService.sendReportHistory(stakeKeyReportHistory.getReportHistory());
     if (Boolean.FALSE.equals(isSuccess)) {
       stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
-      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
     }
     return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
   }

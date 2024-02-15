@@ -31,8 +31,8 @@ import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.LotData
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
 import org.cardanofoundation.explorer.api.service.impl.BolnisiMetadataServiceImpl;
-import org.cardanofoundation.explorer.consumercommon.entity.TxMetadata;
-import org.cardanofoundation.ledgersync.common.util.HexUtil;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadata;
+import org.cardanofoundation.explorer.common.utils.HexUtil;
 
 @ExtendWith(MockitoExtension.class)
 class BolnisiMetadataServiceTest {

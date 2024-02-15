@@ -31,7 +31,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeCheckp
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.impl.FetchRewardDataFromKoiosServiceImpl;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 
 @ExtendWith(MockitoExtension.class)
 public class FetchRewardDataFromKoiosServiceTest {

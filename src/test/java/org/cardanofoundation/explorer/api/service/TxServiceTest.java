@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
+import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
@@ -67,17 +68,16 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalReposi
 import org.cardanofoundation.explorer.api.service.impl.TxServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.TxIOProjectionImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.TxMetadataHash;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressToken;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadataHash;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class TxServiceTest {

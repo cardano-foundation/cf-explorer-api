@@ -14,7 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularR
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
+import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 
 public interface PoolReportService {
 
@@ -22,7 +22,7 @@ public interface PoolReportService {
    * Generate pool report of current user
    *
    * @param poolReportCreateRequest request body
-   * @param username username of current request user
+   * @param userPrincipal userPrincipal
    * @return true if success
    */
   Boolean create(PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal);

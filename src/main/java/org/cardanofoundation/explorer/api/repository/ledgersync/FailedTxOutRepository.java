@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.FailedTxOut;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.FailedTxOut;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface FailedTxOutRepository extends JpaRepository<FailedTxOut, Long> {
   @Query(

@@ -14,9 +14,9 @@ import org.springframework.stereotype.Repository;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCertificateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDeRegistrationProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolRetire;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolRetire;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 @Repository
 public interface PoolRetireRepository extends JpaRepository<PoolRetire, Long> {

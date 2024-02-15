@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.experimental.FieldDefaults;
 
 import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptPurposeType;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
