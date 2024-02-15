@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.AggregatePoolInfo;
 
 public interface AggregatePoolInfoRepository extends JpaRepository<AggregatePoolInfo, Long> {
 

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolCertificateHistory;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.DeRegistrationResponse;
@@ -51,11 +52,10 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolUpdate;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor
@@ -382,7 +382,7 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
     PoolHash pool =
         poolHashRepository
             .findByViewOrHashRaw(poolViewOrHash)
-            .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+            .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
     String poolView = pool.getView();
     if (fetchRewardDataService.useKoios()) {
       List<String> rewardAccounts = poolUpdateRepository.findRewardAccountByPoolView(poolView);

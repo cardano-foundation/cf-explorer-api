@@ -12,8 +12,8 @@ import org.springframework.data.repository.query.Param;
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
 import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.TxOut;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TxOut;
 
 public interface TxOutRepository extends JpaRepository<TxOut, Long> {
 

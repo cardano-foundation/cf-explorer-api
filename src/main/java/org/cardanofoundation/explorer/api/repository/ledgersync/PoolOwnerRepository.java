@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolOwnerProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolOwner;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolOwner;
 
 @Repository
 public interface PoolOwnerRepository extends JpaRepository<PoolOwner, Long> {

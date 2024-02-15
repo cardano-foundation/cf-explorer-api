@@ -23,11 +23,11 @@ import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.TxPoolCertificateHistory;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolRetire_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolUpdate_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolRetire_;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate_;
 
 @RestController
 @RequestMapping("/api/v1/pools")

@@ -14,10 +14,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 @Repository
 public interface StakeRegistrationRepository extends JpaRepository<StakeRegistration, Long> {

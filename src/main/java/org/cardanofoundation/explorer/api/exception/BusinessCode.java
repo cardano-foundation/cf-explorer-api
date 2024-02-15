@@ -1,9 +1,8 @@
 package org.cardanofoundation.explorer.api.exception;
 
-import org.cardanofoundation.explorer.common.exceptions.enums.ErrorCode;
+import org.cardanofoundation.explorer.common.exception.ErrorCode;
 
 public enum BusinessCode implements ErrorCode {
-  INTERNAL_ERROR("INTERNAL-SERVER", "Something went wrong"),
   EPOCH_NOT_FOUND("404-EPOCH_NOT_FOUND", "Epoch not found"),
   BLOCK_NOT_FOUND("404-BLOCK_NOT_FOUND", "Block not found"),
   TRANSACTION_NOT_FOUND("404-TRANSACTION_NOT_FOUND", "Transaction not found"),

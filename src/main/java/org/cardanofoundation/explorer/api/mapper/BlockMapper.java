@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 
 @Mapper(componentModel = "spring")
 public interface BlockMapper {

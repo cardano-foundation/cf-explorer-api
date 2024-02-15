@@ -8,8 +8,8 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 import org.cardanofoundation.explorer.api.model.request.script.nativescript.NativeScriptFilterRequest;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo_;
+import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo_;
 
 public class NativeScriptInfoSpecification {
 

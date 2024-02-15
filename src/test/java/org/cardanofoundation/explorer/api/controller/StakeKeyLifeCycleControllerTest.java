@@ -39,7 +39,7 @@ import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilt
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 
 @WebMvcTest(StakeKeyLifeCycleController.class)
 @AutoConfigureMockMvc(addFilters = false)

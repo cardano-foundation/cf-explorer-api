@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import org.cardanofoundation.explorer.api.model.response.tx.TxDelegationResponse;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Delegation;
 
 @Mapper(componentModel = "spring")
 public interface DelegationMapper {

@@ -62,9 +62,9 @@ import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyRe
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 
 @WebMvcTest(StakeKeyReportController.class)
 @Import(RoleFilterMapper.class)

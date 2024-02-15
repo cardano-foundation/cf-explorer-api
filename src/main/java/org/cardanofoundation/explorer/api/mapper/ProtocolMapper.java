@@ -16,9 +16,9 @@ import org.cardanofoundation.explorer.api.model.response.protocol.HistoriesProto
 import org.cardanofoundation.explorer.api.model.response.protocol.ProtocolHistory;
 import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.model.response.tx.ProtocolParamResponse;
-import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
-import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
-import org.cardanofoundation.ledgersync.common.util.JsonUtil;
+import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
+import org.cardanofoundation.explorer.common.entity.ledgersync.ParamProposal;
+import org.cardanofoundation.explorer.common.utils.JsonUtil;
 
 @Mapper(componentModel = "spring")
 public interface ProtocolMapper {

@@ -3,9 +3,9 @@ package org.cardanofoundation.explorer.api.common.enumeration;
 import java.util.List;
 
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
-import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.ParamProposal_;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 public enum ProtocolType {
   MIN_FEE_A(EpochParam_.MIN_FEE_A),
