@@ -32,33 +32,6 @@ class WebSocketServiceTest {
   @InjectMocks WebSocketServiceImpl webSocketServiceImpl;
 
   @Test
-  void getMarketDataMessage_withCurrencyUSD_shouldReturnResponse() {
-    when(marketDataService.getMarketData("usd")).thenReturn("Payload");
-    WebSocketMessage expected =
-        WebSocketMessage.builder()
-            .eventType(WebSocketEventType.CURRENT_PRICE_USD)
-            .payload("Payload")
-            .build();
-    WebSocketMessage actual = webSocketServiceImpl.getMarketDataMessage("usd");
-    Assertions.assertEquals(expected.getEventType(), actual.getEventType());
-    Assertions.assertEquals(expected.getPayload(), actual.getPayload());
-  }
-
-  @Test
-  void getMarketDataMessage_withCurrencyBTC_shouldReturnResponse() {
-    when(marketDataService.getMarketData("btc")).thenReturn("Payload");
-    WebSocketMessage expected =
-        WebSocketMessage.builder()
-            .eventType(WebSocketEventType.CURRENT_PRICE_BTC)
-            .payload("Payload")
-            .build();
-    WebSocketMessage actual = webSocketServiceImpl.getMarketDataMessage("btc");
-    Assertions.assertEquals(expected.getEventType(), actual.getEventType());
-    Assertions.assertEquals(
-        JsonUtil.getPrettyJson(expected.getPayload()), JsonUtil.getPrettyJson(actual.getPayload()));
-  }
-
-  @Test
   void getCurrentBlockInfoMessage_shouldReturnResponse() {
     Block blockPrepared = Block.builder().blockNo(1L).hash("hash").txCount(100L).build();
     EpochSummary epochSummaryPrepared =

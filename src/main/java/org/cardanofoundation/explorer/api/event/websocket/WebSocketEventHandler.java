@@ -37,11 +37,6 @@ public class WebSocketEventHandler extends TextWebSocketHandler {
     sessions.add(session);
     session.sendMessage(
         new TextMessage(JsonUtil.getPrettyJson(webSocketService.getCurrentBlockInfoMessage())));
-    session.sendMessage(
-        new TextMessage(JsonUtil.getPrettyJson(webSocketService.getMarketDataMessage("btc"))));
-    session.sendMessage(
-        new TextMessage(JsonUtil.getPrettyJson(webSocketService.getMarketDataMessage("usd"))));
-
     super.afterConnectionEstablished(session);
   }
 
