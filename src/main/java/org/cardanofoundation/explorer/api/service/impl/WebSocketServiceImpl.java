@@ -25,18 +25,6 @@ public class WebSocketServiceImpl implements WebSocketService {
   private final BlockRepository blockRepository;
 
   @Override
-  public WebSocketMessage getMarketDataMessage(String currency) {
-    Object payload = marketDataService.getMarketData(currency);
-    WebSocketMessage webSocketMessage = WebSocketMessage.builder().payload(payload).build();
-    if (currency.equals("usd")) {
-      webSocketMessage.setEventType(WebSocketEventType.CURRENT_PRICE_USD);
-    } else if (currency.equals("btc")) {
-      webSocketMessage.setEventType(WebSocketEventType.CURRENT_PRICE_BTC);
-    }
-    return webSocketMessage;
-  }
-
-  @Override
   public WebSocketMessage getCurrentBlockInfoMessage() {
     Block block = blockRepository.findCurrentBlockById();
     BlockSyncInfo blockSyncInfo =
