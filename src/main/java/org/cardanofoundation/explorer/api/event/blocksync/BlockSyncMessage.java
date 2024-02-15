@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.model.redis;
+package org.cardanofoundation.explorer.api.event.blocksync;
 
 import java.io.Serializable;
 
