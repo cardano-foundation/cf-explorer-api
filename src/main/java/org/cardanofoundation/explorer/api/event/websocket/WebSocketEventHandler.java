@@ -14,7 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import org.cardanofoundation.explorer.api.service.WebSocketService;
-import org.cardanofoundation.ledgersync.common.util.JsonUtil;
+import org.cardanofoundation.explorer.common.utils.JsonUtil;
 
 @Log4j2
 @Component

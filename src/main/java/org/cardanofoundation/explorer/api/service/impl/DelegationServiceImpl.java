@@ -38,6 +38,7 @@ import com.google.gson.JsonObject;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -84,14 +85,13 @@ import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolOfflineData_;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.BaseEntity_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Delegation_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolOfflineData_;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Service
 @RequiredArgsConstructor

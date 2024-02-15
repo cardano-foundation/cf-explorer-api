@@ -13,7 +13,7 @@ import org.cardanofoundation.explorer.api.model.request.script.smartcontract.Sma
 import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.SmartContractInfo;
 
 @Mapper(componentModel = "spring")
 public interface ScriptMapper {

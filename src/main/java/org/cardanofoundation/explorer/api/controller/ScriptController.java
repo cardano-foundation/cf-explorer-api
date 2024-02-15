@@ -29,11 +29,11 @@ import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResp
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
+import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset_;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo_;
 
 @RestController
 @RequestMapping("/api/v1/scripts")

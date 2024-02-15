@@ -12,7 +12,7 @@ import org.mapstruct.Named;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 
 @Mapper(componentModel = "spring")
 public abstract class AssetMetadataMapper {

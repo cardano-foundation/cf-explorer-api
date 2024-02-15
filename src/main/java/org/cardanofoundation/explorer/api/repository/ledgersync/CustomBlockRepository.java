@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Sort.Direction;
 
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 
 public interface CustomBlockRepository {
 

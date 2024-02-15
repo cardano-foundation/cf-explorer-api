@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 
 public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long> {
 

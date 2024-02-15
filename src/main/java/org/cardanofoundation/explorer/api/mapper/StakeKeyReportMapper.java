@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.common.entity.explorer.StakeKeyReportHistory;
 
 @Mapper(
     componentModel = "spring",

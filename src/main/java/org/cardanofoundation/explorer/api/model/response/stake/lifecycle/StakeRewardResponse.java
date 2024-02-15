@@ -10,7 +10,7 @@ import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 
 @Getter
 @Setter

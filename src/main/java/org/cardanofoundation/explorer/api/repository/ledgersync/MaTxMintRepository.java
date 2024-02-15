@@ -11,9 +11,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.MintProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint_;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
 

@@ -19,10 +19,10 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
-import org.cardanofoundation.explorer.consumercommon.entity.Address_;
 
 @RestController
 @RequestMapping("/api/v1/contracts")

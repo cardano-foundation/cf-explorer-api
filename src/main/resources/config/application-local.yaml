@@ -2,7 +2,7 @@
 multi-datasource: #specified for HikariDataSource
   datasourceLedgerSync:
     hikariConfig:
-      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.112}:${LEDGER_SYNC_PORT:54323}/${LEDGER_SYNC_DB:explorer_api}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.75}:${LEDGER_SYNC_PORT:54322}/${LEDGER_SYNC_DB:explorer}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
       username: ${LEDGER_SYNC_USER:ducphung}
       password: ${LEDGER_SYNC_PASSWORD:ducphung@pw}
       driverClassName: org.postgresql.Driver
@@ -28,9 +28,9 @@ multi-datasource: #specified for HikariDataSource
 
   datasourceExplorer:
     hikariConfig:
-      jdbcUrl: jdbc:postgresql://${EXPLORER_HOST:10.4.10.112}:${EXPLORER_PORT:54323}/${EXPLORER_DB:explorer_api}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+      jdbcUrl: jdbc:postgresql://${EXPLORER_HOST:10.4.10.112}:${EXPLORER_PORT:54324}/${EXPLORER_DB:explorer_analytics}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
       username: ${EXPLORER_USER:cardano-master}
-      password: ${EXPLORER_PASSWORD:Y2FyZGFuby1kYXRhYmFzZS1tYXN0ZXI=}
+      password: ${EXPLORER_PASSWORD:dbpass}
       driverClassName: org.postgresql.Driver
       poolName: explorer-api-explorer-pool
       minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
@@ -61,7 +61,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: mainnet
+        default_schema: preprod
         show_sql: true
         format_sql: true
   flyway:
@@ -96,7 +96,7 @@ spring:
                 per:
                   connection: 1
     topics:
-      reports: ${REPORTS_TOPIC:dev.explorer.api.mainnet.reports}
+      reports: ${REPORTS_TOPIC:dev.explorer.api.preprod.reports}
 
 redis:
   databaseIndex: 0
@@ -114,7 +114,7 @@ redis:
 
 # Redis pubsub topic
 application:
-  network: ${SCHEMA:mainnet}
+  network: ${SCHEMA:preprod}
   epoch:
     days: ${EPOCH_DAYS:5}
   api.coin.gecko.market:
@@ -143,8 +143,8 @@ application:
     block-time-threshold: ${BLOCK_TIME_THRESHOLD_IN_SECOND:240}
     inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
   api.bolnisi:
-    off-chain: ${API_BOLNISI_OFFCHAIN_URL:https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/{cid}}
-    public-key: ${API_BOLNISI_PUBLIC_KEY_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
+    off-chain: ${API_BOLNISI_OFFCHAIN_URL:https://offchain.stg.cf-bolnisi-preprod.eu-west-1.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/{cid}}
+    public-key: ${API_BOLNISI_PUBLIC_KEY_URL:https://www.google.com.tmp}
 
 springdoc:
   api-docs.path: /apidocs
@@ -206,8 +206,8 @@ logging:
 spring:
   redis:
     pubsub:
-      topic: ${REDIS_PUBSUB_TOPIC:block.mainnet}
+      topic: ${REDIS_PUBSUB_TOPIC:block.preprod}
 
 genesis:
-  shelley: ${SHELLEY_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/shelley-genesis.json}
-  byron: ${BYRON_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/byron-genesis.json}
+  shelley: ${SHELLEY_GENESIS_FILE:src/main/resources/networks/${SCHEMA:preprod}/shelley-genesis.json}
+  byron: ${BYRON_GENESIS_FILE:src/main/resources/networks/${SCHEMA:preprod}/byron-genesis.json}

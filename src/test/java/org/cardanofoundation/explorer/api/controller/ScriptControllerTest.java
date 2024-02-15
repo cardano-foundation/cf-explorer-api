@@ -47,7 +47,7 @@ import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResp
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 
 @WebMvcTest(ScriptController.class)
 @Import({

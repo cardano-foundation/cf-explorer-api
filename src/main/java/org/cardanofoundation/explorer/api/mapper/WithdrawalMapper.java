@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import org.cardanofoundation.explorer.api.model.response.tx.WithdrawalResponse;
-import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Withdrawal;
 
 @Mapper(componentModel = "spring")
 public interface WithdrawalMapper {

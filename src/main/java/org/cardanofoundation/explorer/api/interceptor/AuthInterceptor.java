@@ -23,16 +23,15 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.RsaConfig;
+import org.cardanofoundation.explorer.api.exception.UnauthorizedException;
 import org.cardanofoundation.explorer.api.interceptor.auth.Request;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleConfigurationMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
-import org.cardanofoundation.explorer.common.annotation.IgnoreAuthentication;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
-import org.cardanofoundation.explorer.common.exceptions.UnauthorizedException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.common.utils.JwtUtils;
+import org.cardanofoundation.explorer.api.util.JwtUtils;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
 
 @Component

@@ -31,8 +31,8 @@ import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHisto
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportHistoryServiceTest {

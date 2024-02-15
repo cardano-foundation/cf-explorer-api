@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
-import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
+import org.cardanofoundation.explorer.api.model.redis.BlockSyncMessage;
 
 public interface WebSocketService {
 

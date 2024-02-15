@@ -23,7 +23,6 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.controller.validation.PageZeroValid;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
@@ -41,12 +40,13 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
+import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeDeregistration_;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration_;
 
 @RestController
 @RequestMapping("/api/v1/stakes")

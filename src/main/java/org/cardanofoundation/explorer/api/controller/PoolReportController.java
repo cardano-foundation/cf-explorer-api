@@ -39,10 +39,10 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportD
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
+import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
 
 @RestController
 @RequestMapping("api/v1/pool-report")

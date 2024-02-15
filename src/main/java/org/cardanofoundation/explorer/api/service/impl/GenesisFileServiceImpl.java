@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.service.GenesisService;
-import org.cardanofoundation.ledgersync.common.model.ByronGenesis;
-import org.cardanofoundation.ledgersync.common.model.ShelleyGenesis;
-import org.cardanofoundation.ledgersync.common.util.GenesisUtils;
+import org.cardanofoundation.explorer.common.model.ByronGenesis;
+import org.cardanofoundation.explorer.common.model.ShelleyGenesis;
+import org.cardanofoundation.explorer.common.utils.GenesisUtils;
 
 @Service
 @RequiredArgsConstructor

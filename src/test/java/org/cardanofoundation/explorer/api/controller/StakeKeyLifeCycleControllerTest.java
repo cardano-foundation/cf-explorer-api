@@ -39,7 +39,7 @@ import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilt
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 
 @WebMvcTest(StakeKeyLifeCycleController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -59,7 +59,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void testGetStakeLifeCycle() throws Exception {
-    String stakeKey = "stake1u9h5g7m75hwhqnesgz0mkdk5qqhnhzpyfwj2l2tm6n28v4s2w8uqq";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeLifecycleResponse response =
         StakeLifecycleResponse.builder()
             .hasRegistration(true)
@@ -81,7 +81,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetRegistrations() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
     List<StakeRegistrationFilterResponse> list = new ArrayList<>();
     list.add(
@@ -112,7 +112,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetRegistrationDetail() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
     StakeRegistrationDetailResponse registration =
         StakeRegistrationDetailResponse.builder()
@@ -139,7 +139,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetDeRegistrations() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     List<StakeRegistrationFilterResponse> list = new ArrayList<>();
     StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
     list.add(
@@ -170,7 +170,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetDeRegistrationDetail() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
     StakeRegistrationDetailResponse registration =
         StakeRegistrationDetailResponse.builder()
@@ -197,7 +197,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetDelegations() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
     List<StakeDelegationFilterResponse> list = new ArrayList<>();
     list.add(
@@ -227,7 +227,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetDelegationDetail() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     String hash = "bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488";
     StakeDelegationDetailResponse response =
         StakeDelegationDetailResponse.builder()
@@ -260,7 +260,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetRewards() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     Date fromDate = sdf.parse("2023/01/01 00:00:00");
     Date toDate = sdf.parse("2023/01/01 00:00:00");
@@ -285,7 +285,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetWithdrawals() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
     List<StakeWithdrawalFilterResponse> list = new ArrayList<>();
     list.add(
@@ -315,7 +315,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void shouldGetWithdrawalDetail() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     String hash = "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381";
     StakeWithdrawalDetailResponse response =
         StakeWithdrawalDetailResponse.builder()
@@ -341,7 +341,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void testGetWalletActivities() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeWalletActivityResponse response = new StakeWalletActivityResponse();
     response.setTxHash("8e85eb8f7de457868ab64c2d8c07257252063d517c4d4e1a01aa2af5783e9bda");
     response.setAmount(BigInteger.ONE);
@@ -371,7 +371,7 @@ class StakeKeyLifeCycleControllerTest {
 
   @Test
   void testGetRewardActivities() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeRewardActivityResponse response =
         StakeRewardActivityResponse.builder()
             .type(StakeRewardType.REWARD_RECEIVED)
