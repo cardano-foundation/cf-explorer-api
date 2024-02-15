@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHistoryCheckpoint;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHistoryCheckpoint;
 
 @Repository
 public interface PoolHistoryCheckpointRepository

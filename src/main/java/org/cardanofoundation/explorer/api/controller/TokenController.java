@@ -25,12 +25,12 @@ import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.BaseEntity_;
 import org.cardanofoundation.explorer.common.validation.length.LengthValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
-import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
 
 @RestController
 @RequestMapping("/api/v1/tokens")

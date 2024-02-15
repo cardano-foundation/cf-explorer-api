@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.cardanofoundation.explorer.api.projection.InstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.TxInstantaneousRewardsProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Reserve;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Reserve;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface ReserveRepository extends JpaRepository<Reserve, Long> {
 

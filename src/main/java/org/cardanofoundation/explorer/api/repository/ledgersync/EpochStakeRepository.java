@@ -16,7 +16,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochCh
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolActiveStakeProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.EpochStake;
+import org.cardanofoundation.explorer.common.entity.ledgersync.EpochStake;
 
 @Repository
 public interface EpochStakeRepository extends JpaRepository<EpochStake, Long> {

@@ -46,14 +46,14 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.ParamProposalRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.impl.ProtocolParamServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.ParamHistoryProjection;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.CostModel;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.ledgersync.common.model.ByronGenesis;
-import org.cardanofoundation.ledgersync.common.model.ShelleyGenesis;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.CostModel;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
+import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.model.ByronGenesis;
+import org.cardanofoundation.explorer.common.model.ShelleyGenesis;
 
 @ExtendWith(MockitoExtension.class)
 @ContextConfiguration(classes = ProtocolMapper.class)

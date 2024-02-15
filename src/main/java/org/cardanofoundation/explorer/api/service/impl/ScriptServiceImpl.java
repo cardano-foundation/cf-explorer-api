@@ -20,6 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.bloxbean.cardano.client.exception.CborDeserializationException;
+import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
+import com.bloxbean.cardano.client.transaction.spec.script.RequireTimeAfter;
+import com.bloxbean.cardano.client.transaction.spec.script.RequireTimeBefore;
+import com.bloxbean.cardano.client.transaction.spec.script.ScriptAll;
+import com.bloxbean.cardano.client.transaction.spec.script.ScriptAny;
+import com.bloxbean.cardano.client.transaction.spec.script.ScriptAtLeast;
+import com.bloxbean.cardano.client.transaction.spec.script.ScriptPubkey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
@@ -50,15 +57,15 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.specification.NativeScriptInfoSpecification;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
-import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.VerifiedScript;
-import org.cardanofoundation.ledgersync.common.common.nativescript.*;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.SmartContractInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.VerifiedScript;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor
@@ -178,13 +185,11 @@ public class ScriptServiceImpl implements ScriptService {
       }
     } else if (nativeScript.getClass().equals(RequireTimeAfter.class)) {
       RequireTimeAfter requireTimeAfter = (RequireTimeAfter) nativeScript;
-      LocalDateTime after =
-          slotToTime(requireTimeAfter.getSlot().longValue(), firstBlock, firstShellyBlock);
+      LocalDateTime after = slotToTime(requireTimeAfter.getSlot(), firstBlock, firstShellyBlock);
       nativeScriptResponse.setAfter(after);
     } else if (nativeScript.getClass().equals(RequireTimeBefore.class)) {
       RequireTimeBefore requireTimeBefore = (RequireTimeBefore) nativeScript;
-      LocalDateTime before =
-          slotToTime(requireTimeBefore.getSlot().longValue(), firstBlock, firstShellyBlock);
+      LocalDateTime before = slotToTime(requireTimeBefore.getSlot(), firstBlock, firstShellyBlock);
       nativeScriptResponse.setBefore(before);
     }
   }
@@ -267,7 +272,7 @@ public class ScriptServiceImpl implements ScriptService {
             nativeScriptResponse.setIsOneTimeMint(true);
           } else
             nativeScriptResponse.setIsOneTimeMint(
-                org.cardanofoundation.ledgersync.common.common.nativescript.ScriptType.all.equals(
+                com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all.equals(
                     nativeScriptResponse.getConditionType()));
         } else {
           nativeScriptResponse.setIsOneTimeMint(false);

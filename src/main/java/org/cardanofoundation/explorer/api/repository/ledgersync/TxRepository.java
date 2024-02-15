@@ -16,9 +16,9 @@ import org.springframework.data.repository.query.Param;
 import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx_;
 
 public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationExecutor<Tx> {
 

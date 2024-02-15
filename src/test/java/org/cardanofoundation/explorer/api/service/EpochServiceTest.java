@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
+import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
@@ -39,10 +40,9 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepositor
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.service.impl.EpochServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.EpochSummaryProjectionImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
+import org.cardanofoundation.explorer.common.entity.enumeration.EraType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class EpochServiceTest {

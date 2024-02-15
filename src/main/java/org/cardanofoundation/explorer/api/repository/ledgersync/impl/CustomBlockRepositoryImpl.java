@@ -20,8 +20,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.cardanofoundation.explorer.api.repository.ledgersync.CustomBlockRepository;
-import org.cardanofoundation.explorer.consumercommon.entity.BaseEntity_;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.BaseEntity_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 
 @Repository
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

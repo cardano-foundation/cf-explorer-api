@@ -57,7 +57,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportD
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.service.PoolReportService;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
+import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 
 @WebMvcTest(PoolReportController.class)
 @Import({

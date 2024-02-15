@@ -129,7 +129,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetStakeDetail_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeAddressResponse response = new StakeAddressResponse();
 
     when(stakeService.getStake(stakeKey)).thenReturn(response);
@@ -142,7 +142,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetTransactions_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     Pageable pageable = PageRequest.of(0, 10);
     BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
 
@@ -157,7 +157,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetDelegationHistories_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     Pageable pageable = PageRequest.of(0, 10);
     BaseFilterResponse<StakeDelegationProjection> response = new BaseFilterResponse<>();
 
@@ -174,7 +174,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetStakeHistories_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     Pageable pageable = PageRequest.of(0, 10);
     BaseFilterResponse<StakeHistoryProjection> response = new BaseFilterResponse<>();
 
@@ -191,7 +191,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetWithdrawalHistories_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     Pageable pageable = PageRequest.of(0, 10);
     BaseFilterResponse<StakeWithdrawalProjection> response = new BaseFilterResponse<>();
 
@@ -208,7 +208,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetInstantaneousRewards_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     Pageable pageable = PageRequest.of(0, 10);
     BaseFilterResponse<StakeInstantaneousRewardsProjection> response = new BaseFilterResponse<>();
 
@@ -238,7 +238,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetAddresses_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     Pageable pageable = PageRequest.of(0, 10);
     BaseFilterResponse<AddressFilterResponse> response = new BaseFilterResponse<>();
 
@@ -267,7 +267,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetStakeBalanceAnalytics_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     AnalyticType type = AnalyticType.ONE_DAY;
     List<AddressChartBalanceData> data = List.of();
     AddressChartBalanceResponse response =
@@ -283,7 +283,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetStakeRewardAnalytics_thenReturn() throws Exception {
-    String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     List<StakeAnalyticRewardResponse> response = List.of();
 
     when(stakeService.getStakeRewardAnalytics(stakeKey)).thenReturn(response);
@@ -296,7 +296,7 @@ public class StakeKeyControllerTest {
 
   @Test
   void testGetStakeAddressRewardDistributionInfo() throws Exception {
-    String stakeKey = "stake1u9h5g7m75hwhqnesgz0mkdk5qqhnhzpyfwj2l2tm6n28v4s2w8uqq";
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
     StakeAddressRewardDistribution response =
         StakeAddressRewardDistribution.builder()
             .stakeAddress(stakeKey)

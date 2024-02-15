@@ -14,10 +14,10 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface AddressTxBalanceRepository extends JpaRepository<AddressTxBalance, Long> {
 

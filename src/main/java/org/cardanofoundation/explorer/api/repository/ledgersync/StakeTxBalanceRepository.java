@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeTxBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeTxBalance;
 
 public interface StakeTxBalanceRepository extends JpaRepository<StakeTxBalance, Long> {
 

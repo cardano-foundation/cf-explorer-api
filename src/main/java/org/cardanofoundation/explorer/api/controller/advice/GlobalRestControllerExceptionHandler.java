@@ -19,9 +19,16 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.apache.logging.log4j.util.Strings;
 
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
+import org.cardanofoundation.explorer.api.exception.NoContentException;
+import org.cardanofoundation.explorer.api.exception.UnauthorizedException;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.common.exceptions.*;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.AccessTokenExpireException;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.ErrorResponse;
+import org.cardanofoundation.explorer.common.exception.IgnoreRollbackException;
+import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
+import org.cardanofoundation.explorer.common.exception.TokenRefreshException;
 
 @Log4j2
 @RestControllerAdvice
@@ -171,8 +178,6 @@ public class GlobalRestControllerExceptionHandler {
 
   @ExceptionHandler({UnauthorizedException.class})
   public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(UnauthorizedException e) {
-    log.warn("Argument type not valid: {}", e.getMessage());
-
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(
             ErrorResponse.builder()

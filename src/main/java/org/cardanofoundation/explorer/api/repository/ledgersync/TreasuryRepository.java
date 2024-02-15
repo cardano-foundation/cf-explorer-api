@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.cardanofoundation.explorer.api.projection.InstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsProjection;
 import org.cardanofoundation.explorer.api.projection.TxInstantaneousRewardsProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Treasury;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Treasury;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface TreasuryRepository extends JpaRepository<Treasury, Long> {
 

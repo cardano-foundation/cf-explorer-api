@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 
 public interface StakeKeyLifeCycleService {
 

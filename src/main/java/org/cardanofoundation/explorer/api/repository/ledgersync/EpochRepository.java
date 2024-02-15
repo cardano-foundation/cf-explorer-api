@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.EpochTimeProjection;
 import org.cardanofoundation.explorer.api.projection.UniqueAddressProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 
 public interface EpochRepository extends JpaRepository<Epoch, Long> {
 

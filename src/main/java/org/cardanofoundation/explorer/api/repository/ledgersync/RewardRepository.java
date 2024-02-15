@@ -19,10 +19,10 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolAct
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.projection.StakeRewardProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
-import org.cardanofoundation.explorer.consumercommon.entity.Reward;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Reward;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 
 @Repository
 public interface RewardRepository extends JpaRepository<Reward, Long> {

@@ -32,11 +32,11 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.PolicyService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor

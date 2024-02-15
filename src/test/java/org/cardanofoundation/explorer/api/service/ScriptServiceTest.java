@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,16 +56,15 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.impl.ScriptServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.SmartContractTxProjectionImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.NativeScriptInfo;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.VerifiedScript;
-import org.cardanofoundation.ledgersync.common.common.nativescript.NativeScript;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.SmartContractInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.VerifiedScript;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class ScriptServiceTest {
@@ -528,9 +527,9 @@ class ScriptServiceTest {
     Assertions.assertFalse(actual.getIsOneTimeMint());
     Assertions.assertEquals(
         actual.getConditionType(),
-        org.cardanofoundation.ledgersync.common.common.nativescript.ScriptType.atLeast);
+        com.bloxbean.cardano.client.transaction.spec.script.ScriptType.atLeast);
     Assertions.assertEquals(actual.getScriptHash(), scriptHash);
-    Assertions.assertEquals(BigInteger.TWO, actual.getRequired());
+    Assertions.assertEquals(2, actual.getRequired());
     Assertions.assertTrue(actual.getIsOpen());
   }
 

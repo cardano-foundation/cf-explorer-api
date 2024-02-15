@@ -17,8 +17,8 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResp
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressToken;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 
 @Mapper(
     componentModel = "spring",

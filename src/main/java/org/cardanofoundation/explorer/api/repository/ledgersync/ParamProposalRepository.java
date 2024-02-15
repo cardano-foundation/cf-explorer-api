@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.LatestParamHistory;
 import org.cardanofoundation.explorer.api.projection.ParamHistory;
-import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal;
+import org.cardanofoundation.explorer.common.entity.ledgersync.ParamProposal;
 
 @Repository
 public interface ParamProposalRepository extends JpaRepository<ParamProposal, Long> {

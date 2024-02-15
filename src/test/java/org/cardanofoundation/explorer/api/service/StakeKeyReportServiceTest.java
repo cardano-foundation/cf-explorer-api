@@ -49,12 +49,12 @@ import org.cardanofoundation.explorer.api.repository.explorer.StakeKeyReportHist
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyReportServiceImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.ReportHistory;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
+import org.cardanofoundation.explorer.common.entity.explorer.ReportHistory;
+import org.cardanofoundation.explorer.common.entity.explorer.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 public class StakeKeyReportServiceTest {

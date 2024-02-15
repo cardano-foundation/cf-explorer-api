@@ -16,9 +16,9 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpd
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolUpdate;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 @Repository
 public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {

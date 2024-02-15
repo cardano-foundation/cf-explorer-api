@@ -44,9 +44,9 @@ public class LedgerSyncDatasourceConfig {
     return builder
         .dataSource(dataSource)
         .packages(
-            "org.cardanofoundation.explorer.consumercommon.entity",
-            "org.cardanofoundation.explorer.consumercommon.enumeration",
-            "org.cardanofoundation.explorer.consumercommon.validation")
+            "org.cardanofoundation.explorer.common.entity.ledgersync",
+            "org.cardanofoundation.explorer.common.entity.enumeration",
+            "org.cardanofoundation.explorer.common.entity.validation")
         .build();
   }
 

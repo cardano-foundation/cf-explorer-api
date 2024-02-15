@@ -15,10 +15,10 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal;
-import org.cardanofoundation.explorer.consumercommon.entity.Withdrawal_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Withdrawal;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Withdrawal_;
 
 public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
   @EntityGraph(attributePaths = {Withdrawal_.ADDR})

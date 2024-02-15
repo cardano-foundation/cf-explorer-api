@@ -27,10 +27,10 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.SearchService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 
 @Service
 @RequiredArgsConstructor

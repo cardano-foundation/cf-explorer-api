@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
+import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
@@ -43,12 +44,11 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.EpochParam;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class StakeKeyLifeCycleServiceTest {

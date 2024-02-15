@@ -15,7 +15,6 @@ import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.controller.validation.PageZeroValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
@@ -24,6 +23,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 

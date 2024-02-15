@@ -40,9 +40,9 @@ public class ExplorerDatasourceConfig {
     return builder
         .dataSource(dataSource)
         .packages(
-            "org.cardanofoundation.explorer.consumercommon.explorer.entity",
-            "org.cardanofoundation.explorer.consumercommon.enumeration",
-            "org.cardanofoundation.explorer.consumercommon.validation")
+            "org.cardanofoundation.explorer.common.entity.explorer",
+            "org.cardanofoundation.explorer.common.entity.enumeration",
+            "org.cardanofoundation.explorer.common.entity.validation")
         .build();
   }
 
