@@ -14,7 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.tx.TxMintingResponse;
 import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjection;
 import org.cardanofoundation.explorer.api.projection.MintProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 
 @Mapper(
     componentModel = "spring",

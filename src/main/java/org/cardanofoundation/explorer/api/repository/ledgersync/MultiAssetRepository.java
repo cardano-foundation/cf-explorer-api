@@ -13,8 +13,8 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 

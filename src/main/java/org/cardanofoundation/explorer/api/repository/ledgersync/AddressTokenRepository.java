@@ -12,8 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressToken;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 
 public interface AddressTokenRepository extends JpaRepository<AddressToken, Long> {
 

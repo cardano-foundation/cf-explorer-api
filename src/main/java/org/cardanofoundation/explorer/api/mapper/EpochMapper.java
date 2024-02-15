@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import org.mapstruct.Mapper;
 
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 
 @Mapper(componentModel = "spring")
 public interface EpochMapper {

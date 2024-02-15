@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import org.cardanofoundation.ledgersync.common.util.JsonUtil;
+import org.cardanofoundation.explorer.common.utils.JsonUtil;
 
 @Data
 @Builder

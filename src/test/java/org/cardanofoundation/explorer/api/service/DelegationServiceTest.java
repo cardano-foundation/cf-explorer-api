@@ -80,11 +80,11 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.DelegationServiceImpl;
-import org.cardanofoundation.explorer.consumercommon.entity.Delegation_;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHash;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolUpdate;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Delegation_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolUpdate;
 
 @ExtendWith(MockitoExtension.class)
 class DelegationServiceTest {

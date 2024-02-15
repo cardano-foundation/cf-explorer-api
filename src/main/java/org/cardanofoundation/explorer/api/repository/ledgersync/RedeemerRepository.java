@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Redeemer;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Redeemer;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface RedeemerRepository extends JpaRepository<Redeemer, Long> {
 

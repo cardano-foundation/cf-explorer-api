@@ -7,8 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 
 @Data
 @Builder

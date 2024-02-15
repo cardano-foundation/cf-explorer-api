@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.EpochChartProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolHistory;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHistory;
 
 @Repository
 public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> {

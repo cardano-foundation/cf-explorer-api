@@ -34,6 +34,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
+import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
@@ -59,17 +60,16 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.MaTxMint;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.entity.Script;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.aggregation.AggregateAddressToken;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.TokenInfo;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressToken;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {

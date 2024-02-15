@@ -37,10 +37,10 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataReposi
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.util.CidUtils;
 import org.cardanofoundation.explorer.api.util.JwsUtils;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.TxMetadata;
-import org.cardanofoundation.ledgersync.common.util.HexUtil;
-import org.cardanofoundation.ledgersync.common.util.JsonUtil;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadata;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.utils.HexUtil;
+import org.cardanofoundation.explorer.common.utils.JsonUtil;
 
 @Service
 @RequiredArgsConstructor

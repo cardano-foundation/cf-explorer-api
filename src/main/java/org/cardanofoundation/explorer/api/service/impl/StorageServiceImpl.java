@@ -12,9 +12,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
-import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.service.StorageService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class StorageServiceImpl implements StorageService {
       return inputStream.readAllBytes();
     } catch (IOException e) {
       e.printStackTrace();
-      throw new BusinessException(BusinessCode.INTERNAL_ERROR);
+      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
     }
   }
 }

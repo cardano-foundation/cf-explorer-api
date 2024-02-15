@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.StakeKeyReportHistory;
+import org.cardanofoundation.explorer.common.entity.explorer.StakeKeyReportHistory;
 
 public interface StakeKeyReportHistoryRepository
     extends JpaRepository<StakeKeyReportHistory, Long> {

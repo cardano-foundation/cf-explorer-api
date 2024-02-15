@@ -22,7 +22,7 @@ import org.cardanofoundation.explorer.api.repository.explorer.ReportHistoryRepos
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.RoleService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
 
 @Service
 @RequiredArgsConstructor

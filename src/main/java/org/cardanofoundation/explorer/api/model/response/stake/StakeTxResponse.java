@@ -8,8 +8,8 @@ import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.cardanofoundation.explorer.consumercommon.entity.StakeDeregistration;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeRegistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
 
 @Getter
 @Setter

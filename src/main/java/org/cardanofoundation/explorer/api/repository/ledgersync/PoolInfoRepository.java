@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiosProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.PoolInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.PoolInfo;
 
 @Repository
 public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {

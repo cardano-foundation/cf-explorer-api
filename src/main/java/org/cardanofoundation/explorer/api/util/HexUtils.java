@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.binary.Hex;
 
-import org.cardanofoundation.ledgersync.common.util.StringUtil;
+import org.cardanofoundation.explorer.common.utils.StringUtil;
 
 public class HexUtils {
 

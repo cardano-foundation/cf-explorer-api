@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
+import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.AddressMapper;
 import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
@@ -48,10 +49,12 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyServiceImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.*;
-import org.cardanofoundation.explorer.consumercommon.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 public class StakeKeyServiceTest {

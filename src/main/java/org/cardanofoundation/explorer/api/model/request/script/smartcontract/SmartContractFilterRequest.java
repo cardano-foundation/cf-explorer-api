@@ -11,7 +11,7 @@ import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.cardanofoundation.explorer.api.common.enumeration.TxPurposeType;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 
 @Getter
 @Setter
