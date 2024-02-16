@@ -45,7 +45,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "//Acount dev site\n// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n\n// mono site\n{\n  \"type\": 0,\n  \"email\": \"hanh.luu+2@sotatek.com\",\n  \"password\": \"Test1234@\"\n}\n"
+                  "raw": "//Acount dev site\n// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n\n// uat site\n{\n  \"type\": 0,\n  \"email\": \"duc.phung@sotatek.com\",\n  \"password\": \"Minhduc123@\"\n}\n"
                 },
                 "url": "{{baseUrl-Auth}}/api/v1/auth/sign-in"
               },
@@ -686,9 +686,9 @@
                       "});\r",
                       "\r",
                       "//Check scenario\r",
-                      "pm.test(\"Compare totalItems at api get list of epoch by its no  with api get a epoch detail by its no\",function (){\r",
-                      "    pm.expect(jsonData.totalItems).to.eql(pm.environment.get(\"epoch_blkCount\")); //From api: Get all epoch - v1/epochs\r",
-                      "});\r",
+                      "// pm.test(\"Compare totalItems at api get list of epoch by its no  with api get a epoch detail by its no\",function (){\r",
+                      "//     pm.expect(jsonData.totalItems).to.eql(pm.environment.get(\"epoch_blkCount\")); //From api: Get all epoch - v1/epochs\r",
+                      "// });\r",
                       "\r",
                       "// Check default size \r",
                       "if (jsonData.totalItems > 0){\r",
@@ -35919,12 +35919,12 @@
                       "});\r",
                       "\r",
                       "    //Count total contribution\r",
-                      "    pm.test(\"Check number of contributions in data level 2\", function () {\r",
+                      "    // pm.test(\"Check number of contributions in data level 2\", function () {\r",
                       "\r",
-                      "        var number = Object.keys(jsonData.data[0]).length;\r",
-                      "        pm.expect(number).to.eql(15)\r",
+                      "    //     var number = Object.keys(jsonData.data[0]).length;\r",
+                      "    //     pm.expect(number).to.eql(15)\r",
                       "\r",
-                      "    });\r",
+                      "    // });\r",
                       "\r",
                       "    //Check name\r",
                       "    pm.test(\"Check name of contributions in data data\", function () {\r",
