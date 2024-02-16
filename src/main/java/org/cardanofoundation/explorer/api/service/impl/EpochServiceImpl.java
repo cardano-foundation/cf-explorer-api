@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,12 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -36,6 +39,7 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 public class EpochServiceImpl implements EpochService {
 
   private final EpochRepository epochRepository;
+  private final BlockRepository blockRepository;
   private final EpochMapper epochMapper;
   private final RedisTemplate<String, Object> redisTemplate;
   private final FetchRewardDataService fetchRewardDataService;
@@ -48,6 +52,9 @@ public class EpochServiceImpl implements EpochService {
 
   @Value("${application.epoch.days}")
   public int epochDays;
+
+  @Value("${application.healthcheck.block-time-threshold}")
+  private Long blockTimeThresholdInSecond;
 
   @Override
   public EpochResponse getEpochDetail(String no) {
@@ -73,9 +80,15 @@ public class EpochServiceImpl implements EpochService {
           epochRepository
               .findFirstByNo(BigInteger.ZERO.intValue())
               .orElseThrow(() -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+
+      Block currentBlock =
+          blockRepository
+              .findLatestBlock()
+              .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
+
       LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
-      checkEpochStatus(response, currentEpoch);
+      checkEpochStatus(response, currentBlock);
       LocalDateTime startTime =
           modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getStartTime());
       response.setStartTime(startTime);
@@ -92,6 +105,10 @@ public class EpochServiceImpl implements EpochService {
 
   @Override
   public BaseFilterResponse<EpochResponse> getAllEpoch(Pageable pageable) {
+    Block currentBlock =
+        blockRepository
+            .findLatestBlock()
+            .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
 
     Epoch firstEpoch =
         epochRepository
@@ -133,7 +150,7 @@ public class EpochServiceImpl implements EpochService {
         .getContent()
         .forEach(
             epoch -> {
-              checkEpochStatus(epoch, currentEpoch);
+              checkEpochStatus(epoch, currentBlock);
               LocalDateTime startTime =
                   modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime());
               epoch.setStartTime(startTime);
@@ -176,15 +193,19 @@ public class EpochServiceImpl implements EpochService {
    *
    * @param epoch epoch response
    */
-  private void checkEpochStatus(EpochResponse epoch, Integer currentEpoch) {
-    if (epoch.getStartTime().plusDays(epochDays).isAfter(LocalDateTime.now(ZoneOffset.UTC))
-        && epoch.getStartTime().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
+  private void checkEpochStatus(EpochResponse epoch, Block currentBlock) {
+    LocalDateTime currentTime = LocalDateTime.now(ZoneOffset.UTC);
+    if (epoch.getStartTime().plusDays(epochDays).isAfter(currentTime)
+        && epoch.getStartTime().isBefore(currentTime)) {
       epoch.setStatus(EpochStatus.IN_PROGRESS);
       epoch.setEndTime(epoch.getStartTime().plusDays(epochDays));
     } else {
       epoch.setStatus(EpochStatus.FINISHED);
     }
-    if (!EpochStatus.IN_PROGRESS.equals(epoch.getStatus()) && currentEpoch.equals(epoch.getNo())) {
+
+    if (epoch.getStatus().equals(EpochStatus.IN_PROGRESS)
+        && blockTimeThresholdInSecond
+            <= ChronoUnit.SECONDS.between(currentBlock.getTime().toLocalDateTime(), currentTime)) {
       epoch.setStatus(EpochStatus.SYNCING);
     }
   }
