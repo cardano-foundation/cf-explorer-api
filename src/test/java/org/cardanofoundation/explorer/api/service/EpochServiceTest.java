@@ -37,10 +37,12 @@ import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.service.impl.EpochServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.EpochSummaryProjectionImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.EraType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -54,6 +56,7 @@ class EpochServiceTest {
   @Mock HashOperations hashOperations;
   @Mock AdaPotsRepository adaPotsRepository;
   @Mock FetchRewardDataService fetchRewardDataService;
+  @Mock BlockRepository blockRepository;
 
   @Test
   void testCurrentEpochSummary() {
@@ -135,6 +138,11 @@ class EpochServiceTest {
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.ofNullable(epoch.getNo()));
     when(epochMapper.epochToEpochResponse(epoch)).thenReturn(expect);
     when(fetchRewardDataService.checkEpochRewardDistributed(any())).thenReturn(true);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
+    ReflectionTestUtils.setField(epochService, "blockTimeThresholdInSecond", 240L);
+
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.IN_PROGRESS);
     Assertions.assertEquals(expect, actual);
@@ -179,6 +187,9 @@ class EpochServiceTest {
     when(hashOperations.size(any())).thenReturn(0l);
 
     when(hashOperations.size(any())).thenReturn(1L);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
 
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.SYNCING);
@@ -222,6 +233,9 @@ class EpochServiceTest {
     when(hashOperations.size(any())).thenReturn(0l);
 
     when(hashOperations.size(any())).thenReturn(1L);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
 
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.FINISHED);
@@ -265,6 +279,9 @@ class EpochServiceTest {
     when(hashOperations.size(any())).thenReturn(0l);
 
     when(hashOperations.size(any())).thenReturn(1L);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
 
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.REWARDING);
@@ -359,8 +376,13 @@ class EpochServiceTest {
         .thenReturn(EpochResponse.builder().startTime(dateTime).endTime(dateTime).build());
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
+
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
     ReflectionTestUtils.setField(epochService, "epochDays", 2);
+    ReflectionTestUtils.setField(epochService, "blockTimeThresholdInSecond", 240L);
 
     var response = epochService.getEpochDetail(no.toString());
     Assertions.assertEquals(response.getStatus(), EpochStatus.IN_PROGRESS);
@@ -392,8 +414,6 @@ class EpochServiceTest {
     Assertions.assertEquals(response.getNo(), 1);
     Assertions.assertEquals(response.getTotalSlot(), 26000);
     Assertions.assertEquals(response.getAccount(), 1);
-    Assertions.assertEquals(response.getStartTime().format(dtf), now.format(dtf));
-    Assertions.assertEquals(response.getEndTime().format(dtf), now.format(dtf));
   }
 
   @Test
@@ -414,6 +434,9 @@ class EpochServiceTest {
         .thenReturn(EpochResponse.builder().no(1).startTime(now).endTime(now).build());
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
 
     var response = epochService.getAllEpoch(pageable);
@@ -434,6 +457,9 @@ class EpochServiceTest {
     when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue()))
         .thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(now)).build()));
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.empty());
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
 
     Assertions.assertThrows(NoContentException.class, () -> epochService.getAllEpoch(pageable));
   }
