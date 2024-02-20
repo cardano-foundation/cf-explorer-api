@@ -64,6 +64,7 @@ class EpochServiceTest {
     var localDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
     ReflectionTestUtils.setField(epochService, "epochDays", 5);
+    ReflectionTestUtils.setField(epochService, "blockTimeThresholdInSecond", 240L);
     when(epochRepository.findCurrentEpochSummary())
         .thenReturn(
             Optional.of(
@@ -89,6 +90,13 @@ class EpochServiceTest {
                     .endTime(Timestamp.valueOf(localDate.plusDays(5)))
                     .build()));
     when(adaPotsRepository.getReservesByEpochNo(30)).thenReturn(BigInteger.ONE);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(
+                Block.builder()
+                    .epochSlotNo(430000)
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build()));
     EpochSummary epochSummary = epochService.getCurrentEpochSummary();
 
     EpochSummary expect =
@@ -423,7 +431,16 @@ class EpochServiceTest {
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     when(adaPotsRepository.getReservesByEpochNo(1)).thenReturn(BigInteger.ONE);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(
+                Block.builder()
+                    .epochSlotNo(430000)
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build()));
+
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
+    ReflectionTestUtils.setField(epochService, "blockTimeThresholdInSecond", 240L);
 
     var response = epochService.getCurrentEpochSummary();
     Assertions.assertEquals(response.getNo(), 1);
