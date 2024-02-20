@@ -208,6 +208,12 @@ public class EpochServiceImpl implements EpochService {
             <= ChronoUnit.SECONDS.between(currentBlock.getTime().toLocalDateTime(), currentTime)) {
       epoch.setStatus(EpochStatus.SYNCING);
     }
+
+    if (epoch.getStatus().equals(EpochStatus.FINISHED)) {
+      epoch.setSyncingProgress(1D);
+    } else {
+      epoch.setSyncingProgress((double) currentBlock.getEpochSlotNo() / epoch.getMaxSlot());
+    }
   }
 
   @Override
