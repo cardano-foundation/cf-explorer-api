@@ -6,11 +6,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 
+import jakarta.annotation.PostConstruct;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -34,15 +35,20 @@ public class MarketDataServiceImpl implements MarketDataService {
 
   private final WebClient webClient;
 
-  private final ApplicationEventPublisher applicationEventPublisher;
-
   private final RedisTemplate<String, Object> redisTemplate;
 
   private final ObjectMapper objectMapper;
   private static final String REDIS_PREFIX_KEY = "MARKET_DATA";
   private static final String UNDERSCORE = "_";
   private static final String LAST_UPDATED_FIELD = "last_updated";
-  private static final String CURRENT_PRICE_FIELD = "current_price";
+
+  @PostConstruct
+  void init() {
+    String redisKeyBtc = String.join(UNDERSCORE, REDIS_PREFIX_KEY, "BTC");
+    String redisKeyUsd = String.join(UNDERSCORE, REDIS_PREFIX_KEY, "USD");
+    redisTemplate.delete(redisKeyBtc);
+    redisTemplate.delete(redisKeyUsd);
+  }
 
   public Object getMarketData(String currency) {
     String redisKey = String.join(UNDERSCORE, REDIS_PREFIX_KEY, currency.toUpperCase());
