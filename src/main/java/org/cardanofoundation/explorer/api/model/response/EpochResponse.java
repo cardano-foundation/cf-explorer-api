@@ -33,4 +33,5 @@ public class EpochResponse {
   private BigInteger rewardsDistributed;
 
   private Integer account;
+  private Double syncingProgress;
 }
