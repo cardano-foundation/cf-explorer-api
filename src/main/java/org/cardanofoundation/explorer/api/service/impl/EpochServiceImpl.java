@@ -194,26 +194,32 @@ public class EpochServiceImpl implements EpochService {
    * @param epoch epoch response
    */
   private void checkEpochStatus(EpochResponse epoch, Block currentBlock, int currentEpochNo) {
-    LocalDateTime currentTime = LocalDateTime.now(ZoneOffset.UTC);
-    if (epoch.getStartTime().plusDays(epochDays).isAfter(currentTime)
-        && epoch.getStartTime().isBefore(currentTime)) {
-      epoch.setStatus(EpochStatus.IN_PROGRESS);
-      epoch.setEndTime(epoch.getStartTime().plusDays(epochDays));
-    } else {
-      epoch.setStatus(EpochStatus.FINISHED);
-    }
-
-    if (epoch.getNo().equals(currentEpochNo)
-        && blockTimeThresholdInSecond
-            <= ChronoUnit.SECONDS.between(currentBlock.getTime().toLocalDateTime(), currentTime)) {
-      epoch.setStatus(EpochStatus.SYNCING);
-    }
+    epoch.setStatus(
+        getEpochStatus(epoch.getStartTime(), epoch.getNo(), currentEpochNo, currentBlock));
 
     if (epoch.getStatus().equals(EpochStatus.FINISHED)) {
       epoch.setSyncingProgress(1D);
     } else {
       epoch.setSyncingProgress((double) currentBlock.getEpochSlotNo() / epoch.getMaxSlot());
     }
+  }
+
+  private EpochStatus getEpochStatus(
+      LocalDateTime startTime, Integer epochNo, Integer currentEpochNo, Block currentBlock) {
+    EpochStatus status;
+    LocalDateTime currentTime = LocalDateTime.now(ZoneOffset.UTC);
+    if (startTime.plusDays(epochDays).isAfter(currentTime) && startTime.isBefore(currentTime)) {
+      status = EpochStatus.IN_PROGRESS;
+    } else {
+      status = EpochStatus.FINISHED;
+    }
+
+    if (epochNo.equals(currentEpochNo)
+        && blockTimeThresholdInSecond
+            <= ChronoUnit.SECONDS.between(currentBlock.getTime().toLocalDateTime(), currentTime)) {
+      status = EpochStatus.SYNCING;
+    }
+    return status;
   }
 
   @Override
@@ -261,6 +267,12 @@ public class EpochServiceImpl implements EpochService {
                   .startTime(epochStartTime)
                   .endTime(epochStartTime.plusDays(epochDays))
                   .account(account)
+                  .status(
+                      getEpochStatus(
+                          epochStartTime,
+                          epochSummaryProjection.getNo(),
+                          epochSummaryProjection.getNo(),
+                          currentBlock))
                   .syncingProgress(
                       (double) currentBlock.getEpochSlotNo() / epochSummaryProjection.getMaxSlot())
                   .circulatingSupply(
