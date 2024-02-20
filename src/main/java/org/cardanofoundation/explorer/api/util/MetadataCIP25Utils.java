@@ -328,7 +328,9 @@ public class MetadataCIP25Utils {
             .property(MetadataField.DESCRIPTION.getName())
             .index(index)
             .valueFormat(format.getValue())
-            .valid(format.equals(FormatFieldType.STRING) || format.equals(FormatFieldType.ARRAY))
+            .valid(
+                format.equals(FormatFieldType.STRING)
+                    || format.equals(FormatFieldType.ARRAY_STRING))
             .build();
     if (version == 0) {
       baseProperty.setValid(null);
