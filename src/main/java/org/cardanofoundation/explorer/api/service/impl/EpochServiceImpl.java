@@ -218,6 +218,11 @@ public class EpochServiceImpl implements EpochService {
 
   @Override
   public EpochSummary getCurrentEpochSummary() {
+    Block currentBlock =
+        blockRepository
+            .findLatestBlock()
+            .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
+
     return epochRepository
         .findCurrentEpochSummary()
         .map(
@@ -256,6 +261,8 @@ public class EpochServiceImpl implements EpochService {
                   .startTime(epochStartTime)
                   .endTime(epochStartTime.plusDays(epochDays))
                   .account(account)
+                  .syncingProgress(
+                      (double) currentBlock.getEpochSlotNo() / epochSummaryProjection.getMaxSlot())
                   .circulatingSupply(
                       CommonConstant.TOTAL_ADA.toBigInteger().subtract(circulatingSupply))
                   .blkCount(epochSummaryProjection.getBlkCount())
