@@ -88,7 +88,7 @@ public class EpochServiceImpl implements EpochService {
 
       LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
-      checkEpochStatus(response, currentBlock);
+      checkEpochStatus(response, currentBlock, currentEpoch);
       LocalDateTime startTime =
           modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getStartTime());
       response.setStartTime(startTime);
@@ -150,7 +150,7 @@ public class EpochServiceImpl implements EpochService {
         .getContent()
         .forEach(
             epoch -> {
-              checkEpochStatus(epoch, currentBlock);
+              checkEpochStatus(epoch, currentBlock, currentEpoch);
               LocalDateTime startTime =
                   modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime());
               epoch.setStartTime(startTime);
@@ -193,7 +193,7 @@ public class EpochServiceImpl implements EpochService {
    *
    * @param epoch epoch response
    */
-  private void checkEpochStatus(EpochResponse epoch, Block currentBlock) {
+  private void checkEpochStatus(EpochResponse epoch, Block currentBlock, int currentEpochNo) {
     LocalDateTime currentTime = LocalDateTime.now(ZoneOffset.UTC);
     if (epoch.getStartTime().plusDays(epochDays).isAfter(currentTime)
         && epoch.getStartTime().isBefore(currentTime)) {
@@ -203,7 +203,7 @@ public class EpochServiceImpl implements EpochService {
       epoch.setStatus(EpochStatus.FINISHED);
     }
 
-    if (epoch.getStatus().equals(EpochStatus.IN_PROGRESS)
+    if (epoch.getNo().equals(currentEpochNo)
         && blockTimeThresholdInSecond
             <= ChronoUnit.SECONDS.between(currentBlock.getTime().toLocalDateTime(), currentTime)) {
       epoch.setStatus(EpochStatus.SYNCING);

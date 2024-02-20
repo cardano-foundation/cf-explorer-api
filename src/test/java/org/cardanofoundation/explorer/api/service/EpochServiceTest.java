@@ -191,6 +191,8 @@ class EpochServiceTest {
         .thenReturn(
             Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
 
+    ReflectionTestUtils.setField(epochService, "blockTimeThresholdInSecond", 240L);
+
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.SYNCING);
     Assertions.assertEquals(expect, actual);
@@ -373,7 +375,7 @@ class EpochServiceTest {
     when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue()))
         .thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(dateTime)).build()));
     when(epochMapper.epochToEpochResponse(epoch))
-        .thenReturn(EpochResponse.builder().startTime(dateTime).endTime(dateTime).build());
+        .thenReturn(EpochResponse.builder().no(1).startTime(dateTime).endTime(dateTime).build());
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     when(blockRepository.findLatestBlock())
