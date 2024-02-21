@@ -64,6 +64,7 @@ class EpochServiceTest {
     var localDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
     ReflectionTestUtils.setField(epochService, "epochDays", 5);
+    ReflectionTestUtils.setField(epochService, "blockTimeThresholdInSecond", 240L);
     when(epochRepository.findCurrentEpochSummary())
         .thenReturn(
             Optional.of(
@@ -89,6 +90,13 @@ class EpochServiceTest {
                     .endTime(Timestamp.valueOf(localDate.plusDays(5)))
                     .build()));
     when(adaPotsRepository.getReservesByEpochNo(30)).thenReturn(BigInteger.ONE);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(
+                Block.builder()
+                    .epochSlotNo(430000)
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build()));
     EpochSummary epochSummary = epochService.getCurrentEpochSummary();
 
     EpochSummary expect =
@@ -190,6 +198,8 @@ class EpochServiceTest {
     when(blockRepository.findLatestBlock())
         .thenReturn(
             Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
+
+    ReflectionTestUtils.setField(epochService, "blockTimeThresholdInSecond", 240L);
 
     EpochResponse actual = epochService.getEpochDetail("1");
     expect.setStatus(EpochStatus.SYNCING);
@@ -371,14 +381,26 @@ class EpochServiceTest {
     when(fetchRewardDataService.fetchEpochRewardDistributed(List.of(no)))
         .thenReturn(List.of(Epoch.builder().rewardsDistributed(BigInteger.ONE).build()));
     when(epochRepository.findFirstByNo(BigInteger.ZERO.intValue()))
-        .thenReturn(Optional.of(Epoch.builder().startTime(Timestamp.valueOf(dateTime)).build()));
+        .thenReturn(
+            Optional.of(
+                Epoch.builder().maxSlot(432000).startTime(Timestamp.valueOf(dateTime)).build()));
     when(epochMapper.epochToEpochResponse(epoch))
-        .thenReturn(EpochResponse.builder().startTime(dateTime).endTime(dateTime).build());
+        .thenReturn(
+            EpochResponse.builder()
+                .maxSlot(432000)
+                .no(1)
+                .startTime(dateTime)
+                .endTime(dateTime)
+                .build());
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     when(blockRepository.findLatestBlock())
         .thenReturn(
-            Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
+            Optional.of(
+                Block.builder()
+                    .epochSlotNo(430000)
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build()));
 
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
     ReflectionTestUtils.setField(epochService, "epochDays", 2);
@@ -386,6 +408,7 @@ class EpochServiceTest {
 
     var response = epochService.getEpochDetail(no.toString());
     Assertions.assertEquals(response.getStatus(), EpochStatus.IN_PROGRESS);
+    Assertions.assertEquals(response.getSyncingProgress(), (double) 430000 / 432000);
     Assertions.assertEquals(response.getStartTime().format(dtf), dateTime.format(dtf));
     Assertions.assertEquals(response.getEndTime().format(dtf), dateTime.plusDays(2).format(dtf));
     Assertions.assertEquals(response.getAccount(), 1);
@@ -408,7 +431,16 @@ class EpochServiceTest {
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
     when(adaPotsRepository.getReservesByEpochNo(1)).thenReturn(BigInteger.ONE);
+    when(blockRepository.findLatestBlock())
+        .thenReturn(
+            Optional.of(
+                Block.builder()
+                    .epochSlotNo(430000)
+                    .time(Timestamp.valueOf(LocalDateTime.now()))
+                    .build()));
+
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
+    ReflectionTestUtils.setField(epochService, "blockTimeThresholdInSecond", 240L);
 
     var response = epochService.getCurrentEpochSummary();
     Assertions.assertEquals(response.getNo(), 1);
