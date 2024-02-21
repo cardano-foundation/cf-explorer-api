@@ -288,12 +288,27 @@ public class DelegationServiceImpl implements DelegationService {
                 ? poolHashRepository.findAllWithoutQueryParam(retiredIds, epochNo, pageable)
                 : poolHashRepository.findAllWithoutQueryParam(retiredIds, pageable);
       } else {
-        poolInfoProjections =
-            isKoiOs
-                ? poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(
-                    queryParam, retiredIds, epochNo, pageable)
-                : poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(
-                    queryParam, retiredIds, pageable);
+        if (isKoiOs) {
+          Long count =
+              poolHashRepository.countAllByPoolViewOrPoolNameOrPoolHashWithEpochNo(
+                  queryParam, retiredIds, epochNo);
+          poolInfoProjections =
+              new PageImpl<>(
+                  poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(
+                      queryParam, retiredIds, epochNo, pageable),
+                  pageable,
+                  count);
+        } else {
+          Long count =
+              poolHashRepository.countAllByPoolViewOrPoolNameOrPoolHashWithoutEpochNo(
+                  queryParam, retiredIds);
+          poolInfoProjections =
+              new PageImpl<>(
+                  poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(
+                      queryParam, retiredIds, pageable),
+                  pageable,
+                  count);
+        }
       }
       poolResponseList = mapAggPoolInfoToPoolResponse(retiredIds, poolInfoProjections.getContent());
     } else {
@@ -306,7 +321,6 @@ public class DelegationServiceImpl implements DelegationService {
         return getAllByQueryAndSortByAggField(pageable, queryParam, retiredIds, epochNo);
       }
     }
-
     return new PageImpl<>(poolResponseList, pageable, poolInfoProjections.getTotalElements());
   }
 
