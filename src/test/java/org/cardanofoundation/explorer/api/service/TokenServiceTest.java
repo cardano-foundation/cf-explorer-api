@@ -146,11 +146,12 @@ class TokenServiceTest {
     when(tokenProjection.getId()).thenReturn(0L);
     when(tokenProjection.getPolicy()).thenReturn("policy");
 
-    final Page<TokenProjection> multiAssets = new PageImpl<>(List.of(tokenProjection));
     when(scriptRepository.findAllByHashIn(List.of("policy")))
         .thenReturn(List.of(Script.builder().type(ScriptType.TIMELOCK).hash("policy").build()));
 
-    when(multiAssetRepository.findAll(anyString(), any(Pageable.class))).thenReturn(multiAssets);
+    when(multiAssetRepository.findAll(anyString(), any(Pageable.class)))
+        .thenReturn(List.of(tokenProjection));
+    when(multiAssetRepository.countAllByQuery(anyString())).thenReturn(1L);
 
     final TokenFilterResponse tokenFilterResponse =
         TokenFilterResponse.builder()
