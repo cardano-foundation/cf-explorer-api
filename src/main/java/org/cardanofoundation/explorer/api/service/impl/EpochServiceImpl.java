@@ -88,7 +88,7 @@ public class EpochServiceImpl implements EpochService {
 
       LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
       EpochResponse response = epochMapper.epochToEpochResponse(epoch);
-      checkEpochStatus(response, currentBlock);
+      checkEpochStatus(response, currentBlock, currentEpoch);
       LocalDateTime startTime =
           modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getStartTime());
       response.setStartTime(startTime);
@@ -150,7 +150,7 @@ public class EpochServiceImpl implements EpochService {
         .getContent()
         .forEach(
             epoch -> {
-              checkEpochStatus(epoch, currentBlock);
+              checkEpochStatus(epoch, currentBlock, currentEpoch);
               LocalDateTime startTime =
                   modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime());
               epoch.setStartTime(startTime);
@@ -193,25 +193,42 @@ public class EpochServiceImpl implements EpochService {
    *
    * @param epoch epoch response
    */
-  private void checkEpochStatus(EpochResponse epoch, Block currentBlock) {
-    LocalDateTime currentTime = LocalDateTime.now(ZoneOffset.UTC);
-    if (epoch.getStartTime().plusDays(epochDays).isAfter(currentTime)
-        && epoch.getStartTime().isBefore(currentTime)) {
-      epoch.setStatus(EpochStatus.IN_PROGRESS);
-      epoch.setEndTime(epoch.getStartTime().plusDays(epochDays));
+  private void checkEpochStatus(EpochResponse epoch, Block currentBlock, int currentEpochNo) {
+    epoch.setStatus(
+        getEpochStatus(epoch.getStartTime(), epoch.getNo(), currentEpochNo, currentBlock));
+
+    if (epoch.getStatus().equals(EpochStatus.FINISHED)) {
+      epoch.setSyncingProgress(1D);
     } else {
-      epoch.setStatus(EpochStatus.FINISHED);
+      epoch.setSyncingProgress((double) currentBlock.getEpochSlotNo() / epoch.getMaxSlot());
+    }
+  }
+
+  private EpochStatus getEpochStatus(
+      LocalDateTime startTime, Integer epochNo, Integer currentEpochNo, Block currentBlock) {
+    EpochStatus status;
+    LocalDateTime currentTime = LocalDateTime.now(ZoneOffset.UTC);
+    if (startTime.plusDays(epochDays).isAfter(currentTime) && startTime.isBefore(currentTime)) {
+      status = EpochStatus.IN_PROGRESS;
+    } else {
+      status = EpochStatus.FINISHED;
     }
 
-    if (epoch.getStatus().equals(EpochStatus.IN_PROGRESS)
+    if (epochNo.equals(currentEpochNo)
         && blockTimeThresholdInSecond
             <= ChronoUnit.SECONDS.between(currentBlock.getTime().toLocalDateTime(), currentTime)) {
-      epoch.setStatus(EpochStatus.SYNCING);
+      status = EpochStatus.SYNCING;
     }
+    return status;
   }
 
   @Override
   public EpochSummary getCurrentEpochSummary() {
+    Block currentBlock =
+        blockRepository
+            .findLatestBlock()
+            .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
+
     return epochRepository
         .findCurrentEpochSummary()
         .map(
@@ -250,6 +267,14 @@ public class EpochServiceImpl implements EpochService {
                   .startTime(epochStartTime)
                   .endTime(epochStartTime.plusDays(epochDays))
                   .account(account)
+                  .status(
+                      getEpochStatus(
+                          epochStartTime,
+                          epochSummaryProjection.getNo(),
+                          epochSummaryProjection.getNo(),
+                          currentBlock))
+                  .syncingProgress(
+                      (double) currentBlock.getEpochSlotNo() / epochSummaryProjection.getMaxSlot())
                   .circulatingSupply(
                       CommonConstant.TOTAL_ADA.toBigInteger().subtract(circulatingSupply))
                   .blkCount(epochSummaryProjection.getBlkCount())
