@@ -318,7 +318,10 @@ class DelegationServiceTest {
         .thenReturn(List.of(aggregatePoolInfo));
     when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(
             any(), anyCollection(), any(), any()))
-        .thenReturn(poolIdPage);
+        .thenReturn(poolIdPageContent);
+    when(poolHashRepository.countAllByPoolViewOrPoolNameOrPoolHashWithEpochNo(
+            any(), anyCollection(), anyInt()))
+        .thenReturn(1L);
     // Call the method
     BaseFilterResponse<PoolResponse> response =
         delegationService.getDataForPoolTable(pageable, search, true);
@@ -374,11 +377,10 @@ class DelegationServiceTest {
     PoolAmountProjection pap = Mockito.mock(PoolAmountProjection.class);
     PoolInfoKoiosProjection pikp = Mockito.mock(PoolInfoKoiosProjection.class);
     // Add mock data to poolIdPageContent
-
-    Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
-
     when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), any(), anyInt(), any()))
-        .thenReturn(poolIdPage);
+        .thenReturn(poolIdPageContent);
+    when(poolHashRepository.countAllByPoolViewOrPoolNameOrPoolHashWithEpochNo(any(), any(), any()))
+        .thenReturn(1L);
     when(fetchRewardDataService.useKoios()).thenReturn(true);
     // Call the method
     BaseFilterResponse<PoolResponse> response =
