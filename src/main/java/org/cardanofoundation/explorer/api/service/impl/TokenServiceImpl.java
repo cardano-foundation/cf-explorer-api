@@ -120,7 +120,10 @@ public class TokenServiceImpl implements TokenService {
               pageable,
               Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
                   .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
-      multiAssets = multiAssetRepository.findAll(query.toLowerCase(), pageable);
+      Long count = multiAssetRepository.countAllByQuery(query.toLowerCase());
+      multiAssets =
+          new PageImpl<>(
+              multiAssetRepository.findAll(query.toLowerCase(), pageable), pageable, count);
     }
     var multiAssetResponsesList =
         multiAssets.map(assetMetadataMapper::fromTokenProjectionToTokenFilterResponse);
