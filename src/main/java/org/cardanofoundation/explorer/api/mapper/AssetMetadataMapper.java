@@ -30,6 +30,7 @@ public abstract class AssetMetadataMapper {
       TokenProjection tokenProjection);
 
   @Mapping(target = "displayName", source = "nameView")
+  @Mapping(target = "createdOn", source = "time")
   @Mapping(target = "metadata", expression = "java(getMetadata(tokenProjection))")
   public abstract TokenFilterResponse fromTokenProjectionToFilterResponse(
       TokenProjection tokenProjection);
