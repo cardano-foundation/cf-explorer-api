@@ -264,8 +264,7 @@ public class ScriptServiceImpl implements ScriptService {
         setNativeScriptInfo(nativeScript, nativeScriptResponse);
         // One time mint is a native script that has a timelock before the current time
         // and has only one mint transaction
-        Long countTxMint = maTxMintRepository.countByPolicy(scriptHash);
-        if (Long.valueOf(1L).equals(countTxMint)
+        if (maTxMintRepository.existsMoreOneMintTx(scriptHash).isEmpty()
             && Objects.nonNull(nativeScriptResponse.getBefore())
             && LocalDateTime.now(ZoneOffset.UTC).isAfter(nativeScriptResponse.getBefore())) {
           if (Objects.isNull(nativeScriptResponse.getConditionType())) {
