@@ -1,9 +1,7 @@
 package org.cardanofoundation.explorer.api.config.redis.sentinel;
 
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -13,7 +11,6 @@ import lombok.val;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -53,9 +50,6 @@ public class RedisConfiguration implements CachingConfigurer {
 
   /** Redis properties config */
   private final RedisProperties redisProperties;
-
-  @Value("${application.api.coin.gecko.market.interval-time}")
-  private int apiMarketIntervalTime;
 
   @Bean
   @Primary
@@ -215,13 +209,9 @@ public class RedisConfiguration implements CachingConfigurer {
   @Bean(name = "cacheManager")
   public RedisCacheManager cacheManager(
       @Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
-    RedisCacheConfiguration coinPriceConf =
-        RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofSeconds(apiMarketIntervalTime));
-    Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-    cacheConfigurations.put("market", coinPriceConf);
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(connectionFactory)
-        .withInitialCacheConfigurations(cacheConfigurations)
+        .withInitialCacheConfigurations(
+            Collections.singletonMap("predefined", RedisCacheConfiguration.defaultCacheConfig()))
         .build();
   }
 }
