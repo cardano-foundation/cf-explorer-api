@@ -264,15 +264,13 @@ public class ScriptServiceImpl implements ScriptService {
         setNativeScriptInfo(nativeScript, nativeScriptResponse);
         // One time mint is a native script that has a timelock before the current time
         // and has only one mint transaction
-        if (maTxMintRepository.existsMoreOneMintTx(scriptHash).isEmpty()
-            && Objects.nonNull(nativeScriptResponse.getBefore())
-            && LocalDateTime.now(ZoneOffset.UTC).isAfter(nativeScriptResponse.getBefore())) {
-          if (Objects.isNull(nativeScriptResponse.getConditionType())) {
-            nativeScriptResponse.setIsOneTimeMint(true);
-          } else
-            nativeScriptResponse.setIsOneTimeMint(
-                com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all.equals(
-                    nativeScriptResponse.getConditionType()));
+        if (Objects.nonNull(nativeScriptResponse.getBefore())
+            && LocalDateTime.now(ZoneOffset.UTC).isAfter(nativeScriptResponse.getBefore())
+            && maTxMintRepository.existsMoreOneMintTx(scriptHash).isEmpty()) {
+          nativeScriptResponse.setIsOneTimeMint(
+              Objects.isNull(nativeScriptResponse.getConditionType())
+                  || com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all.equals(
+                      nativeScriptResponse.getConditionType()));
         } else {
           nativeScriptResponse.setIsOneTimeMint(false);
         }

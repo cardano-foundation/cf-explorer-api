@@ -517,7 +517,6 @@ class ScriptServiceTest {
     when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
         .thenReturn(Optional.of(nativeScriptInfo));
     when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
-    when(maTxMintRepository.existsMoreOneMintTx(scriptHash)).thenReturn(Optional.of(1L));
     var actual = scriptService.getNativeScriptDetail(scriptHash);
 
     Assertions.assertEquals(nativeScriptInfo.getNumberOfTokens(), actual.getNumberOfTokens());
