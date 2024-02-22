@@ -1,9 +1,7 @@
 package org.cardanofoundation.explorer.api.config.redis.standalone;
 
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import lombok.extern.log4j.Log4j2;
 import lombok.val;
@@ -45,9 +43,6 @@ public class RedisStandaloneConfig implements CachingConfigurer {
 
   @Value("${spring.redis.standalone.useSsl}")
   private boolean useSsl;
-
-  @Value("${application.api.coin.gecko.market.interval-time}")
-  private int apiMarketIntervalTime;
 
   @Bean
   RedisStandaloneConfiguration redisStandaloneConfiguration() {
@@ -122,13 +117,9 @@ public class RedisStandaloneConfig implements CachingConfigurer {
   @Bean(name = "cacheManager")
   public RedisCacheManager cacheManager(
       @Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
-    RedisCacheConfiguration coinPriceConf =
-        RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofSeconds(apiMarketIntervalTime));
-    Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-    cacheConfigurations.put("market", coinPriceConf);
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(connectionFactory)
-        .withInitialCacheConfigurations(cacheConfigurations)
+        .withInitialCacheConfigurations(
+            Collections.singletonMap("predefined", RedisCacheConfiguration.defaultCacheConfig()))
         .build();
   }
 }

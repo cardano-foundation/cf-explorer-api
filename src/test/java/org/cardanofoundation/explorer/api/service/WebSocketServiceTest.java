@@ -24,8 +24,6 @@ import org.cardanofoundation.explorer.common.utils.JsonUtil;
 
 @ExtendWith(MockitoExtension.class)
 class WebSocketServiceTest {
-
-  @Mock MarketDataService marketDataService;
   @Mock EpochService epochService;
   @Mock BlockRepository blockRepository;
 
