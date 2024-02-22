@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +56,17 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
               + " INNER JOIN MultiAsset ma ON ma = mtm.ident"
               + " WHERE ma.policy = :policy")
   Long countByPolicy(@Param("policy") String policy);
+
+  @Query(
+      value =
+          "SELECT ma.id FROM ma_tx_mint mtm "
+              + "JOIN multi_asset ma ON ma.id = mtm.ident "
+              + "WHERE ma.policy = :policy "
+              + "AND mtm.tx_id != (SELECT mtm.tx_id FROM ma_tx_mint mtm "
+              + "JOIN multi_asset ma ON ma.id = mtm.ident WHERE ma.policy = :policy "
+              + "LIMIT 1) LIMIT 1",
+      nativeQuery = true)
+  Optional<Long> existsMoreOneMintTx(@Param("policy") String policy);
 
   @Query(
       value =
