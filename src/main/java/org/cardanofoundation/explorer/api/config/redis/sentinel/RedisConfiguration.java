@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.config.redis.sentinel;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisNode;
@@ -210,8 +208,6 @@ public class RedisConfiguration implements CachingConfigurer {
   public RedisCacheManager cacheManager(
       @Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(connectionFactory)
-        .withInitialCacheConfigurations(
-            Collections.singletonMap("predefined", RedisCacheConfiguration.defaultCacheConfig()))
         .build();
   }
 }

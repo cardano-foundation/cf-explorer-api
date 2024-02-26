@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.config.redis.cluster;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import lombok.extern.log4j.Log4j2;
@@ -15,7 +14,6 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -105,8 +103,6 @@ public class RedisClusterConfig implements CachingConfigurer {
   public RedisCacheManager cacheManager(
       @Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(connectionFactory)
-        .withInitialCacheConfigurations(
-            Collections.singletonMap("predefined", RedisCacheConfiguration.defaultCacheConfig()))
         .build();
   }
 }
