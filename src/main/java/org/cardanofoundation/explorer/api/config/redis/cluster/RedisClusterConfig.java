@@ -1,10 +1,7 @@
 package org.cardanofoundation.explorer.api.config.redis.cluster;
 
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import lombok.extern.log4j.Log4j2;
 import lombok.val;
@@ -17,7 +14,6 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -40,9 +36,6 @@ public class RedisClusterConfig implements CachingConfigurer {
 
   @Value("${spring.redis.password}")
   private String password;
-
-  @Value("${application.api.coin.gecko.market.interval-time}")
-  private int apiMarketIntervalTime;
 
   @Bean
   RedisClusterConfiguration redisClusterConfiguration() {
@@ -109,13 +102,7 @@ public class RedisClusterConfig implements CachingConfigurer {
   @Bean(name = "cacheManager")
   public RedisCacheManager cacheManager(
       @Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
-    RedisCacheConfiguration coinPriceConf =
-        RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofSeconds(apiMarketIntervalTime));
-    Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-    cacheConfigurations.put("market", coinPriceConf);
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(connectionFactory)
-        .withInitialCacheConfigurations(cacheConfigurations)
         .build();
   }
 }
