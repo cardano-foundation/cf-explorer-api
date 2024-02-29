@@ -14,7 +14,10 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -64,6 +67,7 @@ import org.cardanofoundation.explorer.common.entity.explorer.SmartContractInfo;
 import org.cardanofoundation.explorer.common.entity.explorer.VerifiedScript;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -266,7 +270,7 @@ public class ScriptServiceImpl implements ScriptService {
         // and has only one mint transaction
         if (Objects.nonNull(nativeScriptResponse.getBefore())
             && LocalDateTime.now(ZoneOffset.UTC).isAfter(nativeScriptResponse.getBefore())
-            && maTxMintRepository.existsMoreOneMintTx(scriptHash).isEmpty()) {
+            && isOneTimeMint(scriptHash)) {
           nativeScriptResponse.setIsOneTimeMint(
               Objects.isNull(nativeScriptResponse.getConditionType())
                   || com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all.equals(
@@ -525,5 +529,44 @@ public class ScriptServiceImpl implements ScriptService {
       scriptSearchResponse.setNativeScript(true);
     }
     return scriptSearchResponse;
+  }
+
+  /**
+   * Determines if a given script hash corresponds to a one-time mint. This method checks if there
+   * is only one mint transaction associated with the multi-assets identified by the given script
+   * hash. It iterates through the multi-assets, checking each for multiple mint transactions. If
+   * any multi-asset has more than one mint transaction, the method returns false, indicating that
+   * the script hash is not a one-time mint.
+   *
+   * @param scriptHash The script hash
+   * @return true if the script hash type of one-time mint, false otherwise.
+   */
+  private boolean isOneTimeMint(String scriptHash) {
+    Pageable pageable = PageRequest.of(0, 100, Sort.by("id").ascending());
+    Slice<MultiAsset> multiAssetSlice = multiAssetRepository.getSliceByPolicy(scriptHash, pageable);
+    List<Long> idents =
+        multiAssetSlice.getContent().stream().map(MultiAsset::getId).collect(Collectors.toList());
+    Long firstTxMintId = maTxMintRepository.findFirstTxMintByMultiAssetId(idents.get(0));
+
+    if (Boolean.TRUE.equals(
+        maTxMintRepository.existsMoreOneMintTx(multiAssetSlice.getContent(), firstTxMintId))) {
+      return false;
+    }
+
+    boolean isOneTimeMint = true;
+    while (multiAssetSlice.hasNext()) {
+      multiAssetSlice =
+          multiAssetRepository.getSliceByPolicy(scriptHash, multiAssetSlice.nextPageable());
+      idents =
+          multiAssetSlice.getContent().stream().map(MultiAsset::getId).collect(Collectors.toList());
+      firstTxMintId = maTxMintRepository.findFirstTxMintByMultiAssetId(idents.get(0));
+      if (Boolean.TRUE.equals(
+          maTxMintRepository.existsMoreOneMintTx(multiAssetSlice.getContent(), firstTxMintId))) {
+        isOneTimeMint = false;
+        break;
+      }
+    }
+
+    return isOneTimeMint;
   }
 }
