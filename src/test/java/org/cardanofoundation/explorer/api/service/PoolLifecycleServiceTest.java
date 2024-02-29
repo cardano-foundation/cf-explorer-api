@@ -38,6 +38,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReg
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
@@ -56,6 +57,7 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 class PoolLifecycleServiceTest {
 
   @Mock private StakeAddressRepository stakeAddressRepository;
+  @Mock private RedisProvider<String, Object> redisProvider;
 
   @Mock private PoolHashRepository poolHashRepository;
 

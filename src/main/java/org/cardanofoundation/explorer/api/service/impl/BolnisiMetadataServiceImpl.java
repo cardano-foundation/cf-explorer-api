@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -33,6 +32,7 @@ import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.LotData;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.WineryData;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.util.CidUtils;
@@ -50,10 +50,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   private static final String BOLNISI_METADATA_KEY = "BOLNISI_METADATA:";
   private final TxMetadataRepository txMetadataRepository;
   private final WebClient webClient;
-  private final RedisTemplate<String, Object> redisTemplate;
-
-  @Value("${application.network}")
-  private String network;
+  private final RedisProvider<String, Object> redisProvider;
 
   @Value("${application.api.bolnisi.off-chain}")
   private String offChainMetadataUrl;
@@ -145,7 +142,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
    * @param metadataBolnisi The MetadataBolnisi object containing the winery data to be verified.
    */
   private void verifyPublicKey(MetadataBolnisi metadataBolnisi) {
-    String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyUrl);
+    String publicKeyRedisKey = redisProvider.getRedisKey(BOLNISI_METADATA_KEY + publicKeyUrl);
     Map<String, String> pKeyRedisCachedMap = new HashMap<>();
     List<CompletableFuture<Map<String, String>>> completableFutures = new ArrayList<>();
 
@@ -154,8 +151,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
         .forEach(
             wineryData -> {
               String pKeyCached =
-                  (String)
-                      redisTemplate.opsForHash().get(publicKeyRedisKey, wineryData.getWineryId());
+                  redisProvider.getHashValueByKey(publicKeyRedisKey, wineryData.getWineryId());
               if (pKeyCached != null) {
                 pKeyRedisCachedMap.put(wineryData.getWineryId(), pKeyCached);
               } else {
@@ -189,10 +185,9 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
         .forEach(
             wineryData -> {
               String pKeyOnChain = wineryPkeyMap.get(wineryData.getWineryId());
-              redisTemplate
-                  .opsForHash()
-                  .putIfAbsent(publicKeyRedisKey, wineryData.getWineryId(), pKeyOnChain);
-              redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.DAYS);
+              redisProvider.putHashIfAbsentByKey(
+                  publicKeyRedisKey, wineryData.getWineryId(), pKeyOnChain);
+              redisProvider.setExpire(publicKeyRedisKey, 1L, TimeUnit.DAYS);
               boolean isPKeyVerified =
                   pKeyOnChain != null
                       && removePrefixHexString(wineryData.getPublicKey())
@@ -296,9 +291,9 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       return null;
     }
 
-    String offChainRedisKey = getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
+    String offChainRedisKey = redisProvider.getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
     Object metadataRedisCached =
-        redisTemplate.opsForHash().get(offChainRedisKey, metadataBolnisi.getCid());
+        redisProvider.getHashValueByKey(offChainRedisKey, metadataBolnisi.getCid());
 
     if (metadataRedisCached != null) {
       return (Map<String, List<Object>>) metadataRedisCached;
@@ -327,8 +322,8 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
             .block();
 
     if (offChainMetadata != null) {
-      redisTemplate.opsForHash().put(offChainRedisKey, metadataBolnisi.getCid(), offChainMetadata);
-      redisTemplate.expire(offChainRedisKey, 1, TimeUnit.DAYS);
+      redisProvider.putHashValueByKey(offChainRedisKey, metadataBolnisi.getCid(), offChainMetadata);
+      redisProvider.setExpire(offChainRedisKey, 1L, TimeUnit.DAYS);
     }
 
     return offChainMetadata;
@@ -378,16 +373,12 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
     return hexString.startsWith("0x") ? hexString.substring(2) : hexString;
   }
 
-  private String getRedisKey(String value) {
-    return String.format("%s_%s", network, value).toUpperCase();
-  }
-
   @PostConstruct
   public void init() {
-    String offChainMetaDataRedisKey = getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
-    String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyUrl);
-
-    redisTemplate.delete(offChainMetaDataRedisKey);
-    redisTemplate.delete(publicKeyRedisKey);
+    String offChainMetaDataRedisKey =
+        redisProvider.getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
+    String publicKeyRedisKey = redisProvider.getRedisKey(BOLNISI_METADATA_KEY + publicKeyUrl);
+    redisProvider.del(offChainMetaDataRedisKey);
+    redisProvider.del(publicKeyRedisKey);
   }
 }

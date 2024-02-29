@@ -28,13 +28,11 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +70,7 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
@@ -157,7 +156,7 @@ public class TxServiceImpl implements TxService {
   private final TxReferenceInputMapper txReferenceInputMapper;
   private final BolnisiMetadataService bolnisiMetadataService;
 
-  private final RedisTemplate<String, TxGraph> redisTemplate;
+  private final RedisProvider<String, TxGraph> redisProvider;
   private static final int SUMMARY_SIZE = 4;
   public static final long HOURS_IN_DAY = 24;
   public static final long DAY_IN_WEEK = 7;
@@ -165,9 +164,6 @@ public class TxServiceImpl implements TxService {
   public static final long DAYS_IN_MONTH = 32;
 
   private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
-
-  @Value("${application.network}")
-  private String network;
 
   @Override
   public List<TxSummary> findLatestTxSummary() {
@@ -1344,7 +1340,7 @@ public class TxServiceImpl implements TxService {
    * @return
    */
   private List<TxGraph> getTransactionChartInRange(long day) {
-    final String key = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
+    final String key = redisProvider.getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
     final LocalDateTime currentLocalDate =
@@ -1366,7 +1362,7 @@ public class TxServiceImpl implements TxService {
       day = maxDay;
     }
 
-    var keySize = redisTemplate.opsForList().size(key);
+    var keySize = redisProvider.getSizeListByKey(key);
     // if key not exists or empty
     if (Objects.isNull(keySize) || keySize.equals(BigInteger.ZERO.longValue())) {
       List<TxGraph> txCharts =
@@ -1380,7 +1376,7 @@ public class TxServiceImpl implements TxService {
 
     // txGraphsRedis will not empty
     List<TxGraph> txGraphsRedis =
-        redisTemplate.opsForList().range(key, BigInteger.ZERO.longValue(), DAYS_IN_MONTH);
+        redisProvider.getRangeListByKey(key, BigInteger.ZERO.longValue(), DAYS_IN_MONTH);
 
     final var latestDay = txGraphsRedis.get(BigInteger.ZERO.intValue()).getDate();
     final var latestLocalDateTime =
@@ -1391,7 +1387,7 @@ public class TxServiceImpl implements TxService {
                 txGraphsRedis.get(txGraphsRedis.size() - 1).getDate().toInstant(), ZoneOffset.UTC),
             currentLocalDate)
         > DAYS_IN_MONTH) {
-      redisTemplate.opsForList().rightPop(key);
+      redisProvider.rightPopListByKey(key);
       txGraphsRedis.remove(txGraphsRedis.size() - BigInteger.ONE.intValue());
     }
 
@@ -1438,8 +1434,8 @@ public class TxServiceImpl implements TxService {
 
     if (distanceFromRealAndCache == BigInteger.ONE.longValue()
         && txs.size() == BigInteger.TWO.intValue()) {
-      redisTemplate.opsForList().set(key, BigInteger.ZERO.intValue(), previousChart);
-      redisTemplate.opsForList().leftPush(key, latestChart);
+      redisProvider.setListValueByKey(key, BigInteger.ZERO.intValue(), previousChart);
+      redisProvider.leftPushListByKey(key, latestChart);
 
       txGraphs.add(latestChart);
       txGraphs.add(previousChart);
@@ -1529,20 +1525,9 @@ public class TxServiceImpl implements TxService {
   private void updateRedisTxGraph(List<TxGraph> txGraphs, String key, boolean isEmpty) {
 
     if (isEmpty) {
-      txGraphs.forEach(txGraph -> redisTemplate.opsForList().leftPush(key, txGraph));
+      txGraphs.forEach(txGraph -> redisProvider.leftPushListByKey(key, txGraph));
     }
   }
-
-  /**
-   * create redis key
-   *
-   * @param rawKey
-   * @return
-   */
-  private String getRedisKey(String rawKey) {
-    return String.join("_", this.network, rawKey);
-  }
-
   /**
    * Get protocol params update in transaction
    *

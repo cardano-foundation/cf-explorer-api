@@ -38,7 +38,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +58,7 @@ import org.cardanofoundation.explorer.api.model.response.protocol.Protocols;
 import org.cardanofoundation.explorer.api.projection.EpochTimeProjection;
 import org.cardanofoundation.explorer.api.projection.LatestParamHistory;
 import org.cardanofoundation.explorer.api.projection.ParamHistory;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CostModelRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
@@ -93,11 +93,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   final TxRepository txRepository;
   final CostModelRepository costModelRepository;
   final ProtocolMapper protocolMapper;
-  final RedisTemplate<String, Object> redisTemplate;
+  final RedisProvider<String, Object> redisProvider;
   final GenesisService genesisService;
-
-  @Value("${application.network}")
-  String network;
 
   @Value("${application.epoch.days}")
   public int epochDays;
@@ -125,22 +122,23 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   Map<ProtocolType, Pair<Method, Method>> latestParamHistoryMethods;
 
   private String getHistoryProtocolParametersKey() {
-    return String.format("%s_%s", network, PROTOCOL_HISTORY).toUpperCase();
+    return redisProvider.getRedisKey(PROTOCOL_HISTORY);
   }
 
   @Override
   public HistoriesProtocol getHistoryProtocolParameters(
       List<ProtocolType> protocolTypesInput, BigInteger startTime, BigInteger endTime) {
-    final String redisKey = getHistoryProtocolParametersKey();
+    final String redisKey = redisProvider.getRedisKey(PROTOCOL_HISTORY);
 
     boolean isGetAll = Boolean.FALSE;
 
     if (ObjectUtils.isEmpty(protocolTypesInput) || protocolTypesInput.contains(ProtocolType.ALL)) {
       protocolTypesInput = ProtocolType.getAll();
       isGetAll = Boolean.TRUE;
-      if (Objects.nonNull(redisTemplate.opsForValue().get(redisKey))
+      if (Objects.nonNull(redisProvider.getValueByKey(redisKey))
           && (Objects.isNull(startTime) || Objects.isNull(endTime))) {
-        return (HistoriesProtocol) redisTemplate.opsForValue().get(redisKey);
+        log.info("run here");
+        return (HistoriesProtocol) redisProvider.getValueByKey(redisKey);
       }
     }
 
@@ -338,8 +336,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
       var redisKeyExpireTime = currentEpoch.getStartTime().toLocalDateTime().plusDays(epochDays);
       final var seconds =
           ChronoUnit.SECONDS.between(LocalDateTime.now(ZoneOffset.UTC), redisKeyExpireTime);
-      redisTemplate.opsForValue().set(redisKey, historiesProtocol);
-      redisTemplate.expire(redisKey, Duration.ofSeconds(seconds));
+      redisProvider.setValueByKey(redisKey, historiesProtocol);
+      redisProvider.setExpire(redisKey, Duration.ofSeconds(seconds));
     }
 
     return historiesProtocol;
@@ -370,8 +368,8 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   private void deleteProtocolHistoryCache() {
-    redisTemplate.delete(getHistoryProtocolParametersKey());
-    redisTemplate.delete(getGenesisDelegRedisKeys());
+    redisProvider.del(getHistoryProtocolParametersKey());
+    redisProvider.del(getGenesisDelegRedisKeys());
   }
 
   @Override
@@ -444,7 +442,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   @Override
   public FixedProtocol getFixedProtocols() {
     FixedProtocol fixedProtocol =
-        (FixedProtocol) redisTemplate.opsForValue().get(getFixedProtocolsKey());
+        (FixedProtocol) redisProvider.getValueByKey(getFixedProtocolsKey());
     if (Objects.isNull(fixedProtocol)) {
       fixedProtocol = loadFixedProtocols();
     }
@@ -454,7 +452,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   @Override
   @Transactional
   public Map<String, String> getGenesisDelegateKeysMap() {
-    Object genDelegsRedisMap = redisTemplate.opsForValue().get(getGenesisDelegRedisKeys());
+    Object genDelegsRedisMap = redisProvider.getValueByKey(getGenesisDelegRedisKeys());
 
     if (Objects.isNull(genDelegsRedisMap)) {
       Map<String, String> dKeyHash224Map = new HashMap<>();
@@ -471,7 +469,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                 dKeyHash224Map.put(value, key);
               });
 
-      redisTemplate.opsForValue().set(getGenesisDelegRedisKeys(), dKeyHash224Map);
+      redisProvider.setValueByKey(getGenesisDelegRedisKeys(), dKeyHash224Map);
       return dKeyHash224Map;
     } else {
       return (Map<String, String>) genDelegsRedisMap;
@@ -479,17 +477,17 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   }
 
   private String getFixedProtocolsKey() {
-    return String.format("%s_%s", network, FIXED_PROTOCOL).toUpperCase();
+    return redisProvider.getRedisKey(FIXED_PROTOCOL);
   }
 
   private String getGenesisDelegRedisKeys() {
-    return String.format("%s_%s", network, GENESIS_DELEG_KEYS).toUpperCase();
+    return redisProvider.getRedisKey(GENESIS_DELEG_KEYS);
   }
 
   private FixedProtocol loadFixedProtocols() {
     FixedProtocol fixedProtocol = getFixedProtocolFromShelleyGenesis(shelleyUrl);
     getFixedProtocolFromByronGenesis(byronUrl, fixedProtocol);
-    redisTemplate.opsForValue().set(getFixedProtocolsKey(), fixedProtocol);
+    redisProvider.setValueByKey(getFixedProtocolsKey(), fixedProtocol);
     return fixedProtocol;
   }
 

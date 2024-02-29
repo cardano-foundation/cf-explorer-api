@@ -27,7 +27,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.Answers;
@@ -64,6 +63,7 @@ import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.explorer.AggregatePoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
@@ -112,7 +112,7 @@ class DelegationServiceTest {
   @Mock private PoolHistoryRepository poolHistoryRepository;
 
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-  private RedisTemplate<String, Object> redisTemplate;
+  private RedisProvider<String, Object> redisProvider;
 
   @Mock private FetchRewardDataService fetchRewardDataService;
 
@@ -244,7 +244,7 @@ class DelegationServiceTest {
             .build();
     when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
-    when(redisTemplate.opsForValue().get(any())).thenReturn(10);
+    when(redisProvider.getValueByKey(any())).thenReturn(10);
 
     // Execute the method
     DelegationHeaderResponse response = delegationService.getDataForDelegationHeader();
@@ -312,7 +312,7 @@ class DelegationServiceTest {
     Page<PoolListProjection> poolIdPage = new PageImpl<>(poolIdPageContent, pageable, 20L);
 
     when(fetchRewardDataService.useKoios()).thenReturn(true);
-    when(redisTemplate.opsForHash().values(any())).thenReturn(poolRetiredIds);
+    when(redisProvider.getSetHashValueByKey(any())).thenReturn(poolRetiredIds);
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(100));
     when(aggregatePoolInfoRepository.getAllByPoolIdIn(anyCollection()))
         .thenReturn(List.of(aggregatePoolInfo));
@@ -553,7 +553,7 @@ class DelegationServiceTest {
     when(fetchRewardDataService.checkAdaPots(currentEpochNo)).thenReturn(false);
     when(fetchRewardDataService.fetchAdaPots(List.of(currentEpochNo))).thenReturn(true);
     when(rewardRepository.getPoolRewardByPool(poolId)).thenReturn(BigInteger.ONE);
-    when(redisTemplate.opsForHash().multiGet("ACTIVATE_STAKE_null_1", List.of("1")))
+    when(redisProvider.getListValueByKeys("ACTIVATE_STAKE_null_1", List.of("1")))
         .thenReturn(List.of(BigInteger.ONE));
     List<String> ownerAddress = new ArrayList<>();
     ownerAddress.add("address");
@@ -807,7 +807,7 @@ class DelegationServiceTest {
 
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(1));
     when(delegationRepository.findDelegationPoolsSummary(Mockito.anySet())).thenReturn(pools);
-    when(redisTemplate.opsForHash().multiGet(any(), any()))
+    when(redisProvider.getListValueByKeys(any(), any()))
         .thenReturn(List.of(BigInteger.valueOf(1000), BigInteger.valueOf(2000)));
     when(blockRepository.findTopDelegationByEpochBlock(1, pageable))
         .thenReturn(poolCountProjections);

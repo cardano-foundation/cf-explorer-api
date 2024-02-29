@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -411,7 +410,6 @@ public class StakeKeyServiceTest {
 
   @Test
   void testGetStakeAnalytics_thenReturnRewardDataNull() {
-    ReflectionTestUtils.setField(stakeKeyService, "network", "mainnet");
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(400));
     when(fetchRewardDataService.useKoios()).thenReturn(false);
 
@@ -422,7 +420,6 @@ public class StakeKeyServiceTest {
 
   @Test
   void testGetStakeAnalytics_thenReturnKoios() {
-    ReflectionTestUtils.setField(stakeKeyService, "network", "mainnet");
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(400));
     when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(poolInfoRepository.getTotalActiveStake(400)).thenReturn(BigInteger.ONE);

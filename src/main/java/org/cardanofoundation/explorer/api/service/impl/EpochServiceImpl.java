@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -24,6 +23,7 @@ import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
@@ -41,7 +41,7 @@ public class EpochServiceImpl implements EpochService {
   private final EpochRepository epochRepository;
   private final BlockRepository blockRepository;
   private final EpochMapper epochMapper;
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisProvider<String, Object> redisProvider;
   private final FetchRewardDataService fetchRewardDataService;
   private final AdaPotsRepository adaPotsRepository;
   private static final String UNIQUE_ACCOUNTS_KEY = "UNIQUE_ACCOUNTS";
@@ -94,8 +94,9 @@ public class EpochServiceImpl implements EpochService {
       response.setStartTime(startTime);
       response.setEndTime(startTime.plusDays(epochDays));
       String uniqueAccountRedisKey =
-          String.join(UNDERSCORE, getRedisKey(UNIQUE_ACCOUNTS_KEY), epoch.getNo().toString());
-      Integer account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
+          String.join(
+              UNDERSCORE, redisProvider.getRedisKey(UNIQUE_ACCOUNTS_KEY), epoch.getNo().toString());
+      Integer account = redisProvider.getSizeHashByKey(uniqueAccountRedisKey).intValue();
       response.setAccount(account);
       return response;
     } catch (NumberFormatException e) {
@@ -157,8 +158,10 @@ public class EpochServiceImpl implements EpochService {
               epoch.setEndTime(startTime.plusDays(epochDays));
               String uniqueAccountRedisKey =
                   String.join(
-                      UNDERSCORE, getRedisKey(UNIQUE_ACCOUNTS_KEY), epoch.getNo().toString());
-              epoch.setAccount(redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue());
+                      UNDERSCORE,
+                      redisProvider.getRedisKey(UNIQUE_ACCOUNTS_KEY),
+                      epoch.getNo().toString());
+              epoch.setAccount(redisProvider.getSizeHashByKey(uniqueAccountRedisKey).intValue());
             });
     return new BaseFilterResponse<>(pageResponse);
   }
@@ -248,9 +251,9 @@ public class EpochServiceImpl implements EpochService {
               String uniqueAccountRedisKey =
                   String.join(
                       UNDERSCORE,
-                      getRedisKey(UNIQUE_ACCOUNTS_KEY),
+                      redisProvider.getRedisKey(UNIQUE_ACCOUNTS_KEY),
                       epochSummaryProjection.getNo().toString());
-              var account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
+              var account = redisProvider.getSizeHashByKey(uniqueAccountRedisKey).intValue();
               if (Boolean.FALSE.equals(
                   fetchRewardDataService.checkAdaPots(epochSummaryProjection.getNo()))) {
                 fetchRewardDataService.fetchAdaPots(List.of(epochSummaryProjection.getNo()));
@@ -281,9 +284,5 @@ public class EpochServiceImpl implements EpochService {
                   .build();
             })
         .orElse(EpochSummary.builder().slot(0).no(0).totalSlot(0).build());
-  }
-
-  private String getRedisKey(String key) {
-    return String.join(UNDERSCORE, network.toUpperCase(), key);
   }
 }

@@ -8,12 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 
 @Slf4j
@@ -25,7 +23,7 @@ public class RedisAggregatedDateCacheServiceImpl implements AggregatedDataCacheS
   private static final String BLOCK_TIME_HASH_KEY = "LATEST_BLOCK_TIME";
   private static final String TOKEN_COUNT_HASH_KEY = "TOTAL_TOKEN_COUNT";
   private static final String BLOCK_INSERT_TIME_HASH_KEY = "LATEST_BLOCK_INSERT_TIME";
-  private final RedisTemplate<String, String> redisTemplate;
+  private final RedisProvider<String, String> redisProvider;
 
   private static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -58,13 +56,7 @@ public class RedisAggregatedDateCacheServiceImpl implements AggregatedDataCacheS
   }
 
   private String getRedisHashValue(String hashKey) {
-    HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
-
-    String redisKey = getRedisKey(AGGREGATED_CACHE_KEY);
-    return hashOperations.get(redisKey, hashKey);
-  }
-
-  private String getRedisKey(String key) {
-    return String.join(CommonConstant.UNDERSCORE, network.toUpperCase(), key);
+    return redisProvider.getHashValueByKey(
+        redisProvider.getRedisKey(AGGREGATED_CACHE_KEY), hashKey);
   }
 }

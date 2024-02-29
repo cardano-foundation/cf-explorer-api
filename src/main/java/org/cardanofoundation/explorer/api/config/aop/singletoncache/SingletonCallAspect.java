@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -21,6 +20,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.CodeSignature;
 
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
+
 @Aspect
 @Component
 @Log4j2
@@ -30,7 +31,7 @@ public class SingletonCallAspect {
   private static final String LOCKED = "LOCKED";
   private static final String PREFIX_KEY = "METHOD_CACHE:";
 
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisProvider<String, Object> redisProvider;
 
   /* Config Gson for working with LocalDate/LocalDateTime */
   private static final Gson GSON =
@@ -78,21 +79,19 @@ public class SingletonCallAspect {
     String[] sigParamNames = methodSignature.getParameterNames();
     Object[] sigParamValues = joinPoint.getArgs();
     String cacheKey = generateCacheKey(methodSignature.getName(), sigParamNames, sigParamValues);
-
-    var opValuesRedis = redisTemplate.opsForValue();
     try {
-      Object cacheResult = redisTemplate.opsForValue().get(cacheKey);
+      Object cacheResult = redisProvider.getValueByKey(cacheKey);
       if (cacheResult == null) {
-        opValuesRedis.set(cacheKey, LOCKED);
+        redisProvider.setValueByKey(cacheKey, LOCKED);
         Object data = joinPoint.proceed();
-        opValuesRedis.set(
+        redisProvider.setValueByKey(
             cacheKey, GSON.toJson(data), singletonCall.expireAfterSeconds(), TimeUnit.SECONDS);
         return data;
       } else {
         if (LOCKED.equals(cacheResult.toString())) {
           do {
             Thread.sleep(singletonCall.callAfterMilis());
-            cacheResult = redisTemplate.opsForValue().get(cacheKey);
+            cacheResult = redisProvider.getValueByKey(cacheKey);
             if (cacheResult == null) {
               return null;
             }
@@ -103,7 +102,7 @@ public class SingletonCallAspect {
         return GSON.fromJson(cacheResult.toString(), singletonCall.typeToken().getType().get());
       }
     } catch (Exception e) {
-      redisTemplate.delete(cacheKey);
+      redisProvider.del(cacheKey);
       throw e;
     } finally {
       // do nothing

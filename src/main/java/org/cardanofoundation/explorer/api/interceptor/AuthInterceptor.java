@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -28,6 +27,7 @@ import org.cardanofoundation.explorer.api.interceptor.auth.Request;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleConfigurationMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.util.JwtUtils;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
@@ -42,7 +42,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   private final RsaConfig rsaConfig;
 
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisProvider<String, Object> redisProvider;
 
   private List<AntPathRequestMatcher> matchers;
 
@@ -51,10 +51,10 @@ public class AuthInterceptor implements HandlerInterceptor {
   public AuthInterceptor(
       RoleFilterMapper roleFilterMapper,
       RsaConfig rsaConfig,
-      RedisTemplate<String, Object> redisTemplate) {
+      RedisProvider<String, Object> redisProvider) {
     this.roleConf = roleFilterMapper;
     this.rsaConfig = rsaConfig;
-    this.redisTemplate = redisTemplate;
+    this.redisProvider = redisProvider;
   }
 
   @PostConstruct
@@ -164,6 +164,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {
       throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
     }
-    return redisTemplate.hasKey(CommonConstant.JWT + token);
+    return redisProvider.hasKey(CommonConstant.JWT + token);
   }
 }

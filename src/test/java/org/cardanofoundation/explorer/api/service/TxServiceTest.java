@@ -33,12 +33,14 @@ import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxInfoResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
@@ -81,6 +83,7 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class TxServiceTest {
+  @Mock private RedisProvider<String, TxGraph> redisProvider;
 
   @Mock private TxRepository txRepository;
   @Mock private TxOutRepository txOutRepository;

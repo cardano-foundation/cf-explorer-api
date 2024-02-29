@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.*;
@@ -19,13 +18,14 @@ import com.google.gson.reflect.TypeToken;
 import org.cardanofoundation.explorer.api.common.enumeration.RedisKey;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TokenPageCacheServiceImpl implements TokenPageCacheService {
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisProvider<String, Object> redisProvider;
 
   @Value("${application.network}")
   private String network;
@@ -61,7 +61,7 @@ public class TokenPageCacheServiceImpl implements TokenPageCacheService {
   @Override
   public Optional<BaseFilterResponse<TokenFilterResponse>> getTokePageCache(Pageable pageable) {
     String redisKey = RedisKey.REDIS_TOKEN_PAGE.name() + ":" + network + ":" + toStr(pageable);
-    Object cacheData = redisTemplate.opsForValue().get(redisKey);
+    Object cacheData = redisProvider.getValueByKey(redisKey);
     if (cacheData == null) {
       return Optional.empty();
     }

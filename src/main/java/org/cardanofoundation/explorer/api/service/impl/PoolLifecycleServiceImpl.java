@@ -15,10 +15,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
@@ -42,6 +40,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReg
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateDetailProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
@@ -78,12 +77,9 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
 
   private final PoolInfoRepository poolInfoRepository;
 
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisProvider<String, Object> redisProvider;
 
   private final PoolCertificateService poolCertificateService;
-
-  @Value("${application.network}")
-  private String network;
 
   @Override
   public BaseFilterResponse<String> getPoolViewByStakeKey(String stakeKey, Pageable pageable) {
@@ -491,10 +487,10 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   private String getPoolStatusFromCacheByPoolId(Long poolId) {
-    String key = CommonConstant.POOL_IDS_INACTIVATE + network;
+    String key = redisProvider.getRedisKey(CommonConstant.POOL_IDS_INACTIVATE);
     Object obj = null;
     try {
-      List<Object> objList = redisTemplate.opsForHash().multiGet(key, List.of(poolId));
+      List<Object> objList = redisProvider.getListValueByKeys(key, List.of(poolId));
       obj = objList.get(0);
     } catch (Exception e) {
       log.error("Error: " + e.getMessage());

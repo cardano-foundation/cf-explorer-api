@@ -11,12 +11,10 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
@@ -83,16 +81,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final EpochRepository epochRepository;
   private final TxRepository txRepository;
   private final StakeTxBalanceRepository stakeTxBalanceRepository;
-
-  private final RedisTemplate<String, Object> redisTemplate;
-
   private final PoolInfoRepository poolInfoRepository;
 
   private final FetchRewardDataService fetchRewardDataService;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
-
-  @Value("${application.network}")
-  private String network;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {

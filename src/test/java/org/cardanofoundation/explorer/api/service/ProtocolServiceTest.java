@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -14,10 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.base.Objects;
 import org.mapstruct.factory.Mappers;
@@ -39,6 +37,7 @@ import org.cardanofoundation.explorer.api.model.response.protocol.*;
 import org.cardanofoundation.explorer.api.projection.EpochTimeProjection;
 import org.cardanofoundation.explorer.api.projection.LatestParamHistory;
 import org.cardanofoundation.explorer.api.projection.ParamHistory;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CostModelRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
@@ -64,8 +63,7 @@ class ProtocolServiceTest {
   @Mock TxRepository txRepository;
   @Mock CostModelRepository costModelRepository;
   @Mock EpochRepository epochRepository;
-  @Mock RedisTemplate<String, Object> redisTemplate;
-  @Mock ValueOperations valueOperations;
+  @Mock RedisProvider<String, Object> redisProvider;
   @Spy ProtocolMapper protocolMapper = Mappers.getMapper(ProtocolMapper.class);
 
   @Mock GenesisService genesisService;
@@ -75,7 +73,6 @@ class ProtocolServiceTest {
   void setup() {
     when(genesisService.fillContentByron(any())).thenReturn(new ByronGenesis());
     when(genesisService.fillContentShelley(any())).thenReturn(new ShelleyGenesis());
-    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     protocolParamService.setup();
   }
 
@@ -7068,10 +7065,8 @@ class ProtocolServiceTest {
     BigInteger endTime = BigInteger.TWO;
     String redisKey = "MAINNET_PROTOCOL_HISTORY_ALL";
     HistoriesProtocol historiesProtocol = new HistoriesProtocol();
-
-    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
-    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-    when(valueOperations.get(redisKey)).thenReturn(historiesProtocol);
+    when(redisProvider.getRedisKey(anyString())).thenReturn(redisKey);
+    when(redisProvider.getValueByKey(redisKey)).thenReturn(historiesProtocol);
 
     Assertions.assertEquals(
         protocolParamService.getHistoryProtocolParameters(protocolTypes, startTime, endTime),
@@ -7085,8 +7080,6 @@ class ProtocolServiceTest {
     BigInteger endTime = null;
     HistoriesProtocol historiesProtocol = new HistoriesProtocol();
 
-    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
-
     Assertions.assertThrows(
         BusinessException.class,
         () -> protocolParamService.getHistoryProtocolParameters(protocolTypes, startTime, endTime));
@@ -7097,9 +7090,6 @@ class ProtocolServiceTest {
     List<ProtocolType> protocolTypes = List.of(ProtocolType.MIN_FEE_A);
     BigInteger startTime = BigInteger.TWO;
     BigInteger endTime = BigInteger.ONE;
-    HistoriesProtocol historiesProtocol = new HistoriesProtocol();
-
-    ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
 
     Assertions.assertThrows(
         BusinessException.class,

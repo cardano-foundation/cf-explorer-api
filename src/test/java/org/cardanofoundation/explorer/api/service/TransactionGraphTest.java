@@ -2,6 +2,8 @@ package org.cardanofoundation.explorer.api.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -18,8 +20,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.ObjectUtils;
 
 import org.mockito.InjectMocks;
@@ -34,6 +34,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjectionImp;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
 import org.cardanofoundation.explorer.api.service.impl.TxServiceImpl;
 
@@ -43,10 +44,7 @@ class TransactionGraphTest {
   @Mock private TxChartRepository txChartRepository;
 
   @InjectMocks private TxServiceImpl txService;
-
-  @Mock private RedisTemplate<String, TxGraph> redisTemplate;
-
-  @Mock private ListOperations listOperations;
+  @Mock private RedisProvider<String, TxGraph> redisProvider;
 
   @Test
   void testEmptyTransactionsInOneDay() {
@@ -60,9 +58,6 @@ class TransactionGraphTest {
 
   @Test
   void testEmptyTransactionsByRangeRedisSizeZero() {
-
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(0L);
     when(txChartRepository.getTransactionGraphDayGreaterThan(any(BigInteger.class)))
         .thenReturn(Collections.emptyList());
 
@@ -73,9 +68,6 @@ class TransactionGraphTest {
 
   @Test
   void testEmptyTransactionsByRangeRedisSizeNull() {
-
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(null);
     when(txChartRepository.getTransactionGraphDayGreaterThan(any(BigInteger.class)))
         .thenReturn(Collections.emptyList());
 
@@ -175,8 +167,6 @@ class TransactionGraphTest {
   // transaction graph in range
   @Test
   void getTransactionChartInRangeWithoutCache() {
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(0L);
 
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -264,8 +254,8 @@ class TransactionGraphTest {
 
   @Test
   void testTransactionChartInRangeWithCacheNotCallRepository() {
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(3L);
+    when(redisProvider.getRedisKey(anyString())).thenReturn("key");
+    when(redisProvider.getSizeListByKey(any())).thenReturn(3L);
 
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -338,8 +328,7 @@ class TransactionGraphTest {
             .metadata(dayThree.getMetadata())
             .smartContract(dayThree.getSmartContract())
             .build();
-
-    when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
+    when(redisProvider.getRangeListByKey(any(String.class), any(Long.class), any(Long.class)))
         .thenReturn(List.of(txGraphDayOne, txGraphDayTwo, txGraphDayThree));
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne);
@@ -353,8 +342,8 @@ class TransactionGraphTest {
 
   @Test
   void testTransactionChartInRangeWithCacheCallRepository() {
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(3L);
+    when(redisProvider.getRedisKey(anyString())).thenReturn("key");
+    when(redisProvider.getSizeListByKey(anyString())).thenReturn(3L);
 
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -427,8 +416,7 @@ class TransactionGraphTest {
             .metadata(dayThree.getMetadata())
             .smartContract(dayThree.getSmartContract())
             .build();
-
-    when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
+    when(redisProvider.getRangeListByKey(any(String.class), any(Long.class), any(Long.class)))
         .thenReturn(List.of(txGraphDayOne, txGraphDayTwo, txGraphDayThree));
 
     when(txChartRepository.getTransactionGraphByDay(anyList())).thenReturn(List.of(dayOne, dayTwo));
@@ -444,8 +432,8 @@ class TransactionGraphTest {
 
   @Test
   void testWithCacheCallRepositoryWithOneDayDistance() {
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(3L);
+    when(redisProvider.getSizeListByKey(any())).thenReturn(3L);
+    when(redisProvider.getRedisKey(anyString())).thenReturn("key");
 
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -547,7 +535,7 @@ class TransactionGraphTest {
             .smartContract(dayCurrent.getSmartContract())
             .build();
 
-    when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
+    when(redisProvider.getRangeListByKey(anyString(), anyLong(), anyLong()))
         .thenReturn(List.of(txGraphDayOne, txGraphDayTwo, txGraphDayThree));
 
     when(txChartRepository.getTransactionGraphByDay(anyList()))
@@ -564,8 +552,8 @@ class TransactionGraphTest {
 
   @Test
   void testWithCacheCallRepositoryWithOneDayDistanceInCache() {
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(3L);
+    when(redisProvider.getSizeListByKey(any())).thenReturn(3L);
+    when(redisProvider.getRedisKey(anyString())).thenReturn("key");
 
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -666,8 +654,7 @@ class TransactionGraphTest {
             .metadata(dayCurrent.getMetadata())
             .smartContract(dayCurrent.getSmartContract())
             .build();
-
-    when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
+    when(redisProvider.getRangeListByKey(anyString(), anyLong(), anyLong()))
         .thenReturn(List.of(txGraphDayOne, txGraphDayTwo, txGraphDayThree));
 
     when(txChartRepository.getTransactionGraphByDay(anyList()))
@@ -684,8 +671,8 @@ class TransactionGraphTest {
 
   @Test
   void testChartRange() {
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(7L);
+    when(redisProvider.getRedisKey(anyString())).thenReturn("key");
+    when(redisProvider.getSizeListByKey(anyString())).thenReturn(7L);
 
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -730,8 +717,7 @@ class TransactionGraphTest {
 
               expect.add(txGraphDayOne);
             });
-
-    when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
+    when(redisProvider.getRangeListByKey(any(), anyLong(), anyLong()))
         .thenReturn(List.of(expect.get(6)));
 
     when(txChartRepository.getTransactionGraphDayGreaterThan(any(BigInteger.class)))
@@ -744,9 +730,10 @@ class TransactionGraphTest {
 
   @Test
   void testChartOutOfRange() {
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
     final long range = 34L;
-    when(listOperations.size(any(String.class))).thenReturn(range);
+    when(redisProvider.getRedisKey(anyString())).thenReturn("key");
+    when(redisProvider.getRedisKey(anyString())).thenReturn("key");
+    when(redisProvider.getSizeListByKey(any())).thenReturn(range);
 
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -791,8 +778,7 @@ class TransactionGraphTest {
 
               expectPrepare.add(txGraphDayOne);
             });
-
-    when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
+    when(redisProvider.getRangeListByKey(any(String.class), any(Long.class), any(Long.class)))
         .thenReturn(expectPrepare);
 
     List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
@@ -809,8 +795,7 @@ class TransactionGraphTest {
   void testMissingDataFewDay() {
 
     final long range = 11L;
-    when(redisTemplate.opsForList()).thenReturn(listOperations);
-    when(listOperations.size(any(String.class))).thenReturn(range);
+    when(redisProvider.getSizeListByKey(any())).thenReturn(range);
 
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
@@ -856,8 +841,7 @@ class TransactionGraphTest {
               expectPrepare.add(txGraphDayOne);
             });
 
-    when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
-        .thenReturn(expectPrepare);
+    when(redisProvider.getRangeListByKey(any(), anyLong(), anyLong())).thenReturn(expectPrepare);
 
     List<TxGraphProjection> dataMissingProjections = new ArrayList<>();
     List<TxGraph> dataMissingTxGraph = new ArrayList<>();

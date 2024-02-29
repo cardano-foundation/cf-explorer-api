@@ -29,7 +29,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -67,6 +66,7 @@ import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.provider.RedisProvider;
 import org.cardanofoundation.explorer.api.repository.explorer.AggregatePoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -116,7 +116,7 @@ public class DelegationServiceImpl implements DelegationService {
 
   private final PoolHistoryRepository poolHistoryRepository;
 
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisProvider<String, Object> redisProvider;
 
   private final FetchRewardDataService fetchRewardDataService;
 
@@ -136,9 +136,6 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Value("${spring.data.web.pageable.default-page-size}")
   private int defaultSize;
-
-  @Value("${application.network}")
-  private String network;
 
   @Override
   public BaseFilterResponse<DelegationResponse> getDelegations(Pageable pageable) {
@@ -192,9 +189,10 @@ public class DelegationServiceImpl implements DelegationService {
     EpochSummary epoch = epochService.getCurrentEpochSummary();
     Integer epochNo = epoch.getNo();
     Object poolActiveObj =
-        redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_ACTIVATE + network);
+        redisProvider.getValueByKey(redisProvider.getRedisKey(CommonConstant.REDIS_POOL_ACTIVATE));
     Object poolInActiveObj =
-        redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_INACTIVATE + network);
+        redisProvider.getValueByKey(
+            redisProvider.getRedisKey(CommonConstant.REDIS_POOL_INACTIVATE));
     LocalDateTime endTime = epoch.getEndTime();
     Integer slot = epoch.getSlot();
     long countDownTime =
@@ -213,7 +211,8 @@ public class DelegationServiceImpl implements DelegationService {
       liveStake = null;
     }
     Object delegatorCached =
-        redisTemplate.opsForValue().get(CommonConstant.REDIS_TOTAL_DELEGATOR + network);
+        redisProvider.getValueByKey(
+            redisProvider.getRedisKey(CommonConstant.REDIS_TOTAL_DELEGATOR));
     Integer delegators =
         Objects.nonNull(delegatorCached)
             ? Integer.parseInt(String.valueOf(delegatorCached))
@@ -236,9 +235,9 @@ public class DelegationServiceImpl implements DelegationService {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     Set<Long> poolRetiredIds = new HashSet<>();
     if (!showRetired) {
-      String poolRetiredIdKey = CommonConstant.POOL_IDS_INACTIVATE + network;
+      String poolRetiredIdKey = redisProvider.getRedisKey(CommonConstant.POOL_IDS_INACTIVATE);
       poolRetiredIds =
-          redisTemplate.opsForHash().values(poolRetiredIdKey).stream()
+          redisProvider.getSetHashValueByKey(poolRetiredIdKey).stream()
               .map(item -> Long.parseLong(String.valueOf(item)))
               .collect(Collectors.toSet());
     }
