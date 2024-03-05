@@ -13,7 +13,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -24,18 +23,15 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.RsaConfig;
+import org.cardanofoundation.explorer.api.exception.UnauthorizedException;
 import org.cardanofoundation.explorer.api.interceptor.auth.Request;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleConfigurationMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
-import org.cardanofoundation.explorer.api.interceptor.auth.RoleFunction;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
-
-import org.cardanofoundation.explorer.common.annotation.IgnoreAuthentication;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
-import org.cardanofoundation.explorer.common.exceptions.UnauthorizedException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.common.utils.JwtUtils;
+import org.cardanofoundation.explorer.api.util.JwtUtils;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
 
 @Component
@@ -52,8 +48,10 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   private Map<String, Request> authorEndpoint;
 
-  public AuthInterceptor(RoleFilterMapper roleFilterMapper, RsaConfig rsaConfig,
-                         RedisTemplate<String, Object> redisTemplate) {
+  public AuthInterceptor(
+      RoleFilterMapper roleFilterMapper,
+      RsaConfig rsaConfig,
+      RedisTemplate<String, Object> redisTemplate) {
     this.roleConf = roleFilterMapper;
     this.rsaConfig = rsaConfig;
     this.redisTemplate = redisTemplate;
@@ -61,23 +59,24 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   @PostConstruct
   public void initAuth() {
-    matchers = roleConf.getAuth().stream()
-        .map(request -> {
-          if (org.springframework.util.StringUtils.hasText(request.getMethod())
-              || request.getMethod().equals("*")) {
-            return new AntPathRequestMatcher(request.getUri());
-          }
-          return new AntPathRequestMatcher(request.getUri(), request.getMethod());
-        }).toList();
-    authorEndpoint = roleConf.getAuth().stream()
-        .collect(Collectors.toMap(Request::getUri, Function.identity()));
+    matchers =
+        roleConf.getAuth().stream()
+            .map(
+                request -> {
+                  if (org.springframework.util.StringUtils.hasText(request.getMethod())
+                      || request.getMethod().equals("*")) {
+                    return new AntPathRequestMatcher(request.getUri());
+                  }
+                  return new AntPathRequestMatcher(request.getUri(), request.getMethod());
+                })
+            .toList();
+    authorEndpoint =
+        roleConf.getAuth().stream().collect(Collectors.toMap(Request::getUri, Function.identity()));
   }
-
 
   @Override
   public boolean preHandle(
-      HttpServletRequest request, HttpServletResponse httpServletResponse,
-      Object handler)
+      HttpServletRequest request, HttpServletResponse httpServletResponse, Object handler)
       throws Exception {
     log.info("Authentication Interceptor is running...");
     HandlerMethod handlerMethod;
@@ -120,15 +119,13 @@ public class AuthInterceptor implements HandlerInterceptor {
     userPrincipal.setRoleDescription(roleDescription);
     request.setAttribute("user", userPrincipal);
     return true;
-
   }
-
 
   private void checkRequestAllow(HttpServletRequest request, Set<String> roles) {
     boolean isAllowed = false;
     if (authorEndpoint.containsKey(request.getRequestURI())) {
       Request requestAuthor = authorEndpoint.get(request.getRequestURI());
-      if (requestAuthor.getRoles().length == 0) {// This feature doesn't require authorization
+      if (requestAuthor.getRoles().length == 0) { // This feature doesn't require authorization
         isAllowed = true;
       }
       for (String role : requestAuthor.getRoles()) {
@@ -136,7 +133,7 @@ public class AuthInterceptor implements HandlerInterceptor {
           isAllowed = true;
         }
       }
-    } else {// don't need to auth
+    } else { // don't need to auth
       isAllowed = true;
     }
     if (!isAllowed) {

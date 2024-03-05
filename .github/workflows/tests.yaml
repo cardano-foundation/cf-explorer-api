@@ -34,6 +34,10 @@ jobs:
         run: | 
           envsubst < ./.m2/settings.default.xml.tpl > ./.m2/settings.xml
 
+      - name: Check Formatting
+        run: |
+          mvn spotless:check
+
       - name: Build
         run: |
           mvn --batch-mode --update-snapshots clean package -DskipTests

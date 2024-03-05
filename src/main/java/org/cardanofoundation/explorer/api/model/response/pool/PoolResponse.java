@@ -1,14 +1,17 @@
 package org.cardanofoundation.explorer.api.model.response.pool;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
 
 @Getter
@@ -51,5 +54,4 @@ public class PoolResponse implements Serializable {
   private Integer lifetimeBlock;
 
   private boolean retired;
-
 }

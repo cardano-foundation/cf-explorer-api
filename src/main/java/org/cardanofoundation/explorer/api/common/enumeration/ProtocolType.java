@@ -1,12 +1,11 @@
 package org.cardanofoundation.explorer.api.common.enumeration;
 
-
 import java.util.List;
 
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.EpochParam_;
-import org.cardanofoundation.explorer.consumercommon.entity.ParamProposal_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.ParamProposal_;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 public enum ProtocolType {
   MIN_FEE_A(EpochParam_.MIN_FEE_A),
@@ -37,8 +36,8 @@ public enum ProtocolType {
   COLLATERAL_PERCENT(EpochParam_.COLLATERAL_PERCENT),
   MAX_COLLATERAL_INPUTS(EpochParam_.MAX_COLLATERAL_INPUTS),
   ENTROPY(ParamProposal_.ENTROPY),
-  COST_MODEL(EpochParam_.COST_MODEL)
-  ,ALL("ALL");
+  COST_MODEL(EpochParam_.COST_MODEL),
+  ALL("ALL");
 
   private final String fieldName;
 
@@ -117,11 +116,35 @@ public enum ProtocolType {
   }
 
   public static List<ProtocolType> getAll() {
-    return List.of(MIN_FEE_A, MIN_FEE_B, MAX_BLOCK_SIZE, MAX_TX_SIZE, MAX_BH_SIZE, KEY_DEPOSIT,
-        POOL_DEPOSIT, MAX_EPOCH, OPTIMAL_POOL_COUNT, MIN_UTXO_VALUE, MIN_POOL_COST, MAX_TX_EX_MEM,
-        MAX_TX_EX_STEPS, MAX_BLOCK_EX_MEM, MAX_BLOCK_EX_STEPS, MAX_VAL_SIZE, COINS_PER_UTXO_SIZE,
-        INFLUENCE, MONETARY_EXPAND_RATE, TREASURY_GROWTH_RATE, DECENTRALISATION, PRICE_MEM,
-        PRICE_STEP, PROTOCOL_MAJOR, PROTOCOL_MINOR, COLLATERAL_PERCENT, MAX_COLLATERAL_INPUTS,
-        ENTROPY, COST_MODEL);
+    return List.of(
+        MIN_FEE_A,
+        MIN_FEE_B,
+        MAX_BLOCK_SIZE,
+        MAX_TX_SIZE,
+        MAX_BH_SIZE,
+        KEY_DEPOSIT,
+        POOL_DEPOSIT,
+        MAX_EPOCH,
+        OPTIMAL_POOL_COUNT,
+        MIN_UTXO_VALUE,
+        MIN_POOL_COST,
+        MAX_TX_EX_MEM,
+        MAX_TX_EX_STEPS,
+        MAX_BLOCK_EX_MEM,
+        MAX_BLOCK_EX_STEPS,
+        MAX_VAL_SIZE,
+        COINS_PER_UTXO_SIZE,
+        INFLUENCE,
+        MONETARY_EXPAND_RATE,
+        TREASURY_GROWTH_RATE,
+        DECENTRALISATION,
+        PRICE_MEM,
+        PRICE_STEP,
+        PROTOCOL_MAJOR,
+        PROTOCOL_MINOR,
+        COLLATERAL_PERCENT,
+        MAX_COLLATERAL_INPUTS,
+        ENTROPY,
+        COST_MODEL);
   }
 }

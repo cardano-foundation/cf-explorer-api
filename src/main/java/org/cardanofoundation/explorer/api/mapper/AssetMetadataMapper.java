@@ -5,13 +5,14 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
-import org.cardanofoundation.explorer.api.projection.TokenProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+
+import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
+import org.cardanofoundation.explorer.api.projection.TokenProjection;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 
 @Mapper(componentModel = "spring")
 public abstract class AssetMetadataMapper {
@@ -20,12 +21,16 @@ public abstract class AssetMetadataMapper {
   protected String tokenLogoEndpoint;
 
   @Mapping(target = "createdOn", source = "time")
-  @Mapping(target = "displayName", expression = "java(getDisplayName(tokenProjection.getNameView(), tokenProjection.getFingerprint()))")
+  @Mapping(
+      target = "displayName",
+      expression =
+          "java(getDisplayName(tokenProjection.getNameView(), tokenProjection.getFingerprint()))")
   @Mapping(target = "metadata", expression = "java(getMetadata(tokenProjection))")
   public abstract TokenFilterResponse fromTokenProjectionToTokenFilterResponse(
       TokenProjection tokenProjection);
 
   @Mapping(target = "displayName", source = "nameView")
+  @Mapping(target = "createdOn", source = "time")
   @Mapping(target = "metadata", expression = "java(getMetadata(tokenProjection))")
   public abstract TokenFilterResponse fromTokenProjectionToFilterResponse(
       TokenProjection tokenProjection);
@@ -34,12 +39,12 @@ public abstract class AssetMetadataMapper {
   public abstract TokenMetadataResponse fromAssetMetadata(AssetMetadata metadata);
 
   @Named("getTokenLogoURL")
-  String getTokenLogoEndpoint(String logo){
+  String getTokenLogoEndpoint(String logo) {
     return Objects.isNull(logo) ? null : (tokenLogoEndpoint + logo);
   }
 
   TokenMetadataResponse getMetadata(TokenProjection tokenProjection) {
-    if(StringUtils.isEmpty(tokenProjection.getSubject())) {
+    if (StringUtils.isEmpty(tokenProjection.getSubject())) {
       return null;
     }
     TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse();

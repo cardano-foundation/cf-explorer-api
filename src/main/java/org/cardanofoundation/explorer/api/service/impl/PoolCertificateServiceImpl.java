@@ -36,30 +36,30 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
 
   @Override
   public BaseFilterResponse<TxPoolCertificateHistory> getTxPoolCertificateHistory(
-      String poolViewOrHash,
-      Pageable pageable) {
+      String poolViewOrHash, Pageable pageable) {
 
-    List<TxPoolCertificateHistory> txCertificateHistories = getAllPoolCertificateHistories(
-        poolViewOrHash)
-        .stream()
-        .collect(Collectors.groupingBy(PoolCertificateHistory::getTxId))
-        .values()
-        .stream()
-        .map(poolCertificateHistoryList -> {
-          TxPoolCertificateHistory txPoolCertificateHistory = poolCertificateMapper
-              .fromPoolCertificateHistory(poolCertificateHistoryList.get(0));
-          txPoolCertificateHistory.setActions(poolCertificateHistoryList
-                                                  .stream()
-                                                  .map(PoolCertificateHistory::getActionType)
-                                                  .toList());
-          return txPoolCertificateHistory;
-        })
-        .collect(Collectors.toList());
+    List<TxPoolCertificateHistory> txCertificateHistories =
+        getAllPoolCertificateHistories(poolViewOrHash).stream()
+            .collect(Collectors.groupingBy(PoolCertificateHistory::getTxId))
+            .values()
+            .stream()
+            .map(
+                poolCertificateHistoryList -> {
+                  TxPoolCertificateHistory txPoolCertificateHistory =
+                      poolCertificateMapper.fromPoolCertificateHistory(
+                          poolCertificateHistoryList.get(0));
+                  txPoolCertificateHistory.setActions(
+                      poolCertificateHistoryList.stream()
+                          .map(PoolCertificateHistory::getActionType)
+                          .toList());
+                  return txPoolCertificateHistory;
+                })
+            .collect(Collectors.toList());
 
     txCertificateHistories.sort(
-        Sort.Direction.DESC.equals(pageable.getSort().getOrderFor("createdAt").getDirection()) ?
-        Comparator.comparing(TxPoolCertificateHistory::getBlockTime).reversed() :
-        Comparator.comparing(TxPoolCertificateHistory::getBlockTime));
+        Sort.Direction.DESC.equals(pageable.getSort().getOrderFor("createdAt").getDirection())
+            ? Comparator.comparing(TxPoolCertificateHistory::getBlockTime).reversed()
+            : Comparator.comparing(TxPoolCertificateHistory::getBlockTime));
 
     return new BaseFilterResponse<>(
         BaseFilterResponse.getPageImpl(txCertificateHistories, pageable));
@@ -67,11 +67,13 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
 
   @Override
   public PoolStatus getCurrentPoolStatus(String poolViewOrHash) {
-    PoolCertificateHistory latestPoolUpdate = poolCertificateMapper.fromPoolCertificateProjection(
-        poolUpdateRepository.getLastPoolUpdateByPoolHash(poolViewOrHash));
+    PoolCertificateHistory latestPoolUpdate =
+        poolCertificateMapper.fromPoolCertificateProjection(
+            poolUpdateRepository.getLastPoolUpdateByPoolHash(poolViewOrHash));
 
-    PoolCertificateHistory latestPoolRetire = poolCertificateMapper.fromPoolCertificateProjection(
-        poolRetireRepository.getLastPoolRetireByPoolHash(poolViewOrHash));
+    PoolCertificateHistory latestPoolRetire =
+        poolCertificateMapper.fromPoolCertificateProjection(
+            poolRetireRepository.getLastPoolRetireByPoolHash(poolViewOrHash));
 
     PoolStatus poolStatus = null;
     long latestPoolUpdateTxId = latestPoolUpdate == null ? -1 : latestPoolUpdate.getTxId();
@@ -82,13 +84,14 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
         latestPoolRetire == null ? -1 : latestPoolRetire.getCertIndex();
     if (latestPoolUpdateTxId > latestPoolRetireTxId) {
       poolStatus = PoolStatus.ACTIVE;
-    } else if (latestPoolUpdateTxId < latestPoolRetireTxId ||
-        (latestPoolUpdateTxId == latestPoolRetireTxId
+    } else if (latestPoolUpdateTxId < latestPoolRetireTxId
+        || (latestPoolUpdateTxId == latestPoolRetireTxId
             && latestPoolUpdateCertIndex < latestPoolRetireCertIndex)) {
       Integer currentEpochNo = epochRepository.findCurrentEpochNo().orElse(0);
-      poolStatus = latestPoolRetire.getCertEpochNo() > currentEpochNo ?
-                   PoolStatus.RETIRING :
-                   PoolStatus.RETIRED;
+      poolStatus =
+          latestPoolRetire.getCertEpochNo() > currentEpochNo
+              ? PoolStatus.RETIRING
+              : PoolStatus.RETIRED;
     }
     return poolStatus;
   }
@@ -98,16 +101,18 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
       String poolViewOrHash, PoolActionType action) {
     return getAllPoolCertificateHistories(poolViewOrHash).stream()
         .filter(poolCertificate -> poolCertificate.getActionType().equals(action))
-        .sorted(Comparator.comparing(PoolCertificateHistory::getTxId)).toList();
+        .sorted(Comparator.comparing(PoolCertificateHistory::getTxId))
+        .toList();
   }
 
   private List<PoolCertificateHistory> getAllPoolCertificateHistories(String poolViewOrHash) {
     List<PoolCertificateHistory> certificateHistories =
-        Stream.concat(poolUpdateRepository.getPoolUpdateByPoolViewOrHash(poolViewOrHash).stream(),
-                      poolRetireRepository.getPoolRetireByPoolViewOrHash(poolViewOrHash).stream())
-            .sorted(Comparator
-                        .comparing(PoolCertificateProjection::getTxId)
-                        .thenComparing(PoolCertificateProjection::getCertIndex))
+        Stream.concat(
+                poolUpdateRepository.getPoolUpdateByPoolViewOrHash(poolViewOrHash).stream(),
+                poolRetireRepository.getPoolRetireByPoolViewOrHash(poolViewOrHash).stream())
+            .sorted(
+                Comparator.comparing(PoolCertificateProjection::getTxId)
+                    .thenComparing(PoolCertificateProjection::getCertIndex))
             .map(poolCertificateMapper::fromPoolCertificateProjection)
             .toList();
 
@@ -121,8 +126,8 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
         certificateHistory.setActionType(PoolActionType.POOL_DEREGISTRATION);
       } else if (!Objects.isNull(certificateHistory.getPoolUpdateId())) {
         PoolCertificateHistory previousCertificateHistory = certificateHistories.get(i - 1);
-        if (previousCertificateHistory.getActionType().equals(PoolActionType.POOL_DEREGISTRATION) &&
-            certificateHistory.getTxEpochNo() >= previousCertificateHistory.getCertEpochNo()) {
+        if (previousCertificateHistory.getActionType().equals(PoolActionType.POOL_DEREGISTRATION)
+            && certificateHistory.getTxEpochNo() >= previousCertificateHistory.getCertEpochNo()) {
           certificateHistory.setActionType(PoolActionType.POOL_REGISTRATION);
         } else {
           certificateHistory.setActionType(PoolActionType.POOL_UPDATE);

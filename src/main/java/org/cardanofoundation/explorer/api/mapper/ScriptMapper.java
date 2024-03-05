@@ -5,14 +5,15 @@ import java.util.Set;
 
 import org.springframework.util.CollectionUtils;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import org.cardanofoundation.explorer.api.common.enumeration.TxPurposeType;
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.SmartContractInfo;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.cardanofoundation.explorer.common.entity.explorer.SmartContractInfo;
 
 @Mapper(componentModel = "spring")
 public interface ScriptMapper {

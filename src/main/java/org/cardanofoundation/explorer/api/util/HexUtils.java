@@ -1,8 +1,10 @@
 package org.cardanofoundation.explorer.api.util;
 
-import org.cardanofoundation.ledgersync.common.util.StringUtil;
 import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.codec.binary.Hex;
+
+import org.cardanofoundation.explorer.common.utils.StringUtil;
 
 public class HexUtils {
 
@@ -19,7 +21,7 @@ public class HexUtils {
   public static String fromHex(String hexString, String fingerprint) {
     try {
       byte[] bytes = Hex.decodeHex(hexString.toCharArray());
-      if(StringUtil.isUtf8(bytes)){
+      if (StringUtil.isUtf8(bytes)) {
         return new String(bytes, StandardCharsets.UTF_8);
       }
       return fingerprint;

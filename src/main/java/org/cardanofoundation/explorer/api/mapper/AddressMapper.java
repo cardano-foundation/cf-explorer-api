@@ -1,11 +1,12 @@
 package org.cardanofoundation.explorer.api.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 
 @Mapper(componentModel = "spring")
 public interface AddressMapper {
@@ -16,5 +17,4 @@ public interface AddressMapper {
   AddressResponse fromAddress(Address address);
 
   AddressFilterResponse fromAddressToFilterResponse(Address address);
-
 }

@@ -1,17 +1,17 @@
 package org.cardanofoundation.explorer.api.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.cardanofoundation.explorer.api.common.enumeration.FormatFieldType;
 import org.cardanofoundation.explorer.api.common.enumeration.MetadataField;
 import org.cardanofoundation.explorer.api.model.metadatastandard.BaseProperty;
-
-import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
@@ -27,15 +27,14 @@ public class MetadataCIP83Utils {
 
     try {
       ObjectMapper objectMapper = new ObjectMapper();
-      Map<Object, Object> metadataMap = objectMapper.readValue(jsonMetadata, new TypeReference<>() {
-      });
+      Map<Object, Object> metadataMap =
+          objectMapper.readValue(jsonMetadata, new TypeReference<>() {});
 
       var enc = metadataMap.get(MetadataField.ENC.getName());
       var msg = metadataMap.get(MetadataField.MSG.getName());
 
       requiredProperties.add(MetadataCIP20Utils.msg(msg, "1"));
       requiredProperties.add(enc(enc, "2"));
-
 
     } catch (Exception ex) {
       log.error("Error: structure incorrect, message=" + ex.getMessage());
@@ -49,15 +48,15 @@ public class MetadataCIP83Utils {
 
   public static BaseProperty enc(Object enc, String index) {
     FormatFieldType formatFieldType = MetadataFieldUtils.getFormatTypeByObject(enc);
-    boolean isValid = FormatFieldType.STRING.equals(formatFieldType)
-        || FormatFieldType.STRING.equals(formatFieldType.getParentType());
+    boolean isValid =
+        FormatFieldType.STRING.equals(formatFieldType)
+            || FormatFieldType.STRING.equals(formatFieldType.getParentType());
     return BaseProperty.builder()
         .index(index)
         .property(MetadataField.ENC.getName())
         .format(FormatFieldType.STRING.getValue())
         .valid(isValid)
-        .valueFormat(isValid ? FormatFieldType.STRING.getValue()
-                             : formatFieldType.getValue())
+        .valueFormat(isValid ? FormatFieldType.STRING.getValue() : formatFieldType.getValue())
         .value(enc)
         .build();
   }

@@ -1,10 +1,12 @@
 package org.cardanofoundation.explorer.api.model.response;
 
-import lombok.*;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+
+import lombok.*;
+
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 
 @Getter
 @Setter

@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.cardanofoundation.explorer.api.common.enumeration.RedeemerCertType;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptPurposeType;
 
 @Getter
 @Setter
@@ -19,8 +20,7 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeTy
 @AllArgsConstructor
 @Builder
 public class ContractResponse {
-  @JsonIgnore
-  private String address;
+  @JsonIgnore private String address;
   private String scriptHash;
   private ScriptPurposeType purpose;
   private String redeemerBytes;
@@ -31,10 +31,8 @@ public class ContractResponse {
   private String scriptBytes;
   private String datumHashOut;
   private String datumBytesOut;
-  @JsonIgnore
-  private Long txOutId;
-  @JsonIgnore
-  private String stakeAddress;
+  @JsonIgnore private Long txOutId;
+  @JsonIgnore private String stakeAddress;
   private List<TokenAddressResponse> mintingTokens;
   private List<TokenAddressResponse> burningTokens;
   private Integer utxoIndex;
