@@ -118,19 +118,19 @@ jobs:
         run: newman run src/test/Postman/Cardano-Explorer-API.postman_collection.json -e src/test/Postman/DevInt.postman_environment.json -r cli,htmlextra,allure --reporter-htmlextra-export=reporthtml/reporthtml.html --timeout-request 5000
       - name: Allure Report action from marketplace
         uses: simple-elf/allure-report-action@master
-        if: always()
+        if: github.ref == 'refs/heads/main'
         #id: allure-report
         with:
           allure_results: allure-results
       - name: Archive html results
         uses: actions/upload-artifact@v3
-        if: always()
+        if: github.ref == 'refs/heads/main'
         with:
           name: html-report
           path: reporthtml
       - name: Archive k6 script
         uses: actions/upload-artifact@v3
-        if: always()
+        if: github.ref == 'refs/heads/main'
         with:
           name: k6-script
           path: |
@@ -138,7 +138,7 @@ jobs:
             libs/
       - name: Archive allure results
         uses: actions/upload-artifact@v3
-        if: always()
+        if: github.ref == 'refs/heads/main'
         with:
           name: allure-report
           path: allure-report
@@ -161,7 +161,7 @@ jobs:
           flags: --vus 10 --out csv=k6_results.csv
       - name: Archive allure results
         uses: actions/upload-artifact@v3
-        if: always()
+        if: github.ref == 'refs/heads/main'
         with:
           name: loadtest-report
           path: k6_results.csv
@@ -196,7 +196,7 @@ jobs:
 
       - name: Publish mutation test report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
-        if: always()
+        if: github.ref == 'refs/heads/main'
         with:
           BRANCH: gh-pages
           folder: allure-report
@@ -204,7 +204,7 @@ jobs:
 
       - name: Publish mutation test report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
-        if: always()
+        if: github.ref == 'refs/heads/main'
         with:
           BRANCH: gh-pages
           folder: html-report
@@ -212,7 +212,7 @@ jobs:
 
       - name: Publish LoadTest report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
-        if: always()
+        if: github.ref == 'refs/heads/main'
         with:
           BRANCH: gh-pages
           folder: loadtest-report
