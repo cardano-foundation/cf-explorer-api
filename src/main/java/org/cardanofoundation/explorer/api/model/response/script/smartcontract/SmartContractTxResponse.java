@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeType;
+
+import org.cardanofoundation.explorer.common.entity.enumeration.ScriptPurposeType;
 
 @Getter
 @Setter
@@ -20,8 +21,7 @@ import org.cardanofoundation.explorer.consumercommon.enumeration.ScriptPurposeTy
 @NoArgsConstructor
 public class SmartContractTxResponse {
 
-  @JsonIgnore
-  private Long txId;
+  @JsonIgnore private Long txId;
   private String hash;
   private Timestamp time;
   private Long blockNo;

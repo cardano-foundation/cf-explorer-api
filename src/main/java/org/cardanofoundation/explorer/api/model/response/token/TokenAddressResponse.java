@@ -1,10 +1,12 @@
 package org.cardanofoundation.explorer.api.model.response.token;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.math.BigInteger;
 
 import lombok.*;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 
 @Getter

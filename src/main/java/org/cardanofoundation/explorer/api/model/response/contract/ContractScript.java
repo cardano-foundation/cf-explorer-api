@@ -1,7 +1,8 @@
 package org.cardanofoundation.explorer.api.model.response.contract;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Getter
 @Setter
@@ -10,6 +11,6 @@ import lombok.*;
 @Builder
 @JsonInclude
 public class ContractScript {
-    private Boolean isVerified;
-    private String data;
+  private Boolean isVerified;
+  private String data;
 }

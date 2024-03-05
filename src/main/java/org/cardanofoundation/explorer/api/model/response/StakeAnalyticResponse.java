@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response;
 
 import java.math.BigInteger;
+
 import lombok.Getter;
 import lombok.Setter;
 

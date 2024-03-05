@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.explorer.AggregatePoolInfo;
 
 public interface AggregatePoolInfoRepository extends JpaRepository<AggregatePoolInfo, Long> {
 
@@ -18,11 +18,13 @@ public interface AggregatePoolInfoRepository extends JpaRepository<AggregatePool
 
   AggregatePoolInfo findByPoolId(Long poolId);
 
-  @Query(value = "SELECT ap.poolId as poolId, COALESCE(ap.delegatorCount, 0) as numberDelegators, "
-      + "COALESCE(ap.blockInEpoch, 0) as epochBlock, "
-      + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock "
-      + "from AggregatePoolInfo ap "
-      + "WHERE ap.poolId NOT IN :exceptPoolIds")
-  Page<PoolListProjection> findAllByPoolIdNotIn(@Param("exceptPoolIds") Collection<Long> exceptPoolIds,
-                                             Pageable pageable);
+  @Query(
+      value =
+          "SELECT ap.poolId as poolId, COALESCE(ap.delegatorCount, 0) as numberDelegators, "
+              + "COALESCE(ap.blockInEpoch, 0) as epochBlock, "
+              + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock "
+              + "from AggregatePoolInfo ap "
+              + "WHERE ap.poolId NOT IN :exceptPoolIds")
+  Page<PoolListProjection> findAllByPoolIdNotIn(
+      @Param("exceptPoolIds") Collection<Long> exceptPoolIds, Pageable pageable);
 }

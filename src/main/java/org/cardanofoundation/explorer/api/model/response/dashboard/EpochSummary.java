@@ -1,12 +1,16 @@
 package org.cardanofoundation.explorer.api.model.response.dashboard;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import org.cardanofoundation.explorer.api.config.JackSonDateTimeSerializer;
 
 @Data
@@ -27,4 +31,6 @@ public class EpochSummary {
 
   private BigInteger circulatingSupply;
   private Integer blkCount;
+  private Double syncingProgress;
+  private EpochStatus status;
 }

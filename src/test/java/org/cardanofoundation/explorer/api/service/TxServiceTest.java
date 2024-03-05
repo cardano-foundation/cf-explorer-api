@@ -1,5 +1,14 @@
 package org.cardanofoundation.explorer.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -7,19 +16,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.cardanofoundation.explorer.api.mapper.*;
-
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
+import org.cardanofoundation.explorer.api.exception.NoContentException;
+import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
@@ -48,7 +61,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrat
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
@@ -56,142 +68,93 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalReposi
 import org.cardanofoundation.explorer.api.service.impl.TxServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.TxIOProjectionImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.NoContentException;
-import org.cardanofoundation.explorer.consumercommon.entity.Address;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressToken;
-import org.cardanofoundation.explorer.consumercommon.entity.AddressTxBalance;
-import org.cardanofoundation.explorer.consumercommon.entity.AssetMetadata;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.MultiAsset;
-import org.cardanofoundation.explorer.consumercommon.entity.StakeAddress;
-import org.cardanofoundation.explorer.consumercommon.entity.Tx;
-import org.cardanofoundation.explorer.consumercommon.entity.TxMetadataHash;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressToken;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadataHash;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class TxServiceTest {
 
-  @Mock
-  private TxRepository txRepository;
-  @Mock
-  private TxOutRepository txOutRepository;
-  @Mock
-  private BlockRepository blockRepository;
-  @Mock
-  private TxMapper txMapper;
-  @Mock
-  private TxOutMapper txOutMapper;
-  @Mock
-  private TokenMapper tokenMapper;
-  @Mock
-  private RedeemerRepository redeemerRepository;
-  @Mock
-  private EpochRepository epochRepository;
-  @Mock
-  private UnconsumeTxInRepository unconsumeTxInRepository;
-  @Mock
-  private FailedTxOutRepository failedTxOutRepository;
-  @Mock
-  private WithdrawalRepository withdrawalRepository;
-  @Mock
-  private AddressRepository addressRepository;
-  @Mock
-  private WithdrawalMapper withdrawalMapper;
-  @Mock
-  private DelegationRepository delegationRepository;
-  @Mock
-  private DelegationMapper delegationMapper;
-  @Mock
-  private MaTxMintRepository maTxMintRepository;
-  @Mock
-  private MaTxMintMapper maTxMintMapper;
-  @Mock
-  private AddressTxBalanceRepository addressTxBalanceRepository;
-  @Mock
-  private MultiAssetRepository multiAssetRepository;
-  @Mock
-  private AddressTokenRepository addressTokenRepository;
-  @Mock
-  private AssetMetadataRepository assetMetadataRepository;
-  @Mock
-  private AssetMetadataMapper assetMetadataMapper;
-  @Mock
-  private StakeRegistrationRepository stakeRegistrationRepository;
-  @Mock
-  private StakeDeRegistrationRepository stakeDeRegistrationRepository;
-  @Mock
-  private PoolUpdateRepository poolUpdateRepository;
-  @Mock
-  private PoolRelayRepository poolRelayRepository;
-  @Mock
-  private PoolRetireRepository poolRetireRepository;
-  @Mock
-  private ParamProposalRepository paramProposalRepository;
-  @Mock
-  private EpochParamRepository epochParamRepository;
-  @Mock
-  private ProtocolMapper protocolMapper;
-  @Mock
-  private TxChartRepository txChartRepository;
-  @Mock
-  private TreasuryRepository treasuryRepository;
-  @Mock
-  private ReserveRepository reserveRepository;
-  @Mock
-  private StakeAddressRepository stakeAddressRepository;
+  @Mock private TxRepository txRepository;
+  @Mock private TxOutRepository txOutRepository;
+  @Mock private BlockRepository blockRepository;
+  @Mock private TxMapper txMapper;
+  @Mock private TxOutMapper txOutMapper;
+  @Mock private TokenMapper tokenMapper;
+  @Mock private RedeemerRepository redeemerRepository;
+  @Mock private EpochRepository epochRepository;
+  @Mock private UnconsumeTxInRepository unconsumeTxInRepository;
+  @Mock private FailedTxOutRepository failedTxOutRepository;
+  @Mock private WithdrawalRepository withdrawalRepository;
+  @Mock private AddressRepository addressRepository;
+  @Mock private WithdrawalMapper withdrawalMapper;
+  @Mock private DelegationRepository delegationRepository;
+  @Mock private DelegationMapper delegationMapper;
+  @Mock private MaTxMintRepository maTxMintRepository;
+  @Mock private MaTxMintMapper maTxMintMapper;
+  @Mock private AddressTxBalanceRepository addressTxBalanceRepository;
+  @Mock private MultiAssetRepository multiAssetRepository;
+  @Mock private AddressTokenRepository addressTokenRepository;
+  @Mock private AssetMetadataRepository assetMetadataRepository;
+  @Mock private AssetMetadataMapper assetMetadataMapper;
+  @Mock private StakeRegistrationRepository stakeRegistrationRepository;
+  @Mock private StakeDeRegistrationRepository stakeDeRegistrationRepository;
+  @Mock private PoolUpdateRepository poolUpdateRepository;
+  @Mock private PoolRelayRepository poolRelayRepository;
+  @Mock private PoolRetireRepository poolRetireRepository;
+  @Mock private ParamProposalRepository paramProposalRepository;
+  @Mock private EpochParamRepository epochParamRepository;
+  @Mock private ProtocolMapper protocolMapper;
+  @Mock private TxChartRepository txChartRepository;
+  @Mock private TreasuryRepository treasuryRepository;
+  @Mock private ReserveRepository reserveRepository;
+  @Mock private StakeAddressRepository stakeAddressRepository;
 
-
-  @InjectMocks
-  private TxServiceImpl txService;
+  @InjectMocks private TxServiceImpl txService;
 
   @Test
   void testFindLatestTxSummary() {
-    final List<TxSummary> expect = List.of(TxSummary.builder()
-        .blockNo(1000000L)
-        .fromAddress(List.of(
-            "addr1qyx9ezl77cf8n3qs4hw2gw0ewn4l8c095k6qfjy3un9qnw9ywmzs2czds2nthq8uqenjc06p9l40xgyh5q4xmx7d2cgs3xwhx4"))
-        .toAddress(List.of(
-            "addr1zyq0kyrml023kwjk8zr86d5gaxrt5w8lxnah8r6m6s4jp4g3r6dxnzml343sx8jweqn4vn3fz2kj8kgu9czghx0jrsyqqktyhv"))
-        .amount(456350000000.0)
-        .hash("29c8a63ac4ff2bdb630656e9e568c3e526ef316b280b7123b9a9a9719f9ce8d7")
-        .epochNo(410)
-        .epochSlotNo(102927)
-        .slot(99203727)
-        .time(LocalDateTime.of(2020, 1, 1, 0, 0, 0))
-        .status(TxStatus.SUCCESS)
-        .build());
-    final TxIOProjection txIOProjection = TxIOProjectionImpl.builder()
-        .id(0L)
-        .blockNo(1000000L)
-        .fromAddress(
-            "addr1qyx9ezl77cf8n3qs4hw2gw0ewn4l8c095k6qfjy3un9qnw9ywmzs2czds2nthq8uqenjc06p9l40xgyh5q4xmx7d2cgs3xwhx4")
-        .toAddress(
-            "addr1zyq0kyrml023kwjk8zr86d5gaxrt5w8lxnah8r6m6s4jp4g3r6dxnzml343sx8jweqn4vn3fz2kj8kgu9czghx0jrsyqqktyhv")
-        .amount(BigInteger.valueOf(456350000000L))
-        .hash("29c8a63ac4ff2bdb630656e9e568c3e526ef316b280b7123b9a9a9719f9ce8d7")
-        .epochNo(410)
-        .epochSlotNo(102927)
-        .slot(99203727)
-        .time(LocalDateTime.of(2020, 1, 1, 0, 0, 0))
-        .validContract(Boolean.TRUE)
-        .build();
+    final List<TxSummary> expect =
+        List.of(
+            TxSummary.builder()
+                .blockNo(1000000L)
+                .fromAddress(
+                    List.of(
+                        "addr1qyx9ezl77cf8n3qs4hw2gw0ewn4l8c095k6qfjy3un9qnw9ywmzs2czds2nthq8uqenjc06p9l40xgyh5q4xmx7d2cgs3xwhx4"))
+                .toAddress(
+                    List.of(
+                        "addr1zyq0kyrml023kwjk8zr86d5gaxrt5w8lxnah8r6m6s4jp4g3r6dxnzml343sx8jweqn4vn3fz2kj8kgu9czghx0jrsyqqktyhv"))
+                .amount(456350000000.0)
+                .hash("29c8a63ac4ff2bdb630656e9e568c3e526ef316b280b7123b9a9a9719f9ce8d7")
+                .epochNo(410)
+                .epochSlotNo(102927)
+                .slot(99203727)
+                .time(LocalDateTime.of(2020, 1, 1, 0, 0, 0))
+                .status(TxStatus.SUCCESS)
+                .build());
+    final TxIOProjection txIOProjection =
+        TxIOProjectionImpl.builder()
+            .id(0L)
+            .blockNo(1000000L)
+            .fromAddress(
+                "addr1qyx9ezl77cf8n3qs4hw2gw0ewn4l8c095k6qfjy3un9qnw9ywmzs2czds2nthq8uqenjc06p9l40xgyh5q4xmx7d2cgs3xwhx4")
+            .toAddress(
+                "addr1zyq0kyrml023kwjk8zr86d5gaxrt5w8lxnah8r6m6s4jp4g3r6dxnzml343sx8jweqn4vn3fz2kj8kgu9czghx0jrsyqqktyhv")
+            .amount(BigInteger.valueOf(456350000000L))
+            .hash("29c8a63ac4ff2bdb630656e9e568c3e526ef316b280b7123b9a9a9719f9ce8d7")
+            .epochNo(410)
+            .epochSlotNo(102927)
+            .slot(99203727)
+            .time(LocalDateTime.of(2020, 1, 1, 0, 0, 0))
+            .validContract(Boolean.TRUE)
+            .build();
 
     when(txRepository.findLatestTxId(any())).thenReturn(List.of(0L));
     when(txRepository.findLatestTxIO(List.of(0L))).thenReturn(List.of(txIOProjection));
@@ -238,20 +201,21 @@ class TxServiceTest {
 
     final Page<Tx> txs = new PageImpl<>(List.of(tx));
     when(txRepository.findAllTx(any(Pageable.class))).thenReturn(txs);
-    when(blockRepository.findAllByIdIn(any())).thenReturn(
-        List.of(Block.builder().id(0L).build()));
-    when(txOutRepository.findAddressInputListByTxId(any())).thenReturn(List.of(
-        AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
-            .build()
-    ));
-    when(txOutRepository.findAddressOutputListByTxId(any())).thenReturn(List.of(
-        AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-            .build()
-    ));
+    when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(Block.builder().id(0L).build()));
+    when(txOutRepository.findAddressInputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
+                    .build()));
+    when(txOutRepository.findAddressOutputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
+                    .build()));
 
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
 
@@ -262,8 +226,7 @@ class TxServiceTest {
         List.of("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq"));
 
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getAll(
-        PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result = txService.getAll(PageRequest.of(0, 1));
 
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
@@ -277,8 +240,7 @@ class TxServiceTest {
     when(txRepository.findAllTx(any(Pageable.class)))
         .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-    final BaseFilterResponse<TxFilterResponse> result = txService.getAll(
-        PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result = txService.getAll(PageRequest.of(0, 1));
 
     assertEquals(List.of(), result.getData());
   }
@@ -302,13 +264,14 @@ class TxServiceTest {
     when(txRepository.findAllTx(any(Pageable.class))).thenReturn(txs);
 
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(new Block()));
-    when(txOutRepository.findAddressInputListByTxId(any()))
-        .thenReturn(Collections.emptyList());
-    when(txOutRepository.findAddressOutputListByTxId(any())).thenReturn(
-        List.of(AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-            .build()));
+    when(txOutRepository.findAddressInputListByTxId(any())).thenReturn(Collections.emptyList());
+    when(txOutRepository.findAddressOutputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
+                    .build()));
 
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
 
@@ -318,8 +281,7 @@ class TxServiceTest {
         List.of("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq"));
 
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getAll(
-        PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result = txService.getAll(PageRequest.of(0, 1));
 
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
@@ -347,13 +309,14 @@ class TxServiceTest {
     when(txRepository.findAllTx(any(Pageable.class))).thenReturn(txs);
 
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(new Block()));
-    when(txOutRepository.findAddressInputListByTxId(any())).thenReturn(
-        List.of(AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-            .build()));
-    when(txOutRepository.findAddressOutputListByTxId(any()))
-        .thenReturn(Collections.emptyList());
+    when(txOutRepository.findAddressInputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
+                    .build()));
+    when(txOutRepository.findAddressOutputListByTxId(any())).thenReturn(Collections.emptyList());
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
 
     final TxFilterResponse expect = new TxFilterResponse();
@@ -362,8 +325,7 @@ class TxServiceTest {
     expect.setAddressesOutput(List.of());
 
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getAll(
-        PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result = txService.getAll(PageRequest.of(0, 1));
 
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
@@ -391,18 +353,20 @@ class TxServiceTest {
     when(txRepository.findByBlockNo(eq(0L), any(Pageable.class))).thenReturn(txs);
 
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(block));
-    when(txOutRepository.findAddressInputListByTxId(any())).thenReturn(List.of(
-        AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
-            .build()
-    ));
-    when(txOutRepository.findAddressOutputListByTxId(any())).thenReturn(List.of(
-        AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-            .build()
-    ));
+    when(txOutRepository.findAddressInputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
+                    .build()));
+    when(txOutRepository.findAddressOutputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
+                    .build()));
 
     final TxFilterResponse expect = new TxFilterResponse();
     expect.setAddressesInput(
@@ -413,8 +377,8 @@ class TxServiceTest {
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
 
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getTransactionsByBlock(
-        "0", PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result =
+        txService.getTransactionsByBlock("0", PageRequest.of(0, 1));
 
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
@@ -430,8 +394,8 @@ class TxServiceTest {
         .thenReturn(new PageImpl<>(Collections.emptyList()));
 
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getTransactionsByBlock(
-        "0", PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result =
+        txService.getTransactionsByBlock("0", PageRequest.of(0, 1));
 
     // Verify the results
     assertEquals(List.of(), result.getData());
@@ -458,22 +422,24 @@ class TxServiceTest {
     when(txRepository.findByBlockHash(blockId, PageRequest.of(0, 1))).thenReturn(txs);
 
     when(blockRepository.findAllByIdIn(Set.of(0L))).thenReturn(List.of(new Block()));
-    when(txOutRepository.findAddressInputListByTxId(Set.of(0L))).thenReturn(List.of(
-        AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
-            .build()
-    ));
-    when(txOutRepository.findAddressOutputListByTxId(any())).thenReturn(List.of(
-        AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-            .build()
-    ));
+    when(txOutRepository.findAddressInputListByTxId(Set.of(0L)))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
+                    .build()));
+    when(txOutRepository.findAddressOutputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
+                    .build()));
 
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
-    final BaseFilterResponse<TxFilterResponse> result = txService.getTransactionsByBlock(
-        blockId, PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result =
+        txService.getTransactionsByBlock(blockId, PageRequest.of(0, 1));
 
     verify(txRepository).findByBlockHash(blockId, PageRequest.of(0, 1));
   }
@@ -481,13 +447,14 @@ class TxServiceTest {
   @Test
   void testGetTransactionsByAddress() {
     // Setup
-    final Address address = Address.builder()
-        .id(0L)
-        .address("Ae2tdPwUPEZ1pRs1gSidtoRGMpJR54UyNrdVDMFxXu2pBkhxitAWhqrGqd9")
-        .txCount(1L)
-        .balance(new BigInteger("100"))
-        .addressHasScript(false)
-        .build();
+    final Address address =
+        Address.builder()
+            .id(0L)
+            .address("Ae2tdPwUPEZ1pRs1gSidtoRGMpJR54UyNrdVDMFxXu2pBkhxitAWhqrGqd9")
+            .txCount(1L)
+            .balance(new BigInteger("100"))
+            .addressHasScript(false)
+            .build();
     final Optional<Address> addressOpt = Optional.of(address);
     when(addressRepository.findFirstByAddress(anyString())).thenReturn(addressOpt);
 
@@ -505,42 +472,43 @@ class TxServiceTest {
     tx.setTxMetadataHash(txMetadataHash);
     final List<Tx> txs = List.of(tx);
 
-    when(addressTxBalanceRepository.findAllByAddress(eq(address),
-        any(Pageable.class))).thenReturn(txs);
+    when(addressTxBalanceRepository.findAllByAddress(eq(address), any(Pageable.class)))
+        .thenReturn(txs);
 
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(block));
     when(txOutRepository.findAddressInputListByTxId(any())).thenReturn(List.of());
     when(txOutRepository.findAddressOutputListByTxId(any())).thenReturn(List.of());
     TxFilterResponse txFilterResponse = new TxFilterResponse();
     txFilterResponse.setId(0L);
-    when(txMapper.txToTxFilterResponse(any())).thenReturn(
-        txFilterResponse);
+    when(txMapper.txToTxFilterResponse(any())).thenReturn(txFilterResponse);
 
-    final AddressTxBalance addressTxBalance = AddressTxBalance.builder()
-        .id(0L)
-        .address(address)
-        .txId(0L)
-        .balance(new BigInteger("100"))
-        .build();
+    final AddressTxBalance addressTxBalance =
+        AddressTxBalance.builder()
+            .id(0L)
+            .address(address)
+            .txId(0L)
+            .balance(new BigInteger("100"))
+            .build();
 
     final List<AddressTxBalance> addressTxBalances = List.of(addressTxBalance);
-    when(
-        addressTxBalanceRepository.findByTxIdInAndByAddress(any(), eq(address.getAddress())))
+    when(addressTxBalanceRepository.findByTxIdInAndByAddress(any(), eq(address.getAddress())))
         .thenReturn(addressTxBalances);
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("policy")
-        .name("name")
-        .nameView("nameView")
-        .txCount(10L)
-        .build();
-    final AddressToken addressToken = AddressToken.builder()
-        .address(address)
-        .multiAssetId(0L)
-        .multiAsset(multiAsset)
-        .tx(tx)
-        .balance(new BigInteger("100"))
-        .build();
+    final MultiAsset multiAsset =
+        MultiAsset.builder()
+            .id(0L)
+            .policy("policy")
+            .name("name")
+            .nameView("nameView")
+            .txCount(10L)
+            .build();
+    final AddressToken addressToken =
+        AddressToken.builder()
+            .address(address)
+            .multiAssetId(0L)
+            .multiAsset(multiAsset)
+            .tx(tx)
+            .balance(new BigInteger("100"))
+            .build();
     final List<AddressToken> addressTokens = List.of(addressToken);
     when(addressTokenRepository.findByTxIdInAndByAddress(any(), eq(address.getAddress())))
         .thenReturn(addressTokens);
@@ -548,28 +516,30 @@ class TxServiceTest {
     final List<MultiAsset> multiAssets = List.of(multiAsset);
     when(multiAssetRepository.findAllByIdIn(any())).thenReturn(multiAssets);
 
-    final AssetMetadata assetMetadata1 = AssetMetadata.builder()
-        .id(0L)
-        .subject(multiAsset.getPolicy() + multiAsset.getName())
-        .build();
+    final AssetMetadata assetMetadata1 =
+        AssetMetadata.builder()
+            .id(0L)
+            .subject(multiAsset.getPolicy() + multiAsset.getName())
+            .build();
     final List<AssetMetadata> assetMetadata = List.of(assetMetadata1);
     when(assetMetadataRepository.findBySubjectIn(any())).thenReturn(assetMetadata);
 
-    final TokenAddressResponse tokenAddressResponse = TokenAddressResponse.builder()
-        .address("address")
-        .metadata(TokenMetadataResponse.builder().build())
-        .build();
+    final TokenAddressResponse tokenAddressResponse =
+        TokenAddressResponse.builder()
+            .address("address")
+            .metadata(TokenMetadataResponse.builder().build())
+            .build();
 
     when(tokenMapper.fromMultiAssetAndAddressToken(any(), any(AddressToken.class)))
         .thenReturn(tokenAddressResponse);
 
-    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
-        0, "logo", "description");
+    final TokenMetadataResponse tokenMetadataResponse =
+        new TokenMetadataResponse("url", "ticker", 0, "logo", "description");
     when(assetMetadataMapper.fromAssetMetadata(any())).thenReturn(tokenMetadataResponse);
 
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getTransactionsByAddress(
-        address.getAddress(), PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result =
+        txService.getTransactionsByAddress(address.getAddress(), PageRequest.of(0, 1));
 
     final TxFilterResponse expect = new TxFilterResponse();
     expect.setBalance(addressTxBalance.getBalance());
@@ -585,26 +555,28 @@ class TxServiceTest {
     when(addressRepository.findFirstByAddress("address")).thenReturn(Optional.empty());
 
     // Run the test
-    assertThrows(NoContentException.class, () -> txService.getTransactionsByAddress("address",
-        PageRequest.of(0, 1)));
+    assertThrows(
+        NoContentException.class,
+        () -> txService.getTransactionsByAddress("address", PageRequest.of(0, 1)));
   }
 
   @Test
   void testGetTransactionsByToken() {
     // Setup
-    final MultiAsset multiAsset1 = MultiAsset.builder()
-        .id(0L)
-        .policy("policy")
-        .name("name")
-        .nameView("nameView")
-        .txCount(1L)
-        .build();
+    final MultiAsset multiAsset1 =
+        MultiAsset.builder()
+            .id(0L)
+            .policy("policy")
+            .name("name")
+            .nameView("nameView")
+            .txCount(1L)
+            .build();
 
     final Optional<MultiAsset> multiAsset = Optional.of(multiAsset1);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAsset);
 
-    when(addressTokenRepository.findTxsByMultiAsset(eq(multiAsset1),
-        any(Pageable.class))).thenReturn(List.of(0L));
+    when(addressTokenRepository.findTxsByMultiAsset(eq(multiAsset1), any(Pageable.class)))
+        .thenReturn(List.of(0L));
 
     final Tx tx = new Tx();
     tx.setId(0L);
@@ -621,20 +593,21 @@ class TxServiceTest {
     final List<Tx> txs = List.of(tx);
     when(txRepository.findByIdIn(any())).thenReturn(txs);
 
-    when(blockRepository.findAllByIdIn(any())).thenReturn(
-        List.of(block));
-    when(txOutRepository.findAddressInputListByTxId(any())).thenReturn(List.of(
-        AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
-            .build()
-    ));
-    when(txOutRepository.findAddressOutputListByTxId(any())).thenReturn(List.of(
-        AddressInputOutputProjectionImpl.builder()
-            .txId(0L)
-            .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-            .build()
-    ));
+    when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(block));
+    when(txOutRepository.findAddressInputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
+                    .build()));
+    when(txOutRepository.findAddressOutputListByTxId(any()))
+        .thenReturn(
+            List.of(
+                AddressInputOutputProjectionImpl.builder()
+                    .txId(0L)
+                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
+                    .build()));
 
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
 
@@ -645,8 +618,8 @@ class TxServiceTest {
         List.of("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq"));
 
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getTransactionsByToken(
-        "tokenId", PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result =
+        txService.getTransactionsByToken("tokenId", PageRequest.of(0, 1));
 
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
@@ -661,8 +634,8 @@ class TxServiceTest {
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(Optional.empty());
 
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getTransactionsByToken(
-        "tokenId", PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result =
+        txService.getTransactionsByToken("tokenId", PageRequest.of(0, 1));
 
     // Verify the results
     assertEquals(0, result.getTotalItems());
@@ -671,13 +644,14 @@ class TxServiceTest {
   @Test
   void testGetTransactionsByStake() {
     // Setup
-    final StakeAddress stakeAddress1 = StakeAddress.builder()
-        .id(0L)
-        .hashRaw("hashRaw")
-        .view("stakeAddress")
-        .scriptHash("scriptHash")
-        .balance(new BigInteger("100"))
-        .build();
+    final StakeAddress stakeAddress1 =
+        StakeAddress.builder()
+            .id(0L)
+            .hashRaw("hashRaw")
+            .view("stakeAddress")
+            .scriptHash("scriptHash")
+            .balance(new BigInteger("100"))
+            .build();
 
     final Optional<StakeAddress> stakeAddress = Optional.of(stakeAddress1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(stakeAddress);
@@ -695,8 +669,7 @@ class TxServiceTest {
     txMetadataHash.setHash("hash");
     tx.setTxMetadataHash(txMetadataHash);
     final Page<Tx> txs = new PageImpl<>(List.of(tx));
-    when(addressTxBalanceRepository.findAllByStake(any(), any(Pageable.class)))
-        .thenReturn(txs);
+    when(addressTxBalanceRepository.findAllByStake(any(), any(Pageable.class))).thenReturn(txs);
 
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(block));
     when(txOutRepository.findAddressInputListByTxId(any())).thenReturn(List.of());
@@ -704,35 +677,37 @@ class TxServiceTest {
 
     TxFilterResponse txFilterResponse = new TxFilterResponse();
     txFilterResponse.setId(0L);
-    when(txMapper.txToTxFilterResponse(any())).thenReturn(
-        txFilterResponse);
+    when(txMapper.txToTxFilterResponse(any())).thenReturn(txFilterResponse);
     when(txMapper.txToTxFilterResponse(tx)).thenReturn(txFilterResponse);
 
-    final AddressTxBalance addressTxBalance = AddressTxBalance.builder()
-        .id(0L)
-        .stakeAddress(stakeAddress1)
-        .txId(0L)
-        .balance(new BigInteger("100"))
-        .build();
+    final AddressTxBalance addressTxBalance =
+        AddressTxBalance.builder()
+            .id(0L)
+            .stakeAddress(stakeAddress1)
+            .txId(0L)
+            .balance(new BigInteger("100"))
+            .build();
 
     final List<AddressTxBalance> addressTxBalances = List.of(addressTxBalance);
     when(addressTxBalanceRepository.findByTxIdInAndStakeId(any(), eq(stakeAddress1.getId())))
         .thenReturn(addressTxBalances);
 
-    final MultiAsset multiAsset = MultiAsset.builder()
-        .id(0L)
-        .policy("policy")
-        .name("name")
-        .nameView("nameView")
-        .txCount(10L)
-        .build();
-    final AddressToken addressToken = AddressToken.builder()
-        .address(Address.builder().id(0L).stakeAddress(stakeAddress1).build())
-        .multiAssetId(0L)
-        .multiAsset(multiAsset)
-        .tx(tx)
-        .balance(new BigInteger("100"))
-        .build();
+    final MultiAsset multiAsset =
+        MultiAsset.builder()
+            .id(0L)
+            .policy("policy")
+            .name("name")
+            .nameView("nameView")
+            .txCount(10L)
+            .build();
+    final AddressToken addressToken =
+        AddressToken.builder()
+            .address(Address.builder().id(0L).stakeAddress(stakeAddress1).build())
+            .multiAssetId(0L)
+            .multiAsset(multiAsset)
+            .tx(tx)
+            .balance(new BigInteger("100"))
+            .build();
     final List<AddressToken> addressTokens = List.of(addressToken);
     when(addressTokenRepository.findByTxIdInAndStakeId(any(), eq(stakeAddress1.getId())))
         .thenReturn(addressTokens);
@@ -740,28 +715,30 @@ class TxServiceTest {
     when(multiAssetRepository.findAllByIdIn(List.of(0L))).thenReturn(multiAssets);
     //
 
-    final AssetMetadata assetMetadata1 = AssetMetadata.builder()
-        .id(0L)
-        .subject(multiAsset.getPolicy() + multiAsset.getName())
-        .build();
+    final AssetMetadata assetMetadata1 =
+        AssetMetadata.builder()
+            .id(0L)
+            .subject(multiAsset.getPolicy() + multiAsset.getName())
+            .build();
     final List<AssetMetadata> assetMetadata = List.of(assetMetadata1);
 
     when(assetMetadataRepository.findBySubjectIn(any())).thenReturn(assetMetadata);
 
-    final TokenAddressResponse tokenAddressResponse = TokenAddressResponse.builder()
-        .address("address")
-        .metadata(TokenMetadataResponse.builder().build())
-        .build();
+    final TokenAddressResponse tokenAddressResponse =
+        TokenAddressResponse.builder()
+            .address("address")
+            .metadata(TokenMetadataResponse.builder().build())
+            .build();
 
     when(tokenMapper.fromMultiAssetAndAddressToken(any(), any(AddressToken.class)))
         .thenReturn(tokenAddressResponse);
 
-    final TokenMetadataResponse tokenMetadataResponse = new TokenMetadataResponse("url", "ticker",
-        0, "logo", "description");
+    final TokenMetadataResponse tokenMetadataResponse =
+        new TokenMetadataResponse("url", "ticker", 0, "logo", "description");
     when(assetMetadataMapper.fromAssetMetadata(any())).thenReturn(tokenMetadataResponse);
     // Run the test
-    final BaseFilterResponse<TxFilterResponse> result = txService.getTransactionsByStake(
-        "stakeKey", PageRequest.of(0, 1));
+    final BaseFilterResponse<TxFilterResponse> result =
+        txService.getTransactionsByStake("stakeKey", PageRequest.of(0, 1));
 
     final TxFilterResponse expect = new TxFilterResponse();
     expect.setBalance(addressTxBalance.getBalance());
@@ -777,8 +754,9 @@ class TxServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.empty());
 
     // Run the test
-    assertThrows(NoContentException.class, () -> txService.getTransactionsByStake("stakeKey",
-        PageRequest.of(0, 1)));
+    assertThrows(
+        NoContentException.class,
+        () -> txService.getTransactionsByStake("stakeKey", PageRequest.of(0, 1)));
   }
 
   @Test
@@ -845,5 +823,4 @@ class TxServiceTest {
     // Run the test
     assertThrows(BusinessException.class, () -> txService.getTxDetailByHash("hash"));
   }
-
 }

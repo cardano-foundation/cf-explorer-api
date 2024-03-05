@@ -4,9 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCountProjection;
-import org.cardanofoundation.explorer.consumercommon.entity.Block;
-import org.cardanofoundation.explorer.consumercommon.entity.Block_;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -15,6 +13,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCountProjection;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block_;
 
 @Repository
 public interface BlockRepository
@@ -26,9 +28,7 @@ public interface BlockRepository
   @EntityGraph(attributePaths = {Block_.SLOT_LEADER})
   Optional<Block> findFirstByHash(@Param("hash") String hash);
 
-  @Query(
-      value = "SELECT b FROM Block b",
-      countQuery = "SELECT sum (e.blkCount) + 1 FROM Epoch e")
+  @Query(value = "SELECT b FROM Block b", countQuery = "SELECT sum (e.blkCount) + 1 FROM Epoch e")
   Page<Block> findAllBlock(Pageable pageable);
 
   @Query(
@@ -118,9 +118,10 @@ public interface BlockRepository
   @Query("SELECT b FROM Block b WHERE b.blockNo IS NOT NULL ORDER BY b.blockNo ASC LIMIT 1")
   Optional<Block> findFirstBlock();
 
-  @Query("SELECT b FROM Block b"
-      + " INNER JOIN Epoch e ON e.no = b.epochNo"
-      + " WHERE e.era != org.cardanofoundation.explorer.consumercommon.enumeration.EraType.BYRON"
-      + " ORDER BY b.blockNo ASC LIMIT 1")
+  @Query(
+      "SELECT b FROM Block b"
+          + " INNER JOIN Epoch e ON e.no = b.epochNo"
+          + " WHERE e.era != org.cardanofoundation.explorer.common.entity.enumeration.EraType.BYRON"
+          + " ORDER BY b.blockNo ASC LIMIT 1")
   Optional<Block> findFirstShellyBlock();
 }

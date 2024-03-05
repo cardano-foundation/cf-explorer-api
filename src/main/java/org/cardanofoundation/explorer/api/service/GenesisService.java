@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
-import org.cardanofoundation.ledgersync.common.model.ByronGenesis;
-import org.cardanofoundation.ledgersync.common.model.ShelleyGenesis;
+import org.cardanofoundation.explorer.common.model.ByronGenesis;
+import org.cardanofoundation.explorer.common.model.ShelleyGenesis;
 
 public interface GenesisService {
 

@@ -11,37 +11,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.projection.ReportHistoryProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.ReportHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.ReportHistoryServiceImpl;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportStatus;
-import org.cardanofoundation.explorer.consumercommon.enumeration.ReportType;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.junit.jupiter.api.Assertions;
-import org.springframework.data.domain.Sort;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportHistoryServiceTest {
 
-  @Mock
-  ReportHistoryRepository reportHistoryRepository;
+  @Mock ReportHistoryRepository reportHistoryRepository;
 
-  @InjectMocks
-  private ReportHistoryServiceImpl reportHistoryService;
+  @InjectMocks private ReportHistoryServiceImpl reportHistoryService;
 
-  @Mock
-  RoleService roleService;
+  @Mock RoleService roleService;
 
   @Test
   void whenGetReportHistoryWithCondition_thenReturnReportHistory() {
@@ -49,13 +49,14 @@ public class ReportHistoryServiceTest {
     Date fromDate = new Date();
     Date toDate = new Date();
     LocalDateTime createdAt = LocalDateTime.now();
-    ReportHistoryFilterRequest condition = ReportHistoryFilterRequest.builder()
-        .reportName("reportName")
-        .fromDate(fromDate)
-        .toDate(toDate)
-        .build();
+    ReportHistoryFilterRequest condition =
+        ReportHistoryFilterRequest.builder()
+            .reportName("reportName")
+            .fromDate(fromDate)
+            .toDate(toDate)
+            .build();
 
-      ReportHistoryProjection projection = Mockito.mock(ReportHistoryProjection.class);
+    ReportHistoryProjection projection = Mockito.mock(ReportHistoryProjection.class);
     when(projection.getReportName()).thenReturn("reportName");
     when(projection.getCreatedAt()).thenReturn(createdAt);
     when(projection.getStakeKeyReportId()).thenReturn(1L);
@@ -63,8 +64,12 @@ public class ReportHistoryServiceTest {
     when(projection.getStatus()).thenReturn(ReportStatus.GENERATED);
     Page<ReportHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
 
-    when(reportHistoryRepository.getRecordHistoryByFilter(anyString(), any(Timestamp.class),
-        any(Timestamp.class), anyString(), any(Pageable.class)))
+    when(reportHistoryRepository.getRecordHistoryByFilter(
+            anyString(),
+            any(Timestamp.class),
+            any(Timestamp.class),
+            anyString(),
+            any(Pageable.class)))
         .thenReturn(page);
 
     var response = reportHistoryService.getReportHistory(condition, "username", pageable);
@@ -81,31 +86,30 @@ public class ReportHistoryServiceTest {
 
   @Test
   void isLimitReached_shouldReturnTrueIfLimitIsReached() {
-    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
-                                                                    any(Timestamp.class),
-                                                                    any(Timestamp.class)))
+    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(
+            anyString(), any(Timestamp.class), any(Timestamp.class)))
         .thenReturn(5);
-    Assertions.assertTrue(reportHistoryService.isLimitReached("username",5));
+    Assertions.assertTrue(reportHistoryService.isLimitReached("username", 5));
   }
 
   @Test
   void isLimitReached_shouldReturnFalseIfLimitIsNotReached() {
-    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
-                                                                    any(Timestamp.class),
-                                                                    any(Timestamp.class)))
+    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(
+            anyString(), any(Timestamp.class), any(Timestamp.class)))
         .thenReturn(4);
-    Assertions.assertFalse(reportHistoryService.isLimitReached("username",5));
+    Assertions.assertFalse(reportHistoryService.isLimitReached("username", 5));
   }
 
   @Test
   void getReportLimitPer24Hours_shouldReturnLimit() {
-    Map<String, Map<String,Object>> roleDescriptions = new HashMap<>();
-    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(anyString(),
-                                                                    any(Timestamp.class),
-                                                                    any(Timestamp.class)))
+    Map<String, Map<String, Object>> roleDescriptions = new HashMap<>();
+    when(reportHistoryRepository.countByUsernameAndCreatedAtBetween(
+            anyString(), any(Timestamp.class), any(Timestamp.class)))
         .thenReturn(4);
     when(roleService.getReportLimit(roleDescriptions)).thenReturn(5);
-    var reportLimit = reportHistoryService.getReportLimit(UserPrincipal.builder().username("username").roleDescription(roleDescriptions).build());
+    var reportLimit =
+        reportHistoryService.getReportLimit(
+            UserPrincipal.builder().username("username").roleDescription(roleDescriptions).build());
     Assertions.assertEquals(5, reportLimit.getLimitPer24hours());
     Assertions.assertEquals(Boolean.FALSE, reportLimit.getIsLimitReached());
   }

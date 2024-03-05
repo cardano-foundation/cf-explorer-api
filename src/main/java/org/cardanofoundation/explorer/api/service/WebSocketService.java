@@ -1,11 +1,9 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.cardanofoundation.explorer.api.event.blocksync.BlockSyncMessage;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
-import org.cardanofoundation.ledgersync.common.redis.BlockSyncMessage;
 
 public interface WebSocketService {
-
-  WebSocketMessage getMarketDataMessage(String currency);
 
   WebSocketMessage getCurrentBlockInfoMessage();
 

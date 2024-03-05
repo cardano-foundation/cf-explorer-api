@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 
 @Data
@@ -71,20 +72,43 @@ public class ProtocolParamResponse {
 
   Object costModel;
 
-
   @Override
   public int hashCode() {
-    return CommonConstant.hashCode(minFeeA, minFeeB, maxBlockSize, maxTxSize, maxBhSize, keyDeposit,
+    return CommonConstant.hashCode(
+        minFeeA,
+        minFeeB,
+        maxBlockSize,
+        maxTxSize,
+        maxBhSize,
+        keyDeposit,
         poolDeposit,
-        maxEpoch, optimalPoolCount, minUtxoValue, minPoolCost, maxTxExMem, maxTxExSteps,
-        maxBlockExMem, maxBlockExSteps, maxValSize, coinsPerUtxoSize, influence, monetaryExpandRate,
-        treasuryGrowthRate, decentralisation, priceMem, priceStep, protocolMajor, protocolMinor,
-        collateralPercent, maxCollateralInputs, entropy, costModel);
+        maxEpoch,
+        optimalPoolCount,
+        minUtxoValue,
+        minPoolCost,
+        maxTxExMem,
+        maxTxExSteps,
+        maxBlockExMem,
+        maxBlockExSteps,
+        maxValSize,
+        coinsPerUtxoSize,
+        influence,
+        monetaryExpandRate,
+        treasuryGrowthRate,
+        decentralisation,
+        priceMem,
+        priceStep,
+        protocolMajor,
+        protocolMinor,
+        collateralPercent,
+        maxCollateralInputs,
+        entropy,
+        costModel);
   }
 
   @JsonIgnore
   public boolean isNull() {
-    if(this.hashCode() == new ProtocolParamResponse().hashCode()) {
+    if (this.hashCode() == new ProtocolParamResponse().hashCode()) {
       return true;
     }
     return false;

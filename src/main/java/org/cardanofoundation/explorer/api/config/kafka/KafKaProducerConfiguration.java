@@ -3,7 +3,6 @@ package org.cardanofoundation.explorer.api.config.kafka;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.kafka.clients.CommonClientConfigs;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -21,6 +21,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 public class KafKaProducerConfiguration {
 
   private static final int MAX_REQUEST_SIZE = 2_097_152;
+
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
 
@@ -49,21 +50,15 @@ public class KafKaProducerConfiguration {
   public ProducerFactory<String, Object> producerFactory() {
     Map<String, Object> map = new HashMap<>();
 
-    map.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-        bootstrapServers);
-    map.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-        StringSerializer.class);
-    map.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-        JsonSerializer.class);
-    map.put(ProducerConfig.RETRIES_CONFIG,
-        retriesTime);
-    map.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,
-        isIdempotence);
-    map.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,
-        requestPerConnection);
-    map.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG,retryBackoff);
+    map.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    map.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    map.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+    map.put(ProducerConfig.RETRIES_CONFIG, retriesTime);
+    map.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, isIdempotence);
+    map.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, requestPerConnection);
+    map.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, retryBackoff);
     map.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, MAX_REQUEST_SIZE);
-    map.put(ProducerConfig.ACKS_CONFIG,acks);
+    map.put(ProducerConfig.ACKS_CONFIG, acks);
     map.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, maxBlockMs);
 
     if (useSsl) {
@@ -77,5 +72,4 @@ public class KafKaProducerConfiguration {
   KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
     return new KafkaTemplate<>(producerFactory);
   }
-
 }

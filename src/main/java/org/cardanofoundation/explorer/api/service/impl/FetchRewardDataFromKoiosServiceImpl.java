@@ -5,21 +5,22 @@ import java.util.*;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import reactor.core.publisher.Mono;
+
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryCheckpointRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardCheckpointRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.consumercommon.entity.Epoch;
-import org.cardanofoundation.explorer.consumercommon.enumeration.EraType;
-import reactor.core.publisher.Mono;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.cardanofoundation.explorer.common.entity.enumeration.EraType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Profile("koios")
 @Service
@@ -58,59 +59,59 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchReward(String stakeKey) {
-    return postWebClient(apiCheckRewardUrl,Boolean.class,Collections.singleton(stakeKey)).block();
+    return postWebClient(apiCheckRewardUrl, Boolean.class, Collections.singleton(stakeKey)).block();
   }
 
   @Override
   public Boolean checkRewardAvailable(List<String> stakeAddressList) {
-    Integer countCheckPoint = rewardCheckpointRepository.checkRewardByRewardAccountsAndEpoch(
-        stakeAddressList);
+    Integer countCheckPoint =
+        rewardCheckpointRepository.checkRewardByRewardAccountsAndEpoch(stakeAddressList);
     Integer sizeCheck = stakeAddressList.size();
     return Objects.equals(countCheckPoint, sizeCheck);
   }
 
   @Override
   public Boolean fetchReward(List<String> stakeAddressList) {
-    return postWebClient(apiCheckRewardUrl,Boolean.class,stakeAddressList).block();
+    return postWebClient(apiCheckRewardUrl, Boolean.class, stakeAddressList).block();
   }
 
   @Override
   public Boolean checkPoolHistoryForPool(Set<String> poolIds) {
-    Integer countCheckPoint = poolHistoryCheckpointRepository.checkRewardByPoolViewAndEpoch(
-        poolIds);
+    Integer countCheckPoint =
+        poolHistoryCheckpointRepository.checkRewardByPoolViewAndEpoch(poolIds);
     Integer sizeCheck = poolIds.size();
     return Objects.equals(countCheckPoint, sizeCheck);
   }
 
   @Override
   public Boolean fetchPoolHistoryForPool(Set<String> poolIds) {
-     return postWebClient(apiCheckPoolHistoryUrl,Boolean.class,poolIds).block();
+    return postWebClient(apiCheckPoolHistoryUrl, Boolean.class, poolIds).block();
   }
 
   @Override
   public Boolean checkEpochStakeForPool(List<String> rewardAccounts) {
-    Integer countCheckPoint = epochStakeCheckpointRepository.checkEpochStakeByAccountsAndEpoch(
-        rewardAccounts);
+    Integer countCheckPoint =
+        epochStakeCheckpointRepository.checkEpochStakeByAccountsAndEpoch(rewardAccounts);
     Integer sizeCheck = rewardAccounts.size();
     return Objects.equals(countCheckPoint, sizeCheck);
   }
 
   @Override
   public Boolean fetchEpochStakeForPool(List<String> rewardAccounts) {
-    return postWebClient(apiCheckEpochStakeUrl,Boolean.class,rewardAccounts).block();
+    return postWebClient(apiCheckEpochStakeUrl, Boolean.class, rewardAccounts).block();
   }
 
   @Override
   public Boolean checkRewardForPool(List<String> rewardAccounts) {
-    Integer countCheckPoint = rewardCheckpointRepository.checkRewardByRewardAccountsAndEpoch(
-        rewardAccounts);
+    Integer countCheckPoint =
+        rewardCheckpointRepository.checkRewardByRewardAccountsAndEpoch(rewardAccounts);
     Integer sizeCheck = rewardAccounts.size();
     return Objects.equals(countCheckPoint, sizeCheck);
   }
 
   @Override
   public Boolean fetchRewardForPool(List<String> rewardAccounts) {
-    return postWebClient(apiCheckRewardUrl, Boolean.class,rewardAccounts).block();
+    return postWebClient(apiCheckRewardUrl, Boolean.class, rewardAccounts).block();
   }
 
   @Override
@@ -120,7 +121,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
 
   @Override
   public Boolean fetchAdaPots(List<Integer> epochNo) {
-    return postWebClient(apiCheckAdaPotsUrl,Boolean.class,epochNo).block();
+    return postWebClient(apiCheckAdaPotsUrl, Boolean.class, epochNo).block();
   }
 
   @Override
@@ -133,7 +134,7 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   @Override
   public List<Epoch> fetchEpochRewardDistributed(List<Integer> epochNoList) {
     try {
-      Epoch[] epoch = postWebClient(apiCheckEpochUrl,Epoch[].class,epochNoList).block();
+      Epoch[] epoch = postWebClient(apiCheckEpochUrl, Epoch[].class, epochNoList).block();
       if (Objects.nonNull(epoch)) {
         return Arrays.asList(epoch);
       }
@@ -147,15 +148,17 @@ public class FetchRewardDataFromKoiosServiceImpl implements FetchRewardDataServi
   public Boolean useKoios() {
     return true;
   }
-  public <T> Mono<T> postWebClient(String url, Class<T> clazz, Object body){
-    return webClient.post()
+
+  public <T> Mono<T> postWebClient(String url, Class<T> clazz, Object body) {
+    return webClient
+        .post()
         .uri(url)
         .bodyValue(body)
         .acceptCharset(StandardCharsets.UTF_8)
         .retrieve()
-        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-            clientResponse -> Mono.error(
-                new BusinessException(BusinessCode.FETCH_REWARD_ERROR)))
+        .onStatus(
+            status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse -> Mono.error(new BusinessException(BusinessCode.FETCH_REWARD_ERROR)))
         .bodyToMono(clazz);
   }
 }

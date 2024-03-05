@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
+import org.springframework.data.domain.Pageable;
+
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.pool.report.PoolReportCreateRequest;
@@ -12,29 +14,25 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularR
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
-import org.cardanofoundation.explorer.consumercommon.explorer.entity.PoolReportHistory;
-
-import org.springframework.data.domain.Pageable;
+import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 
 public interface PoolReportService {
-
 
   /**
    * Generate pool report of current user
    *
    * @param poolReportCreateRequest request body
-   * @param username                username of current request user
+   * @param userPrincipal userPrincipal
    * @return true if success
    */
   Boolean create(PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal);
 
-
   /**
    * Download the export file of pool report from storage of current user
    *
-   * @param reportId   report id
+   * @param reportId report id
    * @param exportType export type
-   * @param username   username
+   * @param username username
    * @return PoolReportExportResponse
    */
   PoolReportExportResponse export(Long reportId, ExportType exportType, String username);
@@ -47,7 +45,8 @@ public interface PoolReportService {
    * @param filterRequest filter request
    * @return BaseFilterResponse<PoolReportListResponse>
    */
-  BaseFilterResponse<PoolReportListResponse> list(Pageable pageable, String username, ReportHistoryFilterRequest filterRequest);
+  BaseFilterResponse<PoolReportListResponse> list(
+      Pageable pageable, String username, ReportHistoryFilterRequest filterRequest);
 
   /**
    * Get pool report detail by report id
@@ -66,9 +65,8 @@ public interface PoolReportService {
    * @param username username
    * @return PoolReportDetailResponse
    */
-  BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(Long reportId,
-                                                                        Pageable pageable,
-                                                                        String username);
+  BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(
+      Long reportId, Pageable pageable, String username);
   /**
    * Get pool registration detail by report id
    *
@@ -77,8 +75,8 @@ public interface PoolReportService {
    * @param username username
    * @return PoolReportDetailResponse
    */
-  BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(Long reportId, Pageable pageable,
-                                                                 String username);
+  BaseFilterResponse<TabularRegisResponse> fetchPoolRegistration(
+      Long reportId, Pageable pageable, String username);
 
   /**
    * Get pool update detail by report id
@@ -88,8 +86,8 @@ public interface PoolReportService {
    * @param username username
    * @return PoolReportDetailResponse
    */
-  BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(Long reportId, Pageable pageable,
-                                                               String username);
+  BaseFilterResponse<PoolUpdateDetailResponse> fetchPoolUpdate(
+      Long reportId, Pageable pageable, String username);
 
   /**
    * Get rewards distribution detail by report id
@@ -99,8 +97,8 @@ public interface PoolReportService {
    * @param username username
    * @return PoolReportDetailResponse
    */
-  BaseFilterResponse<RewardResponse> fetchRewardsDistribution(Long reportId, Pageable pageable,
-                                                              String username);
+  BaseFilterResponse<RewardResponse> fetchRewardsDistribution(
+      Long reportId, Pageable pageable, String username);
 
   /**
    * Get pool deregistration detail by report id
@@ -110,6 +108,6 @@ public interface PoolReportService {
    * @param username username
    * @return PoolReportDetailResponse
    */
-  BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(Long reportId, Pageable pageable,
-                                                                String username);
+  BaseFilterResponse<DeRegistrationResponse> fetchDeregistraion(
+      Long reportId, Pageable pageable, String username);
 }
