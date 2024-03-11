@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -72,36 +71,7 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.FailedTxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ParamProposalRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRelayRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.service.TxService;
@@ -152,6 +122,7 @@ public class TxServiceImpl implements TxService {
   private final TxMetadataRepository txMetadataRepository;
   private final TxWitnessesRepository txWitnessesRepository;
   private final TxBootstrapWitnessesRepository txBootstrapWitnessesRepository;
+  private final TransactionWitnessRepository transactionWitnessRepository;
   private final ProtocolParamService protocolParamService;
   private final ReferenceTxInRepository referenceTxInRepository;
   private final TxReferenceInputMapper txReferenceInputMapper;
@@ -566,28 +537,19 @@ public class TxServiceImpl implements TxService {
    * @param txResponse
    */
   private void getSignersInformation(Tx tx, TxResponse txResponse) {
-    List<TxWitness> txVkeyWitnesses = txRepository.findWitnessesByTxId(tx.getId());
-    List<TxBootstrapWitnesses> txBootstrapWitnesses =
-        txRepository.findBoostrapWitnessesByTxId(tx.getId());
-    if (!CollectionUtils.isEmpty(txVkeyWitnesses)) {
-      Map<Integer, String> signersIndexMap = new HashMap<>();
-      txVkeyWitnesses.forEach(
-          txVkeyWitness ->
-              Arrays.stream(txVkeyWitness.getIndexArr())
-                  .forEach(index -> signersIndexMap.put(index, txVkeyWitness.getKey())));
+    List<TransactionWitness> transactionWitnesses =
+        transactionWitnessRepository.findAllByTxHash(tx.getHash());
+
+    if (!CollectionUtils.isEmpty(transactionWitnesses)) {
+      var signersIndexMap = new HashMap<Integer, String>();
+      transactionWitnesses.forEach(
+          transactionWitness ->
+              signersIndexMap.put(transactionWitness.getIndex(), transactionWitness.getPubKey()));
 
       List<TxSignersResponse> txSignersResponses =
-          Stream.concat(
-                  signersIndexMap.entrySet().stream()
-                      .sorted(Map.Entry.comparingByKey())
-                      .map(
-                          entry -> TxSignersResponse.builder().publicKey(entry.getValue()).build()),
-                  txBootstrapWitnesses.stream()
-                      .map(
-                          txBootstrapWitness ->
-                              TxSignersResponse.builder()
-                                  .publicKey(txBootstrapWitness.getPublicKey())
-                                  .build()))
+          signersIndexMap.entrySet().stream()
+              .sorted(Map.Entry.comparingByKey())
+              .map(entry -> TxSignersResponse.builder().publicKey(entry.getValue()).build())
               .toList();
 
       if (Objects.nonNull(txResponse.getProtocols())
@@ -604,7 +566,6 @@ public class TxServiceImpl implements TxService {
               }
             });
       }
-
       txResponse.setSignersInformation(txSignersResponses);
     }
   }

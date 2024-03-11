@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -17,6 +16,9 @@ import org.springframework.data.repository.query.Param;
 import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx_;
 
 public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationExecutor<Tx> {
 
@@ -114,10 +116,4 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
           + " AND r.scriptHash = :scriptHash")
   List<SmartContractTxProjection> getSmartContractTxsPurpose(
       @Param("txIds") Collection<Long> txIds, @Param("scriptHash") String scriptHash);
-
-  @Query("SELECT tw FROM TxWitness tw WHERE tw.tx.id = :id")
-  List<TxWitness> findWitnessesByTxId(@Param("id") Long id);
-
-  @Query("SELECT tbw FROM TxBootstrapWitnesses tbw WHERE tbw.tx.id = :id")
-  List<TxBootstrapWitnesses> findBoostrapWitnessesByTxId(@Param("id") Long id);
 }
