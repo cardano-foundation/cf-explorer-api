@@ -566,9 +566,9 @@ public class TxServiceImpl implements TxService {
    * @param txResponse
    */
   private void getSignersInformation(Tx tx, TxResponse txResponse) {
-    List<TxWitness> txVkeyWitnesses = txWitnessesRepository.findAllByTx(tx);
+    List<TxWitness> txVkeyWitnesses = txRepository.findWitnessesByTxId(tx.getId());
     List<TxBootstrapWitnesses> txBootstrapWitnesses =
-        txBootstrapWitnessesRepository.findAllByTx(tx);
+        txRepository.findBoostrapWitnessesByTxId(tx.getId());
     if (!CollectionUtils.isEmpty(txVkeyWitnesses)) {
       Map<Integer, String> signersIndexMap = new HashMap<>();
       txVkeyWitnesses.forEach(

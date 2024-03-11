@@ -10,5 +10,5 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.TxBootstrapWitnes
 
 public interface TxBootstrapWitnessesRepository extends JpaRepository<TxBootstrapWitnesses, Long> {
 
-  List<TxBootstrapWitnesses> findAllByTx(@Param("tx") Tx tx);
+  List<TxBootstrapWitnesses> findAllByTx(@Param("pub_key") String pubKey);
 }
