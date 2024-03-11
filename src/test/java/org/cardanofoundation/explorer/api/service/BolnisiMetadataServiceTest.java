@@ -31,7 +31,7 @@ import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.LotData
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
 import org.cardanofoundation.explorer.api.service.impl.BolnisiMetadataServiceImpl;
-import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TransactionMetadata;
 import org.cardanofoundation.explorer.common.utils.HexUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -199,7 +199,11 @@ class BolnisiMetadataServiceTest {
     String wineryId = "b";
     when(txMetadataRepository.findAllByTxHash(txHash))
         .thenReturn(
-            List.of(TxMetadata.builder().key(BigInteger.valueOf(1904)).json(jsonMetadata).build()));
+            List.of(
+                TransactionMetadata.builder()
+                    .label(BigInteger.valueOf(1904).toString())
+                    .body(jsonMetadata)
+                    .build()));
 
     String offChainRedisKey = getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
 

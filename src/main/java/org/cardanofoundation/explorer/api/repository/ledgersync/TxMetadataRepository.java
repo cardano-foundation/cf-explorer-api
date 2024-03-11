@@ -3,16 +3,13 @@ package org.cardanofoundation.explorer.api.repository.ledgersync;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
-import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TransactionMetadata;
 
-public interface TxMetadataRepository extends JpaRepository<TxMetadata, Long> {
+public interface TxMetadataRepository extends JpaRepository<TransactionMetadata, Long> {
 
-  List<TxMetadata> findAllByTxOrderByKeyAsc(Tx tx);
+  List<TransactionMetadata> findAllByTxHashOrderByLabelAsc(String txHash);
 
-  @Query("SELECT t FROM TxMetadata t WHERE t.tx.hash = :txHash")
-  List<TxMetadata> findAllByTxHash(@Param("txHash") String txHash);
+  List<TransactionMetadata> findAllByTxHash(@Param("txHash") String txHash);
 }

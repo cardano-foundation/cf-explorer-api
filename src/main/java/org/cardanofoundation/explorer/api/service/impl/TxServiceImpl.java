@@ -617,31 +617,31 @@ public class TxServiceImpl implements TxService {
    */
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
-        txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream()
+        txMetadataRepository.findAllByTxHashOrderByLabelAsc(tx.getHash()).stream()
             .map(
                 txMetadata ->
                     TxMetadataResponse.builder()
-                        .label(txMetadata.getKey())
-                        .value(txMetadata.getJson())
+                        .label(txMetadata.getLabel())
+                        .value(txMetadata.getBody())
                         .metadataCIP25(
-                            txMetadata.getKey().equals(BigInteger.valueOf(721))
-                                ? MetadataCIP25Utils.standard(txMetadata.getJson())
+                            BigInteger.valueOf(721).equals(new BigInteger(txMetadata.getLabel()))
+                                ? MetadataCIP25Utils.standard(txMetadata.getBody())
                                 : null)
                         .metadataCIP60(
-                            txMetadata.getKey().equals(BigInteger.valueOf(721))
-                                ? MetadataCIP60Utils.standard(txMetadata.getJson())
+                            BigInteger.valueOf(721).equals(new BigInteger(txMetadata.getLabel()))
+                                ? MetadataCIP60Utils.standard(txMetadata.getBody())
                                 : null)
                         .metadataCIP20(
-                            txMetadata.getKey().equals(BigInteger.valueOf(674))
-                                ? MetadataCIP20Utils.standard(txMetadata.getJson())
+                            BigInteger.valueOf(674).equals(new BigInteger(txMetadata.getLabel()))
+                                ? MetadataCIP20Utils.standard(txMetadata.getBody())
                                 : null)
                         .metadataCIP83(
-                            txMetadata.getKey().equals(BigInteger.valueOf(674))
-                                ? MetadataCIP83Utils.standard(txMetadata.getJson())
+                            BigInteger.valueOf(674).equals(new BigInteger(txMetadata.getLabel()))
+                                ? MetadataCIP83Utils.standard(txMetadata.getBody())
                                 : null)
                         .metadataBolnisi(
-                            txMetadata.getKey().equals(BigInteger.valueOf(1904))
-                                ? bolnisiMetadataService.getBolnisiMetadata(txMetadata.getJson())
+                            BigInteger.valueOf(1904).equals(new BigInteger(txMetadata.getLabel()))
+                                ? bolnisiMetadataService.getBolnisiMetadata(txMetadata.getBody())
                                 : null)
                         .build())
             .toList();

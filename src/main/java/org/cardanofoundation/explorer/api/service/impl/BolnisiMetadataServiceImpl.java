@@ -37,7 +37,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataReposi
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.util.CidUtils;
 import org.cardanofoundation.explorer.api.util.JwsUtils;
-import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TransactionMetadata;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.cardanofoundation.explorer.common.utils.HexUtil;
 import org.cardanofoundation.explorer.common.utils.JsonUtil;
@@ -119,13 +119,15 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
   @Override
   public WineryData getWineryData(String txHash, String wineryId) {
-    List<TxMetadata> txMetadataList =
+    List<TransactionMetadata> transactionMetadataList =
         txMetadataRepository.findAllByTxHash(txHash).stream()
-            .filter(txMetadata -> txMetadata.getKey().equals(BigInteger.valueOf(1904)))
-            .collect(Collectors.toList());
+            .filter(
+                txMetadata ->
+                    BigInteger.valueOf(1904).equals(new BigInteger(txMetadata.getLabel())))
+            .toList();
 
-    return txMetadataList.stream()
-        .map(txMetadata -> getBolnisiMetadata(txMetadata.getJson()))
+    return transactionMetadataList.stream()
+        .map(txMetadata -> getBolnisiMetadata(txMetadata.getBody()))
         .map(MetadataBolnisi::getWineryData)
         .flatMap(List::stream)
         .filter(wineryData -> wineryData.getWineryId().equals(wineryId))

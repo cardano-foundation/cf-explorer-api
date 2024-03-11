@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.model.response.tx;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 import lombok.*;
@@ -14,7 +13,7 @@ import org.cardanofoundation.explorer.api.model.metadatastandard.cip.MetadataCIP
 @NoArgsConstructor
 @AllArgsConstructor
 public class TxMetadataResponse {
-  private BigInteger label;
+  private String label;
   private String value;
   private MetadataCIP metadataCIP25;
   private MetadataCIP metadataCIP60;
