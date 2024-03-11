@@ -621,7 +621,7 @@ public class TxServiceImpl implements TxService {
             .map(
                 txMetadata ->
                     TxMetadataResponse.builder()
-                        .label(txMetadata.getLabel())
+                        .label(new BigInteger(txMetadata.getLabel()))
                         .value(txMetadata.getBody())
                         .metadataCIP25(
                             BigInteger.valueOf(721).equals(new BigInteger(txMetadata.getLabel()))
