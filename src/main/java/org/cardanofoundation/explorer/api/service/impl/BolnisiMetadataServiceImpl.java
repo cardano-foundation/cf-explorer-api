@@ -33,11 +33,11 @@ import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.LotData;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.WineryData;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TransactionMetadataRepository;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.util.CidUtils;
 import org.cardanofoundation.explorer.api.util.JwsUtils;
-import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TransactionMetadata;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.cardanofoundation.explorer.common.utils.HexUtil;
 import org.cardanofoundation.explorer.common.utils.JsonUtil;
@@ -48,7 +48,7 @@ import org.cardanofoundation.explorer.common.utils.JsonUtil;
 public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
   private static final String BOLNISI_METADATA_KEY = "BOLNISI_METADATA:";
-  private final TxMetadataRepository txMetadataRepository;
+  private final TransactionMetadataRepository transactionMetadataRepository;
   private final WebClient webClient;
   private final RedisTemplate<String, Object> redisTemplate;
 
@@ -119,13 +119,15 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
   @Override
   public WineryData getWineryData(String txHash, String wineryId) {
-    List<TxMetadata> txMetadataList =
-        txMetadataRepository.findAllByTxHash(txHash).stream()
-            .filter(txMetadata -> txMetadata.getKey().equals(BigInteger.valueOf(1904)))
-            .collect(Collectors.toList());
+    List<TransactionMetadata> transactionMetadataList =
+        transactionMetadataRepository.findAllByTxHash(txHash).stream()
+            .filter(
+                txMetadata ->
+                    BigInteger.valueOf(1904).equals(new BigInteger(txMetadata.getLabel())))
+            .toList();
 
-    return txMetadataList.stream()
-        .map(txMetadata -> getBolnisiMetadata(txMetadata.getJson()))
+    return transactionMetadataList.stream()
+        .map(txMetadata -> getBolnisiMetadata(txMetadata.getBody()))
         .map(MetadataBolnisi::getWineryData)
         .flatMap(List::stream)
         .filter(wineryData -> wineryData.getWineryId().equals(wineryId))

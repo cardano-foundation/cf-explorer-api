@@ -93,10 +93,10 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepositor
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TransactionMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxWitnessesRepository;
@@ -149,7 +149,7 @@ public class TxServiceImpl implements TxService {
   private final ReserveRepository reserveRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final TxContractMapper txContractMapper;
-  private final TxMetadataRepository txMetadataRepository;
+  private final TransactionMetadataRepository transactionMetadataRepository;
   private final TxWitnessesRepository txWitnessesRepository;
   private final TxBootstrapWitnessesRepository txBootstrapWitnessesRepository;
   private final ProtocolParamService protocolParamService;
@@ -617,31 +617,31 @@ public class TxServiceImpl implements TxService {
    */
   private void getMetadata(Tx tx, TxResponse txResponse) {
     List<TxMetadataResponse> txMetadataList =
-        txMetadataRepository.findAllByTxOrderByKeyAsc(tx).stream()
+        transactionMetadataRepository.findAllByTxHashOrderByLabelAsc(tx.getHash()).stream()
             .map(
                 txMetadata ->
                     TxMetadataResponse.builder()
-                        .label(txMetadata.getKey())
-                        .value(txMetadata.getJson())
+                        .label(new BigInteger(txMetadata.getLabel()))
+                        .value(txMetadata.getBody())
                         .metadataCIP25(
-                            txMetadata.getKey().equals(BigInteger.valueOf(721))
-                                ? MetadataCIP25Utils.standard(txMetadata.getJson())
+                            BigInteger.valueOf(721).equals(new BigInteger(txMetadata.getLabel()))
+                                ? MetadataCIP25Utils.standard(txMetadata.getBody())
                                 : null)
                         .metadataCIP60(
-                            txMetadata.getKey().equals(BigInteger.valueOf(721))
-                                ? MetadataCIP60Utils.standard(txMetadata.getJson())
+                            BigInteger.valueOf(721).equals(new BigInteger(txMetadata.getLabel()))
+                                ? MetadataCIP60Utils.standard(txMetadata.getBody())
                                 : null)
                         .metadataCIP20(
-                            txMetadata.getKey().equals(BigInteger.valueOf(674))
-                                ? MetadataCIP20Utils.standard(txMetadata.getJson())
+                            BigInteger.valueOf(674).equals(new BigInteger(txMetadata.getLabel()))
+                                ? MetadataCIP20Utils.standard(txMetadata.getBody())
                                 : null)
                         .metadataCIP83(
-                            txMetadata.getKey().equals(BigInteger.valueOf(674))
-                                ? MetadataCIP83Utils.standard(txMetadata.getJson())
+                            BigInteger.valueOf(674).equals(new BigInteger(txMetadata.getLabel()))
+                                ? MetadataCIP83Utils.standard(txMetadata.getBody())
                                 : null)
                         .metadataBolnisi(
-                            txMetadata.getKey().equals(BigInteger.valueOf(1904))
-                                ? bolnisiMetadataService.getBolnisiMetadata(txMetadata.getJson())
+                            BigInteger.valueOf(1904).equals(new BigInteger(txMetadata.getLabel()))
+                                ? bolnisiMetadataService.getBolnisiMetadata(txMetadata.getBody())
                                 : null)
                         .build())
             .toList();
