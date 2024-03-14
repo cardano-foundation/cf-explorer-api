@@ -41,11 +41,11 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
 
   @Query(
       value =
-          "SELECT tm.json FROM Tx tx"
+          "SELECT tm.body FROM Tx tx"
               + " JOIN MaTxMint mtm ON mtm.tx = tx"
-              + " JOIN TxMetadata tm ON tm.tx = tx"
+              + " JOIN TransactionMetadata tm ON tm.txHash = tx.hash"
               + " JOIN MultiAsset ma ON ma = mtm.ident"
-              + " WHERE ma.fingerprint = :fingerprint AND tm.key = :label"
+              + " WHERE ma.fingerprint = :fingerprint AND tm.label = :label"
               + " ORDER BY mtm.id DESC LIMIT 1")
   String getTxMetadataToken(
       @Param("fingerprint") String fingerprint, @Param("label") BigInteger label);
