@@ -29,9 +29,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.LotData;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TransactionMetadataRepository;
 import org.cardanofoundation.explorer.api.service.impl.BolnisiMetadataServiceImpl;
-import org.cardanofoundation.explorer.common.entity.ledgersync.TxMetadata;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TransactionMetadata;
 import org.cardanofoundation.explorer.common.utils.HexUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +43,7 @@ class BolnisiMetadataServiceTest {
       "https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/{cid}";
   final String publicKeyUrl =
       "https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}";
-  @Mock private TxMetadataRepository txMetadataRepository;
+  @Mock private TransactionMetadataRepository transactionMetadataRepository;
   @Mock private WebClient webClient;
   @Mock private WebClient.RequestHeadersSpec requestHeadersMock;
   @Mock private WebClient.RequestHeadersUriSpec requestHeadersUriMock;
@@ -197,9 +197,13 @@ class BolnisiMetadataServiceTest {
         "{\"st\":\"georgianWine\",\"d\":{\"b\":{\"s\":[\"0xcba031e160496eba1d50709186008c30c85c9994c179fa85db3c3c19cbf3ed1d1015632ff1fcb3521af210217a0801d6a5cfe2f25e9806d54fed16ac00d2330d\",\"0x3fcd5f7cf8ec25a13710f14743794a62bfd974274c6d772ee38557435f5bbbc0ddd4e889888d67c1a630e329bec653d22091a666c5e3eb05057bf683a736180f\",\"0x98e19030d219f9e07ad3c5f2b9a2a90128beb1c8e4da127aa0acd6008ba7fd3f53bafcc608e9ab0df53b62d8d6cf7239aa334143668df72fd955ffb085809c0a\"],\"h\":\"0x7b22616c67223a224564445341227d\",\"pk\":\"0xd04938654a3540577f6721564da3471e62ca9da40fd7020b65ecaa9a9ff9a676\"}},\"t\":\"scm\",\"v\":\"1\",\"cid\":\"zCT5htke5RhzBU7mBTyDTvZgYajrkgzT4Eprkdxdrp9JtZYMHrbs\"}";
     String txHash = "69046f8d6510f888bf8b1682c6b29dd4d298dd478f9490abe0e0ee3e08b68e3d";
     String wineryId = "b";
-    when(txMetadataRepository.findAllByTxHash(txHash))
+    when(transactionMetadataRepository.findAllByTxHash(txHash))
         .thenReturn(
-            List.of(TxMetadata.builder().key(BigInteger.valueOf(1904)).json(jsonMetadata).build()));
+            List.of(
+                TransactionMetadata.builder()
+                    .label(BigInteger.valueOf(1904).toString())
+                    .body(jsonMetadata)
+                    .build()));
 
     String offChainRedisKey = getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
 
