@@ -39,6 +39,12 @@ public interface ScriptMapper {
     if (Boolean.TRUE.equals(smartContractInfo.getIsScriptSpend())) {
       scriptPurposeTypes.add(TxPurposeType.SPEND);
     }
+    if (Boolean.TRUE.equals(smartContractInfo.getIsScriptVote())) {
+      scriptPurposeTypes.add(TxPurposeType.VOTE);
+    }
+    if (Boolean.TRUE.equals(smartContractInfo.getIsScriptPropose())) {
+      scriptPurposeTypes.add(TxPurposeType.PROPOSE);
+    }
     return scriptPurposeTypes;
   }
 
@@ -51,6 +57,8 @@ public interface ScriptMapper {
       filterRequest.setIsScriptCert(txPurposeTypes.contains(TxPurposeType.CERT));
       filterRequest.setIsScriptSpend(txPurposeTypes.contains(TxPurposeType.SPEND));
       filterRequest.setIsScriptMint(txPurposeTypes.contains(TxPurposeType.MINT));
+      filterRequest.setIsScriptVote(txPurposeTypes.contains(TxPurposeType.VOTE));
+      filterRequest.setIsScriptPropose(txPurposeTypes.contains(TxPurposeType.PROPOSE));
     } else {
       filterRequest.setIsScriptAny(true);
     }
