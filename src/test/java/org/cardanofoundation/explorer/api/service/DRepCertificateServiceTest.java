@@ -21,13 +21,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
-import org.cardanofoundation.explorer.api.service.impl.DRepCertificateServiceImpl;
+import org.cardanofoundation.explorer.api.service.impl.DRepServiceImpl;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.DRepActionType;
 
 @ExtendWith(MockitoExtension.class)
 public class DRepCertificateServiceTest {
   @Mock DRepRegistrationRepository dRepRegistrationRepository;
-  @InjectMocks DRepCertificateServiceImpl dRepCertificateService;
+  @InjectMocks DRepServiceImpl dRepCertificateService;
 
   @Spy
   private DRepCertificateMapper dRepCertificateMapper =

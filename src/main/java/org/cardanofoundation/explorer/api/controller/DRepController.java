@@ -1,7 +1,5 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Sort;
@@ -20,7 +18,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
-import org.cardanofoundation.explorer.api.service.DRepCertificateService;
+import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -32,12 +30,12 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationVal
 @Tag(name = "drep", description = "The delegated representatives APIs")
 public class DRepController {
 
-  private final DRepCertificateService dRepCertificateService;
+  private final DRepService dRepService;
 
-  @GetMapping("/certificates-history/{drepHashOrDrepId}")
+  @GetMapping("/{drepHashOrDrepId}/certificates-history")
   @LogMessage
   @Operation(
-      summary = "Get list of DRep certificates history",
+      summary = "Get list of DRep certificate history",
       tags = {"drep"})
   public ResponseEntity<BaseFilterResponse<DRepCertificateHistoryResponse>>
       getTxDRepCertificatesHistory(
@@ -49,10 +47,8 @@ public class DRepController {
                   size = 20,
                   sort = {"createdAt"},
                   direction = Sort.Direction.DESC)
-              @Valid
               Pagination pagination) {
     return ResponseEntity.ok(
-        dRepCertificateService.getTxDRepCertificateHistory(
-            drepHashOrDrepId, pagination.toPageable()));
+        dRepService.getTxDRepCertificateHistory(drepHashOrDrepId, pagination.toPageable()));
   }
 }

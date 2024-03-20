@@ -15,11 +15,11 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
-import org.cardanofoundation.explorer.api.service.DRepCertificateService;
+import org.cardanofoundation.explorer.api.service.DRepService;
 
 @Service
 @RequiredArgsConstructor
-public class DRepCertificateServiceImpl implements DRepCertificateService {
+public class DRepServiceImpl implements DRepService {
 
   private final DRepRegistrationRepository dRepRegistrationRepository;
   private final DRepCertificateMapper dRepCertificateMapper;
