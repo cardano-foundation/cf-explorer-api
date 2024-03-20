@@ -35,7 +35,7 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
-import org.cardanofoundation.explorer.api.service.DRepCertificateService;
+import org.cardanofoundation.explorer.api.service.DRepService;
 
 @WebMvcTest(DRepController.class)
 @Import({
@@ -49,7 +49,7 @@ import org.cardanofoundation.explorer.api.service.DRepCertificateService;
 public class DrepControllerTest {
   @MockBean private AuthInterceptor authInterceptor;
   @Autowired private MockMvc mockMvc;
-  @MockBean private DRepCertificateService dRepCertificateService;
+  @MockBean private DRepService dRepService;
 
   @BeforeEach
   void preControllerTest() throws Exception {
@@ -79,13 +79,13 @@ public class DrepControllerTest {
             .build();
     Pageable pageable = PageRequest.of(0, 2, Sort.by("createdAt").descending());
 
-    when(dRepCertificateService.getTxDRepCertificateHistory(anyString(), any(Pageable.class)))
+    when(dRepService.getTxDRepCertificateHistory(anyString(), any(Pageable.class)))
         .thenReturn(
             new BaseFilterResponse<>(
                 List.of(dRepCertificateHistoryResponse1, dRepCertificateHistoryResponse2), 2L));
     mockMvc
         .perform(
-            get("/api/v1/dreps/certificates-history/{drepHashOrDrepId}", drepHash)
+            get("/api/v1/dreps/{drepHashOrDrepId}/certificates-history", drepHash)
                 .param("page", "0")
                 .param("size", "2")
                 .param("sort", "createdAt,DESC")
@@ -96,7 +96,7 @@ public class DrepControllerTest {
                 .string(containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")))
         .andExpect(jsonPath("$.data[0].blockNo").value(100L));
 
-    verify(dRepCertificateService).getTxDRepCertificateHistory(drepHash, pageable);
+    verify(dRepService).getTxDRepCertificateHistory(drepHash, pageable);
   }
 
   @Test
@@ -113,11 +113,11 @@ public class DrepControllerTest {
     // default
     Pageable pageable = PageRequest.of(0, 20, Sort.by("createdAt").descending());
 
-    when(dRepCertificateService.getTxDRepCertificateHistory(anyString(), any(Pageable.class)))
+    when(dRepService.getTxDRepCertificateHistory(anyString(), any(Pageable.class)))
         .thenReturn(new BaseFilterResponse<>(List.of(dRepCertificateHistoryResponse), 1L));
     mockMvc
         .perform(
-            get("/api/v1/dreps/certificates-history/{drepHashOrDrepId}", drepHash)
+            get("/api/v1/dreps/{drepHashOrDrepId}/certificates-history", drepHash)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(
@@ -125,6 +125,6 @@ public class DrepControllerTest {
                 .string(containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")))
         .andExpect(jsonPath("$.data[0].blockNo").value(100L));
 
-    verify(dRepCertificateService).getTxDRepCertificateHistory(drepHash, pageable);
+    verify(dRepService).getTxDRepCertificateHistory(drepHash, pageable);
   }
 }
