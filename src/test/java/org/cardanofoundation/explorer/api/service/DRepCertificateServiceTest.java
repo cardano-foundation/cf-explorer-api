@@ -51,11 +51,6 @@ public class DRepCertificateServiceTest {
         Mockito.mock(DRepCertificateProjection.class);
     when(dRepCertificateProjection2.getTxHash())
         .thenReturn("947e3c4acb552d04ad22259768d96420f43b8d354048ae596f2439fc9c099fca");
-    when(dRepCertificateProjection1.getTxIndex()).thenReturn(1L);
-    when(dRepCertificateProjection1.getEpochNo()).thenReturn(10);
-    when(dRepCertificateProjection1.getAbsoluteSlot()).thenReturn(1000L);
-    when(dRepCertificateProjection1.getBlockNo()).thenReturn(100L);
-    when(dRepCertificateProjection1.getSlotNo()).thenReturn(50L);
     when(dRepCertificateProjection2.getType()).thenReturn(DRepActionType.UPDATE_DREP_CERT);
 
     when(dRepRegistrationRepository.getDRepCertificateByDRepIdOrHash(drepHash))
