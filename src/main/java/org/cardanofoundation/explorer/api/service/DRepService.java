@@ -4,8 +4,11 @@ import org.springframework.data.domain.Pageable;
 
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 
 public interface DRepService {
   BaseFilterResponse<DRepCertificateHistoryResponse> getTxDRepCertificateHistory(
       String drepHashOrDrepId, Pageable pageable);
+
+  VotingProcedureChartResponse getVoteProcedureChart(String drepHashOrDrepId, String govActionType);
 }
