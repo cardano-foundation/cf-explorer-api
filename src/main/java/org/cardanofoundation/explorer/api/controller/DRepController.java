@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
+import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
@@ -61,7 +62,7 @@ public class DRepController {
       tags = {"drep"})
   public ResponseEntity<VotingProcedureChartResponse> getChartOfDRepVotesOnGovernanceAction(
       @PathVariable @Parameter(description = "dRepHash") String dRepHash,
-      @RequestParam(value = "govActionType") String govActionType) {
+      @RequestParam(value = "govActionType") GovActionType govActionType) {
     return ResponseEntity.ok(dRepService.getVoteProcedureChart(dRepHash, govActionType));
   }
 }

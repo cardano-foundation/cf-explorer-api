@@ -20,17 +20,7 @@ public interface VotingProcedureRepository
               + " vp.txHash as votingProcedureTxHash, vp.index as votingProcedureTxIndex, vp.blockTime as blockTime,vp.vote as vote"
               + " from VotingProcedure vp "
               + " join GovActionProposal gap on gap.txHash = vp.govActionTxHash and gap.index = vp.govActionIndex"
-              + " where vp.voterHash = :voterHash and gap.type = :govActionType")
+              + " where vp.voterHash = :voterHash and (:govActionType is null or gap.type = :govActionType)")
   List<VotingProcedureProjection> findVotingProcedureByVoterHashAndGovActionType(
       @Param("voterHash") String voterHash, @Param("govActionType") GovActionType govActionType);
-
-  @Query(
-      value =
-          "select gap.txHash as govActionTxHash, gap.index as govActionIndex, gap.type as govActionType, vp.voterHash as voterHash,"
-              + " vp.txHash as votingProcedureTxHash, vp.index as votingProcedureTxIndex, vp.blockTime as blockTime,vp.vote as vote"
-              + " from VotingProcedure vp "
-              + " join GovActionProposal gap on gap.txHash = vp.govActionTxHash and gap.index = vp.govActionIndex"
-              + " where vp.voterHash = :voterHash")
-  List<VotingProcedureProjection> findVotingProcedureByVoterHash(
-      @Param("voterHash") String voterHash);
 }

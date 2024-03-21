@@ -3,7 +3,8 @@ package org.cardanofoundation.explorer.api.service.impl;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -14,8 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import io.micrometer.common.util.StringUtils;
-
+import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
@@ -25,7 +25,6 @@ import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
 
 @Service
@@ -71,27 +70,25 @@ public class DRepServiceImpl implements DRepService {
   }
 
   @Override
-  public VotingProcedureChartResponse getVoteProcedureChart(String drepHash, String govActionType) {
+  public VotingProcedureChartResponse getVoteProcedureChart(
+      String drepHash, GovActionType govActionType) {
     List<VotingProcedureProjection> votingProcedureProjectionListResponse;
     Map<Vote, Long> counted;
-    List<VotingProcedureProjection> votingProcedureProjections;
-    if (StringUtils.isEmpty(govActionType) || govActionType.equalsIgnoreCase("all")) {
-      votingProcedureProjections =
-          votingProcedureRepository.findVotingProcedureByVoterHash(drepHash);
-    } else {
-      votingProcedureProjections =
-          votingProcedureRepository.findVotingProcedureByVoterHashAndGovActionType(
-              drepHash, GovActionType.valueOf(govActionType));
-    }
+    List<VotingProcedureProjection> votingProcedureProjections =
+        votingProcedureRepository.findVotingProcedureByVoterHashAndGovActionType(
+            drepHash,
+            govActionType.equals(GovActionType.ALL)
+                ? null
+                : org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                    .valueOf(govActionType.name()));
     votingProcedureProjectionListResponse =
         votingProcedureProjections.stream()
             .collect(
-                Collectors.groupingBy(
+                Collectors.toMap(
                     e -> Pair.of(e.getGovActionTxHash(), e.getGovActionIndex()),
-                    Collectors.collectingAndThen(
-                        Collectors.maxBy(
-                            Comparator.comparing(VotingProcedureProjection::getBlockTime)),
-                        Optional::get)))
+                    Function.identity(),
+                    BinaryOperator.maxBy(
+                        Comparator.comparing(VotingProcedureProjection::getBlockTime))))
             .values()
             .stream()
             .toList();
@@ -102,10 +99,7 @@ public class DRepServiceImpl implements DRepService {
 
     return VotingProcedureChartResponse.builder()
         .dRepHash(drepHash)
-        .govActionType(
-            StringUtils.isEmpty(govActionType) || govActionType.equalsIgnoreCase("all")
-                ? "all"
-                : govActionType)
+        .govActionType(govActionType)
         .numberOfYesVote(counted.get(Vote.YES))
         .numberOfNoVotes(counted.get(Vote.NO))
         .numberOfAbstainVotes(counted.get(Vote.ABSTAIN))
