@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigInteger;
 import java.sql.Date;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
@@ -35,6 +37,8 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
 
 @WebMvcTest(DRepController.class)
@@ -126,5 +130,56 @@ public class DrepControllerTest {
         .andExpect(jsonPath("$.data[0].blockNo").value(100L));
 
     verify(dRepService).getTxDRepCertificateHistory(drepHash, pageable);
+  }
+
+  @Test
+  void testGetDrepDetails() throws Exception {
+    String drepHash = "43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e";
+
+    DRepDetailsResponse dRepDetailsResponse =
+        DRepDetailsResponse.builder()
+            .drepId("dRepId")
+            .drepHash(drepHash)
+            .activeVoteStake(BigInteger.TEN)
+            .delegators(10)
+            .liveStake(BigInteger.TEN)
+            .votingParticipation(BigInteger.TEN.add(BigInteger.TWO))
+            .build();
+
+    when(dRepService.getDrepDetails(drepHash)).thenReturn(dRepDetailsResponse);
+    mockMvc
+        .perform(
+            get("/api/v1/dreps/{drepHashOrDrepId}/drep-details", drepHash)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(
+            content()
+                .string(
+                    containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")));
+  }
+
+  @Test
+  void testGetChartDRepVoteOnGovernanceAction() throws Exception {
+    String dRepHash = "43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e";
+    VotingProcedureChartResponse votingProcedureChartResponse =
+        VotingProcedureChartResponse.builder()
+            .govActionType(GovActionType.INFO_ACTION)
+            .dRepHash(dRepHash)
+            .numberOfYesVote(10L)
+            .numberOfNoVotes(0L)
+            .numberOfAbstainVotes(5L)
+            .build();
+    when(dRepService.getVoteProcedureChart(dRepHash, GovActionType.INFO_ACTION))
+        .thenReturn(votingProcedureChartResponse);
+    mockMvc
+        .perform(
+            get("/api/v1/dreps/{dRepHash}/vote-procedure-chart", dRepHash)
+                .param("govActionType", "INFO_ACTION")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(
+            content()
+                .string(containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")))
+        .andExpect(jsonPath("$.numberOfYesVote").value(10L));
   }
 }
