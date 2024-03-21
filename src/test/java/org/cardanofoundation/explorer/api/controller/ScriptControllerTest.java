@@ -76,7 +76,7 @@ public class ScriptControllerTest {
     SmartContractFilterResponse smartContractFilterResponse =
         SmartContractFilterResponse.builder()
             .scriptHash("hash")
-            .scriptVersion(ScriptType.PLUTUSV1)
+            .scriptVersion(ScriptType.PLUTUSV3)
             .txPurposes(Set.of(TxPurposeType.MINT))
             .txCount(1L)
             .build();
@@ -95,7 +95,7 @@ public class ScriptControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").exists())
         .andExpect(jsonPath("$.data[0].scriptHash").value("hash"))
-        .andExpect(jsonPath("$.data[0].scriptVersion").value("PLUTUSV1"))
+        .andExpect(jsonPath("$.data[0].scriptVersion").value("PLUTUSV3"))
         .andExpect(jsonPath("$.data[0].txPurposes[0]").value("MINT"))
         .andExpect(jsonPath("$.data[0].txCount").value("1"));
   }
