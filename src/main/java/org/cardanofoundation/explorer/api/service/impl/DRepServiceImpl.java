@@ -17,11 +17,14 @@ import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
+import org.cardanofoundation.explorer.api.mapper.DRepMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
+import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
@@ -35,6 +38,8 @@ public class DRepServiceImpl implements DRepService {
   private final DRepRegistrationRepository dRepRegistrationRepository;
   private final DRepCertificateMapper dRepCertificateMapper;
   private final VotingProcedureRepository votingProcedureRepository;
+  private final DrepInfoRepository drepInfoRepository;
+  private final DRepMapper dRepMapper;
 
   @Override
   public BaseFilterResponse<DRepCertificateHistoryResponse> getTxDRepCertificateHistory(
@@ -104,5 +109,10 @@ public class DRepServiceImpl implements DRepService {
         .numberOfNoVotes(counted.get(Vote.NO))
         .numberOfAbstainVotes(counted.get(Vote.ABSTAIN))
         .build();
+  }
+
+  @Override
+  public DRepDetailsResponse getDrepDetails(String dRepHashOrDRepId) {
+    return dRepMapper.fromDrepInfo(drepInfoRepository.findByDrepHashOrDrepId(dRepHashOrDRepId));
   }
 }
