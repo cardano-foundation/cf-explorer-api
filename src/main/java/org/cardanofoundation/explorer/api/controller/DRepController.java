@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Sort;
@@ -20,6 +22,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
@@ -64,5 +67,15 @@ public class DRepController {
       @PathVariable @Parameter(description = "dRepHash") String dRepHash,
       @RequestParam(value = "govActionType") GovActionType govActionType) {
     return ResponseEntity.ok(dRepService.getVoteProcedureChart(dRepHash, govActionType));
+  }
+
+  @GetMapping("/{dRepHashOrDRepId}/drep-details")
+  @LogMessage
+  @Operation(
+      summary = "Get details of Delegated Representative (DRep)",
+      tags = {"drep"})
+  public ResponseEntity<DRepDetailsResponse> getDRepDetails(
+      @Valid @PathVariable @Parameter(description = "dRepHashOrDRepId") String dRepHashOrDRepId) {
+    return ResponseEntity.ok(dRepService.getDrepDetails(dRepHashOrDRepId));
   }
 }
