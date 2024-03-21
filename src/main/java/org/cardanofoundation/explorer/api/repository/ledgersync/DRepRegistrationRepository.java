@@ -22,7 +22,7 @@ public interface DRepRegistrationRepository
               + " dr.blockTime as blockTime, b.slotNo as absoluteSlot"
               + " from DRepRegistrationEntity dr"
               + " join Block b on b.blockNo = dr.blockNumber"
-              + " where dr.drepId = :drepHashOrDrepId or dr.txHash = :drepHashOrDrepId"
+              + " where dr.drepId = :drepHashOrDrepId or dr.drepHash = :drepHashOrDrepId"
               + " order by blockTime desc")
   List<DRepCertificateProjection> getDRepCertificateByDRepIdOrHash(
       @Param("drepHashOrDrepId") String drepHashOrDrepId);
