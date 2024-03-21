@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
+
 @Getter
 @Setter
 @Builder
@@ -14,7 +16,7 @@ import lombok.Setter;
 public class VotingProcedureChartResponse {
   private String dRepHash;
 
-  private String govActionType;
+  private GovActionType govActionType;
 
   private Long numberOfYesVote;
   private Long numberOfNoVotes;
