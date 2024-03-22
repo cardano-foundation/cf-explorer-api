@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.DRepType;
 
 @Data
 @Builder
@@ -35,5 +36,8 @@ public class DRepDetailsResponse {
   @Enumerated(EnumType.STRING)
   private DRepStatus status;
 
-  @Builder.Default private BigInteger votingParticipation = BigInteger.ZERO;
+  @Enumerated(EnumType.STRING)
+  private DRepType type;
+
+  private BigInteger votingParticipation;
 }
