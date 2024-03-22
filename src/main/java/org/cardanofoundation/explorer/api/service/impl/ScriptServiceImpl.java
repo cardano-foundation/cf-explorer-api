@@ -412,6 +412,8 @@ public class ScriptServiceImpl implements ScriptService {
             filterRequest.getIsScriptCert(),
             filterRequest.getIsScriptSpend(),
             filterRequest.getIsScriptMint(),
+            filterRequest.getIsScriptVote(),
+            filterRequest.getIsScriptPropose(),
             filterRequest.getIsScriptAny(),
             filterRequest.getIsScriptNone(),
             pageable);
@@ -428,7 +430,8 @@ public class ScriptServiceImpl implements ScriptService {
             .orElseThrow(() -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND));
 
     if (!script.getType().equals(ScriptType.PLUTUSV1)
-        && !script.getType().equals(ScriptType.PLUTUSV2)) {
+        && !script.getType().equals(ScriptType.PLUTUSV2)
+        && !script.getType().equals(ScriptType.PLUTUSV3)) {
       throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
     }
 
@@ -519,7 +522,8 @@ public class ScriptServiceImpl implements ScriptService {
             .orElseThrow(() -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND));
     boolean isSmartContract =
         ScriptType.PLUTUSV1.equals(script.getType())
-            || ScriptType.PLUTUSV2.equals(script.getType());
+            || ScriptType.PLUTUSV2.equals(script.getType())
+            || ScriptType.PLUTUSV3.equals(script.getType());
     ScriptSearchResponse scriptSearchResponse =
         ScriptSearchResponse.builder().scriptHash(script.getHash()).build();
 

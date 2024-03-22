@@ -180,6 +180,8 @@ class ScriptServiceTest {
             .isScriptAny(false)
             .isScriptReward(false)
             .isScriptCert(false)
+            .isScriptVote(false)
+            .isScriptPropose(false)
             .build();
 
     SmartContractInfo smartContractInfo =
@@ -197,6 +199,8 @@ class ScriptServiceTest {
             filterRequest.getIsScriptCert(),
             filterRequest.getIsScriptSpend(),
             filterRequest.getIsScriptMint(),
+            filterRequest.getIsScriptVote(),
+            filterRequest.getIsScriptPropose(),
             filterRequest.getIsScriptAny(),
             filterRequest.getIsScriptNone(),
             pageable))
@@ -213,6 +217,59 @@ class ScriptServiceTest {
     Assertions.assertTrue(response.getData().get(0).getTxPurposes().contains(TxPurposeType.SPEND));
     Assertions.assertTrue(response.getData().get(0).getTxPurposes().contains(TxPurposeType.MINT));
     Assertions.assertEquals(ScriptType.PLUTUSV1, response.getData().get(0).getScriptVersion());
+  }
+
+  @Test
+  void testGetSmartContracts_withScriptVersionIsPlutusV3() {
+    // Given
+    Pageable pageable = PageRequest.of(0, 1);
+    SmartContractFilterRequest filterRequest =
+        SmartContractFilterRequest.builder()
+            .txPurpose(Set.of(TxPurposeType.VOTE))
+            .scriptVersion(ScriptType.PLUTUSV3)
+            .isScriptMint(false)
+            .isScriptSpend(false)
+            .isScriptNone(false)
+            .isScriptAny(false)
+            .isScriptReward(false)
+            .isScriptCert(false)
+            .isScriptVote(true)
+            .isScriptPropose(false)
+            .build();
+
+    SmartContractInfo smartContractInfo =
+        SmartContractInfo.builder()
+            .scriptHash("e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6")
+            .type(ScriptType.PLUTUSV3)
+            .txCount(10L)
+            .isScriptVote(true)
+            .build();
+
+    when(smartContractInfoRepository.findAllByFilterRequest(
+            filterRequest.getScriptVersion(),
+            filterRequest.getIsScriptReward(),
+            filterRequest.getIsScriptCert(),
+            filterRequest.getIsScriptSpend(),
+            filterRequest.getIsScriptMint(),
+            filterRequest.getIsScriptVote(),
+            filterRequest.getIsScriptPropose(),
+            filterRequest.getIsScriptAny(),
+            filterRequest.getIsScriptNone(),
+            pageable))
+        .thenReturn(new PageImpl<>(List.of(smartContractInfo)));
+
+    var response = scriptService.getSmartContracts(filterRequest, pageable);
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals(
+        "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6",
+        response.getData().get(0).getScriptHash());
+    Assertions.assertEquals(10L, response.getData().get(0).getTxCount());
+    Assertions.assertFalse(response.getData().get(0).getTxPurposes().contains(TxPurposeType.SPEND));
+    Assertions.assertFalse(response.getData().get(0).getTxPurposes().contains(TxPurposeType.MINT));
+    Assertions.assertTrue(response.getData().get(0).getTxPurposes().contains(TxPurposeType.VOTE));
+    Assertions.assertEquals(ScriptType.PLUTUSV3, response.getData().get(0).getScriptVersion());
   }
 
   @Test
@@ -336,6 +393,24 @@ class ScriptServiceTest {
                 Script.builder()
                     .hash("9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79")
                     .type(ScriptType.PLUTUSV1)
+                    .build()));
+
+    var response =
+        scriptService.searchScript("9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79");
+    Assertions.assertEquals(
+        "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79", response.getScriptHash());
+    Assertions.assertTrue(response.isSmartContract());
+    Assertions.assertFalse(response.isNativeScript());
+  }
+
+  @Test
+  void searchScript_shouldReturnSmartContractResponseWithTypePlutus3() {
+    when(scriptRepository.findByHash("9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79"))
+        .thenReturn(
+            Optional.of(
+                Script.builder()
+                    .hash("9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79")
+                    .type(ScriptType.PLUTUSV3)
                     .build()));
 
     var response =

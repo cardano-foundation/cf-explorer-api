@@ -142,7 +142,7 @@ public class SearchServiceTest {
   @Test
   void testSearch_thenReturnMatchScript() {
     String query = "query";
-    Script script = Script.builder().hash(query).type(ScriptType.PLUTUSV1).build();
+    Script script = Script.builder().hash(query).type(ScriptType.PLUTUSV3).build();
 
     when(scriptRepository.findByHash(query)).thenReturn(Optional.of(script));
     var actual = searchService.search(query);
