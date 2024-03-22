@@ -19,13 +19,17 @@ public interface SmartContractInfoRepository extends JpaRepository<SmartContract
           + "(:isScriptCert = sci.isScriptCert AND sci.isScriptCert = TRUE) OR "
           + "(:isScriptMint = sci.isScriptMint AND sci.isScriptMint = TRUE) OR "
           + "(:isScriptReward = sci.isScriptReward AND sci.isScriptReward = TRUE) OR "
-          + "(:isScriptSpend= sci.isScriptSpend AND sci.isScriptSpend = TRUE)) ")
+          + "(:isScriptSpend = sci.isScriptSpend AND sci.isScriptSpend = TRUE) OR "
+          + "(:isScriptVote = sci.isScriptVote AND sci.isScriptVote = TRUE) OR "
+          + "(:isScriptPropose = sci.isScriptPropose AND sci.isScriptPropose = TRUE))")
   Page<SmartContractInfo> findAllByFilterRequest(
       @Param("scriptType") ScriptType scriptType,
       @Param("isScriptReward") Boolean isScriptReward,
       @Param("isScriptCert") Boolean isScriptCert,
       @Param("isScriptSpend") Boolean isScriptSpend,
       @Param("isScriptMint") Boolean isScriptMint,
+      @Param("isScriptVote") Boolean isScriptVote,
+      @Param("isScriptPropose") Boolean isScriptPropose,
       @Param("isScriptAny") Boolean isScriptAny,
       @Param("isScriptNone") Boolean isScriptNone,
       Pageable pageable);

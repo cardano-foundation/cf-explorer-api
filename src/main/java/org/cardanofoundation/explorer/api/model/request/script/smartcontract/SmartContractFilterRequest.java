@@ -27,6 +27,8 @@ public class SmartContractFilterRequest {
   @JsonIgnore private Boolean isScriptCert;
   @JsonIgnore private Boolean isScriptSpend;
   @JsonIgnore private Boolean isScriptMint;
+  @JsonIgnore private Boolean isScriptVote;
+  @JsonIgnore private Boolean isScriptPropose;
   @JsonIgnore private Boolean isScriptAny;
   @JsonIgnore private Boolean isScriptNone;
 }
