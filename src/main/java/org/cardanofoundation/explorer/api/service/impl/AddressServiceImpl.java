@@ -97,7 +97,8 @@ public class AddressServiceImpl implements AddressService {
           .ifPresent(
               script -> {
                 if (ScriptType.PLUTUSV1.equals(script.getType())
-                    || ScriptType.PLUTUSV2.equals(script.getType())) {
+                    || ScriptType.PLUTUSV2.equals(script.getType())
+                    || ScriptType.PLUTUSV3.equals(script.getType())) {
                   addressResponse.setAssociatedSmartContract(Boolean.TRUE);
                 } else {
                   addressResponse.setAssociatedNativeScript(Boolean.TRUE);
