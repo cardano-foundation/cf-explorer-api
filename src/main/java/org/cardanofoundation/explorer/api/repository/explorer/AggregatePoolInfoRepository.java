@@ -20,7 +20,7 @@ public interface AggregatePoolInfoRepository extends JpaRepository<AggregatePool
 
   @Query(
       value =
-          "SELECT ap.poolId as poolId, COALESCE(ap.delegatorCount, 0) as numberDelegators, "
+          "SELECT ap.poolId as poolId, "
               + "COALESCE(ap.blockInEpoch, 0) as epochBlock, "
               + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock "
               + "from AggregatePoolInfo ap "
