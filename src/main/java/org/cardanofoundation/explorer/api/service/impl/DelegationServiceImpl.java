@@ -274,7 +274,10 @@ public class DelegationServiceImpl implements DelegationService {
       String queryParam, Pageable pageable, Set<Long> retiredIds, int epochNo) {
     List<String> sortProperties = pageable.getSort().stream().map(Sort.Order::getProperty).toList();
     boolean isSortedOnAggTable =
-        sortProperties.contains("epochBlock") || sortProperties.contains("lifetimeBlock");
+        sortProperties.contains("epochBlock")
+            || sortProperties.contains("lifetimeBlock")
+            || sortProperties.contains("votingPower")
+            || sortProperties.contains("governanceParticipationRate");
     boolean isQueryEmpty = DataUtil.isNullOrEmpty(queryParam);
     boolean isKoiOs = fetchRewardDataService.useKoios();
     Page<PoolListProjection> poolInfoProjections;
@@ -336,12 +339,23 @@ public class DelegationServiceImpl implements DelegationService {
 
     List<PoolResponse> poolResponseList =
         mapAggPoolInfoToPoolResponse(retiredIds, poolListProjections);
+    Set<Long> idsInList =
+        poolResponseList.stream().map(PoolResponse::getId).collect(Collectors.toSet());
+    retiredIds.retainAll(idsInList);
     if (sortProperties.contains("epochBlock")) {
       poolResponseList.sort(
           Comparator.comparing(PoolResponse::getEpochBlock).thenComparing(PoolResponse::getPoolId));
     } else if (sortProperties.contains("lifetimeBlock")) {
       poolResponseList.sort(
           Comparator.comparing(PoolResponse::getLifetimeBlock)
+              .thenComparing(PoolResponse::getPoolId));
+    } else if (sortProperties.contains("votingPower")) {
+      poolResponseList.sort(
+          Comparator.comparing(PoolResponse::getVotingPower)
+              .thenComparing(PoolResponse::getPoolId));
+    } else if (sortProperties.contains("governanceParticipationRate")) {
+      poolResponseList.sort(
+          Comparator.comparing(PoolResponse::getGovernanceParticipationRate)
               .thenComparing(PoolResponse::getPoolId));
     }
 
@@ -370,12 +384,15 @@ public class DelegationServiceImpl implements DelegationService {
    */
   private List<PoolResponse> mapAggPoolInfoToPoolResponse(
       Set<Long> retiredIds, List<PoolListProjection> poolListProjections) {
-    List<Long> poolIds = poolListProjections.stream().map(PoolListProjection::getPoolId).toList();
+    List<Long> poolIds =
+        new ArrayList<>(poolListProjections.stream().map(PoolListProjection::getPoolId).toList());
     Map<Long, AggregatePoolInfo> aggPoolInfoMap =
         aggregatePoolInfoRepository.getAllByPoolIdIn(poolIds).stream()
             .collect(Collectors.toMap(AggregatePoolInfo::getPoolId, Function.identity()));
 
+    poolIds.removeIf(id -> !aggPoolInfoMap.containsKey(id));
     return poolListProjections.stream()
+        .filter(projection -> aggPoolInfoMap.containsKey(projection.getPoolId()))
         .map(
             projection -> {
               AggregatePoolInfo aggPoolInfo = aggPoolInfoMap.get(projection.getPoolId());
@@ -394,8 +411,14 @@ public class DelegationServiceImpl implements DelegationService {
                           ? null
                           : projection.getSaturation())
                   .lifetimeBlock(aggPoolInfo.getBlockLifeTime())
-                  .votingPower(aggPoolInfo.getVotingPower())
-                  .governanceParticipationRate(aggPoolInfo.getGovernanceParticipationRate())
+                  .votingPower(
+                      Objects.nonNull(aggPoolInfo.getVotingPower())
+                          ? aggPoolInfo.getVotingPower()
+                          : 0)
+                  .governanceParticipationRate(
+                      Objects.nonNull(aggPoolInfo.getGovernanceParticipationRate())
+                          ? aggPoolInfo.getGovernanceParticipationRate()
+                          : 0)
                   .epochBlock(aggPoolInfo.getBlockInEpoch())
                   .retired(retiredIds.contains(projection.getPoolId()))
                   .build();
@@ -413,9 +436,9 @@ public class DelegationServiceImpl implements DelegationService {
                 ? poolHashRepository.findAllByPoolIdIn(poolIds, epochNo)
                 : poolHashRepository.findAllByPoolIdIn(poolIds))
             .stream().collect(Collectors.toMap(PoolListProjection::getPoolId, Function.identity()));
-
     poolResponseList =
         poolListProjections.stream()
+            .filter(projection -> poolListProjectionMap.containsKey(projection.getPoolId()))
             .map(
                 pool -> {
                   PoolListProjection poolListProjection =
@@ -437,9 +460,14 @@ public class DelegationServiceImpl implements DelegationService {
                       .lifetimeBlock(pool.getLifetimeBlock())
                       .epochBlock(pool.getEpochBlock())
                       .retired(retiredIds.contains(pool.getPoolId()))
-                      .votingPower(poolListProjection.getVotingPoweer())
+                      .votingPower(
+                          Objects.nonNull(poolListProjection.getVotingPower())
+                              ? poolListProjection.getVotingPower()
+                              : 0)
                       .governanceParticipationRate(
-                          poolListProjection.getGovernanceParticipationRate())
+                          Objects.nonNull(poolListProjection.getGovernanceParticipationRate())
+                              ? poolListProjection.getGovernanceParticipationRate()
+                              : 0)
                       .build();
                 })
             .collect(Collectors.toList());
