@@ -45,9 +45,9 @@ public class PoolResponse implements Serializable {
 
   private Integer lifetimeBlock;
 
-  @Builder.Default private Integer votingPower = 0;
+  private Integer votingPower;
 
-  @Builder.Default private Integer governanceParticipationRate = 0;
+  private Integer governanceParticipationRate;
 
   private boolean retired;
 }

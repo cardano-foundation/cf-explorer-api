@@ -22,7 +22,7 @@ public interface PoolListProjection {
 
   Double getSaturation();
 
-  Integer getVotingPoweer();
+  Integer getVotingPower();
 
   Integer getGovernanceParticipationRate();
 }
