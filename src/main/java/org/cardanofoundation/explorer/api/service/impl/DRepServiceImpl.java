@@ -2,27 +2,39 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
+import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class DRepServiceImpl implements DRepService {
 
   private final DRepRegistrationRepository dRepRegistrationRepository;
   private final DRepCertificateMapper dRepCertificateMapper;
+  private final VotingProcedureRepository votingProcedureRepository;
 
   @Override
   public BaseFilterResponse<DRepCertificateHistoryResponse> getTxDRepCertificateHistory(
@@ -55,5 +67,42 @@ public class DRepServiceImpl implements DRepService {
 
     return new BaseFilterResponse<>(
         BaseFilterResponse.getPageImpl(dRepCertificateHistoryResponses, pageable));
+  }
+
+  @Override
+  public VotingProcedureChartResponse getVoteProcedureChart(
+      String drepHash, GovActionType govActionType) {
+    List<VotingProcedureProjection> votingProcedureProjectionListResponse;
+    Map<Vote, Long> counted;
+    List<VotingProcedureProjection> votingProcedureProjections =
+        votingProcedureRepository.findVotingProcedureByVoterHashAndGovActionType(
+            drepHash,
+            govActionType.equals(GovActionType.ALL)
+                ? null
+                : org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                    .valueOf(govActionType.name()));
+    votingProcedureProjectionListResponse =
+        votingProcedureProjections.stream()
+            .collect(
+                Collectors.toMap(
+                    e -> Pair.of(e.getGovActionTxHash(), e.getGovActionIndex()),
+                    Function.identity(),
+                    BinaryOperator.maxBy(
+                        Comparator.comparing(VotingProcedureProjection::getBlockTime))))
+            .values()
+            .stream()
+            .toList();
+    counted =
+        votingProcedureProjectionListResponse.stream()
+            .collect(
+                Collectors.groupingBy(VotingProcedureProjection::getVote, Collectors.counting()));
+
+    return VotingProcedureChartResponse.builder()
+        .dRepHash(drepHash)
+        .govActionType(govActionType)
+        .numberOfYesVote(counted.get(Vote.YES))
+        .numberOfNoVotes(counted.get(Vote.NO))
+        .numberOfAbstainVotes(counted.get(Vote.ABSTAIN))
+        .build();
   }
 }
