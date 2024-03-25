@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.GovActionProposal;
 import org.cardanofoundation.explorer.common.entity.ledgersync.compositeKey.GovActionProposalId;
@@ -42,4 +44,16 @@ public interface GovernanceActionRepository
       @Param("to") Timestamp to,
       @Param("slotDRep") Long slotDRep,
       Pageable pageable);
+
+  @Query(
+      value =
+          "select gap.txHash as txHash, gap.index as index, gap.anchorHash as anchorHash, gap.anchorUrl as anchorUrl,"
+              + " gap.type as type, gap.details as details, vp.vote as vote, vp.slot as slot, vp.blockTime as blockTime, vp.voterHash as voterHash, gap.epoch as epoch"
+              + " from GovActionProposal gap "
+              + " left join VotingProcedure vp on (gap.txHash = vp.govActionTxHash and gap.index = vp.govActionIndex)"
+              + " where vp.voterHash = :dRepHashOrPoolHash and gap.txHash = :txHash and gap.index = :index")
+  List<GovActionDetailsProjection> getGovActionDetailsByTxHashAndIndex(
+      @Param("txHash") String txHash,
+      @Param("index") Integer index,
+      @Param("dRepHashOrPoolHash") String dRepHashOrPoolHash);
 }

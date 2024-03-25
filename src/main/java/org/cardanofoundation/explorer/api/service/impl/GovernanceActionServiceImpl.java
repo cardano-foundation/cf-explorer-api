@@ -1,8 +1,11 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.sql.Timestamp;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -16,10 +19,16 @@ import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.common.enumeration.VoteType;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetails;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
+import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
@@ -37,6 +46,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final PoolHashRepository poolHashRepository;
 
   private final GovernanceActionMapper governanceActionMapper;
+
+  private final EpochRepository epochRepository;
 
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
@@ -96,5 +107,55 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     govActionResponse.setTotalPages(governanceActionProjections.getTotalPages());
     govActionResponse.setCurrentPage(pageable.getPageNumber());
     return govActionResponse;
+  }
+
+  @Override
+  public GovernanceActionDetailsResponse getGovernanceActionDetails(
+      String dRepHashOrPoolHash, GovernanceActionRequest governanceActionRequest) {
+    List<GovActionDetailsProjection> govActionDetailsProjections =
+        governanceActionRepository.getGovActionDetailsByTxHashAndIndex(
+            governanceActionRequest.getTxHash(),
+            governanceActionRequest.getIndex(),
+            dRepHashOrPoolHash);
+    List<GovernanceActionDetails> governanceActionDetails =
+        new java.util.ArrayList<>(
+            govActionDetailsProjections.stream()
+                .map(governanceActionMapper::fromGovActionDetailsProjection)
+                .sorted(Comparator.comparing(GovernanceActionDetails::getBlockTime).reversed())
+                .toList());
+    GovernanceActionDetailsResponse response;
+    if (governanceActionDetails.isEmpty()) {
+      response =
+          governanceActionMapper.fromGovActionDetailsWithHistoryVotes(
+              governanceActionDetails.get(0));
+      response.setVoteType(VoteType.NONE);
+      return response;
+    }
+
+    Integer epoch = governanceActionDetails.get(0).getEpoch();
+
+    Timestamp endDate = epochRepository.getEndDateByEpochNo(epoch);
+
+    Optional<GovernanceActionDetails> governanceActionDetailsOptional =
+        governanceActionDetails.stream()
+            .max(Comparator.comparing(GovernanceActionDetails::getBlockTime));
+
+    response =
+        governanceActionMapper.fromGovActionDetailsWithHistoryVotes(
+            governanceActionDetailsOptional.get());
+    response.setExpiryDate(new Date(endDate.getTime()));
+    response.setHistoryVotes(
+        governanceActionDetails.stream()
+            .map(
+                governanceActionDetail ->
+                    HistoryVote.builder()
+                        .vote(Vote.valueOf(governanceActionDetail.getVoteType().toString()))
+                        .timestamp(
+                            governanceActionDetail.getBlockTime() == null
+                                ? null
+                                : new Date(governanceActionDetail.getBlockTime() * 1000))
+                        .build())
+            .collect(Collectors.toList()));
+    return response;
   }
 }

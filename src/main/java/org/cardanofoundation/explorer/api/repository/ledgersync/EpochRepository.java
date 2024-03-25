@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,4 +58,7 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
               + "FROM Epoch e "
               + "WHERE e.no BETWEEN :min AND :max")
   List<EpochTimeProjection> findEpochTime(@Param("min") Integer min, @Param("max") Integer max);
+
+  @Query(value = "select e.endTime from Epoch e where e.no = :epochNo")
+  Timestamp getEndDateByEpochNo(@Param("epochNo") Integer epochNo);
 }
