@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
@@ -84,7 +83,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                   GovernanceActionResponse governanceActionResponse =
                       governanceActionMapper.fromGovernanceActionProjection(
                           governanceActionProjection);
-                  governanceActionResponse.setVotingPower(BigInteger.TEN);
                   governanceActionResponse.setStatus(GovActionStatus.OPEN);
                   return governanceActionResponse;
                 })
