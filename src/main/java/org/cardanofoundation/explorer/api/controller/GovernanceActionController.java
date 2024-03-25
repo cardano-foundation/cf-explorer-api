@@ -17,7 +17,9 @@ import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 
@@ -34,7 +36,7 @@ public class GovernanceActionController {
   @LogMessage
   @Operation(
       summary = "Get governance action that vote by DRep or pool",
-      tags = {"drep"})
+      tags = {"gov-actions"})
   public ResponseEntity<BaseFilterResponse<GovernanceActionResponse>> getGovActionByFilter(
       @PathVariable @Parameter(description = "The DRep hash or pool hash")
           String dRepHashOrPoolHash,
@@ -43,5 +45,19 @@ public class GovernanceActionController {
     return ResponseEntity.ok(
         governanceActionService.getGovernanceActions(
             dRepHashOrPoolHash, governanceActionFilter, pageable));
+  }
+
+  @GetMapping("{dRepHashOrPoolHash}/voting-procedure-detail")
+  @LogMessage
+  @Operation(
+      summary = "Get governance action that vote by DRep or pool",
+      tags = {"gov-actions"})
+  public ResponseEntity<GovernanceActionDetailsResponse> getGovActionByTxHashAndVoterHash(
+      @PathVariable @Parameter(description = "The DRep hash or pool hash")
+          String dRepHashOrPoolHash,
+      @ParameterObject GovernanceActionRequest governanceActionRequest) {
+    return ResponseEntity.ok(
+        governanceActionService.getGovernanceActionDetails(
+            dRepHashOrPoolHash, governanceActionRequest));
   }
 }
