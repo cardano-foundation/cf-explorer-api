@@ -26,4 +26,9 @@ public interface DRepRegistrationRepository
               + " order by blockTime desc")
   List<DRepCertificateProjection> getDRepCertificateByDRepIdOrHash(
       @Param("drepHashOrDrepId") String drepHashOrDrepId);
+
+  @Query(
+      value =
+          " select min(dr.slot) from DRepRegistrationEntity dr where dr.drepHash = :drepHashOrDrepId or dr.drepId = :drepHashOrDrepId")
+  Long getSlotOfDRepRegistration(@Param("drepHashOrDrepId") String drepHashOrDrepId);
 }
