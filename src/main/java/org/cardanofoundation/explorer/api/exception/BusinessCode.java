@@ -31,7 +31,9 @@ public enum BusinessCode implements ErrorCode {
   REPORT_LIMIT_REACHED("400-REPORT_LIMIT_REACHED", "Report limit reached"),
   OUT_OF_QUERY_LIMIT("400-OUT_OF_QUERY_LIMIT", "Out of query limit"),
   EXTERNAL_API_IS_NOT_AVAILABLE(
-      "500-EXTERNAL_API_IS_NOT_AVAILABLE", "External API is not available");
+      "500-EXTERNAL_API_IS_NOT_AVAILABLE", "External API is not available"),
+
+  GOVERNANCE_ACTION_NOT_FOUND("404-GOVERNANCE_ACTION_NOT_FOUND", "Governance action not found");
 
   private final String code;
   private final String desc;
