@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
-import java.sql.Timestamp;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -34,19 +33,19 @@ public interface GovernanceActionRepository
               + " and vp.voterHash = :voterHash)"
               + " where (:type is null or gap.type = :type)"
               + " and (:gapStatus is null or gapInfo.status = :gapStatus)"
-              + " and (:isRepeatVote is null or vp.repeatVote = :isRepeatVote)"
-              + " and (:vote is null or (vp.vote = :vote and vp.slot >= :slotDRep))"
-              + " and (cast(:from as date) is null or vp.blockTime >= :from)"
-              + " and (cast(:to as date) is null or vp.blockTime <= :to)")
+              + " and (:vote is null or (vp.vote = :vote and vp.slot >= :slot))"
+              + " and (:isRepeatVote is null or (vp.repeatVote = :isRepeatVote))"
+              + " and (vp.blockTime >= :from)"
+              + " and (vp.blockTime <= :to)")
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,
       @Param("vote") Vote vote,
       @Param("voterHash") String dRepHash,
       @Param("type") GovActionType type,
-      @Param("from") Timestamp from,
-      @Param("to") Timestamp to,
-      @Param("slotDRep") Long slotDRep,
+      @Param("from") Long from,
+      @Param("to") Long to,
+      @Param("slot") Long slot,
       Pageable pageable);
 
   @Query(
