@@ -411,14 +411,8 @@ public class DelegationServiceImpl implements DelegationService {
                           ? null
                           : projection.getSaturation())
                   .lifetimeBlock(aggPoolInfo.getBlockLifeTime())
-                  .votingPower(
-                      Objects.nonNull(aggPoolInfo.getVotingPower())
-                          ? aggPoolInfo.getVotingPower()
-                          : 0)
-                  .governanceParticipationRate(
-                      Objects.nonNull(aggPoolInfo.getGovernanceParticipationRate())
-                          ? aggPoolInfo.getGovernanceParticipationRate()
-                          : 0)
+                  .votingPower(aggPoolInfo.getVotingPower())
+                  .governanceParticipationRate(aggPoolInfo.getGovernanceParticipationRate())
                   .epochBlock(aggPoolInfo.getBlockInEpoch())
                   .retired(retiredIds.contains(projection.getPoolId()))
                   .build();
@@ -460,14 +454,9 @@ public class DelegationServiceImpl implements DelegationService {
                       .lifetimeBlock(pool.getLifetimeBlock())
                       .epochBlock(pool.getEpochBlock())
                       .retired(retiredIds.contains(pool.getPoolId()))
-                      .votingPower(
-                          Objects.nonNull(poolListProjection.getVotingPower())
-                              ? poolListProjection.getVotingPower()
-                              : 0)
+                      .votingPower(poolListProjection.getVotingPower())
                       .governanceParticipationRate(
-                          Objects.nonNull(poolListProjection.getGovernanceParticipationRate())
-                              ? poolListProjection.getGovernanceParticipationRate()
-                              : 0)
+                          poolListProjection.getGovernanceParticipationRate())
                       .build();
                 })
             .collect(Collectors.toList());
