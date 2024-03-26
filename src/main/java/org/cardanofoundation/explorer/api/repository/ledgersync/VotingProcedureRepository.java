@@ -10,6 +10,7 @@ import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.VotingProcedure;
 import org.cardanofoundation.explorer.common.entity.ledgersync.compositeKey.VotingProcedureId;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
 
 public interface VotingProcedureRepository
     extends JpaRepository<VotingProcedure, VotingProcedureId> {
@@ -28,9 +29,10 @@ public interface VotingProcedureRepository
       value =
           "select vp.govActionTxHash as govActionTxHash, vp.govActionIndex as govActionIndex, vp.vote as vote, vp.txHash as votingProcedureTxHash, vp.index as votingProcedureTxIndex,"
               + " vp.blockTime as blockTime"
-              + " from VotingProcedure vp where vp.govActionTxHash = :txHash and vp.govActionIndex = :index and vp.voterHash = :voterHash")
+              + " from VotingProcedure vp where vp.govActionTxHash = :txHash and vp.govActionIndex = :index and vp.voterHash = :voterHash and vp.voterType = :voterType")
   List<VotingProcedureProjection> getVotingProcedureByTxHashAndIndexAndVoterHash(
       @Param("txHash") String txHash,
       @Param("index") Integer index,
-      @Param("voterHash") String voterHash);
+      @Param("voterHash") String voterHash,
+      @Param("voterType") VoterType voterType);
 }
