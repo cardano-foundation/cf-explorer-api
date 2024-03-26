@@ -31,12 +31,13 @@ public interface GovernanceActionRepository
               + " vp.govActionTxHash = gap.txHash"
               + " and vp.govActionIndex = gap.index"
               + " and vp.voterHash = :voterHash)"
-              + " where (:type is null or gap.type = :type)"
-              + " and (:gapStatus is null or gapInfo.status = :gapStatus)"
-              + " and (:vote is null or (vp.vote = :vote and vp.slot >= :slot))"
+              + " where (:vote is null or (:vote != 'NONE' and :vote = vp.vote) or (:vote = 'NONE' and vp.vote is null))"
               + " and (:isRepeatVote is null or (vp.repeatVote = :isRepeatVote))"
-              + " and (vp.blockTime >= :from)"
-              + " and (vp.blockTime <= :to)")
+              + " and (:gapStatus is null or (gapInfo.status = :gapStatus))"
+              + " and (:type is null or (gap.type = :type))"
+              + " and (gap.slot >= :slot)"
+              + " and (gap.slot >= :from)"
+              + " and (gap.slot <= :to)")
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,
