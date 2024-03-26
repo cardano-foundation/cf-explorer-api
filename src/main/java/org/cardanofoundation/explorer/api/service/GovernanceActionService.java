@@ -7,6 +7,7 @@ import org.cardanofoundation.explorer.api.model.request.governanceAction.Governa
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
 
 public interface GovernanceActionService {
   BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
@@ -14,4 +15,6 @@ public interface GovernanceActionService {
 
   GovernanceActionDetailsResponse getGovernanceActionDetails(
       String dRepHashOrPoolHash, GovernanceActionRequest governanceActionRequest);
+
+  VotingChartResponse getVotingChartByGovActionTxHashAndIndex(String txHash, Integer index);
 }
