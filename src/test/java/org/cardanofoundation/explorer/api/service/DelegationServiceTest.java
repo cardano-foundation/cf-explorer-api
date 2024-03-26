@@ -58,7 +58,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDet
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailEpochProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoKoiosProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
 import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
@@ -298,8 +297,6 @@ class DelegationServiceTest {
     when(projection.getPoolId()).thenReturn(1L);
     when(projection.getPoolName()).thenReturn("name");
     when(projection.getPledge()).thenReturn(BigInteger.ONE);
-    when(projection.getFee()).thenReturn(BigInteger.ONE);
-    when(projection.getMargin()).thenReturn(1D);
     AggregatePoolInfo aggregatePoolInfo =
         AggregatePoolInfo.builder()
             .poolId(1L)
@@ -329,7 +326,6 @@ class DelegationServiceTest {
     // Perform assertions
     assertNotNull(response);
     assertEquals(poolIdPageContent.size(), response.getData().size());
-    Assertions.assertEquals(100, response.getData().get(0).getNumberDelegators());
     Assertions.assertEquals(1, response.getData().get(0).getId());
     // Add more assertions as needed
   }
@@ -371,11 +367,7 @@ class DelegationServiceTest {
     when(projection.getPoolId()).thenReturn(1L);
     when(projection.getPoolName()).thenReturn("name");
     when(projection.getPledge()).thenReturn(BigInteger.ONE);
-    when(projection.getFee()).thenReturn(BigInteger.ONE);
-    when(projection.getMargin()).thenReturn(1D);
     poolIdPageContent.add(projection);
-    PoolAmountProjection pap = Mockito.mock(PoolAmountProjection.class);
-    PoolInfoKoiosProjection pikp = Mockito.mock(PoolInfoKoiosProjection.class);
     // Add mock data to poolIdPageContent
     when(poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(any(), any(), anyInt(), any()))
         .thenReturn(poolIdPageContent);
@@ -784,13 +776,11 @@ class DelegationServiceTest {
     PoolDelegationSummaryProjection pds1 = Mockito.mock(PoolDelegationSummaryProjection.class);
     when(pds1.getPoolName()).thenReturn("Pool 1");
     when(pds1.getPoolView()).thenReturn("pool1");
-    when(pds1.getMargin()).thenReturn(0.02);
     when(pds1.getPledge()).thenReturn(BigInteger.valueOf(100));
     when(pds1.getPoolId()).thenReturn(1L);
     PoolDelegationSummaryProjection pds2 = Mockito.mock(PoolDelegationSummaryProjection.class);
     when(pds2.getPoolName()).thenReturn("Pool 2");
     when(pds2.getPoolView()).thenReturn("pool2");
-    when(pds2.getMargin()).thenReturn(0.03);
     when(pds2.getPledge()).thenReturn(BigInteger.valueOf(200));
     when(pds2.getPoolId()).thenReturn(2L);
     List<PoolDelegationSummaryProjection> pools = List.of(pds1, pds2);
@@ -820,11 +810,9 @@ class DelegationServiceTest {
     assert result.get(0).getPoolId().equals("pool2");
     assert result.get(0).getPoolName().equals("Pool 2");
     assert result.get(0).getPledge().equals(BigInteger.valueOf(200));
-    assert result.get(0).getFeePercent() == 0.03;
     assert result.get(1).getPoolId().equals("pool1");
     assert result.get(1).getPoolName().equals("Pool 1");
     assert result.get(1).getPledge().equals(BigInteger.valueOf(100));
-    assert result.get(1).getFeePercent() == 0.02;
   }
 
   @Test
@@ -835,7 +823,6 @@ class DelegationServiceTest {
     PoolDelegationSummaryProjection pds = Mockito.mock(PoolDelegationSummaryProjection.class);
     when(pds.getPoolName()).thenReturn("Pool 1");
     when(pds.getPoolView()).thenReturn("pool1");
-    when(pds.getMargin()).thenReturn(0.02);
     when(pds.getPledge()).thenReturn(BigInteger.valueOf(100));
     when(pds.getPoolId()).thenReturn(1L);
     List<PoolDelegationSummaryProjection> pools = List.of(pds);
@@ -867,7 +854,6 @@ class DelegationServiceTest {
     assert result.get(0).getPoolId().equals("pool1");
     assert result.get(0).getPoolName().equals("Pool 1");
     assert result.get(0).getPledge().equals(BigInteger.valueOf(100));
-    assert result.get(0).getFeePercent() == 0.02;
   }
 
   @Test
