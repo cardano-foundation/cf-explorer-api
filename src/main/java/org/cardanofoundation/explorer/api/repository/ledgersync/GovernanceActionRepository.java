@@ -36,8 +36,8 @@ public interface GovernanceActionRepository
               + " and (:gapStatus is null or (gapInfo.status = :gapStatus))"
               + " and (:type is null or (gap.type = :type))"
               + " and (gap.slot >= :slot)"
-              + " and (gap.slot >= :from)"
-              + " and (gap.slot <= :to)")
+              + " and (gap.blockTime >= :from)"
+              + " and (gap.blockTime <= :to)")
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,
