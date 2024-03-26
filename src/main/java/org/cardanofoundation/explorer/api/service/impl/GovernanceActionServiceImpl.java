@@ -143,25 +143,31 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
     org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
         govActionType = govActionDetailsProjections.get().getType();
-
-    if ((govActionType.equals(
+    // STAKING POOL not allowed to vote on treasury withdrawals, parameter change and update
+    // committee
+    List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
+        govActionTypes =
+            List.of(
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .TREASURY_WITHDRAWALS_ACTION)
-            && governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH))
-        || (govActionType.equals(
+                    .TREASURY_WITHDRAWALS_ACTION,
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .PARAMETER_CHANGE_ACTION)
-            && governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH))) {
+                    .PARAMETER_CHANGE_ACTION);
+    if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
+        && govActionTypes.contains(govActionType)) {
       return new GovernanceActionDetailsResponse();
     }
     GovernanceActionDetailsResponse response =
         governanceActionMapper.fromGovActionDetailsProjection(govActionDetailsProjections.get());
 
+    VoterType voterType = VoterType.valueOf(governanceActionRequest.getVoterType().name());
+
     List<VotingProcedureProjection> votingProcedureProjections =
         votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
             governanceActionRequest.getTxHash(),
             governanceActionRequest.getIndex(),
-            dRepHashOrPoolHash);
+            dRepHashOrPoolHash,
+            voterType);
+    // no vote procedure found = none vote
     if (votingProcedureProjections.isEmpty()) {
       response.setVoteType(VoteType.NONE);
       return response;
