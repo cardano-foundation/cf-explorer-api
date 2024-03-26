@@ -28,6 +28,16 @@ public class GovernanceActionDetails {
 
   GovActionType govActionType;
 
+  String anchorHash;
+
+  String anchorUrl;
+
+  JsonNode details;
+
+  @JsonIgnore Integer epoch;
+
+  @JsonIgnore Long blockTime;
+
   VoteType voteType;
 
   String voterHash;
@@ -39,14 +49,4 @@ public class GovernanceActionDetails {
   Date submissionDate;
 
   Date expiryDate;
-
-  String anchorHash;
-
-  String anchorUrl;
-
-  JsonNode details;
-
-  @JsonIgnore Long blockTime;
-
-  @JsonIgnore Integer epoch;
 }
