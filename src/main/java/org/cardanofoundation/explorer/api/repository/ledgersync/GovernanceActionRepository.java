@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.common.entity.ledgersync.GovActionProposal;
 import org.cardanofoundation.explorer.common.entity.ledgersync.compositeKey.GovActionProposalId;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
@@ -22,21 +23,24 @@ public interface GovernanceActionRepository
     extends JpaRepository<GovActionProposal, GovActionProposalId> {
   @Query(
       value =
-          "select gap.txHash as txHash, gap.index as index, vp.vote as vote, vp.slot as slot, gap.type as type from GovActionProposal gap"
-              + " left join VotingProcedure vp on ("
+          "select gap.txHash as txHash, gap.index as index, vp.vote as vote, vp.slot as slot, "
+              + "gap.type as type, vp.repeatVote as repeatVote, "
+              + "gapInfo.status as status, gapInfo.votingPower as votingPower "
+              + "from GovActionProposal gap "
+              + " join GovActionProposalInfo gapInfo on (gap.txHash = gapInfo.txHash and gap.index = gapInfo.index)"
+              + " left join LatestVotingProcedure vp on ("
               + " vp.govActionTxHash = gap.txHash"
               + " and vp.govActionIndex = gap.index"
-              + " and vp.voterHash = :voterHash"
-              + " and not exists (select 1 from VotingProcedure vp2"
-              + "                    where vp2.govActionTxHash = gap.txHash"
-              + "                    and vp2.govActionIndex = gap.index"
-              + "                    and vp2.voterHash = :voterHash"
-              + "                    and vp2.blockTime > vp.blockTime))"
+              + " and vp.voterHash = :voterHash)"
               + " where (:type is null or gap.type = :type)"
+              + " and (:gapStatus is null or gapInfo.status = :gapStatus)"
+              + " and (:isRepeatVote is null or vp.repeatVote = :isRepeatVote)"
               + " and (:vote is null or (vp.vote = :vote and vp.slot >= :slotDRep))"
-              + " and (:from is null or vp.blockTime >= :from)"
-              + " and (:to is null or vp.blockTime <= :to)")
+              + " and (cast(:from as date) is null or vp.blockTime >= :from)"
+              + " and (cast(:to as date) is null or vp.blockTime <= :to)")
   Page<GovernanceActionProjection> getAllByFilter(
+      @Param("isRepeatVote") Boolean isRepeatVote,
+      @Param("gapStatus") GovActionStatus gapStatus,
       @Param("vote") Vote vote,
       @Param("voterHash") String dRepHash,
       @Param("type") GovActionType type,
