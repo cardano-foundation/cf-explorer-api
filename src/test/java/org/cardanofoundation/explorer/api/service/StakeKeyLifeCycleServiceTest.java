@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -14,6 +13,7 @@ import java.util.*;
 
 import org.springframework.data.domain.*;
 
+import com.bloxbean.cardano.client.transaction.spec.cert.CertificateType;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,16 +33,7 @@ import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
@@ -69,12 +60,13 @@ class StakeKeyLifeCycleServiceTest {
 
   @Mock EpochParamRepository epochParamRepository;
 
+  @Mock YaciStakeRegistrationRepository yaciStakeRegistrationRepository;
+
   @InjectMocks private StakeKeyLifeCycleServiceImpl stakeKeyLifeCycleService;
 
   StakeAddress stakeAddress =
       StakeAddress.builder()
           .view("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")
-          .balance(BigInteger.valueOf(1000000000))
           .availableReward(BigInteger.valueOf(0))
           .build();
 
@@ -134,8 +126,12 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(
             "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna"))
         .thenReturn(Optional.of(stakeAddress));
-    when(stakeRegistrationRepository.existsByAddr(stakeAddress)).thenReturn(true);
-    when(stakeDeRegistrationRepository.existsByAddr(stakeAddress)).thenReturn(true);
+    when(yaciStakeRegistrationRepository.existsByAddress(
+            stakeAddress.getView(), CertificateType.STAKE_REGISTRATION))
+        .thenReturn(true);
+    when(yaciStakeRegistrationRepository.existsByAddress(
+            stakeAddress.getView(), CertificateType.STAKE_DEREGISTRATION))
+        .thenReturn(true);
     when(delegationRepository.existsByAddress(stakeAddress)).thenReturn(true);
     when(rewardRepository.existsByAddr(stakeAddress)).thenReturn(true);
     when(withdrawalRepository.existsByAddr(stakeAddress)).thenReturn(true);
@@ -171,8 +167,13 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
-    when(stakeRegistrationRepository.getStakeRegistrationsByAddress(
-            stakeAddress, condition.getTxHash(), fromDate, toDate, pageable))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddress(
+            stakeAddress.getView(),
+            condition.getTxHash(),
+            fromDate,
+            toDate,
+            CertificateType.STAKE_REGISTRATION,
+            pageable))
         .thenReturn(page);
     EpochParam epochParam = new EpochParam();
     epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
@@ -201,7 +202,8 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTxHash()).thenReturn(txHash);
     when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
-    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash))
+    when(yaciStakeRegistrationRepository.findByAddressAndTx(
+            stakeKey, txHash, CertificateType.STAKE_REGISTRATION))
         .thenReturn(Optional.of(projection));
     EpochParam epochParam = new EpochParam();
     epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
@@ -221,7 +223,8 @@ class StakeKeyLifeCycleServiceTest {
   void whenStakeAddressAndTxHashNotHaveRegistration_showThrowException() {
     String txHash = "f8680884f04ef2b10fdc778e2aa981b909f7268570db231a1d0baac377620ea2";
     String stakeKey = "stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna";
-    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash))
+    when(yaciStakeRegistrationRepository.findByAddressAndTx(
+            stakeKey, txHash, CertificateType.STAKE_REGISTRATION))
         .thenReturn(Optional.empty());
     Assertions.assertThrows(
         BusinessException.class,
@@ -237,7 +240,8 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTxHash()).thenReturn(txHash);
     when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
-    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash))
+    when(yaciStakeRegistrationRepository.findByAddressAndTx(
+            stakeKey, txHash, CertificateType.STAKE_REGISTRATION))
         .thenReturn(Optional.of(projection));
     EpochParam epochParam = new EpochParam();
     epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
@@ -262,7 +266,8 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTxHash()).thenReturn(txHash);
     when(projection.getFee()).thenReturn(BigInteger.valueOf(173333));
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
-    when(stakeRegistrationRepository.findByAddressAndTx(stakeKey, txHash))
+    when(yaciStakeRegistrationRepository.findByAddressAndTx(
+            stakeKey, txHash, CertificateType.STAKE_REGISTRATION))
         .thenReturn(Optional.of(projection));
     EpochParam epochParam = new EpochParam();
     epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
@@ -375,8 +380,8 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
-    when(stakeRegistrationRepository.getStakeRegistrationsByAddress(
-            any(), any(), any(), any(), any()))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddress(
+            any(), any(), any(), any(), eq(CertificateType.STAKE_REGISTRATION), any()))
         .thenReturn(page);
     EpochParam epochParam = new EpochParam();
     epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
@@ -841,9 +846,11 @@ class StakeKeyLifeCycleServiceTest {
     when(addressTxBalanceRepository.findTxAndAmountByStake(stakeAddress.getView(), pageable))
         .thenReturn(page);
     when(txRepository.findByIdIn(any())).thenReturn(txList);
-    when(stakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(any(), any()))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
+            any(), any(), eq(CertificateType.STAKE_REGISTRATION)))
         .thenReturn(List.of(102L));
-    when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddressAndTxIn(any(), any()))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
+            any(), any(), eq(CertificateType.STAKE_DEREGISTRATION)))
         .thenReturn(List.of(105L));
     when(delegationRepository.findDelegationByAddressAndTxIn(any(), any()))
         .thenReturn(List.of(104L));
@@ -914,8 +921,13 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
     Page<StakeHistoryProjection> page = new PageImpl<>(List.of(projection), pageable, 1);
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
-    when(stakeRegistrationRepository.getStakeRegistrationsByAddress(
-            stakeAddress, null, fromDate, toDate, pageable))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddress(
+            stakeAddress.getView(),
+            null,
+            fromDate,
+            toDate,
+            CertificateType.STAKE_REGISTRATION,
+            pageable))
         .thenReturn(page);
     EpochParam epochParam = new EpochParam();
     epochParam.setKeyDeposit(BigInteger.valueOf(2000000L));
@@ -1121,9 +1133,11 @@ class StakeKeyLifeCycleServiceTest {
                     .fee(BigInteger.ONE)
                     .validContract(true)
                     .build()));
-    when(stakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(stakeAddress, txIds))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
+            stakeAddress.getView(), txIds, CertificateType.STAKE_REGISTRATION))
         .thenReturn(List.of(100L));
-    when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddressAndTxIn(stakeAddress, txIds))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
+            stakeAddress.getView(), txIds, CertificateType.STAKE_REGISTRATION))
         .thenReturn(List.of(100L));
     when(delegationRepository.findDelegationByAddressAndTxIn(stakeAddress, txIds))
         .thenReturn(List.of(100L));

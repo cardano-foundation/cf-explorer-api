@@ -8,7 +8,8 @@ import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LsStakeDeregistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LsStakeRegistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
 
 @Getter
@@ -35,12 +36,17 @@ public class StakeTxResponse implements Serializable {
 
   public StakeTxResponse() {}
 
-  public StakeTxResponse(StakeRegistration stakeRegistration) {
+  public StakeTxResponse(LsStakeRegistration stakeRegistration) {
     this.txId = stakeRegistration.getTxId();
     this.stakeAddressId = stakeRegistration.getStakeAddressId();
   }
 
-  public StakeTxResponse(StakeDeregistration stakeDeRegistration) {
+  public StakeTxResponse(StakeRegistration stakeRegistration) {
+    this.txHash = stakeRegistration.getTxHash();
+    this.stakeKey = stakeRegistration.getAddress();
+  }
+
+  public StakeTxResponse(LsStakeDeregistration stakeDeRegistration) {
     this.txId = stakeDeRegistration.getTxId();
     this.stakeAddressId = stakeDeRegistration.getStakeAddressId();
   }

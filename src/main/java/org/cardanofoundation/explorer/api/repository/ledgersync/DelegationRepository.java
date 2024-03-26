@@ -41,7 +41,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + "AND dg2.tx.id > dg1.tx.id) "
               + "AND NOT EXISTS "
               + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
+              + "FROM LsStakeDeregistration sd "
               + "WHERE sd.addr.id = dg1.address.id "
               + "AND sd.tx.id > dg1.tx.id) "
               + "GROUP BY dg1.activeEpochNo "
@@ -52,7 +52,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
       value =
           "SELECT sa.id AS stakeAddressId, sa.view AS view , bk.time AS time, tx.fee AS fee "
               + "FROM StakeAddress sa "
-              + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr2.id) FROM StakeRegistration sr2 WHERE sa.id = sr2.addr.id) "
+              + "JOIN LsStakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr2.id) FROM LsStakeRegistration sr2 WHERE sa.id = sr2.addr.id) "
               + "JOIN Tx tx ON sr.tx.id  = tx.id "
               + "JOIN Block bk ON tx.block.id = bk.id "
               + "WHERE sa.id IN :addressIds "
@@ -143,8 +143,8 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.id ="
           + " (SELECT max(pod.id) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
           + " WHERE delegation.id = (SELECT max(d2.id) FROM Delegation d2 where d2.address = :address )"
-          + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = :address) >"
-          + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = :address)")
+          + " AND (SELECT max(sr.txId) FROM LsStakeRegistration sr WHERE sr.addr = :address) >"
+          + " (SELECT COALESCE(max(sd.txId), 0) FROM LsStakeDeregistration sd WHERE sd.addr = :address)")
   Optional<StakeDelegationProjection> findPoolDataByAddress(@Param("address") StakeAddress address);
 
   @Query(
@@ -178,7 +178,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + "AND dg2.tx.id > dg1.tx.id) "
               + "AND NOT EXISTS "
               + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
+              + "FROM LsStakeDeregistration sd "
               + "WHERE sd.addr.id = dg1.address.id "
               + "AND sd.tx.id > dg1.tx.id)")
   Integer liveDelegatorsCount(@Param("poolView") String poolView);
@@ -197,7 +197,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + "AND dg2.tx.id > dg1.tx.id) "
               + "AND NOT EXISTS "
               + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
+              + "FROM LsStakeDeregistration sd "
               + "WHERE sd.addr.id = dg1.address.id "
               + "AND sd.tx.id > dg1.tx.id)")
   Page<Long> liveDelegatorsList(@Param("poolViewOrHash") String poolViewOrHash, Pageable pageable);
@@ -231,7 +231,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + "AND dg2.tx.id > dg1.tx.id) "
               + "AND NOT EXISTS "
               + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
+              + "FROM LsStakeDeregistration sd "
               + "WHERE sd.addr.id = dg1.address.id "
               + "AND sd.tx.id > dg1.tx.id)")
   Integer totalLiveDelegatorsCount();
@@ -249,7 +249,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + "AND dg2.tx.id > dg1.tx.id) "
               + "AND NOT EXISTS "
               + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
+              + "FROM LsStakeDeregistration sd "
               + "WHERE sd.addr.id = dg1.address.id "
               + "AND sd.tx.id > dg1.tx.id) "
               + "GROUP BY ph.id ")

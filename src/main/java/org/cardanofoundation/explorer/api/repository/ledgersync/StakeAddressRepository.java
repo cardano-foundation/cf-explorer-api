@@ -22,12 +22,10 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   @Query(
       value =
-          "SELECT sa.id as id, sa.view as stakeAddress, sa.balance as totalStake"
+          "SELECT sa.id as id, sa.view as stakeAddress, sab.quantity as totalStake"
               + " FROM StakeAddress sa"
-              + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
-              + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = sa) >"
-              + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)"
-              + " AND sa.balance IS NOT NULL"
+              + " JOIN StakeAddressBalance sab ON sa.view = sab.address"
+              + " AND sab.quantity IS NOT NULL"
               + " ORDER BY totalStake DESC")
   List<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
 
@@ -56,9 +54,14 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
   @Query("SELECT stake.view" + " FROM StakeAddress stake" + " WHERE stake.scriptHash = :scriptHash")
   List<String> getStakeAssociatedAddress(@Param("scriptHash") String scriptHash);
 
-  @Query(value = "SELECT COALESCE(SUM(sa.balance), 0) FROM StakeAddress sa WHERE sa.view IN :views")
+  @Query(
+      value =
+          "SELECT COALESCE(SUM(sab.quantity), 0) FROM StakeAddress sa JOIN StakeAddressBalance sab ON sab.address = sa.view WHERE sa.view IN :views")
   BigInteger getBalanceByView(@Param("views") List<String> views);
 
   @Query(value = "SELECT sa.view FROM StakeAddress sa WHERE sa.scriptHash = :scriptHash")
   List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
+
+  @Query(value = "SELECT sa FROM StakeAddress sa WHERE sa.view IN :views")
+  List<StakeAddress> findByViewIn(@Param("views") Collection<String> views);
 }

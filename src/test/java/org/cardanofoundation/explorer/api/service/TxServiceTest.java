@@ -650,7 +650,6 @@ class TxServiceTest {
             .hashRaw("hashRaw")
             .view("stakeAddress")
             .scriptHash("scriptHash")
-            .balance(new BigInteger("100"))
             .build();
 
     final Optional<StakeAddress> stakeAddress = Optional.of(stakeAddress1);

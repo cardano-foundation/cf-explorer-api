@@ -26,7 +26,7 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
 
   @Query(
       "SELECT SUM(w.amount) FROM Withdrawal w "
-          + " INNER JOIN StakeAddress stakeAddress ON w.addr.id = stakeAddress.id"
+          + " INNER JOIN StakeAddress stakeAddress ON w.addr.view = stakeAddress.view"
           + " WHERE stakeAddress.view = :stakeAddress")
   Optional<BigInteger> getRewardWithdrawnByStakeAddress(@Param("stakeAddress") String stakeAddress);
 

@@ -14,17 +14,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LsStakeRegistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LsStakeRegistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 @Repository
-public interface StakeRegistrationRepository extends JpaRepository<StakeRegistration, Long> {
+public interface StakeRegistrationRepository extends JpaRepository<LsStakeRegistration, Long> {
 
   @Query(
       "SELECT max(stakeRegis.tx.id) "
-          + " FROM StakeRegistration stakeRegis"
+          + " FROM LsStakeRegistration stakeRegis"
           + " WHERE stakeRegis.addr = :stake")
   Optional<Long> findMaxTxIdByStake(@Param("stake") StakeAddress stake);
 
@@ -33,7 +33,7 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
           "SELECT tx.hash as txHash, b.time as time, b.slotNo as slotNo,"
               + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
               + " 'Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
-              + " FROM StakeRegistration sr"
+              + " FROM LsStakeRegistration sr"
               + " JOIN Tx tx ON tx.id = sr.tx.id"
               + " JOIN Block b ON b.id = tx.blockId"
               + " WHERE sr.addr = :stakeKey"
@@ -44,7 +44,7 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
   @Query(
       value =
           "SELECT sr.tx.id"
-              + " FROM StakeRegistration sr"
+              + " FROM LsStakeRegistration sr"
               + " WHERE sr.addr = :stakeKey AND sr.tx.id IN :txIds")
   List<Long> getStakeRegistrationsByAddressAndTxIn(
       @Param("stakeKey") StakeAddress stakeKey, @Param("txIds") Collection<Long> txIds);
@@ -54,7 +54,7 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
           "SELECT tx.hash as txHash, b.time as time,"
               + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
               + " 'Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
-              + " FROM StakeRegistration sr"
+              + " FROM LsStakeRegistration sr"
               + " JOIN Tx tx ON tx.id = sr.tx.id"
               + " JOIN Block b ON b.id = tx.blockId"
               + " WHERE sr.addr = :stakeKey"
@@ -72,7 +72,7 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
       value =
           "SELECT tx.hash as txHash, b.time as time, b.epochNo as epochNo,"
               + " tx.fee as fee, tx.deposit as deposit"
-              + " FROM StakeRegistration sr"
+              + " FROM LsStakeRegistration sr"
               + " JOIN Tx tx ON tx.id = sr.tx.id"
               + " JOIN Block b ON b.id = tx.blockId"
               + " JOIN StakeAddress sa ON sa.id = sr.addr.id"
@@ -81,8 +81,8 @@ public interface StakeRegistrationRepository extends JpaRepository<StakeRegistra
   Optional<StakeHistoryProjection> findByAddressAndTx(
       @Param("stakeKey") String stakeKey, @Param("txHash") String txHash);
 
-  @EntityGraph(attributePaths = {StakeRegistration_.ADDR})
-  List<StakeRegistration> findByTx(@Param("tx") Tx tx);
+  @EntityGraph(attributePaths = {LsStakeRegistration_.ADDR})
+  List<LsStakeRegistration> findByTx(@Param("tx") Tx tx);
 
   Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
 }

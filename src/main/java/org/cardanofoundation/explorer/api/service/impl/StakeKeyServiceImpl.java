@@ -12,12 +12,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import com.bloxbean.cardano.client.transaction.spec.cert.CertificateType;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
@@ -31,32 +30,14 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.*;
 import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.*;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -71,6 +52,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final StakeRegistrationRepository stakeRegistrationRepository;
 
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
+
+  private final YaciStakeRegistrationRepository yaciStakeRegistrationRepository;
+  private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RewardRepository rewardRepository;
   private final WithdrawalRepository withdrawalRepository;
@@ -96,43 +80,43 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
-
-    Page<StakeRegistration> stakeRegistrationPage = stakeRegistrationRepository.findAll(pageable);
-    Page<StakeTxResponse> stakeTxResponsePage = stakeRegistrationPage.map(StakeTxResponse::new);
-    getDetailInfoStakeTxResponse(stakeTxResponsePage);
-    return new BaseFilterResponse<>(stakeTxResponsePage);
+    Page<StakeRegistration> yaciStakeRegistrationPage =
+        yaciStakeRegistrationRepository.findAllStake(CertificateType.STAKE_REGISTRATION, pageable);
+    Page<StakeTxResponse> yaciStakeTxResponsePage =
+        yaciStakeRegistrationPage.map(StakeTxResponse::new);
+    getDetailInfoStakeTxResponse(yaciStakeTxResponsePage);
+    return new BaseFilterResponse<>(yaciStakeTxResponsePage);
   }
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyDeRegistration(Pageable pageable) {
 
-    Page<StakeDeregistration> stakeDeregistrationPage =
-        stakeDeRegistrationRepository.findAll(pageable);
+    Page<StakeRegistration> stakeDeregistrationPage =
+        yaciStakeRegistrationRepository.findAllStake(
+            CertificateType.STAKE_DEREGISTRATION, pageable);
     Page<StakeTxResponse> stakeTxResponsePage = stakeDeregistrationPage.map(StakeTxResponse::new);
     getDetailInfoStakeTxResponse(stakeTxResponsePage);
     return new BaseFilterResponse<>(stakeTxResponsePage);
   }
 
   private void getDetailInfoStakeTxResponse(Page<StakeTxResponse> stakeTxResponsePage) {
-    Set<Long> txIds =
-        stakeTxResponsePage.stream().map(StakeTxResponse::getTxId).collect(Collectors.toSet());
-    List<TxIOProjection> txList = txRepository.findTxIn(txIds);
-    Map<Long, TxIOProjection> txMap =
-        txList.stream().collect(Collectors.toMap(TxIOProjection::getId, Function.identity()));
+    Set<String> txHashes =
+        stakeTxResponsePage.stream().map(StakeTxResponse::getTxHash).collect(Collectors.toSet());
+    List<TxIOProjection> txList = txRepository.findTxInByHashes(txHashes);
+    Map<String, TxIOProjection> txMap =
+        txList.stream().collect(Collectors.toMap(TxIOProjection::getHash, Function.identity()));
 
-    Set<Long> stakeAddressIds =
-        stakeTxResponsePage.stream()
-            .map(StakeTxResponse::getStakeAddressId)
-            .collect(Collectors.toSet());
-    List<StakeAddress> stakeAddressList = stakeAddressRepository.findAllById(stakeAddressIds);
-    Map<Long, StakeAddress> stakeAddressMap =
+    Set<String> stakeKeys =
+        stakeTxResponsePage.stream().map(StakeTxResponse::getStakeKey).collect(Collectors.toSet());
+    List<StakeAddress> stakeAddressList = stakeAddressRepository.findByViewIn(stakeKeys);
+    Map<String, StakeAddress> stakeAddressMap =
         stakeAddressList.stream()
-            .collect(Collectors.toMap(StakeAddress::getId, Function.identity()));
+            .collect(Collectors.toMap(StakeAddress::getView, Function.identity()));
 
     stakeTxResponsePage.forEach(
         item -> {
-          TxIOProjection txIOProjection = txMap.get(item.getTxId());
-          StakeAddress stakeAddress = stakeAddressMap.get(item.getStakeAddressId());
+          TxIOProjection txIOProjection = txMap.get(item.getTxHash());
+          StakeAddress stakeAddress = stakeAddressMap.get(item.getStakeKey());
           item.setTxHash(txIOProjection.getHash());
           item.setEpoch(txIOProjection.getEpochNo());
           item.setBlock(txIOProjection.getBlockNo());
@@ -167,22 +151,25 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       }
     }
     stakeAddressResponse.setStakeAddress(stake);
+    BigInteger stakeQuantity =
+        stakeAddressBalanceRepository.getQuantityByAddress(stake).orElse(BigInteger.ZERO);
     if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
-      BigInteger stakeRewardWithdrawn =
-          withdrawalRepository.getRewardWithdrawnByStakeAddress(stake).orElse(BigInteger.ZERO);
+      BigInteger stakeRewardWithdrawn = BigInteger.ZERO;
+      //
+      // withdrawalRepository.getRewardWithdrawnByStakeAddress(stake).orElse(BigInteger.ZERO);
+      // TODO: modify withdrwal entity
       BigInteger stakeAvailableReward =
           rewardRepository.getAvailableRewardByStakeAddress(stake).orElse(BigInteger.ZERO);
       stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
       stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
       stakeAddressResponse.setTotalStake(
-          stakeAddress.getBalance().add(stakeAvailableReward).subtract(stakeRewardWithdrawn));
+          stakeQuantity.add(stakeAvailableReward).subtract(stakeRewardWithdrawn));
     }
 
     if (stakeAddressResponse.getRewardAvailable() == null) {
-      stakeAddressResponse.setTotalStake(stakeAddress.getBalance());
+      stakeAddressResponse.setTotalStake(stakeQuantity);
     } else {
-      stakeAddressResponse.setTotalStake(
-          stakeAddress.getBalance().add(stakeAddressResponse.getRewardAvailable()));
+      stakeAddressResponse.setTotalStake(stakeQuantity);
     }
 
     StakeDelegationProjection poolData =
@@ -198,8 +185,14 @@ public class StakeKeyServiceImpl implements StakeKeyService {
               .build();
       stakeAddressResponse.setPool(poolResponse);
     }
-    Long txIdRegister = stakeRegistrationRepository.findMaxTxIdByStake(stakeAddress).orElse(0L);
-    Long txIdDeregister = stakeDeRegistrationRepository.findMaxTxIdByStake(stakeAddress).orElse(0L);
+    Long txIdRegister =
+        yaciStakeRegistrationRepository
+            .findMaxTxIdByStake(stakeAddress.getView(), CertificateType.STAKE_REGISTRATION)
+            .orElse(0L);
+    Long txIdDeregister =
+        yaciStakeRegistrationRepository
+            .findMaxTxIdByStake(stakeAddress.getView(), CertificateType.STAKE_DEREGISTRATION)
+            .orElse(0L);
     if (txIdRegister.compareTo(txIdDeregister) > 0) {
       stakeAddressResponse.setStatus(StakeAddressStatus.ACTIVE);
     } else {
@@ -225,9 +218,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
             .findByView(stakeKey)
             .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
     List<StakeHistoryProjection> stakeHistoryList =
-        stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress);
+        yaciStakeRegistrationRepository.getStakeRegistrationsByAddress(
+            stakeAddress.getView(), CertificateType.STAKE_REGISTRATION);
     stakeHistoryList.addAll(
-        stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress));
+        yaciStakeRegistrationRepository.getStakeRegistrationsByAddress(
+            stakeAddress.getView(), CertificateType.STAKE_DEREGISTRATION));
     stakeHistoryList.sort(
         (o1, o2) -> {
           if (o1.getBlockNo().equals(o2.getBlockNo())) {

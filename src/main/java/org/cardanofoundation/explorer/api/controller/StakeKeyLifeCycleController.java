@@ -28,10 +28,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxBalance_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.BaseEntity_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Delegation_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 import org.cardanofoundation.explorer.common.validation.date.DatePattern;
 import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 import org.cardanofoundation.explorer.common.validation.length.LengthValid;
@@ -81,7 +78,7 @@ public class StakeKeyLifeCycleController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {StakeRegistration_.TX},
+              sort = {LsStakeRegistration_.TX},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {
@@ -125,7 +122,7 @@ public class StakeKeyLifeCycleController {
               @PaginationValid
               @PaginationDefault(
                   size = 20,
-                  sort = {StakeRegistration_.TX},
+                  sort = {StakeRegistration_.TX_HASH},
                   direction = Sort.Direction.DESC)
               @Valid
               Pagination pagination) {

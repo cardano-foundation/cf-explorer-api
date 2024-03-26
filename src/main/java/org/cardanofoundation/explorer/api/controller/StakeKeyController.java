@@ -40,7 +40,6 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
@@ -67,7 +66,7 @@ public class StakeKeyController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {StakeRegistration_.TX_ID},
+              sort = {StakeRegistration_.TX_HASH},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {
@@ -82,7 +81,7 @@ public class StakeKeyController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {StakeDeregistration_.TX_ID},
+              sort = {StakeRegistration_.TX_HASH},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {

@@ -23,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.bloxbean.cardano.client.transaction.spec.cert.CertificateType;
+
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
@@ -34,16 +36,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
@@ -69,6 +62,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final TxOutRepository txOutRepository;
   private final FetchRewardDataService fetchRewardDataService;
   private final EpochParamRepository epochParamRepository;
+  private final YaciStakeRegistrationRepository yaciStakeRegistrationRepository;
 
   @Override
   public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
@@ -100,8 +94,12 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     }
 
     return StakeLifecycleResponse.builder()
-        .hasRegistration(stakeRegistrationRepository.existsByAddr(stakeAddress))
-        .hasDeRegistration(stakeDeRegistrationRepository.existsByAddr(stakeAddress))
+        .hasRegistration(
+            yaciStakeRegistrationRepository.existsByAddress(
+                stakeAddress.getView(), CertificateType.STAKE_REGISTRATION))
+        .hasDeRegistration(
+            yaciStakeRegistrationRepository.existsByAddress(
+                stakeAddress.getView(), CertificateType.STAKE_DEREGISTRATION))
         .hasDelegation(delegationRepository.existsByAddress(stakeAddress))
         .hashRewards(hasReward)
         .hasWithdrawal(hasWithdrawal)
@@ -131,8 +129,13 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
       condition.setTxHash(null);
     }
     Page<StakeHistoryProjection> stakeHistoryList =
-        stakeRegistrationRepository.getStakeRegistrationsByAddress(
-            stakeAddress, condition.getTxHash(), fromDate, toDate, pageable);
+        yaciStakeRegistrationRepository.getStakeRegistrationsByAddress(
+            stakeAddress.getView(),
+            condition.getTxHash(),
+            fromDate,
+            toDate,
+            CertificateType.STAKE_REGISTRATION,
+            pageable);
     var epochNoList = stakeHistoryList.stream().map(StakeHistoryProjection::getEpochNo).toList();
     var epochParams = epochParamRepository.findByEpochNoIn(epochNoList);
     Map<Integer, BigInteger> epochNoDepositMap =
@@ -153,8 +156,8 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   @Override
   public StakeRegistrationDetailResponse getStakeRegistrationDetail(String stakeKey, String hash) {
     StakeHistoryProjection stakeHistoryProjection =
-        stakeRegistrationRepository
-            .findByAddressAndTx(stakeKey, hash)
+        yaciStakeRegistrationRepository
+            .findByAddressAndTx(stakeKey, hash, CertificateType.STAKE_REGISTRATION)
             .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_REGISTRATION_NOT_FOUND));
     Long deposit =
         epochParamRepository
@@ -521,10 +524,18 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
             .map(StakeTxProjection::getTxId)
             .collect(Collectors.toList());
     var txList = txRepository.findByIdIn(txIds);
+    //    var registrationList =
+    //        stakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(stakeAddress,
+    // txIds);
+    //    var deregistrationList =
+    //        stakeDeRegistrationRepository.getStakeDeRegistrationsByAddressAndTxIn(stakeAddress,
+    // txIds);
     var registrationList =
-        stakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(stakeAddress, txIds);
+        yaciStakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
+            stakeAddress.getView(), txIds, CertificateType.STAKE_REGISTRATION);
     var deregistrationList =
-        stakeDeRegistrationRepository.getStakeDeRegistrationsByAddressAndTxIn(stakeAddress, txIds);
+        yaciStakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(
+            stakeAddress.getView(), txIds, CertificateType.STAKE_DEREGISTRATION);
     var delegationList = delegationRepository.findDelegationByAddressAndTxIn(stakeAddress, txIds);
     var withdrawList = withdrawalRepository.getWithdrawalByAddressAndTxIn(stakeAddress, txIds);
     Map<Long, Tx> txMap = txList.stream().collect(Collectors.toMap(Tx::getId, Function.identity()));

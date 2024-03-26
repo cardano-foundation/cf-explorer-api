@@ -1,8 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -15,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.bloxbean.cardano.client.transaction.spec.cert.CertificateType;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -32,28 +32,10 @@ import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.projection.*;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,22 +63,21 @@ public class StakeKeyServiceTest {
   @Mock private ValueOperations valueOperations;
   @Mock private TxRepository txRepository;
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
+  @Mock private YaciStakeRegistrationRepository yaciStakeRegistrationRepository;
 
   @Test
   void testGetDataForStakeKeyRegistration_thenReturn() {
     Pageable pageable = PageRequest.of(0, 10);
     StakeRegistration stakeRegistration = new StakeRegistration();
-    stakeRegistration.setStakeAddressId(1L);
-    stakeRegistration.setTxId(1L);
+    stakeRegistration.setTxHash("67e20ecd3777bcdafc63e38ff830b0ab527d3bd5996d3940cefa14c61e33906c");
 
     TxIOProjection tx = Mockito.mock(TxIOProjection.class);
-    when(tx.getId()).thenReturn(1L);
     when(tx.getHash())
         .thenReturn("67e20ecd3777bcdafc63e38ff830b0ab527d3bd5996d3940cefa14c61e33906c");
     when(tx.getTime()).thenReturn(LocalDateTime.now());
     when(tx.getEpochNo()).thenReturn(430);
-    when(txRepository.findTxIn(new HashSet<>(List.of(1L)))).thenReturn(List.of(tx));
-    when(stakeRegistrationRepository.findAll(pageable))
+    when(txRepository.findTxInByHashes(any())).thenReturn(List.of(tx));
+    when(yaciStakeRegistrationRepository.findAllStake(CertificateType.STAKE_REGISTRATION, pageable))
         .thenReturn(new PageImpl<>(List.of(stakeRegistration)));
 
     StakeAddress stakeAddress = new StakeAddress();
@@ -118,24 +99,29 @@ public class StakeKeyServiceTest {
   @Test
   void testGetDataForStakeKeyDeRegistration_thenReturn() {
     Pageable pageable = PageRequest.of(0, 10);
-    StakeDeregistration stakeRegistration = new StakeDeregistration();
-    stakeRegistration.setStakeAddressId(1L);
-    stakeRegistration.setTxId(1L);
+    StakeRegistration stakeRegistration = new StakeRegistration();
+    stakeRegistration.setTxHash("00020fc043ddd670fd852204d5f797a82b733a65fdb389249d80543a0fcb9723");
+    stakeRegistration.setAddress(
+        "stake1u9q7f0kyqfe2ljlfwzyad9hl9n0kqg3zsq35kq8jxrnce4q4wy688"); // Ensure the stake address
+    // is set
 
     TxIOProjection tx = Mockito.mock(TxIOProjection.class);
-    when(tx.getId()).thenReturn(1L);
     when(tx.getHash())
-        .thenReturn("c7d41594ea5fa56b9daf6dbbddeb61f74b1dd06392ac12830920de26d2f5f93d");
+        .thenReturn("00020fc043ddd670fd852204d5f797a82b733a65fdb389249d80543a0fcb9723");
     when(tx.getTime()).thenReturn(LocalDateTime.now());
     when(tx.getEpochNo()).thenReturn(430);
-    when(txRepository.findTxIn(new HashSet<>(List.of(1L)))).thenReturn(List.of(tx));
-    when(stakeDeRegistrationRepository.findAll(pageable))
+    when(txRepository.findTxInByHashes(
+            new HashSet<>(
+                List.of("00020fc043ddd670fd852204d5f797a82b733a65fdb389249d80543a0fcb9723"))))
+        .thenReturn(List.of(tx));
+    when(yaciStakeRegistrationRepository.findAllStake(
+            CertificateType.STAKE_DEREGISTRATION, pageable))
         .thenReturn(new PageImpl<>(List.of(stakeRegistration)));
 
     StakeAddress stakeAddress = new StakeAddress();
-    stakeAddress.setId(1L);
     stakeAddress.setView("stake1u9q7f0kyqfe2ljlfwzyad9hl9n0kqg3zsq35kq8jxrnce4q4wy688");
-    when(stakeAddressRepository.findAllById(new HashSet<>(List.of(1L))))
+    when(stakeAddressRepository.findByViewIn(
+            new HashSet<>(List.of("stake1u9q7f0kyqfe2ljlfwzyad9hl9n0kqg3zsq35kq8jxrnce4q4wy688"))))
         .thenReturn(List.of(stakeAddress));
 
     var response = stakeKeyService.getDataForStakeKeyDeRegistration(pageable);
@@ -153,7 +139,7 @@ public class StakeKeyServiceTest {
     String address =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
-    StakeAddress stakeAddress = StakeAddress.builder().balance(BigInteger.ONE).build();
+    StakeAddress stakeAddress = StakeAddress.builder().build();
     StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
     when(sdp.getPoolId()).thenReturn("1");
     when(sdp.getPoolData()).thenReturn("poolData");
@@ -184,7 +170,7 @@ public class StakeKeyServiceTest {
     String address =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
-    StakeAddress stakeAddress = StakeAddress.builder().balance(BigInteger.ONE).build();
+    StakeAddress stakeAddress = StakeAddress.builder().view(address).build();
     StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
     when(sdp.getPoolId()).thenReturn("1");
     when(sdp.getPoolData()).thenReturn("poolData");
@@ -194,8 +180,12 @@ public class StakeKeyServiceTest {
     when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(true);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
     when(delegationRepository.findPoolDataByAddress(any())).thenReturn(Optional.of(sdp));
-    when(stakeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
-    when(stakeDeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
+    when(yaciStakeRegistrationRepository.findMaxTxIdByStake(
+            any(), CertificateType.STAKE_REGISTRATION))
+        .thenReturn(Optional.of(1L));
+    when(yaciStakeRegistrationRepository.findMaxTxIdByStake(
+            any(), CertificateType.STAKE_DEREGISTRATION))
+        .thenReturn(Optional.of(1L));
     when(poolUpdateRepository.findPoolByRewardAccount(any())).thenReturn(List.of("pool"));
 
     var response = stakeKeyService.getStakeByAddress(address);
@@ -211,7 +201,7 @@ public class StakeKeyServiceTest {
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
 
     when(stakeAddressRepository.findByView(stakeKey))
-        .thenReturn(Optional.of(StakeAddress.builder().balance(BigInteger.ONE).build()));
+        .thenReturn(Optional.of(StakeAddress.builder().build()));
     when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(false);
     when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(false);
 
@@ -243,7 +233,10 @@ public class StakeKeyServiceTest {
   void testGetStakeHistories_thenReturn() {
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
     Pageable pageable = PageRequest.of(0, 10);
-    StakeAddress stakeAddress = StakeAddress.builder().balance(BigInteger.ONE).build();
+    StakeAddress stakeAddress =
+        StakeAddress.builder()
+            .view("stake_test1uzzzmcnyjfqle0qgal8234yvvp9q0u9e9qdxhzrmq5el7mc25kaav")
+            .build();
     StakeHistoryProjection shp1 = Mockito.mock(StakeHistoryProjection.class);
     when(shp1.getBlockNo()).thenReturn(1L);
     when(shp1.getBlockIndex()).thenReturn(1);
@@ -256,9 +249,11 @@ public class StakeKeyServiceTest {
     list2.add(shp2);
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-    when(stakeRegistrationRepository.getStakeRegistrationsByAddress(stakeAddress))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddress(
+            stakeAddress.getView(), CertificateType.STAKE_REGISTRATION))
         .thenReturn(list1);
-    when(stakeDeRegistrationRepository.getStakeDeRegistrationsByAddress(stakeAddress))
+    when(yaciStakeRegistrationRepository.getStakeRegistrationsByAddress(
+            stakeAddress.getView(), CertificateType.STAKE_DEREGISTRATION))
         .thenReturn(list2);
 
     var response = stakeKeyService.getStakeHistories(stakeKey, pageable);

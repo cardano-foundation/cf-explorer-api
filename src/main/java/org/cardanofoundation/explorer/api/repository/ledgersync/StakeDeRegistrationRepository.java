@@ -14,17 +14,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LsStakeDeregistration;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LsStakeRegistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 @Repository
-public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregistration, Long> {
+public interface StakeDeRegistrationRepository extends JpaRepository<LsStakeDeregistration, Long> {
 
   @Query(
       "SELECT max(stakeDeregis.tx.id) "
-          + " FROM StakeDeregistration stakeDeregis"
+          + " FROM LsStakeDeregistration stakeDeregis"
           + " WHERE stakeDeregis.addr = :stake")
   Optional<Long> findMaxTxIdByStake(@Param("stake") StakeAddress stake);
 
@@ -33,7 +33,7 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
           "SELECT tx.hash as txHash, b.time as time,"
               + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo, b.slotNo as slotNo,"
               + " 'De Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
-              + " FROM StakeDeregistration sd"
+              + " FROM LsStakeDeregistration sd"
               + " JOIN Tx tx ON tx.id = sd.tx.id"
               + " JOIN Block b ON b.id = tx.blockId"
               + " WHERE sd.addr = :stakeKey"
@@ -44,7 +44,7 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
   @Query(
       value =
           "SELECT sd.tx.id"
-              + " FROM StakeDeregistration sd"
+              + " FROM LsStakeDeregistration sd"
               + " WHERE sd.addr = :stakeKey AND sd.tx.id IN :txIds")
   List<Long> getStakeDeRegistrationsByAddressAndTxIn(
       @Param("stakeKey") StakeAddress stakeKey, @Param("txIds") Collection<Long> txIds);
@@ -54,7 +54,7 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
           "SELECT tx.hash as txHash, b.time as time,"
               + " b.epochSlotNo as epochSlotNo, b.blockNo as blockNo, b.epochNo as epochNo,"
               + " 'De Registered' AS action, tx.blockIndex as blockIndex, tx.fee as fee, tx.deposit as deposit"
-              + " FROM StakeDeregistration dr"
+              + " FROM LsStakeDeregistration dr"
               + " JOIN Tx tx ON tx.id = dr.tx.id"
               + " JOIN Block b ON b.id = tx.blockId"
               + " WHERE dr.addr = :stakeKey"
@@ -72,7 +72,7 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
       value =
           "SELECT tx.hash as txHash, b.time as time, b.epochNo as epochNo,"
               + " tx.fee as fee, tx.deposit as deposit"
-              + " FROM StakeDeregistration sd"
+              + " FROM LsStakeDeregistration sd"
               + " JOIN Tx tx ON tx.id = sd.tx.id"
               + " JOIN Block b ON b.id = tx.blockId"
               + " JOIN StakeAddress sa ON sa.id = sd.addr.id"
@@ -81,8 +81,8 @@ public interface StakeDeRegistrationRepository extends JpaRepository<StakeDeregi
   Optional<StakeHistoryProjection> findByAddressAndTx(
       @Param("stakeKey") String stakeKey, @Param("txHash") String txHash);
 
-  @EntityGraph(attributePaths = {StakeRegistration_.ADDR})
-  List<StakeDeregistration> findByTx(@Param("tx") Tx tx);
+  @EntityGraph(attributePaths = {LsStakeRegistration_.ADDR})
+  List<LsStakeDeregistration> findByTx(@Param("tx") Tx tx);
 
   Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
 }
