@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +22,7 @@ import org.cardanofoundation.explorer.api.model.request.governanceAction.Governa
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 
 @RestController
@@ -59,5 +61,17 @@ public class GovernanceActionController {
     return ResponseEntity.ok(
         governanceActionService.getGovernanceActionDetails(
             dRepHashOrPoolHash, governanceActionRequest));
+  }
+
+  @GetMapping("voting-chart")
+  @LogMessage
+  @Operation(
+      summary = "Get voting chart of governance action",
+      tags = {"gov-actions"})
+  public ResponseEntity<VotingChartResponse> getVotingChartByGovAction(
+      @RequestParam @Parameter(description = "The tx hash of governance action") String txHash,
+      @RequestParam @Parameter(description = "The index of governance action") Integer index) {
+    return ResponseEntity.ok(
+        governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index));
   }
 }
