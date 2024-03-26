@@ -53,22 +53,16 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   @Value("${application.epoch.days}")
   public long epochDays;
 
+  public static final String MIN_TIME = "1970-01-01 00:00:00";
+
   private final DRepRegistrationRepository dRepRegistrationRepository;
-
   private final GovernanceActionRepository governanceActionRepository;
-
   private final PoolHashRepository poolHashRepository;
-
   private final GovernanceActionMapper governanceActionMapper;
-
   private final VotingProcedureMapper votingProcedureMapper;
-
   private final VotingProcedureRepository votingProcedureRepository;
-
   private final EpochParamRepository epochParamRepository;
-
   private final EpochMapper epochMapper;
-
   private final EpochRepository epochRepository;
 
   @Override
@@ -96,15 +90,15 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 : org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
                     .valueOf(governanceActionFilter.getActionType().name());
 
-    Timestamp from =
-        Objects.isNull(governanceActionFilter.getFromDate())
-            ? null
-            : new Timestamp(governanceActionFilter.getFromDate().getTime());
+    long fromDate = 0L;
+    long toDate = 99999999999999999L;
 
-    Timestamp to =
-        Objects.isNull(governanceActionFilter.getToDate())
-            ? null
-            : new Timestamp(governanceActionFilter.getToDate().getTime());
+    if (Objects.nonNull(governanceActionFilter.getFromDate())) {
+      fromDate = Timestamp.from(governanceActionFilter.getFromDate().toInstant()).getTime();
+    }
+    if (Objects.nonNull(governanceActionFilter.getToDate())) {
+      toDate = 99999999999999999L;
+    }
 
     org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus govActionStatus =
         governanceActionFilter.getActionStatus().equals(GovActionStatus.ANY)
@@ -119,8 +113,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             vote,
             dRepHashOrPoolHash,
             govActionType,
-            from,
-            to,
+            fromDate,
+            toDate,
             slot,
             pageable);
 
