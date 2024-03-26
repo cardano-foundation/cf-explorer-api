@@ -2,7 +2,9 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -90,14 +92,20 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 : org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
                     .valueOf(governanceActionFilter.getActionType().name());
 
-    long fromDate = 0L;
-    long toDate = 99999999999999999L;
+    long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
+    long toDate =
+        Timestamp.from(
+                    LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+                        .toInstant(ZoneOffset.UTC))
+                .getTime()
+            / 1000;
 
     if (Objects.nonNull(governanceActionFilter.getFromDate())) {
-      fromDate = Timestamp.from(governanceActionFilter.getFromDate().toInstant()).getTime();
+      fromDate = Timestamp.from(governanceActionFilter.getFromDate().toInstant()).getTime() / 1000;
     }
     if (Objects.nonNull(governanceActionFilter.getToDate())) {
-      toDate = 99999999999999999L;
+      long to = Timestamp.from(governanceActionFilter.getToDate().toInstant()).getTime() / 1000;
+      toDate = Math.min(to, toDate);
     }
 
     org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus govActionStatus =
