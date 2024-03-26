@@ -1,7 +1,10 @@
 package org.cardanofoundation.explorer.api.projection;
 
+import java.math.BigInteger;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
 
 public interface GovActionDetailsProjection {
@@ -20,4 +23,8 @@ public interface GovActionDetailsProjection {
   Long getBlockTime();
 
   Integer getEpoch();
+
+  GovActionStatus getStatus();
+
+  BigInteger getVotingPower();
 }
