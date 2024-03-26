@@ -263,4 +263,11 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
               + "WHERE LOWER(pod.poolName) LIKE CONCAT('%', :query, '%') OR "
               + "LOWER(pod.tickerName) LIKE CONCAT('%', :query, '%') ")
   List<PoolInfoProjection> findByPoolNameLike(@Param("query") String query, Pageable pageable);
+
+  @Query(
+      value =
+          "select min(d.slotNo) from PoolHash ph"
+              + " join Delegation d on d.poolHash.id = ph.id"
+              + " where ph.hashRaw =:poolHash")
+  Long getSlotNoWhenFirstDelegationByPoolHash(@Param("poolHash") String poolHash);
 }
