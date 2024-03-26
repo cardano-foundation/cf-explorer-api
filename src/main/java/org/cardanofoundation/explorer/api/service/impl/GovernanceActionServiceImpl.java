@@ -1,12 +1,17 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,21 +19,39 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.explorer.api.common.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.common.enumeration.VoteType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
+import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.EpochResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
+import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
+import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
+import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor
 public class GovernanceActionServiceImpl implements GovernanceActionService {
+
+  @Value("${application.epoch.days}")
+  public long epochDays;
 
   private final DRepRegistrationRepository dRepRegistrationRepository;
 
@@ -37,6 +60,16 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final PoolHashRepository poolHashRepository;
 
   private final GovernanceActionMapper governanceActionMapper;
+
+  private final VotingProcedureMapper votingProcedureMapper;
+
+  private final VotingProcedureRepository votingProcedureRepository;
+
+  private final EpochParamRepository epochParamRepository;
+
+  private final EpochMapper epochMapper;
+
+  private final EpochRepository epochRepository;
 
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
@@ -96,5 +129,81 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     govActionResponse.setTotalPages(governanceActionProjections.getTotalPages());
     govActionResponse.setCurrentPage(pageable.getPageNumber());
     return govActionResponse;
+  }
+
+  @Override
+  public GovernanceActionDetailsResponse getGovernanceActionDetails(
+      String dRepHashOrPoolHash, GovernanceActionRequest governanceActionRequest) {
+    Optional<GovActionDetailsProjection> govActionDetailsProjections =
+        governanceActionRepository.getGovActionDetailsByTxHashAndIndex(
+            governanceActionRequest.getTxHash(), governanceActionRequest.getIndex());
+    if (govActionDetailsProjections.isEmpty()) {
+      throw new BusinessException(BusinessCode.GOVERNANCE_ACTION_NOT_FOUND);
+    }
+
+    org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+        govActionType = govActionDetailsProjections.get().getType();
+
+    if ((govActionType.equals(
+                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                    .TREASURY_WITHDRAWALS_ACTION)
+            && governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH))
+        || (govActionType.equals(
+                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                    .PARAMETER_CHANGE_ACTION)
+            && governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH))) {
+      return new GovernanceActionDetailsResponse();
+    }
+    GovernanceActionDetailsResponse response =
+        governanceActionMapper.fromGovActionDetailsProjection(govActionDetailsProjections.get());
+
+    List<VotingProcedureProjection> votingProcedureProjections =
+        votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
+            governanceActionRequest.getTxHash(),
+            governanceActionRequest.getIndex(),
+            dRepHashOrPoolHash);
+    if (votingProcedureProjections.isEmpty()) {
+      response.setVoteType(VoteType.NONE);
+      return response;
+    }
+    List<HistoryVote> historyVotes =
+        votingProcedureProjections.stream()
+            .sorted(Comparator.comparing(VotingProcedureProjection::getBlockTime).reversed())
+            .map(votingProcedureMapper::fromVotingProcedureProjection)
+            .toList();
+    response.setVoteType(VoteType.valueOf(votingProcedureProjections.get(0).getVote().name()));
+    response.setHistoryVotes(historyVotes);
+    setExpiryDateOfGovAction(response);
+    return response;
+  }
+
+  void setExpiryDateOfGovAction(GovernanceActionDetailsResponse response) {
+    Epoch epoch =
+        epochRepository
+            .findFirstByNo(response.getEpoch())
+            .orElseThrow(() -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+    Epoch firstEpoch =
+        epochRepository
+            .findFirstByNo(BigInteger.ZERO.intValue())
+            .orElseThrow(() -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+    LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
+    EpochResponse epochResponse = epochMapper.epochToEpochResponse(epoch);
+    LocalDateTime startTime =
+        modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epochResponse.getStartTime());
+    EpochParam epochParam = epochParamRepository.findByEpochNo(response.getEpoch());
+    response.setExpiryDate(
+        Timestamp.valueOf(
+            startTime.plusDays(epochDays * epochParam.getGovActionLifetime().longValue())));
+  }
+
+  private LocalDateTime modifyStartTimeAndEndTimeOfEpoch(
+      LocalDateTime firstEpochStartTime, LocalDateTime epochTime) {
+    return LocalDateTime.of(
+        epochTime.getYear(),
+        epochTime.getMonth(),
+        epochTime.getDayOfMonth(),
+        firstEpochStartTime.getHour(),
+        firstEpochStartTime.getMinute(),
+        firstEpochStartTime.getSecond());
   }
 }
