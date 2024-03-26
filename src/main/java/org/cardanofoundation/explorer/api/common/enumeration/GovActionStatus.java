@@ -13,9 +13,10 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public enum GovActionStatus {
   ANY("ANY"),
-  OPEN("OPEN"),
+  OPEN_BALLOT("OPEN_BALLOT"),
   RATIFIED("RATIFIED"),
-  ENACTED("ENACTED");
+  ENACTED("ENACTED"),
+  EXPIRED("EXPIRED");
 
   String value;
 

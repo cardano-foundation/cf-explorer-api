@@ -12,6 +12,8 @@ import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 
 @Mapper(componentModel = "spring")
 public interface GovernanceActionMapper {
+
+  @Mapping(source = "status", target = "status")
   GovernanceActionResponse fromGovernanceActionProjection(
       GovernanceActionProjection governanceActionProjection);
 
