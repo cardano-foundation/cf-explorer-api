@@ -32,4 +32,6 @@ public interface EpochParamRepository extends JpaRepository<EpochParam, Long> {
   BigInteger findKeyDepositByEpochNo(@Param("epochNo") Integer epochNo);
 
   List<EpochParam> findByEpochNoIn(@Param("epochNo") List<Integer> epochNo);
+
+  EpochParam findByEpochNo(@Param("epochNo") Integer epochNo);
 }
