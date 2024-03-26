@@ -105,20 +105,28 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         Objects.isNull(governanceActionFilter.getToDate())
             ? null
             : new Timestamp(governanceActionFilter.getToDate().getTime());
+
+    org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus govActionStatus =
+        governanceActionFilter.getActionStatus().equals(GovActionStatus.ANY)
+            ? null
+            : org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus.valueOf(
+                governanceActionFilter.getActionStatus().name());
+
     Page<GovernanceActionProjection> governanceActionProjections =
         governanceActionRepository.getAllByFilter(
-            vote, dRepHashOrPoolHash, govActionType, from, to, slot, pageable);
+            governanceActionFilter.getIsRepeatVote(),
+            govActionStatus,
+            vote,
+            dRepHashOrPoolHash,
+            govActionType,
+            from,
+            to,
+            slot,
+            pageable);
 
     List<GovernanceActionResponse> governanceActionResponses =
         governanceActionProjections.stream()
-            .map(
-                governanceActionProjection -> {
-                  GovernanceActionResponse governanceActionResponse =
-                      governanceActionMapper.fromGovernanceActionProjection(
-                          governanceActionProjection);
-                  governanceActionResponse.setStatus(GovActionStatus.OPEN);
-                  return governanceActionResponse;
-                })
+            .map(governanceActionMapper::fromGovernanceActionProjection)
             .collect(Collectors.toList());
 
     if (governanceActionResponses.isEmpty()) {
