@@ -414,11 +414,11 @@ public class DelegationServiceImpl implements DelegationService {
                   .votingPower(
                       Objects.nonNull(aggPoolInfo.getVotingPower())
                           ? aggPoolInfo.getVotingPower()
-                          : 0)
+                          : null)
                   .governanceParticipationRate(
                       Objects.nonNull(aggPoolInfo.getGovernanceParticipationRate())
                           ? aggPoolInfo.getGovernanceParticipationRate()
-                          : 0)
+                          : null)
                   .epochBlock(aggPoolInfo.getBlockInEpoch())
                   .retired(retiredIds.contains(projection.getPoolId()))
                   .build();
@@ -463,11 +463,11 @@ public class DelegationServiceImpl implements DelegationService {
                       .votingPower(
                           Objects.nonNull(poolListProjection.getVotingPower())
                               ? poolListProjection.getVotingPower()
-                              : 0)
+                              : null)
                       .governanceParticipationRate(
                           Objects.nonNull(poolListProjection.getGovernanceParticipationRate())
                               ? poolListProjection.getGovernanceParticipationRate()
-                              : 0)
+                              : null)
                       .build();
                 })
             .collect(Collectors.toList());
