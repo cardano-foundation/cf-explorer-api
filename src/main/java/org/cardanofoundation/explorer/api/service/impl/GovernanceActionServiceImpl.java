@@ -5,8 +5,10 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +34,9 @@ import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChart;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
+import org.cardanofoundation.explorer.api.projection.CountVoteOnGovActionProjection;
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
@@ -39,6 +44,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistration
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
@@ -64,6 +70,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final VotingProcedureMapper votingProcedureMapper;
   private final VotingProcedureRepository votingProcedureRepository;
   private final EpochParamRepository epochParamRepository;
+  private final LatestVotingProcedureRepository latestVotingProcedureRepository;
+
   private final EpochMapper epochMapper;
   private final EpochRepository epochRepository;
 
@@ -153,25 +161,31 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
     org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
         govActionType = govActionDetailsProjections.get().getType();
-
-    if ((govActionType.equals(
+    // STAKING POOL not allowed to vote on treasury withdrawals, parameter change and update
+    // committee
+    List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
+        govActionTypes =
+            List.of(
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .TREASURY_WITHDRAWALS_ACTION)
-            && governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH))
-        || (govActionType.equals(
+                    .TREASURY_WITHDRAWALS_ACTION,
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .PARAMETER_CHANGE_ACTION)
-            && governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH))) {
+                    .PARAMETER_CHANGE_ACTION);
+    if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
+        && govActionTypes.contains(govActionType)) {
       return new GovernanceActionDetailsResponse();
     }
     GovernanceActionDetailsResponse response =
         governanceActionMapper.fromGovActionDetailsProjection(govActionDetailsProjections.get());
 
+    VoterType voterType = VoterType.valueOf(governanceActionRequest.getVoterType().name());
+
     List<VotingProcedureProjection> votingProcedureProjections =
         votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
             governanceActionRequest.getTxHash(),
             governanceActionRequest.getIndex(),
-            dRepHashOrPoolHash);
+            dRepHashOrPoolHash,
+            voterType);
+    // no vote procedure found = none vote
     if (votingProcedureProjections.isEmpty()) {
       response.setVoteType(VoteType.NONE);
       return response;
@@ -215,5 +229,54 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         firstEpochStartTime.getHour(),
         firstEpochStartTime.getMinute(),
         firstEpochStartTime.getSecond());
+  }
+
+  @Override
+  public VotingChartResponse getVotingChartByGovActionTxHashAndIndex(String txHash, Integer index) {
+    List<CountVoteOnGovActionProjection> votingProcedureProjectionList =
+        latestVotingProcedureRepository
+            .countLatestVotingProcedureByGovActionTxHashAndGovActionIndex(txHash, index);
+
+    Map<Vote, Long> voteCount =
+        votingProcedureProjectionList.stream()
+            .collect(
+                Collectors.groupingBy(
+                    CountVoteOnGovActionProjection::getVote,
+                    Collectors.summingLong(CountVoteOnGovActionProjection::getCount)));
+
+    long yesVotes = voteCount.getOrDefault(Vote.YES, 0L);
+    long noVotes = voteCount.getOrDefault(Vote.NO, 0L);
+    long abstainVotes = voteCount.getOrDefault(Vote.ABSTAIN, 0L);
+
+    VotingChartResponse votingChart =
+        VotingChartResponse.builder()
+            .numberOfYesVote(yesVotes)
+            .numberOfNoVotes(noVotes)
+            .numberOfAbstainVotes(abstainVotes)
+            .build();
+
+    List<VotingChart> list = new ArrayList<>();
+
+    Map<VoterType, Map<Vote, Long>> voteCountByVoterTypeAndVote =
+        votingProcedureProjectionList.stream()
+            .collect(
+                Collectors.groupingBy(
+                    CountVoteOnGovActionProjection::getVoterType,
+                    Collectors.groupingBy(
+                        CountVoteOnGovActionProjection::getVote,
+                        Collectors.summingLong(CountVoteOnGovActionProjection::getCount))));
+
+    voteCountByVoterTypeAndVote.forEach(
+        (voterType, voteCountMap) -> {
+          list.add(
+              VotingChart.builder()
+                  .voterType(voterType)
+                  .numberOfYesVote(voteCountMap.getOrDefault(Vote.YES, 0L))
+                  .numberOfNoVotes(voteCountMap.getOrDefault(Vote.NO, 0L))
+                  .numberOfAbstainVotes(voteCountMap.getOrDefault(Vote.ABSTAIN, 0L))
+                  .build());
+        });
+    votingChart.setVotingChartsList(list);
+    return votingChart;
   }
 }
