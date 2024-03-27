@@ -270,4 +270,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
               + " join Delegation d on d.poolHash.id = ph.id"
               + " where ph.hashRaw =:poolHash")
   Long getSlotNoWhenFirstDelegationByPoolHash(@Param("poolHash") String poolHash);
+
+  @Query(value = "select ph.hashRaw from PoolHash ph where ph.view = :view")
+  Optional<String> getHashRawByView(@Param("view") String view);
 }
