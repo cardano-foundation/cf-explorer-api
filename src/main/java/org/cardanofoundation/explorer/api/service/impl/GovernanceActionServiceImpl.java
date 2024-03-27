@@ -2,7 +2,9 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -59,24 +61,18 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   @Value("${application.epoch.days}")
   public long epochDays;
 
+  public static final String MIN_TIME = "1970-01-01 00:00:00";
+
   private final DRepRegistrationRepository dRepRegistrationRepository;
-
   private final GovernanceActionRepository governanceActionRepository;
-
   private final PoolHashRepository poolHashRepository;
-
   private final GovernanceActionMapper governanceActionMapper;
-
   private final VotingProcedureMapper votingProcedureMapper;
-
   private final VotingProcedureRepository votingProcedureRepository;
-
   private final EpochParamRepository epochParamRepository;
-
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
 
   private final EpochMapper epochMapper;
-
   private final EpochRepository epochRepository;
 
   @Override
@@ -104,29 +100,43 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 : org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
                     .valueOf(governanceActionFilter.getActionType().name());
 
-    Timestamp from =
-        Objects.isNull(governanceActionFilter.getFromDate())
-            ? null
-            : new Timestamp(governanceActionFilter.getFromDate().getTime());
+    long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
+    long toDate =
+        Timestamp.from(
+                    LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+                        .toInstant(ZoneOffset.UTC))
+                .getTime()
+            / 1000;
 
-    Timestamp to =
-        Objects.isNull(governanceActionFilter.getToDate())
+    if (Objects.nonNull(governanceActionFilter.getFromDate())) {
+      fromDate = Timestamp.from(governanceActionFilter.getFromDate().toInstant()).getTime() / 1000;
+    }
+    if (Objects.nonNull(governanceActionFilter.getToDate())) {
+      long to = Timestamp.from(governanceActionFilter.getToDate().toInstant()).getTime() / 1000;
+      toDate = Math.min(to, toDate);
+    }
+
+    org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus govActionStatus =
+        governanceActionFilter.getActionStatus().equals(GovActionStatus.ANY)
             ? null
-            : new Timestamp(governanceActionFilter.getToDate().getTime());
+            : org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus.valueOf(
+                governanceActionFilter.getActionStatus().name());
+
     Page<GovernanceActionProjection> governanceActionProjections =
         governanceActionRepository.getAllByFilter(
-            vote, dRepHashOrPoolHash, govActionType, from, to, slot, pageable);
+            governanceActionFilter.getIsRepeatVote(),
+            govActionStatus,
+            vote,
+            dRepHashOrPoolHash,
+            govActionType,
+            fromDate,
+            toDate,
+            slot,
+            pageable);
 
     List<GovernanceActionResponse> governanceActionResponses =
         governanceActionProjections.stream()
-            .map(
-                governanceActionProjection -> {
-                  GovernanceActionResponse governanceActionResponse =
-                      governanceActionMapper.fromGovernanceActionProjection(
-                          governanceActionProjection);
-                  governanceActionResponse.setStatus(GovActionStatus.OPEN);
-                  return governanceActionResponse;
-                })
+            .map(governanceActionMapper::fromGovernanceActionProjection)
             .collect(Collectors.toList());
 
     if (governanceActionResponses.isEmpty()) {
