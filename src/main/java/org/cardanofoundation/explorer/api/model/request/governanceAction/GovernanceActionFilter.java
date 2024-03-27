@@ -2,6 +2,8 @@ package org.cardanofoundation.explorer.api.model.request.governanceAction;
 
 import java.util.Date;
 
+import jakarta.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,13 +28,13 @@ public class GovernanceActionFilter {
 
   String anchorText;
 
-  GovActionType actionType;
+  @NotNull GovActionType actionType;
 
-  GovActionStatus actionStatus;
+  @NotNull GovActionStatus actionStatus;
 
-  VoteType voteType;
+  @NotNull VoteType voteType;
 
-  VoterType voterType;
+  @NotNull VoterType voterType;
 
   @DateValid(pattern = DatePattern.YYYY_MM_DD)
   private Date fromDate;
