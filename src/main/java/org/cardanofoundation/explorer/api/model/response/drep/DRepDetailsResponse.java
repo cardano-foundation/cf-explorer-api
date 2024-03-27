@@ -26,6 +26,7 @@ public class DRepDetailsResponse {
   private String drepHash;
   private String drepId;
   private String anchorUrl;
+  private String anchorHash;
   private Integer delegators;
   private BigInteger activeVoteStake;
   private BigInteger liveStake;

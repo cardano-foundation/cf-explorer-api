@@ -129,8 +129,8 @@ public class DRepServiceImpl implements DRepService {
   }
 
   @Override
-  public DRepDetailsResponse getDrepDetails(String dRepHashOrDRepId) {
-    return dRepMapper.fromDrepInfo(drepInfoRepository.findByDrepHashOrDrepId(dRepHashOrDRepId));
+  public DRepDetailsResponse getDRepDetails(String dRepHashOrDRepId) {
+    return dRepMapper.fromDrepInfo(drepInfoRepository.findByDRepHashOrDRepId(dRepHashOrDRepId));
   }
 
   @Override
