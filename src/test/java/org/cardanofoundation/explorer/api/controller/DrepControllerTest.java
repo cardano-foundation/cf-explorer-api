@@ -146,7 +146,7 @@ public class DrepControllerTest {
             .votingParticipation(BigInteger.TEN.add(BigInteger.TWO))
             .build();
 
-    when(dRepService.getDrepDetails(drepHash)).thenReturn(dRepDetailsResponse);
+    when(dRepService.getDRepDetails(drepHash)).thenReturn(dRepDetailsResponse);
     mockMvc
         .perform(
             get("/api/v1/dreps/{drepHashOrDrepId}/drep-details", drepHash)
@@ -181,5 +181,23 @@ public class DrepControllerTest {
             content()
                 .string(containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")))
         .andExpect(jsonPath("$.numberOfYesVote").value(10L));
+  }
+
+  @Test
+  void testGetDetailsOfDRep() throws Exception {
+    String dRepHash = "43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e";
+    DRepDetailsResponse dRepDetailsResponse =
+        DRepDetailsResponse.builder().drepHash(dRepHash).drepId("dRepId").delegators(100).build();
+    when(dRepService.getDRepDetails(dRepHash)).thenReturn(dRepDetailsResponse);
+    mockMvc
+        .perform(
+            get("/api/v1/dreps/{dRepHashOrDRepId}/drep-details", dRepHash)
+                .param("dRepHashOrDRepId", dRepHash)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(
+            content()
+                .string(containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")))
+        .andExpect(jsonPath("$.delegators").value(100));
   }
 }

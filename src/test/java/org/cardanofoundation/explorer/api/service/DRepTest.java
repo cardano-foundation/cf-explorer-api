@@ -90,9 +90,9 @@ public class DRepTest {
             .delegators(10)
             .activeVoteStake(BigInteger.TWO)
             .build();
-    when(drepInfoRepository.findByDrepHashOrDrepId(drepHash)).thenReturn(dRepInfo);
+    when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(dRepInfo);
 
-    var actual = dRepCertificateService.getDrepDetails(drepHash);
+    var actual = dRepCertificateService.getDRepDetails(drepHash);
 
     Assertions.assertEquals(dRepInfo.getDrepId(), actual.getDrepId());
     Assertions.assertEquals(10, actual.getDelegators());
