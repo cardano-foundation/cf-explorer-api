@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -34,19 +35,21 @@ public interface GovernanceActionRepository
               + " where (:vote is null or (:vote != 'NONE' and :vote = vp.vote) or (:vote = 'NONE' and vp.vote is null))"
               + " and (:isRepeatVote is null or (vp.repeatVote = :isRepeatVote))"
               + " and (:gapStatus is null or (gapInfo.status = :gapStatus))"
-              + " and (:type is null or (gap.type = :type))"
+              + " and gap.type in (:type)"
               + " and (gap.slot >= :slot)"
               + " and (gap.blockTime >= :from)"
-              + " and (gap.blockTime <= :to)")
+              + " and (gap.blockTime <= :to)"
+              + " and (:txHash is null or gap.txHash = :txHash)")
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,
       @Param("vote") Vote vote,
       @Param("voterHash") String dRepHash,
-      @Param("type") GovActionType type,
+      @Param("type") List<GovActionType> type,
       @Param("from") Long from,
       @Param("to") Long to,
       @Param("slot") Long slot,
+      @Param("txHash") String txHash,
       Pageable pageable);
 
   @Query(

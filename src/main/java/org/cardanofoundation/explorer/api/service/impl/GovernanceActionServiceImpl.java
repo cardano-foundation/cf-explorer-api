@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,13 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     BaseFilterResponse<GovernanceActionResponse> govActionResponse = new BaseFilterResponse<>();
     govActionResponse.setData(List.of());
 
+    if (dRepHashOrPoolHash.toLowerCase().startsWith("pool")) {
+      dRepHashOrPoolHash =
+          poolHashRepository
+              .getHashRawByView(dRepHashOrPoolHash)
+              .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+    }
+
     Long slot = null;
     if (governanceActionFilter.getVoterType().equals(VoterType.DREP_KEY_HASH)) {
       slot = dRepRegistrationRepository.getSlotOfDRepRegistration(dRepHashOrPoolHash);
@@ -93,12 +101,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             ? null
             : Vote.valueOf(governanceActionFilter.getVoteType().name());
 
-    org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-        govActionType =
-            governanceActionFilter.getActionType().equals(GovActionType.ALL)
-                ? null
-                : org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .valueOf(governanceActionFilter.getActionType().name());
+    List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
+        govActionTypeList =
+            getGovActionTypeByVoterType(
+                governanceActionFilter.getVoterType(), governanceActionFilter.getActionType());
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
     long toDate =
@@ -128,10 +134,11 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             govActionStatus,
             vote,
             dRepHashOrPoolHash,
-            govActionType,
+            govActionTypeList,
             fromDate,
             toDate,
             slot,
+            governanceActionFilter.getGovernanceActionTxHash(),
             pageable);
 
     List<GovernanceActionResponse> governanceActionResponses =
@@ -147,6 +154,47 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     govActionResponse.setTotalPages(governanceActionProjections.getTotalPages());
     govActionResponse.setCurrentPage(pageable.getPageNumber());
     return govActionResponse;
+  }
+
+  private List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
+      getGovActionTypeByVoterType(VoterType voterType, GovActionType govActionType) {
+    List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
+        govActionTypeList =
+            new ArrayList<>(
+                Arrays.asList(
+                    org.cardanofoundation.explorer.common.entity.ledgersync.enumeration
+                        .GovActionType.values()));
+
+    if (govActionType.equals(
+        org.cardanofoundation.explorer.api.common.enumeration.GovActionType.ALL)) {
+      if (voterType.equals(VoterType.STAKING_POOL_KEY_HASH)) {
+        govActionTypeList.remove(
+            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                .UPDATE_COMMITTEE);
+        govActionTypeList.remove(
+            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                .PARAMETER_CHANGE_ACTION);
+        govActionTypeList.remove(
+            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                .TREASURY_WITHDRAWALS_ACTION);
+      }
+    } else {
+      govActionTypeList = new ArrayList<>();
+      govActionTypeList.add(
+          org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType.valueOf(
+              govActionType.name()));
+      if (voterType.equals(VoterType.STAKING_POOL_KEY_HASH)) {
+        govActionTypeList.removeAll(
+            List.of(
+                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                    .UPDATE_COMMITTEE,
+                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                    .PARAMETER_CHANGE_ACTION,
+                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                    .TREASURY_WITHDRAWALS_ACTION));
+      }
+    }
+    return govActionTypeList;
   }
 
   @Override
