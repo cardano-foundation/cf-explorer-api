@@ -12,5 +12,5 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
       value =
           " select dri from DRepInfo dri"
               + " where dri.drepHash = :dRepHashOrDRepId or dri.drepId = :dRepHashOrDRepId")
-  DRepInfo findByDrepHashOrDrepId(@Param("dRepHashOrDRepId") String dRepHashOrDRepId);
+  DRepInfo findByDRepHashOrDRepId(@Param("dRepHashOrDRepId") String dRepHashOrDRepId);
 }
