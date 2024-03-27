@@ -45,7 +45,7 @@ public class GovernanceActionController {
       summary = "Get governance action that vote by DRep or pool",
       tags = {"gov-actions"})
   public ResponseEntity<BaseFilterResponse<GovernanceActionResponse>> getGovActionByFilter(
-      @PathVariable @Parameter(description = "The DRep hash or pool hash")
+      @PathVariable @Parameter(description = "The DRep hash or pool hash or pool view")
           String dRepHashOrPoolHash,
       @ParameterObject GovernanceActionFilter governanceActionFilter,
       @ParameterObject
