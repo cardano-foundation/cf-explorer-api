@@ -44,6 +44,9 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
   @Query(value = "SELECT sa.view FROM StakeAddress sa WHERE sa.id IN :addressIds")
   List<String> getViewByAddressId(@Param("addressIds") Set<Long> addressIds);
 
+  @Query(value = "select sa.id, sa.view from StakeAddress sa where sa.view in :views")
+  List<StakeAddressProjection> getAddressIdByViewIn(List<String> views);
+
   List<StakeAddress> findByIdIn(Collection<Long> ids);
 
   @Query(

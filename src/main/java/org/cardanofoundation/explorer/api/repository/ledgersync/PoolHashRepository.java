@@ -34,8 +34,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(
       value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, "
-              + "po.tickerName as tickerName, pu.margin AS margin, LENGTH(po.poolName) as poolNameLength "
+          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, "
+              + "po.tickerName as tickerName, LENGTH(po.poolName) as poolNameLength "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.poolId AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.poolId = ph.id)) "
               + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHashId AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHashId = ph.id) "
@@ -61,8 +61,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(
       value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, pu.fixedCost AS fee, "
-              + "po.tickerName as tickerName, pu.margin AS margin, LENGTH(po.poolName) as poolNameLength, "
+          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, "
+              + "po.tickerName as tickerName, LENGTH(po.poolName) as poolNameLength, "
               + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.poolId AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.poolId = ph.id)) "
@@ -95,8 +95,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   @Query(
       value =
           "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
-              + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength "
+              + "po.tickerName as tickerName, pu.pledge AS pledge, "
+              + "LENGTH(po.poolName) as poolNameLength "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
               + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
@@ -129,7 +129,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   @Query(
       value =
           "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
+              + "po.tickerName as tickerName, pu.pledge AS pledge, "
               + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
@@ -142,7 +142,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   @Query(
       value =
           "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
+              + "po.tickerName as tickerName, pu.pledge AS pledge, "
               + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength, "
               + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation "
               + "FROM PoolHash ph "
@@ -160,8 +160,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   @Query(
       value =
           "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
-              + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength "
+              + "po.tickerName as tickerName, pu.pledge AS pledge, "
+              + "LENGTH(po.poolName) as poolNameLength "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
               + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
@@ -171,8 +171,8 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   @Query(
       value =
           "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
-              + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength, "
+              + "po.tickerName as tickerName, pu.pledge AS pledge, "
+              + "LENGTH(po.poolName) as poolNameLength, "
               + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
@@ -263,4 +263,11 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
               + "WHERE LOWER(pod.poolName) LIKE CONCAT('%', :query, '%') OR "
               + "LOWER(pod.tickerName) LIKE CONCAT('%', :query, '%') ")
   List<PoolInfoProjection> findByPoolNameLike(@Param("query") String query, Pageable pageable);
+
+  @Query(
+      value =
+          "select min(d.slotNo) from PoolHash ph"
+              + " join Delegation d on d.poolHash.id = ph.id"
+              + " where ph.hashRaw =:poolHash")
+  Long getSlotNoWhenFirstDelegationByPoolHash(@Param("poolHash") String poolHash);
 }

@@ -22,6 +22,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
@@ -65,7 +66,9 @@ public class DRepController {
       tags = {"dRep"})
   public ResponseEntity<VotingProcedureChartResponse> getChartOfDRepVotesOnGovernanceAction(
       @PathVariable @Parameter(description = "The DRep hash") String dRepHash,
-      @RequestParam(value = "govActionType") @Parameter(description = "The type of Governance Action") GovActionType govActionType) {
+      @RequestParam(value = "govActionType")
+          @Parameter(description = "The type of Governance Action")
+          GovActionType govActionType) {
     return ResponseEntity.ok(dRepService.getVoteProcedureChart(dRepHash, govActionType));
   }
 
@@ -75,7 +78,20 @@ public class DRepController {
       summary = "Get details of Delegated Representative (DRep)",
       tags = {"dRep"})
   public ResponseEntity<DRepDetailsResponse> getDRepDetails(
-      @Valid @PathVariable @Parameter(description = "The DRep id or DRep hash") String dRepHashOrDRepId) {
+      @Valid @PathVariable @Parameter(description = "The DRep id or DRep hash")
+          String dRepHashOrDRepId) {
     return ResponseEntity.ok(dRepService.getDRepDetails(dRepHashOrDRepId));
+  }
+
+  @GetMapping("/{dRepHashOrDRepId}/get-delegation")
+  @LogMessage
+  @Operation(
+      summary = "Get stake that delegated to Delegated Representative (DRep)",
+      tags = {"drep"})
+  public ResponseEntity<BaseFilterResponse<DRepDelegatorsResponse>> getDRepDelegation(
+      @Valid @PathVariable @Parameter(description = "dRepHashOrDRepId") String dRepHashOrDRepId,
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+    return ResponseEntity.ok(
+        dRepService.getDRepDelegators(dRepHashOrDRepId, pagination.toPageable()));
   }
 }
