@@ -15,5 +15,5 @@ public interface DRepService {
   VotingProcedureChartResponse getVoteProcedureChart(
       String drepHashOrDrepId, GovActionType govActionType);
 
-  DRepDetailsResponse getDrepDetails(String drepHashOrDrepId);
+  DRepDetailsResponse getDRepDetails(String drepHashOrDrepId);
 }

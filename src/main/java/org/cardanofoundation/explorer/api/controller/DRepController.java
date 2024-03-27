@@ -33,7 +33,7 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationVal
 @RequestMapping("/api/v1/dreps")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "drep", description = "The delegated representatives APIs")
+@Tag(name = "dRep", description = "The delegated representatives APIs")
 public class DRepController {
 
   private final DRepService dRepService;
@@ -42,7 +42,7 @@ public class DRepController {
   @LogMessage
   @Operation(
       summary = "Get list of DRep certificate history",
-      tags = {"drep"})
+      tags = {"dRep"})
   public ResponseEntity<BaseFilterResponse<DRepCertificateHistoryResponse>>
       getTxDRepCertificatesHistory(
           @PathVariable @Parameter(description = "The DRep id or DRep hash")
@@ -62,10 +62,10 @@ public class DRepController {
   @LogMessage
   @Operation(
       summary = "Get chart of DRep vote on Governance Action",
-      tags = {"drep"})
+      tags = {"dRep"})
   public ResponseEntity<VotingProcedureChartResponse> getChartOfDRepVotesOnGovernanceAction(
-      @PathVariable @Parameter(description = "dRepHash") String dRepHash,
-      @RequestParam(value = "govActionType") GovActionType govActionType) {
+      @PathVariable @Parameter(description = "The DRep hash") String dRepHash,
+      @RequestParam(value = "govActionType") @Parameter(description = "The type of Governance Action") GovActionType govActionType) {
     return ResponseEntity.ok(dRepService.getVoteProcedureChart(dRepHash, govActionType));
   }
 
@@ -73,9 +73,9 @@ public class DRepController {
   @LogMessage
   @Operation(
       summary = "Get details of Delegated Representative (DRep)",
-      tags = {"drep"})
+      tags = {"dRep"})
   public ResponseEntity<DRepDetailsResponse> getDRepDetails(
-      @Valid @PathVariable @Parameter(description = "dRepHashOrDRepId") String dRepHashOrDRepId) {
-    return ResponseEntity.ok(dRepService.getDrepDetails(dRepHashOrDRepId));
+      @Valid @PathVariable @Parameter(description = "The DRep id or DRep hash") String dRepHashOrDRepId) {
+    return ResponseEntity.ok(dRepService.getDRepDetails(dRepHashOrDRepId));
   }
 }
