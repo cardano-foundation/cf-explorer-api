@@ -224,6 +224,12 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
     GovernanceActionDetailsResponse response =
         governanceActionMapper.fromGovActionDetailsProjection(govActionDetailsProjections.get());
+    // get pool name for SPO
+    if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)) {
+      Optional<String> poolName =
+          poolHashRepository.getPoolNameByPoolHashOrPoolView(dRepHashOrPoolHash);
+      response.setPoolName(poolName.orElse(null));
+    }
 
     VoterType voterType = VoterType.valueOf(governanceActionRequest.getVoterType().name());
 
