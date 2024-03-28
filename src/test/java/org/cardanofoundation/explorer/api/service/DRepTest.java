@@ -9,7 +9,6 @@ import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,6 +26,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCer
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.impl.DRepServiceImpl;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
@@ -39,8 +39,7 @@ public class DRepTest {
   @Mock DRepRegistrationRepository dRepRegistrationRepository;
   @Mock DrepInfoRepository drepInfoRepository;
   @Mock VotingProcedureRepository votingProcedureRepository;
-  @Mock
-  LatestVotingProcedureRepository latestVotingProcedureRepository;
+  @Mock LatestVotingProcedureRepository latestVotingProcedureRepository;
   @InjectMocks DRepServiceImpl dRepCertificateService;
 
   @Spy
