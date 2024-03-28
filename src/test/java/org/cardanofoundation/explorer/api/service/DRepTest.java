@@ -4,10 +4,12 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,6 +39,8 @@ public class DRepTest {
   @Mock DRepRegistrationRepository dRepRegistrationRepository;
   @Mock DrepInfoRepository drepInfoRepository;
   @Mock VotingProcedureRepository votingProcedureRepository;
+  @Mock
+  LatestVotingProcedureRepository latestVotingProcedureRepository;
   @InjectMocks DRepServiceImpl dRepCertificateService;
 
   @Spy
@@ -90,7 +94,7 @@ public class DRepTest {
             .delegators(10)
             .activeVoteStake(BigInteger.TWO)
             .build();
-    when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(dRepInfo);
+    when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(Optional.of(dRepInfo));
 
     var actual = dRepCertificateService.getDRepDetails(drepHash);
 

@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.repository.explorer;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,5 +14,5 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
       value =
           " select dri from DRepInfo dri"
               + " where dri.drepHash = :dRepHashOrDRepId or dri.drepId = :dRepHashOrDRepId")
-  DRepInfo findByDRepHashOrDRepId(@Param("dRepHashOrDRepId") String dRepHashOrDRepId);
+  Optional<DRepInfo> findByDRepHashOrDRepId(@Param("dRepHashOrDRepId") String dRepHashOrDRepId);
 }
