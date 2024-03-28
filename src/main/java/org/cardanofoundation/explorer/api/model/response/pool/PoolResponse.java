@@ -47,7 +47,7 @@ public class PoolResponse implements Serializable {
 
   private Integer votingPower;
 
-  private Integer governanceParticipationRate;
+  private Double governanceParticipationRate;
 
   private boolean retired;
 }

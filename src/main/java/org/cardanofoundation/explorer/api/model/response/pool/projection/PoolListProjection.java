@@ -24,5 +24,5 @@ public interface PoolListProjection {
 
   Integer getVotingPower();
 
-  Integer getGovernanceParticipationRate();
+  Double getGovernanceParticipationRate();
 }
