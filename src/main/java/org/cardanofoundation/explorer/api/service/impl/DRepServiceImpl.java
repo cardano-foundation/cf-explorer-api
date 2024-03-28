@@ -161,7 +161,7 @@ public class DRepServiceImpl implements DRepService {
     long totalVotes = counted.values().stream().reduce(0L, Long::sum);
     Long numberOfYesVote = counted.get(Vote.YES) == null ? 0 : counted.get(Vote.YES);
     Long numberOfNoVotes = counted.get(Vote.NO) == null ? 0 : counted.get(Vote.NO);
-    dRepDetailsResponse.setGovernanceParticipationRate(
+    dRepDetailsResponse.setVotingParticipation(
         totalVotes == 0 ? 0 : (float) ((numberOfYesVote + numberOfNoVotes) * 1.0 / totalVotes));
   }
 
