@@ -273,4 +273,13 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(value = "select ph.hashRaw from PoolHash ph where ph.view = :view")
   Optional<String> getHashRawByView(@Param("view") String view);
+
+  @Query(
+      value =
+          "SELECT pod.poolName AS poolName"
+              + " FROM PoolHash ph"
+              + " INNER JOIN PoolOfflineData pod ON ph.id  = pod.poolId AND pod.id ="
+              + " (SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.poolId)"
+              + " WHERE  ph.hashRaw = :poolViewOrHash or ph.view = :poolViewOrHash")
+  Optional<String> getPoolNameByPoolHashOrPoolView(@Param("poolViewOrHash") String poolViewOrHash);
 }
