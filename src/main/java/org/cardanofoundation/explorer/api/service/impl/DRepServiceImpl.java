@@ -20,6 +20,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
 import org.cardanofoundation.explorer.api.mapper.DRepMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -29,18 +30,22 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsRespons
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
+import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationVoteRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.DelegationVote_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +61,7 @@ public class DRepServiceImpl implements DRepService {
   private final EpochRepository epochRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final EpochStakeRepository epochStakeRepository;
+  private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final DRepMapper dRepMapper;
 
   @Override
@@ -130,7 +136,33 @@ public class DRepServiceImpl implements DRepService {
 
   @Override
   public DRepDetailsResponse getDRepDetails(String dRepHashOrDRepId) {
-    return dRepMapper.fromDrepInfo(drepInfoRepository.findByDRepHashOrDRepId(dRepHashOrDRepId));
+    DRepInfo dRepInfo =
+        drepInfoRepository
+            .findByDRepHashOrDRepId(dRepHashOrDRepId)
+            .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
+    DRepDetailsResponse response = dRepMapper.fromDrepInfo(dRepInfo);
+    calculateGovernanceParticipationRate(response, dRepInfo.getCreatedAt());
+    return response;
+  }
+
+  private void calculateGovernanceParticipationRate(
+      DRepDetailsResponse dRepDetailsResponse, Long createdAt) {
+    List<LatestVotingProcedureProjection> list =
+        latestVotingProcedureRepository.findVotingByDRepHash(
+            dRepDetailsResponse.getDrepHash(), createdAt);
+    if (list.isEmpty()) {
+      return;
+    }
+    Map<Vote, Long> counted =
+        list.stream()
+            .collect(
+                Collectors.groupingBy(
+                    LatestVotingProcedureProjection::getVote, Collectors.counting()));
+    long totalVotes = counted.values().stream().reduce(0L, Long::sum);
+    Long numberOfYesVote = counted.get(Vote.YES) == null ? 0 : counted.get(Vote.YES);
+    Long numberOfNoVotes = counted.get(Vote.NO) == null ? 0 : counted.get(Vote.NO);
+    dRepDetailsResponse.setGovernanceParticipationRate(
+        totalVotes == 0 ? 0 : (float) ((numberOfYesVote + numberOfNoVotes) * 1.0 / totalVotes));
   }
 
   @Override

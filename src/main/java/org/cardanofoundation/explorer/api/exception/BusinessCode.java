@@ -33,7 +33,8 @@ public enum BusinessCode implements ErrorCode {
   EXTERNAL_API_IS_NOT_AVAILABLE(
       "500-EXTERNAL_API_IS_NOT_AVAILABLE", "External API is not available"),
 
-  GOVERNANCE_ACTION_NOT_FOUND("404-GOVERNANCE_ACTION_NOT_FOUND", "Governance action not found");
+  GOVERNANCE_ACTION_NOT_FOUND("404-GOVERNANCE_ACTION_NOT_FOUND", "Governance action not found"),
+  DREP_NOT_FOUND("404-DREP_NOT_FOUND", "DRep not found");
 
   private final String code;
   private final String desc;
