@@ -233,6 +233,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             governanceActionRequest.getIndex(),
             dRepHashOrPoolHash,
             voterType);
+    setExpiryDateOfGovAction(response);
     // no vote procedure found = none vote
     if (votingProcedureProjections.isEmpty()) {
       response.setVoteType(VoteType.NONE);
@@ -245,7 +246,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             .toList();
     response.setVoteType(VoteType.valueOf(votingProcedureProjections.get(0).getVote().name()));
     response.setHistoryVotes(historyVotes);
-    setExpiryDateOfGovAction(response);
     return response;
   }
 
