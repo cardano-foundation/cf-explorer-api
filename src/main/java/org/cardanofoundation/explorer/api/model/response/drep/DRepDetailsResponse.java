@@ -30,6 +30,7 @@ public class DRepDetailsResponse {
   private Integer delegators;
   private BigInteger activeVoteStake;
   private BigInteger liveStake;
+  private Float governanceParticipationRate;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private Date createdAt;
