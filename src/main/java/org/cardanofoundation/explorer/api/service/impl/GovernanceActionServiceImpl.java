@@ -169,7 +169,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       if (voterType.equals(VoterType.STAKING_POOL_KEY_HASH)) {
         govActionTypeList.remove(
             org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                .UPDATE_COMMITTEE);
+                .NEW_CONSTITUTION);
         govActionTypeList.remove(
             org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
                 .PARAMETER_CHANGE_ACTION);
@@ -186,7 +186,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         govActionTypeList.removeAll(
             List.of(
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .UPDATE_COMMITTEE,
+                    .NEW_CONSTITUTION,
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
                     .PARAMETER_CHANGE_ACTION,
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
@@ -216,7 +216,9 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
                     .TREASURY_WITHDRAWALS_ACTION,
                 org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .PARAMETER_CHANGE_ACTION);
+                    .PARAMETER_CHANGE_ACTION,
+                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
+                    .NEW_CONSTITUTION);
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
         && govActionTypes.contains(govActionType)) {
       return new GovernanceActionDetailsResponse();
