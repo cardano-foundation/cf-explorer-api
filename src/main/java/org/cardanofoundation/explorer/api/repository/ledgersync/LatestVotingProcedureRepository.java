@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.CountVoteOnGovActionProjection;
+import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestVotingProcedure;
 import org.cardanofoundation.explorer.common.entity.ledgersync.compositeKey.LatestVotingProcedureId;
 
@@ -25,4 +26,10 @@ public interface LatestVotingProcedureRepository
   List<CountVoteOnGovActionProjection> countLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
       @Param("govActionTxHash") String govActionTxHash,
       @Param("govActionIndex") Integer govActionIndex);
+
+  @Query(
+      value =
+          " select lvp.vote as vote, lvp.govActionTxHash as govActionTxHash, lvp.govActionIndex as govActionIndex from LatestVotingProcedure lvp where lvp.voterHash = :dRepHash and lvp.blockTime >= :blockTime")
+  List<LatestVotingProcedureProjection> findVotingByDRepHash(
+      @Param("dRepHash") String dRepHash, @Param("blockTime") Long slot);
 }
