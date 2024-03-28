@@ -32,7 +32,7 @@ public interface GovernanceActionRepository
               + " vp.govActionTxHash = gap.txHash"
               + " and vp.govActionIndex = gap.index"
               + " and vp.voterHash = :voterHash)"
-              + " where (:vote is null or (:vote != 'NONE' and :vote = vp.vote) or (:vote = 'NONE' and vp.vote is null))"
+              + " where (coalesce(:vote, null) is null or (:vote != 'NONE' and :vote = vp.vote) or (:vote = 'NONE' and vp.vote is null))"
               + " and (:isRepeatVote is null or (vp.repeatVote = :isRepeatVote))"
               + " and (:gapStatus is null or (gapInfo.status = :gapStatus))"
               + " and gap.type in (:type)"
