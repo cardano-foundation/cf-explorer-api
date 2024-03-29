@@ -14,7 +14,7 @@ public interface GovernanceActionService {
       String dRepHashOrDRepId, GovernanceActionFilter governanceActionFilter, Pageable pageable);
 
   GovernanceActionDetailsResponse getGovernanceActionDetails(
-      String dRepHashOrPoolHash, GovernanceActionRequest governanceActionRequest);
+      String dRepHashOrPoolHashOrPoolView, GovernanceActionRequest governanceActionRequest);
 
   VotingChartResponse getVotingChartByGovActionTxHashAndIndex(String txHash, Integer index);
 }

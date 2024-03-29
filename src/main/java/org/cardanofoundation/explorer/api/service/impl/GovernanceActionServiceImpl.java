@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -57,6 +58,7 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class GovernanceActionServiceImpl implements GovernanceActionService {
 
   @Value("${application.epoch.days}")
@@ -202,14 +204,19 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
   @Override
   public GovernanceActionDetailsResponse getGovernanceActionDetails(
-      String dRepHashOrPoolHash, GovernanceActionRequest governanceActionRequest) {
+      String dRepHashOrPoolHashOrPoolView, GovernanceActionRequest governanceActionRequest) {
     Optional<GovActionDetailsProjection> govActionDetailsProjections =
         governanceActionRepository.getGovActionDetailsByTxHashAndIndex(
             governanceActionRequest.getTxHash(), governanceActionRequest.getIndex());
     if (govActionDetailsProjections.isEmpty()) {
       throw new BusinessException(BusinessCode.GOVERNANCE_ACTION_NOT_FOUND);
     }
-
+    if (dRepHashOrPoolHashOrPoolView.toLowerCase().startsWith("pool")) {
+      dRepHashOrPoolHashOrPoolView =
+          poolHashRepository
+              .getHashRawByView(dRepHashOrPoolHashOrPoolView)
+              .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+    }
     org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
         govActionType = govActionDetailsProjections.get().getType();
     // STAKING POOL not allowed to vote on treasury withdrawals, parameter change and update
@@ -232,7 +239,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     // get pool name for SPO
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)) {
       Optional<String> poolName =
-          poolHashRepository.getPoolNameByPoolHashOrPoolView(dRepHashOrPoolHash);
+          poolHashRepository.getPoolNameByPoolHashOrPoolView(dRepHashOrPoolHashOrPoolView);
       response.setPoolName(poolName.orElse(null));
     }
 
@@ -242,7 +249,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
             governanceActionRequest.getTxHash(),
             governanceActionRequest.getIndex(),
-            dRepHashOrPoolHash,
+            dRepHashOrPoolHashOrPoolView,
             voterType);
     setExpiryDateOfGovAction(response);
     // no vote procedure found = none vote
