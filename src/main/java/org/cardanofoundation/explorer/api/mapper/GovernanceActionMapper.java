@@ -14,6 +14,7 @@ import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 public interface GovernanceActionMapper {
 
   @Mapping(source = "status", target = "status")
+  @Mapping(source = "repeatVote", target = "isRepeatVote")
   GovernanceActionResponse fromGovernanceActionProjection(
       GovernanceActionProjection governanceActionProjection);
 
