@@ -87,7 +87,7 @@ public class DRepController {
   @LogMessage
   @Operation(
       summary = "Get stake that delegated to Delegated Representative (DRep)",
-      tags = {"drep"})
+      tags = {"dRep"})
   public ResponseEntity<BaseFilterResponse<DRepDelegatorsResponse>> getDRepDelegation(
       @Valid @PathVariable @Parameter(description = "dRepHashOrDRepId") String dRepHashOrDRepId,
       @ParameterObject @PaginationValid @Valid Pagination pagination) {
