@@ -143,7 +143,7 @@ public class DrepControllerTest {
             .activeVoteStake(BigInteger.TEN)
             .delegators(10)
             .liveStake(BigInteger.TEN)
-            .votingParticipation(BigInteger.TEN.add(BigInteger.TWO))
+            .votingParticipation(Float.valueOf("0.5"))
             .build();
 
     when(dRepService.getDRepDetails(drepHash)).thenReturn(dRepDetailsResponse);
@@ -154,8 +154,8 @@ public class DrepControllerTest {
         .andExpect(status().isOk())
         .andExpect(
             content()
-                .string(
-                    containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")));
+                .string(containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")))
+        .andExpect(jsonPath("$.votingParticipation").value(0.5));
   }
 
   @Test
