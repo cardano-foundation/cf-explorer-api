@@ -106,6 +106,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 governanceActionFilter.getVoterType(), governanceActionFilter.getActionType());
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
+    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate =
         Timestamp.from(
                     LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
@@ -127,6 +128,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             : org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus.valueOf(
                 governanceActionFilter.getActionStatus().name());
 
+    String anchorText = governanceActionFilter.getAnchorText();
+
     Page<GovernanceActionProjection> governanceActionProjections =
         governanceActionRepository.getAllByFilter(
             governanceActionFilter.getIsRepeatVote(),
@@ -138,6 +141,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             toDate,
             slot,
             governanceActionFilter.getGovernanceActionTxHash(),
+            anchorText,
             pageable);
 
     List<GovernanceActionResponse> governanceActionResponses =

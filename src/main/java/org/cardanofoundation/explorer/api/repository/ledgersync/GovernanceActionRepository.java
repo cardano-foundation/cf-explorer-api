@@ -39,7 +39,8 @@ public interface GovernanceActionRepository
               + " and (gap.slot >= :slot)"
               + " and (gap.blockTime >= :from)"
               + " and (gap.blockTime <= :to)"
-              + " and (:txHash is null or gap.txHash = :txHash)")
+              + " and (:txHash is null or gap.txHash = :txHash)"
+              + " and (:anchorText is null or gap.anchorUrl like concat('%', :anchorText, '%') or gap.anchorHash like concat('%', :anchorText, '%'))")
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,
@@ -50,6 +51,7 @@ public interface GovernanceActionRepository
       @Param("to") Long to,
       @Param("slot") Long slot,
       @Param("txHash") String txHash,
+      @Param("anchorText") String anchorText,
       Pageable pageable);
 
   @Query(
