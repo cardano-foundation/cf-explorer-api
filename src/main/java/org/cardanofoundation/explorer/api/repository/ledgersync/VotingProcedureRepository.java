@@ -29,8 +29,7 @@ public interface VotingProcedureRepository
       value =
           "select vp.govActionTxHash as govActionTxHash, vp.govActionIndex as govActionIndex, vp.vote as vote, vp.txHash as votingProcedureTxHash, vp.index as votingProcedureTxIndex,"
               + " vp.blockTime as blockTime"
-              + " from VotingProcedure vp where vp.govActionTxHash = :txHash and vp.govActionIndex = :index and vp.voterHash = :voterHash and vp.voterType = :voterType"
-              + " order by vp.blockTime desc")
+              + " from VotingProcedure vp where vp.govActionTxHash = :txHash and vp.govActionIndex = :index and vp.voterHash = :voterHash and vp.voterType = :voterType")
   List<VotingProcedureProjection> getVotingProcedureByTxHashAndIndexAndVoterHash(
       @Param("txHash") String txHash,
       @Param("index") Integer index,

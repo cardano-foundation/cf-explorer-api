@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -246,6 +247,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
     List<HistoryVote> historyVotes =
         votingProcedureProjections.stream()
+            .sorted(Comparator.comparing(VotingProcedureProjection::getBlockTime).reversed())
             .map(votingProcedureMapper::fromVotingProcedureProjection)
             .toList();
     response.setVoteType(VoteType.valueOf(votingProcedureProjections.get(0).getVote().name()));
