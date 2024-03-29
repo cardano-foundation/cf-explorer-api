@@ -30,7 +30,6 @@ public class DRepDetailsResponse {
   private Integer delegators;
   private BigInteger activeVoteStake;
   private BigInteger liveStake;
-  private Float governanceParticipationRate;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private Date createdAt;
@@ -41,5 +40,5 @@ public class DRepDetailsResponse {
   @Enumerated(EnumType.STRING)
   private DRepType type;
 
-  private BigInteger votingParticipation;
+  private Float votingParticipation;
 }
