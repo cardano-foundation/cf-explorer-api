@@ -19,7 +19,12 @@ public interface DelegationVoteRepository extends JpaRepository<DelegationVote, 
           "select dv.address as stakeAddress, dv.txHash as txHash, dv.blockTime as blockTime, t.fee as fee "
               + " from DelegationVote dv"
               + " join Tx t on t.hash = dv.txHash"
-              + " where dv.drepHash = :dRepHashOrDRepId or dv.drepId = :dRepHashOrDRepId")
-  Page<DRepDelegatorProjection> getDelegationVoteByDrepHashOrDRepId(
+              + " where (dv.drepHash = :dRepHashOrDRepId or dv.drepId = :dRepHashOrDRepId)"
+              + " and not exists"
+              + " (select true from DelegationVote dv2"
+              + " where dv2.drepHash = dv.drepHash"
+              + " and dv2.address = dv.address"
+              + " and dv2.slot > dv.slot)")
+  Page<DRepDelegatorProjection> getDelegationVoteByDRepHashOrDRepId(
       @Param("dRepHashOrDRepId") String dRepHashOrDRepId, Pageable pageable);
 }
