@@ -61,4 +61,7 @@ public interface GovernanceActionRepository
               + " where gap.txHash = :txHash and gap.index = :index")
   Optional<GovActionDetailsProjection> getGovActionDetailsByTxHashAndIndex(
       @Param("txHash") String txHash, @Param("index") Integer index);
+
+  @Query(value = "select count(*) from GovActionProposal gap where gap.blockTime >= :blockTime")
+  Long countGovActionThatAllowedToVoteByDRep(@Param("blockTime") Long blockTime);
 }
