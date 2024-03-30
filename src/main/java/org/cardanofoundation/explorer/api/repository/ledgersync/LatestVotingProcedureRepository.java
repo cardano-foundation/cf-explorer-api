@@ -17,12 +17,10 @@ public interface LatestVotingProcedureRepository
 
   @Query(
       value =
-          "select count(*), lvp.vote as vote, lvp.voter_type as voterType"
-              + " from latest_voting_procedure lvp"
-              + " where lvp.gov_action_tx_hash = :govActionTxHash and lvp.gov_action_index = :govActionIndex and lvp.repeat_vote is false"
-              + " group by vote, voterType",
-      nativeQuery = true)
-  List<CountVoteOnGovActionProjection> countLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
+          "select lvp.voterHash,lvp.vote as vote, lvp.voterType as voterType"
+              + " from LatestVotingProcedure lvp"
+              + " where lvp.govActionTxHash = :govActionTxHash and lvp.govActionIndex = :govActionIndex")
+  List<CountVoteOnGovActionProjection> getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
       @Param("govActionTxHash") String govActionTxHash,
       @Param("govActionIndex") Integer govActionIndex);
 

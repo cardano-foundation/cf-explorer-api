@@ -298,22 +298,23 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   @Override
   public VotingChartResponse getVotingChartByGovActionTxHashAndIndex(String txHash, Integer index) {
     List<CountVoteOnGovActionProjection> votingProcedureProjectionList =
-        latestVotingProcedureRepository
-            .countLatestVotingProcedureByGovActionTxHashAndGovActionIndex(txHash, index);
+        latestVotingProcedureRepository.getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
+            txHash, index);
 
-    Map<Vote, Long> voteCount =
+    Map<Vote, List<CountVoteOnGovActionProjection>> voteCount =
         votingProcedureProjectionList.stream()
             .collect(
                 Collectors.groupingBy(
-                    CountVoteOnGovActionProjection::getVote,
-                    Collectors.summingLong(CountVoteOnGovActionProjection::getCount)));
+                    CountVoteOnGovActionProjection::getVote, Collectors.toList()));
 
-    long yesVotes = voteCount.getOrDefault(Vote.YES, 0L);
-    long noVotes = voteCount.getOrDefault(Vote.NO, 0L);
-    long abstainVotes = voteCount.getOrDefault(Vote.ABSTAIN, 0L);
+    long yesVotes = voteCount.getOrDefault(Vote.YES, List.of()).size();
+    long noVotes = voteCount.getOrDefault(Vote.NO, List.of()).size();
+    long abstainVotes = voteCount.getOrDefault(Vote.ABSTAIN, List.of()).size();
 
     VotingChartResponse votingChart =
         VotingChartResponse.builder()
+            .txHash(txHash)
+            .index(index)
             .numberOfYesVote(yesVotes)
             .numberOfNoVotes(noVotes)
             .numberOfAbstainVotes(abstainVotes)
@@ -327,8 +328,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 Collectors.groupingBy(
                     CountVoteOnGovActionProjection::getVoterType,
                     Collectors.groupingBy(
-                        CountVoteOnGovActionProjection::getVote,
-                        Collectors.summingLong(CountVoteOnGovActionProjection::getCount))));
+                        CountVoteOnGovActionProjection::getVote, Collectors.counting())));
 
     voteCountByVoterTypeAndVote.forEach(
         (voterType, voteCountMap) -> {
