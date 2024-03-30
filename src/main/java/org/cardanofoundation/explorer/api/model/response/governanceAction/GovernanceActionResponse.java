@@ -29,4 +29,6 @@ public class GovernanceActionResponse {
   GovActionStatus status;
 
   BigInteger votingPower;
+
+  Boolean isRepeatVote;
 }
