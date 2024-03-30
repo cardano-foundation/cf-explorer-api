@@ -26,6 +26,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCer
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.impl.DRepServiceImpl;
@@ -35,11 +36,12 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovAc
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
 
 @ExtendWith(MockitoExtension.class)
-public class DRepTest {
+public class DRepServiceTest {
   @Mock DRepRegistrationRepository dRepRegistrationRepository;
   @Mock DrepInfoRepository drepInfoRepository;
   @Mock VotingProcedureRepository votingProcedureRepository;
   @Mock LatestVotingProcedureRepository latestVotingProcedureRepository;
+  @Mock GovernanceActionRepository governanceActionRepository;
   @InjectMocks DRepServiceImpl dRepCertificateService;
 
   @Spy
@@ -92,14 +94,18 @@ public class DRepTest {
             .liveStake(BigInteger.TEN)
             .delegators(10)
             .activeVoteStake(BigInteger.TWO)
+            .createdAt(1000L)
             .build();
     when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(Optional.of(dRepInfo));
+    when(governanceActionRepository.countGovActionThatAllowedToVoteByDRep(dRepInfo.getCreatedAt()))
+        .thenReturn(0L);
 
     var actual = dRepCertificateService.getDRepDetails(drepHash);
 
     Assertions.assertEquals(dRepInfo.getDrepId(), actual.getDrepId());
     Assertions.assertEquals(10, actual.getDelegators());
     Assertions.assertEquals(BigInteger.TEN, actual.getLiveStake());
+    Assertions.assertNull(actual.getVotingParticipation());
   }
 
   @Test
