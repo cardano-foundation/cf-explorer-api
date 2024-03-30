@@ -23,7 +23,7 @@ public interface AggregatePoolInfoRepository extends JpaRepository<AggregatePool
           "SELECT ap.poolId as poolId, "
               + "COALESCE(ap.blockInEpoch, 0) as epochBlock, "
               + "COALESCE(ap.blockLifeTime, 0) as lifetimeBlock, "
-              + "COALESCE(ap.votingPower,0) as votingPower, "
+              + "ap.votingPower as votingPower, "
               + "ap.governanceParticipationRate as governanceParticipationRate "
               + "from AggregatePoolInfo ap "
               + "WHERE ap.poolId NOT IN :exceptPoolIds")
