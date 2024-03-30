@@ -454,9 +454,8 @@ public class DelegationServiceImpl implements DelegationService {
                       .lifetimeBlock(pool.getLifetimeBlock())
                       .epochBlock(pool.getEpochBlock())
                       .retired(retiredIds.contains(pool.getPoolId()))
-                      .votingPower(poolListProjection.getVotingPower())
-                      .governanceParticipationRate(
-                          poolListProjection.getGovernanceParticipationRate())
+                      .votingPower(pool.getVotingPower())
+                      .governanceParticipationRate(pool.getGovernanceParticipationRate())
                       .build();
                 })
             .collect(Collectors.toList());
