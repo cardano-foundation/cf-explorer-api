@@ -26,6 +26,8 @@ public interface LatestVotingProcedureRepository
 
   @Query(
       value =
-          " select count(*) from LatestVotingProcedure lvp where lvp.voterHash = :dRepHash and lvp.blockTime >= :blockTime")
+          "select count(*) from LatestVotingProcedure lvp"
+              + " join GovActionProposal gap on gap.txHash = lvp.govActionTxHash and gap.index = lvp.govActionIndex"
+              + " where lvp.voterHash = :dRepHash and lvp.blockTime >= :blockTime and gap.blockTime >= :blockTime")
   Long countVoteByDRepHash(@Param("dRepHash") String dRepHash, @Param("blockTime") Long blockTime);
 }
