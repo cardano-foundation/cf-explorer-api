@@ -182,7 +182,7 @@ public class DRepServiceImpl implements DRepService {
     delegatorResponse.setData(List.of());
 
     Page<DRepDelegatorProjection> dRepDelegatorProjections =
-        delegationVoteRepository.getDelegationVoteByDrepHashOrDRepId(drepHashOrDrepId, pageable);
+        delegationVoteRepository.getDelegationVoteByDRepHashOrDRepId(drepHashOrDrepId, pageable);
 
     List<DRepDelegatorsResponse> dRepDelegatorsResponseList =
         dRepDelegatorProjections.stream().map(dRepMapper::fromDRepDelegatorProjection).toList();
