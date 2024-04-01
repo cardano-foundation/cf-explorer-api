@@ -5,7 +5,7 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Voter
 
 public interface CountVoteOnGovActionProjection {
 
-  Long getCount();
+  String getVoterHash();
 
   Vote getVote();
 

@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class VotingChartResponse {
   String txHash;
-  String index;
+  Integer index;
   private Long numberOfYesVote;
   private Long numberOfNoVotes;
   private Long numberOfAbstainVotes;
