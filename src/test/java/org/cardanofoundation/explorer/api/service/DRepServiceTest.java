@@ -112,6 +112,10 @@ public class DRepServiceTest {
   public void testGetVoteProcedureChart() {
     String drepHash = "3fad80b8e41ed700e63b9967a3f5664b7dbe79e7385e392b4940ed73";
 
+    DRepInfo dRepInfo =
+        DRepInfo.builder().drepHash(drepHash).drepId("dRepId").createdAt(0L).build();
+    when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(Optional.of(dRepInfo));
+
     VotingProcedureProjection vote1 = Mockito.mock(VotingProcedureProjection.class);
 
     when(vote1.getGovActionTxHash()).thenReturn("hash");
@@ -144,7 +148,7 @@ public class DRepServiceTest {
     when(vote5.getVote()).thenReturn(Vote.YES);
 
     when(votingProcedureRepository.findVotingProcedureByVoterHashAndGovActionType(
-            drepHash, GovActionType.TREASURY_WITHDRAWALS_ACTION))
+            drepHash, GovActionType.TREASURY_WITHDRAWALS_ACTION, 0L))
         .thenReturn(List.of(vote1, vote2, vote3, vote4, vote5));
 
     var actual =

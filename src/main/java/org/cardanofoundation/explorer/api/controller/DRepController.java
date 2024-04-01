@@ -59,17 +59,17 @@ public class DRepController {
         dRepService.getTxDRepCertificateHistory(drepHashOrDrepId, pagination.toPageable()));
   }
 
-  @GetMapping("/{dRepHash}/vote-procedure-chart")
+  @GetMapping("/{dRepHashOrId}/vote-procedure-chart")
   @LogMessage
   @Operation(
       summary = "Get chart of DRep vote on Governance Action",
       tags = {"dRep"})
   public ResponseEntity<VotingProcedureChartResponse> getChartOfDRepVotesOnGovernanceAction(
-      @PathVariable @Parameter(description = "The DRep hash") String dRepHash,
+      @PathVariable @Parameter(description = "The DRep hash or id") String dRepHashOrId,
       @RequestParam(value = "govActionType")
           @Parameter(description = "The type of Governance Action")
           GovActionType govActionType) {
-    return ResponseEntity.ok(dRepService.getVoteProcedureChart(dRepHash, govActionType));
+    return ResponseEntity.ok(dRepService.getVoteProcedureChart(dRepHashOrId, govActionType));
   }
 
   @GetMapping("/{dRepHashOrDRepId}/drep-details")

@@ -100,16 +100,25 @@ public class DRepServiceImpl implements DRepService {
 
   @Override
   public VotingProcedureChartResponse getVoteProcedureChart(
-      String drepHash, GovActionType govActionType) {
+      String dRepHashOrId, GovActionType govActionType) {
     List<VotingProcedureProjection> votingProcedureProjectionListResponse;
     Map<Vote, Long> counted;
+
+    DRepInfo dRepInfo =
+        drepInfoRepository
+            .findByDRepHashOrDRepId(dRepHashOrId)
+            .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
+
+    // if dRepHashOrId is a DRep id
+    dRepHashOrId = dRepInfo.getDrepHash();
     List<VotingProcedureProjection> votingProcedureProjections =
         votingProcedureRepository.findVotingProcedureByVoterHashAndGovActionType(
-            drepHash,
+            dRepHashOrId,
             govActionType.equals(GovActionType.ALL)
                 ? null
                 : org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .valueOf(govActionType.name()));
+                    .valueOf(govActionType.name()),
+            dRepInfo.getCreatedAt());
     votingProcedureProjectionListResponse =
         votingProcedureProjections.stream()
             .collect(
@@ -127,11 +136,11 @@ public class DRepServiceImpl implements DRepService {
                 Collectors.groupingBy(VotingProcedureProjection::getVote, Collectors.counting()));
 
     return VotingProcedureChartResponse.builder()
-        .dRepHash(drepHash)
+        .dRepHash(dRepHashOrId)
         .govActionType(govActionType)
-        .numberOfYesVote(counted.get(Vote.YES))
-        .numberOfNoVotes(counted.get(Vote.NO))
-        .numberOfAbstainVotes(counted.get(Vote.ABSTAIN))
+        .numberOfYesVote(counted.getOrDefault(Vote.YES, 0L))
+        .numberOfNoVotes(counted.getOrDefault(Vote.NO, 0L))
+        .numberOfAbstainVotes(counted.getOrDefault(Vote.ABSTAIN, 0L))
         .build();
   }
 
