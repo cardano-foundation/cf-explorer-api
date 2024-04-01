@@ -18,4 +18,6 @@ public interface VotingProcedureProjection {
   Long getBlockTime();
 
   Vote getVote();
+
+  Long getGovActionBlockTime();
 }
