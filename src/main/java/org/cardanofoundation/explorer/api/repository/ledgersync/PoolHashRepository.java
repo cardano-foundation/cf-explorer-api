@@ -110,8 +110,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
   @Query(
       value =
           "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, pu.fixedCost AS fee, "
-              + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength, "
+              + "po.tickerName as tickerName, pu.pledge AS pledge, LENGTH(po.poolName) as poolNameLength, "
               + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
