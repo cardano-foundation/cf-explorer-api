@@ -14,7 +14,7 @@ public interface DRepService {
       String drepHashOrDrepId, Pageable pageable);
 
   VotingProcedureChartResponse getVoteProcedureChart(
-      String drepHashOrDrepId, GovActionType govActionType);
+      String dRepHashOrId, GovActionType govActionType);
 
   BaseFilterResponse<DRepDelegatorsResponse> getDRepDelegators(
       String drepHashOrDrepId, Pageable pageable);
