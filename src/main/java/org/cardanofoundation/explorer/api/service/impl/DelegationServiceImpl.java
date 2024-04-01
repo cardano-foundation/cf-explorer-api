@@ -351,11 +351,14 @@ public class DelegationServiceImpl implements DelegationService {
               .thenComparing(PoolResponse::getPoolId));
     } else if (sortProperties.contains("votingPower")) {
       poolResponseList.sort(
-          Comparator.comparing(PoolResponse::getVotingPower)
+          Comparator.comparing(
+                  PoolResponse::getVotingPower, Comparator.nullsFirst(Comparator.naturalOrder()))
               .thenComparing(PoolResponse::getPoolId));
     } else if (sortProperties.contains("governanceParticipationRate")) {
       poolResponseList.sort(
-          Comparator.comparing(PoolResponse::getGovernanceParticipationRate)
+          Comparator.comparing(
+                  PoolResponse::getGovernanceParticipationRate,
+                  Comparator.nullsFirst(Comparator.naturalOrder()))
               .thenComparing(PoolResponse::getPoolId));
     }
 
@@ -411,8 +414,14 @@ public class DelegationServiceImpl implements DelegationService {
                           ? null
                           : projection.getSaturation())
                   .lifetimeBlock(aggPoolInfo.getBlockLifeTime())
-                  .votingPower(aggPoolInfo.getVotingPower())
-                  .governanceParticipationRate(aggPoolInfo.getGovernanceParticipationRate())
+                  .votingPower(
+                      Double.valueOf(-1).equals(aggPoolInfo.getVotingPower())
+                          ? null
+                          : aggPoolInfo.getVotingPower())
+                  .governanceParticipationRate(
+                      Double.valueOf(-1).equals(aggPoolInfo.getGovernanceParticipationRate())
+                          ? null
+                          : aggPoolInfo.getGovernanceParticipationRate())
                   .epochBlock(aggPoolInfo.getBlockInEpoch())
                   .retired(retiredIds.contains(projection.getPoolId()))
                   .build();
@@ -454,8 +463,14 @@ public class DelegationServiceImpl implements DelegationService {
                       .lifetimeBlock(pool.getLifetimeBlock())
                       .epochBlock(pool.getEpochBlock())
                       .retired(retiredIds.contains(pool.getPoolId()))
-                      .votingPower(pool.getVotingPower())
-                      .governanceParticipationRate(pool.getGovernanceParticipationRate())
+                      .votingPower(
+                          Double.valueOf(-1).equals(pool.getVotingPower())
+                              ? null
+                              : pool.getVotingPower())
+                      .governanceParticipationRate(
+                          Double.valueOf(-1).equals(pool.getGovernanceParticipationRate())
+                              ? null
+                              : pool.getGovernanceParticipationRate())
                       .build();
                 })
             .collect(Collectors.toList());
