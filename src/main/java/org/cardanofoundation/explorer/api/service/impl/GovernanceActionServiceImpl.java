@@ -41,6 +41,7 @@ import org.cardanofoundation.explorer.api.projection.CountVoteOnGovActionProject
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
+import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
@@ -49,6 +50,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProc
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
+import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
@@ -71,6 +73,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final GovernanceActionMapper governanceActionMapper;
   private final VotingProcedureMapper votingProcedureMapper;
   private final VotingProcedureRepository votingProcedureRepository;
+  private final DrepInfoRepository drepInfoRepository;
   private final EpochParamRepository epochParamRepository;
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final EpochMapper epochMapper;
@@ -87,6 +90,12 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
           poolHashRepository
               .getHashRawByView(dRepHashOrPoolHash)
               .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+    } else if (dRepHashOrPoolHash.toLowerCase().startsWith("drep")) {
+      DRepInfo dRepInfo =
+          drepInfoRepository
+              .findByDRepHashOrDRepId(dRepHashOrPoolHash)
+              .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
+      dRepHashOrPoolHash = dRepInfo.getDrepHash();
     }
 
     Long slot = null;
@@ -215,6 +224,12 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
           poolHashRepository
               .getHashRawByView(dRepHashOrPoolHashOrPoolView)
               .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+    } else if (dRepHashOrPoolHashOrPoolView.toLowerCase().startsWith("drep")) {
+      DRepInfo dRepInfo =
+          drepInfoRepository
+              .findByDRepHashOrDRepId(dRepHashOrPoolHashOrPoolView)
+              .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
+      dRepHashOrPoolHashOrPoolView = dRepInfo.getDrepHash();
     }
     org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
         govActionType = govActionDetailsProjections.get().getType();

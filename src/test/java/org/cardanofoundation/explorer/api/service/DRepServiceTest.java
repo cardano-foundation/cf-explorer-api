@@ -118,6 +118,8 @@ public class DRepServiceTest {
 
     VotingProcedureProjection vote1 = Mockito.mock(VotingProcedureProjection.class);
 
+    when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(Optional.of(dRepInfo));
+
     when(vote1.getGovActionTxHash()).thenReturn("hash");
     when(vote1.getGovActionIndex()).thenReturn(1);
     when(vote1.getBlockTime()).thenReturn(1000L);
