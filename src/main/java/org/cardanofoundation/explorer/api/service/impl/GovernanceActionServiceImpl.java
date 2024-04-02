@@ -106,6 +106,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       slot = poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(dRepHashOrPoolHash);
     }
 
+    Boolean isVoteNone = governanceActionFilter.getVoteType().equals(VoteType.NONE);
+
     Vote vote =
         governanceActionFilter.getVoteType().equals(VoteType.ANY)
             ? null
@@ -153,6 +155,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             slot,
             governanceActionFilter.getGovernanceActionTxHash(),
             anchorText,
+            isVoteNone,
             pageable);
 
     List<GovernanceActionResponse> governanceActionResponses =
