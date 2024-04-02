@@ -76,7 +76,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final DrepInfoRepository drepInfoRepository;
   private final EpochParamRepository epochParamRepository;
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
-
   private final EpochMapper epochMapper;
   private final EpochRepository epochRepository;
 

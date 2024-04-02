@@ -112,6 +112,10 @@ public class DRepServiceTest {
   public void testGetVoteProcedureChart() {
     String drepHash = "3fad80b8e41ed700e63b9967a3f5664b7dbe79e7385e392b4940ed73";
 
+    DRepInfo dRepInfo =
+        DRepInfo.builder().drepHash(drepHash).drepId("dRepId").createdAt(0L).build();
+    when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(Optional.of(dRepInfo));
+
     VotingProcedureProjection vote1 = Mockito.mock(VotingProcedureProjection.class);
 
     DRepInfo dRepInfo =
