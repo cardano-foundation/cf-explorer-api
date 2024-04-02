@@ -1,12 +1,13 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +32,6 @@ import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
@@ -51,7 +51,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
@@ -281,33 +280,11 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   }
 
   void setExpiryDateOfGovAction(GovernanceActionDetailsResponse response) {
-    Epoch epoch =
-        epochRepository
-            .findFirstByNo(response.getEpoch())
-            .orElseThrow(() -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
-    Epoch firstEpoch =
-        epochRepository
-            .findFirstByNo(BigInteger.ZERO.intValue())
-            .orElseThrow(() -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
-    LocalDateTime firstEpochStartTime = firstEpoch.getStartTime().toLocalDateTime();
-    EpochResponse epochResponse = epochMapper.epochToEpochResponse(epoch);
-    LocalDateTime startTime =
-        modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epochResponse.getStartTime());
+    Instant startTime = Instant.ofEpochSecond(response.getBlockTime());
     EpochParam epochParam = epochParamRepository.findByEpochNo(response.getEpoch());
-    response.setExpiryDate(
-        Timestamp.valueOf(
-            startTime.plusDays(epochDays * epochParam.getGovActionLifetime().longValue())));
-  }
-
-  private LocalDateTime modifyStartTimeAndEndTimeOfEpoch(
-      LocalDateTime firstEpochStartTime, LocalDateTime epochTime) {
-    return LocalDateTime.of(
-        epochTime.getYear(),
-        epochTime.getMonth(),
-        epochTime.getDayOfMonth(),
-        firstEpochStartTime.getHour(),
-        firstEpochStartTime.getMinute(),
-        firstEpochStartTime.getSecond());
+    Instant expiryTime =
+        startTime.plus(epochDays * epochParam.getGovActionLifetime().longValue(), ChronoUnit.DAYS);
+    response.setExpiryDate(Date.from(expiryTime));
   }
 
   @Override
