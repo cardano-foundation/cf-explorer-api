@@ -32,7 +32,7 @@ public interface GovernanceActionRepository
               + " vp.govActionTxHash = gap.txHash"
               + " and vp.govActionIndex = gap.index"
               + " and vp.voterHash = :voterHash)"
-              + " where (:vote is null or (vp.vote = :vote))"
+              + " where (:vote is null or (vp.vote = :vote) or (:isVoteNone = true and vp is null))"
               + " and (:isRepeatVote is null or (vp.repeatVote = :isRepeatVote))"
               + " and (:gapStatus is null or (gapInfo.status = :gapStatus))"
               + " and gap.type in (:type)"
@@ -52,6 +52,7 @@ public interface GovernanceActionRepository
       @Param("slot") Long slot,
       @Param("txHash") String txHash,
       @Param("anchorText") String anchorText,
+      @Param("isVoteNone") Boolean isVoteNone,
       Pageable pageable);
 
   @Query(
