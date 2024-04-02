@@ -52,7 +52,7 @@ public class GovernanceActionController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {"vp.blockTime"},
+              sort = {"blockTime"},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {
