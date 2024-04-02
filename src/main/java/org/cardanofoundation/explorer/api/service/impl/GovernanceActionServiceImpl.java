@@ -109,7 +109,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     Vote vote =
         governanceActionFilter.getVoteType().equals(VoteType.ANY)
             ? null
-            : Vote.valueOf(governanceActionFilter.getVoteType().name());
+            : Vote.fromValue(governanceActionFilter.getVoteType().name());
 
     List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
         govActionTypeList =
