@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.repository.explorer;
+package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
-import org.cardanofoundation.explorer.common.entity.explorer.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AggregatePoolInfo;
 
 public interface AggregatePoolInfoRepository extends JpaRepository<AggregatePoolInfo, Long> {
 

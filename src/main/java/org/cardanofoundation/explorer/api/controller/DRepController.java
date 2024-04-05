@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
@@ -26,6 +25,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResp
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;

@@ -3,8 +3,8 @@ package org.cardanofoundation.explorer.api.projection;
 import java.math.BigInteger;
 
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 
 public interface GovernanceActionProjection {
   String getTxHash();

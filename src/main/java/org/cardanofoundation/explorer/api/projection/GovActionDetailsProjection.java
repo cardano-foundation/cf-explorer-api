@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 
 public interface GovActionDetailsProjection {
   String getTxHash();

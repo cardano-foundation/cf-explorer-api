@@ -63,8 +63,8 @@ import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.explorer.AggregatePoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregatePoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
@@ -79,7 +79,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.DelegationServiceImpl;
-import org.cardanofoundation.explorer.common.entity.explorer.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AggregatePoolInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Delegation_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;

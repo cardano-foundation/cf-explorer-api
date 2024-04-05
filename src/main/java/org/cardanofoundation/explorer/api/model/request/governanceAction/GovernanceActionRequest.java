@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 
 @Getter
 @Setter

@@ -30,10 +30,10 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceAction
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.impl.DRepServiceImpl;
+import org.cardanofoundation.explorer.common.entity.enumeration.DRepActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.DRepActionType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
 
 @ExtendWith(MockitoExtension.class)
 public class DRepServiceTest {
@@ -154,9 +154,7 @@ public class DRepServiceTest {
 
     var actual =
         dRepCertificateService.getVoteProcedureChart(
-            drepHash,
-            org.cardanofoundation.explorer.api.common.enumeration.GovActionType
-                .TREASURY_WITHDRAWALS_ACTION);
+            drepHash, GovActionType.TREASURY_WITHDRAWALS_ACTION);
 
     Assertions.assertEquals(2, actual.getNumberOfYesVote());
     Assertions.assertEquals(1, actual.getNumberOfAbstainVotes());
