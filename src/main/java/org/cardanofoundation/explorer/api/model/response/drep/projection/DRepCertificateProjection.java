@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.drep.projection;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.DRepActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.DRepActionType;
 
 public interface DRepCertificateProjection {
 

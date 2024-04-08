@@ -2,13 +2,13 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.springframework.data.domain.Pageable;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 
 public interface DRepService {
   BaseFilterResponse<DRepCertificateHistoryResponse> getTxDRepCertificateHistory(
