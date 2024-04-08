@@ -7,6 +7,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 
 public interface DRepService {
@@ -20,4 +21,6 @@ public interface DRepService {
       String drepHashOrDrepId, Pageable pageable);
 
   DRepDetailsResponse getDRepDetails(String drepHashOrDrepId);
+
+  DRepOverviewResponse getDRepOverview();
 }
