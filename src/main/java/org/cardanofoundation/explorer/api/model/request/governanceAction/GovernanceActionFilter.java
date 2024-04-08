@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
@@ -20,6 +21,7 @@ import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 public class GovernanceActionFilter {
 
   Boolean isRepeatVote;
