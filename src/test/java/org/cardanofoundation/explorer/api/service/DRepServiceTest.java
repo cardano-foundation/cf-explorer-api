@@ -1,12 +1,16 @@
 package org.cardanofoundation.explorer.api.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import org.mapstruct.factory.Mappers;
@@ -23,9 +27,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
 import org.cardanofoundation.explorer.api.mapper.DRepMapper;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
+import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationVoteRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
@@ -40,9 +46,11 @@ public class DRepServiceTest {
   @Mock DRepRegistrationRepository dRepRegistrationRepository;
   @Mock DrepInfoRepository drepInfoRepository;
   @Mock VotingProcedureRepository votingProcedureRepository;
+  @Mock DelegationVoteRepository delegationVoteRepository;
   @Mock LatestVotingProcedureRepository latestVotingProcedureRepository;
   @Mock GovernanceActionRepository governanceActionRepository;
-  @InjectMocks DRepServiceImpl dRepCertificateService;
+  @InjectMocks DRepServiceImpl dRepService;
+  @Mock FetchRewardDataService fetchRewardDataService;
 
   @Spy
   private DRepCertificateMapper dRepCertificateMapper =
@@ -74,7 +82,7 @@ public class DRepServiceTest {
         .thenReturn(List.of(dRepCertificateProjection1, dRepCertificateProjection2));
 
     var actual =
-        dRepCertificateService.getTxDRepCertificateHistory(
+        dRepService.getTxDRepCertificateHistory(
             drepHash, PageRequest.of(0, 2, Sort.by("createdAt").descending()));
 
     Assertions.assertEquals(1, actual.getTotalItems());
@@ -100,7 +108,7 @@ public class DRepServiceTest {
     when(governanceActionRepository.countGovActionThatAllowedToVoteByDRep(dRepInfo.getCreatedAt()))
         .thenReturn(0L);
 
-    var actual = dRepCertificateService.getDRepDetails(drepHash);
+    var actual = dRepService.getDRepDetails(drepHash);
 
     Assertions.assertEquals(dRepInfo.getDrepId(), actual.getDrepId());
     Assertions.assertEquals(10, actual.getDelegators());
@@ -153,7 +161,7 @@ public class DRepServiceTest {
         .thenReturn(List.of(vote1, vote2, vote3, vote4, vote5));
 
     var actual =
-        dRepCertificateService.getVoteProcedureChart(
+        dRepService.getVoteProcedureChart(
             drepHash,
             org.cardanofoundation.explorer.api.common.enumeration.GovActionType
                 .TREASURY_WITHDRAWALS_ACTION);
@@ -161,5 +169,49 @@ public class DRepServiceTest {
     Assertions.assertEquals(2, actual.getNumberOfYesVote());
     Assertions.assertEquals(1, actual.getNumberOfAbstainVotes());
     Assertions.assertEquals(1, actual.getNumberOfNoVotes());
+  }
+
+  @Test
+  public void testDRepGetDelegators() {
+    String dRepHash = "3fad80b8e41ed700e63b9967a3f5664b7dbe79e7385e392b4940ed73";
+
+    Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+
+    DRepDelegatorProjection dRepDelegatorProjection1 = Mockito.mock(DRepDelegatorProjection.class);
+    when(dRepDelegatorProjection1.getStakeAddress()).thenReturn("address1");
+    when(dRepDelegatorProjection1.getBlockTime()).thenReturn(10L);
+
+    DRepDelegatorProjection dRepDelegatorProjection2 = Mockito.mock(DRepDelegatorProjection.class);
+    when(dRepDelegatorProjection2.getStakeAddress()).thenReturn("address2");
+    when(dRepDelegatorProjection2.getBlockTime()).thenReturn(20L);
+
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    when(delegationVoteRepository.getDelegationVoteByDRepHashOrDRepId(anyString(), any()))
+        .thenReturn(new PageImpl<>(List.of(dRepDelegatorProjection1, dRepDelegatorProjection2)));
+    var actual = dRepService.getDRepDelegators(dRepHash, pageable);
+
+    Assertions.assertEquals(2, actual.getTotalItems());
+    Assertions.assertEquals("address1", actual.getData().get(0).getStakeAddress());
+  }
+
+  @Test
+  public void testDRepGetDelegators_withoutPageable() {
+    String dRepHash = "3fad80b8e41ed700e63b9967a3f5664b7dbe79e7385e392b4940ed73";
+
+    DRepDelegatorProjection dRepDelegatorProjection1 = Mockito.mock(DRepDelegatorProjection.class);
+    when(dRepDelegatorProjection1.getStakeAddress()).thenReturn("address1");
+    when(dRepDelegatorProjection1.getBlockTime()).thenReturn(10L);
+
+    DRepDelegatorProjection dRepDelegatorProjection2 = Mockito.mock(DRepDelegatorProjection.class);
+    when(dRepDelegatorProjection2.getStakeAddress()).thenReturn("address2");
+    when(dRepDelegatorProjection2.getBlockTime()).thenReturn(20L);
+
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
+    when(delegationVoteRepository.getDelegationVoteByDRepHashOrDRepId(anyString(), any()))
+        .thenReturn(new PageImpl<>(List.of(dRepDelegatorProjection1, dRepDelegatorProjection2)));
+    var actual = dRepService.getDRepDelegators(dRepHash, PageRequest.of(0, 10));
+
+    Assertions.assertEquals(2, actual.getTotalItems());
+    Assertions.assertEquals("address1", actual.getData().get(0).getStakeAddress());
   }
 }
