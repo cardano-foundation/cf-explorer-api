@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
 import org.cardanofoundation.explorer.api.mapper.DRepMapper;
@@ -42,9 +41,10 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.DelegationVote_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -114,10 +114,7 @@ public class DRepServiceImpl implements DRepService {
     List<VotingProcedureProjection> votingProcedureProjections =
         votingProcedureRepository.findVotingProcedureByVoterHashAndGovActionType(
             dRepHashOrId,
-            govActionType.equals(GovActionType.ALL)
-                ? null
-                : org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .valueOf(govActionType.name()),
+            govActionType.equals(GovActionType.ALL) ? null : govActionType,
             dRepInfo.getCreatedAt());
     votingProcedureProjectionListResponse =
         votingProcedureProjections.stream()
