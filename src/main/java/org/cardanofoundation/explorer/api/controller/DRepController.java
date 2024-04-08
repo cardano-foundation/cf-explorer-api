@@ -19,10 +19,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.request.drep.DRepFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
@@ -103,5 +105,25 @@ public class DRepController {
       tags = {"dRep"})
   public ResponseEntity<DRepOverviewResponse> getDRepOverview() {
     return ResponseEntity.ok(dRepService.getDRepOverview());
+  }
+
+  @GetMapping("/filter")
+  @LogMessage
+  @Operation(
+      summary = "Get list of DRep by filter",
+      tags = {"dRep"})
+  public ResponseEntity<BaseFilterResponse<DRepFilterResponse>> getDRepsByFilter(
+      @ParameterObject @Valid DRepFilterRequest dRepFilterRequest,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 20,
+              sort = {"createdAt"},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
+
+    return ResponseEntity.ok(
+        dRepService.getDRepsByFilter(dRepFilterRequest, pagination.toPageable()));
   }
 }
