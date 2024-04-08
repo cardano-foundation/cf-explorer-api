@@ -2,8 +2,8 @@ package org.cardanofoundation.explorer.api.projection;
 
 import java.math.BigInteger;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 
 public interface LatestVotingProcedureProjection {
   String getTxHash();

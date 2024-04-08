@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 
 @Getter
 @Setter
