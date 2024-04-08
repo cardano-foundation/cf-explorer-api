@@ -24,6 +24,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
@@ -93,5 +94,14 @@ public class DRepController {
       @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(
         dRepService.getDRepDelegators(dRepHashOrDRepId, pagination.toPageable()));
+  }
+
+  @GetMapping("/overview")
+  @LogMessage
+  @Operation(
+      summary = "Get overview of Delegated Representatives (DRep)",
+      tags = {"dRep"})
+  public ResponseEntity<DRepOverviewResponse> getDRepOverview() {
+    return ResponseEntity.ok(dRepService.getDRepOverview());
   }
 }

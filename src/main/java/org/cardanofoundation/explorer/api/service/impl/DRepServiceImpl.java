@@ -1,5 +1,9 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +28,14 @@ import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
 import org.cardanofoundation.explorer.api.mapper.DRepMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
+import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
@@ -41,7 +48,9 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProc
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
+import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
+import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.DelegationVote_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
@@ -64,6 +73,8 @@ public class DRepServiceImpl implements DRepService {
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final GovernanceActionRepository governanceActionRepository;
   private final DRepMapper dRepMapper;
+
+  private final EpochService epochService;
 
   @Override
   public BaseFilterResponse<DRepCertificateHistoryResponse> getTxDRepCertificateHistory(
@@ -162,6 +173,49 @@ public class DRepServiceImpl implements DRepService {
             ? null
             : (float) (count * 1.0 / totalGovActionAllowedToVote));
     return response;
+  }
+
+  @Override
+  public DRepOverviewResponse getDRepOverview() {
+    EpochSummary epochSummary = epochService.getCurrentEpochSummary();
+
+    Map<DRepStatus, DRepStatusCountProjection> dRepStatusCountMap =
+        drepInfoRepository.getDRepStatusCount().stream()
+            .collect(Collectors.toMap(DRepStatusCountProjection::getStatus, Function.identity()));
+
+    long countDownTime =
+        Timestamp.valueOf(epochSummary.getEndTime()).getTime()
+            - Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)).getTime();
+
+    Long totalDReps =
+        dRepStatusCountMap.values().stream().mapToLong(DRepStatusCountProjection::getCnt).sum();
+    Long activeDReps = dRepStatusCountMap.get(DRepStatus.ACTIVE).getCnt();
+    Long inactiveDReps = dRepStatusCountMap.get(DRepStatus.INACTIVE).getCnt();
+    Long retiredDReps = dRepStatusCountMap.get(DRepStatus.RETIRED).getCnt();
+
+    // TODO: implement abstainDReps and noConfidenceDReps and registeredDReps
+    Long abstainDReps = null;
+    Long noConfidenceDReps = null;
+    Long registeredDReps = null;
+
+    // TODO: implement activeStake
+    BigInteger activeStake = null;
+    Long delegators = drepInfoRepository.getDelegateCount();
+
+    return DRepOverviewResponse.builder()
+        .epochNo(epochSummary.getNo())
+        .countDownEndTime(countDownTime)
+        .epochSlotNo(epochSummary.getSlot())
+        .activeStake(activeStake)
+        .delegators(delegators)
+        .totalDReps(totalDReps)
+        .activeDReps(activeDReps)
+        .inactiveDReps(inactiveDReps)
+        .retiredDReps(retiredDReps)
+        .abstainDReps(abstainDReps)
+        .noConfidenceDReps(noConfidenceDReps)
+        .registeredDReps(registeredDReps)
+        .build();
   }
 
   @Override
