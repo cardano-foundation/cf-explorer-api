@@ -28,7 +28,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
@@ -41,6 +40,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResp
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 
 @WebMvcTest(DRepController.class)
 @Import({

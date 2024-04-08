@@ -12,9 +12,9 @@ import lombok.experimental.SuperBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import org.cardanofoundation.explorer.api.common.enumeration.VoteType;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 
 @Getter
 @Setter
@@ -38,7 +38,7 @@ public class GovernanceActionDetails {
 
   @JsonIgnore Long blockTime;
 
-  VoteType voteType;
+  Vote voteType;
 
   String voterHash;
 

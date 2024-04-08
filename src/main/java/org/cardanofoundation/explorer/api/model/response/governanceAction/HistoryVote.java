@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 
 @Getter
 @Setter
