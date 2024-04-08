@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
+import org.cardanofoundation.explorer.common.entity.compositeKey.VotingProcedureId;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.VotingProcedure;
-import org.cardanofoundation.explorer.common.entity.ledgersync.compositeKey.VotingProcedureId;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
 
 public interface VotingProcedureRepository
     extends JpaRepository<VotingProcedure, VotingProcedureId> {

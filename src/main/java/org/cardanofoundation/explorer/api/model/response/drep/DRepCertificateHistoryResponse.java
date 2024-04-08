@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.DRepActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.DRepActionType;
 
 @Getter
 @Setter
