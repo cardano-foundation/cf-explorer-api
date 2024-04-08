@@ -19,10 +19,12 @@ import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.PoolRangeValuesResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.TxPoolCertificateHistory;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
+import org.cardanofoundation.explorer.api.service.PoolService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.PoolRetire_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.PoolUpdate_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
@@ -38,6 +40,7 @@ public class PoolController {
 
   private final PoolRegistrationService poolRegistrationService;
   private final PoolCertificateService poolCertificateService;
+  private final PoolService poolService;
 
   @GetMapping("/registration")
   @LogMessage
@@ -93,5 +96,14 @@ public class PoolController {
     return ResponseEntity.ok(
         poolCertificateService.getTxPoolCertificateHistory(
             poolViewOrHash, pagination.toPageable()));
+  }
+
+  @GetMapping("/range-values-for-filter")
+  @LogMessage
+  @Operation(
+      summary = "Get range value to filter on pool overview page",
+      tags = {"pools"})
+  public ResponseEntity<PoolRangeValuesResponse> getPoolRangeValues() {
+    return ResponseEntity.ok(poolService.getPoolRangeValues());
   }
 }
