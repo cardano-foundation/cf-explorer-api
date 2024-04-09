@@ -138,7 +138,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             : org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus.valueOf(
                 governanceActionFilter.getActionStatus().name());
 
-    String anchorText = governanceActionFilter.getAnchorText();
+    String anchorText =
+        governanceActionFilter.getAnchorText() == null
+            ? null
+            : governanceActionFilter.getAnchorText().toLowerCase();
 
     Page<GovernanceActionProjection> governanceActionProjections =
         governanceActionRepository.getAllByFilter(
