@@ -20,17 +20,17 @@ import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 @NoArgsConstructor
 public class DRepFilterResponse {
 
-  String dRepId;
-  String dRepHash;
+  String drepId;
+  String drepHash;
   String anchorUrl;
   String anchorHash;
-  BigInteger activeStake;
+  BigInteger activeVoteStake;
   Double votingPower;
   DRepStatus status;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
-  Date registeredAt;
+  Date createdAt;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
-  Date lastUpdatedAt;
+  Date updatedAt;
 }

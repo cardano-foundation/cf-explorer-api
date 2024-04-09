@@ -22,11 +22,8 @@ public interface DRepMapper {
   DRepDelegatorsResponse fromDRepDelegatorProjection(
       DRepDelegatorProjection dRepDelegatorProjection);
 
-  @Mapping(target = "registeredAt", expression = "java(fromLong(dRepInfo.getCreatedAt()))")
-  @Mapping(target = "lastUpdatedAt", expression = "java(fromLong(dRepInfo.getUpdatedAt()))")
-  @Mapping(target = "activeStake", source = "activeVoteStake")
-  @Mapping(target = "dRepId", source = "drepId")
-  @Mapping(target = "dRepHash", source = "drepHash")
+  @Mapping(target = "createdAt", expression = "java(fromLong(dRepInfo.getCreatedAt()))")
+  @Mapping(target = "updatedAt", expression = "java(fromLong(dRepInfo.getUpdatedAt()))")
   DRepFilterResponse fromDRepInfo(DRepInfo dRepInfo);
 
   default Date fromLong(Long value) {
