@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDet
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
+import org.cardanofoundation.explorer.api.projection.PoolRangeProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
 
 @Repository
@@ -34,152 +36,72 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
 
   @Query(
       value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, "
-              + "po.tickerName as tickerName, LENGTH(po.poolName) as poolNameLength "
+          " SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, "
+              + "po.tickerName as tickerName, LENGTH(po.poolName) as poolNameLength, "
+              + "COALESCE(api.governanceParticipationRate, -1) as governanceParticipationRate, COALESCE(api.votingPower, -1) as votingPower,"
+              + "COALESCE(api.blockLifeTime, 0) as lifetimeBlock, COALESCE(api.blockInEpoch, 0) as epochBlock "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.poolId AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.poolId = ph.id)) "
-              + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHashId AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHashId = ph.id) "
-              + "WHERE ph.id NOT IN :exceptPoolIds AND ( :param IS NULL OR ph.view = :param "
-              + "OR ph.hashRaw = :param OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%') OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%') )")
-  List<PoolListProjection> findAllByPoolViewOrPoolNameOrPoolHash(
+              + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHashId AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHashId = ph.id)"
+              + "LEFT JOIN AggregatePoolInfo api on api.poolId = ph.id "
+              + "WHERE ph.id NOT IN :exceptPoolIds "
+              + "AND ( :param is null OR ph.view = :param OR ph.hashRaw = :param "
+              + "OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%') OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%'))"
+              + "AND ( :minPledge <= pu.pledge and :maxPledge >= pu.pledge)"
+              + "AND ( api.votingPower is null or (:minVotingPower <= api.votingPower and :maxVotingPower >= api.votingPower)) "
+              + "AND ( :minGovParticipationRate <= api.governanceParticipationRate and :maxGovParticipationRate >= api.governanceParticipationRate) "
+              + "AND ( :minBlockLifeTime <= api.blockLifeTime and :maxBlockLifeTime >= api.blockLifeTime) ")
+  Page<PoolListProjection> findAllWithoutUsingKoi0s(
       @Param("param") String param,
       @Param("exceptPoolIds") Collection<Long> exceptPoolIds,
+      @Param("minPledge") BigInteger minPledge,
+      @Param("maxPledge") BigInteger maxPledge,
+      @Param("minVotingPower") Double minVotingPower,
+      @Param("maxVotingPower") Double maxVotingPower,
+      @Param("minGovParticipationRate") Double minGovParticipationRate,
+      @Param("maxGovParticipationRate") Double maxGovParticipationRate,
+      @Param("minBlockLifeTime") Integer minBlockLifeTime,
+      @Param("maxBlockLifeTime") Integer maxBlockLifeTime,
       Pageable pageable);
-
-  @Query(
-      value =
-          "SELECT COUNT(*) FROM "
-              + "(SELECT 1 FROM pool_hash ph "
-              + "LEFT JOIN pool_offline_data po ON ph.id = po.pool_id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM pool_offline_data po2 WHERE po2.pool_id = ph.id)) "
-              + "WHERE ph.id NOT IN :exceptPoolIds AND ( ph.view = :param "
-              + "OR ph.hash_raw = :param "
-              + "OR LOWER(po.pool_name) LIKE CONCAT('%', :param, '%') OR LOWER(po.ticker_name) LIKE CONCAT('%', :param, '%') ) "
-              + "LIMIT 1000) AS A",
-      nativeQuery = true)
-  Long countAllByPoolViewOrPoolNameOrPoolHashWithoutEpochNo(
-      @Param("param") String param, @Param("exceptPoolIds") Collection<Long> exceptPoolIds);
 
   @Query(
       value =
           "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, pu.pledge AS pledge, "
               + "po.tickerName as tickerName, LENGTH(po.poolName) as poolNameLength, "
-              + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation "
+              + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation, "
+              + "COALESCE(api.governanceParticipationRate, -1) as governanceParticipationRate, COALESCE(api.votingPower, -1) as votingPower,"
+              + "COALESCE(api.blockLifeTime, 0) as lifetimeBlock, COALESCE(api.blockInEpoch, 0) as epochBlock "
               + "FROM PoolHash ph "
               + "LEFT JOIN PoolOfflineData po ON ph.id = po.poolId AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.poolId = ph.id)) "
               + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHashId AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHashId = ph.id) "
               + "LEFT JOIN PoolInfo pi ON ph.id = pi.poolId AND pi.fetchedAtEpoch = :epochNo "
-              + "WHERE ph.id NOT IN :exceptPoolIds AND ( :param IS NULL OR ph.view = :param "
-              + "OR ph.hashRaw = :param OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%') OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%') )")
-  List<PoolListProjection> findAllByPoolViewOrPoolNameOrPoolHash(
+              + "LEFT JOIN AggregatePoolInfo api on api.poolId = ph.id "
+              + "WHERE ph.id NOT IN :exceptPoolIds "
+              + "AND ( :param is null OR  ph.view = :param OR ph.hashRaw = :param "
+              + "OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%')  OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%'))"
+              + "AND ( :minPoolSize <= pi.activeStake and :maxPoolSize >= pi.activeStake )"
+              + "AND ( :minPledge <= pu.pledge and :maxPledge >= pu.pledge)"
+              + "AND ( :minSaturation <= pi.liveSaturation and :maxSaturation >= pi.liveSaturation) "
+              + "AND ( :minVotingPower <= api.votingPower and :maxVotingPower >= api.votingPower) "
+              + "AND ( :minGovParticipationRate <= api.governanceParticipationRate and :maxGovParticipationRate >= api.governanceParticipationRate) "
+              + "AND ( :minBlockLifeTime <= api.blockLifeTime and :maxBlockLifeTime >= api.blockLifeTime) ")
+  Page<PoolListProjection> findAllWithUsingKoiOs(
       @Param("param") String param,
       @Param("exceptPoolIds") Collection<Long> exceptPoolIds,
       @Param("epochNo") Integer epochNo,
+      @Param("minPoolSize") BigInteger minPoolSize,
+      @Param("maxPoolSize") BigInteger maxPoolSize,
+      @Param("minPledge") BigInteger minPledge,
+      @Param("maxPledge") BigInteger maxPledge,
+      @Param("minSaturation") Double minSaturation,
+      @Param("maxSaturation") Double maxSaturation,
+      @Param("minVotingPower") Double minVotingPower,
+      @Param("maxVotingPower") Double maxVotingPower,
+      @Param("minGovParticipationRate") Double minGovParticipationRate,
+      @Param("maxGovParticipationRate") Double maxGovParticipationRate,
+      @Param("minBlockLifeTime") Integer minBlockLifeTime,
+      @Param("maxBlockLifeTime") Integer maxBlockLifeTime,
       Pageable pageable);
-
-  @Query(
-      value =
-          "SELECT COUNT(*) FROM "
-              + "(SELECT 1 FROM pool_hash ph "
-              + "LEFT JOIN pool_offline_data po ON ph.id = po.pool_id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM pool_offline_data po2 WHERE po2.pool_id = ph.id)) "
-              + "WHERE ph.id NOT IN :exceptPoolIds AND ( ph.view = :param "
-              + "OR ph.hash_raw = :param "
-              + "OR LOWER(po.pool_name) LIKE CONCAT('%', :param, '%') OR LOWER(po.ticker_name) LIKE CONCAT('%', :param, '%') ) "
-              + "AND :epochNo IS NOT NULL "
-              + "LIMIT 1000) AS A",
-      nativeQuery = true)
-  Long countAllByPoolViewOrPoolNameOrPoolHashWithEpochNo(
-      @Param("param") String param,
-      @Param("exceptPoolIds") Collection<Long> exceptPoolIds,
-      @Param("epochNo") int epochNo);
-
-  @Query(
-      value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, "
-              + "LENGTH(po.poolName) as poolNameLength "
-              + "FROM PoolHash ph "
-              + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
-              + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-              + "WHERE ph.id NOT IN :exceptPoolIds "
-              + "AND (:param IS NULL OR ph.view = :param OR ph.hashRaw = :param "
-              + "OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%')"
-              + "OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%'))")
-  List<PoolListProjection> findAllByPoolViewOrPoolNameOrPoolHash(
-      @Param("param") String param, @Param("exceptPoolIds") Collection<Long> exceptPoolIds);
-
-  @Query(
-      value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, LENGTH(po.poolName) as poolNameLength, "
-              + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation "
-              + "FROM PoolHash ph "
-              + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
-              + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-              + "LEFT JOIN PoolInfo pi ON pi.pool = ph AND pi.fetchedAtEpoch = :epochNo "
-              + "WHERE ph.id NOT IN :exceptPoolIds "
-              + "AND (:param IS NULL OR ph.view = :param OR ph.hashRaw = :param "
-              + "OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%')"
-              + "OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%'))")
-  List<PoolListProjection> findAllByPoolViewOrPoolNameOrPoolHash(
-      @Param("param") String param,
-      @Param("exceptPoolIds") Collection<Long> exceptPoolIds,
-      @Param("epochNo") Integer epochNo);
-
-  @Query(
-      value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, "
-              + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength "
-              + "FROM PoolHash ph "
-              + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
-              + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-              + "WHERE ph.id NOT IN :exceptPoolIds ",
-      countQuery = "SELECT COUNT(ph.id) FROM PoolHash ph WHERE ph.id NOT IN :exceptPoolIds")
-  Page<PoolListProjection> findAllWithoutQueryParam(
-      @Param("exceptPoolIds") Collection<Long> exceptPoolIds, Pageable pageable);
-
-  @Query(
-      value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, "
-              + "pu.margin AS margin, LENGTH(po.poolName) as poolNameLength, "
-              + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation "
-              + "FROM PoolHash ph "
-              + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
-              + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-              + "LEFT JOIN PoolInfo pi ON pi.pool = ph AND pi.fetchedAtEpoch = :epochNo "
-              + "WHERE ph.id NOT IN :exceptPoolIds ",
-      countQuery =
-          "SELECT COUNT(ph.id) FROM PoolHash ph WHERE ph.id NOT IN :exceptPoolIds AND :epochNo IS NOT NULL")
-  Page<PoolListProjection> findAllWithoutQueryParam(
-      @Param("exceptPoolIds") Collection<Long> exceptPoolIds,
-      @Param("epochNo") Integer epochNo,
-      Pageable pageable);
-
-  @Query(
-      value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, "
-              + "LENGTH(po.poolName) as poolNameLength "
-              + "FROM PoolHash ph "
-              + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
-              + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-              + "WHERE ph.id IN :poolIds ")
-  List<PoolListProjection> findAllByPoolIdIn(@Param("poolIds") Collection<Long> poolIds);
-
-  @Query(
-      value =
-          "SELECT ph.id AS poolId, ph.view AS poolView, po.poolName AS poolName, "
-              + "po.tickerName as tickerName, pu.pledge AS pledge, "
-              + "LENGTH(po.poolName) as poolNameLength, "
-              + "COALESCE(pi.activeStake, -1) AS poolSize, COALESCE(pi.liveSaturation, -1) AS saturation "
-              + "FROM PoolHash ph "
-              + "LEFT JOIN PoolOfflineData po ON ph.id = po.pool.id AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = ph.id)) "
-              + "LEFT JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHash.id = ph.id) "
-              + "LEFT JOIN PoolInfo pi ON pi.pool = ph AND pi.fetchedAtEpoch = :epochNo "
-              + "WHERE ph.id IN :poolIds ")
-  List<PoolListProjection> findAllByPoolIdIn(
-      @Param("poolIds") Collection<Long> poolIds, @Param("epochNo") Integer epochNo);
 
   @Query(value = "SELECT ph.id FROM PoolHash ph " + "WHERE ph.view IN :poolViews ")
   Set<Long> getListPoolIdIn(@Param("poolViews") Set<String> poolViews);
@@ -281,4 +203,30 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
               + " (SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.poolId)"
               + " WHERE  ph.hashRaw = :poolViewOrHash or ph.view = :poolViewOrHash")
   Optional<String> getPoolNameByPoolHashOrPoolView(@Param("poolViewOrHash") String poolViewOrHash);
+
+  @Query(
+      value =
+          " SELECT min(pi.activeStake) as minPoolSize, max(pi.activeStake) as maxPoolSize,"
+              + " min(pi.liveSaturation) as minSaturation, max(pi.liveSaturation) as maxSaturation,"
+              + " min(pu.pledge) as minPledge, max(pu.pledge) as maxPledge,"
+              + " min(api.votingPower) as minVotingPower, max(api.votingPower) as maxVotingPower,"
+              + " min (api.governanceParticipationRate) as minGovParticipationRate, max(api.governanceParticipationRate) as maxGovParticipationRate,"
+              + " min (api.blockLifeTime) as minLifetimeBlock, max(api.blockLifeTime) as maxLifetimeBlock"
+              + " FROM PoolHash ph"
+              + " left join PoolOfflineData po ON ph.id = po.poolId AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.poolId = ph.id))"
+              + " left join PoolUpdate pu ON ph.id = pu.poolHashId AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHashId = ph.id)"
+              + " LEFT JOIN PoolInfo pi ON ph.id = pi.poolId AND pi.fetchedAtEpoch = :epochNo "
+              + " left join AggregatePoolInfo api on api.poolId = ph.id ")
+  PoolRangeProjection getPoolRangeWithUsingKoi0s(@Param("epochNo") Integer epochNo);
+
+  @Query(
+      value =
+          " SELECT min(pu.pledge) as minPledge, max(pu.pledge) as maxPledge,"
+              + " min(api.votingPower) as minVotingPower, max(api.votingPower) as maxVotingPower,"
+              + " min (api.governanceParticipationRate) as minGovParticipationRate, max(api.governanceParticipationRate) as maxGovParticipationRate,"
+              + " min (api.blockLifeTime) as minLifetimeBlock, max(api.blockLifeTime) as maxLifetimeBlock"
+              + " FROM PoolHash ph"
+              + " left join PoolUpdate pu ON ph.id = pu.poolHashId AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE pu2.poolHashId = ph.id)"
+              + " left join AggregatePoolInfo api on api.poolId = ph.id ")
+  PoolRangeProjection getPoolRangeWithoutUsingKoi0s();
 }
