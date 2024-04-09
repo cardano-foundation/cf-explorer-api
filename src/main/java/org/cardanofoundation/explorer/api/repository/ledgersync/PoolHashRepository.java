@@ -47,10 +47,10 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
               + "WHERE ph.id NOT IN :exceptPoolIds "
               + "AND ( :param is null OR ph.view = :param OR ph.hashRaw = :param "
               + "OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%') OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%'))"
-              + "AND ( :minPledge <= pu.pledge and :maxPledge >= pu.pledge)"
-              + "AND ( api.votingPower is null or (:minVotingPower <= api.votingPower and :maxVotingPower >= api.votingPower)) "
-              + "AND ( :minGovParticipationRate <= api.governanceParticipationRate and :maxGovParticipationRate >= api.governanceParticipationRate) "
-              + "AND ( :minBlockLifeTime <= api.blockLifeTime and :maxBlockLifeTime >= api.blockLifeTime) ")
+              + "AND ( :minPledge <= coalesce(pu.pledge,0) and :maxPledge >= coalesce(pu.pledge,0) )"
+              + "AND ( :minVotingPower <= coalesce(api.votingPower,0) and :maxVotingPower >= coalesce(api.votingPower,0)) "
+              + "AND ( :minGovParticipationRate <= coalesce(api.governanceParticipationRate,0) and :maxGovParticipationRate >= coalesce(api.governanceParticipationRate,0)) "
+              + "AND ( :minBlockLifeTime <= coalesce(api.blockLifeTime,0) and :maxBlockLifeTime >= coalesce(api.blockLifeTime,0))")
   Page<PoolListProjection> findAllWithoutUsingKoi0s(
       @Param("param") String param,
       @Param("exceptPoolIds") Collection<Long> exceptPoolIds,
@@ -79,12 +79,12 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
               + "WHERE ph.id NOT IN :exceptPoolIds "
               + "AND ( :param is null OR  ph.view = :param OR ph.hashRaw = :param "
               + "OR LOWER(po.poolName) LIKE CONCAT('%', :param, '%')  OR LOWER(po.tickerName) LIKE CONCAT('%', :param, '%'))"
-              + "AND ( :minPoolSize <= pi.activeStake and :maxPoolSize >= pi.activeStake )"
-              + "AND ( :minPledge <= pu.pledge and :maxPledge >= pu.pledge)"
-              + "AND ( :minSaturation <= pi.liveSaturation and :maxSaturation >= pi.liveSaturation) "
-              + "AND ( :minVotingPower <= api.votingPower and :maxVotingPower >= api.votingPower) "
-              + "AND ( :minGovParticipationRate <= api.governanceParticipationRate and :maxGovParticipationRate >= api.governanceParticipationRate) "
-              + "AND ( :minBlockLifeTime <= api.blockLifeTime and :maxBlockLifeTime >= api.blockLifeTime) ")
+              + "AND ( :minPoolSize <= coalesce(pi.activeStake, 0) and :maxPoolSize >= coalesce(pi.activeStake,0) )"
+              + "AND ( :minPledge <= coalesce(pu.pledge,0) and :maxPledge >= coalesce(pu.pledge,0) )"
+              + "AND ( :minSaturation <= coalesce(pi.liveSaturation,0) and :maxSaturation >= coalesce(pi.liveSaturation,0) ) "
+              + "AND ( :minVotingPower <= coalesce(api.votingPower,0) and :maxVotingPower >= coalesce(api.votingPower,0) ) "
+              + "AND ( :minGovParticipationRate <= coalesce(api.governanceParticipationRate,0) and :maxGovParticipationRate >= coalesce(api.governanceParticipationRate,0) ) "
+              + "AND ( :minBlockLifeTime <= coalesce(api.blockLifeTime,0) and :maxBlockLifeTime >= coalesce(api.blockLifeTime,0) ) ")
   Page<PoolListProjection> findAllWithUsingKoiOs(
       @Param("param") String param,
       @Param("exceptPoolIds") Collection<Long> exceptPoolIds,
