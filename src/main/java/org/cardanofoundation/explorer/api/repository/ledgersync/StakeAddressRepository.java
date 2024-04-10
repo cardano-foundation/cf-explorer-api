@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.explorer.api.projection.SmartContractProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 
@@ -44,17 +43,7 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
   @Query(value = "SELECT sa.view FROM StakeAddress sa WHERE sa.id IN :addressIds")
   List<String> getViewByAddressId(@Param("addressIds") Set<Long> addressIds);
 
-  @Query(value = "select sa.id, sa.view from StakeAddress sa where sa.view in :views")
-  List<StakeAddressProjection> getAddressIdByViewIn(List<String> views);
-
   List<StakeAddress> findByIdIn(Collection<Long> ids);
-
-  @Query(
-      "SELECT stake.view as address, stake.scriptHash as scriptHash"
-          + " FROM StakeAddress stake"
-          + " WHERE stake.scriptHash IN :scriptHashList")
-  List<SmartContractProjection> findStakeAssociatedAddressByHashIn(
-      @Param("scriptHashList") List<String> scriptHashList);
 
   @Query("SELECT stake.view" + " FROM StakeAddress stake" + " WHERE stake.scriptHash = :scriptHash")
   List<String> getStakeAssociatedAddress(@Param("scriptHash") String scriptHash);
