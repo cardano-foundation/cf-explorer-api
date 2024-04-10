@@ -398,7 +398,8 @@ public class DelegationServiceImpl implements DelegationService {
     filter.setMaxPoolSize(
         Optional.ofNullable(filter.getMaxPoolSize()).orElse(CommonConstant.MAX_VALUE_BIGINT));
     filter.setMinPoolSize(Optional.ofNullable(filter.getMinPoolSize()).orElse(BigInteger.ZERO));
-    filter.setMaxSaturation(Optional.ofNullable(filter.getMaxSaturation()).orElse(Double.MAX_VALUE));
+    filter.setMaxSaturation(
+        Optional.ofNullable(filter.getMaxSaturation()).orElse(Double.MAX_VALUE));
     filter.setMinSaturation(Optional.ofNullable(filter.getMinSaturation()).orElse(0.0));
     filter.setMaxPledge(
         Optional.ofNullable(filter.getMaxPledge()).orElse(CommonConstant.MAX_VALUE_BIGINT));
