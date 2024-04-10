@@ -84,10 +84,6 @@ class ProtocolServiceTest {
 
   static final long baseTime = 1685491200L;
 
-  private Timestamp getTimeStamp(long days) {
-    return Timestamp.valueOf(LocalDateTime.now().minusDays(days));
-  }
-
   private Timestamp getTimeStampUTC(long days) {
     var time = LocalDateTime.ofEpochSecond(days, 0, ZoneOffset.UTC);
     return Timestamp.valueOf(time);
@@ -101,18 +97,6 @@ class ProtocolServiceTest {
   private Timestamp getTimeStampPlusDays(long days, long day, long seconds) {
     var time = LocalDateTime.ofEpochSecond(days + seconds, 0, ZoneOffset.UTC);
     return Timestamp.valueOf(time.plusDays(day));
-  }
-
-  private EpochParam getBuildEpochParam(BigInteger zero) {
-    return EpochParam.builder().id(zero.longValue()).epochNo(zero.intValue()).build();
-  }
-
-  private ParamHistoryProjection getBuildParamHistory(BigInteger zero) {
-    return ParamHistoryProjection.builder()
-        .id(zero.longValue())
-        .tx(zero.longValue())
-        .epochNo(zero.intValue())
-        .build();
   }
 
   // Histories Change with date filter
@@ -7083,7 +7067,6 @@ class ProtocolServiceTest {
     List<ProtocolType> protocolTypes = List.of(ProtocolType.MIN_FEE_A);
     BigInteger startTime = BigInteger.ONE;
     BigInteger endTime = null;
-    HistoriesProtocol historiesProtocol = new HistoriesProtocol();
 
     ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
 
@@ -7097,7 +7080,6 @@ class ProtocolServiceTest {
     List<ProtocolType> protocolTypes = List.of(ProtocolType.MIN_FEE_A);
     BigInteger startTime = BigInteger.TWO;
     BigInteger endTime = BigInteger.ONE;
-    HistoriesProtocol historiesProtocol = new HistoriesProtocol();
 
     ReflectionTestUtils.setField(protocolParamService, "network", "mainnet");
 

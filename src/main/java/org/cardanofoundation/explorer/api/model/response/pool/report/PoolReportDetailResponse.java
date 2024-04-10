@@ -15,8 +15,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.PoolUpda
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.RewardResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.lifecycle.TabularRegisResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolHistoryKoiosProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolReportProjection;
-import org.cardanofoundation.explorer.api.util.DataUtil;
 
 @Data
 @AllArgsConstructor
@@ -46,14 +44,6 @@ public class PoolReportDetailResponse {
 
     private BigDecimal size;
 
-    public static EpochSize toDomain(PoolReportProjection projection) {
-      return EpochSize.builder()
-          .epoch(projection.getEpochNo().toString())
-          .fee(projection.getFee())
-          .size(new BigDecimal(projection.getSize()))
-          .build();
-    }
-
     public static EpochSize toDomain(PoolHistoryKoiosProjection projection) {
       return EpochSize.builder()
           .epoch(projection.getEpochNo().toString())
@@ -80,19 +70,6 @@ public class PoolReportDetailResponse {
     private BigDecimal adaValue;
 
     private String owner;
-
-    public static PoolRegistration toDomain(TabularRegisResponse response) {
-      PoolRegistration result =
-          PoolRegistration.builder()
-              .txHash(response.getTxHash())
-              .time(response.getTime())
-              .adaValueHold(new BigDecimal(response.getDeposit()))
-              .adaValueFee(new BigDecimal(response.getFee()))
-              .owner(String.join("\n", response.getStakeKeys()))
-              .build();
-      result.setAdaValue(new BigDecimal(response.getTotalFee()));
-      return result;
-    }
   }
 
   @Data
@@ -110,18 +87,6 @@ public class PoolReportDetailResponse {
     private BigDecimal adaValueFee;
 
     private BigDecimal adaValue;
-
-    public static PoolUpdate toDomain(PoolUpdateDetailResponse response) {
-      PoolUpdate result =
-          PoolUpdate.builder()
-              .txHash(response.getTxHash())
-              .time(response.getTime())
-              .adaValueHold(new BigDecimal(response.getPledge()))
-              .adaValueFee(new BigDecimal(response.getFee()))
-              .build();
-      result.setAdaValue(result.getAdaValueHold().subtract(result.getAdaValueFee()));
-      return result;
-    }
   }
 
   @Data
@@ -137,15 +102,6 @@ public class PoolReportDetailResponse {
     private BigDecimal operatorReward;
 
     private String rewardAccount;
-
-    public static RewardDistribution toDomain(RewardResponse response) {
-      return RewardDistribution.builder()
-          .epoch(response.getEpochNo().toString())
-          .time(response.getTime())
-          .operatorReward(new BigDecimal(response.getAmount()))
-          .rewardAccount(response.getRewardAccount())
-          .build();
-    }
   }
 
   @Data
@@ -165,22 +121,5 @@ public class PoolReportDetailResponse {
     private BigDecimal adaValue;
 
     private String owner;
-
-    public static Deregistration toDomain(DeRegistrationResponse response) {
-      Deregistration result =
-          Deregistration.builder()
-              .txHash(response.getTxHash())
-              .time(response.getTime())
-              .adaValueHold(
-                  DataUtil.isNullOrEmpty(response.getPoolHold())
-                      ? null
-                      : new BigDecimal(response.getPoolHold()))
-              .adaValueFee(new BigDecimal(response.getFee()))
-              .owner(String.join("\n", response.getStakeKeys()))
-              .build();
-
-      result.setAdaValue(new BigDecimal(response.getTotalFee()));
-      return result;
-    }
   }
 }
