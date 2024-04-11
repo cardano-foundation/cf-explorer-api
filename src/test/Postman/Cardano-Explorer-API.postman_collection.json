@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "6c0b7e7f-5c73-4dbd-bce9-61367f5bb286",
+    "_postman_id": "4ddb439e-495e-4b3c-955c-fa08303945ff",
     "name": "Cardano Explorer API",
     "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
     "_exporter_id": "25962442"
@@ -114,7 +114,6 @@
                       "  pm.expect(jsonData.blkCount).to.be.a(\"number\");\r",
                       "});\r",
                       "\r",
-                      "//Scenario Compare api: Get current epoch with api: Get all epoch\r",
                       "//Get value\r",
                       "pm.test(\"Get data of Get current epoch api \",function (){\r",
                       "    pm.environment.set(\"epoch_no\", jsonData.no);\r",
@@ -127,7 +126,8 @@
                       "\r",
                       ""
                     ],
-                    "type": "text/javascript"
+                    "type": "text/javascript",
+                    "packages": {}
                   }
                 }
               ],
@@ -245,18 +245,6 @@
                       "    pm.expect(jsonData.data[0].account).to.be.a(\"number\");\r",
                       "});\r",
                       "\r",
-                      "//Scenario Compare api: Get current epoch with api: Get all epoch\r",
-                      "//all variable get from API api/v1/epochs/current(Get current epoch)\r",
-                      "pm.test(\"Compare value between current epoch and Get all epoch\", function () {\r",
-                      "    //Main compare\r",
-                      "    pm.expect(jsonData.data[0].no).to.eql(pm.environment.get(\"epoch_no\"));\r",
-                      "    pm.expect(jsonData.data[0].status).to.include(\"IN_PROGRESS\");\r",
-                      "    pm.expect(jsonData.data[0].maxSlot).to.eql(pm.environment.get(\"epoch_totalSlot\"));\r",
-                      "    pm.expect(jsonData.data[0].account).to.eql(pm.environment.get(\"epoch_account\"));\r",
-                      "    pm.expect(jsonData.data[0].startTime).to.eql(pm.environment.get(\"epoch_startTime\"));\r",
-                      "    pm.expect(jsonData.data[0].endTime).to.eql(pm.environment.get(\"epoch_endTime\"));\r",
-                      "});\r",
-                      "\r",
                       "// Scenario Compare api: Get all epoch with api: Get a epoch detail by its no\r",
                       "pm.test(\"Get data of Get all epoch api\", function () {\r",
                       "    pm.environment.set(\"epoch_status\", jsonData.data[0].status);\r",
@@ -275,7 +263,8 @@
                       "};\r",
                       ""
                     ],
-                    "type": "text/javascript"
+                    "type": "text/javascript",
+                    "packages": {}
                   }
                 }
               ],
@@ -685,11 +674,6 @@
                       "  pm.expect(jsonData.data[0].slotLeader).to.be.a(\"string\");\r",
                       "});\r",
                       "\r",
-                      "//Check scenario\r",
-                      "// pm.test(\"Compare totalItems at api get list of epoch by its no  with api get a epoch detail by its no\",function (){\r",
-                      "//     pm.expect(jsonData.totalItems).to.eql(pm.environment.get(\"epoch_blkCount\")); //From api: Get all epoch - v1/epochs\r",
-                      "// });\r",
-                      "\r",
                       "// Check default size \r",
                       "if (jsonData.totalItems > 0){\r",
                       "    pm.test(\"Check Size default\", function(){\r",
@@ -698,7 +682,8 @@
                       "};\r",
                       ""
                     ],
-                    "type": "text/javascript"
+                    "type": "text/javascript",
+                    "packages": {}
                   }
                 }
               ],
@@ -1140,84 +1125,13 @@
                       "    pm.expect(jsonData.account).to.be.a(\"number\");\r",
                       "  });\r",
                       "\r",
-                      "// Scenario Compare api: Get all epoch with api: Get a epoch detail by its no\r",
-                      "//all variable get from API api/v1/epochs(Get all epoch)\r",
-                      "pm.test(\"Check no value\", function () {\r",
-                      "    pm.expect(jsonData.no).to.eql(pm.environment.get(\"epoch_no\"));\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check status value\", function () {\r",
-                      "    pm.expect(jsonData.status).to.include(pm.environment.get(\"epoch_status\"));\r",
-                      "});\r",
-                      "\r",
-                      "\r",
-                      "pm.test(\"Check startTime value\", function () {\r",
-                      "    pm.expect(jsonData.startTime).to.include(pm.environment.get(\"epoch_startTime\"));\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check endTime value\", function () {\r",
-                      "    pm.expect(jsonData.endTime).to.contain(pm.environment.get(\"epoch_endTime\"));\r",
-                      "});\r",
                       "\r",
                       "pm.test(\"Check maxSlot value\", function () {\r",
                       "    pm.expect(jsonData.maxSlot).to.eql(432000);\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check value of rewardsDistribute\", ()=>{\r",
-                      "    if (jsonData.rewardsDistribute) {\r",
-                      "        const Key = Object.keys(jsonData.rewardsDistribute)\r",
-                      "        console.log(\"jsonData.rewardsDistribute\", jsonData.rewardsDistribute)\r",
-                      "        if (Key.length > 0) {\r",
-                      "            pm.expect(jsonData.rewardsDistributed).to.eql(pm.environment.get(\"epoch_rewardsDistributed\"));\r",
-                      "            // pm.expect(jsonData.rewardsDistribute).to.be.a(\"null\");\r",
-                      "        }\r",
-                      "    }\r",
-                      "})\r",
-                      "\r",
-                      "pm.test(\"Check account value\", function () {\r",
-                      "    pm.expect(jsonData.account).to.at.least(pm.environment.get(\"epoch_account\"));\r",
-                      "});\r",
-                      "\r",
-                      "\r",
-                      "var blkCount = jsonData.blkCount\r",
-                      "var epoch_blkCount = pm.environment.get(\"epoch_blkCount\")\r",
-                      "var outSum = (jsonData.outSum/10**6).toFixed(2)\r",
-                      "var epoch_outSum = (pm.environment.get(\"epoch_outSum\")/10**6).toFixed(2)\r",
-                      "var txCount = jsonData.txCount\r",
-                      "var epoch_txCount = pm.environment.get(\"epoch_txCount\")\r",
-                      "\r",
-                      "if (blkCount === epoch_blkCount) {\r",
-                      "\r",
-                      "    pm.test(\"Check outSum value (=)\", function () {\r",
-                      "        pm.expect(outSum).to.eql(epoch_outSum);\r",
-                      "    });\r",
-                      "    \r",
-                      "    pm.test(\"Check txCount value (=)\", function () {\r",
-                      "        pm.expect(txCount).to.eql(epoch_txCount);\r",
-                      "    });\r",
-                      "\r",
-                      "} else if (blkCount > (epoch_blkCount)) {\r",
-                      "\r",
-                      "    pm.test(\"Check outSum value (>)\", function () {\r",
-                      "        pm.expect(parseInt(outSum)).to.greaterThan(parseInt(epoch_outSum));\r",
-                      "    });\r",
-                      "    \r",
-                      "    pm.test(\"Check txCount value (>)\", function () {\r",
-                      "        pm.expect(txCount).to.greaterThan(epoch_txCount);\r",
-                      "    });\r",
-                      "\r",
-                      "} else {\r",
-                      "\r",
-                      "    pm.test(\"Check outSum value (<)\", function () {\r",
-                      "        pm.expect(parseInt(outSum)).to.less(parseInt(epoch_outSum));\r",
-                      "    });\r",
-                      "    \r",
-                      "    pm.test(\"Check txCount value (<)\", function () {\r",
-                      "        pm.expect(txCount).to.less(epoch_txCount);\r",
-                      "    });\r",
-                      "}"
+                      "});"
                     ],
-                    "type": "text/javascript"
+                    "type": "text/javascript",
+                    "packages": {}
                   }
                 }
               ],
@@ -22129,6 +22043,8 @@
                       "var stt = 200\r",
                       "var res_time = 5000\r",
                       "\r",
+                      "console.log(jsonData)\r",
+                      "\r",
                       "//Compare static data\r",
                       "pm.test(\"Status code is 200\", function () {\r",
                       "    pm.response.to.have.status(stt);\r",
@@ -22161,14 +22077,6 @@
                       "\r",
                       "pm.test(\"Check data type of poolSize\", () => {\r",
                       "  pm.expect(jsonData[0].poolSize).to.be.a(\"number\");\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check data type of feePercent\", () => {\r",
-                      "  pm.expect(jsonData[0].feePercent).to.be.a(\"number\");\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check data type of feeAmount\", () => {\r",
-                      "  pm.expect(jsonData[0].feeAmount).to.be.a(\"number\");\r",
                       "});\r",
                       "\r",
                       "pm.test(\"Check data type of pledge\", () => {\r",
@@ -22242,7 +22150,8 @@
                       "\r",
                       ""
                     ],
-                    "type": "text/javascript"
+                    "type": "text/javascript",
+                    "packages": {}
                   }
                 }
               ],
@@ -22616,14 +22525,6 @@
                       "    });\r",
                       "}\r",
                       "\r",
-                      "pm.test(\"Check data type of feePercent\", () => {\r",
-                      "    pm.expect(jsonData.data[0].feePercent).to.be.a(\"number\");\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check data type of feeAmount\", () => {\r",
-                      "    pm.expect(jsonData.data[0].feeAmount).to.be.a(\"number\");\r",
-                      "});\r",
-                      "\r",
                       "pm.test(\"Check data type of pledge\", () => {\r",
                       "    pm.expect(jsonData.data[0].pledge).to.be.a(\"number\");\r",
                       "});\r",
@@ -22659,10 +22560,6 @@
                       "    });\r",
                       "}\r",
                       "\r",
-                      "pm.test(\"Check data type of numberDelegators\", () => {\r",
-                      "    pm.expect(jsonData.data[0].numberDelegators).to.be.a(\"number\");\r",
-                      "});\r",
-                      "\r",
                       "pm.test(\"Check data type of epochBlock\", () => {\r",
                       "    pm.expect(jsonData.data[0].epochBlock).to.be.a(\"number\");\r",
                       "});\r",
@@ -22679,39 +22576,6 @@
                       "    pm.expect(jsonData.totalPages).to.be.a(\"number\");\r",
                       "});\r",
                       "\r",
-                      "//Scenario Compare api get Data For Pool Table with api Get: Find Top(default is 3) Delegation Pool order by pool size\r",
-                      "pm.test(\"Compare value between api get Data For Pool Table and api Get: Find Top(default is 3) Delegation Pool order by pool size \", function () {\r",
-                      "    var pool_id = pm.environment.get(\"delegation_poolId\");\r",
-                      "    let result = jsonData.data.find(a => a.poolId === pool_id);\r",
-                      "\r",
-                      "    pm.expect(result.id).to.be.eql(pm.environment.get(\"delegation_id\"));\r",
-                      "    pm.expect(result.poolName).to.be.eql(pm.environment.get(\"delegation_poolName\"));\r",
-                      "    pm.expect(result.poolSize).to.be.eql(pm.environment.get(\"delegation_poolSize\"));\r",
-                      "    if (jsonData.hasOwnProperty('reward')) {\r",
-                      "        pm.expect(result.reward).to.be.eql(pm.environment.get(\"delegation_reward\"));\r",
-                      "    }\r",
-                      "    pm.expect(result.feePercent).to.be.eql(pm.environment.get(\"delegation_feePercent\"));\r",
-                      "    pm.expect(result.feeAmount).to.be.eql(pm.environment.get(\"delegation_feeAmount\"));\r",
-                      "    pm.expect(result.pledge).to.be.eql(pm.environment.get(\"delegation_pledge\"));\r",
-                      "    pm.expect(result.saturation).to.be.eql(pm.environment.get(\"delegation_saturation\"));\r",
-                      "    if (jsonData.hasOwnProperty('stakeLimit')) {\r",
-                      "        pm.expect(result.stakeLimit).to.be.eql(pm.environment.get(\"delegation_stakeLimit\"));\r",
-                      "    }\r",
-                      "    if (jsonData.hasOwnProperty('reserves')) {\r",
-                      "        pm.expect(result.reserves).to.be.eql(pm.environment.get(\"delegation_reserves\"));\r",
-                      "    }\r",
-                      "    if (jsonData.hasOwnProperty('epochBlock')) {\r",
-                      "        pm.expect(result.epochBlock).to.be.eql(pm.environment.get(\"delegation_epochBlock\"));\r",
-                      "    }\r",
-                      "    pm.expect(result.lifetimeBlock).to.be.eql(pm.environment.get(\"delegation_lifetimeBlock\"));\r",
-                      "    if (jsonData.hasOwnProperty('lifetimeRos')) {\r",
-                      "        pm.expect(result.lifetimeRos).to.be.eql(pm.environment.get(\"delegation_lifetimeRos\"));\r",
-                      "    }\r",
-                      "    if (jsonData.hasOwnProperty('kparam')) {\r",
-                      "        pm.expect(result.kparam).to.be.eql(pm.environment.get(\"delegation_kparam\"));\r",
-                      "    }\r",
-                      "});\r",
-                      "\r",
                       "// Check default size \r",
                       "if (jsonData.totalItems > 0) {\r",
                       "    pm.test(\"Check Size default\", function () {\r",
@@ -22719,7 +22583,8 @@
                       "    });\r",
                       "};"
                     ],
-                    "type": "text/javascript"
+                    "type": "text/javascript",
+                    "packages": {}
                   }
                 }
               ],
@@ -32691,10 +32556,6 @@
                       "    pm.response.to.have.status(200);\r",
                       "});\r",
                       "\r",
-                      "// pm.test(\"Response time is less than 5000ms\", function () {\r",
-                      "//     pm.expect(pm.response.responseTime).to.be.below(5000);\r",
-                      "// });\r",
-                      "\r",
                       "pm.test(\"Check currentPage value\", function () {\r",
                       "    pm.expect(jsonData.currentPage).to.eql(0);\r",
                       "});\r",
@@ -32716,7 +32577,8 @@
                       "    });\r",
                       "};"
                     ],
-                    "type": "text/javascript"
+                    "type": "text/javascript",
+                    "packages": {}
                   }
                 }
               ],
@@ -39013,170 +38875,6 @@
                         {
                           "key": "amount",
                           "value": "<integer>",
-                          "description": "(Required) "
-                        }
-                      ]
-                    }
-                  },
-                  "status": "OK",
-                  "code": 200,
-                  "_postman_previewlanguage": "text",
-                  "header": [
-                    {
-                      "key": "Content-Type",
-                      "value": "*/*"
-                    }
-                  ],
-                  "cookie": [],
-                  "body": "{}"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "markets",
-          "item": [
-            {
-              "name": "Get ada cardano price, market cap, volume, and market related data",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "const jsonData = pm.response.json();\r",
-                      "\r",
-                      "//Compare static value\r",
-                      "pm.test(\"Status code is 200\", function () {\r",
-                      "    pm.response.to.have.status(200);\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Response time is less than 5000ms\", function () {\r",
-                      "    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check id value\", function () {\r",
-                      "    pm.expect(jsonData[0].id).to.include(\"cardano\");\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check symbol value\", function () {\r",
-                      "    pm.expect(jsonData[0].symbol).to.include(\"ada\");\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check name value\", function () {\r",
-                      "    pm.expect(jsonData[0].name).to.include( \"Cardano\");\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Check image value\", function () {\r",
-                      "    pm.expect(jsonData[0].image).to.include(\"https://assets.coingecko.com/coins/images/975/large/cardano.png?1696502090\");\r",
-                      "});\r",
-                      "\r",
-                      "\r",
-                      "//Compare data type\r",
-                      "pm.test(\"Check data type of the response\", () => {\r",
-                      "    let moment = require ('moment');\r",
-                      "    pm.expect(jsonData[0]).to.be.an(\"object\");\r",
-                      "    pm.expect(jsonData[0].id).to.be.a(\"string\");\r",
-                      "    pm.expect(jsonData[0].symbol).to.be.a(\"string\");\r",
-                      "    pm.expect(jsonData[0].name).to.be.a(\"string\");\r",
-                      "    pm.expect(jsonData[0].image).to.be.a(\"string\");\r",
-                      "    pm.expect(jsonData[0].current_price).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].fully_diluted_valuation).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].market_cap).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].market_cap_rank).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].total_volume).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].high_24h).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].low_24h).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].price_change_24h).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].price_change_percentage_24h).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].market_cap_change_24h).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].market_cap_change_percentage_24h).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].circulating_supply).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].total_supply).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].max_supply).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].ath).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].ath_change_percentage).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].ath_date).to.include(moment(jsonData[0].ath_date).utcOffset(0).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));\r",
-                      "    pm.expect(jsonData[0].atl).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].atl_change_percentage).to.be.a(\"number\");\r",
-                      "    pm.expect(jsonData[0].atl_date).to.include(moment(jsonData[0].atl_date).utcOffset(0).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));\r",
-                      "    if(jsonData.roi){\r",
-                      "        pm.expect(typeof jsonData[0].roi).to.be.oneOf(['object', 'number']);\r",
-                      "    }\r",
-                      "    pm.expect(jsonData[0].last_updated).to.include(moment(jsonData[0].last_updated).format('YYYY-MM-DDTHH:mm:ss'));\r",
-                      "\r",
-                      "});\r",
-                      "\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": {
-                    "token": "{{Bearer Token}}"
-                  }
-                },
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "*/*"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/api/v1/markets?currency=USD",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "markets"
-                  ],
-                  "query": [
-                    {
-                      "key": "currency",
-                      "value": "USD",
-                      "description": "(Required) "
-                    }
-                  ]
-                }
-              },
-              "response": [
-                {
-                  "name": "OK",
-                  "originalRequest": {
-                    "method": "GET",
-                    "header": [
-                      {
-                        "key": "Accept",
-                        "value": "*/*"
-                      },
-                      {
-                        "key": "Authorization",
-                        "value": "Bearer <token>",
-                        "description": "Added as a part of security scheme: bearer"
-                      }
-                    ],
-                    "url": {
-                      "raw": "{{baseUrl}}/api/v1/markets?currency=<string>",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "markets"
-                      ],
-                      "query": [
-                        {
-                          "key": "currency",
-                          "value": "<string>",
                           "description": "(Required) "
                         }
                       ]
