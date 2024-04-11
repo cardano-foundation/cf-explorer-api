@@ -29,6 +29,7 @@ import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
+import org.cardanofoundation.explorer.api.model.request.pool.PoolListFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -104,21 +105,21 @@ public class DelegationControllerTest {
 
   @Test
   public void testGetDataForPoolTable() throws Exception {
+    PoolListFilter filter = PoolListFilter.builder().isShowRetired(true).build();
     // Mock request and response objects
     Pageable pageable = PageRequest.of(0, 10);
-    String search = "testSearch";
     List<PoolResponse> mockResponse = Arrays.asList(new PoolResponse(), new PoolResponse());
     BaseFilterResponse<PoolResponse> response =
         new BaseFilterResponse<>(mockResponse, pageable.getPageSize());
 
     // Mock the service method
-    when(delegationService.getDataForPoolTable(pageable, search, true)).thenReturn(response);
+    when(delegationService.getDataForPoolTable(pageable, filter)).thenReturn(response);
 
     // Perform the GET request
     mockMvc
         .perform(
             get("/api/v1/delegations/pool-list")
-                .param("search", search)
+                .param("isShowRetired", "true")
                 .param("page", "0")
                 .param("size", "10"))
         .andExpect(status().isOk())
@@ -126,7 +127,7 @@ public class DelegationControllerTest {
         .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
 
     // Verify that the service method was called with the correct arguments
-    verify(delegationService).getDataForPoolTable(pageable, search, true);
+    verify(delegationService).getDataForPoolTable(pageable, filter);
   }
 
   @Test

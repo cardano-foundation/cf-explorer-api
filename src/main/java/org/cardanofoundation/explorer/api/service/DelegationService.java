@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
+import org.cardanofoundation.explorer.api.model.request.pool.PoolListFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -35,12 +36,9 @@ public interface DelegationService {
    * Get list pool for delegate pools
    *
    * @param pageable page, size and sort parameters
-   * @param search query for search by pool name or ticker name
-   * @param showRetired show retired pool
    * @return BaseFilterResponse<PoolResponse>
    */
-  BaseFilterResponse<PoolResponse> getDataForPoolTable(
-      Pageable pageable, String search, boolean showRetired);
+  BaseFilterResponse<PoolResponse> getDataForPoolTable(Pageable pageable, PoolListFilter filter);
 
   /**
    * Get detail pool for delegate pools detail

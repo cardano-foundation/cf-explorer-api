@@ -28,7 +28,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +38,7 @@ import com.google.gson.JsonObject;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
+import org.cardanofoundation.explorer.api.model.request.pool.PoolListFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -232,10 +232,10 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(
-      Pageable pageable, String search, boolean showRetired) {
+      Pageable pageable, PoolListFilter filter) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     Set<Long> poolRetiredIds = new HashSet<>();
-    if (!showRetired) {
+    if (!filter.getIsShowRetired()) {
       String poolRetiredIdKey = CommonConstant.POOL_IDS_INACTIVATE + network;
       poolRetiredIds =
           redisTemplate.opsForHash().values(poolRetiredIdKey).stream()
@@ -244,11 +244,10 @@ public class DelegationServiceImpl implements DelegationService {
     }
     // add -1L to poolRetiredIds to avoid empty list
     poolRetiredIds.add(-1L);
-    boolean isQueryEmpty = DataUtil.isNullOrEmpty(search);
+    boolean isQueryEmpty = DataUtil.isNullOrEmpty(filter.getQuery());
     if (isQueryEmpty) {
       pageable = createPageableWithSort(pageable, Sort.by(Sort.Direction.ASC, BaseEntity_.ID));
     } else {
-      search = search.toLowerCase();
       String poolNameLength = "poolNameLength";
       if (MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()) {
         throw new BusinessException(BusinessCode.OUT_OF_QUERY_LIMIT);
@@ -259,7 +258,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
     Integer epochNo = epochRepository.findCurrentEpochNo().orElse(CommonConstant.ZERO);
     Page<PoolResponse> poolResponse =
-        getPoolResponseList(search, pageable, poolRetiredIds, epochNo);
+        getPoolResponseList(pageable, poolRetiredIds, epochNo, filter);
     response.setData(poolResponse.getContent());
     response.setTotalItems(poolResponse.getTotalElements());
     response.setTotalPages(poolResponse.getTotalPages());
@@ -271,113 +270,55 @@ public class DelegationServiceImpl implements DelegationService {
   }
 
   private Page<PoolResponse> getPoolResponseList(
-      String queryParam, Pageable pageable, Set<Long> retiredIds, int epochNo) {
-    List<String> sortProperties = pageable.getSort().stream().map(Sort.Order::getProperty).toList();
-    boolean isSortedOnAggTable =
-        sortProperties.contains("epochBlock")
-            || sortProperties.contains("lifetimeBlock")
-            || sortProperties.contains("votingPower")
-            || sortProperties.contains("governanceParticipationRate");
-    boolean isQueryEmpty = DataUtil.isNullOrEmpty(queryParam);
+      Pageable pageable, Set<Long> retiredIds, int epochNo, PoolListFilter filter) {
     boolean isKoiOs = fetchRewardDataService.useKoios();
+    BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
+    response.setData(List.of());
     Page<PoolListProjection> poolInfoProjections;
     List<PoolResponse> poolResponseList;
-    if (!isSortedOnAggTable) {
-      if (isQueryEmpty) {
-        poolInfoProjections =
-            isKoiOs
-                ? poolHashRepository.findAllWithoutQueryParam(retiredIds, epochNo, pageable)
-                : poolHashRepository.findAllWithoutQueryParam(retiredIds, pageable);
-      } else {
-        if (isKoiOs) {
-          Long count =
-              poolHashRepository.countAllByPoolViewOrPoolNameOrPoolHashWithEpochNo(
-                  queryParam, retiredIds, epochNo);
-          poolInfoProjections =
-              new PageImpl<>(
-                  poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(
-                      queryParam, retiredIds, epochNo, pageable),
-                  pageable,
-                  count);
-        } else {
-          Long count =
-              poolHashRepository.countAllByPoolViewOrPoolNameOrPoolHashWithoutEpochNo(
-                  queryParam, retiredIds);
-          poolInfoProjections =
-              new PageImpl<>(
-                  poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(
-                      queryParam, retiredIds, pageable),
-                  pageable,
-                  count);
-        }
-      }
-      poolResponseList = mapAggPoolInfoToPoolResponse(retiredIds, poolInfoProjections.getContent());
+    standardFilter(filter);
+
+    if (isKoiOs) {
+      poolInfoProjections =
+          poolHashRepository.findAllWithUsingKoiOs(
+              filter.getQuery(),
+              retiredIds,
+              epochNo,
+              filter.getMinPoolSize(),
+              filter.getMaxPoolSize(),
+              filter.getMinPledge(),
+              filter.getMaxPledge(),
+              filter.getMinSaturation(),
+              filter.getMaxSaturation(),
+              filter.getMinVotingPower(),
+              filter.getMaxSaturation(),
+              filter.getMinGovParticipationRate(),
+              filter.getMaxGovParticipationRate(),
+              filter.getMinBlockLifetime(),
+              filter.getMaxBlockLifetime(),
+              pageable);
     } else {
-      if (isQueryEmpty) {
-        poolInfoProjections =
-            aggregatePoolInfoRepository.findAllByPoolIdNotIn(retiredIds, pageable);
-        poolResponseList =
-            mapPoolInfoForPoolResponse(retiredIds, epochNo, poolInfoProjections.getContent());
-      } else {
-        return getAllByQueryAndSortByAggField(pageable, queryParam, retiredIds, epochNo);
-      }
+      poolInfoProjections =
+          poolHashRepository.findAllWithoutUsingKoi0s(
+              filter.getQuery(),
+              retiredIds,
+              filter.getMinPledge(),
+              filter.getMaxPledge(),
+              filter.getMinVotingPower(),
+              filter.getMaxVotingPower(),
+              filter.getMinGovParticipationRate(),
+              filter.getMaxGovParticipationRate(),
+              filter.getMinBlockLifetime(),
+              filter.getMaxBlockLifetime(),
+              pageable);
     }
+    poolResponseList = mapAggPoolInfoToPoolResponse(retiredIds, poolInfoProjections);
+    response.setData(poolResponseList);
+    response.setTotalItems(poolInfoProjections.getTotalElements());
+    response.setCurrentPage(pageable.getPageNumber());
+    response.setTotalPages(poolInfoProjections.getTotalPages());
     return new PageImpl<>(poolResponseList, pageable, poolInfoProjections.getTotalElements());
   }
-
-  private Page<PoolResponse> getAllByQueryAndSortByAggField(
-      Pageable pageable, String queryParam, Set<Long> retiredIds, int epochNo) {
-    List<String> sortProperties = pageable.getSort().stream().map(Sort.Order::getProperty).toList();
-    List<Direction> sortDirections =
-        pageable.getSort().stream().map(Sort.Order::getDirection).toList();
-    boolean isKoiOs = fetchRewardDataService.useKoios();
-    List<PoolListProjection> poolListProjections =
-        isKoiOs
-            ? poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(
-                queryParam, retiredIds, epochNo)
-            : poolHashRepository.findAllByPoolViewOrPoolNameOrPoolHash(queryParam, retiredIds);
-
-    List<PoolResponse> poolResponseList =
-        mapAggPoolInfoToPoolResponse(retiredIds, poolListProjections);
-    Set<Long> idsInList =
-        poolResponseList.stream().map(PoolResponse::getId).collect(Collectors.toSet());
-    retiredIds.retainAll(idsInList);
-    if (sortProperties.contains("epochBlock")) {
-      poolResponseList.sort(
-          Comparator.comparing(PoolResponse::getEpochBlock).thenComparing(PoolResponse::getPoolId));
-    } else if (sortProperties.contains("lifetimeBlock")) {
-      poolResponseList.sort(
-          Comparator.comparing(PoolResponse::getLifetimeBlock)
-              .thenComparing(PoolResponse::getPoolId));
-    } else if (sortProperties.contains("votingPower")) {
-      poolResponseList.sort(
-          Comparator.comparing(
-                  PoolResponse::getVotingPower, Comparator.nullsFirst(Comparator.naturalOrder()))
-              .thenComparing(PoolResponse::getPoolId));
-    } else if (sortProperties.contains("governanceParticipationRate")) {
-      poolResponseList.sort(
-          Comparator.comparing(
-                  PoolResponse::getGovernanceParticipationRate,
-                  Comparator.nullsFirst(Comparator.naturalOrder()))
-              .thenComparing(PoolResponse::getPoolId));
-    }
-
-    if (sortDirections.get(0).equals(Direction.DESC)) {
-      Collections.reverse(poolResponseList);
-    }
-
-    if (poolResponseList.size() > MAX_TOTAL_ELEMENTS) {
-      poolResponseList = poolResponseList.subList(0, MAX_TOTAL_ELEMENTS);
-    }
-
-    final int start = (int) pageable.getOffset();
-    final int end = Math.min((start + pageable.getPageSize()), poolResponseList.size());
-    if (start > poolResponseList.size()) {
-      return Page.empty();
-    }
-    return new PageImpl<>(poolResponseList.subList(start, end), pageable, poolResponseList.size());
-  }
-
   /**
    * Map aggregate pool info for pool response
    *
@@ -386,95 +327,37 @@ public class DelegationServiceImpl implements DelegationService {
    * @return
    */
   private List<PoolResponse> mapAggPoolInfoToPoolResponse(
-      Set<Long> retiredIds, List<PoolListProjection> poolListProjections) {
-    List<Long> poolIds =
-        new ArrayList<>(poolListProjections.stream().map(PoolListProjection::getPoolId).toList());
-    Map<Long, AggregatePoolInfo> aggPoolInfoMap =
-        aggregatePoolInfoRepository.getAllByPoolIdIn(poolIds).stream()
-            .collect(Collectors.toMap(AggregatePoolInfo::getPoolId, Function.identity()));
-
-    poolIds.removeIf(id -> !aggPoolInfoMap.containsKey(id));
+      Set<Long> retiredIds, Page<PoolListProjection> poolListProjections) {
     return poolListProjections.stream()
-        .filter(projection -> aggPoolInfoMap.containsKey(projection.getPoolId()))
         .map(
-            projection -> {
-              AggregatePoolInfo aggPoolInfo = aggPoolInfoMap.get(projection.getPoolId());
-              return PoolResponse.builder()
-                  .poolId(projection.getPoolView())
-                  .id(projection.getPoolId())
-                  .poolName(projection.getPoolName())
-                  .tickerName(projection.getTickerName())
-                  .pledge(projection.getPledge())
-                  .poolSize(
-                      BigInteger.valueOf(-1).equals(projection.getPoolSize())
-                          ? null
-                          : projection.getPoolSize())
-                  .saturation(
-                      Double.valueOf(-1).equals(projection.getSaturation())
-                          ? null
-                          : projection.getSaturation())
-                  .lifetimeBlock(aggPoolInfo.getBlockLifeTime())
-                  .votingPower(
-                      Double.valueOf(-1).equals(aggPoolInfo.getVotingPower())
-                          ? null
-                          : aggPoolInfo.getVotingPower())
-                  .governanceParticipationRate(
-                      Double.valueOf(-1).equals(aggPoolInfo.getGovernanceParticipationRate())
-                          ? null
-                          : aggPoolInfo.getGovernanceParticipationRate())
-                  .epochBlock(aggPoolInfo.getBlockInEpoch())
-                  .retired(retiredIds.contains(projection.getPoolId()))
-                  .build();
-            })
+            projection ->
+                PoolResponse.builder()
+                    .poolId(projection.getPoolView())
+                    .id(projection.getPoolId())
+                    .poolName(projection.getPoolName())
+                    .tickerName(projection.getTickerName())
+                    .pledge(projection.getPledge())
+                    .poolSize(
+                        BigInteger.valueOf(-1).equals(projection.getPoolSize())
+                            ? null
+                            : projection.getPoolSize())
+                    .saturation(
+                        Double.valueOf(-1).equals(projection.getSaturation())
+                            ? null
+                            : projection.getSaturation())
+                    .lifetimeBlock(projection.getLifetimeBlock())
+                    .votingPower(
+                        Double.valueOf(-1).equals(projection.getVotingPower())
+                            ? null
+                            : projection.getVotingPower())
+                    .governanceParticipationRate(
+                        Double.valueOf(-1).equals(projection.getGovernanceParticipationRate())
+                            ? null
+                            : projection.getGovernanceParticipationRate())
+                    .epochBlock(projection.getEpochBlock())
+                    .retired(retiredIds.contains(projection.getPoolId()))
+                    .build())
         .collect(Collectors.toList());
-  }
-
-  private List<PoolResponse> mapPoolInfoForPoolResponse(
-      Set<Long> retiredIds, int epochNo, List<PoolListProjection> poolListProjections) {
-    boolean isKoiOs = fetchRewardDataService.useKoios();
-    List<PoolResponse> poolResponseList;
-    List<Long> poolIds = poolListProjections.stream().map(PoolListProjection::getPoolId).toList();
-    Map<Long, PoolListProjection> poolListProjectionMap =
-        (isKoiOs
-                ? poolHashRepository.findAllByPoolIdIn(poolIds, epochNo)
-                : poolHashRepository.findAllByPoolIdIn(poolIds))
-            .stream().collect(Collectors.toMap(PoolListProjection::getPoolId, Function.identity()));
-    poolResponseList =
-        poolListProjections.stream()
-            .filter(projection -> poolListProjectionMap.containsKey(projection.getPoolId()))
-            .map(
-                pool -> {
-                  PoolListProjection poolListProjection =
-                      poolListProjectionMap.get(pool.getPoolId());
-                  return PoolResponse.builder()
-                      .poolId(poolListProjection.getPoolView())
-                      .id(poolListProjection.getPoolId())
-                      .poolName(poolListProjection.getPoolName())
-                      .tickerName(poolListProjection.getTickerName())
-                      .pledge(poolListProjection.getPledge())
-                      .poolSize(
-                          BigInteger.valueOf(-1).equals(poolListProjection.getPoolSize())
-                              ? null
-                              : poolListProjection.getPoolSize())
-                      .saturation(
-                          Double.valueOf(-1).equals(poolListProjection.getSaturation())
-                              ? null
-                              : poolListProjection.getSaturation())
-                      .lifetimeBlock(pool.getLifetimeBlock())
-                      .epochBlock(pool.getEpochBlock())
-                      .retired(retiredIds.contains(pool.getPoolId()))
-                      .votingPower(
-                          Double.valueOf(-1).equals(pool.getVotingPower())
-                              ? null
-                              : pool.getVotingPower())
-                      .governanceParticipationRate(
-                          Double.valueOf(-1).equals(pool.getGovernanceParticipationRate())
-                              ? null
-                              : pool.getGovernanceParticipationRate())
-                      .build();
-                })
-            .collect(Collectors.toList());
-    return poolResponseList;
   }
 
   /**
@@ -505,6 +388,35 @@ public class DelegationServiceImpl implements DelegationService {
     }
     pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     return pageable;
+  }
+
+  void standardFilter(PoolListFilter filter) {
+    if (Objects.nonNull(filter.getQuery())) {
+      String queryLowerCase = filter.getQuery().toLowerCase();
+      filter.setQuery(queryLowerCase);
+    }
+    filter.setMaxPoolSize(
+        Optional.ofNullable(filter.getMaxPoolSize()).orElse(CommonConstant.MAX_VALUE_BIGINT));
+    filter.setMinPoolSize(Optional.ofNullable(filter.getMinPoolSize()).orElse(BigInteger.ZERO));
+    filter.setMaxSaturation(
+        Optional.ofNullable(filter.getMaxSaturation()).orElse(Double.MAX_VALUE));
+    filter.setMinSaturation(Optional.ofNullable(filter.getMinSaturation()).orElse(0.0));
+    filter.setMaxPledge(
+        Optional.ofNullable(filter.getMaxPledge()).orElse(CommonConstant.MAX_VALUE_BIGINT));
+    filter.setMinPledge(Optional.ofNullable(filter.getMinPledge()).orElse(BigInteger.ZERO));
+    filter.setMaxBlockLifetime(
+        Optional.ofNullable(filter.getMaxBlockLifetime()).orElse(Integer.MAX_VALUE));
+    filter.setMinBlockLifetime(Optional.ofNullable(filter.getMinBlockLifetime()).orElse(0));
+    filter.setMaxVotingPower(
+        Optional.ofNullable(filter.getMaxVotingPower()).orElse(CommonConstant.MAX_PERCENT));
+    filter.setMinVotingPower(
+        Optional.ofNullable(filter.getMinVotingPower()).orElse(CommonConstant.MIN_PERCENT));
+    filter.setMinGovParticipationRate(
+        Optional.ofNullable(filter.getMinGovParticipationRate())
+            .orElse(CommonConstant.MIN_PERCENT));
+    filter.setMaxGovParticipationRate(
+        Optional.ofNullable(filter.getMaxGovParticipationRate())
+            .orElse(CommonConstant.MAX_PERCENT));
   }
 
   @Override
