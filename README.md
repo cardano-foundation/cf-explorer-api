@@ -80,8 +80,6 @@ To ensure the stability and reliability of this project, unit and mutation tests
 
 - `API_NEWS_URL`: URL for get news data.
 - `API_NEWS_CACHE_TIME`: Cache time for news data. Default is 120s.
-- `API_MARKET_URL`: URL for get market data. Default is `https://api.coingecko.com/api/v3/coins/markets?ids=cardano&vs_currency=%s`
-- `API_MARKET_CACHE_TIME` : Cache time for market data. Default is 120s.
 - `API_BOLNISI_OFFCHAIN_URL`: URL for get bolnisi offchain data by cid.
 - `API_BOLNISI_PUBLIC_KEY_URL`: URL for get bolnisi public key data by wineryId.
 

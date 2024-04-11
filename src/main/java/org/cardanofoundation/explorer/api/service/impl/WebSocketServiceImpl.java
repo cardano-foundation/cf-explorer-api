@@ -11,7 +11,6 @@ import org.cardanofoundation.explorer.api.event.blocksync.BlockSyncMessage;
 import org.cardanofoundation.explorer.api.event.websocket.WebSocketMessage;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
-import org.cardanofoundation.explorer.api.service.MarketDataService;
 import org.cardanofoundation.explorer.api.service.WebSocketService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 
@@ -20,7 +19,6 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 @Log4j2
 public class WebSocketServiceImpl implements WebSocketService {
 
-  private final MarketDataService marketDataService;
   private final EpochService epochService;
   private final BlockRepository blockRepository;
 

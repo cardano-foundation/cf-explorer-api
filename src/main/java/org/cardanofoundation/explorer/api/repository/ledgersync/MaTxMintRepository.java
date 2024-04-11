@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.cardanofoundation.explorer.api.projection.MintProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
@@ -55,6 +57,30 @@ public interface MaTxMintRepository extends JpaRepository<MaTxMint, Long> {
               + " INNER JOIN MultiAsset ma ON ma = mtm.ident"
               + " WHERE ma.policy = :policy")
   Long countByPolicy(@Param("policy") String policy);
+
+  @Query(
+      value =
+          "SELECT ma.id FROM ma_tx_mint mtm "
+              + "JOIN multi_asset ma ON ma.id = mtm.ident "
+              + "WHERE ma.policy = :policy "
+              + "AND mtm.tx_id != (SELECT mtm.tx_id FROM ma_tx_mint mtm "
+              + "JOIN multi_asset ma ON ma.id = mtm.ident WHERE ma.policy = :policy "
+              + "LIMIT 1) LIMIT 1",
+      nativeQuery = true)
+  Optional<Long> existsMoreOneMintTx(@Param("policy") String policy);
+
+  @Query(
+      value = "SELECT mtm.tx_id from ma_tx_mint mtm where mtm.ident = :multiAssetId LIMIT 1",
+      nativeQuery = true)
+  Long findFirstTxMintByMultiAssetId(@Param("multiAssetId") Long multiAssetId);
+
+  @Query(
+      value =
+          "SELECT TRUE FROM MaTxMint mtm "
+              + "WHERE mtm.ident IN :multiAssets "
+              + "AND mtm.tx.id != :txId")
+  Boolean existsMoreOneMintTx(
+      @Param("multiAssets") List<MultiAsset> multiAssets, @Param("txId") Long txId);
 
   @Query(
       value =
