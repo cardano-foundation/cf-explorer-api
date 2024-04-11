@@ -52,7 +52,7 @@
         <version.maven-project-info-reports-plugin>3.3.0</version.maven-project-info-reports-plugin>
         <version.maven-site-plugin>4.0.0-M2</version.maven-site-plugin>
         <version.spring-boot>3.0.5</version.spring-boot>
-        <version.bloxbean>0.4.3</version.bloxbean>
+        <version.bloxbean>0.5.1</version.bloxbean>
         <version.lombok>1.18.26</version.lombok>
         <version.springdoc-starter>2.1.0</version.springdoc-starter>
         <version.springdoc-openapi-ui>1.7.0</version.springdoc-openapi-ui>
@@ -239,6 +239,13 @@
             <artifactId>cardano-client-lib</artifactId>
             <version>${version.bloxbean}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.bloxbean.cardano</groupId>
+            <artifactId>cardano-client-backend-blockfrost</artifactId>
+            <version>${version.bloxbean}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
