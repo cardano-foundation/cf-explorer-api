@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -63,6 +68,7 @@ import org.cardanofoundation.explorer.common.entity.explorer.SmartContractInfo;
 import org.cardanofoundation.explorer.common.entity.explorer.VerifiedScript;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -517,7 +523,6 @@ class ScriptServiceTest {
     when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
         .thenReturn(Optional.of(nativeScriptInfo));
     when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
-    when(maTxMintRepository.countByPolicy(scriptHash)).thenReturn(2L);
     var actual = scriptService.getNativeScriptDetail(scriptHash);
 
     Assertions.assertEquals(nativeScriptInfo.getNumberOfTokens(), actual.getNumberOfTokens());
@@ -531,6 +536,53 @@ class ScriptServiceTest {
     Assertions.assertEquals(actual.getScriptHash(), scriptHash);
     Assertions.assertEquals(2, actual.getRequired());
     Assertions.assertTrue(actual.getIsOpen());
+  }
+
+  @Test
+  void testGetNativeScriptDetail_shouldReturnNativeScriptResponse_withOneTimeMint() {
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson =
+        "{\"type\":\"all\",\"scripts\":[{\"type\":\"before\",\"slot\":48037363},{\"type\":\"sig\",\"keyHash\":\"a316ed93fca3970fb603a5d103a25780fc1a0d3c33878073226ca586\"}]}";
+    Script script = Script.builder().hash(scriptHash).type(ScriptType.TIMELOCK).json(null).build();
+
+    VerifiedScript verifiedScript =
+        VerifiedScript.builder().hash(scriptHash).json(scriptJson).build();
+
+    NativeScriptInfo nativeScriptInfo =
+        NativeScriptInfo.builder()
+            .scriptHash(scriptHash)
+            .id(3L)
+            .beforeSlot(23069343L)
+            .numberOfTokens(1L)
+            .numberOfAssetHolders(1L)
+            .build();
+    Block currentBlock = Block.builder().slotNo(100L).build();
+    when(blockRepository.findLatestBlock()).thenReturn(Optional.of(currentBlock));
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
+    when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
+        .thenReturn(Optional.of(nativeScriptInfo));
+    when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
+
+    Slice<MultiAsset> multiAssetSlice =
+        new SliceImpl<>(List.of(MultiAsset.builder().id(1L).build()));
+
+    Pageable pageable = PageRequest.of(0, 100, Sort.by("id").ascending());
+    when(multiAssetRepository.getSliceByPolicy(scriptHash, pageable)).thenReturn(multiAssetSlice);
+    when(maTxMintRepository.findFirstTxMintByMultiAssetId(anyLong())).thenReturn(1L);
+    when(maTxMintRepository.existsMoreOneMintTx(anyList(), anyLong())).thenReturn(Boolean.FALSE);
+
+    var actual = scriptService.getNativeScriptDetail(scriptHash);
+
+    Assertions.assertEquals(nativeScriptInfo.getNumberOfTokens(), actual.getNumberOfTokens());
+    Assertions.assertEquals(
+        nativeScriptInfo.getNumberOfAssetHolders(), actual.getNumberOfAssetHolders());
+    Assertions.assertTrue(actual.getVerifiedContract());
+    Assertions.assertEquals(
+        actual.getConditionType(),
+        com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all);
+    Assertions.assertEquals(actual.getScriptHash(), scriptHash);
+    Assertions.assertTrue(actual.getIsOpen());
+    Assertions.assertTrue(actual.getIsOneTimeMint());
   }
 
   @Test

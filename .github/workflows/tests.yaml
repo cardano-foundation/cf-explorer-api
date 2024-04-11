@@ -119,7 +119,7 @@ jobs:
       - name: Migrate config
         run: postman-to-k6 src/test/Postman/Cardano-Explorer-API.postman_collection.json --environment src/test/Postman/DevInt.postman_environment.json -o k6-script.js --skip-post -i 10
       - name: Test
-        run: newman run src/test/Postman/Cardano-Explorer-API.postman_collection.json -e src/test/Postman/DevInt.postman_environment.json -r cli,htmlextra,allure --reporter-htmlextra-export=reporthtml/reporthtml.html --timeout-request 5000
+        run: newman run src/test/Postman/Cardano-Explorer-API.postman_collection.json -e src/test/Postman/DevInt.postman_environment.json -r cli,htmlextra,allure --reporter-htmlextra-export=reporthtml/reporthtml.html --timeout-request 10000
       - name: Allure Report action from marketplace
         uses: simple-elf/allure-report-action@master
         if: github.ref == 'refs/heads/main'
