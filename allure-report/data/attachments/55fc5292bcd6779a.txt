@@ -1,0 +1,27 @@
+const jsonData = pm.response.json();
+
+//Compare static value
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+//Compare data type
+pm.test("Check data type of the response", () => {
+    pm.expect(jsonData.totalItems).to.be.a("number");
+    pm.expect(jsonData.totalPages).to.be.a("number");
+    pm.expect(jsonData.currentPage).to.be.a("number");
+    pm.expect(jsonData.data[0].address).to.be.a("string");
+    pm.expect(jsonData.data[0].txCount).to.be.a("number");
+    pm.expect(jsonData.data[0].balance).to.be.a("number");
+});
+
+// Check default size 
+if (jsonData.totalItems > 0){
+    pm.test("Check Size default", function(){
+        pm.expect(jsonData.data.length).to.be.within(1, 100);
+    });
+};

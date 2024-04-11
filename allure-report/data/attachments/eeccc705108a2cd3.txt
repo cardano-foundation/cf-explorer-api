@@ -1,0 +1,1 @@
+{"data":[{"time":"2023/06/12 03:32:34","slotNo":94974463,"fee":176187,"blockNo":8893160,"blockIndex":2,"epochNo":417,"txHash":"5f934f4d1322788656aa0bd7a73013db47d428b82c62ae2aadbb9c4e837332e7","epochSlotNo":193663,"deposit":2000000,"action":"Registered"}],"totalItems":1,"totalPages":1,"currentPage":0,"isDataOverSize":null}

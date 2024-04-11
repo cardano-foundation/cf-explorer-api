@@ -1,0 +1,1 @@
+{"data":[{"txHash":"a883505c19c173e88cc5b570862b3224767e9d0fdab3fca0beb1293c1df88599","amount":-238133670,"fee":176281,"time":"2023/06/16 15:13:46","type":"SENT","status":"SUCCESS"}],"totalItems":292,"totalPages":292,"currentPage":0,"isDataOverSize":null}

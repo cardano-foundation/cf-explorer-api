@@ -1,0 +1,71 @@
+// var stt = "200";
+// stt = pm.variables.get("stt");
+var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check totalOutput value", function () {
+    pm.expect((jsonData.totalOutput/10**6).toFixed(2)).to.eql((pm.environment.get("block_totalOutput")/10**6).toFixed(2));
+});
+
+pm.test("Check slotLeader value", function () {
+    pm.expect(jsonData.slotLeader).to.include(pm.environment.get("block_slotLeader"));
+});
+
+//Compare data type
+
+pm.test("Check data type of the response", () => {
+    let moment = require ('moment');
+    pm.expect(jsonData.hash).to.be.a("string");
+    pm.expect(jsonData.time).to.include(moment(jsonData.time).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.txCount).to.be.a("number");
+    pm.expect(jsonData.epochNo).to.be.a("number");
+    pm.expect(jsonData.blockNo).to.be.a("number");
+    pm.expect(jsonData.slotNo).to.be.a("number");
+    pm.expect(jsonData.epochSlotNo).to.be.a("number");
+    pm.expect(jsonData.totalFees).to.be.a("number");
+    pm.expect(jsonData.totalOutput).to.be.a("number");
+    pm.expect(jsonData.slotLeader).to.be.a("string");
+    pm.expect(jsonData.confirmation).to.be.a("number");
+});
+
+//Scenario Compare api Get all block with api Get a block detail
+//all variable get from API /api/v1/blocks(Get all block)
+pm.test("Check hash value", function () {
+    pm.expect(jsonData.hash).to.include(pm.environment.get("block_hash"));
+});
+
+pm.test("Check time value", function () {
+    pm.expect(jsonData.time).to.contain(pm.environment.get("block_time"));
+});
+
+pm.test("Check txCount value", function () {
+    pm.expect(jsonData.txCount).to.eql(pm.environment.get("block_txCount"));
+});
+
+pm.test("Check epochNo value", function () {
+    pm.expect(jsonData.epochNo).to.eql(pm.environment.get("block_epochNo"));
+});
+
+pm.test("Check blockNo value", function () {
+    pm.expect(jsonData.blockNo).to.eql(pm.environment.get("block_blockNo"));
+});
+
+pm.test("Check slotNo value", function () {
+    pm.expect(jsonData.slotNo).to.eql(pm.environment.get("block_slotNo"));
+});
+
+pm.test("Check epochSlotNo value", function () {
+    pm.expect(jsonData.epochSlotNo).to.eql(pm.environment.get("block_epochSlotNo"));
+});
+
+pm.test("Check totalFees value", function () {
+    pm.expect(jsonData.totalFees).to.eql(pm.environment.get("block_totalFees"));
+});
+

@@ -1,0 +1,1 @@
+{"data":[{"epoch":418,"time":"2023/06/14 21:44:54","amount":618306,"poolView":null,"poolHash":null}],"totalItems":118,"totalPages":118,"currentPage":0,"isDataOverSize":null}

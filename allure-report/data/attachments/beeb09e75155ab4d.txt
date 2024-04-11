@@ -1,0 +1,1 @@
+{"data":[{"txHash":"3ae9c979f28dbb235262990c590a782145728efbd7f86aad8999acb7b772b7ed","outSum":14781869,"fee":174301,"time":"2024/04/09 03:36:35","poolName":"CARDANIANS.io #3","poolId":"pool189lsf6c2upyhmrzddyvyfjxxkqnte9pw8aqx7f4cuf85sjxlm02"}],"totalItems":38,"totalPages":38,"currentPage":0,"isDataOverSize":null}

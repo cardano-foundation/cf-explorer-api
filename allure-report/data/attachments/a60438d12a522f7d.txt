@@ -1,0 +1,100 @@
+var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+//Compare data type
+pm.test("Check data type of name", () => {
+  pm.expect(jsonData.data[0].name).to.be.a("string");
+});
+
+pm.test("Check data type of displayName", () => {
+  pm.expect(jsonData.data[0].displayName).to.be.a("string");
+});
+
+pm.test("Check data type of policy", () => {
+  pm.expect(jsonData.data[0].policy).to.be.a("string");
+});
+
+pm.test("Check data type of fingerprint", () => {
+  pm.expect(jsonData.data[0].fingerprint).to.be.a("string");
+});
+
+pm.test("Check data type of txCount", () => {
+  pm.expect(jsonData.data[0].txCount).to.be.a("number");
+});
+
+pm.test("Check data type of supply", () => {
+  pm.expect(jsonData.data[0].supply).to.be.a("string");
+});
+
+pm.test("Check data type of volumeIn24h", () => {
+  pm.expect(jsonData.data[0].volumeIn24h).to.be.a("string");
+});
+
+pm.test("Check data type of totalVolume", () => {
+  pm.expect(jsonData.data[0].totalVolume).to.be.a("string");
+});
+
+pm.test("Check data type of numberOfHolders", () => {
+  pm.expect(jsonData.data[0].numberOfHolders).to.be.a("number");
+});
+
+pm.test("Check data type of createdOn", () => {
+        let moment = require ('moment');
+  pm.expect(jsonData.data[0].createdOn).to.include(moment(jsonData.data[0].createdOn).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Check data type of totalItems", () => {
+  pm.expect(jsonData.totalItems).to.be.a("number");
+});
+
+pm.test("Check data type of totalPages", () => {
+  pm.expect(jsonData.totalPages).to.be.a("number");
+});
+
+
+pm.test("Check data type of totalItems", () => {
+  pm.expect(jsonData.totalItems).to.be.a("number");
+});
+
+pm.test("Check data type of totalPages", () => {
+  pm.expect(jsonData.totalPages).to.be.a("number");
+});
+
+//Check scenario - variable declaration
+pm.test("Others value exist",function (){
+    
+    //Randome value 0-9
+    var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));
+    console.log(randomIndex);
+    
+    pm.environment.set("token_data_txCount", jsonData.data[randomIndex].txCount)
+    pm.environment.set("token_data_fingerprint", jsonData.data[randomIndex].fingerprint)
+    pm.environment.set("token_name", jsonData.data[randomIndex].name);
+    pm.environment.set("token_displayName", jsonData.data[randomIndex].displayName);
+    pm.environment.set("token_policy", jsonData.data[randomIndex].policy);
+    pm.environment.set("token_fingerprint", jsonData.data[randomIndex].fingerprint);
+    pm.environment.set("token_txCount", jsonData.data[randomIndex].txCount);
+    pm.environment.set("token_supply", jsonData.data[randomIndex].supply);
+    pm.environment.set("token_volumeIn24h", jsonData.data[randomIndex].volumeIn24h);
+    pm.environment.set("token_totalVolume", jsonData.data[randomIndex].totalVolume);
+    pm.environment.set("token_numberOfHolders", jsonData.data[randomIndex].numberOfHolders);
+    pm.environment.set("token_createdOn", jsonData.data[randomIndex].createdOn);
+
+});
+
+// Check default size 
+if (jsonData.totalItems > 0){
+    pm.test("Check Size default", function(){
+        pm.expect(jsonData.data.length).to.be.within(1, 100);
+    });
+};

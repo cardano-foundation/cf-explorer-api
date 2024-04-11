@@ -1,0 +1,11 @@
+{
+  "reportName": "Report1_pool1mv9jm887f4gdpr0f5p8rerewjsdgvd29lt2awtdnmj3ggkq973a",
+  "poolId": "pool1mv9jm887f4gdpr0f5p8rerewjsdgvd29lt2awtdnmj3ggkq973a",
+  "isPoolSize": "true",
+  "isFeesPaid": "true",
+  "eventRegistration": "true",
+  "eventDeregistration": "true",
+  "eventReward": "true",
+  "eventPoolUpdate": "true",
+  "epochRanges": [0, 300]
+}

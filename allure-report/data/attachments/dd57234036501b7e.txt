@@ -1,0 +1,31 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+pm.test("Check type of Data", function () {
+    const keys = Object.keys(jsonData);
+    (keys || []).map(k => {console.log(jsonData)
+        if (jsonData[k]&&jsonData[k]?.time) {
+            let moment = require('moment')
+            pm.expect(jsonData[k].time).to.include(moment(jsonData[k].time).format('YYYY/MM/DD HH:mm:ss'))
+        }
+        if (jsonData[k]&&jsonData[k].value) {
+            pm.expect(typeof jsonData[k].value).to.be.oneOf(["number","string"])
+        } 
+        if (keys.epochNo) {
+            pm.expect(jsonData[k].epochNo).to.be.a("number", "jsonData[k].epochNo")
+        }
+    })
+});
+
+
+

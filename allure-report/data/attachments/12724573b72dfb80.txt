@@ -1,0 +1,1 @@
+{"txHash":"f3c00ebe4ad10a2865b868fda0fc485f4ba8ac5a93f3149eb885ecdc3e51c1e9","blockNo":9764072,"epoch":458,"outSum":139397720,"fee":174301,"poolId":"pool189lsf6c2upyhmrzddyvyfjxxkqnte9pw8aqx7f4cuf85sjxlm02","poolName":"CARDANIANS.io #3","time":"2024/01/05 04:35:28","stakeTotalAmount":3508626435}

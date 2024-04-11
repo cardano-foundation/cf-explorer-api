@@ -1,0 +1,11 @@
+const jsonData = pm.response.json();
+
+
+//Compare data type
+pm.test("Check data type of the response", () => {
+    let moment = require ('moment');
+    pm.expect(jsonData.total).to.be.an("number");
+    pm.expect(jsonData.offset).to.be.an("number");
+    pm.expect(jsonData.limit).to.be.an("number");
+    pm.expect(jsonData.articles).to.be.an("array");
+});

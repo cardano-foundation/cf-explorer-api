@@ -1,0 +1,46 @@
+const jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare data type
+pm.test("Check data type of highest", () => {
+  pm.expect(jsonData.epochChart.highest).to.be.a("number");
+});
+
+pm.test("Check data type of lowest", () => {
+  pm.expect(jsonData.epochChart.lowest).to.be.a("number");
+});
+
+pm.test("Check data type of epochNo", () => {
+  pm.expect(jsonData.epochChart.dataByDays[0].epochNo).to.be.a("number");
+});
+
+pm.test("Check data type of totalStake", () => {
+  pm.expect(jsonData.epochChart.dataByDays[0].totalStake).to.be.a("number");
+});
+
+pm.test("Check data type of highest", () => {
+  pm.expect(jsonData.delegatorChart.highest).to.be.a("number");
+});
+
+pm.test("Check data type of lowest", () => {
+  pm.expect(jsonData.delegatorChart.lowest).to.be.a("number");
+});
+
+pm.test("Check data type of epochNo", () => {
+  pm.expect(jsonData.delegatorChart.dataByDays[0].epochNo).to.be.a("number");
+});
+
+pm.test("Check data type of numberDelegator", () => {
+  pm.expect(jsonData.delegatorChart.dataByDays[0].numberDelegator).to.be.a("number");
+});
+

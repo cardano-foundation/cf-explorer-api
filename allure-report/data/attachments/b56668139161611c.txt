@@ -1,0 +1,1 @@
+{"data":[{"txHash":"0395a81d0b86747d3d26db7086202ba3026a3cef31da4c2328b92617ffe6dd3a","txTime":"2024/04/11 11:37:50","block":10172439,"epoch":478,"slotNo":121269179,"epochSlotNo":136379,"stakeKey":"stake1uxzs5788z0r7pda0evsvqg7rqfjw53evcukwzdk57pwzfnq8paked"}],"totalItems":473120,"totalPages":473120,"currentPage":0,"isDataOverSize":null}

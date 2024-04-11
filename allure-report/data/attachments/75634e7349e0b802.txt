@@ -1,0 +1,9 @@
+const jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Check the length of the array with site max (100)", function(){
+    pm.expect(jsonData.data.length).to.eql(100);
+});

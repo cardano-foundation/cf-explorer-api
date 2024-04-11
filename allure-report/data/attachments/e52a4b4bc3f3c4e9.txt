@@ -1,0 +1,40 @@
+    var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+//Compare data type
+pm.test("Check data type of policy", () => {
+  pm.expect(jsonData.data[0].policy).to.be.a("string");
+});
+
+pm.test("Check data type of name", () => {
+  pm.expect(jsonData.data[0].name).to.be.a("string");
+});
+
+pm.test("Check data type of displayName", () => {
+  pm.expect(jsonData.data[0].displayName).to.be.a("string");
+});
+
+pm.test("Check data type of fingerprint", () => {
+  pm.expect(jsonData.data[0].fingerprint).to.be.a("string");
+});
+
+pm.test("Check data type of quantity", () => {
+  pm.expect(jsonData.data[0].quantity).to.be.a("number");
+});
+
+// Check default size 
+if (jsonData.totalItems > 0){
+    pm.test("Check Size default", function(){
+        pm.expect(jsonData.data.length).to.be.within(1, 100);
+    });
+};

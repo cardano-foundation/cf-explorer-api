@@ -1,0 +1,1 @@
+{"no":478,"slot":136939,"totalSlot":432000,"account":39456,"startTime":"2024/04/09 21:44:51","endTime":"2024/04/14 21:44:51","circulatingSupply":36785005676862309,"blkCount":6737,"syncingProgress":0.31691435185185185,"status":"IN_PROGRESS"}

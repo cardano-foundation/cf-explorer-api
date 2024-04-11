@@ -1,0 +1,1 @@
+{"data":[{"poolUpdateId":2,"txHash":"a96c79773b7506211eb56bf94886a2face17657d1009f52fb5ea05f19cc8823e","fee":200000,"time":"2020/07/29 22:00:31","margin":0.049,"poolHold":500000000}],"totalItems":1,"totalPages":0,"currentPage":0,"isDataOverSize":null}

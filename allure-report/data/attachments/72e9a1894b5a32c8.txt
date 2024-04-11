@@ -1,0 +1,1 @@
+{"isRegistration":true,"isUpdate":true,"isReward":true,"isDeRegistration":false}

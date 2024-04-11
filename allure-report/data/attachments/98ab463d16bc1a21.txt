@@ -1,0 +1,2 @@
+pm.environment.set("address", "Ae2tdPwUPEYwFx4dmJheyNPPYXtvHbJLeCaA96o6Y2iiUL18cAt7AizN2zG");
+pm.environment.set("address", "123");

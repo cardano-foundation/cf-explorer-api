@@ -1,0 +1,12 @@
+{
+    "Content-Type": "application/json",
+    "Accept": "*/*",
+    "Authorization": "Bearer {{access_token}}",
+    "User-Agent": "PostmanRuntime/7.36.3",
+    "Cache-Control": "no-cache",
+    "Postman-Token": "509c7494-26c4-46c0-9f74-6ecdb58d04d6",
+    "Host": "api.uat.cf-explorer-mainnet.eu-west-1.metadata.dev.cf-deployments.org",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Content-Length": "266"
+}

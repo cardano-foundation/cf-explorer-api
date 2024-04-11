@@ -1,0 +1,80 @@
+var jsonData = pm.response.json();
+
+//Compare static value
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check id value", function () {
+    pm.expect(jsonData.id).to.eql(pm.environment.get("pool_report_reportId"));
+});
+
+pm.test("Check isPoolSize value", function () {
+    pm.expect(jsonData.isPoolSize).to.eql(pm.environment.get("pool_report_isPoolSize"));
+});
+
+pm.test("Check isFeesPaid value", function () {
+    pm.expect(jsonData.isFeesPaid).to.eql(pm.environment.get("pool_report_isFeesPaid"));
+});
+
+pm.test("Check eventRegistration value", function () {
+    pm.expect(jsonData.eventRegistration).to.eql(pm.environment.get("pool_report_eventRegistration"));
+});
+
+pm.test("Check eventDeregistration value", function () {
+    pm.expect(jsonData.eventDeregistration).to.eql(pm.environment.get("pool_report_eventDeregistration"));
+});
+
+pm.test("Check eventReward value", function () {
+    pm.expect(jsonData.eventReward).to.eql(pm.environment.get("pool_report_eventReward"));
+});
+
+pm.test("Check eventPoolUpdate value", function () {
+    pm.expect(jsonData.eventPoolUpdate).to.eql(pm.environment.get("pool_report_eventPoolUpdate"));
+});
+
+pm.test("Check reportName value", function () {
+    pm.expect(jsonData.reportHistory.reportName).to.include(pm.environment.get("pool_report_reportName"));
+});
+
+pm.test("Check createdAt value", function () {
+    pm.expect(jsonData.reportHistory.createdAt).to.contain(pm.environment.get("pool_report_createdAt"));
+});
+
+pm.test("Check status value", function () {
+    pm.expect(jsonData.reportHistory.status).to.contain.oneOf(["IN_PROGRESS", "GENERATED", "FAILED", "EXPIRED"])
+});
+//Compare data type
+pm.test("Check data type of the response", () => {
+    let moment = require ('moment');
+    pm.expect(jsonData).to.be.an("object");
+    pm.expect(jsonData.id).to.be.a("number");
+    pm.expect(jsonData.poolView).to.be.a("string");
+    pm.expect(jsonData.isPoolSize).to.be.a("boolean");
+    pm.expect(jsonData.isFeesPaid).to.be.a("boolean");
+    pm.expect(jsonData.eventRegistration).to.be.a("boolean");
+    pm.expect(jsonData.eventDeregistration).to.be.a("boolean");
+    pm.expect(jsonData.eventReward).to.be.a("boolean");
+    pm.expect(jsonData.eventPoolUpdate).to.be.a("boolean");
+    pm.expect(jsonData.beginEpoch).to.be.a("number");
+    pm.expect(jsonData.endEpoch).to.be.a("number");
+    pm.expect(jsonData.reportHistory.id).to.be.a("number");
+    if(jsonData.reportHistory.storageKey){
+        pm.expect(typeof jsonData.reportHistory.storageKey).to.be.oneOf([ 'object', 'string']);
+    }
+    pm.expect(jsonData.reportHistory.reportName).to.be.a("string");
+    pm.expect(jsonData.reportHistory.username).to.be.a("string");
+    pm.expect(jsonData.reportHistory.createdAt).to.include(moment(jsonData.reportHistory.createdAt).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.reportHistory.uploadedAt).to.include(moment(jsonData.reportHistory.uploadedAt).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.reportHistory.status).to.be.a("string");
+    pm.expect(jsonData.reportHistory.type).to.be.a("string");
+});
+
+//Check scenario continue: get poolview
+pm.test("Others value exist",function (){
+    pm.environment.set("pool_report_poolView", jsonData.poolView)
+});

@@ -1,0 +1,1 @@
+{"data":[{"poolUpdateId":15941,"txHash":"b6444dd95034f9ca8892031f5a3b64c7445bff91cd2ad98021d81273d2206898","totalFee":500199601,"time":"2021/04/20 23:55:28","fee":199601,"stakeKeys":["stake1uyq405f7jgavqylw2kskgwp48np5hjsevcrxpxxjpuwr0ggaxjexq"],"deposit":500000000}],"totalItems":1,"totalPages":0,"currentPage":0,"isDataOverSize":null}

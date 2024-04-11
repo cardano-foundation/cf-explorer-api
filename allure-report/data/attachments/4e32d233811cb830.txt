@@ -1,0 +1,29 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare data type
+pm.test("Check data type", () => {
+    if(jsonData.data.length > 0){
+        let moment = require ('moment');
+        pm.expect(jsonData).to.be.an("object");
+        pm.expect(jsonData.data[0].id).to.be.a("number");
+        pm.expect(jsonData.data[0].name).to.be.a("string");
+        pm.expect(jsonData.data[0].displayName).to.be.a("string");
+        pm.expect(jsonData.data[0].policy).to.be.a("string");
+        pm.expect(jsonData.data[0].policyIsNativeScript).to.be.a("boolean");
+        pm.expect(jsonData.data[0].txCount).to.be.a("number");
+        pm.expect(jsonData.data[0].supply).to.be.a("string");
+        pm.expect(jsonData.data[0].totalVolume).to.be.a("string");
+        // pm.expect(jsonData.data[0].createdOn).to.include(moment(jsonData.data[0].createdOn).format('YYYY/MM/DD HH:mm:ss'));
+    }
+});

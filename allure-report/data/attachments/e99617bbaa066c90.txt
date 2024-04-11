@@ -1,0 +1,41 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+pm.test("Check hasRegistration value", function () {
+    pm.expect(jsonData.hasRegistration).to.eql(pm.environment.get("stakinglifecycle_eventRegistration"));
+});
+pm.test("Check hasDelegation value", function () {
+    pm.expect(jsonData.hasDelegation).to.eql(pm.environment.get("stakinglifecycle_eventDelegation"));
+});
+pm.test("Check hashRewards value", function () {
+    pm.expect(jsonData.hashRewards).to.eql(pm.environment.get("stakinglifecycle_eventRewards"));
+});
+pm.test("Check hasWithdrawal value", function () {
+    pm.expect(jsonData.hasWithdrawal).to.eql(pm.environment.get("stakinglifecycle_eventWithdrawal"));
+});
+pm.test("Check hasDeRegistration value", function () {
+    pm.expect(jsonData.hasDeRegistration).to.eql(pm.environment.get("stakinglifecycle_eventDeregistration"));
+});
+
+//Compare format data type
+pm.test("Check data type of the response", () => {
+    let moment = require ('moment');
+    pm.expect(jsonData.hasRegistration).to.be.a("boolean");
+    pm.expect(jsonData.hasDelegation).to.be.a("boolean");
+    pm.expect(jsonData.hashRewards).to.be.a("boolean");
+    pm.expect(jsonData.hasWithdrawal).to.be.a("boolean");
+    pm.expect(jsonData.hasDeRegistration).to.be.a("boolean");
+});
+
+
+

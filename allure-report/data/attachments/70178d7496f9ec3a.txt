@@ -1,0 +1,10 @@
+var jsonData = pm.response.json();
+
+//Compare static value
+pm.test("Status code is 404", function () {
+    pm.response.to.have.status(400);
+});
+
+pm.test("Check errorMessage is Stake report history not found", function () {
+    pm.expect(jsonData.errorMessage).to.include("Stake report history not found" );
+});

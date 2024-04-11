@@ -1,0 +1,1 @@
+{"data":[{"stakeAddressId":4575959,"totalStake":1778649688,"time":"2024/03/02 05:02:31","fee":174301,"view":"stake1uxfh6favunna6y4uthysazn0m9j500l85mmp7skjtxth5nq9pc2cz"}],"totalItems":174,"totalPages":174,"currentPage":0,"isDataOverSize":null}

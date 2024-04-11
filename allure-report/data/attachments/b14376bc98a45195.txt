@@ -1,0 +1,54 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare format data type
+pm.test("Check data type of the response", () => {
+    let moment = require ('moment');
+    pm.expect(jsonData.id).to.be.a("number");
+    pm.expect(jsonData.stakeKey).to.be.a("string");
+    pm.expect(jsonData.username).to.be.a("string");
+    pm.expect(jsonData.reportName).to.be.a("string");
+    pm.expect(jsonData.fromDate).to.include(moment(jsonData.fromDate).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.toDate).to.include(moment(jsonData.toDate).format('YYYY/MM/DD HH:mm:ss'));
+    pm.expect(jsonData.isADATransfer).to.be.a("boolean");
+    pm.expect(jsonData.isFeesPaid).to.be.a("boolean");
+    pm.expect(jsonData.eventRegistration).to.be.a("boolean");
+    pm.expect(jsonData.eventDelegation).to.be.a("boolean");
+    pm.expect(jsonData.eventRewards).to.be.a("boolean");
+    pm.expect(jsonData.eventWithdrawal).to.be.a("boolean");
+    pm.expect(jsonData.eventDeregistration).to.be.a("boolean");
+    pm.expect(jsonData.status).to.be.a("string");
+    pm.expect(jsonData.type).to.be.a("string");
+    pm.expect(jsonData.createdAt).to.include(moment(jsonData.createdAt).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+//Scenario compare Get stake key report detail by report id api with Generate stake key report api
+pm.test("Compare value between Get stake key report detail by report id api and Generate stake key report api",function(){
+    //all variable get from API api/v1/staking-lifecycle/report/stake-key(Generate stake key report)
+    pm.expect(jsonData.id).to.eql(pm.environment.get("stakinglifecycle_id"));    
+    pm.expect(jsonData.stakeKey).to.include(pm.environment.get("stakinglifecycle_stakeKey"));
+    pm.expect(jsonData.username).to.include(pm.environment.get("stakinglifecycle_username"));
+    pm.expect(jsonData.reportName).to.include(pm.environment.get("stakinglifecycle_reportName"));
+    pm.expect(jsonData.fromDate).to.contain(pm.environment.get("stakinglifecycle_fromDate"));
+    pm.expect(jsonData.toDate).to.contain(pm.environment.get("stakinglifecycle_toDate"));
+    pm.expect(jsonData.isADATransfer).to.eql(pm.environment.get("stakinglifecycle_isADATransfer"));
+    pm.expect(jsonData.isFeesPaid).to.eql(pm.environment.get("stakinglifecycle_isFeesPaid"));
+    pm.expect(jsonData.eventRegistration).to.eql(pm.environment.get("stakinglifecycle_eventRegistration"));
+    pm.expect(jsonData.eventDelegation).to.eql(pm.environment.get("stakinglifecycle_eventDelegation"));
+    pm.expect(jsonData.eventRewards).to.eql(pm.environment.get("stakinglifecycle_eventRewards"));
+    pm.expect(jsonData.eventWithdrawal).to.eql(pm.environment.get("stakinglifecycle_eventWithdrawal"));
+    pm.expect(jsonData.eventDeregistration).to.eql(pm.environment.get("stakinglifecycle_eventDeregistration"));
+    pm.expect(jsonData.type).to.include(pm.environment.get("stakinglifecycle_type"));
+    pm.expect(jsonData.createdAt).to.contain(pm.environment.get("stakinglifecycle_createdAt"));
+});
+

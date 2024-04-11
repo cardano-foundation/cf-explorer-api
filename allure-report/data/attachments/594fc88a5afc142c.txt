@@ -1,0 +1,195 @@
+// var stt = "200";
+// stt = pm.variables.get("stt");
+var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+//Scenario compare data Detail token api with Filter token api - Data called from api Filter token: /api/v1/tokens
+pm.test("Check name value", function () {
+    pm.expect(jsonData.name).to.include(pm.environment.get("token_name"));
+});
+
+pm.test("Check displayName value", function () {
+    pm.expect(jsonData.displayName).to.include(pm.environment.get("token_displayName"));
+});
+
+pm.test("Check policy value", function () {
+    pm.expect(jsonData.policy).to.include(pm.environment.get("token_policy"));
+});
+
+pm.test("Check fingerprint value", function () {
+    pm.expect(jsonData.fingerprint).to.include(pm.environment.get("token_fingerprint"));
+});
+
+if (jsonData.txCount) {
+    pm.test("Check txCount value", function () {
+        pm.expect(jsonData.txCount).to.eql(pm.environment.get("token_txCount"));
+    });
+}
+
+pm.test("Check supply value", function () {
+    pm.expect(jsonData.supply).to.contain(pm.environment.get("token_supply"));
+});
+
+pm.test("Check volumeIn24h value", function () {
+    pm.expect(jsonData.volumeIn24h).to.contain(pm.environment.get("token_volumeIn24h"));
+});
+
+pm.test("Check totalVolume value", function () {
+    pm.expect(jsonData.totalVolume).to.equal(pm.environment.get("token_totalVolume"));
+});
+
+pm.test("Check numberOfHolders value", function () {
+    pm.expect(jsonData.numberOfHolders).to.eql(pm.environment.get("token_numberOfHolders"));
+});
+
+pm.test("Check createdOn value", function () {
+    pm.expect(jsonData.createdOn).to.contain(pm.environment.get("token_createdOn"));
+});
+
+//Compare data type
+pm.test("Check data type of name", () => {
+    pm.expect(jsonData.name).to.be.a("string");
+});
+
+pm.test("Check data type of displayName", () => {
+    pm.expect(jsonData.displayName).to.be.a("string");
+});
+
+pm.test("Check data type of supply", () => {
+    pm.expect(jsonData.supply).to.be.a("string");
+});
+
+pm.test("Check data type of totalVolume", () => {
+    pm.expect(jsonData.totalVolume).to.be.a("string");
+});
+
+pm.test("Check data type of numberOfHolders", () => {
+    pm.expect(jsonData.numberOfHolders).to.be.a("number");
+});
+
+pm.test("Check data type of createdOn", () => {
+    let moment = require('moment')
+    pm.expect(jsonData.createdOn).to.include(moment(jsonData.createdOn).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Check data type of tokenLastActivity", () => {
+    let moment = require('moment')
+    pm.expect(jsonData.tokenLastActivity).to.include(moment(jsonData.tokenLastActivity).format('YYYY/MM/DD HH:mm:ss'));
+});
+
+pm.test("Check data type of tokenType", () => {
+    pm.expect(jsonData.tokenType).to.contain.oneOf(["NFT", "FT"])
+});
+
+pm.test("Check data type of metadataJson", () => {
+    if (jsonData.metadataJson) {
+        const policy = pm.environment.get("token_policy")
+        const tokenName = pm.environment.get("token_displayName")
+        const metadataJsonData = JSON.parse(jsonData.metadataJson)[policy][tokenName]
+        console.log(metadataJsonData)
+        if (metadataJsonData[tokenName]?.website) {
+            pm.expect(metadataJsonData[tokenName].website).to.be.a("string", "metadataJsonData.website");
+        }
+        if (metadataJsonData[tokenName]?.image) {
+            pm.expect(metadataJsonData[tokenName].image).to.be.a("string", "metadataJsonData.image")
+        }
+        if (metadataJsonData[tokenName]?.attributes && metadataJsonData[tokenName].attributes.edition) {
+            pm.expect(metadataJsonData[tokenName].attributes.edition).to.be.a("string", "metadataJsonData.image")
+        }
+        if (metadataJsonData[tokenName]?.effect && metadataJsonData[tokenName].effect.length > 0) {
+            pm.expect(metadataJsonData[tokenName].effect[0]).to.be.an("array")
+        }
+        if (metadataJsonData[tokenName]?.mediaType) {
+            pm.expect(metadataJsonData[tokenName].mediaType).to.be.an("string")
+        }
+        if (metadataJsonData[tokenName]?.name) {
+            pm.expect(metadataJsonData[tokenName].name).to.be.an("string")
+        }
+    }
+})
+
+pm.test("Check type of metadataCIP25", () => {
+    const metadataCIP25 = jsonData.metadataCIP25
+    const token_name = pm.environment.get('token_displayName')
+    const tokenData = metadataCIP25.tokenMap[token_name]
+    if (tokenData) {
+        const requirePropertiesData = tokenData?.requireProperties[0]
+        const optionalPropertiesData = tokenData?.optionalProperties[0]
+
+        pm.expect(tokenData.tokenName).to.eql(token_name)
+        if (requirePropertiesData && requirePropertiesData.length > 0) {
+            pm.expect(requirePropertiesData.index).to.be.a("string")
+            pm.expect(requirePropertiesData.valid).to.be.a("boolean")
+            pm.expect(requirePropertiesData.value).to.be.a("string")
+            pm.expect(requirePropertiesData.property).to.be.a("string")
+            pm.expect(requirePropertiesData.format).to.be.a("string")
+        }
+        if (optionalPropertiesData && optionalPropertiesData.length > 0) {
+            pm.expect(optionalPropertiesData.index).to.be.a("string")
+            pm.expect(optionalPropertiesData.valid).to.be.a("boolean")
+            pm.expect(optionalPropertiesData.value).to.be.a("string")
+            pm.expect(optionalPropertiesData.property).to.be.a("string")
+            pm.expect(optionalPropertiesData.format).to.be.a("string")
+        }
+        pm.expect(metadataCIP25.valid).to.be.a("boolean")
+    }
+})
+
+pm.test("Check type of metadataCIP60", () => {
+    const metadataCIP60 = jsonData.metadataCIP60
+    const token_name = pm.environment.get('token_displayName')
+    const tokenData = metadataCIP60.tokenMap[token_name]
+    if (tokenData) {
+        const requirePropertiesData = tokenData?.requireProperties[0]
+        const optionalPropertiesData = tokenData?.optionalProperties[0]
+
+        pm.expect(tokenData.tokenName).to.eql(token_name)
+        if (requirePropertiesData && requirePropertiesData.length > 0) {
+            pm.expect(requirePropertiesData.index).to.be.a("string")
+            pm.expect(requirePropertiesData.valid).to.be.a("boolean")
+            pm.expect(requirePropertiesData.value).to.be.a("string")
+            pm.expect(requirePropertiesData.property).to.be.a("string")
+            pm.expect(requirePropertiesData.format).to.be.a("string")
+        }
+        if (optionalPropertiesData && optionalPropertiesData.length > 0) {
+            pm.expect(optionalPropertiesData.index).to.be.a("string")
+            pm.expect(optionalPropertiesData.valid).to.be.a("boolean")
+            pm.expect(optionalPropertiesData.value).to.be.a("string")
+            pm.expect(optionalPropertiesData.property).to.be.a("string")
+            pm.expect(optionalPropertiesData.format).to.be.a("string")
+        }
+        pm.expect(metadataCIP60.valid).to.be.a("boolean")
+    }
+})
+
+
+
+//Deleted level 2
+// pm.test("Check data type of url", () => {
+//   pm.expect(jsonData.metadata.url).to.be.a("string");
+// });  
+
+// pm.test("Check data type of ticker", () => {
+//   pm.expect(jsonData.metadata.ticker).to.be.a("string");
+// });
+
+// pm.test("Check data type of decimals", () => {
+//   pm.expect(jsonData.metadata.decimals).to.be.a("number");
+// });
+
+// pm.test("Check data type of logo", () => {
+//   pm.expect(jsonData.metadata.logo).to.be.a("string");
+// });
+
+// pm.test("Check data type of description", () => {
+//   pm.expect(jsonData.metadata.description).to.be.a("string");
+// });
+
+

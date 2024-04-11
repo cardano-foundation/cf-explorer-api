@@ -1,0 +1,94 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare data type
+pm.test("Check type of Data", () => {
+    const keys = Object.keys(jsonData)
+    keys.map(k => {
+        if (k === 'epochChanges') {
+            console.log("k = ", k)
+            console.log("jsonData[k] = ", jsonData[k])
+            pm.expect(jsonData[k][0].startEpoch).to.be.a("number");
+            pm.expect(jsonData[k][0].endEpoch).to.be.a("number");
+        } 
+        else {
+            let moment = require('moment')
+            pm.expect(jsonData[k][0].status).to.contain.oneOf(["UPDATED", "ADDED", "NOT_EXIST", "NOT_CHANGE"])
+            if(jsonData[k].value){
+                pm.expect(typeof jsonData[k][0].value).to.be.oneOf("number","string")
+            }
+            if(jsonData[k].time){
+                pm.expect(jsonData[k][0].time).to.include(moment(jsonDat[k][0].time).format('YYYY/MM/DD HH:mm:ss'))
+            }
+            if(jsonData[k].transactionHashs && jsonData[k].transactionHashs.lenght>0){
+                pm.expect(jsonData[k][0].transactionHashs[0]).to.be.a("string")
+            }
+            
+            console.log("k = ", k)
+            console.log("jsonData[k] = ", jsonData[k])
+        }
+    })
+
+
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// pm.test("Check data type of response", () => {
+//     let moment = require ('moment');
+//     pm.expect(jsonData.epochChanges).to.be.an("array");
+//     pm.expect(jsonData.minFeeA).to.be.an("array");
+//     pm.expect(jsonData.minFeeB).to.be.an("array");
+//     pm.expect(jsonData.maxBlockSize).to.be.an("array");
+//     pm.expect(jsonData.maxTxSize).to.be.an("array");
+//     pm.expect(jsonData.maxBhSize).to.be.an("array");
+//     pm.expect(jsonData.keyDeposit).to.be.an("array");
+//     pm.expect(jsonData.poolDeposit).to.be.an("array");
+//     pm.expect(jsonData.maxEpoch).to.be.an("array");
+//     pm.expect(jsonData.optimalPoolCount).to.be.an("array");
+//     pm.expect(jsonData.influence).to.be.an("array");
+//     pm.expect(jsonData.monetaryExpandRate).to.be.an("array");
+//     pm.expect(jsonData.treasuryGrowthRate).to.be.an("array");
+//     pm.expect(jsonData.decentralisation).to.be.an("array");
+//     pm.expect(jsonData.entropy).to.be.an("array");
+//     pm.expect(jsonData.protocolMajor).to.be.an("array");
+//     pm.expect(jsonData.protocolMinor).to.be.an("array");
+//     pm.expect(jsonData.minUtxoValue).to.be.an("array");
+//     pm.expect(jsonData.minPoolCost).to.be.an("array");
+//     pm.expect(jsonData.costModel).to.be.an("array");
+//     pm.expect(jsonData.priceMem).to.be.an("array");
+//     pm.expect(jsonData.priceStep).to.be.an("array");
+//     pm.expect(jsonData.maxTxExMem).to.be.an("array");
+//     pm.expect(jsonData.maxTxExSteps).to.be.an("array");
+//     pm.expect(jsonData.maxBlockExMem).to.be.an("array");
+//     pm.expect(jsonData.maxBlockExSteps).to.be.an("array");
+//     pm.expect(jsonData.maxValSize).to.be.an("array");
+//     pm.expect(jsonData.collateralPercent).to.be.an("array");
+//     pm.expect(jsonData.maxCollateralInputs).to.be.an("array");
+//     pm.expect(jsonData.coinsPerUTxOByte).to.be.an("array");
+// });
+

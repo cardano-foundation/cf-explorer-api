@@ -1,0 +1,36 @@
+var metadataCIP60 = pm.response.json().metadata[0].metadataCIP60.tokenMap;
+
+const token = 'NEWM_7';
+
+pm.test('Status code is 200', function () {
+    pm.response.to.have.status(200);
+})
+
+pm.test('Response time is less than 5000ms', function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+})
+
+pm.test("Check metadata CIP 60", function () {
+    pm.expect(metadataCIP60[token].tokenName).to.be.a("string", "metadataCIP60.tokenMap[token].tokenName")
+
+    if (metadataCIP60[token].tokenName.requireProperties && metadataCIP60[token].tokenName.requireProperties.length > 0) {
+        metadataCIP60[token].tokenName.requireProperties.map(require => {
+            pm.expect(require.index).to.be.a("string", "require.index")
+            pm.expect(require.valid).to.be.a("boolean", "require.valid")
+            pm.expect(require.value).to.be.a("string", "require.value")
+            pm.expect(require.property).to.be.a("string", "require.property")
+            pm.expect(require.format).to.be.a("string", "require.format")
+        })
+    }
+    if (metadataCIP60[token].tokenName.optionalProperties && metadataCIP60[token].tokenName.optionalProperties.length > 0) {
+        metadataCIP60[token].tokenName.optionalProperties.map(require => {
+            pm.expect(require.index).to.be.a("string", "require.index")
+            pm.expect(require.valid).to.be.a("boolean", "require.valid")
+            pm.expect(require.value).to.be.a("string", "require.value")
+            pm.expect(require.property).to.be.a("string", "require.property")
+            pm.expect(require.format).to.be.a("string", "require.format")
+        })
+    }
+});
+
+

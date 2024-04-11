@@ -1,0 +1,21 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare format dynamic data
+pm.test("Check data type of the response", () => {
+    pm.expect(jsonData).to.be.an("object");
+    pm.expect(jsonData.stakeAddress).to.be.a("string");
+    pm.expect(jsonData.rewardAvailable).to.be.a("number");
+    pm.expect(jsonData.hasMemberReward).to.be.a("boolean");
+    pm.expect(jsonData.hasLeaderReward).to.be.a("boolean");
+});

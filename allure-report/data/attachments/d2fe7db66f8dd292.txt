@@ -1,0 +1,1 @@
+{"data":[{"epoch":473,"time":"2024/03/15 21:45:26","amount":647047,"type":"MEMBER","poolView":"pool189lsf6c2upyhmrzddyvyfjxxkqnte9pw8aqx7f4cuf85sjxlm02","poolHash":"397f04eb0ae0497d8c4d691844c8c6b026bc942e3f406f26b8e24f48"}],"totalItems":145,"totalPages":145,"currentPage":0,"isDataOverSize":null}

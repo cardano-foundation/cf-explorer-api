@@ -1,0 +1,9 @@
+// const baseUrl = pm.environment.get("baseUrl")
+
+// const contract_scripHash_tx = pm.environment.get("contract_scriptHash_trx_hash")
+// const contract_scriptHash = pm.environment.get("contract_scriptHash")
+
+// if (!contract_scripHash_tx) {
+//     pm.request.url.update(`${baseUrl}/api/v1/scripts/contract-executions/d86454e6e09d8c722a8690ab6594c01a8a37715a56623298e59099ce2f2b32b1/252eba5dd7dfc83c488bb44bfe7ac79acaa18a5d0fffa412237f2294`)
+// }
+

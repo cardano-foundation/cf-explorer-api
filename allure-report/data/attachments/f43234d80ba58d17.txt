@@ -1,0 +1,1 @@
+{"txHash":"bc50101870c209817b4eaffefe3c180a7fb5680ea773900ee568698db47277dd","fee":171309,"deposit":-2000000,"time":"2024/02/01 13:20:43","joinDepositPaid":true}

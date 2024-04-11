@@ -1,0 +1,1 @@
+{"status":"ACTIVE","stakeAddress":"stake1u9esdcl9se8sdgc8sfc28yu65lspqqy220d86l9flz96krcy04hfa","totalStake":1778152982883085,"rewardAvailable":152664646,"rewardWithdrawn":58111577202,"pool":{"tickerName":"MIN","poolName":"Minswap","poolId":"pool1ases3nklh6gyjf74r7dqm89exjfd520z9cefqru959wcccmrdlk","logoUrl":null,"iconUrl":null},"rewardPools":[]}

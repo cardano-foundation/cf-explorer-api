@@ -1,0 +1,17 @@
+{
+    "Date": "Thu, 11 Apr 2024 11:47:27 GMT",
+    "Content-Type": "application/json",
+    "Transfer-Encoding": "chunked",
+    "Connection": "keep-alive",
+    "Cache-Control": "max-age=20, must-revalidate",
+    "Content-Encoding": "gzip",
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; script-src-elem 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; style-src-elem 'self' 'unsafe-inline'; img-src 'self' 'unsafe-inline'",
+    "Expires": "0",
+    "Permissions-Policy": "geolocation=(self)",
+    "Pragma": "no-cache",
+    "Referrer-Policy": "same-origin",
+    "Vary": "origin,access-control-request-method,access-control-request-headers,accept-encoding",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-Xss-Protection": "0"
+}

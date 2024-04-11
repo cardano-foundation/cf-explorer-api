@@ -1,0 +1,40 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare data type
+pm.test("Check data type of response", () => {
+    let moment = require ('moment');
+    if(jsonData.epoch){
+        pm.expect(typeof jsonData.epoch).to.be.oneOf([ 'object', 'number']);
+    }
+    if(jsonData.block){
+        pm.expect(typeof jsonData.block).to.be.oneOf([ 'object', 'number']);
+    }
+    if(jsonData.tx){
+        pm.expect(typeof jsonData.tx).to.be.oneOf([ 'object', 'string']);
+    }
+    if(jsonData.token){
+        pm.expect(typeof jsonData.token).to.be.oneOf([ 'object', 'string']);
+    }
+    pm.expect(jsonData.validTokenName).to.be.a('boolean');
+    if(jsonData.address){
+        pm.expect(typeof jsonData.address).to.be.oneOf([ 'object', 'string']);
+    }
+    if(jsonData.pool){
+        pm.expect(typeof jsonData.pool).to.be.oneOf([ 'object', 'string']);
+    }
+    pm.expect(jsonData.validPoolName).to.be.a('boolean');
+    if(jsonData.script){
+        pm.expect(typeof jsonData.script).to.be.oneOf([ 'object', 'string']);
+    }
+});

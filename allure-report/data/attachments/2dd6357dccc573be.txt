@@ -1,0 +1,64 @@
+const jsonData = pm.response.json();
+
+//Compare static value
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+if  (jsonData.data.length > 0){
+    //Compare data type
+    pm.test("Check data type of the response", () => {
+        let moment = require ('moment');
+        pm.expect(jsonData).to.be.an("object");
+        pm.expect(jsonData.totalItems).to.be.a("number");
+        pm.expect(jsonData.totalPages).to.be.a("number");
+        pm.expect(jsonData.currentPage).to.be.a("number");
+        pm.expect(jsonData.data).to.be.an("array");
+        pm.expect(jsonData.data[0].poolId).to.be.a("string");
+        if(jsonData.data.poolName){
+            pm.expect(typeof jsonData.data[0].poolName).to.be.oneOf(["object","string"]);
+        }
+        pm.expect(jsonData.data[0].poolView).to.be.a("string");
+        pm.expect(jsonData.data[0].stakeKeys).to.be.a("array");
+        pm.expect(jsonData.data[0].txHash).to.be.a("string");
+        pm.expect(jsonData.data[0].totalFee).to.be.a("number");
+        pm.expect(jsonData.data[0].poolHold).to.be.a("number");
+        pm.expect(jsonData.data[0].time).to.include(moment(jsonData.data[0].time).format('YYYY/MM/DD HH:mm:ss'));
+        pm.expect(jsonData.data[0].fee).to.be.a("number");
+        pm.expect(jsonData.data[0].retiringEpoch).to.be.a("number");
+        pm.expect(jsonData.data[0].refundFlag).to.be.a("boolean");
+    });
+    
+    //Scenario compare Get detail Deregistration api with get de Registration api 
+    pm.test("Get detail Deregistration data",function(){
+        
+        //Randome value
+        var randomIndex = Math.floor(Math.random() * (jsonData.data.length-1));
+        pm.environment.set("poolreport_detailDere_data_poolId", jsonData.data[randomIndex].poolId);
+        pm.environment.set("poolreport_detailDere_data_poolName", jsonData.data[randomIndex].poolName);
+        pm.environment.set("poolreport_detailDere_data_poolView", jsonData.data[randomIndex].poolView);
+        pm.environment.set("poolreport_detailDere_data_stakeKeys", jsonData.data[randomIndex].stakeKeys);
+        pm.environment.set("poolreport_detailDere_data_txHash", jsonData.data[randomIndex].txHash);
+        pm.environment.set("poolreport_detailDere_data_totalFee", jsonData.data[randomIndex].totalFee);
+        pm.environment.set("poolreport_detailDere_data_poolHold", jsonData.data[randomIndex].poolHold);
+        pm.environment.set("poolreport_detailDere_data_time", jsonData.data[randomIndex].time);
+        pm.environment.set("poolreport_detailDere_data_fee", jsonData.data[randomIndex].fee);
+        pm.environment.set("poolreport_detailDere_data_retiringEpoch", jsonData.data[randomIndex].retiringEpoch);
+        pm.environment.set("poolreport_detailDere_data_refundFlag", jsonData.data[randomIndex].refundFlag);  
+    });
+}
+
+// Check default size 
+if (jsonData.totalItems > 0){
+    pm.test("Check Size default", function(){
+        pm.expect(jsonData.data.length).to.be.within(1, 100);
+    });
+};

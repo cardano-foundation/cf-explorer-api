@@ -1,0 +1,13 @@
+{
+  "stakeKey": "stake1u9h5g7m75hwhqnesgz0mkdk5qqhnhzpyfwj2l2tm6n28v4s2w8uqq",
+  "reportName": "Yen test ExampleStakeKey 2",
+  "fromDate": "2010/01/01 00:00:00",
+  "toDate": "2023/07/12 00:00:00",
+  "isADATransfer": "true",
+  "isFeesPaid": "true",
+  "eventRegistration": "true",
+  "eventDelegation": "true",
+  "eventRewards": "true",
+  "eventWithdrawal": "true",
+  "eventDeregistration": "true"
+}

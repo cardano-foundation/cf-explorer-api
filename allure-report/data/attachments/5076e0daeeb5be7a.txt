@@ -1,0 +1,55 @@
+// var stt = "200";
+// stt = pm.variables.get("stt");
+    var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+ //Scenario compare data Get a address detail api with get top addresses api - Data called from Get top addresses api: /api/v1/addresses/top-addresses
+pm.test("Check address value", function () {
+    pm.expect(jsonData.address).to.include(pm.environment.get("address_address"));
+});
+
+pm.test("Check txCount value", function () {
+    pm.expect(jsonData.txCount).to.equal(pm.environment.get("address_txCount"));
+});
+
+pm.test("Check balance value", function () {
+    pm.expect(jsonData.balance).to.eql(pm.environment.get("address_balance"));
+});
+
+//Compare data type
+pm.test("Check data type of address", () => {
+  pm.expect(jsonData.address).to.be.a("string");
+});
+
+pm.test("Check data type of txCount", () => {
+  pm.expect(jsonData.txCount).to.be.a("number");
+});
+
+pm.test("Check data type of balance", () => {
+  pm.expect(jsonData.balance).to.be.a("number");
+});
+
+pm.test("Check data type of stakeAddress", () => {
+    if(jsonData.stakeAddress){
+        pm.expect(typeof jsonData.stakeAddress).to.be.oneOf([ 'object', 'string']);
+    }
+});
+
+pm.test("Check data type of isContract", function () {
+    if (jsonData.hasOwnProperty('isContract')) {
+       pm.expect(jsonData.isContract).to.be.a("boolean");
+    }
+});
+
+pm.test("Check data type of verifiedContract", function () {
+    if (jsonData.hasOwnProperty('verifiedContract')) {
+       pm.expect(jsonData.isContract).to.be.a("boolean");
+    }
+});
+

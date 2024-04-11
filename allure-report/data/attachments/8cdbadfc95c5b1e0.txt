@@ -1,0 +1,7 @@
+var stt = 200
+var res_time = 5000
+
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});

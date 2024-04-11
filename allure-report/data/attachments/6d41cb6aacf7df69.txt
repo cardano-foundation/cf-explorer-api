@@ -1,0 +1,42 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(stt);
+});
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare format dynamic data
+pm.test("Check data type of epochNo", () => {
+  pm.expect(jsonData.epochNo).to.be.a("number");
+});
+
+pm.test("Check data type of countDownEndTime", () => {
+  pm.expect(jsonData.countDownEndTime).to.be.a("number");
+});
+
+pm.test("Check data type of epochSlotNo", () => {
+  pm.expect(jsonData.epochSlotNo).to.be.a("number");
+});
+
+pm.test("Check data type of liveStake", () => {
+  pm.expect(jsonData.liveStake).to.be.a("number");
+});
+
+pm.test("Check data type of delegators", () => {
+  pm.expect(jsonData.delegators).to.be.a("number");
+});
+
+pm.test("Check data type of activePools", () => {
+  pm.expect(jsonData.activePools).to.be.a("number");
+});
+
+pm.test("Check data type of delegators", () => {
+  pm.expect(jsonData.retiredPools).to.be.a("number");
+});
+

@@ -1,0 +1,32 @@
+var jsonData = pm.response.json();
+
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Check currentPage value", function () {
+    pm.expect(jsonData.currentPage).to.eql(0);
+});
+
+//Check type of Data
+pm.test("Check type of data", function () {
+    const data = jsonData.data[0]
+    let moment = require('moment')
+    pm.expect(data.txHash).to.be.a("string");
+    pm.expect(data.blockNo).to.be.a("number");
+    pm.expect(data.epochSlotNo).to.be.a("number");
+    pm.expect(data.slotNo).to.be.a("number");
+    pm.expect(data.actions[0]).to.contain.oneOf(["POOL_REGISTRATION", "POOL_UPDATE", "POOL_DEREGISTRATION"]);
+    pm.expect(data.createdAt).to.include(moment(data.createdAt).format(('YYYY/MM/DD HH:mm:ss')));
+
+});
+
+// Check default size 
+if (jsonData.totalItems > 0){
+    pm.test("Check Size default", function(){
+        pm.expect(jsonData.data.length).to.be.within(1, 100);
+    });
+};

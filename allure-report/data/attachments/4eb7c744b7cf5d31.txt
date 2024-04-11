@@ -1,0 +1,1 @@
+{"data":[{"epoch":477,"block":6,"stakeAmount":5705218388590,"delegators":null,"fee":null,"ros":0.000000}],"totalItems":268,"totalPages":268,"currentPage":0,"isDataOverSize":null}

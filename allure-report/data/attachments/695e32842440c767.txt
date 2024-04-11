@@ -1,0 +1,1 @@
+{"data":[{"txHash":"f6f12b2b1f0d7af22217ea40527b0cfd28ebffdf56f3472a13d5d22a63c6fd87","time":"2024/03/06 15:01:44","blockNo":10021492,"epochNo":471,"epochSlotNo":62213,"slotNo":118171013,"numberOfStakes":1,"rewards":52140000000000}],"totalItems":1061,"totalPages":1061,"currentPage":0,"isDataOverSize":null}

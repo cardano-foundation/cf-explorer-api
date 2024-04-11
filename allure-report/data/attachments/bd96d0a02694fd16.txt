@@ -1,0 +1,40 @@
+var jsonData = pm.response.json();
+var stt = 200
+var res_time = 5000
+
+//Compare static data
+pm.test("Check status code", function () {
+    pm.expect(pm.response.code).to.be.oneOf([200, 400]);
+});
+
+if (!jsonData.errorCode) {
+    pm.test("Status code is 200", function () {
+        pm.response.to.have.status(stt);
+    });
+} else {
+    pm.test("Status code is 400", function () {
+        pm.response.to.have.status(400);
+    });
+}
+
+pm.test("Response time is less than 5000ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(res_time);
+});
+
+//Compare format data type
+pm.test("Check data type of the response", () => {
+    if (jsonData.length > 0) {
+        pm.expect(jsonData[0]).to.be.a("string")
+    }
+});
+
+pm.test("check input output addresses executes", () => {
+    const contract_scripHash_tx = pm.environment.get("contract_scriptHash_trx_hash")
+    if (contract_scripHash_tx) {
+        pm.expect(jsonData.length).to.be.above(0);
+        jsonData.map(data => pm.expect(data).to.be.a("string"))
+    } else {
+        pm.response.to.have.status(400)
+    }
+})
+
