@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response.pool;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import lombok.AllArgsConstructor;
@@ -34,12 +33,6 @@ public class PoolResponse implements Serializable {
 
   @JsonSerialize(using = PercentSerializer.class)
   private Double saturation;
-
-  private BigDecimal stakeLimit;
-
-  private Integer kParam;
-
-  private BigInteger reserves;
 
   private Integer epochBlock;
 
