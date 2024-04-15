@@ -329,17 +329,50 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
+  void createProposal_parameterChangeAction() {
+    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+
+    var parameterChange = new ParameterChangeAction();
+    parameterChange.setPrevGovActionId(
+        new GovActionId("950d4b364840a27afeba929324d51dec0fac80b00cf7ca37905de08e3eae5ca6", 0));
+    parameterChange.setProtocolParamUpdate(
+        ProtocolParamUpdate.builder().keyDeposit(adaToLovelace(1000)).build());
+
+    var anchor =
+        new Anchor(
+            "https://shorturl.at/vBIJ8",
+            HexUtil.decodeHexString(
+                "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
+
+    Tx tx =
+        new Tx()
+            .createProposal(parameterChange, adaToLovelace(1000), sender1.stakeAddress(), anchor)
+            .from(sender1Addr);
+
+    Result<String> result =
+        quickTxBuilder
+            .compose(tx)
+            .withSigner(SignerProviders.drepKeySignerFrom(sender1))
+            .withSigner(SignerProviders.signerFrom(sender1))
+            .completeAndWait(s -> System.out.println(s));
+
+    System.out.println(result);
+    assertTrue(result.isSuccessful());
+    checkIfUtxoAvailable(result.getValue(), sender1Addr);
+  }
+
+  @Test
   void createProposal_newConstitutionAction() {
     QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
 
     var anchor =
         new Anchor(
-            "https://bit.ly/2kBHHHL",
+            "https://shorturl.at/vBIJ8",
             HexUtil.decodeHexString(
-                "cdfef700c0039a2efb056a665b3a8bcd94f8670b88d659f7f3db68340f6f0937"));
+                "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
     var govAction = new NewConstitution();
     govAction.setPrevGovActionId(
-        new GovActionId("bd5d786d745ec7c1994f8cff341afee513c7cdad73e8883d540ff71c41763fd1", 0));
+        new GovActionId("597686b8c917ba2c74cd0018f3fb325bddf0f1fe747038170c41373376c03b5c", 0));
     govAction.setConstitution(Constitution.builder().anchor(anchor).build());
 
     Tx tx =
@@ -364,13 +397,16 @@ public class GovernanceTxIT extends QuickTxBaseIT {
     QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
 
     var noConfidence = new NoConfidence();
-    noConfidence.setPrevGovActionId(
-        new GovActionId("e86050ac376fc4df7c76635f648c963f44702e13beb81a5c9971a418013c74dc", 0));
+    // if there is no previous action id, then set it to null
+    //    noConfidence.setPrevGovActionId(
+    //        new GovActionId("e86050ac376fc4df7c76635f648c963f44702e13beb81a5c9971a418013c74dc",
+    // 0));
+
     var anchor =
         new Anchor(
-            "https://xyz.com",
+            "https://shorturl.at/vBIJ8",
             HexUtil.decodeHexString(
-                "cafef700c0039a2efb056a665b3a8bcd94f8670b88d659f7f3db68340f6f0937"));
+                "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
 
     Tx tx =
         new Tx()
@@ -390,52 +426,24 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void createProposal_parameterChangeAction() {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
-
-    var parameterChange = new ParameterChangeAction();
-    parameterChange.setPrevGovActionId(
-        new GovActionId("529736be1fac33431667f2b66231b7b66d4c7a3975319ddac7cfb17dcb5c4145", 0));
-    parameterChange.setProtocolParamUpdate(
-        ProtocolParamUpdate.builder().minPoolCost(adaToLovelace(100)).build());
-    var anchor =
-        new Anchor(
-            "https://xyz.com",
-            HexUtil.decodeHexString(
-                "cafef700c0039a2efb056a665b3a8bcd94f8670b88d659f7f3db68340f6f0937"));
-
-    Tx tx =
-        new Tx()
-            .createProposal(parameterChange, adaToLovelace(1000), sender1.stakeAddress(), anchor)
-            .from(sender1Addr);
-
-    Result<String> result =
-        quickTxBuilder
-            .compose(tx)
-            .withSigner(SignerProviders.drepKeySignerFrom(sender1))
-            .withSigner(SignerProviders.signerFrom(sender1))
-            .completeAndWait(s -> System.out.println(s));
-
-    System.out.println(result);
-    assertTrue(result.isSuccessful());
-    checkIfUtxoAvailable(result.getValue(), sender1Addr);
-  }
-
-  @Test
   void createProposal_updateCommittee() {
     QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
 
     var updateCommittee = new UpdateCommittee();
-    updateCommittee.setPrevGovActionId(
-        new GovActionId("b3ce0371310a07a797657d19453d953bb352b6841c2f5c5e0bd2557189ef5c3a", 0));
+
+    // if there is no previous action id, then set it to null
+    //    updateCommittee.setPrevGovActionId(
+    //        new GovActionId("b3ce0371310a07a797657d19453d953bb352b6841c2f5c5e0bd2557189ef5c3a",
+    // 0));
+
     updateCommittee.setQuorumThreshold(
         new UnitInterval(BigInteger.valueOf(1), BigInteger.valueOf(3)));
 
     var anchor =
         new Anchor(
-            "https://xyz.com",
+            "https://shorturl.at/vBIJ8",
             HexUtil.decodeHexString(
-                "daeef700c0039a2efb056a665b3a8bcd94f8670b88d659f7f3db68340f6f0937"));
+                "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
 
     Tx tx =
         new Tx()
@@ -459,15 +467,18 @@ public class GovernanceTxIT extends QuickTxBaseIT {
     QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
 
     var hardforkInitiation = new HardForkInitiationAction();
-    hardforkInitiation.setPrevGovActionId(
-        new GovActionId("416f7f01c548a85546aa5bbd155b34bb2802df68e08db4e843ef6da764cd8f7e", 0));
-    hardforkInitiation.setProtocolVersion(new ProtocolVersion(9, 3));
+
+    // if there is no previous action id, then set it to null
+    //    hardforkInitiation.setPrevGovActionId(
+    //        new GovActionId("416f7f01c548a85546aa5bbd155b34bb2802df68e08db4e843ef6da764cd8f7e",
+    // 0));
+    hardforkInitiation.setProtocolVersion(new ProtocolVersion(10, 0));
 
     var anchor =
         new Anchor(
-            "https://xyz.com",
+            "https://shorturl.at/vBIJ8",
             HexUtil.decodeHexString(
-                "daeef700c0039a2efb056a665b3a8bcd94f8670b88d659f7f3db68340f6f0937"));
+                "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
 
     Tx tx =
         new Tx()
@@ -494,7 +505,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
             HexUtil.decodeHexString(
                 "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
     var govActionId =
-        new GovActionId("1d8dcfa0f3bfeda4c4690c945b51a4e01d40a3f3e85658a2c63c34e093716549", 0);
+        new GovActionId("75738ba6fd156234c5ade130e24c9d44746d0be2585bfbc4d8175a6e27e8a704", 0);
 
     createVote(govActionId, Vote.YES, anchor, sender1);
     createVote(govActionId, Vote.NO, anchor, sender3);
