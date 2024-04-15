@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -265,8 +266,13 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     Instant startTime = Instant.ofEpochSecond(response.getBlockTime());
     EpochParam epochParam = epochParamRepository.findByEpochNo(response.getEpoch());
     Instant expiryTime =
-        startTime.plus(epochDays * epochParam.getGovActionLifetime().longValue(), ChronoUnit.DAYS);
+        startTime.plus(
+            epochDays * getLongValue(epochParam.getGovActionLifetime()), ChronoUnit.DAYS);
     response.setExpiryDate(Date.from(expiryTime));
+  }
+
+  private Long getLongValue(BigInteger bigInteger) {
+    return bigInteger == null ? 0L : bigInteger.longValue();
   }
 
   @Override
