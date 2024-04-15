@@ -67,7 +67,7 @@
         <version.snakeyaml>2.0</version.snakeyaml>
         <version.mapstruct>1.5.3.Final</version.mapstruct>
         <version.lombok-mapstruct-binding>0.2.0</version.lombok-mapstruct-binding>
-        <version.explorer-common>0.9.0-PR198</version.explorer-common>
+        <version.explorer-common>0.9.0-PR199</version.explorer-common>
         <sonar.coverage.jacoco.xmlReportPaths>../cardano-explorer-api/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/entity/*, **/validation/*</sonar.coverage.exclusions>
@@ -233,11 +233,6 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.bloxbean.cardano</groupId>
-            <artifactId>cardano-client-lib</artifactId>
-            <version>${version.bloxbean}</version>
         </dependency>
 
         <dependency>
