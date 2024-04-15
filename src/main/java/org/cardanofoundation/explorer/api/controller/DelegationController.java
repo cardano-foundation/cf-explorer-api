@@ -22,6 +22,7 @@ import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.request.pool.PoolListFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.DelegationResponse;
 import org.cardanofoundation.explorer.api.model.response.PoolDetailDelegatorResponse;
@@ -79,14 +80,9 @@ public class DelegationController {
       tags = {"delegation"})
   public ResponseEntity<BaseFilterResponse<PoolResponse>> getDataForPoolTable(
       @ParameterObject @PaginationValid @Valid Pagination pagination,
-      @RequestParam(value = "search", required = false)
-          @Parameter(description = "Query param for search pool by name or ticker name")
-          String search,
-      @RequestParam(value = "isShowRetired", defaultValue = "true")
-          @Parameter(description = "Query param for show retired pool")
-          boolean isShowRetired) {
+      @ParameterObject @Parameter(description = "The filter for pool") PoolListFilter filter) {
     return ResponseEntity.ok(
-        delegationService.getDataForPoolTable(pagination.toPageable(), search, isShowRetired));
+        delegationService.getDataForPoolTable(pagination.toPageable(), filter));
   }
 
   @GetMapping("/pool-detail-header/{poolViewOrHash}")
