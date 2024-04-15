@@ -185,9 +185,18 @@ public class DRepServiceImpl implements DRepService {
 
     Long totalDReps =
         dRepStatusCountMap.values().stream().mapToLong(DRepStatusCountProjection::getCnt).sum();
-    Long activeDReps = dRepStatusCountMap.get(DRepStatus.ACTIVE).getCnt();
-    Long inactiveDReps = dRepStatusCountMap.get(DRepStatus.INACTIVE).getCnt();
-    Long retiredDReps = dRepStatusCountMap.get(DRepStatus.RETIRED).getCnt();
+    Long activeDReps =
+        dRepStatusCountMap.containsKey(DRepStatus.ACTIVE)
+            ? dRepStatusCountMap.get(DRepStatus.ACTIVE).getCnt()
+            : 0L;
+    Long inactiveDReps =
+        dRepStatusCountMap.containsKey(DRepStatus.INACTIVE)
+            ? dRepStatusCountMap.get(DRepStatus.INACTIVE).getCnt()
+            : 0L;
+    Long retiredDReps =
+        dRepStatusCountMap.containsKey(DRepStatus.RETIRED)
+            ? dRepStatusCountMap.get(DRepStatus.RETIRED).getCnt()
+            : 0L;
 
     // TODO: implement abstainDReps and noConfidenceDReps and registeredDReps
     Long abstainDReps = null;
