@@ -291,7 +291,7 @@ public class DelegationServiceImpl implements DelegationService {
               filter.getMinSaturation(),
               filter.getMaxSaturation(),
               filter.getMinVotingPower(),
-              filter.getMaxSaturation(),
+              filter.getMaxVotingPower(),
               filter.getMinGovParticipationRate(),
               filter.getMaxGovParticipationRate(),
               filter.getMinBlockLifetime(),
