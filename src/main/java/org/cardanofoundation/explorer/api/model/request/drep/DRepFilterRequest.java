@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.validation.date.DatePattern;
@@ -16,6 +17,7 @@ import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 public class DRepFilterRequest {
 
   private String drepIdOrHash;
