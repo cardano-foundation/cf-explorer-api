@@ -40,7 +40,7 @@ public interface GovernanceActionRepository
               + " and (gap.blockTime >= :from)"
               + " and (gap.blockTime <= :to)"
               + " and (:txHash is null or gap.txHash = :txHash)"
-              + " and (:anchorText is null or gap.anchorUrl like concat('%', :anchorText, '%') or gap.anchorHash like concat('%', :anchorText, '%'))")
+              + " and (:anchorText is null or gap.anchorUrl like %:anchorText% or gap.anchorHash like %:anchorText%)")
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,
