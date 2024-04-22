@@ -34,6 +34,8 @@ public class PoolReportCreateRequest {
   private Boolean eventPoolUpdate;
 
   private Integer[] epochRanges;
+  private String timePattern;
+  private Long zoneOffset; // diff with UTC in minutes
 
   public PoolReportHistory toEntity(ReportHistory reportHistory) {
     return PoolReportHistory.builder()
