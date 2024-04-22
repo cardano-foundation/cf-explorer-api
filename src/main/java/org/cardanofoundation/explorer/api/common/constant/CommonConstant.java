@@ -16,6 +16,12 @@ public class CommonConstant {
 
   public static final BigDecimal TOTAL_ADA = new BigDecimal(45000000000000000L);
 
+  public static final BigInteger MAX_VALUE_BIGINT = BigInteger.valueOf(Long.MAX_VALUE);
+
+  public static final Double MAX_PERCENT = 1.0;
+
+  public static final Double MIN_PERCENT = 0.0;
+
   public static final String MAINNET_NETWORK = "mainnet";
 
   public static final String TESTNET_ADDRESS_PREFIX = "addr_test";
@@ -30,7 +36,13 @@ public class CommonConstant {
 
   public static final String LOVELACE = "LOVELACE";
 
+  public static final BigDecimal PERCENT = new BigDecimal(100);
+
+  public static final String REDIS_TOTAL_LIVE_STAKE = "TOTAL_LIVE_STAKE_";
+
   public static final int TX_HASH_LENGTH = 64;
+
+  public static final int BLOCK_HASH_LENGTH = 64;
 
   public static final int STAKE_KEY_LENGTH_MAINNET = 59;
 
@@ -44,6 +56,12 @@ public class CommonConstant {
 
   public static final int HASH_LENGTH = 31;
 
+  public static final String ACTIVATE_STAKE = "ACTIVATE_STAKE_";
+
+  public static final String LIVE_STAKE = "LIVE_STAKE_";
+
+  public static final String REDIS_TOTAL_ACTIVATE_STAKE = "TOTAL_ACTIVATE_STAKE_";
+
   public static final String REDIS_POOL_ACTIVATE = "POOL_ACTIVATE_";
 
   public static final String REDIS_POOL_INACTIVATE = "POOL_INACTIVATE_";
@@ -51,7 +69,14 @@ public class CommonConstant {
   public static final String REDIS_TOTAL_DELEGATOR = "TOTAL_DELEGATOR_";
 
   public static final String PREFIXED_STAKE_KEY = "stake";
+
+  public static final String PREFIXED_POOL_VIEW = "pool";
+
   public static final String PREFIXED_TOKEN_FINGERPRINT = "asset";
+
+  public static final String PREPROD_NETWORK = "preprod";
+
+  public static final String PREVIEW_NETWORK = "preview";
 
   public static final String POOL_IDS_INACTIVATE = "POOL_IDS_INACTIVATE_";
 
