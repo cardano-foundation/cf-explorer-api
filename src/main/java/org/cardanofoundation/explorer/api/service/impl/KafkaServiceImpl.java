@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.explorer.api.config.kafka.KafkaTopic;
 import org.cardanofoundation.explorer.api.service.KafkaService;
 import org.cardanofoundation.explorer.common.entity.explorer.ReportHistory;
+import org.cardanofoundation.explorer.common.model.ReportMessage;
 
 @Log4j2
 @Service
@@ -23,8 +24,10 @@ public class KafkaServiceImpl implements KafkaService {
   private final KafkaTopic topic;
 
   @Override
-  public Boolean sendReportHistory(ReportHistory reportHistory) {
+  public Boolean sendReportHistory(ReportMessage reportMessage) {
     AtomicBoolean isSendSuccess = new AtomicBoolean(false);
+    ReportHistory reportHistory = reportMessage.getReportHistory();
+
     try {
       CompletableFuture<SendResult<String, Object>> future =
           kafkaTemplate.send(
