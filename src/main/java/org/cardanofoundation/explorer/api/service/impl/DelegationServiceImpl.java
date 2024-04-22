@@ -235,7 +235,7 @@ public class DelegationServiceImpl implements DelegationService {
       Pageable pageable, PoolListFilter filter) {
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     Set<Long> poolRetiredIds = new HashSet<>();
-    if (!filter.getIsShowRetired()) {
+    if (!Boolean.TRUE.equals(filter.getIsShowRetired())) {
       String poolRetiredIdKey = CommonConstant.POOL_IDS_INACTIVATE + network;
       poolRetiredIds =
           redisTemplate.opsForHash().values(poolRetiredIdKey).stream()
