@@ -174,7 +174,6 @@ public class BlockServiceTest {
     Integer epochNo = 1;
     Pageable pageable = PageRequest.of(0, 10);
     Page<Block> blocks = new PageImpl<>(Collections.singletonList(new Block()));
-    BaseFilterResponse<BlockFilterResponse> expectedResponse = new BaseFilterResponse<>();
 
     // Mock repository method
     when(blockRepository.findBlockByEpochNo(epochNo, pageable)).thenReturn(blocks);

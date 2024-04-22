@@ -23,12 +23,6 @@ import org.cardanofoundation.explorer.common.utils.JsonUtil;
 @Mapper(componentModel = "spring")
 public interface ProtocolMapper {
 
-  String MAINNET = "mainnet";
-  String PREPROD = "preprod";
-  String PREVIEW = "preview";
-  String MAINNET_NAME = "Mainnet";
-  String TESTNET_NAME = "Testnet";
-
   default ProtocolParamResponse mapProtocolParamResponse(List<ParamProposal> paramProposals) {
     ProtocolParamResponse protocolParam = new ProtocolParamResponse();
 

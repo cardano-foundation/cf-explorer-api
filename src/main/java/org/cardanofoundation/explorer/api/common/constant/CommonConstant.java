@@ -16,8 +16,6 @@ public class CommonConstant {
 
   public static final BigDecimal TOTAL_ADA = new BigDecimal(45000000000000000L);
 
-  public static final BigDecimal EPOCH_IN_YEARS = new BigDecimal(73);
-
   public static final BigInteger MAX_VALUE_BIGINT = BigInteger.valueOf(Long.MAX_VALUE);
 
   public static final Double MAX_PERCENT = 1.0;

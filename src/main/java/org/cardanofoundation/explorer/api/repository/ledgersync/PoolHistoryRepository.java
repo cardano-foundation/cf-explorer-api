@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,14 +16,6 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHistory;
 
 @Repository
 public interface PoolHistoryRepository extends JpaRepository<PoolHistory, Long> {
-
-  @Query(
-      value =
-          "SELECT ph.pool.view AS view, ph.delegatorRewards AS delegateReward, ph.epochRos AS ros "
-              + "FROM PoolHistory ph "
-              + "WHERE ph.pool.view IN :poolIds AND ph.epochNo = :epochNo")
-  List<PoolHistoryKoiosProjection> getPoolHistoryKoios(
-      @Param("poolIds") Set<String> poolIds, @Param("epochNo") Integer epochNo);
 
   @Query(
       value =

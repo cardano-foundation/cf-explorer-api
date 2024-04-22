@@ -534,9 +534,6 @@ class StakeKeyLifeCycleServiceTest {
   @Test
   void whenStakeAddressDoNotHaveRewardsAvailable_showReturnRewardNotAvailable() {
     Pageable pageable = PageRequest.of(0, 1);
-    StakeRewardResponse rewardResponse =
-        new StakeRewardResponse(
-            333, Date.from(Instant.now()), BigInteger.valueOf(382916), RewardType.MEMBER);
     Date fromDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
     Date toDate = Date.from(Instant.now());
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));

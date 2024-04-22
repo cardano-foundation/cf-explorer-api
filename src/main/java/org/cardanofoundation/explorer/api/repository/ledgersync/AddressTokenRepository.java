@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.explorer.api.projection.TokenVolumeProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AddressToken;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 
@@ -27,15 +26,6 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
 
   @Query(
       value =
-          "SELECT COALESCE(sum(addrToken.balance), 0)"
-              + " FROM AddressToken addrToken"
-              + " WHERE addrToken.multiAsset = :multiAsset "
-              + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId")
-  BigInteger sumBalanceAfterTx(
-      @Param("multiAsset") MultiAsset multiAsset, @Param("txId") Long txId);
-
-  @Query(
-      value =
           "SELECT COALESCE(SUM(addrToken.balance), 0)"
               + " FROM AddressToken addrToken"
               + " WHERE addrToken.multiAsset = :multiAsset"
@@ -52,30 +42,6 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
       @Param("multiAsset") MultiAsset multiAsset,
       @Param("from") Timestamp from,
       @Param("to") Timestamp to);
-
-  @Query(
-      value =
-          "SELECT COALESCE(SUM(addrToken.balance), 0)"
-              + " FROM AddressToken addrToken"
-              + " WHERE addrToken.multiAsset = :multiAsset"
-              + " AND addrToken.tx.id >"
-              + "   (SELECT MAX(tx.id) FROM Tx tx WHERE tx.blockId = "
-              + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :from AND block.txCount > 0)"
-              + "   )"
-              + " AND addrToken.balance > 0")
-  Optional<BigInteger> sumBalanceBetweenTx(
-      @Param("multiAsset") MultiAsset multiAsset, @Param("from") Timestamp from);
-
-  @Query(
-      value =
-          "SELECT addrToken.multiAsset.id AS ident, "
-              + " COALESCE(SUM(addrToken.balance), 0) AS volume"
-              + " FROM AddressToken addrToken"
-              + " WHERE addrToken.multiAsset IN :multiAsset "
-              + " AND addrToken.balance > 0 AND addrToken.tx.id >= :txId"
-              + " GROUP BY addrToken.multiAsset")
-  List<TokenVolumeProjection> sumBalanceAfterTx(
-      @Param("multiAsset") Collection<MultiAsset> multiAsset, @Param("txId") Long txId);
 
   @Query(
       "SELECT addrToken FROM AddressToken addrToken"
@@ -88,23 +54,4 @@ public interface AddressTokenRepository extends JpaRepository<AddressToken, Long
           + " WHERE addrToken.tx.id in :ids and addrToken.address.stakeAddress.id = :stakeId")
   List<AddressToken> findByTxIdInAndStakeId(
       @Param("ids") Collection<Long> ids, @Param("stakeId") Long stakeId);
-
-  @Query(
-      value =
-          "SELECT count(addrToken)"
-              + " FROM AddressToken addrToken"
-              + " WHERE addrToken.multiAsset = :multiAsset"
-              + " AND addrToken.tx.id >"
-              + "   (SELECT MAX(tx.id) FROM Tx tx WHERE tx.blockId = "
-              + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :from AND block.txCount > 0)"
-              + "   )"
-              + " AND addrToken.tx.id <="
-              + "   (SELECT MAX(tx.id) FROM Tx tx WHERE tx.blockId = "
-              + "     (SELECT MAX(block.id) FROM Block block WHERE block.time < :to AND block.txCount > 0)"
-              + "   )"
-              + " AND addrToken.balance > 0")
-  Long countRecord(
-      @Param("multiAsset") MultiAsset multiAsset,
-      @Param("from") Timestamp from,
-      @Param("to") Timestamp to);
 }

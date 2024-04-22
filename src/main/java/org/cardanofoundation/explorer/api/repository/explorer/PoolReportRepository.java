@@ -25,13 +25,4 @@ public interface PoolReportRepository extends JpaRepository<PoolReportHistory, L
       @Param("toDate") Timestamp toDate,
       @Param("username") String username,
       Pageable pageable);
-
-  @Query(
-      "SELECT prh FROM PoolReportHistory prh"
-          + " LEFT JOIN ReportHistory rh ON prh.reportHistory.id = rh.id"
-          + " WHERE rh.username = :username"
-          + " AND prh.id = :id")
-  PoolReportHistory findByUsernameAndId(@Param("username") String username, @Param("id") Long id);
-
-  PoolReportHistory findByReportHistoryId(@Param("reportHistoryId") Long reportHistoryId);
 }
