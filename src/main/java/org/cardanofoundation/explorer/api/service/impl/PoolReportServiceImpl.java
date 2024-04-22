@@ -48,6 +48,7 @@ import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 import org.cardanofoundation.explorer.common.entity.explorer.ReportHistory;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
+import org.cardanofoundation.explorer.common.model.ReportMessage;
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +79,14 @@ public class PoolReportServiceImpl implements PoolReportService {
       PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal) {
     PoolReportHistory poolReportHistory = saveToDb(poolReportCreateRequest, userPrincipal);
 
-    Boolean isSuccess = kafkaService.sendReportHistory(poolReportHistory.getReportHistory());
+    ReportMessage reportMessage =
+        ReportMessage.builder()
+            .reportHistory(poolReportHistory.getReportHistory())
+            .timePattern(poolReportCreateRequest.getTimePattern())
+            .zoneOffset(poolReportCreateRequest.getZoneOffset())
+            .build();
+
+    Boolean isSuccess = kafkaService.sendReportHistory(reportMessage);
     if (Boolean.FALSE.equals(isSuccess)) {
       poolReportRepository.delete(poolReportHistory);
       throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
