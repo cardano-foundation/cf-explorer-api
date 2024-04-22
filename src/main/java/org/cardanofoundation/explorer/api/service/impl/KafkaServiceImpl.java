@@ -31,7 +31,7 @@ public class KafkaServiceImpl implements KafkaService {
     try {
       CompletableFuture<SendResult<String, Object>> future =
           kafkaTemplate.send(
-              topic.getReports(), String.valueOf(reportHistory.getId()), reportHistory);
+              topic.getReports(), String.valueOf(reportHistory.getId()), reportMessage);
       isSendSuccess.set(future.get().getRecordMetadata().hasOffset());
     } catch (Exception e) {
       log.error(e);
