@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -47,7 +46,6 @@ import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
-import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
 import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -238,7 +236,6 @@ class StakeKeyReportControllerTest {
   void shouldGetAllStakeKeyReportHistories() throws Exception {
     Long reportId = 1L;
     String username = "username";
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 
     StakeKeyReportHistoryResponse stakeKeyReportHistoryResponse =
         getStakeKeyReportHistoryResponse(reportId, username);
@@ -452,7 +449,6 @@ class StakeKeyReportControllerTest {
   void shouldGetWithdrawals() throws Exception {
     Long reportId = 1L;
     String username = "username";
-    StakeLifeCycleFilterRequest filter = new StakeLifeCycleFilterRequest();
     List<StakeWithdrawalFilterResponse> list = new ArrayList<>();
     list.add(
         StakeWithdrawalFilterResponse.builder()

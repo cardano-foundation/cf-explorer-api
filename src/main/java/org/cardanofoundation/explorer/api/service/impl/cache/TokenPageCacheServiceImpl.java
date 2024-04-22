@@ -3,7 +3,6 @@ package org.cardanofoundation.explorer.api.service.impl.cache;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 
-import org.cardanofoundation.explorer.api.common.enumeration.RedisKey;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.cache.TokenPageCacheService;
 
 @Service
@@ -57,24 +52,6 @@ public class TokenPageCacheServiceImpl implements TokenPageCacheService {
                           jsonElement.getAsJsonPrimitive().getAsString(),
                           DateTimeFormatter.ISO_LOCAL_DATE_TIME))
           .create();
-
-  @Override
-  public Optional<BaseFilterResponse<TokenFilterResponse>> getTokePageCache(Pageable pageable) {
-    String redisKey = RedisKey.REDIS_TOKEN_PAGE.name() + ":" + network + ":" + toStr(pageable);
-    Object cacheData = redisTemplate.opsForValue().get(redisKey);
-    if (cacheData == null) {
-      return Optional.empty();
-    }
-    try {
-      return Optional.of(
-          GSON.fromJson(
-              cacheData.toString(),
-              new TypeToken<BaseFilterResponse<TokenFilterResponse>>() {}.getType()));
-    } catch (Exception e) {
-      log.error("Exception when getTokenFilterResponseSchedulerCache key: {}", redisKey, e);
-      return Optional.empty();
-    }
-  }
 
   private String toStr(Pageable pageable) {
     return pageable.toString().replace(" ", "").replace(":", "_");

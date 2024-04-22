@@ -14,8 +14,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import org.cardanofoundation.explorer.api.model.response.pool.projection.DelegatorChartProjection;
-import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCountProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
@@ -30,26 +28,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
   @Query(
       value =
-          "SELECT dg1.activeEpochNo AS chartKey, count(dg1.address.id) AS chartValue "
-              + "FROM Delegation dg1 "
-              + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
-              + "WHERE ph.id = :poolId "
-              + "AND NOT EXISTS "
-              + "(SELECT TRUE "
-              + "FROM Delegation dg2 "
-              + "WHERE dg2.address.id = dg1.address.id "
-              + "AND dg2.tx.id > dg1.tx.id) "
-              + "AND NOT EXISTS "
-              + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
-              + "WHERE sd.addr.id = dg1.address.id "
-              + "AND sd.tx.id > dg1.tx.id) "
-              + "GROUP BY dg1.activeEpochNo "
-              + "ORDER BY dg1.activeEpochNo")
-  List<DelegatorChartProjection> getDataForDelegatorChart(@Param("poolId") Long poolId);
-
-  @Query(
-      value =
           "SELECT sa.id AS stakeAddressId, sa.view AS view , bk.time AS time, tx.fee AS fee "
               + "FROM StakeAddress sa "
               + "JOIN StakeRegistration sr ON sa.id = sr.addr.id AND sr.id = (SELECT max(sr2.id) FROM StakeRegistration sr2 WHERE sa.id = sr2.addr.id) "
@@ -59,9 +37,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + "ORDER BY tx.id DESC")
   List<PoolDetailDelegatorProjection> getDelegatorsByAddress(
       @Param("addressIds") Set<Long> addressIds);
-
-  @Query("SELECT count(de.id) FROM Delegation de WHERE de.activeEpochNo = :epochNo")
-  Integer numberDelegatorsAllPoolByEpochNo(@Param("epochNo") Long epochNo);
 
   /**
    * Get pool delegation summary information by list pool hash id order by pool hash id ascending
@@ -167,24 +142,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
 
   @Query(
       value =
-          "SELECT count(dg1.address.id) "
-              + "FROM Delegation dg1 "
-              + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
-              + "WHERE ph.view = :poolView "
-              + "AND NOT EXISTS "
-              + "(SELECT TRUE "
-              + "FROM Delegation dg2 "
-              + "WHERE dg2.address.id = dg1.address.id "
-              + "AND dg2.tx.id > dg1.tx.id) "
-              + "AND NOT EXISTS "
-              + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
-              + "WHERE sd.addr.id = dg1.address.id "
-              + "AND sd.tx.id > dg1.tx.id)")
-  Integer liveDelegatorsCount(@Param("poolView") String poolView);
-
-  @Query(
-      value =
           "SELECT dg1.address.id "
               + "FROM Delegation dg1 "
               + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
@@ -218,40 +175,4 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + " AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = poolHash.id))"
               + " WHERE delegation.txId IN :txIds")
   List<DelegationProjection> findDelegationByTxIdIn(@Param("txIds") List<Long> txIds);
-
-  @Query(
-      value =
-          "SELECT count(dg1.address.id) "
-              + "FROM Delegation dg1 "
-              + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
-              + "WHERE NOT EXISTS "
-              + "(SELECT TRUE "
-              + "FROM Delegation dg2 "
-              + "WHERE dg2.address.id = dg1.address.id "
-              + "AND dg2.tx.id > dg1.tx.id) "
-              + "AND NOT EXISTS "
-              + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
-              + "WHERE sd.addr.id = dg1.address.id "
-              + "AND sd.tx.id > dg1.tx.id)")
-  Integer totalLiveDelegatorsCount();
-
-  @Query(
-      value =
-          "SELECT ph.id AS poolId, count(dg1.address.id) AS countValue "
-              + "FROM Delegation dg1 "
-              + "JOIN PoolHash ph ON dg1.poolHash.id = ph.id "
-              + "WHERE ph.id IN :poolIds "
-              + "AND NOT EXISTS "
-              + "(SELECT TRUE "
-              + "FROM Delegation dg2 "
-              + "WHERE dg2.address.id = dg1.address.id "
-              + "AND dg2.tx.id > dg1.tx.id) "
-              + "AND NOT EXISTS "
-              + "(SELECT TRUE "
-              + "FROM StakeDeregistration sd "
-              + "WHERE sd.addr.id = dg1.address.id "
-              + "AND sd.tx.id > dg1.tx.id) "
-              + "GROUP BY ph.id ")
-  List<PoolCountProjection> liveDelegatorsCountByPools(@Param("poolIds") Set<Long> poolIds);
 }

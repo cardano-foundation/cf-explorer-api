@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +13,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
-import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
@@ -68,14 +66,6 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
               + "ORDER BY b.blockNo DESC, tx.blockIndex DESC")
   List<TxIOProjection> findLatestTxIO(@Param("txIds") Collection<Long> txIds);
 
-  @Query(
-      value =
-          "SELECT b.time as time, b.txCount as transactionNo "
-              + "FROM Block b "
-              + "WHERE b.time >= :time "
-              + "ORDER BY b.time DESC")
-  List<TxGraphProjection> getTransactionsAfterTime(@Param("time") Timestamp time);
-
   @Query("SELECT tx FROM Tx tx WHERE tx.id IN :ids ORDER BY tx.blockId DESC, tx.blockIndex DESC")
   @EntityGraph(attributePaths = {Tx_.BLOCK})
   List<Tx> findByIdIn(@Param("ids") List<Long> ids);
@@ -93,12 +83,6 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
           + "WHERE tx.id IN :txIds "
           + "ORDER BY b.blockNo DESC, tx.blockIndex DESC")
   List<TxIOProjection> findTxIn(@Param("txIds") Collection<Long> txIds);
-
-  @Query(
-      "SELECT min(tx.id) FROM Tx tx "
-          + " INNER JOIN Block b ON b.id = tx.blockId"
-          + " WHERE b.time >= :time AND b.txCount > 0")
-  Optional<Long> findMinTxByAfterTime(@Param("time") Timestamp time);
 
   @Query(
       "SELECT tx.id as txId, tx.hash as hash, b.time as time, b.blockNo as blockNo,  "
