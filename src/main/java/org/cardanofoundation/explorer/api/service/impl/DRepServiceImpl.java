@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,11 +43,8 @@ import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationVoteRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.api.service.EpochService;
@@ -73,9 +69,6 @@ public class DRepServiceImpl implements DRepService {
   private final DrepInfoRepository drepInfoRepository;
   private final DelegationVoteRepository delegationVoteRepository;
   private final FetchRewardDataService fetchRewardDataService;
-  private final EpochRepository epochRepository;
-  private final StakeAddressRepository stakeAddressRepository;
-  private final EpochStakeRepository epochStakeRepository;
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final GovernanceActionRepository governanceActionRepository;
   private final DRepMapper dRepMapper;
@@ -320,75 +313,15 @@ public class DRepServiceImpl implements DRepService {
     if (dRepDelegatorProjections.isEmpty()) {
       return delegatorResponse;
     }
-    // for mainnet
-    //    Set<String> stakeAddresses =
-    //        dRepDelegatorProjections.stream()
-    //            .map(DRepDelegatorProjection::getStakeAddress)
-    //            .collect(Collectors.toSet());
-    //
-    //    Integer currentEpoch =
-    //        epochRepository
-    //            .findCurrentEpochNo()
-    //            .orElseThrow(() -> new NoContentException(CommonErrorCode.UNKNOWN_ERROR));
-    // for mainnet
+    // TODO
+    // for mainnet using Koios
     if (fetchRewardDataService.useKoios()) {
-      //      List<String> stakeAddressesList = stakeAddresses.stream().toList();
-      //      Boolean isStake = fetchRewardDataService.checkEpochStakeForPool(stakeAddressesList);
-      //      if (Boolean.FALSE.equals(isStake)) {
-      //        Boolean isFetch =
-      //            stakeAddressesList.size() > 40
-      //                ? null
-      //                : fetchRewardDataService.fetchEpochStakeForPool(stakeAddressesList);
-      //        if (Objects.isNull(isFetch)) {
-      //          List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>();
-      //          List<List<String>> subAddressList = Lists.partition(stakeAddressesList, 25);
-      //          subAddressList.forEach(
-      //              addressList -> completableFutures.add(fetchEpochStakeKoios(addressList)));
-      //          CompletableFuture<Void> combinedFuture =
-      //              CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
-      //          CompletableFuture<List<Boolean>> allResultFuture =
-      //              combinedFuture.thenApply(
-      //                  v -> completableFutures.stream().map(CompletableFuture::join).toList());
-      //          allResultFuture
-      //              .thenApply(
-      //                  results -> results.stream().allMatch(result ->
-      // result.equals(Boolean.TRUE)))
-      //              .exceptionally(
-      //                  ex -> {
-      //                    log.error("Error: when fetch data from koios");
-      //                    return Boolean.FALSE;
-      //                  });
-      //        }
-      //      }
-      //      List<StakeAddressProjection> addressIdList =
-      //          stakeAddressRepository.getAddressIdByViewIn(stakeAddressesList);
-      //
-      //      Set<Long> addressIdSet =
-      //
-      // addressIdList.stream().map(StakeAddressProjection::getId).collect(Collectors.toSet());
-      //
-      //      List<StakeAddressProjection> stakeAddressProjections =
-      //          epochStakeRepository.totalStakeByAddressAndPool(addressIdSet, currentEpoch);
-      //      Map<String, BigInteger> stakeAddressProjectionMap =
-      //          stakeAddressProjections.stream()
-      //              .collect(
-      //                  Collectors.toMap(
-      //                      StakeAddressProjection::getView,
-      // StakeAddressProjection::getTotalStake));
-      //      dRepDelegatorsResponseList.forEach(
-      //          delegator ->
-      //
-      // delegator.setTotalStake(stakeAddressProjectionMap.get(delegator.getStakeAddress())));
+      return delegatorResponse;
     }
     delegatorResponse.setTotalItems(dRepDelegatorProjections.getTotalElements());
     delegatorResponse.setData(dRepDelegatorsResponseList);
     delegatorResponse.setTotalPages(dRepDelegatorProjections.getTotalPages());
     delegatorResponse.setCurrentPage(pageable.getPageNumber());
     return delegatorResponse;
-  }
-
-  private CompletableFuture<Boolean> fetchEpochStakeKoios(List<String> addressIds) {
-    return CompletableFuture.supplyAsync(
-        () -> fetchRewardDataService.fetchEpochStakeForPool(addressIds));
   }
 }

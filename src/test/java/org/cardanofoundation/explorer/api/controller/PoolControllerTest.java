@@ -39,11 +39,13 @@ import org.cardanofoundation.explorer.api.controller.advice.GlobalRestController
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.PoolRangeValuesResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.TxPoolCertificateHistory;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
+import org.cardanofoundation.explorer.api.service.PoolService;
 
 @WebMvcTest(PoolController.class)
 @Import({
@@ -63,6 +65,7 @@ public class PoolControllerTest {
   @MockBean private PoolCertificateService poolCertificateService;
 
   @MockBean private AuthInterceptor authInterceptor;
+  @MockBean private PoolService poolService;
 
   @BeforeEach
   void preControllerTest() throws Exception {
@@ -153,5 +156,19 @@ public class PoolControllerTest {
         .andExpect(jsonPath("$.data[0].blockNo").value(5699952L));
 
     verify(poolCertificateService).getTxPoolCertificateHistory(poolView, pageable);
+  }
+
+  @Test
+  void testGetRangeValueToFilterForPoolOverviewPage() throws Exception {
+
+    PoolRangeValuesResponse response = PoolRangeValuesResponse.builder().build();
+
+    when(poolService.getPoolRangeValues()).thenReturn(response);
+
+    mockMvc
+        .perform(get("/api/v1/pools/range-values-for-filter").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(poolService).getPoolRangeValues();
   }
 }

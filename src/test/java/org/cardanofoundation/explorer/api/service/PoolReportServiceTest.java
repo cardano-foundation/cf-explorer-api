@@ -50,6 +50,7 @@ import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 import org.cardanofoundation.explorer.common.entity.explorer.ReportHistory;
 import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.model.ReportMessage;
 
 @ExtendWith(MockitoExtension.class)
 public class PoolReportServiceTest {
@@ -145,7 +146,7 @@ public class PoolReportServiceTest {
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
     when(reportHistoryService.isLimitReached(username, 1)).thenReturn(false);
     when(roleService.getReportLimit(roleDescriptions)).thenReturn(1);
-    when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(true);
+    when(kafkaService.sendReportHistory(any(ReportMessage.class))).thenReturn(true);
     Assertions.assertTrue(
         poolReportService.create(
             request,

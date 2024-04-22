@@ -55,6 +55,7 @@ import org.cardanofoundation.explorer.common.entity.explorer.ReportHistory;
 import org.cardanofoundation.explorer.common.entity.explorer.StakeKeyReportHistory;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.model.ReportMessage;
 
 @ExtendWith(MockitoExtension.class)
 public class StakeKeyReportServiceTest {
@@ -164,7 +165,7 @@ public class StakeKeyReportServiceTest {
     when(reportHistoryService.isLimitReached(username, 10)).thenReturn(Boolean.FALSE);
     when(stakeKeyReportMapper.toStakeKeyReportHistoryResponse(expect)).thenReturn(responseExpect);
 
-    when(kafkaService.sendReportHistory(any(ReportHistory.class))).thenReturn(Boolean.TRUE);
+    when(kafkaService.sendReportHistory(any(ReportMessage.class))).thenReturn(Boolean.TRUE);
 
     var responseActual =
         stakeKeyReportService.generateStakeKeyReport(
