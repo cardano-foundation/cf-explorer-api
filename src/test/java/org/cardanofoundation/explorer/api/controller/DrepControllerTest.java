@@ -37,6 +37,7 @@ import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.request.drep.DRepFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
@@ -202,6 +203,33 @@ public class DrepControllerTest {
             content()
                 .string(containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")))
         .andExpect(jsonPath("$.delegators").value(100));
+  }
+
+  @Test
+  void testGetDelegation() throws Exception {
+    String dRepHash = "43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e";
+    DRepDelegatorsResponse dRepDelegatorsResponse =
+        DRepDelegatorsResponse.builder()
+            .stakeAddress("address1")
+            .totalStake(BigInteger.TEN)
+            .build();
+    DRepDelegatorsResponse dRepDelegatorsResponse1 =
+        DRepDelegatorsResponse.builder()
+            .stakeAddress("address2")
+            .totalStake(BigInteger.TEN)
+            .build();
+
+    when(dRepService.getDRepDelegators(any(), any()))
+        .thenReturn(
+            new BaseFilterResponse<>(List.of(dRepDelegatorsResponse, dRepDelegatorsResponse1), 2L));
+    mockMvc
+        .perform(
+            get("/api/v1/dreps/{dRepHashOrDRepId}/get-delegation", dRepHash)
+                .param("dRepHashOrDRepId", dRepHash)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("address1")))
+        .andExpect(jsonPath("$.data[1].stakeAddress").value("address2"));
   }
 
   @Test
