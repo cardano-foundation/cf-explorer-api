@@ -75,6 +75,7 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
             .reportHistory(stakeKeyReportHistory.getReportHistory())
             .timePattern(stakeKeyReportRequest.getTimePattern())
             .zoneOffset(stakeKeyReportRequest.getZoneOffset())
+            .dateFormat(stakeKeyReportRequest.getDateFormat())
             .build();
 
     Boolean isSuccess = kafkaService.sendReportHistory(reportMessage);
