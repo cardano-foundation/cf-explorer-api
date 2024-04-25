@@ -1,1 +1,0 @@
-{"epoch":null,"block":null,"tx":null,"token":null,"validTokenName":false,"address":null,"pool":null,"validPoolName":false,"script":null}

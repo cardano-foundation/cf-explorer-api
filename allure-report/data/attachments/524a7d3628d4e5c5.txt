@@ -1,1 +1,0 @@
-{"data":[{"txHash":"422811c43953c4aa25352b2de75af6490bca5715a360a92c199d30e4c71bc390","blockNo":10109708,"epochSlotNo":146077,"slotNo":119982877,"actions":["POOL_REGISTRATION"],"epochNo":475,"createdAt":"2024/03/27 14:19:28"}],"totalItems":1,"totalPages":1,"currentPage":0,"isDataOverSize":null}

@@ -1,1 +1,0 @@
-{"policyId":"3d67069772c7ff1a14ea648c2de179fb3517759ac48c8f29ed1624ac","totalToken":1,"policyScript":"{\"type\":\"all\",\"scripts\":[{\"type\":\"sig\",\"keyHash\":\"8f1e976f58e8069f69260158033906c163118c94d3489e09e4884baf\"},{\"type\":\"before\",\"slot\":62095772}]}","smartContract":false,"nativeScript":true}

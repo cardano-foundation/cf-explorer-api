@@ -1,1 +1,0 @@
-{"data":[{"time":"2023/05/02 17:22:04","slotNo":91481833,"blockNo":8722618,"amount":"8931404863383","blockIndex":22,"epochNo":409,"txHash":"4b4ca196d524ae3877f772d5f0871e76aeedbf0330d2549178a834158593b299","epochSlotNo":157033}],"totalItems":6,"totalPages":6,"currentPage":0,"isDataOverSize":null}

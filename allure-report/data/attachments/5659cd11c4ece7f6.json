@@ -1,9 +1,0 @@
-{
-    "Accept": "*/*",
-    "User-Agent": "PostmanRuntime/7.36.3",
-    "Cache-Control": "no-cache",
-    "Postman-Token": "474d1527-5123-4740-85f1-91590260c677",
-    "Host": "api.uat.cf-explorer-mainnet.eu-west-1.metadata.dev.cf-deployments.org",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive"
-}

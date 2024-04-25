@@ -1,1 +1,0 @@
-{"data":[{"blockNo":237567,"slotNo":237599,"epochNo":10,"epochSlotNo":21599,"hash":"2a5fd14ba10583ba912ec75e03f24179d187ab7f37dcf769558952c954af2b22","time":"2017/11/17 21:44:31","txCount":0,"totalFees":0,"totalOutput":0,"slotLeader":"888c451ae09a16fed73e4ad2f01437f1baca37178ea2399fc604d90b"}],"totalItems":21601,"totalPages":21601,"currentPage":0,"isDataOverSize":null}

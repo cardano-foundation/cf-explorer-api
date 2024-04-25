@@ -1,1 +1,0 @@
-{"hasRegistration":true,"hasDelegation":true,"hashRewards":true,"hasWithdrawal":true,"hasDeRegistration":true,"totalOperatorRewards":0,"totalDelegatorRewards":290403562}

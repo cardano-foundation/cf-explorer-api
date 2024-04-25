@@ -1,1 +1,0 @@
-{"data":[{"epochNo":450,"amount":3231647221,"time":"2023/11/26 21:44:36","type":"REWARD_WITHDRAWN"}],"totalItems":100,"totalPages":100,"currentPage":0,"isDataOverSize":null}

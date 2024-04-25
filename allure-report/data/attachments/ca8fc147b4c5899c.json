@@ -1,9 +1,0 @@
-{
-    "Accept": "application/vnd.spring-boot.actuator.v3+json",
-    "User-Agent": "PostmanRuntime/7.36.3",
-    "Cache-Control": "no-cache",
-    "Postman-Token": "05084b82-62f0-4f4b-b4e8-2e7c34f27948",
-    "Host": "api.uat.cf-explorer-mainnet.eu-west-1.metadata.dev.cf-deployments.org",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive"
-}

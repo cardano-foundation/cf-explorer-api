@@ -1,1 +1,0 @@
-{"data":[{"poolUpdateId":30902,"txHash":"68b302b1a31a47a4688320635c77440f6d5c2845484f1751ac19eb4f361416c6","fee":190000,"time":"2023/04/30 17:15:36","margin":0.049,"poolHold":null}],"totalItems":1,"totalPages":0,"currentPage":0,"isDataOverSize":null}

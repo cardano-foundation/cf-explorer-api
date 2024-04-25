@@ -1,1 +1,0 @@
-{"data":[{"time":"2024/03/18 07:12:38","stakeAddressId":null,"slotNo":119179667,"txId":null,"fee":null,"blockNo":10070825,"amount":647047,"epochNo":473,"txHash":"65c31f4a03df20ab82c16ce85e0c054776c2163341f0492f62701db1e78d1e14","epochSlotNo":206867}],"totalItems":100,"totalPages":100,"currentPage":0,"isDataOverSize":null}

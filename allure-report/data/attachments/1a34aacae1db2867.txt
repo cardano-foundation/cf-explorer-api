@@ -1,1 +1,0 @@
-{"data":[{"txHash":"1d3e6450acd7bd96039cbceac293f4a2fcfb9832136e2ae9274dae5d6f083f6c","amount":167828950,"fee":173817,"time":"2024/04/09 04:38:25","type":"RECEIVED","status":"SUCCESS"}],"totalItems":519,"totalPages":519,"currentPage":0,"isDataOverSize":null}

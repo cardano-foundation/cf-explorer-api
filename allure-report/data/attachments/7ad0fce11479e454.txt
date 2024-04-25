@@ -1,1 +1,0 @@
-{"stakeAddress":"stake1u9h5g7m75hwhqnesgz0mkdk5qqhnhzpyfwj2l2tm6n28v4s2w8uqq","rewardAvailable":290403562,"hasMemberReward":true,"hasLeaderReward":false}

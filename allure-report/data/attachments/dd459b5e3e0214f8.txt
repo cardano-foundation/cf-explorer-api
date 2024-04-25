@@ -1,1 +1,0 @@
-{"txHash":"0f4b42ddc4434759bb24e8f54c85ca3897240df3d87be670089130e3fff5391c","fee":174301,"deposit":2000000,"time":"2024/04/04 05:48:13","joinDepositPaid":true}

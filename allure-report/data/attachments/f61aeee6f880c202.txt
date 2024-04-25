@@ -1,1 +1,0 @@
-{"address":"addr1zyc5zkajzqtyea4cf5d3y5mlq7fd9yfdz4hq78k3mywg8nhkrew0j6j9qjdde8a5py4m9yyh2mylaal4q899rgptn88qe57mt7","txCount":39530,"balance":3835030624989199,"stakeAddress":"stake1u8mpuh8edfzsfxkun76qj2ajjzt4dj077l6srjj35q4ennsutx4m5","scriptHash":"31415bb210164cf6b84d1b12537f0792d2912d156e0f1ed1d91c83ce","associatedSmartContract":true,"associatedNativeScript":false}

@@ -1,1 +1,0 @@
-{"data":[{"stakeKey":"stake1u9f9v0z5zzlldgx58n8tklphu8mf7h4jvp2j2gddluemnssjfnkzz","balance":63050723599127341,"poolId":"pool1ases3nklh6gyjf74r7dqm89exjfd520z9cefqru959wcccmrdlk","tickerName":"MIN","poolName":"Minswap"}],"totalItems":1,"totalPages":1,"currentPage":0,"isDataOverSize":null}

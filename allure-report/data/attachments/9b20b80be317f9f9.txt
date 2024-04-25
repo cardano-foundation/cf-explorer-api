@@ -1,9 +1,0 @@
-var jsonData = pm.response.json();
-
-pm.test("Status code is 400", function () {
-    pm.response.to.have.status(400);
-});
-
-pm.test("Check errorMessage is Page size should be a positive integer", function () {
-    pm.expect(jsonData.errorMessage).to.include("Page size should be a positive integer" );
-});

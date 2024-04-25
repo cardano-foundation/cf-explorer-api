@@ -1,1 +1,0 @@
-{"no":478,"status":"IN_PROGRESS","blkCount":6737,"outSum":41296370534911299,"txCount":81346,"startTime":"2024/04/09 21:44:51","endTime":"2024/04/14 21:44:51","maxSlot":432000,"rewardsDistributed":null,"account":39456,"syncingProgress":0.31691435185185185}
