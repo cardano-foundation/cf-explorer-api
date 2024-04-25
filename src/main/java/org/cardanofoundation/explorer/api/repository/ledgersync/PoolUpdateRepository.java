@@ -27,15 +27,6 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       value =
           "SELECT sa.view FROM PoolHash ph "
               + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE ph.id = pu2.poolHash.id) "
-              + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-              + "WHERE ph.id = :poolId "
-              + "GROUP BY sa.view")
-  List<String> findRewardAccountByPool(@Param("poolId") Long poolId);
-
-  @Query(
-      value =
-          "SELECT sa.view FROM PoolHash ph "
-              + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id AND pu.id = (SELECT max(pu2.id) FROM PoolUpdate pu2 WHERE ph.id = pu2.poolHash.id) "
               + "JOIN PoolOwner po ON pu.id = po.poolUpdate.id "
               + "JOIN StakeAddress sa ON po.stakeAddress.id = sa.id "
               + "WHERE ph.id  = :poolId ")
@@ -90,25 +81,6 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
               + "WHERE pu.id IN :poolUpdateIds ")
   List<StakeKeyProjection> findOwnerAccountByPoolUpdate(
       @Param("poolUpdateIds") Set<Long> poolUpdateIds);
-
-  @Query(
-      value =
-          "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin "
-              + "FROM PoolHash ph "
-              + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-              + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
-              + "JOIN Block bk ON tx.blockId = bk.id AND (tx.deposit IS NULL OR tx.deposit < (SELECT ep.poolDeposit FROM EpochParam ep WHERE ep.epochNo = bk.epochNo)) "
-              + "WHERE (ph.view = :poolViewOrHash "
-              + "OR ph.hashRaw = :poolViewOrHash) "
-              + "AND (:txHash IS NULL OR tx.hash = :txHash) "
-              + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
-              + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
-  Page<PoolUpdateProjection> findPoolUpdateByPool(
-      @Param("poolViewOrHash") String poolViewOrHash,
-      @Param("txHash") String txHash,
-      @Param("fromDate") Timestamp fromDate,
-      @Param("toDate") Timestamp toDate,
-      Pageable pageable);
 
   @Query(
       value =
@@ -180,26 +152,6 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   @Query(
       value =
           "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin, ep.poolDeposit AS deposit "
-              + "FROM PoolHash ph "
-              + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-              + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
-              + "JOIN Block bk ON tx.blockId = bk.id "
-              + "JOIN EpochParam ep ON ep.epochNo = bk.epochNo AND tx.deposit IS NOT NULL AND tx.deposit >= ep.poolDeposit "
-              + "WHERE (ph.view = :poolViewOrHash "
-              + "OR ph.hashRaw = :poolViewOrHash) "
-              + "AND (:txHash IS NULL OR tx.hash = :txHash) "
-              + "AND (CAST(:fromDate AS timestamp) IS NULL OR bk.time >= :fromDate) "
-              + "AND (CAST(:toDate AS timestamp) IS NULL OR bk.time <= :toDate) ")
-  Page<PoolUpdateProjection> findPoolRegistrationByPool(
-      @Param("poolViewOrHash") String poolViewOrHash,
-      @Param("txHash") String txHash,
-      @Param("fromDate") Timestamp fromDate,
-      @Param("toDate") Timestamp toDate,
-      Pageable pageable);
-
-  @Query(
-      value =
-          "SELECT pu.id AS poolUpdateId, tx.hash AS txHash, tx.fee AS fee, bk.time AS time, pu.margin AS margin, ep.poolDeposit AS deposit "
               + "FROM PoolUpdate pu "
               + "JOIN Tx tx ON pu.registeredTx.id  = tx.id "
               + "JOIN Block bk ON tx.blockId = bk.id "
@@ -214,15 +166,6 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
       @Param("fromDate") Timestamp fromDate,
       @Param("toDate") Timestamp toDate,
       Pageable pageable);
-
-  @Query(
-      value =
-          "SELECT sa.view FROM PoolHash ph "
-              + "JOIN PoolUpdate pu ON ph.id = pu.poolHash.id "
-              + "JOIN StakeAddress sa ON pu.rewardAddr.id = sa.id "
-              + "WHERE ph.view IN :poolViews "
-              + "GROUP BY sa.view")
-  List<String> findRewardAccountByPoolView(@Param("poolViews") Set<String> poolViews);
 
   @Query(
       value =

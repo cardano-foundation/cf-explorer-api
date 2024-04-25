@@ -34,6 +34,4 @@ public interface StakeKeyReportHistoryRepository
       @Param("toDate") Timestamp toDate,
       @Param("username") String username,
       Pageable pageable);
-
-  StakeKeyReportHistory findByReportHistoryId(@Param("reportHistoryId") Long reportHistoryId);
 }

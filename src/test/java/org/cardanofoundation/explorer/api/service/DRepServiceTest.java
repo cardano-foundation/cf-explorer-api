@@ -1,12 +1,16 @@
 package org.cardanofoundation.explorer.api.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import org.mapstruct.factory.Mappers;
@@ -22,7 +26,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.mapper.DRepCertificateMapper;
 import org.cardanofoundation.explorer.api.mapper.DRepMapper;
+import org.cardanofoundation.explorer.api.model.request.drep.DRepFilterRequest;
+import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
+import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
@@ -31,6 +38,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProc
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.impl.DRepServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
@@ -42,6 +50,7 @@ public class DRepServiceTest {
   @Mock VotingProcedureRepository votingProcedureRepository;
   @Mock LatestVotingProcedureRepository latestVotingProcedureRepository;
   @Mock GovernanceActionRepository governanceActionRepository;
+  @Mock EpochService epochService;
   @InjectMocks DRepServiceImpl dRepCertificateService;
 
   @Spy
@@ -159,5 +168,66 @@ public class DRepServiceTest {
     Assertions.assertEquals(2, actual.getNumberOfYesVote());
     Assertions.assertEquals(1, actual.getNumberOfAbstainVotes());
     Assertions.assertEquals(1, actual.getNumberOfNoVotes());
+  }
+
+  @Test
+  void testGetDRepOverview() {
+    EpochSummary epochSummary =
+        EpochSummary.builder().no(100).slot(1000).endTime(LocalDateTime.now().minusDays(5)).build();
+
+    DRepStatusCountProjection projection1 = Mockito.mock(DRepStatusCountProjection.class);
+    when(projection1.getStatus()).thenReturn(DRepStatus.ACTIVE);
+    when(projection1.getCnt()).thenReturn(10L);
+
+    DRepStatusCountProjection projection2 = Mockito.mock(DRepStatusCountProjection.class);
+    when(projection2.getStatus()).thenReturn(DRepStatus.INACTIVE);
+    when(projection2.getCnt()).thenReturn(5L);
+
+    when(drepInfoRepository.getDRepStatusCount()).thenReturn(List.of(projection1, projection2));
+    when(drepInfoRepository.getDelegateCount()).thenReturn(100L);
+    when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
+
+    var actual = dRepCertificateService.getDRepOverview();
+
+    Assertions.assertEquals(10, actual.getActiveDReps());
+    Assertions.assertEquals(5, actual.getInactiveDReps());
+    Assertions.assertEquals(100, actual.getDelegators());
+    Assertions.assertEquals(100, actual.getEpochNo());
+  }
+
+  @Test
+  void testGetDRepListByFilter() {
+    DRepFilterRequest filter =
+        DRepFilterRequest.builder()
+            .activeStakeFrom(BigInteger.ONE)
+            .activeStakeTo(BigInteger.TEN)
+            .votingPowerFrom(0.5)
+            .votingPowerTo(1.0)
+            .drepStatus(DRepStatus.ACTIVE)
+            .build();
+
+    DRepInfo response1 =
+        DRepInfo.builder()
+            .votingPower(0.6)
+            .activeVoteStake(BigInteger.TWO)
+            .status(DRepStatus.ACTIVE)
+            .build();
+
+    DRepInfo response2 =
+        DRepInfo.builder()
+            .votingPower(0.7)
+            .activeVoteStake(BigInteger.TWO)
+            .status(DRepStatus.ACTIVE)
+            .build();
+
+    when(drepInfoRepository.getDRepInfoByFilterRequest(
+            any(), any(), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(response1, response2)));
+
+    var actual = dRepCertificateService.getDRepsByFilter(filter, PageRequest.of(0, 2));
+
+    Assertions.assertEquals(2, actual.getTotalItems());
+    Assertions.assertEquals(0.6, actual.getData().get(0).getVotingPower());
+    Assertions.assertEquals(BigInteger.TWO, actual.getData().get(1).getActiveVoteStake());
   }
 }

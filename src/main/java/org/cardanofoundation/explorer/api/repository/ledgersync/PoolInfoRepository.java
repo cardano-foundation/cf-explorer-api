@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,15 +25,6 @@ public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {
               + "WHERE pi.pool.view IN :poolIds AND pi.fetchedAtEpoch = :epochNo")
   List<PoolInfoKoiosProjection> getPoolInfoKoios(
       @Param("poolIds") Set<String> poolIds, @Param("epochNo") Integer epochNo);
-
-  @Query(
-      value =
-          "SELECT pi.pool.view AS view, pi.activeStake AS activeStake "
-              + "FROM PoolInfo pi "
-              + "WHERE pi.fetchedAtEpoch = :epochNo AND pi.activeStake IS NOT NULL "
-              + "ORDER BY pi.activeStake DESC")
-  List<PoolInfoKoiosProjection> getTopPoolInfoKoios(
-      @Param("epochNo") Integer epochNo, Pageable pageable);
 
   @Query(
       value =

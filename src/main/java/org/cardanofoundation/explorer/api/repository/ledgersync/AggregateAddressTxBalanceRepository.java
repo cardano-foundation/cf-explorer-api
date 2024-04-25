@@ -57,7 +57,4 @@ public interface AggregateAddressTxBalanceRepository
       @Param("stakeAddressId") Long stakeAddressId,
       @Param("from") LocalDate from,
       @Param("to") LocalDate to);
-
-  @Query("select max(a.day) from AggregateAddressTxBalance a")
-  Optional<LocalDate> getMaxDay();
 }

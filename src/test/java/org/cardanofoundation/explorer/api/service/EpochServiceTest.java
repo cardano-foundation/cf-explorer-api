@@ -300,60 +300,12 @@ class EpochServiceTest {
 
   @Test
   void testGetEpochDetailThrowCauseNumberFormatException() {
-    Epoch epoch =
-        Epoch.builder()
-            .era(EraType.ALONZO)
-            .id(1L)
-            .no(1)
-            .blkCount(1)
-            .txCount(2)
-            .fees(BigInteger.ONE)
-            .outSum(BigInteger.valueOf(12L))
-            .maxSlot(12)
-            .startTime(Timestamp.valueOf(LocalDateTime.now()))
-            .endTime(Timestamp.valueOf(LocalDateTime.now()))
-            .build();
-
-    EpochResponse expect =
-        EpochResponse.builder()
-            .no(1)
-            .blkCount(1)
-            .txCount(2)
-            .outSum(BigInteger.valueOf(12L))
-            .maxSlot(12)
-            .status(EpochStatus.IN_PROGRESS)
-            .build();
-
     Assertions.assertThrows(
         BusinessException.class, () -> epochService.getEpochDetail(UUID.randomUUID().toString()));
   }
 
   @Test
   void testGetEpochDetailThrowCauseNotFound() {
-    Epoch epoch =
-        Epoch.builder()
-            .era(EraType.ALONZO)
-            .id(1L)
-            .no(1)
-            .blkCount(1)
-            .txCount(2)
-            .fees(BigInteger.ONE)
-            .outSum(BigInteger.valueOf(12L))
-            .maxSlot(12)
-            .startTime(Timestamp.valueOf(LocalDateTime.now()))
-            .endTime(Timestamp.valueOf(LocalDateTime.now()))
-            .build();
-
-    EpochResponse expect =
-        EpochResponse.builder()
-            .no(1)
-            .blkCount(1)
-            .txCount(2)
-            .outSum(BigInteger.valueOf(12L))
-            .maxSlot(12)
-            .status(EpochStatus.IN_PROGRESS)
-            .build();
-
     Assertions.assertThrows(BusinessException.class, () -> epochService.getEpochDetail("0"));
   }
 
@@ -416,8 +368,6 @@ class EpochServiceTest {
 
   @Test
   void testGetCurrentEpochSummary_thenReturn() {
-    LocalDateTime now = LocalDateTime.now();
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss");
 
     EpochSummaryProjection esp = Mockito.mock(EpochSummaryProjection.class);
     when(esp.getStartTime()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
