@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.model.request.governanceAction;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -9,12 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
-import org.cardanofoundation.explorer.common.validation.date.DatePattern;
-import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 
 @Getter
 @Setter
@@ -36,9 +36,9 @@ public class GovernanceActionFilter {
 
   @NotNull VoterType voterType;
 
-  @DateValid(pattern = DatePattern.YYYY_MM_DD)
-  private Date fromDate;
+  @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss")
+  private LocalDateTime fromDate;
 
-  @DateValid(pattern = DatePattern.YYYY_MM_DD)
-  private Date toDate;
+  @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss")
+  private LocalDateTime toDate;
 }
