@@ -1,7 +1,7 @@
 package org.cardanofoundation.explorer.api.model.request.drep;
 
 import java.math.BigInteger;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
-import org.cardanofoundation.explorer.common.validation.date.DatePattern;
-import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 
 @Getter
 @Setter
@@ -31,9 +31,9 @@ public class DRepFilterRequest {
 
   private DRepStatus drepStatus;
 
-  @DateValid(pattern = DatePattern.YYYY_MM_DD)
-  private Date fromDate;
+  @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss")
+  private LocalDateTime fromDate;
 
-  @DateValid(pattern = DatePattern.YYYY_MM_DD)
-  private Date toDate;
+  @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss")
+  private LocalDateTime toDate;
 }
