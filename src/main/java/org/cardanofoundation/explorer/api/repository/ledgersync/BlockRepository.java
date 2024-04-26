@@ -15,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolCountProjection;
+import org.cardanofoundation.explorer.api.projection.PoolMintBlockProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block_;
 
@@ -94,4 +95,16 @@ public interface BlockRepository
           + " WHERE e.era != org.cardanofoundation.explorer.common.entity.enumeration.EraType.BYRON"
           + " ORDER BY b.blockNo ASC LIMIT 1")
   Optional<Block> findFirstShellyBlock();
+
+  @Query(
+      value =
+          """
+          select b.blockNo as blockNo, ph.view as poolView, po.poolName as poolName, po.tickerName as poolTicker
+          from Block b
+          left join SlotLeader sl on sl.id = b.slotLeaderId
+          left join PoolHash ph on ph.id = sl.poolHashId
+          left join PoolOfflineData po on ph.id = po.poolId AND po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.poolId = ph.id)
+          where b.blockNo = :blockNo
+      """)
+  PoolMintBlockProjection getPoolInfoThatMintedBlock(@Param("blockNo") Long blockNo);
 }
