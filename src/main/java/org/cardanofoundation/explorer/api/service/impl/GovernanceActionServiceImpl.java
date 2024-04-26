@@ -118,18 +118,13 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
     fromDate = fromDate < 0 ? 0 : fromDate;
-    long toDate =
-        Timestamp.from(
-                    LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
-                        .toInstant(ZoneOffset.UTC))
-                .getTime()
-            / 1000;
+    long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(governanceActionFilter.getFromDate())) {
-      fromDate = Timestamp.from(governanceActionFilter.getFromDate().toInstant()).getTime() / 1000;
+      fromDate = governanceActionFilter.getFromDate().toEpochSecond(ZoneOffset.UTC);
     }
     if (Objects.nonNull(governanceActionFilter.getToDate())) {
-      long to = Timestamp.from(governanceActionFilter.getToDate().toInstant()).getTime() / 1000;
+      long to = governanceActionFilter.getToDate().toEpochSecond(ZoneOffset.UTC);
       toDate = Math.min(to, toDate);
     }
 
