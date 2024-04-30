@@ -14,12 +14,6 @@ public interface PoolListProjection {
 
   BigInteger getPledge();
 
-  BigInteger getFee();
-
-  Double getMargin();
-
-  Integer getNumberDelegators();
-
   Integer getEpochBlock();
 
   Integer getLifetimeBlock();
@@ -27,4 +21,8 @@ public interface PoolListProjection {
   BigInteger getPoolSize();
 
   Double getSaturation();
+
+  Double getVotingPower();
+
+  Double getGovernanceParticipationRate();
 }

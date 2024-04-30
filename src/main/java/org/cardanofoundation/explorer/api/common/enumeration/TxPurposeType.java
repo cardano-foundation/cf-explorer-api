@@ -6,6 +6,8 @@ public enum TxPurposeType {
   MINT,
   CERT,
   REWARD,
+  VOTE,
+  PROPOSE,
   ANY, // all types above
   NO_TX_PURPOSE // no tx purpose
 }

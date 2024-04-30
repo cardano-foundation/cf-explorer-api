@@ -175,7 +175,8 @@ public class SearchServiceImpl implements SearchService {
     if (Objects.nonNull(script)) {
       boolean isSmartContract =
           ScriptType.PLUTUSV1.equals(script.getType())
-              || ScriptType.PLUTUSV2.equals(script.getType());
+              || ScriptType.PLUTUSV2.equals(script.getType())
+              || ScriptType.PLUTUSV3.equals(script.getType());
 
       ScriptSearchResponse scriptSearchResponse =
           ScriptSearchResponse.builder().scriptHash(script.getHash()).build();

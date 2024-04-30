@@ -274,9 +274,10 @@ public class DelegationServiceImpl implements DelegationService {
       String queryParam, Pageable pageable, Set<Long> retiredIds, int epochNo) {
     List<String> sortProperties = pageable.getSort().stream().map(Sort.Order::getProperty).toList();
     boolean isSortedOnAggTable =
-        sortProperties.contains("numberDelegators")
-            || sortProperties.contains("epochBlock")
-            || sortProperties.contains("lifetimeBlock");
+        sortProperties.contains("epochBlock")
+            || sortProperties.contains("lifetimeBlock")
+            || sortProperties.contains("votingPower")
+            || sortProperties.contains("governanceParticipationRate");
     boolean isQueryEmpty = DataUtil.isNullOrEmpty(queryParam);
     boolean isKoiOs = fetchRewardDataService.useKoios();
     Page<PoolListProjection> poolInfoProjections;
@@ -338,16 +339,26 @@ public class DelegationServiceImpl implements DelegationService {
 
     List<PoolResponse> poolResponseList =
         mapAggPoolInfoToPoolResponse(retiredIds, poolListProjections);
-    if (sortProperties.contains("numberDelegators")) {
-      poolResponseList.sort(
-          Comparator.comparing(PoolResponse::getNumberDelegators)
-              .thenComparing(PoolResponse::getPoolId));
-    } else if (sortProperties.contains("epochBlock")) {
+    Set<Long> idsInList =
+        poolResponseList.stream().map(PoolResponse::getId).collect(Collectors.toSet());
+    retiredIds.retainAll(idsInList);
+    if (sortProperties.contains("epochBlock")) {
       poolResponseList.sort(
           Comparator.comparing(PoolResponse::getEpochBlock).thenComparing(PoolResponse::getPoolId));
     } else if (sortProperties.contains("lifetimeBlock")) {
       poolResponseList.sort(
           Comparator.comparing(PoolResponse::getLifetimeBlock)
+              .thenComparing(PoolResponse::getPoolId));
+    } else if (sortProperties.contains("votingPower")) {
+      poolResponseList.sort(
+          Comparator.comparing(
+                  PoolResponse::getVotingPower, Comparator.nullsFirst(Comparator.naturalOrder()))
+              .thenComparing(PoolResponse::getPoolId));
+    } else if (sortProperties.contains("governanceParticipationRate")) {
+      poolResponseList.sort(
+          Comparator.comparing(
+                  PoolResponse::getGovernanceParticipationRate,
+                  Comparator.nullsFirst(Comparator.naturalOrder()))
               .thenComparing(PoolResponse::getPoolId));
     }
 
@@ -376,12 +387,15 @@ public class DelegationServiceImpl implements DelegationService {
    */
   private List<PoolResponse> mapAggPoolInfoToPoolResponse(
       Set<Long> retiredIds, List<PoolListProjection> poolListProjections) {
-    List<Long> poolIds = poolListProjections.stream().map(PoolListProjection::getPoolId).toList();
+    List<Long> poolIds =
+        new ArrayList<>(poolListProjections.stream().map(PoolListProjection::getPoolId).toList());
     Map<Long, AggregatePoolInfo> aggPoolInfoMap =
         aggregatePoolInfoRepository.getAllByPoolIdIn(poolIds).stream()
             .collect(Collectors.toMap(AggregatePoolInfo::getPoolId, Function.identity()));
 
+    poolIds.removeIf(id -> !aggPoolInfoMap.containsKey(id));
     return poolListProjections.stream()
+        .filter(projection -> aggPoolInfoMap.containsKey(projection.getPoolId()))
         .map(
             projection -> {
               AggregatePoolInfo aggPoolInfo = aggPoolInfoMap.get(projection.getPoolId());
@@ -391,8 +405,6 @@ public class DelegationServiceImpl implements DelegationService {
                   .poolName(projection.getPoolName())
                   .tickerName(projection.getTickerName())
                   .pledge(projection.getPledge())
-                  .feeAmount(projection.getFee())
-                  .feePercent(projection.getMargin())
                   .poolSize(
                       BigInteger.valueOf(-1).equals(projection.getPoolSize())
                           ? null
@@ -401,8 +413,15 @@ public class DelegationServiceImpl implements DelegationService {
                       Double.valueOf(-1).equals(projection.getSaturation())
                           ? null
                           : projection.getSaturation())
-                  .numberDelegators(aggPoolInfo.getDelegatorCount())
                   .lifetimeBlock(aggPoolInfo.getBlockLifeTime())
+                  .votingPower(
+                      Double.valueOf(-1).equals(aggPoolInfo.getVotingPower())
+                          ? null
+                          : aggPoolInfo.getVotingPower())
+                  .governanceParticipationRate(
+                      Double.valueOf(-1).equals(aggPoolInfo.getGovernanceParticipationRate())
+                          ? null
+                          : aggPoolInfo.getGovernanceParticipationRate())
                   .epochBlock(aggPoolInfo.getBlockInEpoch())
                   .retired(retiredIds.contains(projection.getPoolId()))
                   .build();
@@ -420,9 +439,9 @@ public class DelegationServiceImpl implements DelegationService {
                 ? poolHashRepository.findAllByPoolIdIn(poolIds, epochNo)
                 : poolHashRepository.findAllByPoolIdIn(poolIds))
             .stream().collect(Collectors.toMap(PoolListProjection::getPoolId, Function.identity()));
-
     poolResponseList =
         poolListProjections.stream()
+            .filter(projection -> poolListProjectionMap.containsKey(projection.getPoolId()))
             .map(
                 pool -> {
                   PoolListProjection poolListProjection =
@@ -433,8 +452,6 @@ public class DelegationServiceImpl implements DelegationService {
                       .poolName(poolListProjection.getPoolName())
                       .tickerName(poolListProjection.getTickerName())
                       .pledge(poolListProjection.getPledge())
-                      .feeAmount(poolListProjection.getFee())
-                      .feePercent(poolListProjection.getMargin())
                       .poolSize(
                           BigInteger.valueOf(-1).equals(poolListProjection.getPoolSize())
                               ? null
@@ -443,10 +460,17 @@ public class DelegationServiceImpl implements DelegationService {
                           Double.valueOf(-1).equals(poolListProjection.getSaturation())
                               ? null
                               : poolListProjection.getSaturation())
-                      .numberDelegators(pool.getNumberDelegators())
                       .lifetimeBlock(pool.getLifetimeBlock())
                       .epochBlock(pool.getEpochBlock())
                       .retired(retiredIds.contains(pool.getPoolId()))
+                      .votingPower(
+                          Double.valueOf(-1).equals(pool.getVotingPower())
+                              ? null
+                              : pool.getVotingPower())
+                      .governanceParticipationRate(
+                          Double.valueOf(-1).equals(pool.getGovernanceParticipationRate())
+                              ? null
+                              : pool.getGovernanceParticipationRate())
                       .build();
                 })
             .collect(Collectors.toList());
@@ -526,8 +550,6 @@ public class DelegationServiceImpl implements DelegationService {
                     PoolResponse.builder()
                         .poolId(pool.getPoolView())
                         .poolName(pool.getPoolName())
-                        .feeAmount(pool.getFee())
-                        .feePercent(pool.getMargin())
                         .pledge(pool.getPledge())
                         .id(pool.getPoolId())
                         .epochBlock(blockEpochsMap.get(pool.getPoolId()))
