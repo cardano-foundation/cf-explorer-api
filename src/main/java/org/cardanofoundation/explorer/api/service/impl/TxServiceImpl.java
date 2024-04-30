@@ -835,9 +835,19 @@ public class TxServiceImpl implements TxService {
                 case SPEND -> setSpendContractResponse(contractResponse);
                 case REWARD -> setRewardContractResponse(txResponse, contractResponse);
                 case CERT -> setCertContractResponse(contractResponse);
+                case VOTING -> setVoteContractResponse(contractResponse);
+                case PROPOSING -> setProposeContractResponse(contractResponse);
               }
             });
     return contractResponses;
+  }
+
+  private void setVoteContractResponse(ContractResponse contractResponse) {
+    // TODO
+  }
+
+  private void setProposeContractResponse(ContractResponse contractResponse) {
+    // TODO
   }
 
   /**

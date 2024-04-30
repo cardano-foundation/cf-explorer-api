@@ -30,12 +30,6 @@ public class PoolResponse implements Serializable {
   private String tickerName;
 
   private BigInteger poolSize;
-
-  @JsonSerialize(using = PercentSerializer.class)
-  private Double feePercent;
-
-  private BigInteger feeAmount;
-
   private BigInteger pledge;
 
   @JsonSerialize(using = PercentSerializer.class)
@@ -47,11 +41,13 @@ public class PoolResponse implements Serializable {
 
   private BigInteger reserves;
 
-  private Integer numberDelegators;
-
   private Integer epochBlock;
 
   private Integer lifetimeBlock;
+
+  private Double votingPower;
+
+  private Double governanceParticipationRate;
 
   private boolean retired;
 }
