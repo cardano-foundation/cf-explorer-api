@@ -26,6 +26,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResp
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepRangeValuesResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
@@ -125,5 +126,14 @@ public class DRepController {
 
     return ResponseEntity.ok(
         dRepService.getDRepsByFilter(dRepFilterRequest, pagination.toPageable()));
+  }
+
+  @GetMapping("/range-values-for-filter")
+  @LogMessage
+  @Operation(
+      summary = "Get range value to filter on DRep overview page",
+      tags = {"dRep"})
+  public ResponseEntity<DRepRangeValuesResponse> getDRepRangeValues() {
+    return ResponseEntity.ok(dRepService.getDRepRangeValues());
   }
 }
