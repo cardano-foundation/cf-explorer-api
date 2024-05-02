@@ -4,9 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,8 +122,6 @@ public class GovActionServiceTest {
             .voteType(Vote.ANY)
             .actionStatus(GovActionStatus.ANY)
             .actionType(GovActionType.INFO_ACTION)
-            .fromDate(Date.from(Instant.now().minus(5, ChronoUnit.DAYS)))
-            .toDate(Date.from(Instant.now()))
             .build();
     Long slot = 0L;
     when(poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(poolHash)).thenReturn(slot);
