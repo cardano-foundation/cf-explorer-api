@@ -26,6 +26,7 @@ import org.cardanofoundation.explorer.api.mapper.BlockMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
+import org.cardanofoundation.explorer.api.projection.PoolMintBlockProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CustomBlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.SlotLeaderRepository;
@@ -77,10 +78,15 @@ public class BlockServiceImpl implements BlockService {
   private BlockResponse getBlockResponse(Block block) {
     BlockResponse blockResponse = blockMapper.blockToBlockResponse(block);
     List<Tx> txList = txRepository.findAllByBlock(block);
+    PoolMintBlockProjection poolMintBlockProjection =
+        blockRepository.getPoolInfoThatMintedBlock(block.getBlockNo());
     blockResponse.setTotalOutput(
         txList.stream().map(Tx::getOutSum).reduce(BigInteger.ZERO, BigInteger::add));
     blockResponse.setTotalFees(
         txList.stream().map(Tx::getFee).reduce(BigInteger.ZERO, BigInteger::add));
+    blockResponse.setPoolName(poolMintBlockProjection.getPoolName());
+    blockResponse.setPoolView(poolMintBlockProjection.getPoolView());
+    blockResponse.setPoolTicker(poolMintBlockProjection.getPoolTicker());
     Integer currentBlockNo =
         blockRepository
             .findCurrentBlock()

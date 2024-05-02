@@ -33,4 +33,10 @@ public class BlockResponse {
   private String slotLeader;
 
   private Integer confirmation;
+
+  private String poolView;
+
+  private String poolTicker;
+
+  private String poolName;
 }
