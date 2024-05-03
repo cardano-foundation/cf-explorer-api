@@ -13,7 +13,6 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 
 public interface ScriptService {
@@ -28,8 +27,8 @@ public interface ScriptService {
   BaseFilterResponse<TokenFilterResponse> getNativeScriptTokens(
       String scriptHash, Pageable pageable);
 
-  BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(
-      String scriptHash, Pageable pageable);
+  //  BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(
+  //      String scriptHash, Pageable pageable);
 
   BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(
       SmartContractFilterRequest filterRequest, Pageable pageable);

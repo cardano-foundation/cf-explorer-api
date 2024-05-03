@@ -28,7 +28,6 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.PolicyService;
 
@@ -84,17 +83,17 @@ public class PolicyControllerTest {
         .andExpect(jsonPath("$").exists());
   }
 
-  @Test
-  void testGetHolders_thenReturn() throws Exception {
-    String policyId = "1";
-    Pageable pageable = PageRequest.of(0, 10);
-    BaseFilterResponse<TokenAddressResponse> response = new BaseFilterResponse<>(List.of(), 0);
-
-    when(policyService.getHolders(policyId, pageable)).thenReturn(response);
-
-    mockMvc
-        .perform(get("/api/v1/policies/{policyId}/holders", policyId))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").exists());
-  }
+  //  @Test
+  //  void testGetHolders_thenReturn() throws Exception {
+  //    String policyId = "1";
+  //    Pageable pageable = PageRequest.of(0, 10);
+  //    BaseFilterResponse<TokenAddressResponse> response = new BaseFilterResponse<>(List.of(), 0);
+  //
+  //    when(policyService.getHolders(policyId, pageable)).thenReturn(response);
+  //
+  //    mockMvc
+  //        .perform(get("/api/v1/policies/{policyId}/holders", policyId))
+  //        .andExpect(status().isOk())
+  //        .andExpect(jsonPath("$").exists());
+  //  }
 }

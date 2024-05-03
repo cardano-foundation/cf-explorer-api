@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import jakarta.validation.Valid;
@@ -18,10 +17,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
@@ -81,42 +78,43 @@ public class TokenController {
     return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pagination.toPageable()));
   }
 
-  @GetMapping("/{tokenId}/top_holders")
-  @LogMessage
-  @Operation(summary = "Filter holders by token")
-  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
-      @PathVariable
-          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
-          String tokenId,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-    return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pagination.toPageable()));
-  }
+  //  @GetMapping("/{tokenId}/top_holders")
+  //  @LogMessage
+  //  @Operation(summary = "Filter holders by token")
+  //  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
+  //      @PathVariable
+  //          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+  //          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+  //          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
+  //          String tokenId,
+  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+  //    return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pagination.toPageable()));
+  //  }
 
-  @GetMapping("/{tokenId}/txs")
-  @LogMessage
-  @Operation(summary = "Filter transaction by token")
-  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-      @PathVariable
-          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
-          String tokenId,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-    return ResponseEntity.ok(txService.getTransactionsByToken(tokenId, pagination.toPageable()));
-  }
+  //  @GetMapping("/{tokenId}/txs")
+  //  @LogMessage
+  //  @Operation(summary = "Filter transaction by token")
+  //  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
+  //      @PathVariable
+  //          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+  //          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+  //          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
+  //          String tokenId,
+  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+  //    return ResponseEntity.ok(txService.getTransactionsByToken(tokenId,
+  // pagination.toPageable()));
+  //  }
 
-  @GetMapping("/analytics/{tokenId}/{type}")
-  @LogMessage
-  @Operation(summary = "Filter transaction by token")
-  public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
-      @PathVariable
-          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
-          String tokenId,
-      @PathVariable @Parameter(description = "Type analytics") AnalyticType type) {
-    return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
-  }
+  //  @GetMapping("/analytics/{tokenId}/{type}")
+  //  @LogMessage
+  //  @Operation(summary = "Filter transaction by token")
+  //  public ResponseEntity<List<TokenVolumeAnalyticsResponse>> getTokenVolumeAnalytics(
+  //      @PathVariable
+  //          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+  //          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+  //          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
+  //          String tokenId,
+  //      @PathVariable @Parameter(description = "Type analytics") AnalyticType type) {
+  //    return ResponseEntity.ok(tokenService.getTokenVolumeAnalytic(tokenId, type));
+  //  }
 }

@@ -26,7 +26,6 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo_;
@@ -93,17 +92,17 @@ public class ScriptController {
         scriptService.getNativeScriptTokens(scriptHash, pagination.toPageable()));
   }
 
-  @GetMapping("/native-scripts/{scriptHash}/holders")
-  @LogMessage
-  @Operation(
-      summary = "Get holders by policy",
-      description = "Get all holders of all tokens of policy")
-  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
-      @PathVariable @Parameter(description = "The native script hash") String scriptHash,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-    return ResponseEntity.ok(
-        scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
-  }
+  //  @GetMapping("/native-scripts/{scriptHash}/holders")
+  //  @LogMessage
+  //  @Operation(
+  //      summary = "Get holders by policy",
+  //      description = "Get all holders of all tokens of policy")
+  //  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
+  //      @PathVariable @Parameter(description = "The native script hash") String scriptHash,
+  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+  //    return ResponseEntity.ok(
+  //        scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
+  //  }
 
   @GetMapping("/contracts")
   public ResponseEntity<BaseFilterResponse<SmartContractFilterResponse>> getSmartContracts(

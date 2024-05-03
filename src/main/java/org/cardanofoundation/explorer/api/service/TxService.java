@@ -49,7 +49,8 @@ public interface TxService {
    * @param pageable page information
    * @return list transaction information in this page
    */
-  BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address, Pageable pageable);
+  //  BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(String address, Pageable
+  // pageable);
 
   /**
    * Get transaction by token
@@ -58,12 +59,14 @@ public interface TxService {
    * @param pageable page information
    * @return list transaction of token in this page
    */
-  BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId, Pageable pageable);
+  //  BaseFilterResponse<TxFilterResponse> getTransactionsByToken(String tokenId, Pageable
+  // pageable);
 
   /**
    * @param stakeKey stake key view value
    * @param pageable page information
    * @return list transaction of stake in this page
    */
-  BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable pageable);
+  //  BaseFilterResponse<TxFilterResponse> getTransactionsByStake(String stakeKey, Pageable
+  // pageable);
 }

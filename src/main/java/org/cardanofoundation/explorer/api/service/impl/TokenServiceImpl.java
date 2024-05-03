@@ -1,16 +1,12 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,26 +24,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.apache.commons.lang3.StringUtils;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
@@ -56,20 +44,16 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
-import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.MetadataCIP25Utils;
 import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
-import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressToken;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -80,9 +64,9 @@ public class TokenServiceImpl implements TokenService {
   private final MultiAssetRepository multiAssetRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final AssetMetadataRepository assetMetadataRepository;
-  private final AddressTokenRepository addressTokenRepository;
+  //  private final AddressTokenRepository addressTokenRepository;
   private final AddressRepository addressRepository;
-  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
+  //  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final ScriptRepository scriptRepository;
 
@@ -227,99 +211,103 @@ public class TokenServiceImpl implements TokenService {
     return new BaseFilterResponse<>(maTxMints.map(maTxMintMapper::fromMaTxMintToTokenMintTx));
   }
 
-  @Override
-  public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
-    MultiAsset multiAsset =
-        multiAssetRepository
-            .findByFingerprint(tokenId)
-            .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
-    List<AddressTokenProjection> tokenAddresses =
-        addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
+  //  @Override
+  //  public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable
+  // pageable) {
+  //    MultiAsset multiAsset =
+  //        multiAssetRepository
+  //            .findByFingerprint(tokenId)
+  //            .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
+  //    List<AddressTokenProjection> tokenAddresses =
+  //        addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
+  //
+  //    var numberOfHoldersHaveStakeKey =
+  //
+  // addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(multiAsset).orElse(0L);
+  //    var numberOfHoldersNotHaveStakeKe =
+  //        addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset).orElse(0L);
+  //    var numberOfHolder = numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe;
+  //    Set<Long> stakeAddressIds =
+  //        tokenAddresses.stream()
+  //            .map(AddressTokenProjection::getAddressId)
+  //            .filter(addressId -> addressId > 0L)
+  //            .collect(Collectors.toSet());
+  //    List<StakeAddress> stakeAddressList = stakeAddressRepository.findByIdIn(stakeAddressIds);
+  //    Map<Long, StakeAddress> stakeAddressMap =
+  //        stakeAddressList.stream()
+  //            .collect(Collectors.toMap(StakeAddress::getId, Function.identity()));
+  //    Set<Long> addressIds =
+  //        tokenAddresses.stream()
+  //            .filter(item -> item.getAddressId() < 0L)
+  //            .map(item -> item.getAddressId() * -1L)
+  //            .collect(Collectors.toSet());
+  //    List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
+  //    Map<Long, Address> addressMap =
+  //        addressList.stream().collect(Collectors.toMap(Address::getId, Function.identity()));
+  //    List<TokenAddressResponse> tokenAddressResponses =
+  //        tokenAddresses.stream().map(tokenMapper::fromAddressTokenProjection).toList();
+  //    tokenAddressResponses.forEach(
+  //        tokenAddress -> {
+  //          if (tokenAddress.getAddressId() < 0L) {
+  //            tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId() *
+  // -1L).getAddress());
+  //            tokenAddress.setAddressType(AddressType.PAYMENT_ADDRESS);
+  //          } else {
+  //            tokenAddress.setAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
+  //            tokenAddress.setAddressType(AddressType.STAKE_ADDRESS);
+  //          }
+  //          tokenAddress.setAddressId(null);
+  //        });
+  //    Page<TokenAddressResponse> response =
+  //        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolder);
+  //    return new BaseFilterResponse<>(response);
+  //  }
 
-    var numberOfHoldersHaveStakeKey =
-        addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(multiAsset).orElse(0L);
-    var numberOfHoldersNotHaveStakeKe =
-        addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset).orElse(0L);
-    var numberOfHolder = numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe;
-    Set<Long> stakeAddressIds =
-        tokenAddresses.stream()
-            .map(AddressTokenProjection::getAddressId)
-            .filter(addressId -> addressId > 0L)
-            .collect(Collectors.toSet());
-    List<StakeAddress> stakeAddressList = stakeAddressRepository.findByIdIn(stakeAddressIds);
-    Map<Long, StakeAddress> stakeAddressMap =
-        stakeAddressList.stream()
-            .collect(Collectors.toMap(StakeAddress::getId, Function.identity()));
-    Set<Long> addressIds =
-        tokenAddresses.stream()
-            .filter(item -> item.getAddressId() < 0L)
-            .map(item -> item.getAddressId() * -1L)
-            .collect(Collectors.toSet());
-    List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
-    Map<Long, Address> addressMap =
-        addressList.stream().collect(Collectors.toMap(Address::getId, Function.identity()));
-    List<TokenAddressResponse> tokenAddressResponses =
-        tokenAddresses.stream().map(tokenMapper::fromAddressTokenProjection).toList();
-    tokenAddressResponses.forEach(
-        tokenAddress -> {
-          if (tokenAddress.getAddressId() < 0L) {
-            tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId() * -1L).getAddress());
-            tokenAddress.setAddressType(AddressType.PAYMENT_ADDRESS);
-          } else {
-            tokenAddress.setAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
-            tokenAddress.setAddressType(AddressType.STAKE_ADDRESS);
-          }
-          tokenAddress.setAddressId(null);
-        });
-    Page<TokenAddressResponse> response =
-        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolder);
-    return new BaseFilterResponse<>(response);
-  }
-
-  @Override
-  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(
-      String tokenId, AnalyticType type) {
-
-    MultiAsset multiAsset =
-        multiAssetRepository
-            .findByFingerprint(tokenId)
-            .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
-
-    List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
-
-    List<TokenVolumeAnalyticsResponse> responses = new ArrayList<>();
-    if (AnalyticType.ONE_DAY.equals(type)) {
-      for (int i = 0; i < dates.size() - 1; i++) {
-        BigInteger balance =
-            addressTokenRepository
-                .sumBalanceBetweenTx(
-                    multiAsset,
-                    Timestamp.valueOf(dates.get(i)),
-                    Timestamp.valueOf(dates.get(i + 1)))
-                .orElse(BigInteger.ZERO);
-        responses.add(new TokenVolumeAnalyticsResponse(dates.get(i), balance));
-      }
-    } else {
-      dates.remove(dates.size() - 1);
-      List<AggregateAddressToken> aggregateAddressTokens =
-          aggregateAddressTokenRepository.findAllByIdentAndDayBetween(
-              multiAsset.getId(),
-              dates.get(0).toLocalDate(),
-              dates.get(dates.size() - 1).toLocalDate());
-      Map<LocalDate, BigInteger> aggregateAddressTokenMap =
-          StreamUtil.toMap(
-              aggregateAddressTokens,
-              AggregateAddressToken::getDay,
-              AggregateAddressToken::getBalance);
-      for (LocalDateTime date : dates) {
-        TokenVolumeAnalyticsResponse tokenVolume =
-            new TokenVolumeAnalyticsResponse(
-                date, aggregateAddressTokenMap.getOrDefault(date.toLocalDate(), BigInteger.ZERO));
-        responses.add(tokenVolume);
-      }
-    }
-    return responses;
-  }
+  //  @Override
+  //  public List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(
+  //      String tokenId, AnalyticType type) {
+  //
+  //    MultiAsset multiAsset =
+  //        multiAssetRepository
+  //            .findByFingerprint(tokenId)
+  //            .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
+  //
+  //    List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
+  //
+  //    List<TokenVolumeAnalyticsResponse> responses = new ArrayList<>();
+  //    if (AnalyticType.ONE_DAY.equals(type)) {
+  //      for (int i = 0; i < dates.size() - 1; i++) {
+  //        BigInteger balance =
+  //            addressTokenRepository
+  //                .sumBalanceBetweenTx(
+  //                    multiAsset,
+  //                    Timestamp.valueOf(dates.get(i)),
+  //                    Timestamp.valueOf(dates.get(i + 1)))
+  //                .orElse(BigInteger.ZERO);
+  //        responses.add(new TokenVolumeAnalyticsResponse(dates.get(i), balance));
+  //      }
+  //    } else {
+  //      dates.remove(dates.size() - 1);
+  //      List<AggregateAddressToken> aggregateAddressTokens =
+  //          aggregateAddressTokenRepository.findAllByIdentAndDayBetween(
+  //              multiAsset.getId(),
+  //              dates.get(0).toLocalDate(),
+  //              dates.get(dates.size() - 1).toLocalDate());
+  //      Map<LocalDate, BigInteger> aggregateAddressTokenMap =
+  //          StreamUtil.toMap(
+  //              aggregateAddressTokens,
+  //              AggregateAddressToken::getDay,
+  //              AggregateAddressToken::getBalance);
+  //      for (LocalDateTime date : dates) {
+  //        TokenVolumeAnalyticsResponse tokenVolume =
+  //            new TokenVolumeAnalyticsResponse(
+  //                date, aggregateAddressTokenMap.getOrDefault(date.toLocalDate(),
+  // BigInteger.ZERO));
+  //        responses.add(tokenVolume);
+  //      }
+  //    }
+  //    return responses;
+  //  }
 
   private void setTxMetadataJson(TokenResponse tokenResponse, MultiAsset multiAsset) {
     if (multiAsset.getSupply().equals(BigInteger.ONE)

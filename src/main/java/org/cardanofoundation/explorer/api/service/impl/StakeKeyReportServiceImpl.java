@@ -27,7 +27,6 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
@@ -46,8 +45,6 @@ import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
 import org.cardanofoundation.explorer.common.entity.explorer.StakeKeyReportHistory;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
-import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
-import org.cardanofoundation.explorer.common.model.ReportMessage;
 
 @Service
 @RequiredArgsConstructor
@@ -66,25 +63,25 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private final ReportHistoryService reportHistoryService;
   private final RoleService roleService;
 
-  @Override
-  public StakeKeyReportHistoryResponse generateStakeKeyReport(
-      StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal) {
-    StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, userPrincipal);
-    ReportMessage reportMessage =
-        ReportMessage.builder()
-            .reportHistory(stakeKeyReportHistory.getReportHistory())
-            .timePattern(stakeKeyReportRequest.getTimePattern())
-            .zoneOffset(stakeKeyReportRequest.getZoneOffset())
-            .dateFormat(stakeKeyReportRequest.getDateFormat())
-            .build();
-
-    Boolean isSuccess = kafkaService.sendReportHistory(reportMessage);
-    if (Boolean.FALSE.equals(isSuccess)) {
-      stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
-      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
-    }
-    return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
-  }
+  //  @Override
+  //  public StakeKeyReportHistoryResponse generateStakeKeyReport(
+  //      StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal) {
+  //    StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, userPrincipal);
+  //    ReportMessage reportMessage =
+  //        ReportMessage.builder()
+  //            .reportHistory(stakeKeyReportHistory.getReportHistory())
+  //            .timePattern(stakeKeyReportRequest.getTimePattern())
+  //            .zoneOffset(stakeKeyReportRequest.getZoneOffset())
+  //            .dateFormat(stakeKeyReportRequest.getDateFormat())
+  //            .build();
+  //
+  //    Boolean isSuccess = kafkaService.sendReportHistory(reportMessage);
+  //    if (Boolean.FALSE.equals(isSuccess)) {
+  //      stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
+  //      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
+  //    }
+  //    return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
+  //  }
 
   @Transactional
   public StakeKeyReportHistory save(
@@ -267,16 +264,16 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
         stakeKey, stakeLifeCycleFilterRequest, pageable);
   }
 
-  @Override
-  public BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(
-      Long reportId, String username, Pageable pageable) {
-    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
-    String stakeKey = stakeKeyReportHistory.getStakeKey();
-    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest =
-        getStakeLifeCycleFilterRequest(stakeKeyReportHistory);
-    return stakeKeyLifeCycleService.getStakeWalletActivitiesByDateRange(
-        stakeKey, stakeLifeCycleFilterRequest, pageable);
-  }
+  //  @Override
+  //  public BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(
+  //      Long reportId, String username, Pageable pageable) {
+  //    StakeKeyReportHistory stakeKeyReportHistory = getStakeKeyReportHistory(reportId, username);
+  //    String stakeKey = stakeKeyReportHistory.getStakeKey();
+  //    StakeLifeCycleFilterRequest stakeLifeCycleFilterRequest =
+  //        getStakeLifeCycleFilterRequest(stakeKeyReportHistory);
+  //    return stakeKeyLifeCycleService.getStakeWalletActivitiesByDateRange(
+  //        stakeKey, stakeLifeCycleFilterRequest, pageable);
+  //  }
 
   private StakeLifeCycleFilterRequest getStakeLifeCycleFilterRequest(
       StakeKeyReportHistory stakeKeyReportHistory) {

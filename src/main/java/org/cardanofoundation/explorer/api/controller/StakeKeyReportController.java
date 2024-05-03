@@ -13,9 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,13 +29,11 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
-import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.ReportLimitResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
@@ -59,15 +55,16 @@ public class StakeKeyReportController {
   private final StakeKeyReportService stakeKeyReportService;
   private final ReportHistoryService reportHistoryService;
 
-  @PostMapping(value = "/stake-key")
-  @LogMessage
-  @Operation(summary = "Generate stake key report")
-  public ResponseEntity<StakeKeyReportHistoryResponse> generateStakeKeyReport(
-      @RequestAttribute("user") UserPrincipal userPrincipal,
-      @RequestBody StakeKeyReportRequest stakeKeyReportRequest) {
-    return ResponseEntity.ok()
-        .body(stakeKeyReportService.generateStakeKeyReport(stakeKeyReportRequest, userPrincipal));
-  }
+  //  @PostMapping(value = "/stake-key")
+  //  @LogMessage
+  //  @Operation(summary = "Generate stake key report")
+  //  public ResponseEntity<StakeKeyReportHistoryResponse> generateStakeKeyReport(
+  //      @RequestAttribute("user") UserPrincipal userPrincipal,
+  //      @RequestBody StakeKeyReportRequest stakeKeyReportRequest) {
+  //    return ResponseEntity.ok()
+  //        .body(stakeKeyReportService.generateStakeKeyReport(stakeKeyReportRequest,
+  // userPrincipal));
+  //  }
 
   @GetMapping(value = "/stake-key/{reportId}/export")
   @LogMessage
@@ -256,25 +253,25 @@ public class StakeKeyReportController {
             reportId, userPrincipal.getUsername(), pagination.toPageable()));
   }
 
-  @GetMapping(value = "/stake-key/{reportId}/wallet-activity")
-  @LogMessage
-  @Operation(summary = "Get wallet activity by report id")
-  public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>>
-      getWalletActivityByReportId(
-          @RequestAttribute("user") UserPrincipal userPrincipal,
-          @PathVariable @Parameter(description = "The identifier of report") Long reportId,
-          @ParameterObject
-              @PaginationValid
-              @PaginationDefault(
-                  size = 20,
-                  sort = {"time"},
-                  direction = Sort.Direction.DESC)
-              @Valid
-              Pagination pagination) {
-    return ResponseEntity.ok(
-        stakeKeyReportService.getWalletActivitiesByReportId(
-            reportId, userPrincipal.getUsername(), pagination.toPageable()));
-  }
+  //  @GetMapping(value = "/stake-key/{reportId}/wallet-activity")
+  //  @LogMessage
+  //  @Operation(summary = "Get wallet activity by report id")
+  //  public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>>
+  //      getWalletActivityByReportId(
+  //          @RequestAttribute("user") UserPrincipal userPrincipal,
+  //          @PathVariable @Parameter(description = "The identifier of report") Long reportId,
+  //          @ParameterObject
+  //              @PaginationValid
+  //              @PaginationDefault(
+  //                  size = 20,
+  //                  sort = {"time"},
+  //                  direction = Sort.Direction.DESC)
+  //              @Valid
+  //              Pagination pagination) {
+  //    return ResponseEntity.ok(
+  //        stakeKeyReportService.getWalletActivitiesByReportId(
+  //            reportId, userPrincipal.getUsername(), pagination.toPageable()));
+  //  }
 
   @GetMapping(value = "/report-limit")
   @LogMessage
