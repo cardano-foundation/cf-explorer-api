@@ -15,4 +15,5 @@ public class SearchResponse {
   private PoolSearchResponse pool;
   private boolean validPoolName;
   private ScriptSearchResponse script;
+  private String dRep;
 }
