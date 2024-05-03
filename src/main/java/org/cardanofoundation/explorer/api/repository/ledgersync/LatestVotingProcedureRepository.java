@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.CountVoteOnGovActionProjection;
 import org.cardanofoundation.explorer.common.entity.compositeKey.LatestVotingProcedureId;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestVotingProcedure;
 
 @Repository
@@ -17,12 +18,14 @@ public interface LatestVotingProcedureRepository
 
   @Query(
       value =
-          "select lvp.voterHash,lvp.vote as vote, lvp.voterType as voterType"
+          "select lvp.voterHash as voterHash, lvp.vote as vote, lvp.voterType as voterType"
               + " from LatestVotingProcedure lvp"
-              + " where lvp.govActionTxHash = :govActionTxHash and lvp.govActionIndex = :govActionIndex")
+              + " where lvp.govActionTxHash = :govActionTxHash and lvp.govActionIndex = :govActionIndex"
+              + " and lvp.voterType = :voterType")
   List<CountVoteOnGovActionProjection> getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
       @Param("govActionTxHash") String govActionTxHash,
-      @Param("govActionIndex") Integer govActionIndex);
+      @Param("govActionIndex") Integer govActionIndex,
+      @Param("voterType") VoterType voterType);
 
   @Query(
       value =

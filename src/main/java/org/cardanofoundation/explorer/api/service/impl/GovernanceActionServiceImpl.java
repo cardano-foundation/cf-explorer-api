@@ -9,10 +9,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
@@ -33,13 +36,13 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChart;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
-import org.cardanofoundation.explorer.api.projection.CountVoteOnGovActionProjection;
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
+import org.cardanofoundation.explorer.api.projection.VotingCCProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
@@ -48,6 +51,8 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProc
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
+import org.cardanofoundation.explorer.api.util.ProtocolParamUtil;
+import org.cardanofoundation.explorer.common.entity.enumeration.CommitteeState;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
@@ -75,6 +80,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final DrepInfoRepository drepInfoRepository;
   private final EpochParamRepository epochParamRepository;
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
+  private final CommitteeRegistrationRepository committeeRegistrationRepository;
 
   private final EpochMapper epochMapper;
   private final EpochRepository epochRepository;
@@ -277,51 +283,149 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   }
 
   @Override
-  public VotingChartResponse getVotingChartByGovActionTxHashAndIndex(String txHash, Integer index) {
-    List<CountVoteOnGovActionProjection> votingProcedureProjectionList =
-        latestVotingProcedureRepository.getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
-            txHash, index);
+  public VotingChartResponse getVotingChartByGovActionTxHashAndIndex(
+      String txHash, Integer index, VoterType voterType) {
 
-    Map<Vote, List<CountVoteOnGovActionProjection>> voteCount =
-        votingProcedureProjectionList.stream()
-            .collect(
-                Collectors.groupingBy(
-                    CountVoteOnGovActionProjection::getVote, Collectors.toList()));
+    GovActionDetailsProjection govActionProjection =
+        governanceActionRepository
+            .getGovActionDetailsByTxHashAndIndex(txHash, index)
+            .orElseThrow(() -> new BusinessException(BusinessCode.GOVERNANCE_ACTION_NOT_FOUND));
 
-    long yesVotes = voteCount.getOrDefault(Vote.YES, List.of()).size();
-    long noVotes = voteCount.getOrDefault(Vote.NO, List.of()).size();
-    long abstainVotes = voteCount.getOrDefault(Vote.ABSTAIN, List.of()).size();
+    EpochParam epochParam = epochParamRepository.findByEpochNo(govActionProjection.getEpoch());
 
-    VotingChartResponse votingChart =
-        VotingChartResponse.builder()
-            .txHash(txHash)
-            .index(index)
-            .numberOfYesVote(yesVotes)
-            .numberOfNoVotes(noVotes)
-            .numberOfAbstainVotes(abstainVotes)
-            .build();
+    int expiredEpoch =
+        govActionProjection.getEpoch() + getGovActionLifetime(epochParam.getGovActionLifetime());
 
-    List<VotingChart> list = new ArrayList<>();
+    Integer committeeTotalCount =
+        committeeRegistrationRepository.countByExpiredEpochNo(expiredEpoch);
+    CommitteeState committeeState =
+        committeeTotalCount >= epochParam.getCommitteeMinSize().intValue()
+            ? CommitteeState.NORMAL
+            : CommitteeState.NO_CONFIDENCE;
 
-    Map<VoterType, Map<Vote, Long>> voteCountByVoterTypeAndVote =
-        votingProcedureProjectionList.stream()
-            .collect(
-                Collectors.groupingBy(
-                    CountVoteOnGovActionProjection::getVoterType,
-                    Collectors.groupingBy(
-                        CountVoteOnGovActionProjection::getVote, Collectors.counting())));
+    VotingChartResponse votingChartResponse =
+        VotingChartResponse.builder().txHash(txHash).index(index).build();
 
-    voteCountByVoterTypeAndVote.forEach(
-        (voterType, voteCountMap) -> {
-          list.add(
-              VotingChart.builder()
-                  .voterType(voterType)
-                  .numberOfYesVote(voteCountMap.getOrDefault(Vote.YES, 0L))
-                  .numberOfNoVotes(voteCountMap.getOrDefault(Vote.NO, 0L))
-                  .numberOfAbstainVotes(voteCountMap.getOrDefault(Vote.ABSTAIN, 0L))
-                  .build());
-        });
-    votingChart.setVotingChartsList(list);
-    return votingChart;
+    switch (voterType) {
+      case DREP_KEY_HASH:
+        getVotingChartResponseForDRep(
+            votingChartResponse, epochParam, govActionProjection, committeeState);
+        return votingChartResponse;
+      case STAKING_POOL_KEY_HASH:
+        getVotingChartResponseForPool(
+            votingChartResponse, epochParam, govActionProjection, committeeState);
+        return votingChartResponse;
+      case CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH:
+        getVotingChartResponseForCCType(
+            votingChartResponse, epochParam, govActionProjection, committeeState);
+        return votingChartResponse;
+      default:
+        return votingChartResponse;
+    }
+  }
+
+  // TODO: Active vote stake of Pool type is not available.
+  private void getVotingChartResponseForPool(
+      VotingChartResponse votingChartResponse,
+      EpochParam epochParam,
+      GovActionDetailsProjection govActionDetailsProjection,
+      CommitteeState committeeState) {
+
+    switch (govActionDetailsProjection.getType()) {
+      case NO_CONFIDENCE:
+        votingChartResponse.setThreshold(epochParam.getPvtMotionNoConfidence());
+        break;
+      case UPDATE_COMMITTEE:
+        votingChartResponse.setThreshold(
+            CommitteeState.NORMAL.equals(committeeState)
+                ? epochParam.getPvtCommitteeNormal()
+                : epochParam.getPvtCommitteeNoConfidence());
+        break;
+      case HARD_FORK_INITIATION_ACTION:
+        votingChartResponse.setThreshold(epochParam.getPvtHardForkInitiation());
+        break;
+      default:
+        votingChartResponse.setThreshold(null);
+    }
+  }
+  // TODO: Active vote stake of DRep type is not available.
+  private void getVotingChartResponseForDRep(
+      VotingChartResponse votingChartResponse,
+      EpochParam epochParam,
+      GovActionDetailsProjection govActionDetailsProjection,
+      CommitteeState committeeState) {
+    switch (govActionDetailsProjection.getType()) {
+      case NO_CONFIDENCE:
+        votingChartResponse.setThreshold(epochParam.getDvtMotionNoConfidence());
+        break;
+      case UPDATE_COMMITTEE:
+        votingChartResponse.setThreshold(
+            CommitteeState.NORMAL.equals(committeeState)
+                ? epochParam.getDvtCommitteeNormal()
+                : epochParam.getDvtCommitteeNoConfidence());
+        break;
+      case NEW_CONSTITUTION:
+        votingChartResponse.setThreshold(epochParam.getDvtUpdateToConstitution());
+        break;
+      case HARD_FORK_INITIATION_ACTION:
+        votingChartResponse.setThreshold(epochParam.getDvtHardForkInitiation());
+        break;
+      case PARAMETER_CHANGE_ACTION:
+        votingChartResponse.setThreshold(getParameterChangeActionThreshold(epochParam));
+        break;
+      case TREASURY_WITHDRAWALS_ACTION:
+        votingChartResponse.setThreshold(epochParam.getDvtTreasuryWithdrawal());
+        break;
+      default:
+        votingChartResponse.setThreshold(null);
+    }
+  }
+
+  // TODO: Threshold for CC type is not available. It must be null for now.
+  private void getVotingChartResponseForCCType(
+      VotingChartResponse votingChartResponse,
+      EpochParam epochParam,
+      GovActionDetailsProjection govActionDetailsProjection,
+      CommitteeState committeeState) {
+    votingChartResponse.setThreshold(null);
+    List<VotingCCProjection> votingCCProjections =
+        committeeRegistrationRepository.findByTxHashAndIndex(
+            govActionDetailsProjection.getTxHash(), govActionDetailsProjection.getIndex());
+    List<VotingCCProjection> votingCCProjectionsFiltered =
+        votingCCProjections.stream()
+            .filter(votingCCProjection -> Objects.nonNull(votingCCProjection.getVote()))
+            .toList();
+    Map<Vote, Long> voteCount =
+        votingCCProjectionsFiltered.stream()
+            .collect(Collectors.groupingBy(VotingCCProjection::getVote, Collectors.counting()));
+    Long numberCCCanVote = (long) votingCCProjections.size();
+    votingChartResponse.setYesCcMembers(voteCount.getOrDefault(Vote.YES, 0L));
+    votingChartResponse.setNoCcMembers(voteCount.getOrDefault(Vote.NO, 0L));
+    votingChartResponse.setAbstainCcMembers(voteCount.getOrDefault(Vote.ABSTAIN, 0L));
+    votingChartResponse.setCcMembers(numberCCCanVote);
+  }
+
+  private int getGovActionLifetime(BigInteger govActionLifetime) {
+    return govActionLifetime == null ? 0 : govActionLifetime.intValue();
+  }
+
+  private Double getParameterChangeActionThreshold(EpochParam epochParam) {
+    List<ProtocolParamGroup> protocolParamGroups =
+        ProtocolParamUtil.getGroupsWithNonNullField(epochParam);
+
+    Map<ProtocolParamGroup, Supplier<Double>> groupToThresholdMapping = new HashMap<>();
+    groupToThresholdMapping.put(ProtocolParamGroup.ECONOMIC, epochParam::getDvtPPEconomicGroup);
+    groupToThresholdMapping.put(ProtocolParamGroup.NETWORK, epochParam::getDvtPPNetworkGroup);
+    groupToThresholdMapping.put(ProtocolParamGroup.TECHNICAL, epochParam::getDvtPPTechnicalGroup);
+    groupToThresholdMapping.put(ProtocolParamGroup.GOVERNANCE, epochParam::getDvtPPGovGroup);
+
+    return protocolParamGroups.stream()
+        .map(groupToThresholdMapping::get)
+        .filter(Objects::nonNull)
+        .map(Supplier::get)
+        .filter(Objects::nonNull)
+        .mapToDouble(Double::doubleValue)
+        .max()
+        .orElse(0);
   }
 }
