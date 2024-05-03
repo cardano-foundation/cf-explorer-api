@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.8.0...v0.9.0) (2024-03-05)
+
+
+### Bug Fixes
+
+* add createdOn field ([f9f15ef](https://github.com/cardano-foundation/cf-explorer-api/commit/f9f15efa2dd50524492ec1c286ca0b8704c79c90))
+* failed to sort several fields on pool list ([3ef63d0](https://github.com/cardano-foundation/cf-explorer-api/commit/3ef63d075e3de3778cb582b0a1508aad5562e2e4))
+* MET-1913 update postman collection sprint 0.9.0 ([6b324a6](https://github.com/cardano-foundation/cf-explorer-api/commit/6b324a6c99b2d4f75a78ba3e31ebecdb520f8b21))
+* MET-1972 epoch status display incorrect while syncing ([ce89d98](https://github.com/cardano-foundation/cf-explorer-api/commit/ce89d988f1d8c065b69fab3f1aae29c813dc689c))
+* remove previous market data cache ([e5448ff](https://github.com/cardano-foundation/cf-explorer-api/commit/e5448ff01aa600bb44057729bfb2cefd642c0b42))
+* replace logic check valid value in metadatacip25 ([e69117e](https://github.com/cardano-foundation/cf-explorer-api/commit/e69117e0b6471f2cbb56996ba3cd59c88ecf861e))
+
 ## [0.8.0](https://github.com/cardano-foundation/cf-explorer-api/compare/v0.7.0...v0.8.0) (2024-02-09)
 
 
