@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
@@ -33,9 +31,6 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
-import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
-import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
@@ -140,20 +135,21 @@ public class StakeKeyControllerTest {
         .andExpect(jsonPath("$").exists());
   }
 
-  @Test
-  void testGetTransactions_thenReturn() throws Exception {
-    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
-    Pageable pageable = PageRequest.of(0, 10);
-    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
-
-    when(txService.getTransactionsByStake(stakeKey, pageable)).thenReturn(response);
-
-    mockMvc
-        .perform(
-            get("/api/v1/stakes/{stakeKey}/txs", stakeKey).param("page", "0").param("size", "10"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").exists());
-  }
+  //  @Test
+  //  void testGetTransactions_thenReturn() throws Exception {
+  //    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
+  //    Pageable pageable = PageRequest.of(0, 10);
+  //    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
+  //
+  //    when(txService.getTransactionsByStake(stakeKey, pageable)).thenReturn(response);
+  //
+  //    mockMvc
+  //        .perform(
+  //            get("/api/v1/stakes/{stakeKey}/txs", stakeKey).param("page", "0").param("size",
+  // "10"))
+  //        .andExpect(status().isOk())
+  //        .andExpect(jsonPath("$").exists());
+  //  }
 
   @Test
   void testGetDelegationHistories_thenReturn() throws Exception {
@@ -265,21 +261,21 @@ public class StakeKeyControllerTest {
         .andExpect(jsonPath("$").exists());
   }
 
-  @Test
-  void testGetStakeBalanceAnalytics_thenReturn() throws Exception {
-    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
-    AnalyticType type = AnalyticType.ONE_DAY;
-    List<AddressChartBalanceData> data = List.of();
-    AddressChartBalanceResponse response =
-        new AddressChartBalanceResponse(data, BigInteger.ZERO, BigInteger.ZERO);
-
-    when(stakeService.getStakeBalanceAnalytics(stakeKey, type)).thenReturn(response);
-
-    mockMvc
-        .perform(get("/api/v1/stakes/analytics-balance/{stakeKey}/{type}", stakeKey, type))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").exists());
-  }
+  //  @Test
+  //  void testGetStakeBalanceAnalytics_thenReturn() throws Exception {
+  //    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
+  //    AnalyticType type = AnalyticType.ONE_DAY;
+  //    List<AddressChartBalanceData> data = List.of();
+  //    AddressChartBalanceResponse response =
+  //        new AddressChartBalanceResponse(data, BigInteger.ZERO, BigInteger.ZERO);
+  //
+  //    when(stakeService.getStakeBalanceAnalytics(stakeKey, type)).thenReturn(response);
+  //
+  //    mockMvc
+  //        .perform(get("/api/v1/stakes/analytics-balance/{stakeKey}/{type}", stakeKey, type))
+  //        .andExpect(status().isOk())
+  //        .andExpect(jsonPath("$").exists());
+  //  }
 
   @Test
   void testGetStakeRewardAnalytics_thenReturn() throws Exception {

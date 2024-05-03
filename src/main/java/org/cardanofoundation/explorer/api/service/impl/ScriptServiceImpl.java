@@ -48,10 +48,8 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
@@ -65,7 +63,6 @@ import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo;
 import org.cardanofoundation.explorer.common.entity.explorer.SmartContractInfo;
 import org.cardanofoundation.explorer.common.entity.explorer.VerifiedScript;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
@@ -83,7 +80,7 @@ public class ScriptServiceImpl implements ScriptService {
   private final RedeemerRepository redeemerRepository;
   private final TxRepository txRepository;
   private final AddressRepository addressRepository;
-  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
+  //  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final BlockRepository blockRepository;
   private final VerifiedScriptRepository verifiedScriptRepository;
@@ -364,42 +361,42 @@ public class ScriptServiceImpl implements ScriptService {
     return new BaseFilterResponse<>(tokenPage);
   }
 
-  @Override
-  public BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(
-      String scriptHash, Pageable pageable) {
-    NativeScriptInfo nativeScriptInfo =
-        nativeScriptInfoRepository
-            .findByScriptHash(scriptHash)
-            .orElseGet(
-                () ->
-                    NativeScriptInfo.builder()
-                        .numberOfAssetHolders(
-                            multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
-                        .build());
-    List<AddressTokenProjection> multiAssetList =
-        addressTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable);
-    Page<AddressTokenProjection> multiAssetPage =
-        new PageImpl<>(multiAssetList, pageable, nativeScriptInfo.getNumberOfAssetHolders());
-
-    Set<Long> addressIds =
-        multiAssetPage.stream()
-            .map(AddressTokenProjection::getAddressId)
-            .collect(Collectors.toSet());
-
-    Map<Long, String> addressMap =
-        addressRepository.findAddressByIdIn(addressIds).stream()
-            .collect(Collectors.toMap(Address::getId, Address::getAddress));
-
-    Page<TokenAddressResponse> tokenAddressResponses =
-        multiAssetPage.map(tokenMapper::fromAddressTokenProjection);
-
-    tokenAddressResponses.forEach(
-        tokenAddress -> {
-          tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId()));
-          tokenAddress.setAddressId(null);
-        });
-    return new BaseFilterResponse<>(tokenAddressResponses);
-  }
+  //  @Override
+  //  public BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(
+  //      String scriptHash, Pageable pageable) {
+  //    NativeScriptInfo nativeScriptInfo =
+  //        nativeScriptInfoRepository
+  //            .findByScriptHash(scriptHash)
+  //            .orElseGet(
+  //                () ->
+  //                    NativeScriptInfo.builder()
+  //                        .numberOfAssetHolders(
+  //                            multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
+  //                        .build());
+  //    List<AddressTokenProjection> multiAssetList =
+  //        addressTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable);
+  //    Page<AddressTokenProjection> multiAssetPage =
+  //        new PageImpl<>(multiAssetList, pageable, nativeScriptInfo.getNumberOfAssetHolders());
+  //
+  //    Set<Long> addressIds =
+  //        multiAssetPage.stream()
+  //            .map(AddressTokenProjection::getAddressId)
+  //            .collect(Collectors.toSet());
+  //
+  //    Map<Long, String> addressMap =
+  //        addressRepository.findAddressByIdIn(addressIds).stream()
+  //            .collect(Collectors.toMap(Address::getId, Address::getAddress));
+  //
+  //    Page<TokenAddressResponse> tokenAddressResponses =
+  //        multiAssetPage.map(tokenMapper::fromAddressTokenProjection);
+  //
+  //    tokenAddressResponses.forEach(
+  //        tokenAddress -> {
+  //          tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId()));
+  //          tokenAddress.setAddressId(null);
+  //        });
+  //    return new BaseFilterResponse<>(tokenAddressResponses);
+  //  }
 
   @Override
   public BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(

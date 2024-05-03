@@ -34,7 +34,6 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
@@ -64,7 +63,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final StakeAddressRepository stakeAddressRepository;
   private final RewardRepository rewardRepository;
   private final WithdrawalRepository withdrawalRepository;
-  private final AddressTxBalanceRepository addressTxBalanceRepository;
+  //  private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final TxRepository txRepository;
   private final TxOutRepository txOutRepository;
   private final FetchRewardDataService fetchRewardDataService;
@@ -210,32 +209,32 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
                     .build()));
   }
 
-  @Override
-  public StakeDelegationDetailResponse getStakeDelegationDetail(String stakeKey, String hash) {
-    StakeAddress stakeAddress =
-        stakeAddressRepository
-            .findByView(stakeKey)
-            .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    var delegation =
-        delegationRepository
-            .findDelegationByAddressAndTx(stakeAddress, hash)
-            .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_DELEGATION_NOT_FOUND));
-    var totalBalance =
-        addressTxBalanceRepository
-            .getBalanceByStakeAddressAndTime(stakeAddress, delegation.getTime())
-            .orElse(BigInteger.ZERO);
-    return StakeDelegationDetailResponse.builder()
-        .fee(delegation.getFee())
-        .outSum(delegation.getOutSum())
-        .poolId(delegation.getPoolId())
-        .poolName(delegation.getPoolData())
-        .time(delegation.getTime().toLocalDateTime())
-        .txHash(delegation.getTxHash())
-        .blockNo(delegation.getBlockNo())
-        .epoch(delegation.getEpochNo())
-        .stakeTotalAmount(totalBalance)
-        .build();
-  }
+  //  @Override
+  //  public StakeDelegationDetailResponse getStakeDelegationDetail(String stakeKey, String hash) {
+  //    StakeAddress stakeAddress =
+  //        stakeAddressRepository
+  //            .findByView(stakeKey)
+  //            .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+  //    var delegation =
+  //        delegationRepository
+  //            .findDelegationByAddressAndTx(stakeAddress, hash)
+  //            .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_DELEGATION_NOT_FOUND));
+  //    var totalBalance =
+  //        addressTxBalanceRepository
+  //            .getBalanceByStakeAddressAndTime(stakeAddress, delegation.getTime())
+  //            .orElse(BigInteger.ZERO);
+  //    return StakeDelegationDetailResponse.builder()
+  //        .fee(delegation.getFee())
+  //        .outSum(delegation.getOutSum())
+  //        .poolId(delegation.getPoolId())
+  //        .poolName(delegation.getPoolData())
+  //        .time(delegation.getTime().toLocalDateTime())
+  //        .txHash(delegation.getTxHash())
+  //        .blockNo(delegation.getBlockNo())
+  //        .epoch(delegation.getEpochNo())
+  //        .stakeTotalAmount(totalBalance)
+  //        .build();
+  //  }
 
   @Override
   public BaseFilterResponse<StakeRewardResponse> getStakeRewards(
@@ -306,48 +305,48 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
                     .build()));
   }
 
-  @Override
-  public StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash) {
-    StakeAddress stakeAddress =
-        stakeAddressRepository
-            .findByView(stakeKey)
-            .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
-      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
-      if (!fetchRewardResponse) {
-        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
-      }
-    }
-    var withdrawal =
-        withdrawalRepository
-            .getWithdrawalByAddressAndTx(stakeAddress, hash)
-            .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
-    var totalBalance =
-        addressTxBalanceRepository
-            .getBalanceByStakeAddressAndTime(stakeAddress, withdrawal.getTime())
-            .orElse(BigInteger.ZERO);
-    BigInteger rewardAvailable = null;
-
-    if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
-      var totalReward =
-          rewardRepository
-              .getAvailableRewardByStakeAddressAndEpoch(stakeAddress, withdrawal.getEpochNo())
-              .orElse(BigInteger.ZERO);
-      var totalWithdrawal =
-          withdrawalRepository
-              .sumByAddrAndTx(stakeAddress, withdrawal.getTxId())
-              .orElse(BigInteger.ZERO);
-      rewardAvailable = totalReward.subtract(totalWithdrawal);
-    }
-    return StakeWithdrawalDetailResponse.builder()
-        .fee(withdrawal.getFee())
-        .amount(withdrawal.getAmount())
-        .time(withdrawal.getTime().toLocalDateTime())
-        .txHash(withdrawal.getTxHash())
-        .stakeTotalAmount(totalBalance)
-        .stakeRewardAvailable(rewardAvailable)
-        .build();
-  }
+  //  @Override
+  //  public StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash) {
+  //    StakeAddress stakeAddress =
+  //        stakeAddressRepository
+  //            .findByView(stakeKey)
+  //            .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+  //    if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {
+  //      boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stakeKey);
+  //      if (!fetchRewardResponse) {
+  //        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
+  //      }
+  //    }
+  //    var withdrawal =
+  //        withdrawalRepository
+  //            .getWithdrawalByAddressAndTx(stakeAddress, hash)
+  //            .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
+  //    var totalBalance =
+  //        addressTxBalanceRepository
+  //            .getBalanceByStakeAddressAndTime(stakeAddress, withdrawal.getTime())
+  //            .orElse(BigInteger.ZERO);
+  //    BigInteger rewardAvailable = null;
+  //
+  //    if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
+  //      var totalReward =
+  //          rewardRepository
+  //              .getAvailableRewardByStakeAddressAndEpoch(stakeAddress, withdrawal.getEpochNo())
+  //              .orElse(BigInteger.ZERO);
+  //      var totalWithdrawal =
+  //          withdrawalRepository
+  //              .sumByAddrAndTx(stakeAddress, withdrawal.getTxId())
+  //              .orElse(BigInteger.ZERO);
+  //      rewardAvailable = totalReward.subtract(totalWithdrawal);
+  //    }
+  //    return StakeWithdrawalDetailResponse.builder()
+  //        .fee(withdrawal.getFee())
+  //        .amount(withdrawal.getAmount())
+  //        .time(withdrawal.getTime().toLocalDateTime())
+  //        .txHash(withdrawal.getTxHash())
+  //        .stakeTotalAmount(totalBalance)
+  //        .stakeRewardAvailable(rewardAvailable)
+  //        .build();
+  //  }
 
   @Override
   public BaseFilterResponse<StakeRegistrationFilterResponse> getStakeDeRegistrations(
@@ -419,19 +418,19 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         .build();
   }
 
-  @Override
-  public BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivities(
-      String stakeKey, Pageable pageable) {
-    StakeAddress stakeAddress =
-        stakeAddressRepository
-            .findByView(stakeKey)
-            .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    var txAmountList =
-        addressTxBalanceRepository.findTxAndAmountByStake(stakeAddress.getView(), pageable);
-    List<StakeWalletActivityResponse> response =
-        getStakeWalletActivitiesContent(stakeAddress, txAmountList);
-    return new BaseFilterResponse<>(txAmountList, response);
-  }
+  //  @Override
+  //  public BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivities(
+  //      String stakeKey, Pageable pageable) {
+  //    StakeAddress stakeAddress =
+  //        stakeAddressRepository
+  //            .findByView(stakeKey)
+  //            .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+  //    var txAmountList =
+  //        addressTxBalanceRepository.findTxAndAmountByStake(stakeAddress.getView(), pageable);
+  //    List<StakeWalletActivityResponse> response =
+  //        getStakeWalletActivitiesContent(stakeAddress, txAmountList);
+  //    return new BaseFilterResponse<>(txAmountList, response);
+  //  }
 
   @Override
   public BaseFilterResponse<StakeRewardActivityResponse> getStakeRewardActivities(
@@ -487,31 +486,31 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
     return new BaseFilterResponse<>(page);
   }
 
-  @Override
-  public BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivitiesByDateRange(
-      String stakeKey, StakeLifeCycleFilterRequest condition, Pageable pageable) {
-    StakeAddress stakeAddress =
-        stakeAddressRepository
-            .findByView(stakeKey)
-            .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
-    Timestamp toDate =
-        Timestamp.from(
-            LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toInstant(ZoneOffset.UTC));
-    if (Objects.nonNull(condition.getFromDate())) {
-      fromDate = Timestamp.from(condition.getFromDate().toInstant());
-    }
-    if (Objects.nonNull(condition.getToDate())) {
-      toDate = Timestamp.from(condition.getToDate().toInstant());
-    }
-    var txAmountList =
-        addressTxBalanceRepository.findTxAndAmountByStakeAndDateRange(
-            stakeAddress.getView(), fromDate, toDate, pageable);
-
-    List<StakeWalletActivityResponse> response =
-        getStakeWalletActivitiesContent(stakeAddress, txAmountList);
-    return new BaseFilterResponse<>(txAmountList, response);
-  }
+  //  @Override
+  //  public BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivitiesByDateRange(
+  //      String stakeKey, StakeLifeCycleFilterRequest condition, Pageable pageable) {
+  //    StakeAddress stakeAddress =
+  //        stakeAddressRepository
+  //            .findByView(stakeKey)
+  //            .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+  //    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
+  //    Timestamp toDate =
+  //        Timestamp.from(
+  //            LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toInstant(ZoneOffset.UTC));
+  //    if (Objects.nonNull(condition.getFromDate())) {
+  //      fromDate = Timestamp.from(condition.getFromDate().toInstant());
+  //    }
+  //    if (Objects.nonNull(condition.getToDate())) {
+  //      toDate = Timestamp.from(condition.getToDate().toInstant());
+  //    }
+  //    var txAmountList =
+  //        addressTxBalanceRepository.findTxAndAmountByStakeAndDateRange(
+  //            stakeAddress.getView(), fromDate, toDate, pageable);
+  //
+  //    List<StakeWalletActivityResponse> response =
+  //        getStakeWalletActivitiesContent(stakeAddress, txAmountList);
+  //    return new BaseFilterResponse<>(txAmountList, response);
+  //  }
 
   private List<StakeWalletActivityResponse> getStakeWalletActivitiesContent(
       StakeAddress stakeAddress, Page<StakeTxProjection> txAmountList) {

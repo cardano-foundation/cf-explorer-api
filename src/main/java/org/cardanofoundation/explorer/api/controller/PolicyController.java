@@ -19,7 +19,6 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.PolicyService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
@@ -56,15 +55,15 @@ public class PolicyController {
     return ResponseEntity.ok(policyService.getTokens(policyId, pagination.toPageable()));
   }
 
-  @GetMapping("/{policyId}/holders")
-  @LogMessage
-  @Operation(
-      summary = "Get holders by policy",
-      description = "Get all holders of all tokens of policy",
-      tags = {"policies"})
-  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
-      @PathVariable @Parameter(description = "The policy hash") String policyId,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-    return ResponseEntity.ok(policyService.getHolders(policyId, pagination.toPageable()));
-  }
+  //  @GetMapping("/{policyId}/holders")
+  //  @LogMessage
+  //  @Operation(
+  //      summary = "Get holders by policy",
+  //      description = "Get all holders of all tokens of policy",
+  //      tags = {"policies"})
+  //  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
+  //      @PathVariable @Parameter(description = "The policy hash") String policyId,
+  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+  //    return ResponseEntity.ok(policyService.getHolders(policyId, pagination.toPageable()));
+  //  }
 }

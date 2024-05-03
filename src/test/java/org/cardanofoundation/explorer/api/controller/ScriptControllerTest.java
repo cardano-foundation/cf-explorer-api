@@ -44,7 +44,6 @@ import org.cardanofoundation.explorer.api.model.response.script.smartcontract.Sm
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
@@ -185,30 +184,30 @@ public class ScriptControllerTest {
         .getNativeScriptTokens(scriptHash, PageRequest.of(0, 1, Sort.by("txCount").descending()));
   }
 
-  @Test
-  void testGetHolder() throws Exception {
-    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
-    TokenAddressResponse response =
-        TokenAddressResponse.builder()
-            .address("addreses")
-            .name("name")
-            .fingerprint("fingerprint")
-            .build();
-
-    when(scriptService.getNativeScriptHolders(scriptHash, PageRequest.of(0, 1)))
-        .thenReturn(new BaseFilterResponse<>(List.of(response), 1));
-
-    mockMvc
-        .perform(
-            get("/api/v1/scripts/native-scripts/{scriptHash}/holders", scriptHash)
-                .param("page", "0")
-                .param("size", "1"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data[0].name").value("name"))
-        .andExpect(jsonPath("$.data[0].fingerprint").value("fingerprint"));
-
-    verify(scriptService).getNativeScriptHolders(scriptHash, PageRequest.of(0, 1));
-  }
+  //  @Test
+  //  void testGetHolder() throws Exception {
+  //    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+  //    TokenAddressResponse response =
+  //        TokenAddressResponse.builder()
+  //            .address("addreses")
+  //            .name("name")
+  //            .fingerprint("fingerprint")
+  //            .build();
+  //
+  //    when(scriptService.getNativeScriptHolders(scriptHash, PageRequest.of(0, 1)))
+  //        .thenReturn(new BaseFilterResponse<>(List.of(response), 1));
+  //
+  //    mockMvc
+  //        .perform(
+  //            get("/api/v1/scripts/native-scripts/{scriptHash}/holders", scriptHash)
+  //                .param("page", "0")
+  //                .param("size", "1"))
+  //        .andExpect(status().isOk())
+  //        .andExpect(jsonPath("$.data[0].name").value("name"))
+  //        .andExpect(jsonPath("$.data[0].fingerprint").value("fingerprint"));
+  //
+  //    verify(scriptService).getNativeScriptHolders(scriptHash, PageRequest.of(0, 1));
+  //  }
 
   @Test
   void testGetSmartContracts() throws Exception {

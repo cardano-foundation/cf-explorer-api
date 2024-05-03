@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import jakarta.validation.Valid;
 
@@ -21,13 +20,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
-import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
@@ -114,18 +110,19 @@ public class StakeKeyController {
     return ResponseEntity.ok(stakeService.getStake(stakeKey));
   }
 
-  @GetMapping("/{stakeKey}/txs")
-  @LogMessage
-  @Operation(summary = "Get transactions of stake key", tags = "stake-key")
-  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-      @PathVariable
-          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid
-          @Parameter(description = "The Bech32 encoded version of the stake address.")
-          String stakeKey,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-    return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pagination.toPageable()));
-  }
+  //  @GetMapping("/{stakeKey}/txs")
+  //  @LogMessage
+  //  @Operation(summary = "Get transactions of stake key", tags = "stake-key")
+  //  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
+  //      @PathVariable
+  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+  //          @StakeKeyLengthValid
+  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
+  //          String stakeKey,s
+  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+  //    return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey,
+  // pagination.toPageable()));
+  //  }
 
   @GetMapping("/{stakeKey}/delegation-history")
   @LogMessage
@@ -211,19 +208,20 @@ public class StakeKeyController {
     return ResponseEntity.ok(stakeService.getStakeAnalytics());
   }
 
-  @GetMapping("/analytics-balance/{stakeKey}/{type}")
-  @LogMessage
-  @Operation(summary = "Get stake balance analytics", tags = "stake-key")
-  public ResponseEntity<AddressChartBalanceResponse> getStakeBalanceAnalytics(
-      @PathVariable
-          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid
-          @Parameter(description = "The Bech32 encoded version of the stake address.")
-          String stakeKey,
-      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type)
-      throws ExecutionException, InterruptedException {
-    return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
-  }
+  //  @GetMapping("/analytics-balance/{stakeKey}/{type}")
+  //  @LogMessage
+  //  @Operation(summary = "Get stake balance analytics", tags = "stake-key")
+  //  public ResponseEntity<AddressChartBalanceResponse> getStakeBalanceAnalytics(
+  //      @PathVariable
+  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+  //          @StakeKeyLengthValid
+  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
+  //          String stakeKey,
+  //      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType
+  // type)
+  //      throws ExecutionException, InterruptedException {
+  //    return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
+  //  }
 
   @GetMapping("/analytics-reward/{stakeKey}")
   @LogMessage

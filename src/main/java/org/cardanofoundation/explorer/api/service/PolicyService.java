@@ -4,7 +4,6 @@ import org.springframework.data.domain.Pageable;
 
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 
 public interface PolicyService {
@@ -33,5 +32,5 @@ public interface PolicyService {
    * @param pageable page info
    * @return list holders in this page
    */
-  BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable);
+  //  BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable);
 }

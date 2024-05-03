@@ -2,13 +2,9 @@ package org.cardanofoundation.explorer.api.service;
 
 import org.springframework.data.domain.Pageable;
 
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 
 public interface AddressService {
 
@@ -18,7 +14,7 @@ public interface AddressService {
    * @param address wallet address
    * @return wallet address info
    */
-  AddressResponse getAddressDetail(String address);
+  //  AddressResponse getAddressDetail(String address);
 
   /**
    * Get address analytics
@@ -27,7 +23,7 @@ public interface AddressService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list value balance
    */
-  AddressChartBalanceResponse getAddressAnalytics(String address, AnalyticType type);
+  //  AddressChartBalanceResponse getAddressAnalytics(String address, AnalyticType type);
 
   /**
    * Get list contract
@@ -53,6 +49,6 @@ public interface AddressService {
    * @param displayName display name of token
    * @return list token by display name
    */
-  BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(
-      Pageable pageable, String address, String displayName);
+  //  BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(
+  //      Pageable pageable, String address, String displayName);
 }

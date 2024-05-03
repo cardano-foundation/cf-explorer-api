@@ -2,8 +2,6 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -19,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
@@ -32,7 +29,6 @@ import org.cardanofoundation.explorer.api.model.response.address.*;
 import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
@@ -50,7 +46,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalReposi
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
-import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
@@ -77,7 +72,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final TreasuryRepository treasuryRepository;
   private final ReserveRepository reserveRepository;
   private final PoolUpdateRepository poolUpdateRepository;
-  private final AddressTxBalanceRepository addressTxBalanceRepository;
+  //  private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final StakeAddressMapper stakeAddressMapper;
   private final AddressMapper addressMapper;
   private final EpochRepository epochRepository;
@@ -364,65 +359,68 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     return response;
   }
 
-  @Override
-  public AddressChartBalanceResponse getStakeBalanceAnalytics(String stakeKey, AnalyticType type) {
-
-    StakeAddress addr =
-        stakeAddressRepository
-            .findByView(stakeKey)
-            .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-
-    List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
-    AddressChartBalanceResponse response = new AddressChartBalanceResponse();
-    List<AddressChartBalanceData> data = new ArrayList<>();
-
-    if (AnalyticType.ONE_DAY.equals(type)) {
-      var fromBalance =
-          aggregateAddressTxBalanceRepository
-              .sumBalanceByStakeAddressId(addr.getId(), dates.get(0).minusDays(1).toLocalDate())
-              .orElse(BigInteger.ZERO);
-      getHighestAndLowestBalance(addr, fromBalance, dates, response);
-      // init data for chart
-      data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
-      for (int i = 1; i < dates.size(); i++) {
-        Optional<BigInteger> balance =
-            addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
-                addr, Timestamp.valueOf(dates.get(i - 1)), Timestamp.valueOf(dates.get(i)));
-        if (balance.isPresent()) {
-          fromBalance = fromBalance.add(balance.get());
-        }
-        data.add(new AddressChartBalanceData(dates.get(i), fromBalance));
-      }
-      response.setData(data);
-    } else {
-      // Remove last date because we will get data of today
-      dates.remove(0);
-      var fromBalance =
-          aggregateAddressTxBalanceRepository
-              .sumBalanceByStakeAddressId(addr.getId(), dates.get(0).minusDays(1).toLocalDate())
-              .orElse(BigInteger.ZERO);
-      getHighestAndLowestBalance(addr, fromBalance, dates, response);
-      List<AggregateAddressBalanceProjection> aggregateAddressTxBalances =
-          aggregateAddressTxBalanceRepository.findAllByStakeAddressIdAndDayBetween(
-              addr.getId(), dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
-      // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
-      // So we need to add 1 day to display correct data
-      Map<LocalDate, BigInteger> mapBalance =
-          aggregateAddressTxBalances.stream()
-              .collect(
-                  Collectors.toMap(
-                      balance -> balance.getDay().plusDays(1),
-                      AggregateAddressBalanceProjection::getBalance));
-      for (LocalDateTime date : dates) {
-        if (mapBalance.containsKey(date.toLocalDate())) {
-          fromBalance = fromBalance.add(mapBalance.get(date.toLocalDate()));
-        }
-        data.add(new AddressChartBalanceData(date, fromBalance));
-      }
-      response.setData(data);
-    }
-    return response;
-  }
+  //  @Override
+  //  public AddressChartBalanceResponse getStakeBalanceAnalytics(String stakeKey, AnalyticType
+  // type) {
+  //
+  //    StakeAddress addr =
+  //        stakeAddressRepository
+  //            .findByView(stakeKey)
+  //            .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+  //
+  //    List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
+  //    AddressChartBalanceResponse response = new AddressChartBalanceResponse();
+  //    List<AddressChartBalanceData> data = new ArrayList<>();
+  //
+  //    if (AnalyticType.ONE_DAY.equals(type)) {
+  //      var fromBalance =
+  //          aggregateAddressTxBalanceRepository
+  //              .sumBalanceByStakeAddressId(addr.getId(), dates.get(0).minusDays(1).toLocalDate())
+  //              .orElse(BigInteger.ZERO);
+  //      getHighestAndLowestBalance(addr, fromBalance, dates, response);
+  //      // init data for chart
+  //      data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
+  //      for (int i = 1; i < dates.size(); i++) {
+  //        Optional<BigInteger> balance =
+  //            addressTxBalanceRepository.getBalanceByStakeAddressAndTime(
+  //                addr, Timestamp.valueOf(dates.get(i - 1)), Timestamp.valueOf(dates.get(i)));
+  //        if (balance.isPresent()) {
+  //          fromBalance = fromBalance.add(balance.get());
+  //        }
+  //        data.add(new AddressChartBalanceData(dates.get(i), fromBalance));
+  //      }
+  //      response.setData(data);
+  //    } else {
+  //      // Remove last date because we will get data of today
+  //      dates.remove(0);
+  //      var fromBalance =
+  //          aggregateAddressTxBalanceRepository
+  //              .sumBalanceByStakeAddressId(addr.getId(), dates.get(0).minusDays(1).toLocalDate())
+  //              .orElse(BigInteger.ZERO);
+  //      getHighestAndLowestBalance(addr, fromBalance, dates, response);
+  //      List<AggregateAddressBalanceProjection> aggregateAddressTxBalances =
+  //          aggregateAddressTxBalanceRepository.findAllByStakeAddressIdAndDayBetween(
+  //              addr.getId(), dates.get(0).toLocalDate(), dates.get(dates.size() -
+  // 1).toLocalDate());
+  //      // Data in aggregate_address_tx_balance save at end of day, but we will display start of
+  // day
+  //      // So we need to add 1 day to display correct data
+  //      Map<LocalDate, BigInteger> mapBalance =
+  //          aggregateAddressTxBalances.stream()
+  //              .collect(
+  //                  Collectors.toMap(
+  //                      balance -> balance.getDay().plusDays(1),
+  //                      AggregateAddressBalanceProjection::getBalance));
+  //      for (LocalDateTime date : dates) {
+  //        if (mapBalance.containsKey(date.toLocalDate())) {
+  //          fromBalance = fromBalance.add(mapBalance.get(date.toLocalDate()));
+  //        }
+  //        data.add(new AddressChartBalanceData(date, fromBalance));
+  //      }
+  //      response.setData(data);
+  //    }
+  //    return response;
+  //  }
 
   /**
    * Get highest and lowest balance of stake address
@@ -432,50 +430,51 @@ public class StakeKeyServiceImpl implements StakeKeyService {
    * @param dates list date
    * @param response chart response
    */
-  private void getHighestAndLowestBalance(
-      StakeAddress addr,
-      BigInteger fromBalance,
-      List<LocalDateTime> dates,
-      AddressChartBalanceResponse response) {
-    var minMaxBalance =
-        stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(
-            addr.getId(),
-            fromBalance,
-            Timestamp.valueOf(dates.get(0)),
-            Timestamp.valueOf(dates.get(dates.size() - 1)));
-    if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
-      response.setHighestBalance(minMaxBalance.getMaxVal());
-    } else {
-      response.setHighestBalance(fromBalance);
-    }
-    if (minMaxBalance.getMinVal().compareTo(fromBalance) < 0) {
-      response.setLowestBalance(minMaxBalance.getMinVal());
-    } else {
-      response.setLowestBalance(fromBalance);
-    }
-    Long maxTxId =
-        stakeTxBalanceRepository.findMaxTxIdByStakeAddressId(addr.getId()).orElse(Long.MAX_VALUE);
-    if (!maxTxId.equals(Long.MAX_VALUE)) {
-      List<StakeTxProjection> stakeTxList =
-          addressTxBalanceRepository.findTxAndAmountByStake(addr, maxTxId);
-      for (StakeTxProjection stakeTx : stakeTxList) {
-        if (response
-                .getHighestBalance()
-                .add(stakeTx.getAmount())
-                .compareTo(response.getHighestBalance())
-            > 0) {
-          response.setHighestBalance(response.getHighestBalance().add(stakeTx.getAmount()));
-        }
-        if (response
-                .getLowestBalance()
-                .add(stakeTx.getAmount())
-                .compareTo(response.getLowestBalance())
-            < 0) {
-          response.setLowestBalance(response.getLowestBalance().add(stakeTx.getAmount()));
-        }
-      }
-    }
-  }
+  //  private void getHighestAndLowestBalance(
+  //      StakeAddress addr,
+  //      BigInteger fromBalance,
+  //      List<LocalDateTime> dates,
+  //      AddressChartBalanceResponse response) {
+  //    var minMaxBalance =
+  //        stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(
+  //            addr.getId(),
+  //            fromBalance,
+  //            Timestamp.valueOf(dates.get(0)),
+  //            Timestamp.valueOf(dates.get(dates.size() - 1)));
+  //    if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
+  //      response.setHighestBalance(minMaxBalance.getMaxVal());
+  //    } else {
+  //      response.setHighestBalance(fromBalance);
+  //    }
+  //    if (minMaxBalance.getMinVal().compareTo(fromBalance) < 0) {
+  //      response.setLowestBalance(minMaxBalance.getMinVal());
+  //    } else {
+  //      response.setLowestBalance(fromBalance);
+  //    }
+  //    Long maxTxId =
+  //
+  // stakeTxBalanceRepository.findMaxTxIdByStakeAddressId(addr.getId()).orElse(Long.MAX_VALUE);
+  //    if (!maxTxId.equals(Long.MAX_VALUE)) {
+  //      List<StakeTxProjection> stakeTxList =
+  //          addressTxBalanceRepository.findTxAndAmountByStake(addr, maxTxId);
+  //      for (StakeTxProjection stakeTx : stakeTxList) {
+  //        if (response
+  //                .getHighestBalance()
+  //                .add(stakeTx.getAmount())
+  //                .compareTo(response.getHighestBalance())
+  //            > 0) {
+  //          response.setHighestBalance(response.getHighestBalance().add(stakeTx.getAmount()));
+  //        }
+  //        if (response
+  //                .getLowestBalance()
+  //                .add(stakeTx.getAmount())
+  //                .compareTo(response.getLowestBalance())
+  //            < 0) {
+  //          response.setLowestBalance(response.getLowestBalance().add(stakeTx.getAmount()));
+  //        }
+  //      }
+  //    }
+  //  }
 
   @Override
   public List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey) {
