@@ -1,14 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
@@ -27,8 +19,6 @@ import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
 
@@ -77,27 +67,27 @@ public class AddressControllerTest {
   //    verify(addressService).getAddressDetail(address);
   //  }
 
-  @Test
-  public void testGetTopAddress() throws Exception {
-    // Mock request and response objects
-    List<AddressFilterResponse> mockResponse =
-        Arrays.asList(new AddressFilterResponse(), new AddressFilterResponse());
-    BaseFilterResponse<AddressFilterResponse> response =
-        new BaseFilterResponse<>(mockResponse, this.pageable.getPageSize());
-
-    // Mock the service method
-    when(addressService.getTopAddress(pageable)).thenReturn(response);
-
-    // Perform the GET request
-    mockMvc
-        .perform(get("/api/v1/addresses/top-addresses").param("page", "0").param("size", "10"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
-
-    // Verify that the service method was called with the correct argument
-    verify(addressService).getTopAddress(pageable);
-  }
+  //  @Test
+  //  public void testGetTopAddress() throws Exception {
+  //    // Mock request and response objects
+  //    List<AddressFilterResponse> mockResponse =
+  //        Arrays.asList(new AddressFilterResponse(), new AddressFilterResponse());
+  //    BaseFilterResponse<AddressFilterResponse> response =
+  //        new BaseFilterResponse<>(mockResponse, this.pageable.getPageSize());
+  //
+  //    // Mock the service method
+  //    when(addressService.getTopAddress(pageable)).thenReturn(response);
+  //
+  //    // Perform the GET request
+  //    mockMvc
+  //        .perform(get("/api/v1/addresses/top-addresses").param("page", "0").param("size", "10"))
+  //        .andExpect(status().isOk())
+  //        .andExpect(jsonPath("$.data").isArray())
+  //        .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
+  //
+  //    // Verify that the service method was called with the correct argument
+  //    verify(addressService).getTopAddress(pageable);
+  //  }
 
   //  @Test
   //  public void testGetAddressAnalytics() throws Exception {

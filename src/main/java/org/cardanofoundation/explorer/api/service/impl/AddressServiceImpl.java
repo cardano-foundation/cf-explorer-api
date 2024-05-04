@@ -1,32 +1,22 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.mapper.AddressMapper;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
-import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 
 @Service
 @RequiredArgsConstructor
@@ -203,25 +193,25 @@ public class AddressServiceImpl implements AddressService {
   //    }
   //  }
 
-  @Override
-  public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
-    Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
-    Page<ContractFilterResponse> pageResponse =
-        contractPage.map(addressMapper::fromAddressToContractFilter);
-    return new BaseFilterResponse<>(pageResponse);
-  }
+  //  @Override
+  //  public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
+  //    Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
+  //    Page<ContractFilterResponse> pageResponse =
+  //        contractPage.map(addressMapper::fromAddressToContractFilter);
+  //    return new BaseFilterResponse<>(pageResponse);
+  //  }
 
-  @Override
-  public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
-    List<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
-    List<AddressFilterResponse> responses =
-        addressPage.stream()
-            .map(addressMapper::fromAddressToFilterResponse)
-            .collect(Collectors.toList());
-    Page<AddressFilterResponse> pageResponse =
-        new PageImpl<>(responses, pageable, pageable.getPageSize());
-    return new BaseFilterResponse<>(pageResponse);
-  }
+  //  @Override
+  //  public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
+  //    List<Address> addressPage = addressRepository.findAllOrderByBalance(pageable);
+  //    List<AddressFilterResponse> responses =
+  //        addressPage.stream()
+  //            .map(addressMapper::fromAddressToFilterResponse)
+  //            .collect(Collectors.toList());
+  //    Page<AddressFilterResponse> pageResponse =
+  //        new PageImpl<>(responses, pageable, pageable.getPageSize());
+  //    return new BaseFilterResponse<>(pageResponse);
+  //  }
 
   /**
    * Get list token by display name

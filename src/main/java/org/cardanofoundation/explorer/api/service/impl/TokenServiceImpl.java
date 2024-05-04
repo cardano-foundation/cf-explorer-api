@@ -49,7 +49,6 @@ import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
@@ -170,40 +169,41 @@ public class TokenServiceImpl implements TokenService {
     return pageable;
   }
 
-  @Override
-  public TokenResponse getTokenDetail(String tokenId) {
-    MultiAsset multiAsset =
-        multiAssetRepository
-            .findByFingerprint(tokenId)
-            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-
-    TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-
-    var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
-    var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
-
-    if (tokenInfo.isEmpty()) {
-      tokenResponse.setNumberOfHolders(0L);
-      tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
-    } else {
-      if (tokenInfo.get().getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
-        tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
-      } else {
-        tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
-      }
-      tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
-    }
-
-    AssetMetadata assetMetadata =
-        assetMetadataRepository
-            .findFirstBySubject(multiAsset.getPolicy() + multiAsset.getName())
-            .orElse(null);
-
-    tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
-    tokenResponse.setTokenLastActivity(multiAssetRepository.getLastActivityTimeOfToken(multiAsset));
-    setTxMetadataJson(tokenResponse, multiAsset);
-    return tokenResponse;
-  }
+  //  @Override
+  //  public TokenResponse getTokenDetail(String tokenId) {
+  //    MultiAsset multiAsset =
+  //        multiAssetRepository
+  //            .findByFingerprint(tokenId)
+  //            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+  //
+  //    TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
+  //
+  //    var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
+  //    var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+  //
+  //    if (tokenInfo.isEmpty()) {
+  //      tokenResponse.setNumberOfHolders(0L);
+  //      tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+  //    } else {
+  //      if (tokenInfo.get().getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+  //        tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+  //      } else {
+  //        tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
+  //      }
+  //      tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
+  //    }
+  //
+  //    AssetMetadata assetMetadata =
+  //        assetMetadataRepository
+  //            .findFirstBySubject(multiAsset.getPolicy() + multiAsset.getName())
+  //            .orElse(null);
+  //
+  //    tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
+  //
+  // tokenResponse.setTokenLastActivity(multiAssetRepository.getLastActivityTimeOfToken(multiAsset));
+  //    setTxMetadataJson(tokenResponse, multiAsset);
+  //    return tokenResponse;
+  //  }
 
   @Override
   public BaseFilterResponse<TokenMintTxResponse> getMintTxs(String tokenId, Pageable pageable) {
