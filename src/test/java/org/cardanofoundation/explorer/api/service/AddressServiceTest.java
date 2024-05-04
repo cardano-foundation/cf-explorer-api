@@ -1,37 +1,22 @@
 package org.cardanofoundation.explorer.api.service;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.mapper.AddressMapper;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 
 @ExtendWith(MockitoExtension.class)
 class AddressServiceTest {
@@ -224,37 +209,39 @@ class AddressServiceTest {
   //    Assertions.assertNotNull(response);
   //  }
 
-  @Test
-  void getContracts_shouldReturn() {
-    String addr =
-        "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-    Pageable pageable = PageRequest.of(0, 10);
-    Page<Address> contractPage =
-        new PageImpl<>(List.of(Address.builder().id(1L).address(addr).build()));
-    when(addressRepository.findAllByAddressHasScriptIsTrue(pageable)).thenReturn(contractPage);
-    when(addressMapper.fromAddressToContractFilter(any()))
-        .thenReturn(ContractFilterResponse.builder().address(addr).build());
-    var response = addressService.getContracts(pageable);
-    var expect = List.of(ContractFilterResponse.builder().address(addr).build());
-    Assertions.assertEquals(expect.size(), response.getData().size());
-  }
+  //  @Test
+  //  void getContracts_shouldReturn() {
+  //    String addr =
+  //
+  // "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
+  //    Pageable pageable = PageRequest.of(0, 10);
+  //    Page<Address> contractPage =
+  //        new PageImpl<>(List.of(Address.builder().id(1L).address(addr).build()));
+  //    when(addressRepository.findAllByAddressHasScriptIsTrue(pageable)).thenReturn(contractPage);
+  //    when(addressMapper.fromAddressToContractFilter(any()))
+  //        .thenReturn(ContractFilterResponse.builder().address(addr).build());
+  //    var response = addressService.getContracts(pageable);
+  //    var expect = List.of(ContractFilterResponse.builder().address(addr).build());
+  //    Assertions.assertEquals(expect.size(), response.getData().size());
+  //  }
 
-  @Test
-  void getTopAddress_shouldReturn() {
-    String addr =
-        "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-    Pageable pageable = PageRequest.of(0, 10);
-    AddressFilterResponse addressFilterResponse =
-        AddressFilterResponse.builder().address(addr).build();
-    when(addressRepository.findAllOrderByBalance(pageable))
-        .thenReturn(List.of(Address.builder().address(addr).build()));
-    when(addressMapper.fromAddressToFilterResponse(any())).thenReturn(addressFilterResponse);
-
-    var response = addressService.getTopAddress(pageable);
-    var expect = new BaseFilterResponse<>(new PageImpl<>(List.of(addressFilterResponse)));
-
-    Assertions.assertEquals(expect.getData(), response.getData());
-  }
+  //  @Test
+  //  void getTopAddress_shouldReturn() {
+  //    String addr =
+  //
+  // "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
+  //    Pageable pageable = PageRequest.of(0, 10);
+  //    AddressFilterResponse addressFilterResponse =
+  //        AddressFilterResponse.builder().address(addr).build();
+  //    when(addressRepository.findAllOrderByBalance(pageable))
+  //        .thenReturn(List.of(Address.builder().address(addr).build()));
+  //    when(addressMapper.fromAddressToFilterResponse(any())).thenReturn(addressFilterResponse);
+  //
+  //    var response = addressService.getTopAddress(pageable);
+  //    var expect = new BaseFilterResponse<>(new PageImpl<>(List.of(addressFilterResponse)));
+  //
+  //    Assertions.assertEquals(expect.getData(), response.getData());
+  //  }
 
   //  @Test
   //  void getTokenByDisplayName_shouldReturn() {

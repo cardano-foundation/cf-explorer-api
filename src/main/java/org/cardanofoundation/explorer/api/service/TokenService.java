@@ -24,7 +24,7 @@ public interface TokenService {
    * @param tokenId token id (fingerprint)
    * @return token detail info
    */
-  TokenResponse getTokenDetail(String tokenId);
+  //  TokenResponse getTokenDetail(String tokenId);
 
   /**
    * Get minting transaction by token

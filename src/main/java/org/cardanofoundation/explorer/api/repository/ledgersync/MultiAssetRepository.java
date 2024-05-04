@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -69,10 +68,11 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   List<MultiAsset> findAllByIdIn(@Param("ids") Collection<Long> ids);
 
-  @Query(
-      "SELECT b.time FROM Tx tx JOIN Block b ON b.id = tx.blockId "
-          + "WHERE tx.id = (SELECT max(adt.txId) FROM AddressToken adt WHERE adt.multiAsset = :multiAsset)")
-  Timestamp getLastActivityTimeOfToken(@Param("multiAsset") MultiAsset multiAsset);
+  //  @Query(
+  //      "SELECT b.time FROM Tx tx JOIN Block b ON b.id = tx.blockId "
+  //          + "WHERE tx.id = (SELECT max(adt.txId) FROM AddressToken adt WHERE adt.multiAsset =
+  // :multiAsset)")
+  //  Timestamp getLastActivityTimeOfToken(@Param("multiAsset") MultiAsset multiAsset);
 
   @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE CONCAT('%', :query, '%') ")
   List<MultiAsset> findByNameViewLike(@Param("query") String query, Pageable pageable);
@@ -88,13 +88,13 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
           + " WHERE multiAsset.policy = :policy")
   Long countMultiAssetByPolicy(@Param("policy") String policy);
 
-  @Query(
-      "SELECT COALESCE(COUNT(DISTINCT(atb.addressId, atb.multiAssetId)), 0) "
-          + " FROM MultiAsset ma "
-          + " INNER JOIN AddressTokenBalance atb ON atb.multiAsset = ma"
-          + " WHERE ma.policy = :policy "
-          + " AND atb.balance > 0 ")
-  Long countAssetHoldersByPolicy(@Param("policy") String policy);
+  //  @Query(
+  //      "SELECT COALESCE(COUNT(DISTINCT(atb.addressId, atb.multiAssetId)), 0) "
+  //          + " FROM MultiAsset ma "
+  //          + " INNER JOIN AddressTokenBalance atb ON atb.multiAsset = ma"
+  //          + " WHERE ma.policy = :policy "
+  //          + " AND atb.balance > 0 ")
+  //  Long countAssetHoldersByPolicy(@Param("policy") String policy);
 
   @Query(
       value =

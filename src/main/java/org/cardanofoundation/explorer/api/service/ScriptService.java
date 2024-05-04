@@ -8,8 +8,6 @@ import org.cardanofoundation.explorer.api.model.request.script.nativescript.Nati
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
-import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
@@ -20,7 +18,7 @@ public interface ScriptService {
   BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(
       NativeScriptFilterRequest filterRequest, Pageable pageable);
 
-  NativeScriptResponse getNativeScriptDetail(String scriptHash);
+  //  NativeScriptResponse getNativeScriptDetail(String scriptHash);
 
   String verifyNativeScript(String scriptHash, String scriptJson);
 
@@ -33,7 +31,7 @@ public interface ScriptService {
   BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(
       SmartContractFilterRequest filterRequest, Pageable pageable);
 
-  SmartContractDetailResponse getSmartContractDetail(String scriptHash);
+  //  SmartContractDetailResponse getSmartContractDetail(String scriptHash);
 
   BaseFilterResponse<SmartContractTxResponse> getSmartContractTxs(
       String scriptHash, Pageable pageable);

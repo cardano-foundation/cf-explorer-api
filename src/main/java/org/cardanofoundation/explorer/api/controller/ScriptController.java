@@ -21,8 +21,6 @@ import org.cardanofoundation.explorer.api.model.request.script.nativescript.Nati
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
-import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
@@ -60,12 +58,12 @@ public class ScriptController {
         scriptService.getNativeScripts(filterRequest, pagination.toPageable()));
   }
 
-  @GetMapping("/native-scripts/{scriptHash}")
-  @LogMessage
-  public ResponseEntity<NativeScriptResponse> getNativeScriptDetail(
-      @PathVariable String scriptHash) {
-    return ResponseEntity.ok(scriptService.getNativeScriptDetail(scriptHash));
-  }
+  //  @GetMapping("/native-scripts/{scriptHash}")
+  //  @LogMessage
+  //  public ResponseEntity<NativeScriptResponse> getNativeScriptDetail(
+  //      @PathVariable String scriptHash) {
+  //    return ResponseEntity.ok(scriptService.getNativeScriptDetail(scriptHash));
+  //  }
 
   @PostMapping("/native-scripts/{scriptHash}/verify")
   @LogMessage
@@ -120,15 +118,15 @@ public class ScriptController {
         scriptService.getSmartContracts(filterRequest, pagination.toPageable()));
   }
 
-  @GetMapping("/contracts/{scriptHash}")
-  @LogMessage
-  @Operation(
-      summary = "Get smart contract detail",
-      tags = {"script"})
-  public ResponseEntity<SmartContractDetailResponse> getSmartContracts(
-      @PathVariable @Parameter(description = "The script hash") String scriptHash) {
-    return ResponseEntity.ok(scriptService.getSmartContractDetail(scriptHash));
-  }
+  //  @GetMapping("/contracts/{scriptHash}")
+  //  @LogMessage
+  //  @Operation(
+  //      summary = "Get smart contract detail",
+  //      tags = {"script"})
+  //  public ResponseEntity<SmartContractDetailResponse> getSmartContracts(
+  //      @PathVariable @Parameter(description = "The script hash") String scriptHash) {
+  //    return ResponseEntity.ok(scriptService.getSmartContractDetail(scriptHash));
+  //  }
 
   @GetMapping("/contracts/{scriptHash}/txs")
   @LogMessage

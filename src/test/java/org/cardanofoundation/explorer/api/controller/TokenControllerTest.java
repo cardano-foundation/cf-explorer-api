@@ -34,7 +34,6 @@ import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
 
@@ -93,29 +92,29 @@ class TokenControllerTest {
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
 
-  @Test
-  void testGetTokenDetail() throws Exception {
-    // Setup
-    final TokenResponse tokenResponse = new TokenResponse();
-    tokenResponse.setName("484f534b59");
-    tokenResponse.setDisplayName("HOSKY");
-    tokenResponse.setPolicy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235");
-    tokenResponse.setFingerprint("asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9");
-    tokenResponse.setTxCount(5959573);
-    when(tokenService.getTokenDetail(anyString())).thenReturn(tokenResponse);
-
-    // Run the test
-    final MockHttpServletResponse response =
-        mockMvc
-            .perform(
-                get("/api/v1/tokens/{tokenId}", "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
-                    .accept(MediaType.APPLICATION_JSON))
-            .andReturn()
-            .getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-  }
+  //  @Test
+  //  void testGetTokenDetail() throws Exception {
+  //    // Setup
+  //    final TokenResponse tokenResponse = new TokenResponse();
+  //    tokenResponse.setName("484f534b59");
+  //    tokenResponse.setDisplayName("HOSKY");
+  //    tokenResponse.setPolicy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235");
+  //    tokenResponse.setFingerprint("asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9");
+  //    tokenResponse.setTxCount(5959573);
+  //    when(tokenService.getTokenDetail(anyString())).thenReturn(tokenResponse);
+  //
+  //    // Run the test
+  //    final MockHttpServletResponse response =
+  //        mockMvc
+  //            .perform(
+  //                get("/api/v1/tokens/{tokenId}", "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
+  //                    .accept(MediaType.APPLICATION_JSON))
+  //            .andReturn()
+  //            .getResponse();
+  //
+  //    // Verify the results
+  //    assertEquals(HttpStatus.OK.value(), response.getStatus());
+  //  }
 
   @Test
   void testGetTokenMintTx() throws Exception {

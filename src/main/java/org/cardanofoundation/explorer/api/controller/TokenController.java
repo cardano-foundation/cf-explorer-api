@@ -48,17 +48,17 @@ public class TokenController {
     return ResponseEntity.ok(tokenService.filterToken(query, pagination.toPageable()));
   }
 
-  @GetMapping("/{tokenId}")
-  @LogMessage
-  @Operation(summary = "Detail token")
-  public ResponseEntity<TokenResponse> getTokenDetail(
-      @PathVariable
-          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
-          String tokenId) {
-    return ResponseEntity.ok(tokenService.getTokenDetail(tokenId));
-  }
+  //  @GetMapping("/{tokenId}")
+  //  @LogMessage
+  //  @Operation(summary = "Detail token")
+  //  public ResponseEntity<TokenResponse> getTokenDetail(
+  //      @PathVariable
+  //          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
+  //          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
+  //          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
+  //          String tokenId) {
+  //    return ResponseEntity.ok(tokenService.getTokenDetail(tokenId));
+  //  }
 
   @GetMapping("/{tokenId}/mints")
   @LogMessage

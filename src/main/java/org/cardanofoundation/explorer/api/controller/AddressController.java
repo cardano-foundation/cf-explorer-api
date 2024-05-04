@@ -1,25 +1,14 @@
 package org.cardanofoundation.explorer.api.controller;
 
-import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springdoc.core.annotations.ParameterObject;
 
-import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
-import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
-import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
-import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 
 @RestController
 @RequestMapping("/api/v1/addresses")
@@ -50,15 +39,15 @@ public class AddressController {
   //    return ResponseEntity.ok(addressService.getAddressDetail(address));
   //  }
 
-  @GetMapping("/top-addresses")
-  @LogMessage
-  @Operation(
-      summary = "Get top address by balance",
-      tags = {"address"})
-  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-      @ParameterObject @PaginationValid @PageZeroValid @Valid Pagination pagination) {
-    return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
-  }
+  //  @GetMapping("/top-addresses")
+  //  @LogMessage
+  //  @Operation(
+  //      summary = "Get top address by balance",
+  //      tags = {"address"})
+  //  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
+  //      @ParameterObject @PaginationValid @PageZeroValid @Valid Pagination pagination) {
+  //    return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
+  //  }
 
   //  @GetMapping("/analytics/{address}/{type}")
   //  @LogMessage

@@ -48,7 +48,6 @@ import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
@@ -336,12 +335,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     return new BaseFilterResponse<>(pageResponse);
   }
 
-  @Override
-  public BaseFilterResponse<AddressFilterResponse> getAddresses(
-      String stakeKey, Pageable pageable) {
-    Page<Address> addresses = addressRepository.findByStakeAddress(stakeKey, pageable);
-    return new BaseFilterResponse<>(addresses.map(addressMapper::fromAddressToFilterResponse));
-  }
+  //  @Override
+  //  public BaseFilterResponse<AddressFilterResponse> getAddresses(
+  //      String stakeKey, Pageable pageable) {
+  //    Page<Address> addresses = addressRepository.findByStakeAddress(stakeKey, pageable);
+  //    return new BaseFilterResponse<>(addresses.map(addressMapper::fromAddressToFilterResponse));
+  //  }
 
   @Override
   public StakeAnalyticResponse getStakeAnalytics() {

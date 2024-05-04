@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.annotation.PostConstruct;
 
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.bloxbean.cardano.client.exception.CborDeserializationException;
 import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
 import com.bloxbean.cardano.client.transaction.spec.script.RequireTimeAfter;
 import com.bloxbean.cardano.client.transaction.spec.script.RequireTimeBefore;
@@ -30,7 +28,6 @@ import com.bloxbean.cardano.client.transaction.spec.script.ScriptAll;
 import com.bloxbean.cardano.client.transaction.spec.script.ScriptAny;
 import com.bloxbean.cardano.client.transaction.spec.script.ScriptAtLeast;
 import com.bloxbean.cardano.client.transaction.spec.script.ScriptPubkey;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
@@ -44,7 +41,6 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
 import org.cardanofoundation.explorer.api.model.response.script.projection.SmartContractTxProjection;
-import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
@@ -213,75 +209,76 @@ public class ScriptServiceImpl implements ScriptService {
     return isOpen;
   }
 
-  @Override
-  public NativeScriptResponse getNativeScriptDetail(String scriptHash) {
-    Block currrentBlock =
-        blockRepository
-            .findLatestBlock()
-            .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
-    NativeScriptResponse nativeScriptResponse = new NativeScriptResponse();
-    Script script =
-        scriptRepository
-            .findByHash(scriptHash)
-            .orElseThrow(() -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND));
-    Set<ScriptType> nativeScriptTypes = Set.of(ScriptType.TIMELOCK, ScriptType.MULTISIG);
-    if (!nativeScriptTypes.contains(script.getType())) {
-      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
-    }
-    NativeScriptInfo nativeScriptInfo =
-        nativeScriptInfoRepository
-            .findByScriptHash(scriptHash)
-            .orElseGet(
-                () ->
-                    NativeScriptInfo.builder()
-                        .numberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash))
-                        .numberOfAssetHolders(
-                            multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
-                        .build());
-    nativeScriptResponse.setScriptHash(scriptHash);
-    List<String> associatedAddressList =
-        stakeAddressRepository.getStakeAssociatedAddress(scriptHash);
-    associatedAddressList.addAll(addressRepository.getAssociatedAddress(scriptHash));
-    nativeScriptResponse.setAssociatedAddress(associatedAddressList);
-    nativeScriptResponse.setNumberOfTokens(nativeScriptInfo.getNumberOfTokens());
-    nativeScriptResponse.setNumberOfAssetHolders(nativeScriptInfo.getNumberOfAssetHolders());
-    nativeScriptResponse.setKeyHashes(new ArrayList<>());
-    nativeScriptResponse.setVerifiedContract(false);
-    nativeScriptResponse.setIsOpen(setStatus(nativeScriptInfo, currrentBlock.getSlotNo()));
-
-    String json = script.getJson();
-    if (StringUtils.isEmpty(json)) {
-      Optional<VerifiedScript> verifiedScript = verifiedScriptRepository.findByHash(scriptHash);
-      if (verifiedScript.isPresent() && StringUtils.isEmpty(json)) {
-        json = verifiedScript.get().getJson();
-      }
-    }
-
-    try {
-      if (!StringUtils.isEmpty(json)) {
-        nativeScriptResponse.setVerifiedContract(true);
-        nativeScriptResponse.setScript(json);
-        NativeScript nativeScript = NativeScript.deserializeJson(json);
-        setNativeScriptInfo(nativeScript, nativeScriptResponse);
-        // One time mint is a native script that has a timelock before the current time
-        // and has only one mint transaction
-        if (Objects.nonNull(nativeScriptResponse.getBefore())
-            && LocalDateTime.now(ZoneOffset.UTC).isAfter(nativeScriptResponse.getBefore())
-            && isOneTimeMint(scriptHash)) {
-          nativeScriptResponse.setIsOneTimeMint(
-              Objects.isNull(nativeScriptResponse.getConditionType())
-                  || com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all.equals(
-                      nativeScriptResponse.getConditionType()));
-        } else {
-          nativeScriptResponse.setIsOneTimeMint(false);
-        }
-      }
-    } catch (JsonProcessingException | CborDeserializationException e) {
-      log.warn("Error parsing script json: {}", e.getMessage());
-      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
-    }
-    return nativeScriptResponse;
-  }
+  //  @Override
+  //  public NativeScriptResponse getNativeScriptDetail(String scriptHash) {
+  //    Block currrentBlock =
+  //        blockRepository
+  //            .findLatestBlock()
+  //            .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
+  //    NativeScriptResponse nativeScriptResponse = new NativeScriptResponse();
+  //    Script script =
+  //        scriptRepository
+  //            .findByHash(scriptHash)
+  //            .orElseThrow(() -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND));
+  //    Set<ScriptType> nativeScriptTypes = Set.of(ScriptType.TIMELOCK, ScriptType.MULTISIG);
+  //    if (!nativeScriptTypes.contains(script.getType())) {
+  //      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
+  //    }
+  //    NativeScriptInfo nativeScriptInfo =
+  //        nativeScriptInfoRepository
+  //            .findByScriptHash(scriptHash)
+  //            .orElseGet(
+  //                () ->
+  //                    NativeScriptInfo.builder()
+  //
+  // .numberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash))
+  //                        .numberOfAssetHolders(
+  //                            multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
+  //                        .build());
+  //    nativeScriptResponse.setScriptHash(scriptHash);
+  //    List<String> associatedAddressList =
+  //        stakeAddressRepository.getStakeAssociatedAddress(scriptHash);
+  //    associatedAddressList.addAll(addressRepository.getAssociatedAddress(scriptHash));
+  //    nativeScriptResponse.setAssociatedAddress(associatedAddressList);
+  //    nativeScriptResponse.setNumberOfTokens(nativeScriptInfo.getNumberOfTokens());
+  //    nativeScriptResponse.setNumberOfAssetHolders(nativeScriptInfo.getNumberOfAssetHolders());
+  //    nativeScriptResponse.setKeyHashes(new ArrayList<>());
+  //    nativeScriptResponse.setVerifiedContract(false);
+  //    nativeScriptResponse.setIsOpen(setStatus(nativeScriptInfo, currrentBlock.getSlotNo()));
+  //
+  //    String json = script.getJson();
+  //    if (StringUtils.isEmpty(json)) {
+  //      Optional<VerifiedScript> verifiedScript = verifiedScriptRepository.findByHash(scriptHash);
+  //      if (verifiedScript.isPresent() && StringUtils.isEmpty(json)) {
+  //        json = verifiedScript.get().getJson();
+  //      }
+  //    }
+  //
+  //    try {
+  //      if (!StringUtils.isEmpty(json)) {
+  //        nativeScriptResponse.setVerifiedContract(true);
+  //        nativeScriptResponse.setScript(json);
+  //        NativeScript nativeScript = NativeScript.deserializeJson(json);
+  //        setNativeScriptInfo(nativeScript, nativeScriptResponse);
+  //        // One time mint is a native script that has a timelock before the current time
+  //        // and has only one mint transaction
+  //        if (Objects.nonNull(nativeScriptResponse.getBefore())
+  //            && LocalDateTime.now(ZoneOffset.UTC).isAfter(nativeScriptResponse.getBefore())
+  //            && isOneTimeMint(scriptHash)) {
+  //          nativeScriptResponse.setIsOneTimeMint(
+  //              Objects.isNull(nativeScriptResponse.getConditionType())
+  //                  || com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all.equals(
+  //                      nativeScriptResponse.getConditionType()));
+  //        } else {
+  //          nativeScriptResponse.setIsOneTimeMint(false);
+  //        }
+  //      }
+  //    } catch (JsonProcessingException | CborDeserializationException e) {
+  //      log.warn("Error parsing script json: {}", e.getMessage());
+  //      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
+  //    }
+  //    return nativeScriptResponse;
+  //  }
 
   /**
    * Convert slot to time
@@ -419,31 +416,31 @@ public class ScriptServiceImpl implements ScriptService {
         smartContractProjections.map(scriptMapper::fromSCInfoToSCFilterResponse));
   }
 
-  @Override
-  public SmartContractDetailResponse getSmartContractDetail(String scriptHash) {
-    Script script =
-        scriptRepository
-            .findByHash(scriptHash)
-            .orElseThrow(() -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND));
-
-    if (!script.getType().equals(ScriptType.PLUTUSV1)
-        && !script.getType().equals(ScriptType.PLUTUSV2)
-        && !script.getType().equals(ScriptType.PLUTUSV3)) {
-      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
-    }
-
-    List<String> associatedAddresses =
-        Stream.concat(
-                stakeAddressRepository.getAssociatedAddress(scriptHash).stream(),
-                addressRepository.getAssociatedAddress(scriptHash).stream())
-            .toList();
-
-    return SmartContractDetailResponse.builder()
-        .scriptHash(script.getHash())
-        .scriptType(script.getType())
-        .associatedAddresses(associatedAddresses)
-        .build();
-  }
+  //  @Override
+  //  public SmartContractDetailResponse getSmartContractDetail(String scriptHash) {
+  //    Script script =
+  //        scriptRepository
+  //            .findByHash(scriptHash)
+  //            .orElseThrow(() -> new BusinessException(BusinessCode.SCRIPT_NOT_FOUND));
+  //
+  //    if (!script.getType().equals(ScriptType.PLUTUSV1)
+  //        && !script.getType().equals(ScriptType.PLUTUSV2)
+  //        && !script.getType().equals(ScriptType.PLUTUSV3)) {
+  //      throw new BusinessException(BusinessCode.SCRIPT_NOT_FOUND);
+  //    }
+  //
+  //    List<String> associatedAddresses =
+  //        Stream.concat(
+  //                stakeAddressRepository.getAssociatedAddress(scriptHash).stream(),
+  //                addressRepository.getAssociatedAddress(scriptHash).stream())
+  //            .toList();
+  //
+  //    return SmartContractDetailResponse.builder()
+  //        .scriptHash(script.getHash())
+  //        .scriptType(script.getType())
+  //        .associatedAddresses(associatedAddresses)
+  //        .build();
+  //  }
 
   @Override
   public BaseFilterResponse<SmartContractTxResponse> getSmartContractTxs(

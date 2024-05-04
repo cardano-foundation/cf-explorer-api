@@ -31,7 +31,6 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
@@ -232,22 +231,22 @@ public class StakeKeyControllerTest {
         .andExpect(jsonPath("$").exists());
   }
 
-  @Test
-  void testGetAddresses_thenReturn() throws Exception {
-    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
-    Pageable pageable = PageRequest.of(0, 10);
-    BaseFilterResponse<AddressFilterResponse> response = new BaseFilterResponse<>();
-
-    when(stakeService.getAddresses(stakeKey, pageable)).thenReturn(response);
-
-    mockMvc
-        .perform(
-            get("/api/v1/stakes/{stakeKey}/list-address", stakeKey)
-                .param("page", "0")
-                .param("size", "10"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").exists());
-  }
+  //  @Test
+  //  void testGetAddresses_thenReturn() throws Exception {
+  //    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
+  //    Pageable pageable = PageRequest.of(0, 10);
+  //    BaseFilterResponse<AddressFilterResponse> response = new BaseFilterResponse<>();
+  //
+  //    when(stakeService.getAddresses(stakeKey, pageable)).thenReturn(response);
+  //
+  //    mockMvc
+  //        .perform(
+  //            get("/api/v1/stakes/{stakeKey}/list-address", stakeKey)
+  //                .param("page", "0")
+  //                .param("size", "10"))
+  //        .andExpect(status().isOk())
+  //        .andExpect(jsonPath("$").exists());
+  //  }
 
   @Test
   void testGetStakeAnalytics_thenReturn() throws Exception {

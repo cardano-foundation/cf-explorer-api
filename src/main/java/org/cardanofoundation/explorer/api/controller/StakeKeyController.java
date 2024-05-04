@@ -24,7 +24,6 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
@@ -188,18 +187,18 @@ public class StakeKeyController {
     return stakeService.getTopDelegators(pagination.toPageable());
   }
 
-  @GetMapping("/{stakeKey}/list-address")
-  @LogMessage
-  @Operation(summary = "Get all address of stake", tags = "stake-key")
-  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
-      @PathVariable
-          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-          @StakeKeyLengthValid
-          @Parameter(description = "The Bech32 encoded version of the stake address.")
-          String stakeKey,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-    return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
-  }
+  //  @GetMapping("/{stakeKey}/list-address")
+  //  @LogMessage
+  //  @Operation(summary = "Get all address of stake", tags = "stake-key")
+  //  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
+  //      @PathVariable
+  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+  //          @StakeKeyLengthValid
+  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
+  //          String stakeKey,
+  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+  //    return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
+  //  }
 
   @GetMapping("/analytics")
   @LogMessage
