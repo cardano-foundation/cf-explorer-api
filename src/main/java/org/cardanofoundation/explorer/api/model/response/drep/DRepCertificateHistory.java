@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.DRepActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.DRepActionType;
 
 @Getter
 @Setter

@@ -18,14 +18,17 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.request.drep.DRepFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -93,5 +96,34 @@ public class DRepController {
       @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(
         dRepService.getDRepDelegators(dRepHashOrDRepId, pagination.toPageable()));
+  }
+
+  @GetMapping("/overview")
+  @LogMessage
+  @Operation(
+      summary = "Get overview of Delegated Representatives (DRep)",
+      tags = {"dRep"})
+  public ResponseEntity<DRepOverviewResponse> getDRepOverview() {
+    return ResponseEntity.ok(dRepService.getDRepOverview());
+  }
+
+  @GetMapping("/filter")
+  @LogMessage
+  @Operation(
+      summary = "Get list of DRep by filter",
+      tags = {"dRep"})
+  public ResponseEntity<BaseFilterResponse<DRepFilterResponse>> getDRepsByFilter(
+      @ParameterObject @Valid DRepFilterRequest dRepFilterRequest,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 20,
+              sort = {"createdAt"},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
+
+    return ResponseEntity.ok(
+        dRepService.getDRepsByFilter(dRepFilterRequest, pagination.toPageable()));
   }
 }

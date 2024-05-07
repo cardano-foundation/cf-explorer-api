@@ -28,19 +28,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
 import org.cardanofoundation.explorer.api.controller.advice.GlobalRestControllerExceptionHandler;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
+import org.cardanofoundation.explorer.api.model.request.drep.DRepFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepCertificateHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 
 @WebMvcTest(DRepController.class)
 @Import({
@@ -200,6 +203,69 @@ public class DrepControllerTest {
             content()
                 .string(containsString("43a0e2e2d6bf1d0c48b0eb1744fb853407c6b94f2de79f0508c5962e")))
         .andExpect(jsonPath("$.delegators").value(100));
+  }
+
+  @Test
+  void testDRepOverview() throws Exception {
+
+    DRepOverviewResponse response =
+        DRepOverviewResponse.builder()
+            .totalDReps(12L)
+            .activeDReps(5L)
+            .inactiveDReps(5L)
+            .retiredDReps(0L)
+            .epochNo(200)
+            .abstainDReps(2L)
+            .build();
+    when(dRepService.getDRepOverview()).thenReturn(response);
+    mockMvc
+        .perform(get("/api/v1/dreps/overview").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.totalDReps").value(12L));
+  }
+
+  @Test
+  void testDRepFilter() throws Exception {
+    DRepFilterRequest filter =
+        DRepFilterRequest.builder()
+            .activeStakeFrom(BigInteger.TEN)
+            .activeStakeTo(BigInteger.valueOf(100))
+            .votingPowerFrom(0.5)
+            .votingPowerTo(1.0)
+            .build();
+
+    DRepFilterResponse response1 =
+        DRepFilterResponse.builder()
+            .drepId("dRepId1")
+            .drepHash("dRepHash1")
+            .activeVoteStake(BigInteger.TEN)
+            .votingPower(0.6)
+            .build();
+
+    DRepFilterResponse response2 =
+        DRepFilterResponse.builder()
+            .drepId("dRepId2")
+            .drepHash("dRepHash2")
+            .activeVoteStake(BigInteger.valueOf(20))
+            .votingPower(0.7)
+            .build();
+
+    when(dRepService.getDRepsByFilter(any(), any(Pageable.class)))
+        .thenReturn(new BaseFilterResponse<>(List.of(response1, response2), 2L));
+
+    mockMvc
+        .perform(
+            get("/api/v1/dreps/filter")
+                .param("page", "0")
+                .param("size", "20")
+                .param("activeStakeFrom", filter.getActiveStakeFrom().toString())
+                .param("activeStakeTo", filter.getActiveStakeTo().toString())
+                .param("votingPowerFrom", filter.getVotingPowerFrom().toString())
+                .param("votingPowerTo", filter.getVotingPowerTo().toString())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.length()").value(2L))
+        .andExpect(content().string(containsString("dRepId1")));
   }
 
   @Test

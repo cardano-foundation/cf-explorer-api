@@ -45,4 +45,7 @@ public class StakeKeyReportRequest {
   private Boolean eventRewards;
   private Boolean eventWithdrawal;
   private Boolean eventDeregistration;
+  private String timePattern;
+  private Long zoneOffset; // diff with UTC in minutes
+  private String dateFormat;
 }

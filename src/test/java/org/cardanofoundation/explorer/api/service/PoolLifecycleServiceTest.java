@@ -902,12 +902,6 @@ class PoolLifecycleServiceTest {
         .thenReturn("d867f77bb62fe58df4b13285f6b8d37a8aae41eea662b248b80321ec5ce60asda");
     when(poolHashRepository.getPoolInfo("pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s"))
         .thenReturn(projection);
-    EpochRewardProjection rewardProjection = Mockito.mock(EpochRewardProjection.class);
-    //    when(rewardProjection.getEpochNo()).thenReturn(69);
-    //    when(rewardProjection.getAmount()).thenReturn(BigInteger.valueOf(1001));
-    //    when(rewardRepository.getRewardRefundByEpoch(
-    //        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s", Set.of(69))).thenReturn(
-    //        List.of(rewardProjection));
     Assertions.assertEquals(
         1,
         poolLifecycleService

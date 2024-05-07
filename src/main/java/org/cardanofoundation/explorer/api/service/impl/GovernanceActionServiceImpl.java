@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -22,9 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionStatus;
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
-import org.cardanofoundation.explorer.api.common.enumeration.VoteType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
@@ -50,10 +48,12 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProc
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -105,17 +105,16 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       slot = poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(dRepHashOrPoolHash);
     }
 
-    Boolean isVoteNone = governanceActionFilter.getVoteType().equals(VoteType.NONE);
+    Boolean isVoteNone = governanceActionFilter.getVoteType().equals(Vote.NONE);
 
     Vote vote =
-        governanceActionFilter.getVoteType().equals(VoteType.ANY)
+        governanceActionFilter.getVoteType().equals(Vote.ANY)
             ? null
-            : Vote.fromValue(governanceActionFilter.getVoteType().name());
+            : governanceActionFilter.getVoteType();
 
-    List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
-        govActionTypeList =
-            getGovActionTypeByVoterType(
-                governanceActionFilter.getVoterType(), governanceActionFilter.getActionType());
+    List<GovActionType> govActionTypeList =
+        getGovActionTypeByVoterType(
+            governanceActionFilter.getVoterType(), governanceActionFilter.getActionType());
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
     fromDate = fromDate < 0 ? 0 : fromDate;
@@ -140,7 +139,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             : org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus.valueOf(
                 governanceActionFilter.getActionStatus().name());
 
-    String anchorText = governanceActionFilter.getAnchorText();
+    String anchorText =
+        governanceActionFilter.getAnchorText() == null
+            ? null
+            : governanceActionFilter.getAnchorText().toLowerCase();
 
     Page<GovernanceActionProjection> governanceActionProjections =
         governanceActionRepository.getAllByFilter(
@@ -172,42 +174,25 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     return govActionResponse;
   }
 
-  private List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
-      getGovActionTypeByVoterType(VoterType voterType, GovActionType govActionType) {
-    List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
-        govActionTypeList =
-            new ArrayList<>(
-                Arrays.asList(
-                    org.cardanofoundation.explorer.common.entity.ledgersync.enumeration
-                        .GovActionType.values()));
+  private List<GovActionType> getGovActionTypeByVoterType(
+      VoterType voterType, GovActionType govActionType) {
+    List<GovActionType> govActionTypeList = new ArrayList<>(Arrays.asList(GovActionType.values()));
 
-    if (govActionType.equals(
-        org.cardanofoundation.explorer.api.common.enumeration.GovActionType.ALL)) {
+    if (govActionType.equals(GovActionType.ALL)) {
       if (voterType.equals(VoterType.STAKING_POOL_KEY_HASH)) {
-        govActionTypeList.remove(
-            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                .NEW_CONSTITUTION);
-        govActionTypeList.remove(
-            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                .PARAMETER_CHANGE_ACTION);
-        govActionTypeList.remove(
-            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                .TREASURY_WITHDRAWALS_ACTION);
+        govActionTypeList.remove(GovActionType.NEW_CONSTITUTION);
+        govActionTypeList.remove(GovActionType.PARAMETER_CHANGE_ACTION);
+        govActionTypeList.remove(GovActionType.TREASURY_WITHDRAWALS_ACTION);
       }
     } else {
       govActionTypeList = new ArrayList<>();
-      govActionTypeList.add(
-          org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType.valueOf(
-              govActionType.name()));
+      govActionTypeList.add(GovActionType.valueOf(govActionType.name()));
       if (voterType.equals(VoterType.STAKING_POOL_KEY_HASH)) {
         govActionTypeList.removeAll(
             List.of(
-                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .NEW_CONSTITUTION,
-                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .PARAMETER_CHANGE_ACTION,
-                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .TREASURY_WITHDRAWALS_ACTION));
+                GovActionType.NEW_CONSTITUTION,
+                GovActionType.PARAMETER_CHANGE_ACTION,
+                GovActionType.TREASURY_WITHDRAWALS_ACTION));
       }
     }
     return govActionTypeList;
@@ -234,19 +219,14 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
               .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
       dRepHashOrPoolHashOrPoolView = dRepInfo.getDrepHash();
     }
-    org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-        govActionType = govActionDetailsProjections.get().getType();
+    GovActionType govActionType = govActionDetailsProjections.get().getType();
     // STAKING POOL not allowed to vote on treasury withdrawals, parameter change and update
     // committee
-    List<org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType>
-        govActionTypes =
-            List.of(
-                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .TREASURY_WITHDRAWALS_ACTION,
-                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .PARAMETER_CHANGE_ACTION,
-                org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                    .NEW_CONSTITUTION);
+    List<GovActionType> govActionTypes =
+        List.of(
+            GovActionType.TREASURY_WITHDRAWALS_ACTION,
+            GovActionType.PARAMETER_CHANGE_ACTION,
+            GovActionType.NEW_CONSTITUTION);
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
         && govActionTypes.contains(govActionType)) {
       return new GovernanceActionDetailsResponse();
@@ -271,14 +251,14 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     setExpiryDateOfGovAction(response);
     // no vote procedure found = none vote
     if (votingProcedureProjections.isEmpty()) {
-      response.setVoteType(VoteType.NONE);
+      response.setVoteType(Vote.NONE);
       return response;
     }
     List<HistoryVote> historyVotes =
         votingProcedureProjections.stream()
             .map(votingProcedureMapper::fromVotingProcedureProjection)
             .toList();
-    response.setVoteType(VoteType.valueOf(votingProcedureProjections.get(0).getVote().name()));
+    response.setVoteType(votingProcedureProjections.get(0).getVote());
     response.setHistoryVotes(historyVotes);
     return response;
   }
@@ -287,8 +267,13 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     Instant startTime = Instant.ofEpochSecond(response.getBlockTime());
     EpochParam epochParam = epochParamRepository.findByEpochNo(response.getEpoch());
     Instant expiryTime =
-        startTime.plus(epochDays * epochParam.getGovActionLifetime().longValue(), ChronoUnit.DAYS);
+        startTime.plus(
+            epochDays * getLongValue(epochParam.getGovActionLifetime()), ChronoUnit.DAYS);
     response.setExpiryDate(Date.from(expiryTime));
+  }
+
+  private Long getLongValue(BigInteger bigInteger) {
+    return bigInteger == null ? 0L : bigInteger.longValue();
   }
 
   @Override

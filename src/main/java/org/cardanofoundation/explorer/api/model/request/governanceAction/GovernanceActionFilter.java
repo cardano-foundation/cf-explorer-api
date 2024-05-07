@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionStatus;
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
-import org.cardanofoundation.explorer.api.common.enumeration.VoteType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.validation.date.DatePattern;
 import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 
@@ -34,7 +34,7 @@ public class GovernanceActionFilter {
 
   @NotNull GovActionStatus actionStatus;
 
-  @NotNull VoteType voteType;
+  @NotNull Vote voteType;
 
   @NotNull VoterType voterType;
 
