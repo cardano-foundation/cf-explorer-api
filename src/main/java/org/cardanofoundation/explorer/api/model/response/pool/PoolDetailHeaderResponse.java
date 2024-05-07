@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.cardanofoundation.explorer.api.common.enumeration.PoolStatus;
 import org.cardanofoundation.explorer.api.json.serialize.PercentSerializer;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailUpdateProjection;
-import org.cardanofoundation.explorer.common.entity.explorer.AggregatePoolInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AggregatePoolInfo;
 
 @Getter
 @Setter

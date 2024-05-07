@@ -57,36 +57,6 @@ public interface BlockRepository
   @Query(value = "SELECT max(blockNo) FROM Block")
   Optional<Integer> findCurrentBlock();
 
-  @Query(value = "SELECT max(epochSlotNo) FROM Block WHERE epochNo = :epochNo")
-  Integer findCurrentSlotByEpochNo(@Param("epochNo") Integer epochNo);
-
-  @Query(
-      value =
-          "SELECT count(bk.id) FROM PoolHash ph "
-              + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
-              + "JOIN Block bk ON bk.slotLeader.id = sl.id "
-              + "WHERE ph.id = :poolId")
-  Integer getCountBlockByPool(@Param("poolId") Long poolId);
-
-  @Query(
-      value =
-          "SELECT count(bk.id) FROM PoolHash ph "
-              + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
-              + "JOIN Block bk ON bk.slotLeader.id = sl.id "
-              + "WHERE ph.id = :poolId AND bk.epochNo = (SELECT max(ep.no) FROM Epoch ep)")
-  Integer getCountBlockByPoolAndCurrentEpoch(@Param("poolId") Long poolId);
-
-  @Query(
-      value =
-          "SELECT ph.id AS poolId, count(bk.id) AS countValue "
-              + "FROM PoolHash ph "
-              + "JOIN SlotLeader sl ON sl.poolHash.id = ph.id "
-              + "JOIN Block bk ON bk.slotLeader.id = sl.id "
-              + "WHERE ph.id IN :poolIds AND bk.epochNo = :epochNo "
-              + "GROUP BY ph.id")
-  List<PoolCountProjection> getCountBlockByPoolsAndCurrentEpoch(
-      @Param("poolIds") Set<Long> poolIds, @Param("epochNo") Integer epochNo);
-
   @Query(
       value =
           "SELECT ph.id AS poolId, count(bk.id) AS countValue "

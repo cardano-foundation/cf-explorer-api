@@ -26,9 +26,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionStatus;
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
-import org.cardanofoundation.explorer.api.common.enumeration.VoteType;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
 import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
@@ -45,10 +42,12 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProc
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.impl.GovernanceActionServiceImpl;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
 
 @ExtendWith(MockitoExtension.class)
 public class GovActionServiceTest {
@@ -83,7 +82,7 @@ public class GovActionServiceTest {
     GovernanceActionFilter governanceActionFilter =
         GovernanceActionFilter.builder()
             .voterType(VoterType.DREP_KEY_HASH)
-            .voteType(VoteType.ANY)
+            .voteType(Vote.ANY)
             .actionStatus(GovActionStatus.ANY)
             .actionType(GovActionType.ALL)
             .build();
@@ -95,10 +94,7 @@ public class GovActionServiceTest {
     when(projection1.getIndex()).thenReturn(0);
     when(projection1.getVote()).thenReturn(Vote.YES);
     when(projection1.getRepeatVote()).thenReturn(false);
-    when(projection1.getType())
-        .thenReturn(
-            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                .INFO_ACTION);
+    when(projection1.getType()).thenReturn(GovActionType.INFO_ACTION);
 
     GovernanceActionProjection projection3 = Mockito.mock(GovernanceActionProjection.class);
     when(projection3.getTxHash()).thenReturn("hash3");
@@ -126,7 +122,7 @@ public class GovActionServiceTest {
     GovernanceActionFilter governanceActionFilter =
         GovernanceActionFilter.builder()
             .voterType(VoterType.STAKING_POOL_KEY_HASH)
-            .voteType(VoteType.ANY)
+            .voteType(Vote.ANY)
             .actionStatus(GovActionStatus.ANY)
             .actionType(GovActionType.INFO_ACTION)
             .fromDate(Date.from(Instant.now().minus(5, ChronoUnit.DAYS)))
@@ -140,10 +136,7 @@ public class GovActionServiceTest {
     when(projection1.getIndex()).thenReturn(0);
     when(projection1.getVote()).thenReturn(Vote.NO);
     when(projection1.getRepeatVote()).thenReturn(false);
-    when(projection1.getType())
-        .thenReturn(
-            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                .INFO_ACTION);
+    when(projection1.getType()).thenReturn(GovActionType.INFO_ACTION);
     when(governanceActionRepository.getAllByFilter(
             any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
         .thenReturn(new PageImpl<>(List.of(projection1), pageable, 1));
@@ -173,10 +166,7 @@ public class GovActionServiceTest {
 
     when(govActionDetailsProjection.getTxHash()).thenReturn(txHash);
     when(govActionDetailsProjection.getIndex()).thenReturn(index);
-    when(govActionDetailsProjection.getType())
-        .thenReturn(
-            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                .INFO_ACTION);
+    when(govActionDetailsProjection.getType()).thenReturn(GovActionType.INFO_ACTION);
     when(govActionDetailsProjection.getAnchorHash()).thenReturn("anchorHash");
     when(govActionDetailsProjection.getEpoch()).thenReturn(10);
 
@@ -207,7 +197,7 @@ public class GovActionServiceTest {
 
     Assertions.assertNotNull(actual);
     Assertions.assertEquals(txHash, actual.getTxHash());
-    Assertions.assertEquals(VoteType.NO, actual.getVoteType());
+    Assertions.assertEquals(Vote.NO, actual.getVoteType());
   }
 
   @Test
@@ -227,10 +217,7 @@ public class GovActionServiceTest {
 
     when(govActionDetailsProjection.getTxHash()).thenReturn(txHash);
     when(govActionDetailsProjection.getIndex()).thenReturn(index);
-    when(govActionDetailsProjection.getType())
-        .thenReturn(
-            org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType
-                .INFO_ACTION);
+    when(govActionDetailsProjection.getType()).thenReturn(GovActionType.INFO_ACTION);
     when(govActionDetailsProjection.getAnchorHash()).thenReturn("anchorHash");
     when(govActionDetailsProjection.getEpoch()).thenReturn(10);
 
@@ -261,7 +248,7 @@ public class GovActionServiceTest {
 
     Assertions.assertNotNull(actual);
     Assertions.assertEquals(txHash, actual.getTxHash());
-    Assertions.assertEquals(VoteType.NO, actual.getVoteType());
+    Assertions.assertEquals(Vote.NO, actual.getVoteType());
   }
 
   @Test

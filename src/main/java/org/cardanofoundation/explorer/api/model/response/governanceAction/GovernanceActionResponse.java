@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionStatus;
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 
 @Getter
 @Setter

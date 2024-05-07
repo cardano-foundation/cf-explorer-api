@@ -12,11 +12,11 @@ import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
+import org.cardanofoundation.explorer.common.entity.compositeKey.GovActionProposalId;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 import org.cardanofoundation.explorer.common.entity.ledgersync.GovActionProposal;
-import org.cardanofoundation.explorer.common.entity.ledgersync.compositeKey.GovActionProposalId;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.GovActionType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
 
 @Repository
 public interface GovernanceActionRepository
@@ -40,7 +40,7 @@ public interface GovernanceActionRepository
               + " and (gap.blockTime >= :from)"
               + " and (gap.blockTime <= :to)"
               + " and (:txHash is null or gap.txHash = :txHash)"
-              + " and (:anchorText is null or gap.anchorUrl like concat('%', :anchorText, '%') or gap.anchorHash like concat('%', :anchorText, '%'))")
+              + " and (:anchorText is null or gap.anchorUrl like %:anchorText% or gap.anchorHash like %:anchorText%)")
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,

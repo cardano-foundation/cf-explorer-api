@@ -24,9 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionStatus;
-import org.cardanofoundation.explorer.api.common.enumeration.GovActionType;
-import org.cardanofoundation.explorer.api.common.enumeration.VoteType;
 import org.cardanofoundation.explorer.api.config.JacksonMapperDateConfig;
 import org.cardanofoundation.explorer.api.config.SpringWebSecurityConfig;
 import org.cardanofoundation.explorer.api.config.WebConfig;
@@ -41,8 +38,10 @@ import org.cardanofoundation.explorer.api.model.response.governanceAction.Govern
 import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.Vote;
-import org.cardanofoundation.explorer.common.entity.ledgersync.enumeration.VoterType;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 
 @WebMvcTest(GovernanceActionController.class)
 @Import({
@@ -72,7 +71,7 @@ public class GovernanceActionControllerTest {
             .actionStatus(GovActionStatus.ANY)
             .voterType(VoterType.DREP_KEY_HASH)
             .actionType(GovActionType.ALL)
-            .voteType(VoteType.ANY)
+            .voteType(Vote.ANY)
             .build();
 
     GovernanceActionResponse governanceActionResponse =

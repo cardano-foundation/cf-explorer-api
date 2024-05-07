@@ -496,8 +496,6 @@ class ScriptServiceTest {
     String scriptHash = "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79";
     Pageable pageable = PageRequest.of(0, 2);
     Long addressId = 1L;
-    NativeScriptInfo nativeScriptInfo =
-        NativeScriptInfo.builder().scriptHash(scriptHash).numberOfTokens(2L).build();
     Address address = Address.builder().id(addressId).address("address").build();
     AddressTokenProjection projection = mock(AddressTokenProjection.class);
     when(projection.getPolicy()).thenReturn(scriptHash);
