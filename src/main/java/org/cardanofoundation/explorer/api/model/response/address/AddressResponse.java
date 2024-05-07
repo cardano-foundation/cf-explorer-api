@@ -21,4 +21,10 @@ public class AddressResponse {
   private String scriptHash;
   private boolean isAssociatedSmartContract;
   private boolean isAssociatedNativeScript;
+
+  public AddressResponse(String address, Long txCount, BigInteger balance) {
+    this.address = address;
+    this.txCount = txCount;
+    this.balance = balance;
+  }
 }
