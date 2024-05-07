@@ -1,6 +1,10 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 
@@ -20,7 +24,6 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   //
   //  List<Address> findAddressByIdIn(@Param("idList") Collection<Long> idList);
   //
-  //  @Query(value = "SELECT addr.address FROM Address addr " + "WHERE addr.paymentCred =
-  // :scriptHash")
-  //  List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
+    @Query(value = "SELECT addr.address FROM Address addr WHERE addr.paymentCredential = :scriptHash")
+    List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
 }
