@@ -20,13 +20,14 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   @Query(
       value =
-          "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ma.txCount as txCount,"
-              + " ma.fingerprint as fingerprint, ma.supply as supply, ma.totalVolume as totalVolume, ma.time as time,"
+          "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ttc.txCount as txCount,"
+              + " ma.fingerprint as fingerprint, ma.supply as supply, ma.time as time,"
               + " LENGTH(ma.nameView) as nameViewLength, "
               + " am.url as url, am.ticker as ticker, am.decimals as decimals, "
               + " am.logo as logo, am.description as description, am.subject as subject"
               + " FROM MultiAsset ma"
               + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint"
+              + " LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id "
               + " WHERE ma.fingerprint = :query OR LOWER(ma.nameView) LIKE CONCAT('%', :query, '%')")
   List<TokenProjection> findAll(@Param("query") String query, Pageable pageable);
 
@@ -39,13 +40,14 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   @Query(
       value =
-          "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ma.txCount as txCount,"
-              + " ma.fingerprint as fingerprint, ma.supply as supply, ma.totalVolume as totalVolume, ma.time as time,"
+          "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ttc.txCount as txCount,"
+              + " ma.fingerprint as fingerprint, ma.supply as supply, ma.time as time,"
               + " LENGTH(ma.nameView) as nameViewLength, "
               + " am.url as url, am.ticker as ticker, am.decimals as decimals, "
               + " am.logo as logo, am.description as description, am.subject as subject"
               + " FROM MultiAsset ma"
-              + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint")
+              + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint"
+              + " LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id" )
   List<TokenProjection> findMultiAssets(Pageable pageable);
 
   Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
@@ -56,13 +58,16 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   @Query(
       value =
-          "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ma.txCount as txCount,"
-              + " ma.fingerprint as fingerprint, ma.supply as supply, ma.totalVolume as totalVolume, ma.time as time,"
-              + " am.subject as subject, am.url as url, am.ticker as ticker, "
-              + " am.decimals as decimals, am.logo as logo, am.description as description"
-              + " FROM MultiAsset ma"
-              + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint"
-              + " WHERE ma.policy = :scriptHash")
+          """
+          SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ttc.txCount as txCount,
+                ma.fingerprint as fingerprint, ma.supply as supply, ma.time as time,
+                am.subject as subject, am.url as url, am.ticker as ticker,
+                am.decimals as decimals, am.logo as logo, am.description as description
+                FROM MultiAsset ma
+                LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint
+                LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id
+                WHERE ma.policy = :scriptHash
+      """)
   List<TokenProjection> findTokenInfoByScriptHash(
       @Param("scriptHash") String scriptHash, Pageable pageable);
 
@@ -88,13 +93,13 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
           + " WHERE multiAsset.policy = :policy")
   Long countMultiAssetByPolicy(@Param("policy") String policy);
 
-  //  @Query(
-  //      "SELECT COALESCE(COUNT(DISTINCT(atb.addressId, atb.multiAssetId)), 0) "
-  //          + " FROM MultiAsset ma "
-  //          + " INNER JOIN AddressTokenBalance atb ON atb.multiAsset = ma"
-  //          + " WHERE ma.policy = :policy "
-  //          + " AND atb.balance > 0 ")
-  //  Long countAssetHoldersByPolicy(@Param("policy") String policy);
+    @Query(value = """
+    SELECT COALESCE(COUNT(latestTokenBalance), 0) as numberOfHolders
+              FROM MultiAsset multiAsset
+              LEFT JOIN LatestTokenBalance latestTokenBalance ON multiAsset.unit = latestTokenBalance.unit
+              WHERE multiAsset.policy = :policy
+    """)
+    Long countAssetHoldersByPolicy(@Param("policy") String policy);
 
   @Query(
       value =
@@ -104,7 +109,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
               + " CROSS JOIN LATERAL"
               + " (SELECT ma.name as name, ma.name_view as name_view, ma.policy as policy, ma.fingerprint as fingerprint"
               + " FROM multi_asset ma "
-              + " WHERE ma.policy = s.hash ORDER BY ma.tx_count DESC LIMIT 5)"
+              + " WHERE ma.policy = s.hash)"
               + " AS topMultiAsset WHERE s.hash IN :scriptHashes)"
               + " SELECT firstResult.policy as policy, firstResult.name as name, firstResult.name_view as nameView, firstResult.fingerprint as fingerprint,"
               + " am.url as url, am.ticker as ticker, am.decimals as decimals, "

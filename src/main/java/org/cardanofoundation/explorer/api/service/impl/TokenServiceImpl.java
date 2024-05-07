@@ -49,10 +49,12 @@ import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -90,7 +92,7 @@ public class TokenServiceImpl implements TokenService {
     if (isQueryEmpty) {
       pageable =
           createPageableWithSort(
-              pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
+              pageable, Sort.by(Sort.Direction.DESC, TokenTxCount_.TX_COUNT, MultiAsset_.SUPPLY));
       multiAssets =
           new PageImpl<>(multiAssetRepository.findMultiAssets(pageable), pageable, tokenCount);
     } else {
@@ -102,7 +104,7 @@ public class TokenServiceImpl implements TokenService {
           createPageableWithSort(
               pageable,
               Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
-                  .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
+                  .and(Sort.by(Sort.Direction.DESC, TokenTxCount_.TX_COUNT)));
       Long count = multiAssetRepository.countAllByQuery(query.toLowerCase());
       multiAssets =
           new PageImpl<>(
