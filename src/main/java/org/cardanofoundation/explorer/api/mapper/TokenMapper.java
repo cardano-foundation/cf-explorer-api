@@ -6,7 +6,9 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.bloxbean.cardano.client.address.util.AddressUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -45,6 +47,7 @@ public abstract class TokenMapper {
       expression = "java(HexUtils.fromHex(projection.getTokenName(), projection.getFingerprint()))")
   @Mapping(target = "name", source = "tokenName")
   @Mapping(target = "metadata", expression = "java(getMetadata(projection))")
+  @Mapping(target = "addressType", expression = "java(getAddressType(projection.getAddress()))")
   public abstract TokenAddressResponse fromAddressTokenProjection(
       AddressTokenProjection projection);
 
@@ -72,6 +75,10 @@ public abstract class TokenMapper {
   @Named("getTokenLogoURL")
   String getTokenLogoEndpoint(String logo) {
     return Objects.isNull(logo) ? null : (tokenLogoEndpoint + logo);
+  }
+
+  AddressType getAddressType(String address) {
+    return address.startsWith("stake") ? AddressType.STAKE_ADDRESS : AddressType.PAYMENT_ADDRESS;
   }
 
   TokenMetadataResponse getMetadata(AddressTokenProjection projection) {

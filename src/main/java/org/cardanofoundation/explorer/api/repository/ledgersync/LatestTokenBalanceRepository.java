@@ -1,6 +1,8 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import org.springframework.data.domain.Page;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -62,4 +64,21 @@ public interface LatestTokenBalanceRepository extends
       """)
   List<AddressTokenProjection> findAddressAndBalanceByPolicy(
       @Param("policy") String policy, Pageable pageable);
+
+  @Query(value =
+    """
+    SELECT max(ltb.block_time)
+    FROM latest_token_balance ltb
+    WHERE ltb.unit = :unit
+    """, nativeQuery = true)
+  Long getLastActivityTimeOfToken(@Param("unit") String unit);
+
+  @Query(value =
+    """
+    select (case when ltb.stakeAddress is null then ltb.address else ltb.stakeAddress end) as address, ltb.quantity as quantity
+    from LatestTokenBalance ltb
+    where ltb.unit = :unit
+    and ltb.quantity > 0
+    """)
+  List<AddressTokenProjection> getTopHolderOfToken(@Param("unit") String unit, Pageable pageable);
 }
