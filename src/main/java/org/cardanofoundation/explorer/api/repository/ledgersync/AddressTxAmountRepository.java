@@ -44,7 +44,6 @@ public interface AddressTxAmountRepository
                                                   @Param("from") Long from,
                                                   @Param("to") Long to);
 
-
   @Query(
       value =
       """
@@ -56,4 +55,18 @@ public interface AddressTxAmountRepository
       """)
   Optional<BigInteger> sumBalanceByAddress(
       @Param("address") String address, @Param("to") Long to);
+
+    @Query(value =
+    """
+    SELECT sum(ata.quantity) FROM AddressTxAmount ata
+    WHERE ata.unit = :unit
+    AND ata.quantity > 0
+    AND ata.blockTime > :from
+    AND ata.blockTime < :to
+    """
+    )
+  Optional<BigInteger> sumBalanceBetweenTime(
+      @Param("unit") String unit,
+      @Param("from") Long from,
+      @Param("to") Long to);
 }
