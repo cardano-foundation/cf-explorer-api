@@ -1,9 +1,11 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.data.domain.Pageable;
 
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
 
@@ -24,7 +26,7 @@ public interface TokenService {
    * @param tokenId token id (fingerprint)
    * @return token detail info
    */
-  //  TokenResponse getTokenDetail(String tokenId);
+    TokenResponse getTokenDetail(String tokenId);
 
   /**
    * Get minting transaction by token
@@ -42,7 +44,7 @@ public interface TokenService {
    * @param pageable page information
    * @return list addresses hold token in this page
    */
-  //  BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable);
+    BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable);
 
   /**
    * Analysis volume of token
@@ -51,5 +53,5 @@ public interface TokenService {
    * @param type type of analytic
    * @return list analytic volume of token
    */
-  //  List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type);
+   List<TokenVolumeAnalyticsResponse> getTokenVolumeAnalytic(String tokenId, AnalyticType type);
 }
