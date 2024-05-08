@@ -4,11 +4,14 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
+import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeTxBalance;
 
 public interface StakeTxBalanceRepository extends JpaRepository<StakeTxBalance, Long> {

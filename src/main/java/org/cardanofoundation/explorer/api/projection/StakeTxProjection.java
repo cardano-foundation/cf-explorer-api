@@ -8,5 +8,5 @@ public interface StakeTxProjection {
 
   BigInteger getAmount();
 
-  Timestamp getTime();
+  Long getTime();
 }

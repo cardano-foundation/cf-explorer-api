@@ -91,7 +91,7 @@ public interface StakeKeyLifeCycleService {
    * @param hash hash of transaction
    * @return withdrawal detail
    */
-  //  StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash);
+    StakeWithdrawalDetailResponse getStakeWithdrawalDetail(String stakeKey, String hash);
 
   /**
    * Get list de registration in stake key life cycle
@@ -120,8 +120,8 @@ public interface StakeKeyLifeCycleService {
    * @param pageable page information
    * @return list stake key activity transaction
    */
-  //  BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivities(
-  //      String stakeKey, Pageable pageable);
+    BaseFilterResponse<StakeWalletActivityResponse> getStakeWalletActivities(
+        String stakeKey, Pageable pageable);
 
   /**
    * Get list reward activity in stake key life cycle

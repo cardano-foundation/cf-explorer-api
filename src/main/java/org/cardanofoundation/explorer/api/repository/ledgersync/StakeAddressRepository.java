@@ -12,22 +12,30 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.apache.kafka.common.quota.ClientQuotaAlteration.Op;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 
 public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long> {
 
-  Optional<StakeAddress> findByView(@Param("aLong") String aLong);
+  @Query(value = """
+    SELECT sa from StakeAddress sa
+    WHERE sa.view = :view
+""")
+  Optional<StakeAddress> findByView(@Param("view") String view);
 
   @Query(
       value =
-          "SELECT sa.id as id, sa.view as stakeAddress, sa.balance as totalStake"
-              + " FROM StakeAddress sa"
-              + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
-              + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = sa) >"
-              + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)"
-              + " AND sa.balance IS NOT NULL"
-              + " ORDER BY totalStake DESC")
+          """
+      SELECT sa.id as id, sa.view as stakeAddress, sab.quantity as totalStake
+                    FROM StakeAddress sa
+                    JOIN StakeAddressBalance sab ON sab.address = sa.view
+                      AND NOT EXISTS (SELECT 1 FROM StakeAddressBalance sab1 WHERE sab1.address = sa.view AND sab1.slot > sab.slot)
+                    WHERE EXISTS (SELECT d FROM Delegation d WHERE d.stakeAddressId = sa.id)
+                    AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.stakeAddressId = sa.id) >
+                    (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.stakeAddressId = sa.id)
+                    ORDER BY totalStake DESC
+      """)
   List<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
 
   @Query(
@@ -48,7 +56,11 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
   @Query("SELECT stake.view" + " FROM StakeAddress stake" + " WHERE stake.scriptHash = :scriptHash")
   List<String> getStakeAssociatedAddress(@Param("scriptHash") String scriptHash);
 
-  @Query(value = "SELECT COALESCE(SUM(sa.balance), 0) FROM StakeAddress sa WHERE sa.view IN :views")
+  @Query(value = """
+    SELECT COALESCE(SUM(sab.quantity), 0) FROM StakeAddressBalance sab
+    WHERE sab.address IN :views
+    AND NOT EXISTS(SELECT 1 FROM StakeAddressBalance sab1 WHERE sab1.address = sab.address AND sab1.slot > sab.slot)
+""")
   BigInteger getBalanceByView(@Param("views") List<String> views);
 
   @Query(value = "SELECT sa.view FROM StakeAddress sa WHERE sa.scriptHash = :scriptHash")

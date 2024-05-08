@@ -149,7 +149,7 @@ public class StakeKeyServiceTest {
     String address =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
-    StakeAddress stakeAddress = StakeAddress.builder().balance(BigInteger.ONE).build();
+    StakeAddress stakeAddress = StakeAddress.builder().build();
     StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
     when(sdp.getPoolId()).thenReturn("1");
     when(sdp.getPoolData()).thenReturn("poolData");
@@ -180,7 +180,7 @@ public class StakeKeyServiceTest {
     String address =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
-    StakeAddress stakeAddress = StakeAddress.builder().balance(BigInteger.ONE).build();
+    StakeAddress stakeAddress = StakeAddress.builder().build();
     StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
     when(sdp.getPoolId()).thenReturn("1");
     when(sdp.getPoolData()).thenReturn("poolData");
@@ -207,7 +207,7 @@ public class StakeKeyServiceTest {
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
 
     when(stakeAddressRepository.findByView(stakeKey))
-        .thenReturn(Optional.of(StakeAddress.builder().balance(BigInteger.ONE).build()));
+        .thenReturn(Optional.of(StakeAddress.builder().build()));
     when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(false);
     when(fetchRewardDataService.fetchReward(stakeKey)).thenReturn(false);
 
@@ -239,7 +239,7 @@ public class StakeKeyServiceTest {
   void testGetStakeHistories_thenReturn() {
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
     Pageable pageable = PageRequest.of(0, 10);
-    StakeAddress stakeAddress = StakeAddress.builder().balance(BigInteger.ONE).build();
+    StakeAddress stakeAddress = StakeAddress.builder().build();
     StakeHistoryProjection shp1 = Mockito.mock(StakeHistoryProjection.class);
     when(shp1.getBlockNo()).thenReturn(1L);
     when(shp1.getBlockIndex()).thenReturn(1);

@@ -161,6 +161,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       }
     }
     stakeAddressResponse.setStakeAddress(stake);
+//    Mock
+    BigInteger balance = BigInteger.TEN;
     if (Boolean.TRUE.equals(fetchRewardDataService.useKoios())) {
       BigInteger stakeRewardWithdrawn =
           withdrawalRepository.getRewardWithdrawnByStakeAddress(stake).orElse(BigInteger.ZERO);
@@ -169,14 +171,14 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
       stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
       stakeAddressResponse.setTotalStake(
-          stakeAddress.getBalance().add(stakeAvailableReward).subtract(stakeRewardWithdrawn));
+          balance.add(stakeAvailableReward).subtract(stakeRewardWithdrawn));
     }
 
     if (stakeAddressResponse.getRewardAvailable() == null) {
-      stakeAddressResponse.setTotalStake(stakeAddress.getBalance());
+      stakeAddressResponse.setTotalStake(balance);
     } else {
       stakeAddressResponse.setTotalStake(
-          stakeAddress.getBalance().add(stakeAddressResponse.getRewardAvailable()));
+          balance.add(stakeAddressResponse.getRewardAvailable()));
     }
 
     StakeDelegationProjection poolData =

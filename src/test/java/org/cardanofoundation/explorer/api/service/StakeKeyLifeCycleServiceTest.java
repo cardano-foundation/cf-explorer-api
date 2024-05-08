@@ -69,7 +69,6 @@ class StakeKeyLifeCycleServiceTest {
   StakeAddress stakeAddress =
       StakeAddress.builder()
           .view("stake1u98ujxfgzdm8yh6qsaar54nmmr50484t4ytphxjex3zxh7g4tuwna")
-          .balance(BigInteger.valueOf(1000000000))
           .availableReward(BigInteger.valueOf(0))
           .build();
 
