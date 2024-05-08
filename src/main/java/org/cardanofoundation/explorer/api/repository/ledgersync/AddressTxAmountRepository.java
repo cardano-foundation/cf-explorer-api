@@ -12,12 +12,12 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount;
 
 public interface AddressTxAmountRepository extends JpaRepository<AddressTxAmount, AddressTxAmountId>{
   @Query(value = """
-    SELECT tx.id AS txId, SUM(atm.quantity) AS amount, atm.blockTime AS time
+    SELECT tx.id AS txId, SUM(atm.quantity) AS amount, atm.blockTime AS time, atm.txHash as txHash, tx.validContract as validContract
     FROM AddressTxAmount atm
-             INNER JOIN Tx tx on atm.txHash = tx.hash
-    WHERE atm.unit = 'lovelace'
-      and atm.stakeAddress = :stakeAddressView
-    GROUP BY tx.id, atm.blockTime""")
+    INNER JOIN Tx tx on atm.txHash = tx.hash
+    WHERE atm.unit = 'lovelace' AND atm.stakeAddress = :stakeAddressView
+    GROUP BY tx.id, atm.blockTime, atm.txHash, tx.validContract
+    """)
   Page<StakeTxProjection> findTxAndAmountByStake(
       @Param("stakeAddressView") String stakeAddressView, Pageable pageable);
 }

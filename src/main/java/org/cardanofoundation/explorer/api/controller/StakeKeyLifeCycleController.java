@@ -285,7 +285,7 @@ public class StakeKeyLifeCycleController {
             @PaginationValid
             @PaginationDefault(
                 size = 20,
-                sort = {Tx_.ID},
+                sort = {"tx.id"},
                 direction = Sort.Direction.DESC)
             @Valid
             Pagination pagination) {

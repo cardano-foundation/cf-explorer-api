@@ -9,4 +9,8 @@ public interface StakeTxProjection {
   BigInteger getAmount();
 
   Long getTime();
+
+  String getTxHash();
+
+  Boolean getValidContract();
 }
