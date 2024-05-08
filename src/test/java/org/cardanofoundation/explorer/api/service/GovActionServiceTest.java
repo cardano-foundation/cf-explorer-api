@@ -125,8 +125,6 @@ public class GovActionServiceTest {
             .voteType(Vote.ANY)
             .actionStatus(GovActionStatus.ANY)
             .actionType(GovActionType.INFO_ACTION)
-            .fromDate(Date.from(Instant.now().minus(5, ChronoUnit.DAYS)))
-            .toDate(Date.from(Instant.now()))
             .build();
     Long slot = 0L;
     when(poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(poolHash)).thenReturn(slot);
