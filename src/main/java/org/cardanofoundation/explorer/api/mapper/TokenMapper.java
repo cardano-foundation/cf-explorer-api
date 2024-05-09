@@ -6,13 +6,12 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import com.bloxbean.cardano.client.address.util.AddressUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;

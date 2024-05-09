@@ -20,10 +20,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
@@ -35,6 +38,7 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
@@ -187,18 +191,23 @@ public class StakeKeyController {
     return stakeService.getTopDelegators(pagination.toPageable());
   }
 
-  //  @GetMapping("/{stakeKey}/list-address")
-  //  @LogMessage
-  //  @Operation(summary = "Get all address of stake", tags = "stake-key")
-  //  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
-  //      @PathVariable
-  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-  //          @StakeKeyLengthValid
-  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
-  //          String stakeKey,
-  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-  //    return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
-  //  }
+  @GetMapping("/{stakeKey}/list-address")
+  @LogMessage
+  @Operation(summary = "Get all address of stake", tags = "stake-key")
+  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getAddresses(
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+          @StakeKeyLengthValid
+          @Parameter(description = "The Bech32 encoded version of the stake address.")
+          String stakeKey,
+      @PaginationDefault(
+              size = 20,
+              sort = {LatestAddressBalance_.QUANTITY},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
+  }
 
   @GetMapping("/analytics")
   @LogMessage
@@ -207,20 +216,18 @@ public class StakeKeyController {
     return ResponseEntity.ok(stakeService.getStakeAnalytics());
   }
 
-  //  @GetMapping("/analytics-balance/{stakeKey}/{type}")
-  //  @LogMessage
-  //  @Operation(summary = "Get stake balance analytics", tags = "stake-key")
-  //  public ResponseEntity<AddressChartBalanceResponse> getStakeBalanceAnalytics(
-  //      @PathVariable
-  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-  //          @StakeKeyLengthValid
-  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
-  //          String stakeKey,
-  //      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType
-  // type)
-  //      throws ExecutionException, InterruptedException {
-  //    return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
-  //  }
+  @GetMapping("/analytics-balance/{stakeKey}/{type}")
+  @LogMessage
+  @Operation(summary = "Get stake balance analytics", tags = "stake-key")
+  public ResponseEntity<AddressChartBalanceResponse> getStakeBalanceAnalytics(
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+          @StakeKeyLengthValid
+          @Parameter(description = "The Bech32 encoded version of the stake address.")
+          String stakeKey,
+      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
+    return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
+  }
 
   @GetMapping("/analytics-reward/{stakeKey}")
   @LogMessage

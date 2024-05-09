@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,21 +41,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
+import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.ReportLimitResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.ReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.StakeKeyReportService;
+import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 
@@ -78,50 +84,48 @@ class StakeKeyReportControllerTest {
     when(authInterceptor.preHandle(any(), any(), any())).thenReturn(true);
   }
 
-  //  @Test
-  //  void shouldGenerateStakeKeyReport() throws Exception {
-  //    String username = "username";
-  //    Timestamp fromDateTimestamp = Timestamp.valueOf("2021-01-01 00:00:00");
-  //    Timestamp toDateTimestamp = Timestamp.valueOf("2021-02-01 00:00:00");
-  //
-  //    StakeKeyReportHistoryResponse responseExpect =
-  //        StakeKeyReportHistoryResponse.builder()
-  //            .stakeKey("stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")
-  //            .fromDate(fromDateTimestamp)
-  //            .toDate(toDateTimestamp)
-  //            .isADATransfer(Boolean.TRUE)
-  //            .eventRegistration(Boolean.TRUE)
-  //            .status(ReportStatus.IN_PROGRESS)
-  //            .type(ReportType.STAKE_KEY)
-  //            .build();
-  //
-  //    BDDMockito.given(
-  //            stakeKeyReportService.generateStakeKeyReport(any(StakeKeyReportRequest.class),
-  // any()))
-  //        .willReturn(responseExpect);
-  //
-  //    mockMvc
-  //        .perform(
-  //            post(END_POINT + "/stake-key")
-  //                .contentType(MediaType.APPLICATION_JSON)
-  //                .content(
-  //                    asJsonString(
-  //                        Map.of("fromDate", "2021/01/01 00:00:00", "toDate", "2021/02/01
-  // 00:00:00")))
-  //                .with(
-  //                    request -> {
-  //                      request.setAttribute(
-  //                          "user", UserPrincipal.builder().username(username).build());
-  //                      return request;
-  //                    }))
-  //        .andExpect(status().isOk())
-  //        .andExpect(
-  //            content()
-  //                .string(
-  //                    containsString(
-  //                        "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")))
-  //        .andDo(print());
-  //  }
+  @Test
+  void shouldGenerateStakeKeyReport() throws Exception {
+    String username = "username";
+    Timestamp fromDateTimestamp = Timestamp.valueOf("2021-01-01 00:00:00");
+    Timestamp toDateTimestamp = Timestamp.valueOf("2021-02-01 00:00:00");
+
+    StakeKeyReportHistoryResponse responseExpect =
+        StakeKeyReportHistoryResponse.builder()
+            .stakeKey("stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")
+            .fromDate(fromDateTimestamp)
+            .toDate(toDateTimestamp)
+            .isADATransfer(Boolean.TRUE)
+            .eventRegistration(Boolean.TRUE)
+            .status(ReportStatus.IN_PROGRESS)
+            .type(ReportType.STAKE_KEY)
+            .build();
+
+    BDDMockito.given(
+            stakeKeyReportService.generateStakeKeyReport(any(StakeKeyReportRequest.class), any()))
+        .willReturn(responseExpect);
+
+    mockMvc
+        .perform(
+            post(END_POINT + "/stake-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    asJsonString(
+                        Map.of("fromDate", "2021/01/01 00:00:00", "toDate", "2021/02/01 00:00:00")))
+                .with(
+                    request -> {
+                      request.setAttribute(
+                          "user", UserPrincipal.builder().username(username).build());
+                      return request;
+                    }))
+        .andExpect(status().isOk())
+        .andExpect(
+            content()
+                .string(
+                    containsString(
+                        "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t")))
+        .andDo(print());
+  }
 
   @Test
   void shouldExportStakeKeyReportByStorageKey() throws Exception {
@@ -477,43 +481,43 @@ class StakeKeyReportControllerTest {
         .andDo(print());
   }
 
-  //  @Test
-  //  void shouldGetWalletActivity() throws Exception {
-  //    Long reportId = 1L;
-  //    String username = "username";
-  //    List<StakeWalletActivityResponse> list = new ArrayList<>();
-  //    StakeWalletActivityResponse response = new StakeWalletActivityResponse();
-  //    response.setTxHash("91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
-  //    response.setStatus(TxStatus.SUCCESS);
-  //    response.setType(StakeTxType.SENT);
-  //    response.setTime(LocalDateTime.now());
-  //    response.setFee(BigInteger.valueOf(1000000));
-  //    response.setAmount(BigInteger.valueOf(1000000));
-  //    list.add(response);
-  //    given(
-  //            stakeKeyReportService.getWalletActivitiesByReportId(
-  //                anyLong(), anyString(), any(Pageable.class)))
-  //        .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));
-  //    mockMvc
-  //        .perform(
-  //            get(END_POINT + "/stake-key/{reportId}/wallet-activity", reportId)
-  //                .param("page", "0")
-  //                .param("size", "1")
-  //                .contentType(MediaType.APPLICATION_JSON)
-  //                .with(
-  //                    request -> {
-  //                      request.setAttribute(
-  //                          "user", UserPrincipal.builder().username(username).build());
-  //                      return request;
-  //                    }))
-  //        .andExpect(status().isOk())
-  //        .andExpect(
-  //            content()
-  //                .string(
-  //                    containsString(
-  //                        "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381")))
-  //        .andDo(print());
-  //  }
+  @Test
+  void shouldGetWalletActivity() throws Exception {
+    Long reportId = 1L;
+    String username = "username";
+    List<StakeWalletActivityResponse> list = new ArrayList<>();
+    StakeWalletActivityResponse response = new StakeWalletActivityResponse();
+    response.setTxHash("91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
+    response.setStatus(TxStatus.SUCCESS);
+    response.setType(StakeTxType.SENT);
+    response.setTime(LocalDateTime.now());
+    response.setFee(BigInteger.valueOf(1000000));
+    response.setAmount(BigInteger.valueOf(1000000));
+    list.add(response);
+    given(
+            stakeKeyReportService.getWalletActivitiesByReportId(
+                anyLong(), anyString(), any(Pageable.class)))
+        .willReturn(new BaseFilterResponse<>(list, 1, 1, 0));
+    mockMvc
+        .perform(
+            get(END_POINT + "/stake-key/{reportId}/wallet-activity", reportId)
+                .param("page", "0")
+                .param("size", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(
+                    request -> {
+                      request.setAttribute(
+                          "user", UserPrincipal.builder().username(username).build());
+                      return request;
+                    }))
+        .andExpect(status().isOk())
+        .andExpect(
+            content()
+                .string(
+                    containsString(
+                        "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381")))
+        .andDo(print());
+  }
 
   @Test
   void testGetReportLimit() throws Exception {

@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +47,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
               + " am.logo as logo, am.description as description, am.subject as subject"
               + " FROM MultiAsset ma"
               + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint"
-              + " LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id" )
+              + " LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id")
   List<TokenProjection> findMultiAssets(Pageable pageable);
 
   Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
@@ -94,13 +93,15 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
           + " WHERE multiAsset.policy = :policy")
   Long countMultiAssetByPolicy(@Param("policy") String policy);
 
-    @Query(value = """
+  @Query(
+      value =
+          """
     SELECT COALESCE(COUNT(latestTokenBalance), 0) as numberOfHolders
               FROM MultiAsset multiAsset
               LEFT JOIN LatestTokenBalance latestTokenBalance ON multiAsset.unit = latestTokenBalance.unit
               WHERE multiAsset.policy = :policy
     """)
-    Long countAssetHoldersByPolicy(@Param("policy") String policy);
+  Long countAssetHoldersByPolicy(@Param("policy") String policy);
 
   @Query(
       value =

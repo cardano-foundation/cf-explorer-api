@@ -28,8 +28,8 @@ public interface ScriptService {
   BaseFilterResponse<TokenFilterResponse> getNativeScriptTokens(
       String scriptHash, Pageable pageable);
 
-    BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(
-        String scriptHash, Pageable pageable);
+  BaseFilterResponse<TokenAddressResponse> getNativeScriptHolders(
+      String scriptHash, Pageable pageable);
 
   BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(
       SmartContractFilterRequest filterRequest, Pageable pageable);

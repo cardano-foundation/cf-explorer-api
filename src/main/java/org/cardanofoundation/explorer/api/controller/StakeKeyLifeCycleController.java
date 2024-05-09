@@ -175,23 +175,23 @@ public class StakeKeyLifeCycleController {
         stakeKeyLifeCycleService.getStakeDelegations(stakeKey, condition, pagination.toPageable()));
   }
 
-  //  @GetMapping("/{stakeKey}/delegations/{hash}")
-  //  @LogMessage
-  //  @Operation(
-  //      summary = "Get stake key delegation transaction detail",
-  //      tags = {"stake-lifecycle"})
-  //  public ResponseEntity<StakeDelegationDetailResponse> getDelegationDetail(
-  //      @PathVariable
-  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-  //          @StakeKeyLengthValid
-  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
-  //          String stakeKey,
-  //      @PathVariable
-  //          @Parameter(description = "The hash identifier of the transaction.")
-  //          @LengthValid(CommonConstant.TX_HASH_LENGTH)
-  //          String hash) {
-  //    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDelegationDetail(stakeKey, hash));
-  //  }
+  @GetMapping("/{stakeKey}/delegations/{hash}")
+  @LogMessage
+  @Operation(
+      summary = "Get stake key delegation transaction detail",
+      tags = {"stake-lifecycle"})
+  public ResponseEntity<StakeDelegationDetailResponse> getDelegationDetail(
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+          @StakeKeyLengthValid
+          @Parameter(description = "The Bech32 encoded version of the stake address.")
+          String stakeKey,
+      @PathVariable
+          @Parameter(description = "The hash identifier of the transaction.")
+          @LengthValid(CommonConstant.TX_HASH_LENGTH)
+          String hash) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeDelegationDetail(stakeKey, hash));
+  }
 
   @GetMapping("/{stakeKey}/rewards")
   @LogMessage
@@ -248,46 +248,46 @@ public class StakeKeyLifeCycleController {
         stakeKeyLifeCycleService.getStakeWithdrawals(stakeKey, condition, pagination.toPageable()));
   }
 
-  //  @GetMapping("/{stakeKey}/withdrawals/{hash}")
-  //  @LogMessage
-  //  @Operation(
-  //      summary = "Get stake key withdrawal transaction detail",
-  //      tags = {"stake-lifecycle"})
-  //  public ResponseEntity<StakeWithdrawalDetailResponse> getDetailWithdrawal(
-  //      @PathVariable
-  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
-  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-  //          @StakeKeyLengthValid
-  //          String stakeKey,
-  //      @PathVariable
-  //          @Parameter(description = "The hash identifier of the transaction.")
-  //          @LengthValid(CommonConstant.TX_HASH_LENGTH)
-  //          String hash) {
-  //    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWithdrawalDetail(stakeKey, hash));
-  //  }
+  @GetMapping("/{stakeKey}/withdrawals/{hash}")
+  @LogMessage
+  @Operation(
+      summary = "Get stake key withdrawal transaction detail",
+      tags = {"stake-lifecycle"})
+  public ResponseEntity<StakeWithdrawalDetailResponse> getDetailWithdrawal(
+      @PathVariable
+          @Parameter(description = "The Bech32 encoded version of the stake address.")
+          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+          @StakeKeyLengthValid
+          String stakeKey,
+      @PathVariable
+          @Parameter(description = "The hash identifier of the transaction.")
+          @LengthValid(CommonConstant.TX_HASH_LENGTH)
+          String hash) {
+    return ResponseEntity.ok(stakeKeyLifeCycleService.getStakeWithdrawalDetail(stakeKey, hash));
+  }
 
-  //  @GetMapping("/{stakeKey}/wallet-activity")
-  //  @LogMessage
-  //  @Operation(
-  //      summary = "Get wallet activity of stake key",
-  //      tags = {"stake-lifecycle"})
-  //  public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>> getWalletActivities(
-  //      @PathVariable
-  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
-  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-  //          @StakeKeyLengthValid
-  //          String stakeKey,
-  //      @ParameterObject
-  //          @PaginationValid
-  //          @PaginationDefault(
-  //              size = 20,
-  //              sort = {AddressTxBalance_.TX},
-  //              direction = Sort.Direction.DESC)
-  //          @Valid
-  //          Pagination pagination) {
-  //    return ResponseEntity.ok(
-  //        stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pagination.toPageable()));
-  //  }
+  @GetMapping("/{stakeKey}/wallet-activity")
+  @LogMessage
+  @Operation(
+      summary = "Get wallet activity of stake key",
+      tags = {"stake-lifecycle"})
+  public ResponseEntity<BaseFilterResponse<StakeWalletActivityResponse>> getWalletActivities(
+      @PathVariable
+          @Parameter(description = "The Bech32 encoded version of the stake address.")
+          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+          @StakeKeyLengthValid
+          String stakeKey,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 20,
+              sort = {"tx.id"},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(
+        stakeKeyLifeCycleService.getStakeWalletActivities(stakeKey, pagination.toPageable()));
+  }
 
   @GetMapping("/{stakeKey}/reward-activity")
   @LogMessage

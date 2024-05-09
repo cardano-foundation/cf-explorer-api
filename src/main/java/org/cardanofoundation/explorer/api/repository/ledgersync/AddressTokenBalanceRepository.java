@@ -20,7 +20,8 @@
 ////      "SELECT COUNT(atb.addressId) FROM AddressTokenBalance atb "
 ////          + "WHERE atb.multiAsset = :multiAsset "
 ////          + "AND atb.stakeAddress.id IS NULL AND atb.balance > 0 ")
-////  Optional<Long> countAddressNotHaveStakeByMultiAsset(@Param("multiAsset") MultiAsset multiAsset);
+////  Optional<Long> countAddressNotHaveStakeByMultiAsset(@Param("multiAsset") MultiAsset
+// multiAsset);
 ////
 ////  @Query(
 ////      "SELECT COUNT(DISTINCT atb.stakeAddress.id) FROM AddressTokenBalance atb "
@@ -85,7 +86,8 @@
 //  @Query(
 //      value = """
 //
-//  SELECT ltb.address as address, ltb.quantity as balance, ma.nameView as tokenName, ma.fingerprint as fingerprint
+//  SELECT ltb.address as address, ltb.quantity as balance, ma.nameView as tokenName, ma.fingerprint
+// as fingerprint
 //            FROM LatestTokenBalance ltb
 //            inner JOIN MultiAsset ma ON ma.unit = ltb.unit
 //            WHERE ma.policy = :policy
