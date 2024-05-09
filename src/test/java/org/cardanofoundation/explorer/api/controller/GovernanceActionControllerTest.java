@@ -140,31 +140,31 @@ public class GovernanceActionControllerTest {
         .andExpect(jsonPath("$.anchorHash").value("1111"));
   }
 
-    @Test
-    void getVotingChartByGovAction() throws Exception {
-      String txHash = "61435ac83ffac3353f6845ea17133a6cc93587ae3f28528b2316cc9cbee442d7";
-      int index = 0;
+  @Test
+  void getVotingChartByGovAction() throws Exception {
+    String txHash = "61435ac83ffac3353f6845ea17133a6cc93587ae3f28528b2316cc9cbee442d7";
+    int index = 0;
 
-      VotingChartResponse votingChartResponse =
-          VotingChartResponse.builder()
-              .txHash(txHash)
-              .activeVoteStake(BigInteger.TEN)
-              .totalYesVoteStake(BigInteger.ONE)
-              .totalNoVoteStake(BigInteger.TWO)
-              .abstainVoteStake(BigInteger.ZERO)
-              .build();
+    VotingChartResponse votingChartResponse =
+        VotingChartResponse.builder()
+            .txHash(txHash)
+            .activeVoteStake(BigInteger.TEN)
+            .totalYesVoteStake(BigInteger.ONE)
+            .totalNoVoteStake(BigInteger.TWO)
+            .abstainVoteStake(BigInteger.ZERO)
+            .build();
 
-      when(governanceActionService.getVotingChartByGovActionTxHashAndIndex(anyString(), any(), any()))
-          .thenReturn(votingChartResponse);
-      mockMvc
-          .perform(
-              get("/api/v1/gov-actions/voting-chart")
-                  .param("txHash", txHash)
-                  .param("index", Integer.toString(index))
-                  .param("voterType", VoterType.DREP_KEY_HASH.toString())
-                  .accept(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(content().string(containsString(txHash)))
-          .andExpect(jsonPath("$.activeVoteStake").value(BigInteger.TEN));
-    }
+    when(governanceActionService.getVotingChartByGovActionTxHashAndIndex(anyString(), any(), any()))
+        .thenReturn(votingChartResponse);
+    mockMvc
+        .perform(
+            get("/api/v1/gov-actions/voting-chart")
+                .param("txHash", txHash)
+                .param("index", Integer.toString(index))
+                .param("voterType", VoterType.DREP_KEY_HASH.toString())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString(txHash)))
+        .andExpect(jsonPath("$.activeVoteStake").value(BigInteger.TEN));
+  }
 }
