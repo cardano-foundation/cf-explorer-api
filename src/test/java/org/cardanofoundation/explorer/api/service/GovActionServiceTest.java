@@ -182,7 +182,7 @@ public class GovActionServiceTest {
     when(votingProcedureProjection1.getBlockTime()).thenReturn(1707695293L);
 
     when(votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
-            txHash, index, voterHash, VoterType.DREP_KEY_HASH))
+            txHash, index, voterHash, List.of(VoterType.DREP_KEY_HASH, VoterType.DREP_SCRIPT_HASH)))
         .thenReturn(List.of(votingProcedureProjection1, votingProcedureProjection));
 
     EpochParam epochParam =
@@ -233,7 +233,7 @@ public class GovActionServiceTest {
     when(votingProcedureProjection1.getBlockTime()).thenReturn(1707695293L);
 
     when(votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
-            txHash, index, voterHash, VoterType.DREP_KEY_HASH))
+            txHash, index, voterHash, List.of(VoterType.DREP_KEY_HASH, VoterType.DREP_SCRIPT_HASH)))
         .thenReturn(List.of(votingProcedureProjection1, votingProcedureProjection));
 
     EpochParam epochParam =
