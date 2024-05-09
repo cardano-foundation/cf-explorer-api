@@ -224,7 +224,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             GovActionType.PARAMETER_CHANGE_ACTION,
             GovActionType.NEW_CONSTITUTION);
 
-    List<GovActionType> govActionTypeListAllowedVoteByCc = List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
+    List<GovActionType> govActionTypeListAllowedVoteByCc =
+        List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
     Boolean allowedVoteBySPO = !govActionTypeListAllowedVoteBySPO.contains(govActionType);
     Boolean allowedVoteByCC = !govActionTypeListAllowedVoteByCc.contains(govActionType);
     if (dRepHashOrPoolHashOrPoolView.toLowerCase().startsWith("pool")) {
@@ -241,7 +242,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
         && govActionTypeListAllowedVoteBySPO.contains(govActionType)) {
-      return GovernanceActionDetailsResponse.builder().allowedVoteBySPO(allowedVoteBySPO).allowedVoteByCC(allowedVoteByCC).build();
+      return GovernanceActionDetailsResponse.builder()
+          .allowedVoteBySPO(allowedVoteBySPO)
+          .allowedVoteByCC(allowedVoteByCC)
+          .build();
     }
     GovernanceActionDetailsResponse response =
         governanceActionMapper.fromGovActionDetailsProjection(govActionDetailsProjections.get());
@@ -256,13 +260,14 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
     List<VoterType> voterTypes = new ArrayList<>();
 
-    if(VoterType.DREP_KEY_HASH.equals(governanceActionRequest.getVoterType())){
+    if (VoterType.DREP_KEY_HASH.equals(governanceActionRequest.getVoterType())) {
       voterTypes.add(VoterType.DREP_KEY_HASH);
       voterTypes.add(VoterType.DREP_SCRIPT_HASH);
-    } else if(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH.equals(governanceActionRequest.getVoterType())){
+    } else if (VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH.equals(
+        governanceActionRequest.getVoterType())) {
       voterTypes.add(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH);
       voterTypes.add(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH);
-    } else if(VoterType.STAKING_POOL_KEY_HASH.equals(governanceActionRequest.getVoterType())){
+    } else if (VoterType.STAKING_POOL_KEY_HASH.equals(governanceActionRequest.getVoterType())) {
       voterTypes.add(VoterType.STAKING_POOL_KEY_HASH);
     }
 
