@@ -35,7 +35,7 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
           """
     SELECT dri.drepHash as drepHash, dri.activeVoteStake as activeVoteStake
     FROM DRepInfo dri
-    WHERE dri.createdAt >= :blockTime and dri.status != 'RETIRED'
+    WHERE dri.createdAt <= :blockTime and dri.status != 'RETIRED'
     """)
   List<DRepInfoProjection> findDRepByCreatedAt(@Param("blockTime") Long blockTime);
 
