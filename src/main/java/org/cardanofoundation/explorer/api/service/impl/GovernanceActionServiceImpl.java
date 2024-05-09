@@ -210,9 +210,24 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     Optional<GovActionDetailsProjection> govActionDetailsProjections =
         governanceActionRepository.getGovActionDetailsByTxHashAndIndex(
             governanceActionRequest.getTxHash(), governanceActionRequest.getIndex());
+
     if (govActionDetailsProjections.isEmpty()) {
       throw new BusinessException(BusinessCode.GOVERNANCE_ACTION_NOT_FOUND);
     }
+    GovActionType govActionType = govActionDetailsProjections.get().getType();
+
+    // STAKING POOL not allowed to vote on treasury withdrawals, parameter change and update
+    // committee
+    List<GovActionType> govActionTypeListAllowedVoteBySPO =
+        List.of(
+            GovActionType.TREASURY_WITHDRAWALS_ACTION,
+            GovActionType.PARAMETER_CHANGE_ACTION,
+            GovActionType.NEW_CONSTITUTION);
+
+    List<GovActionType> govActionTypeListAllowedVoteByCc =
+        List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
+    Boolean allowedVoteBySPO = !govActionTypeListAllowedVoteBySPO.contains(govActionType);
+    Boolean allowedVoteByCC = !govActionTypeListAllowedVoteByCc.contains(govActionType);
     if (dRepHashOrPoolHashOrPoolView.toLowerCase().startsWith("pool")) {
       dRepHashOrPoolHashOrPoolView =
           poolHashRepository
@@ -225,20 +240,17 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
               .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
       dRepHashOrPoolHashOrPoolView = dRepInfo.getDrepHash();
     }
-    GovActionType govActionType = govActionDetailsProjections.get().getType();
-    // STAKING POOL not allowed to vote on treasury withdrawals, parameter change and update
-    // committee
-    List<GovActionType> govActionTypes =
-        List.of(
-            GovActionType.TREASURY_WITHDRAWALS_ACTION,
-            GovActionType.PARAMETER_CHANGE_ACTION,
-            GovActionType.NEW_CONSTITUTION);
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
-        && govActionTypes.contains(govActionType)) {
-      return new GovernanceActionDetailsResponse();
+        && govActionTypeListAllowedVoteBySPO.contains(govActionType)) {
+      return GovernanceActionDetailsResponse.builder()
+          .allowedVoteBySPO(allowedVoteBySPO)
+          .allowedVoteByCC(allowedVoteByCC)
+          .build();
     }
     GovernanceActionDetailsResponse response =
         governanceActionMapper.fromGovActionDetailsProjection(govActionDetailsProjections.get());
+    response.setAllowedVoteByCC(allowedVoteByCC);
+    response.setAllowedVoteBySPO(allowedVoteBySPO);
     // get pool name for SPO
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)) {
       Optional<String> poolName =
@@ -246,14 +258,25 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       response.setPoolName(poolName.orElse(null));
     }
 
-    VoterType voterType = VoterType.valueOf(governanceActionRequest.getVoterType().name());
+    List<VoterType> voterTypes = new ArrayList<>();
+
+    if (VoterType.DREP_KEY_HASH.equals(governanceActionRequest.getVoterType())) {
+      voterTypes.add(VoterType.DREP_KEY_HASH);
+      voterTypes.add(VoterType.DREP_SCRIPT_HASH);
+    } else if (VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH.equals(
+        governanceActionRequest.getVoterType())) {
+      voterTypes.add(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH);
+      voterTypes.add(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH);
+    } else if (VoterType.STAKING_POOL_KEY_HASH.equals(governanceActionRequest.getVoterType())) {
+      voterTypes.add(VoterType.STAKING_POOL_KEY_HASH);
+    }
 
     List<VotingProcedureProjection> votingProcedureProjections =
         votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
             governanceActionRequest.getTxHash(),
             governanceActionRequest.getIndex(),
             dRepHashOrPoolHashOrPoolView,
-            voterType);
+            voterTypes);
     setExpiryDateOfGovAction(response);
     // no vote procedure found = none vote
     if (votingProcedureProjections.isEmpty()) {
