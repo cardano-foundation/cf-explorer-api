@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
 import org.cardanofoundation.explorer.api.projection.DRepInfoProjection;
+import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
 
@@ -58,4 +59,12 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
       @Param("fromDate") Long fromDate,
       @Param("toDate") Long toDate,
       Pageable pageable);
+
+  @Query(
+      value =
+          """
+      select max(dri.votingPower) as maxVotingPower , max(dri.activeVoteStake) as maxActiveVoteStake,
+       min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake from DRepInfo dri
+          """)
+  DRepRangeProjection getDRepRangeValues();
 }
