@@ -25,7 +25,7 @@ public interface CommitteeRegistrationRepository
           """
   select lvp.voterHash as voterHash, lvp.txHash as txHash, lvp.index as index, lvp.vote as vote from CommitteeRegistration cr
   left join LatestVotingProcedure lvp on lvp.govActionTxHash = :txHash
-  and lvp.govActionIndex = :index and lvp.voterType = :voterType and lvp.voterHash = cr.hotKey
+  and lvp.govActionIndex = :index and lvp.voterType in :voterType and lvp.voterHash = cr.hotKey
   where not exists ( select 1 from CommitteeRegistration cr2 where cr2.coldKey = cr.coldKey and cr2.blockTime > cr.blockTime)
   and not exists (select 1 from CommitteeDeRegistration cd where cd.coldKey = cr.coldKey and cd.blockTime > cr.blockTime)
 """)
