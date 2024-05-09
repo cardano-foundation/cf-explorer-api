@@ -37,13 +37,17 @@ import org.cardanofoundation.explorer.api.model.response.governanceAction.Govern
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
+import org.cardanofoundation.explorer.api.projection.DRepInfoProjection;
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
+import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjection;
+import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.VotingCCProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
@@ -81,6 +85,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final EpochParamRepository epochParamRepository;
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final CommitteeRegistrationRepository committeeRegistrationRepository;
+  private final DelegationRepository delegationRepository;
 
   private final EpochMapper epochMapper;
   private final EpochRepository epochRepository;
@@ -299,7 +304,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     Integer committeeTotalCount =
         committeeRegistrationRepository.countByExpiredEpochNo(expiredEpoch);
     CommitteeState committeeState =
-        committeeTotalCount >= epochParam.getCommitteeMinSize().intValue()
+        epochParam.getCommitteeMinSize() == null
+                || committeeTotalCount >= epochParam.getCommitteeMinSize().intValue()
             ? CommitteeState.NORMAL
             : CommitteeState.NO_CONFIDENCE;
 
@@ -347,6 +353,61 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       default:
         votingChartResponse.setThreshold(null);
     }
+    List<PoolOverviewProjection> createdAtList =
+        poolHashRepository.getSlotCreatedAtGroupByPoolHash();
+    List<PoolOverviewProjection> poolCanVoteList =
+        createdAtList.stream()
+            .filter(e -> e.getCreatedAt() <= govActionDetailsProjection.getSlot())
+            .toList();
+    Map<String, Long> poolHashByPoolIdMap =
+        poolCanVoteList.stream()
+            .collect(
+                Collectors.toMap(
+                    PoolOverviewProjection::getPoolHash, PoolOverviewProjection::getPoolId));
+    List<Long> poolIds = poolHashByPoolIdMap.values().stream().toList();
+    List<PoolOverviewProjection> poolOverviewProjections =
+        delegationRepository.getBalanceByPoolIdIn(poolIds);
+    Map<String, BigInteger> activeVoteStakeByPoolMap =
+        poolOverviewProjections.stream()
+            .collect(
+                Collectors.toMap(
+                    PoolOverviewProjection::getPoolHash, PoolOverviewProjection::getBalance));
+    BigInteger totalActiveVoteStake =
+        poolOverviewProjections.stream()
+            .map(PoolOverviewProjection::getBalance)
+            .filter(Objects::nonNull)
+            .reduce(BigInteger::add)
+            .orElse(BigInteger.ZERO);
+    List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
+        latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
+            govActionDetailsProjection.getTxHash(),
+            govActionDetailsProjection.getIndex(),
+            poolHashByPoolIdMap.keySet().stream().toList(),
+            List.of(VoterType.STAKING_POOL_KEY_HASH));
+
+    Map<Vote, List<LatestVotingProcedureProjection>> voteCount =
+        latestVotingProcedureProjections.stream()
+            .collect(Collectors.groupingBy(LatestVotingProcedureProjection::getVote));
+
+    Map<Vote, BigInteger> voteStake =
+        voteCount.entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry ->
+                        entry.getValue().stream()
+                            .map( // get active vote stake of Pool
+                                latestVotingProcedureProjection ->
+                                    activeVoteStakeByPoolMap.getOrDefault(
+                                        latestVotingProcedureProjection.getVoterHash(),
+                                        BigInteger.ZERO))
+                            .filter(Objects::nonNull)
+                            .reduce(BigInteger::add)
+                            .orElse(BigInteger.ZERO)));
+    votingChartResponse.setActiveVoteStake(totalActiveVoteStake);
+    votingChartResponse.setTotalYesVoteStake(voteStake.getOrDefault(Vote.YES, BigInteger.ZERO));
+    votingChartResponse.setTotalNoVoteStake(voteStake.getOrDefault(Vote.NO, BigInteger.ZERO));
+    votingChartResponse.setAbstainVoteStake(voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO));
   }
   // TODO: Active vote stake of DRep type is not available.
   private void getVotingChartResponseForDRep(
@@ -379,6 +440,55 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       default:
         votingChartResponse.setThreshold(null);
     }
+
+    List<DRepInfoProjection> dRepInfoProjections =
+        drepInfoRepository.findDRepByCreatedAt(govActionDetailsProjection.getBlockTime());
+    Map<String, BigInteger> activeVoteStakeByDRepMap =
+        dRepInfoProjections.stream()
+            .collect(
+                Collectors.toMap(
+                    DRepInfoProjection::getDrepHash, DRepInfoProjection::getActiveVoteStake));
+    BigInteger totalActiveVoteStake =
+        dRepInfoProjections.stream()
+            .map(DRepInfoProjection::getActiveVoteStake)
+            .filter(Objects::nonNull)
+            .reduce(BigInteger::add)
+            .orElse(BigInteger.ZERO);
+
+    List<String> dRepHashes =
+        dRepInfoProjections.stream().map(DRepInfoProjection::getDrepHash).toList();
+
+    List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
+        latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
+            govActionDetailsProjection.getTxHash(),
+            govActionDetailsProjection.getIndex(),
+            dRepHashes,
+            List.of(VoterType.DREP_KEY_HASH, VoterType.DREP_SCRIPT_HASH));
+
+    Map<Vote, List<LatestVotingProcedureProjection>> voteCount =
+        latestVotingProcedureProjections.stream()
+            .collect(Collectors.groupingBy(LatestVotingProcedureProjection::getVote));
+
+    Map<Vote, BigInteger> voteStake =
+        voteCount.entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry ->
+                        entry.getValue().stream()
+                            .map( // get active vote stake of DRep
+                                latestVotingProcedureProjection ->
+                                    activeVoteStakeByDRepMap.getOrDefault(
+                                        latestVotingProcedureProjection.getVoterHash(),
+                                        BigInteger.ZERO))
+                            .filter(Objects::nonNull)
+                            .reduce(BigInteger::add)
+                            .orElse(BigInteger.ZERO)));
+
+    votingChartResponse.setActiveVoteStake(totalActiveVoteStake);
+    votingChartResponse.setTotalYesVoteStake(voteStake.getOrDefault(Vote.YES, BigInteger.ZERO));
+    votingChartResponse.setTotalNoVoteStake(voteStake.getOrDefault(Vote.NO, BigInteger.ZERO));
+    votingChartResponse.setAbstainVoteStake(voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO));
   }
 
   // TODO: Threshold for CC type is not available. It must be null for now.
@@ -390,7 +500,11 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     votingChartResponse.setThreshold(null);
     List<VotingCCProjection> votingCCProjections =
         committeeRegistrationRepository.findByTxHashAndIndex(
-            govActionDetailsProjection.getTxHash(), govActionDetailsProjection.getIndex());
+            govActionDetailsProjection.getTxHash(),
+            govActionDetailsProjection.getIndex(),
+            List.of(
+                VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH,
+                VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH));
     List<VotingCCProjection> votingCCProjectionsFiltered =
         votingCCProjections.stream()
             .filter(votingCCProjection -> Objects.nonNull(votingCCProjection.getVote()))
