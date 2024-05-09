@@ -27,10 +27,13 @@ import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
 import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
+import org.cardanofoundation.explorer.api.projection.DRepInfoProjection;
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
+import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
@@ -57,6 +60,7 @@ public class GovActionServiceTest {
   @Mock PoolHashRepository poolHashRepository;
   @Mock DrepInfoRepository drepInfoRepository;
   @Mock EpochParamRepository epochParamRepository;
+  @Mock CommitteeRegistrationRepository committeeRegistrationRepository;
 
   @Spy
   private GovernanceActionMapper governanceActionMapper =
@@ -245,40 +249,66 @@ public class GovActionServiceTest {
     Assertions.assertEquals(Vote.NO, actual.getVoteType());
   }
 
-  //  @Test
-  //  void testGetVotingChartByGovActionTxHashAndIndex() {
-  //    String txHash = "358d960c2c18a845272d055f0d36c41dd3e869c8cf811ab12acac27f56970420";
-  //    Integer index = 0;
-  //    CountVoteOnGovActionProjection countVoteOnGovActionProjection =
-  //        Mockito.mock(CountVoteOnGovActionProjection.class);
-  //    when(countVoteOnGovActionProjection.getVote()).thenReturn(Vote.YES);
-  //    when(countVoteOnGovActionProjection.getVoterType()).thenReturn(VoterType.DREP_KEY_HASH);
-  //
-  //    CountVoteOnGovActionProjection countVoteOnGovActionProjection1 =
-  //        Mockito.mock(CountVoteOnGovActionProjection.class);
-  //    when(countVoteOnGovActionProjection1.getVote()).thenReturn(Vote.NO);
-  //    when(countVoteOnGovActionProjection1.getVoterType()).thenReturn(VoterType.DREP_KEY_HASH);
-  //
-  //    CountVoteOnGovActionProjection countVoteOnGovActionProjection2 =
-  //        Mockito.mock(CountVoteOnGovActionProjection.class);
-  //    when(countVoteOnGovActionProjection2.getVote()).thenReturn(Vote.NO);
-  //    when(countVoteOnGovActionProjection2.getVoterType())
-  //        .thenReturn(VoterType.STAKING_POOL_KEY_HASH);
-  //
-  //
-  // when(latestVotingProcedureRepository.getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
-  //            txHash, index))
-  //        .thenReturn(
-  //            List.of(
-  //                countVoteOnGovActionProjection,
-  //                countVoteOnGovActionProjection1,
-  //                countVoteOnGovActionProjection2));
-  //
-  //    var votingChartResponse =
-  //        governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index);
-  //
-  //    Assertions.assertNotNull(votingChartResponse);
-  //    Assertions.assertEquals(1, votingChartResponse.getNumberOfYesVote());
-  //    Assertions.assertEquals(2, votingChartResponse.getNumberOfNoVotes());
-  //  }
+  @Test
+  void testGetVotingChartByGovActionTxHashAndIndex() {
+    String txHash = "4b5a77c3289a41f104e4a4c1fe82319fb047ce12f3d42ff2837caa2b0f2e93de";
+    Integer index = 0;
+    VoterType voterType = VoterType.DREP_KEY_HASH;
+
+    GovActionDetailsProjection govActionDetailsProjection =
+        Mockito.mock(GovActionDetailsProjection.class);
+    when(govActionDetailsProjection.getTxHash()).thenReturn(txHash);
+    when(govActionDetailsProjection.getIndex()).thenReturn(index);
+    when(govActionDetailsProjection.getEpoch()).thenReturn(5);
+    when(govActionDetailsProjection.getType()).thenReturn(GovActionType.UPDATE_COMMITTEE);
+
+    EpochParam epochParam =
+        EpochParam.builder()
+            .committeeMinSize(BigInteger.valueOf(5))
+            .dvtCommitteeNormal(0.51)
+            .govActionLifetime(BigInteger.TEN)
+            .build();
+
+    when(governanceActionRepository.getGovActionDetailsByTxHashAndIndex(txHash, index))
+        .thenReturn(Optional.of(govActionDetailsProjection));
+
+    when(committeeRegistrationRepository.countByExpiredEpochNo(any())).thenReturn(5);
+    when(epochParamRepository.findByEpochNo(any())).thenReturn(epochParam);
+
+    DRepInfoProjection projection1 = Mockito.mock(DRepInfoProjection.class);
+    when(projection1.getDrepHash()).thenReturn("drep1");
+    when(projection1.getActiveVoteStake()).thenReturn(BigInteger.valueOf(100));
+
+    DRepInfoProjection projection2 = Mockito.mock(DRepInfoProjection.class);
+    when(projection2.getDrepHash()).thenReturn("drep2");
+    when(projection2.getActiveVoteStake()).thenReturn(BigInteger.valueOf(100));
+
+    DRepInfoProjection projection3 = Mockito.mock(DRepInfoProjection.class);
+    when(projection3.getDrepHash()).thenReturn("drep3");
+    when(projection3.getActiveVoteStake()).thenReturn(BigInteger.valueOf(100));
+
+    when(drepInfoRepository.findDRepByCreatedAt(any()))
+        .thenReturn(List.of(projection1, projection2, projection3));
+
+    LatestVotingProcedureProjection prj1 = Mockito.mock(LatestVotingProcedureProjection.class);
+    when(prj1.getVoterHash()).thenReturn("drep1");
+    when(prj1.getVote()).thenReturn(Vote.YES);
+
+    LatestVotingProcedureProjection prj2 = Mockito.mock(LatestVotingProcedureProjection.class);
+    when(prj2.getVoterHash()).thenReturn("drep2");
+    when(prj2.getVote()).thenReturn(Vote.NO);
+
+    when(latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
+            any(), any(), any(), any()))
+        .thenReturn(List.of(prj1, prj2));
+
+    var votingChartResponse =
+        governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index, voterType);
+
+    Assertions.assertNotNull(votingChartResponse);
+    Assertions.assertEquals(BigInteger.valueOf(100), votingChartResponse.getTotalYesVoteStake());
+    Assertions.assertEquals(BigInteger.valueOf(100), votingChartResponse.getTotalNoVoteStake());
+    Assertions.assertEquals(BigInteger.valueOf(300), votingChartResponse.getActiveVoteStake());
+    Assertions.assertEquals(Double.valueOf(0.51), votingChartResponse.getThreshold());
+  }
 }

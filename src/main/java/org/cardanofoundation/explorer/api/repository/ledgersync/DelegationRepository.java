@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
+import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 
@@ -175,4 +176,14 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + " AND (po.id IS NULL OR po.id = (SELECT max(po2.id) FROM PoolOfflineData po2 WHERE po2.pool.id = poolHash.id))"
               + " WHERE delegation.txId IN :txIds")
   List<DelegationProjection> findDelegationByTxIdIn(@Param("txIds") List<Long> txIds);
+
+  @Query(
+      value =
+          """
+      select sum(sa.balance) as balance, d.poolHash.hashRaw as poolHash from Delegation d
+      join StakeAddress sa on sa.id = d.stakeAddressId
+      where d.poolHash.id in :poolIds
+      group by d.poolHash.hashRaw
+    """)
+  List<PoolOverviewProjection> getBalanceByPoolIdIn(@Param("poolIds") List<Long> poolIds);
 }
