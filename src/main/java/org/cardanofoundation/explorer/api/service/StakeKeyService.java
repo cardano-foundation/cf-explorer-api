@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
+import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
@@ -99,7 +102,7 @@ public interface StakeKeyService {
    * @param stakeKey stake address
    * @return list address of stake address in this page
    */
-  //  BaseFilterResponse<AddressFilterResponse> getAddresses(String stakeKey, Pageable pageable);
+  BaseFilterResponse<AddressFilterResponse> getAddresses(String stakeKey, Pageable pageable);
 
   /**
    * Get live stake, active stake and total stake
@@ -115,8 +118,7 @@ public interface StakeKeyService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list balance value by stake
    */
-  //  AddressChartBalanceResponse getStakeBalanceAnalytics(String stakeKey, AnalyticType type)
-  //      throws ExecutionException, InterruptedException;
+  AddressChartBalanceResponse getStakeBalanceAnalytics(String stakeKey, AnalyticType type);
 
   /**
    * Get stake reward analytics

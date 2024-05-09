@@ -32,7 +32,6 @@ import org.cardanofoundation.explorer.api.controller.advice.GlobalRestController
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
@@ -43,11 +42,11 @@ import org.cardanofoundation.explorer.api.service.TxService;
 
 @WebMvcTest(AddressController.class)
 @Import({
-    SpringWebSecurityConfig.class,
-    WebConfig.class,
-    JacksonMapperDateConfig.class,
-    GlobalRestControllerExceptionHandler.class,
-    RoleFilterMapper.class
+  SpringWebSecurityConfig.class,
+  WebConfig.class,
+  JacksonMapperDateConfig.class,
+  GlobalRestControllerExceptionHandler.class,
+  RoleFilterMapper.class
 })
 @AutoConfigureMockMvc(addFilters = false)
 public class AddressControllerTest {
@@ -100,9 +99,7 @@ public class AddressControllerTest {
 
     // Perform the GET request
     mockMvc
-        .perform(get("/api/v1/addresses/top-addresses")
-                     .param("page", "0")
-                     .param("size", "10"))
+        .perform(get("/api/v1/addresses/top-addresses").param("page", "0").param("size", "10"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
@@ -139,29 +136,30 @@ public class AddressControllerTest {
     verify(addressService).getAddressAnalytics(address, type);
   }
 
-//  @Test
-//  public void testGetTransactions() throws Exception {
-//    // Mock request and response objects
-//    String address = "testAddress";
-//    List<TxFilterResponse> mockResponse =
-//        Arrays.asList(new TxFilterResponse(), new TxFilterResponse());
-//    BaseFilterResponse<TxFilterResponse> response =
-//        new BaseFilterResponse<>(mockResponse, this.pageable.getPageSize());
-//
-//    // Mock the service method
-//    when(txService.getTransactionsByAddress(address, pageable)).thenReturn(response);
-//
-//    // Perform the GET request
-//    mockMvc
-//        .perform(
-//            get("/api/v1/addresses/{address}/txs", address).param("page", "0").param("size", "10"))
-//        .andExpect(status().isOk())
-//        .andExpect(jsonPath("$.data").isArray())
-//        .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
-//
-//    // Verify that the service method was called with the correct arguments
-//    verify(txService).getTransactionsByAddress(address, pageable);
-//  }
+  //  @Test
+  //  public void testGetTransactions() throws Exception {
+  //    // Mock request and response objects
+  //    String address = "testAddress";
+  //    List<TxFilterResponse> mockResponse =
+  //        Arrays.asList(new TxFilterResponse(), new TxFilterResponse());
+  //    BaseFilterResponse<TxFilterResponse> response =
+  //        new BaseFilterResponse<>(mockResponse, this.pageable.getPageSize());
+  //
+  //    // Mock the service method
+  //    when(txService.getTransactionsByAddress(address, pageable)).thenReturn(response);
+  //
+  //    // Perform the GET request
+  //    mockMvc
+  //        .perform(
+  //            get("/api/v1/addresses/{address}/txs", address).param("page", "0").param("size",
+  // "10"))
+  //        .andExpect(status().isOk())
+  //        .andExpect(jsonPath("$.data").isArray())
+  //        .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
+  //
+  //    // Verify that the service method was called with the correct arguments
+  //    verify(txService).getTransactionsByAddress(address, pageable);
+  //  }
 
   @Test
   public void testGetTokenByAddress() throws Exception {

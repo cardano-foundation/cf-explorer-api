@@ -24,10 +24,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -48,6 +44,7 @@ import org.cardanofoundation.explorer.api.model.request.script.nativescript.Nati
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.tx.ContractResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
+import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
@@ -55,6 +52,7 @@ import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
@@ -68,7 +66,9 @@ import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo;
 import org.cardanofoundation.explorer.common.entity.explorer.SmartContractInfo;
 import org.cardanofoundation.explorer.common.entity.explorer.VerifiedScript;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
+import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -85,8 +85,7 @@ class ScriptServiceTest {
   @Mock BlockRepository blockRepository;
   @Mock AssetMetadataRepository assetMetadataRepository;
   @Mock SmartContractInfoRepository smartContractInfoRepository;
-  @Mock
-  LatestTokenBalanceRepository latestTokenBalanceRepository;
+  @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
   @Mock VerifiedScriptRepository verifiedScriptRepository;
   @Mock TxService txService;
   @Mock NativeScript nativeScript;
@@ -273,54 +272,52 @@ class ScriptServiceTest {
     Assertions.assertEquals(ScriptType.PLUTUSV3, response.getData().get(0).getScriptVersion());
   }
 
-    @Test
-    void getSmartContractDetail_shouldReturnSmartContractDetailResponse() {
-      String scriptHash = "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6";
-      when(scriptRepository.findByHash(scriptHash))
-          .thenReturn(
-              Optional.of(Script.builder().hash(scriptHash).type(ScriptType.PLUTUSV1).build()));
-      when(addressRepository.getAssociatedAddress(scriptHash))
-          .thenReturn(
-              List.of(
+  @Test
+  void getSmartContractDetail_shouldReturnSmartContractDetailResponse() {
+    String scriptHash = "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6";
+    when(scriptRepository.findByHash(scriptHash))
+        .thenReturn(
+            Optional.of(Script.builder().hash(scriptHash).type(ScriptType.PLUTUSV1).build()));
+    when(addressRepository.getAssociatedAddress(scriptHash))
+        .thenReturn(
+            List.of(
+                "addr1z9fvxytwm8dv0aht3x8cxetm3tu4f47kaqdgxney8mu6hjxy0sm24zwzyknar6v855calh3yvxzj8lu6q0ke9a3vejrsjhed7q"));
+    when(stakeAddressRepository.getAssociatedAddress(scriptHash))
+        .thenReturn(List.of("stake1u8sadwjcje35pu2kmfsytxttnhjyzr948nqd449q5geh83ggjxnfd"));
 
-   "addr1z9fvxytwm8dv0aht3x8cxetm3tu4f47kaqdgxney8mu6hjxy0sm24zwzyknar6v855calh3yvxzj8lu6q0ke9a3vejrsjhed7q"));
-      when(stakeAddressRepository.getAssociatedAddress(scriptHash))
-          .thenReturn(List.of("stake1u8sadwjcje35pu2kmfsytxttnhjyzr948nqd449q5geh83ggjxnfd"));
+    var response = scriptService.getSmartContractDetail(scriptHash);
+    Assertions.assertEquals(scriptHash, response.getScriptHash());
+    Assertions.assertEquals(ScriptType.PLUTUSV1, response.getScriptType());
+    Assertions.assertEquals(2, response.getAssociatedAddresses().size());
+    Assertions.assertEquals(
+        "stake1u8sadwjcje35pu2kmfsytxttnhjyzr948nqd449q5geh83ggjxnfd",
+        response.getAssociatedAddresses().get(0));
+    Assertions.assertEquals(
+        "addr1z9fvxytwm8dv0aht3x8cxetm3tu4f47kaqdgxney8mu6hjxy0sm24zwzyknar6v855calh3yvxzj8lu6q0ke9a3vejrsjhed7q",
+        response.getAssociatedAddresses().get(1));
+  }
 
-      var response = scriptService.getSmartContractDetail(scriptHash);
-      Assertions.assertEquals(scriptHash, response.getScriptHash());
-      Assertions.assertEquals(ScriptType.PLUTUSV1, response.getScriptType());
-      Assertions.assertEquals(2, response.getAssociatedAddresses().size());
-      Assertions.assertEquals(
-          "stake1u8sadwjcje35pu2kmfsytxttnhjyzr948nqd449q5geh83ggjxnfd",
-          response.getAssociatedAddresses().get(0));
-      Assertions.assertEquals(
+  @Test
+  void getSmartContractDetail_shouldThrowExceptionWhenScriptHashNotFound() {
+    String scriptHash = "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6";
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.empty());
+    Assertions.assertThrows(
+        BusinessException.class, () -> scriptService.getSmartContractDetail(scriptHash));
+  }
 
-   "addr1z9fvxytwm8dv0aht3x8cxetm3tu4f47kaqdgxney8mu6hjxy0sm24zwzyknar6v855calh3yvxzj8lu6q0ke9a3vejrsjhed7q",
-          response.getAssociatedAddresses().get(1));
-    }
-
-    @Test
-    void getSmartContractDetail_shouldThrowExceptionWhenScriptHashNotFound() {
-      String scriptHash = "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6";
-      when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.empty());
-      Assertions.assertThrows(
-          BusinessException.class, () -> scriptService.getSmartContractDetail(scriptHash));
-    }
-
-    @Test
-    void getSmartContractDetail_shouldThrowExceptionWhenScriptHashNotBelongToSC() {
-      String scriptHash = "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6";
-      when(scriptRepository.findByHash(scriptHash))
-          .thenReturn(
-              Optional.of(
-                  Script.builder()
-                      .hash("e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6")
-                      .type(ScriptType.TIMELOCK)
-                      .build()));
-      Assertions.assertThrows(
-          BusinessException.class, () -> scriptService.getSmartContractDetail(scriptHash));
-    }
+  @Test
+  void getSmartContractDetail_shouldThrowExceptionWhenScriptHashNotBelongToSC() {
+    String scriptHash = "e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6";
+    when(scriptRepository.findByHash(scriptHash))
+        .thenReturn(
+            Optional.of(
+                Script.builder()
+                    .hash("e4d2fb0b8d275852103fd75801e2c7dcf6ed3e276c74cabadbe5b8b6")
+                    .type(ScriptType.TIMELOCK)
+                    .build()));
+    Assertions.assertThrows(
+        BusinessException.class, () -> scriptService.getSmartContractDetail(scriptHash));
+  }
 
   @Test
   void getSmartContractTxs_shouldReturnSmartContractTxResponse() {
@@ -494,24 +491,27 @@ class ScriptServiceTest {
     Assertions.assertTrue(actual.getData().get(0).getPolicy().equals(scriptHash));
   }
 
-    @Test
-    void testGetNativeScriptHolders_thenReturn() {
-      String scriptHash = "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79";
-      Pageable pageable = PageRequest.of(0, 2);
-      Long addressId = 1L;
-      Address address = Address.builder().id(addressId).address("address").build();
-      AddressTokenProjection projection = mock(AddressTokenProjection.class);
-      when(projection.getPolicy()).thenReturn(scriptHash);
-      when(projection.getAddressId()).thenReturn(addressId);
-      when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
-          .thenReturn(List.of(projection));
+  @Test
+  void testGetNativeScriptHolders_thenReturn() {
+    String scriptHash = "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79";
+    Pageable pageable = PageRequest.of(0, 2);
+    Long addressId = 1L;
+    Address address = Address.builder().id(addressId).address("address").build();
+    AddressTokenProjection projection = mock(AddressTokenProjection.class);
+    when(projection.getPolicy()).thenReturn(scriptHash);
+    when(projection.getAddressId()).thenReturn(addressId);
+    when(projection.getAddress()).thenReturn("address");
+    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
+        .thenReturn(List.of(projection));
+    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
+        .thenReturn(List.of(projection));
 
-      var actual = scriptService.getNativeScriptHolders(scriptHash, pageable);
+    var actual = scriptService.getNativeScriptHolders(scriptHash, pageable);
 
-      Assertions.assertTrue(actual.getData().get(0).getPolicy().equals(scriptHash));
-      Assertions.assertEquals(1, actual.getTotalItems());
-      Assertions.assertNotNull(actual.getData().get(0).getAddressId());
-    }
+    Assertions.assertTrue(actual.getData().get(0).getPolicy().equals(scriptHash));
+    Assertions.assertEquals(1, actual.getTotalItems());
+    Assertions.assertNotNull(actual.getData().get(0).getAddressId());
+  }
 
   @Test
   void testVerifyNativeScript_thenReturn() throws BusinessException {
@@ -574,98 +574,93 @@ class ScriptServiceTest {
         BusinessException.class, () -> scriptService.verifyNativeScript(scriptHash, scriptJson));
   }
 
-    @Test
-    void testGetNativeScriptDetail_shouldReturnNativeScriptResponse() {
-      String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
-      String scriptJson = getScripJson();
-      Script script =
-   Script.builder().hash(scriptHash).type(ScriptType.TIMELOCK).json(null).build();
+  @Test
+  void testGetNativeScriptDetail_shouldReturnNativeScriptResponse() {
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson = getScripJson();
+    Script script = Script.builder().hash(scriptHash).type(ScriptType.TIMELOCK).json(null).build();
 
-      VerifiedScript verifiedScript =
-          VerifiedScript.builder().hash(scriptHash).json(scriptJson).build();
+    VerifiedScript verifiedScript =
+        VerifiedScript.builder().hash(scriptHash).json(scriptJson).build();
 
-      NativeScriptInfo nativeScriptInfo =
-          NativeScriptInfo.builder()
-              .scriptHash(scriptHash)
-              .id(1L)
-              .afterSlot(99L)
-              .beforeSlot(101L)
-              .numberOfTokens(2L)
-              .numberOfAssetHolders(3L)
-              .build();
-      Block currentBlock = Block.builder().slotNo(100L).build();
-      when(blockRepository.findLatestBlock()).thenReturn(Optional.of(currentBlock));
-      when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
-      when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
-          .thenReturn(Optional.of(nativeScriptInfo));
+    NativeScriptInfo nativeScriptInfo =
+        NativeScriptInfo.builder()
+            .scriptHash(scriptHash)
+            .id(1L)
+            .afterSlot(99L)
+            .beforeSlot(101L)
+            .numberOfTokens(2L)
+            .numberOfAssetHolders(3L)
+            .build();
+    Block currentBlock = Block.builder().slotNo(100L).build();
+    when(blockRepository.findLatestBlock()).thenReturn(Optional.of(currentBlock));
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
+    when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
+        .thenReturn(Optional.of(nativeScriptInfo));
 
-   when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
-      var actual = scriptService.getNativeScriptDetail(scriptHash);
+    when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
+    var actual = scriptService.getNativeScriptDetail(scriptHash);
 
-      Assertions.assertEquals(nativeScriptInfo.getNumberOfTokens(), actual.getNumberOfTokens());
-      Assertions.assertEquals(
-          nativeScriptInfo.getNumberOfAssetHolders(), actual.getNumberOfAssetHolders());
-      Assertions.assertTrue(actual.getVerifiedContract());
-      Assertions.assertFalse(actual.getIsOneTimeMint());
-      Assertions.assertEquals(
-          actual.getConditionType(),
-          com.bloxbean.cardano.client.transaction.spec.script.ScriptType.atLeast);
-      Assertions.assertEquals(actual.getScriptHash(), scriptHash);
-      Assertions.assertEquals(2, actual.getRequired());
-      Assertions.assertTrue(actual.getIsOpen());
-    }
+    Assertions.assertEquals(nativeScriptInfo.getNumberOfTokens(), actual.getNumberOfTokens());
+    Assertions.assertEquals(
+        nativeScriptInfo.getNumberOfAssetHolders(), actual.getNumberOfAssetHolders());
+    Assertions.assertTrue(actual.getVerifiedContract());
+    Assertions.assertFalse(actual.getIsOneTimeMint());
+    Assertions.assertEquals(
+        actual.getConditionType(),
+        com.bloxbean.cardano.client.transaction.spec.script.ScriptType.atLeast);
+    Assertions.assertEquals(actual.getScriptHash(), scriptHash);
+    Assertions.assertEquals(2, actual.getRequired());
+    Assertions.assertTrue(actual.getIsOpen());
+  }
 
-    @Test
-    void testGetNativeScriptDetail_shouldReturnNativeScriptResponse_withOneTimeMint() {
-      String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
-      String scriptJson =
+  @Test
+  void testGetNativeScriptDetail_shouldReturnNativeScriptResponse_withOneTimeMint() {
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    String scriptJson =
+        "{\"type\":\"all\",\"scripts\":[{\"type\":\"before\",\"slot\":48037363},{\"type\":\"sig\",\"keyHash\":\"a316ed93fca3970fb603a5d103a25780fc1a0d3c33878073226ca586\"}]}";
+    Script script = Script.builder().hash(scriptHash).type(ScriptType.TIMELOCK).json(null).build();
 
-   "{\"type\":\"all\",\"scripts\":[{\"type\":\"before\",\"slot\":48037363},{\"type\":\"sig\",\"keyHash\":\"a316ed93fca3970fb603a5d103a25780fc1a0d3c33878073226ca586\"}]}";
-      Script script =
-   Script.builder().hash(scriptHash).type(ScriptType.TIMELOCK).json(null).build();
+    VerifiedScript verifiedScript =
+        VerifiedScript.builder().hash(scriptHash).json(scriptJson).build();
 
-      VerifiedScript verifiedScript =
-          VerifiedScript.builder().hash(scriptHash).json(scriptJson).build();
+    NativeScriptInfo nativeScriptInfo =
+        NativeScriptInfo.builder()
+            .scriptHash(scriptHash)
+            .id(3L)
+            .beforeSlot(23069343L)
+            .numberOfTokens(1L)
+            .numberOfAssetHolders(1L)
+            .build();
+    Block currentBlock = Block.builder().slotNo(100L).build();
+    when(blockRepository.findLatestBlock()).thenReturn(Optional.of(currentBlock));
+    when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
+    when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
+        .thenReturn(Optional.of(nativeScriptInfo));
 
-      NativeScriptInfo nativeScriptInfo =
-          NativeScriptInfo.builder()
-              .scriptHash(scriptHash)
-              .id(3L)
-              .beforeSlot(23069343L)
-              .numberOfTokens(1L)
-              .numberOfAssetHolders(1L)
-              .build();
-      Block currentBlock = Block.builder().slotNo(100L).build();
-      when(blockRepository.findLatestBlock()).thenReturn(Optional.of(currentBlock));
-      when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
-      when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
-          .thenReturn(Optional.of(nativeScriptInfo));
+    when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
 
-   when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
+    Slice<MultiAsset> multiAssetSlice =
+        new SliceImpl<>(List.of(MultiAsset.builder().id(1L).build()));
 
-      Slice<MultiAsset> multiAssetSlice =
-          new SliceImpl<>(List.of(MultiAsset.builder().id(1L).build()));
+    Pageable pageable = PageRequest.of(0, 100, Sort.by("id").ascending());
+    when(multiAssetRepository.getSliceByPolicy(scriptHash, pageable)).thenReturn(multiAssetSlice);
+    when(maTxMintRepository.findFirstTxMintByMultiAssetId(anyLong())).thenReturn(1L);
+    when(maTxMintRepository.existsMoreOneMintTx(anyList(), anyLong())).thenReturn(Boolean.FALSE);
 
-      Pageable pageable = PageRequest.of(0, 100, Sort.by("id").ascending());
-      when(multiAssetRepository.getSliceByPolicy(scriptHash,
-   pageable)).thenReturn(multiAssetSlice);
-      when(maTxMintRepository.findFirstTxMintByMultiAssetId(anyLong())).thenReturn(1L);
-      when(maTxMintRepository.existsMoreOneMintTx(anyList(),
-   anyLong())).thenReturn(Boolean.FALSE);
+    var actual = scriptService.getNativeScriptDetail(scriptHash);
 
-      var actual = scriptService.getNativeScriptDetail(scriptHash);
-
-      Assertions.assertEquals(nativeScriptInfo.getNumberOfTokens(), actual.getNumberOfTokens());
-      Assertions.assertEquals(
-          nativeScriptInfo.getNumberOfAssetHolders(), actual.getNumberOfAssetHolders());
-      Assertions.assertTrue(actual.getVerifiedContract());
-      Assertions.assertEquals(
-          actual.getConditionType(),
-          com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all);
-      Assertions.assertEquals(actual.getScriptHash(), scriptHash);
-      Assertions.assertTrue(actual.getIsOpen());
-      Assertions.assertTrue(actual.getIsOneTimeMint());
-    }
+    Assertions.assertEquals(nativeScriptInfo.getNumberOfTokens(), actual.getNumberOfTokens());
+    Assertions.assertEquals(
+        nativeScriptInfo.getNumberOfAssetHolders(), actual.getNumberOfAssetHolders());
+    Assertions.assertTrue(actual.getVerifiedContract());
+    Assertions.assertEquals(
+        actual.getConditionType(),
+        com.bloxbean.cardano.client.transaction.spec.script.ScriptType.all);
+    Assertions.assertEquals(actual.getScriptHash(), scriptHash);
+    Assertions.assertTrue(actual.getIsOpen());
+    Assertions.assertTrue(actual.getIsOneTimeMint());
+  }
 
   @Test
   void testGetNativeScriptDetail_shouldThrowExceptionScriptHashNotFound() {
