@@ -27,4 +27,9 @@ public class AddressResponse {
     this.txCount = txCount;
     this.balance = balance;
   }
+
+  public AddressResponse(String address, BigInteger balance) {
+    this.address = address;
+    this.balance = balance;
+  }
 }

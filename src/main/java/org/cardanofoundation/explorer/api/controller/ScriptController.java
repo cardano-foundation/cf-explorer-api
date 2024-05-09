@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
-import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -25,13 +21,16 @@ import org.cardanofoundation.explorer.api.model.request.script.nativescript.Nati
 import org.cardanofoundation.explorer.api.model.request.script.smartcontract.SmartContractFilterRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.script.nativescript.NativeScriptResponse;
+import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractDetailResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.script.smartcontract.SmartContractTxResponse;
 import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -62,12 +61,12 @@ public class ScriptController {
         scriptService.getNativeScripts(filterRequest, pagination.toPageable()));
   }
 
-    @GetMapping("/native-scripts/{scriptHash}")
-    @LogMessage
-    public ResponseEntity<NativeScriptResponse> getNativeScriptDetail(
-        @PathVariable String scriptHash) {
-      return ResponseEntity.ok(scriptService.getNativeScriptDetail(scriptHash));
-    }
+  @GetMapping("/native-scripts/{scriptHash}")
+  @LogMessage
+  public ResponseEntity<NativeScriptResponse> getNativeScriptDetail(
+      @PathVariable String scriptHash) {
+    return ResponseEntity.ok(scriptService.getNativeScriptDetail(scriptHash));
+  }
 
   @PostMapping("/native-scripts/{scriptHash}/verify")
   @LogMessage
@@ -94,17 +93,17 @@ public class ScriptController {
         scriptService.getNativeScriptTokens(scriptHash, pagination.toPageable()));
   }
 
-    @GetMapping("/native-scripts/{scriptHash}/holders")
-    @LogMessage
-    @Operation(
-        summary = "Get holders by policy",
-        description = "Get all holders of all tokens of policy")
-    public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
-        @PathVariable @Parameter(description = "The native script hash") String scriptHash,
-        @ParameterObject @PaginationValid @Valid Pagination pagination) {
-      return ResponseEntity.ok(
-          scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
-    }
+  @GetMapping("/native-scripts/{scriptHash}/holders")
+  @LogMessage
+  @Operation(
+      summary = "Get holders by policy",
+      description = "Get all holders of all tokens of policy")
+  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
+      @PathVariable @Parameter(description = "The native script hash") String scriptHash,
+      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+    return ResponseEntity.ok(
+        scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
+  }
 
   @GetMapping("/contracts")
   public ResponseEntity<BaseFilterResponse<SmartContractFilterResponse>> getSmartContracts(
@@ -122,15 +121,15 @@ public class ScriptController {
         scriptService.getSmartContracts(filterRequest, pagination.toPageable()));
   }
 
-    @GetMapping("/contracts/{scriptHash}")
-    @LogMessage
-    @Operation(
-        summary = "Get smart contract detail",
-        tags = {"script"})
-    public ResponseEntity<SmartContractDetailResponse> getSmartContracts(
-        @PathVariable @Parameter(description = "The script hash") String scriptHash) {
-      return ResponseEntity.ok(scriptService.getSmartContractDetail(scriptHash));
-    }
+  @GetMapping("/contracts/{scriptHash}")
+  @LogMessage
+  @Operation(
+      summary = "Get smart contract detail",
+      tags = {"script"})
+  public ResponseEntity<SmartContractDetailResponse> getSmartContracts(
+      @PathVariable @Parameter(description = "The script hash") String scriptHash) {
+    return ResponseEntity.ok(scriptService.getSmartContractDetail(scriptHash));
+  }
 
   @GetMapping("/contracts/{scriptHash}/txs")
   @LogMessage

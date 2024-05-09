@@ -3,7 +3,6 @@ package org.cardanofoundation.explorer.api.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -26,18 +25,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
-import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
-import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressToken;
-import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -46,29 +33,41 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
+import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
+import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
+import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
+import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
+import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressToken;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {
@@ -241,8 +240,9 @@ class TokenServiceTest {
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
     final long latestEpochTime = 1715133010;
-    final Timestamp latestTimestamp = Timestamp.valueOf(
-        LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
+    final Timestamp latestTimestamp =
+        Timestamp.valueOf(
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
     when(latestTokenBalanceRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
         .thenReturn(latestEpochTime);
 
@@ -261,7 +261,7 @@ class TokenServiceTest {
     assertEquals("100", result.getVolumeIn24h());
     assertEquals(TokenType.NFT, result.getTokenType());
     assertNull(result.getMetadataJson());
-    assertEquals(latestTimestamp,result.getTokenLastActivity());
+    assertEquals(latestTimestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
   }
 
@@ -312,14 +312,14 @@ class TokenServiceTest {
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
     final long latestEpochTime = 1715133010;
-    final Timestamp latestTimestamp = Timestamp.valueOf(
-        LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
+    final Timestamp latestTimestamp =
+        Timestamp.valueOf(
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
     when(latestTokenBalanceRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
         .thenReturn(latestEpochTime);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any()))
         .thenReturn(
-
             "{\"0495e7467b9f8285ef79fca99fe1ed85ca19faba5b7d4dd425c3d884\":{\"ElephantSecretAvatars215\":{\"image\":\"ipfs://QmNvjyj4o7p7UXMEbxnx9ZY5ZLFMJcy9sjMXaTiFRgC4nJ\",\"name\":\"ElephantSecretAvatars#0215\",\"files\":[{\"src\":\"ipfs://QmaRoAcJcHunUsEEE1FSiPm5SWe47PQbexwQpHZdbTLzde\",\"name\":\"ElephantSecretAvatars#0215\",\"mediaType\":\"model/gltf-binary\"}],\"Animation\":\"Idle\",\"Skin\":\"Pink\",\"mediaType\":\"image/png\"}}}");
     // Run the test
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
@@ -328,7 +328,6 @@ class TokenServiceTest {
     assertEquals(100, result.getNumberOfHolders());
     assertEquals("100", result.getVolumeIn24h());
     assertEquals(
-
         "{\"0495e7467b9f8285ef79fca99fe1ed85ca19faba5b7d4dd425c3d884\":{\"ElephantSecretAvatars215\":{\"image\":\"ipfs://QmNvjyj4o7p7UXMEbxnx9ZY5ZLFMJcy9sjMXaTiFRgC4nJ\",\"name\":\"ElephantSecretAvatars#0215\",\"files\":[{\"src\":\"ipfs://QmaRoAcJcHunUsEEE1FSiPm5SWe47PQbexwQpHZdbTLzde\",\"name\":\"ElephantSecretAvatars#0215\",\"mediaType\":\"model/gltf-binary\"}],\"Animation\":\"Idle\",\"Skin\":\"Pink\",\"mediaType\":\"image/png\"}}}",
         result.getMetadataJson());
     assertEquals(TokenType.NFT, result.getTokenType());
@@ -383,14 +382,14 @@ class TokenServiceTest {
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
     final long latestEpochTime = 1715133010;
-    final Timestamp latestTimestamp = Timestamp.valueOf(
-        LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
+    final Timestamp latestTimestamp =
+        Timestamp.valueOf(
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
     when(latestTokenBalanceRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
         .thenReturn(latestEpochTime);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any()))
         .thenReturn(
-
             "{\"2aec93fa65aaedaf2fc0aa46c3ace89c0c8e091ed5f39b8f8127e664\":{\"Promises2239\":{\"Candidate\":\"RichardTrixson\",\"image\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"Series\":\"CampaignMaterials\",\"Promise\":\"Correct\",\"Number\":\"2239\",\"Banner\":\"Modern\",\"Asset\":\"Promises2239\",\"files\":[{\"src\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"},{\"src\":\"ipfs://QmTWuebKD7FC8kKh8tBoPsVedyhJg38g92dBopnb7fM98C\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"}],\"Collection\":\"OldMoney\",\"mediaType\":\"image/jpeg\",\"Name\":\"Promises\"}},\"version\":\"1.0\"}");
     // Run the test
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
@@ -400,18 +399,17 @@ class TokenServiceTest {
     assertEquals("100", result.getVolumeIn24h());
     assertEquals(TokenType.NFT, result.getTokenType());
     assertEquals(
-
         "{\"2aec93fa65aaedaf2fc0aa46c3ace89c0c8e091ed5f39b8f8127e664\":{\"Promises2239\":{\"Candidate\":\"RichardTrixson\",\"image\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"Series\":\"CampaignMaterials\",\"Promise\":\"Correct\",\"Number\":\"2239\",\"Banner\":\"Modern\",\"Asset\":\"Promises2239\",\"files\":[{\"src\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"},{\"src\":\"ipfs://QmTWuebKD7FC8kKh8tBoPsVedyhJg38g92dBopnb7fM98C\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"}],\"Collection\":\"OldMoney\",\"mediaType\":\"image/jpeg\",\"Name\":\"Promises\"}},\"version\":\"1.0\"}",
         result.getMetadataJson());
     assertEquals(latestTimestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
   }
 
-    @Test
-    void testGetTokenDetail_WhenTokenNotFound() {
-      when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(Optional.empty());
-      assertThrows(BusinessException.class, () -> tokenService.getTokenDetail("tokenId"));
-    }
+  @Test
+  void testGetTokenDetail_WhenTokenNotFound() {
+    when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(Optional.empty());
+    assertThrows(BusinessException.class, () -> tokenService.getTokenDetail("tokenId"));
+  }
 
   @Test
   void testGetMintTxs() {
@@ -465,16 +463,18 @@ class TokenServiceTest {
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
     final TokenAddressResponse tokenAddressResponse =
-        TokenAddressResponse.builder()
-            .address("address")
-            .quantity(BigInteger.TEN)
-            .build();
+        TokenAddressResponse.builder().address("address").quantity(BigInteger.TEN).build();
 
     when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
         .thenReturn(tokenAddressResponse);
 
     when(latestTokenBalanceRepository.getTopHolderOfToken(anyString(), any(Pageable.class)))
-        .thenReturn(List.of(AddressTokenProjectionImpl.builder().address("address").quantity(BigInteger.TEN).build()));
+        .thenReturn(
+            List.of(
+                AddressTokenProjectionImpl.builder()
+                    .address("address")
+                    .quantity(BigInteger.TEN)
+                    .build()));
 
     var response = tokenService.getTopHolders("tokenId", PageRequest.of(0, 1));
 
@@ -487,8 +487,7 @@ class TokenServiceTest {
   void testGetTopHolders_WhenTokenNotFound() {
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(Optional.empty());
     assertThrows(
-        BusinessException.class,
-        () -> tokenService.getTopHolders("tokenId", PageRequest.of(0, 1)));
+        BusinessException.class, () -> tokenService.getTopHolders("tokenId", PageRequest.of(0, 1)));
   }
 
   @Test
@@ -572,7 +571,10 @@ class TokenServiceTest {
     List<AggregateAddressToken> aggregateAddressTokens = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
       aggregateAddressTokens.add(
-          AggregateAddressToken.builder().balance(new BigInteger("100")).day(LocalDate.now().minusDays(i)).build());
+          AggregateAddressToken.builder()
+              .balance(new BigInteger("100"))
+              .day(LocalDate.now().minusDays(i))
+              .build());
     }
     Collections.reverse(aggregateAddressTokens);
     when(aggregateAddressTokenRepository.findAllByIdentAndDayBetween(any(), any(), any()))

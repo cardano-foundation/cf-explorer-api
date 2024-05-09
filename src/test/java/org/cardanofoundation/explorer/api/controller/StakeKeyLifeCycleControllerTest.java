@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
+import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.request.stake.StakeLifeCycleFilterRequest;
@@ -224,38 +225,38 @@ class StakeKeyLifeCycleControllerTest {
         .andDo(print());
   }
 
-  //  @Test
-  //  void shouldGetDelegationDetail() throws Exception {
-  //    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
-  //    String hash = "bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488";
-  //    StakeDelegationDetailResponse response =
-  //        StakeDelegationDetailResponse.builder()
-  //            .txHash(hash)
-  //            .outSum(BigInteger.valueOf(102569063))
-  //            .time(LocalDateTime.now())
-  //            .stakeTotalAmount(BigInteger.valueOf(102569063))
-  //            .poolId("pool1tay8z4sq4a4gmyhnygyt0t5j84z8epwjra06wq28jnnmschkkuu")
-  //            .poolName("The HIGH Pool")
-  //            .epoch(369)
-  //            .blockNo(7895711L)
-  //            .fee(BigInteger.valueOf(173333))
-  //            .build();
-  //    given(
-  //            stakeKeyLifeCycleService.getStakeDelegationDetail(
-  //                stakeKey, "bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488"))
-  //        .willReturn(response);
-  //    mockMvc
-  //        .perform(
-  //            get("/api/v1/stake-lifecycle/{stakeKey}/delegations/{hash}", stakeKey, hash)
-  //                .contentType(MediaType.APPLICATION_JSON))
-  //        .andExpect(status().isOk())
-  //        .andExpect(
-  //            content()
-  //                .string(
-  //                    containsString(
-  //                        "bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488")))
-  //        .andDo(print());
-  //  }
+  @Test
+  void shouldGetDelegationDetail() throws Exception {
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
+    String hash = "bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488";
+    StakeDelegationDetailResponse response =
+        StakeDelegationDetailResponse.builder()
+            .txHash(hash)
+            .outSum(BigInteger.valueOf(102569063))
+            .time(LocalDateTime.now())
+            .stakeTotalAmount(BigInteger.valueOf(102569063))
+            .poolId("pool1tay8z4sq4a4gmyhnygyt0t5j84z8epwjra06wq28jnnmschkkuu")
+            .poolName("The HIGH Pool")
+            .epoch(369)
+            .blockNo(7895711L)
+            .fee(BigInteger.valueOf(173333))
+            .build();
+    given(
+            stakeKeyLifeCycleService.getStakeDelegationDetail(
+                stakeKey, "bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488"))
+        .willReturn(response);
+    mockMvc
+        .perform(
+            get("/api/v1/stake-lifecycle/{stakeKey}/delegations/{hash}", stakeKey, hash)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(
+            content()
+                .string(
+                    containsString(
+                        "bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488")))
+        .andDo(print());
+  }
 
   @Test
   void shouldGetRewards() throws Exception {
@@ -312,61 +313,61 @@ class StakeKeyLifeCycleControllerTest {
         .andDo(print());
   }
 
-  //  @Test
-  //  void shouldGetWithdrawalDetail() throws Exception {
-  //    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
-  //    String hash = "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381";
-  //    StakeWithdrawalDetailResponse response =
-  //        StakeWithdrawalDetailResponse.builder()
-  //            .txHash(hash)
-  //            .amount(BigInteger.valueOf(4846486))
-  //            .stakeTotalAmount(BigInteger.valueOf(102569063))
-  //            .stakeRewardAvailable(BigInteger.valueOf(4846486))
-  //            .fee(BigInteger.valueOf(173333))
-  //            .time(LocalDateTime.now())
-  //            .build();
-  //    given(
-  //            stakeKeyLifeCycleService.getStakeWithdrawalDetail(
-  //                stakeKey, "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381"))
-  //        .willReturn(response);
-  //    mockMvc
-  //        .perform(
-  //            get("/api/v1/stake-lifecycle/{stakeKey}/withdrawals/{hash}", stakeKey, hash)
-  //                .contentType(MediaType.APPLICATION_JSON))
-  //        .andExpect(status().isOk())
-  //        .andExpect(content().string(containsString(hash)))
-  //        .andDo(print());
-  //  }
+  @Test
+  void shouldGetWithdrawalDetail() throws Exception {
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
+    String hash = "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381";
+    StakeWithdrawalDetailResponse response =
+        StakeWithdrawalDetailResponse.builder()
+            .txHash(hash)
+            .amount(BigInteger.valueOf(4846486))
+            .stakeTotalAmount(BigInteger.valueOf(102569063))
+            .stakeRewardAvailable(BigInteger.valueOf(4846486))
+            .fee(BigInteger.valueOf(173333))
+            .time(LocalDateTime.now())
+            .build();
+    given(
+            stakeKeyLifeCycleService.getStakeWithdrawalDetail(
+                stakeKey, "91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381"))
+        .willReturn(response);
+    mockMvc
+        .perform(
+            get("/api/v1/stake-lifecycle/{stakeKey}/withdrawals/{hash}", stakeKey, hash)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString(hash)))
+        .andDo(print());
+  }
 
-  //  @Test
-  //  void testGetWalletActivities() throws Exception {
-  //    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
-  //    StakeWalletActivityResponse response = new StakeWalletActivityResponse();
-  //    response.setTxHash("8e85eb8f7de457868ab64c2d8c07257252063d517c4d4e1a01aa2af5783e9bda");
-  //    response.setAmount(BigInteger.ONE);
-  //    response.setStatus(TxStatus.SUCCESS);
-  //
-  //    when(stakeKeyLifeCycleService.getStakeWalletActivities(
-  //            stakeKey, PageRequest.of(0, 1, Sort.by("tx").descending())))
-  //        .thenReturn(new BaseFilterResponse<>(List.of(response), 1));
-  //
-  //    mockMvc
-  //        .perform(
-  //            get("/api/v1/stake-lifecycle/{stakeKey}/wallet-activity", stakeKey)
-  //                .param("page", "0")
-  //                .param("size", "1")
-  //                .param("sort", "tx,DESC")
-  //                .contentType(MediaType.APPLICATION_JSON))
-  //        .andExpect(status().isOk())
-  //        .andExpect(
-  //            jsonPath("$.data[0].txHash")
-  //                .value("8e85eb8f7de457868ab64c2d8c07257252063d517c4d4e1a01aa2af5783e9bda"))
-  //        .andExpect(jsonPath("$.data[0].status").value(TxStatus.SUCCESS.toString()))
-  //        .andExpect(jsonPath("$.data[0].amount").value(1));
-  //
-  //    verify(stakeKeyLifeCycleService)
-  //        .getStakeWalletActivities(stakeKey, PageRequest.of(0, 1, Sort.by("tx").descending()));
-  //  }
+  @Test
+  void testGetWalletActivities() throws Exception {
+    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
+    StakeWalletActivityResponse response = new StakeWalletActivityResponse();
+    response.setTxHash("8e85eb8f7de457868ab64c2d8c07257252063d517c4d4e1a01aa2af5783e9bda");
+    response.setAmount(BigInteger.ONE);
+    response.setStatus(TxStatus.SUCCESS);
+
+    when(stakeKeyLifeCycleService.getStakeWalletActivities(
+            stakeKey, PageRequest.of(0, 1, Sort.by("tx").descending())))
+        .thenReturn(new BaseFilterResponse<>(List.of(response), 1));
+
+    mockMvc
+        .perform(
+            get("/api/v1/stake-lifecycle/{stakeKey}/wallet-activity", stakeKey)
+                .param("page", "0")
+                .param("size", "1")
+                .param("sort", "tx,DESC")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.data[0].txHash")
+                .value("8e85eb8f7de457868ab64c2d8c07257252063d517c4d4e1a01aa2af5783e9bda"))
+        .andExpect(jsonPath("$.data[0].status").value(TxStatus.SUCCESS.toString()))
+        .andExpect(jsonPath("$.data[0].amount").value(1));
+
+    verify(stakeKeyLifeCycleService)
+        .getStakeWalletActivities(stakeKey, PageRequest.of(0, 1, Sort.by("tx").descending()));
+  }
 
   @Test
   void testGetRewardActivities() throws Exception {
