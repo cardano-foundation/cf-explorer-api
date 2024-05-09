@@ -122,28 +122,28 @@ public class ScriptControllerTest {
         .andExpect(jsonPath("$.data[0].scriptHash").value("hash"));
   }
 
-    @Test
-    void testGetNativeScriptDetail() throws Exception {
-      String scriptHash = "a5bb0e5bb275a573d744a021f9b3bff73595468e002755b447e01559";
-      NativeScriptResponse response =
-          NativeScriptResponse.builder()
-              .script("script")
-              .numberOfTokens(1L)
-              .scriptHash(scriptHash)
-              .build();
+  @Test
+  void testGetNativeScriptDetail() throws Exception {
+    String scriptHash = "a5bb0e5bb275a573d744a021f9b3bff73595468e002755b447e01559";
+    NativeScriptResponse response =
+        NativeScriptResponse.builder()
+            .script("script")
+            .numberOfTokens(1L)
+            .scriptHash(scriptHash)
+            .build();
 
-      when(scriptService.getNativeScriptDetail(scriptHash)).thenReturn(response);
+    when(scriptService.getNativeScriptDetail(scriptHash)).thenReturn(response);
 
-      mockMvc
-          .perform(get("/api/v1/scripts/native-scripts/{scriptHash}", scriptHash))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$").exists())
-          .andExpect(jsonPath("$.script").value("script"))
-          .andExpect(jsonPath("$.numberOfTokens").value("1"))
-          .andExpect(jsonPath("$.scriptHash").value(scriptHash));
+    mockMvc
+        .perform(get("/api/v1/scripts/native-scripts/{scriptHash}", scriptHash))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").exists())
+        .andExpect(jsonPath("$.script").value("script"))
+        .andExpect(jsonPath("$.numberOfTokens").value("1"))
+        .andExpect(jsonPath("$.scriptHash").value(scriptHash));
 
-      verify(scriptService).getNativeScriptDetail(scriptHash);
-    }
+    verify(scriptService).getNativeScriptDetail(scriptHash);
+  }
 
   @Test
   void testVerifyContract() throws Exception {
@@ -185,30 +185,30 @@ public class ScriptControllerTest {
         .getNativeScriptTokens(scriptHash, PageRequest.of(0, 1, Sort.by("txCount").descending()));
   }
 
-    @Test
-    void testGetHolder() throws Exception {
-      String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
-      TokenAddressResponse response =
-          TokenAddressResponse.builder()
-              .address("addreses")
-              .name("name")
-              .fingerprint("fingerprint")
-              .build();
+  @Test
+  void testGetHolder() throws Exception {
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    TokenAddressResponse response =
+        TokenAddressResponse.builder()
+            .address("addreses")
+            .name("name")
+            .fingerprint("fingerprint")
+            .build();
 
-      when(scriptService.getNativeScriptHolders(scriptHash, PageRequest.of(0, 1)))
-          .thenReturn(new BaseFilterResponse<>(List.of(response), 1));
+    when(scriptService.getNativeScriptHolders(scriptHash, PageRequest.of(0, 1)))
+        .thenReturn(new BaseFilterResponse<>(List.of(response), 1));
 
-      mockMvc
-          .perform(
-              get("/api/v1/scripts/native-scripts/{scriptHash}/holders", scriptHash)
-                  .param("page", "0")
-                  .param("size", "1"))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.data[0].name").value("name"))
-          .andExpect(jsonPath("$.data[0].fingerprint").value("fingerprint"));
+    mockMvc
+        .perform(
+            get("/api/v1/scripts/native-scripts/{scriptHash}/holders", scriptHash)
+                .param("page", "0")
+                .param("size", "1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data[0].name").value("name"))
+        .andExpect(jsonPath("$.data[0].fingerprint").value("fingerprint"));
 
-      verify(scriptService).getNativeScriptHolders(scriptHash, PageRequest.of(0, 1));
-    }
+    verify(scriptService).getNativeScriptHolders(scriptHash, PageRequest.of(0, 1));
+  }
 
   @Test
   void testGetSmartContracts() throws Exception {
@@ -232,25 +232,25 @@ public class ScriptControllerTest {
         .getSmartContracts(any(SmartContractFilterRequest.class), any(Pageable.class));
   }
 
-    @Test
-    void testGetSmartContractsDetails() throws Exception {
-      String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
-      SmartContractDetailResponse response =
-          SmartContractDetailResponse.builder()
-              .scriptHash(scriptHash)
-              .scriptType(ScriptType.TIMELOCK)
-              .build();
+  @Test
+  void testGetSmartContractsDetails() throws Exception {
+    String scriptHash = "3a9241cd79895e3a8d65261b40077d4437ce71e9d7c8c6c00e3f658e";
+    SmartContractDetailResponse response =
+        SmartContractDetailResponse.builder()
+            .scriptHash(scriptHash)
+            .scriptType(ScriptType.TIMELOCK)
+            .build();
 
-      when(scriptService.getSmartContractDetail(scriptHash)).thenReturn(response);
+    when(scriptService.getSmartContractDetail(scriptHash)).thenReturn(response);
 
-      mockMvc
-          .perform(get("/api/v1/scripts/contracts/{scriptHash}", scriptHash))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.scriptHash").value(scriptHash))
-          .andExpect(jsonPath("$.scriptType").value(String.valueOf(ScriptType.TIMELOCK)));
+    mockMvc
+        .perform(get("/api/v1/scripts/contracts/{scriptHash}", scriptHash))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.scriptHash").value(scriptHash))
+        .andExpect(jsonPath("$.scriptType").value(String.valueOf(ScriptType.TIMELOCK)));
 
-      verify(scriptService).getSmartContractDetail(scriptHash);
-    }
+    verify(scriptService).getSmartContractDetail(scriptHash);
+  }
 
   @Test
   void testGetSmartContractsTxs() throws Exception {

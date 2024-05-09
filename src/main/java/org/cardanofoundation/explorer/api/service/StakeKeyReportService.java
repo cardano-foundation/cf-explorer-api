@@ -3,11 +3,14 @@ package org.cardanofoundation.explorer.api.service;
 import org.springframework.data.domain.Pageable;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ExportType;
+import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
 import org.cardanofoundation.explorer.api.model.request.stake.report.ReportHistoryFilterRequest;
+import org.cardanofoundation.explorer.api.model.request.stake.report.StakeKeyReportRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeDelegationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRegistrationFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
+import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWalletActivityResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeWithdrawalFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportHistoryResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.report.StakeKeyReportResponse;
@@ -22,8 +25,8 @@ public interface StakeKeyReportService {
    * @param username username of current request user
    * @return StakeKeyReportHistoryResponse
    */
-  //  StakeKeyReportHistoryResponse generateStakeKeyReport(
-  //      StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal);
+  StakeKeyReportHistoryResponse generateStakeKeyReport(
+      StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal);
 
   /**
    * Get stake key report history by username and stake key
@@ -130,6 +133,6 @@ public interface StakeKeyReportService {
    * @param pageable pageable
    * @return BaseFilterResponse<StakeWalletActivityResponse>
    */
-  //  BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(
-  //      Long reportId, String username, Pageable pageable);
+  BaseFilterResponse<StakeWalletActivityResponse> getWalletActivitiesByReportId(
+      Long reportId, String username, Pageable pageable);
 }

@@ -82,18 +82,4 @@ public class PolicyControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").exists());
   }
-
-  //  @Test
-  //  void testGetHolders_thenReturn() throws Exception {
-  //    String policyId = "1";
-  //    Pageable pageable = PageRequest.of(0, 10);
-  //    BaseFilterResponse<TokenAddressResponse> response = new BaseFilterResponse<>(List.of(), 0);
-  //
-  //    when(policyService.getHolders(policyId, pageable)).thenReturn(response);
-  //
-  //    mockMvc
-  //        .perform(get("/api/v1/policies/{policyId}/holders", policyId))
-  //        .andExpect(status().isOk())
-  //        .andExpect(jsonPath("$").exists());
-  //  }
 }
