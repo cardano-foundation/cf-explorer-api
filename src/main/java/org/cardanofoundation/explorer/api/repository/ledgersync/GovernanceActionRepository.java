@@ -58,7 +58,7 @@ public interface GovernanceActionRepository
   @Query(
       value =
           "select gap.txHash as txHash, gap.index as index, gap.anchorHash as anchorHash, gap.anchorUrl as anchorUrl,"
-              + " gap.type as type, gap.details as details, gap.epoch as epoch, gap.blockTime as blockTime, gapi.status as status, gapi.votingPower as votingPower"
+              + " gap.type as type, gap.details as details, gap.epoch as epoch, gap.blockTime as blockTime,gap.slot as slot, gapi.status as status, gapi.votingPower as votingPower"
               + " from GovActionProposal gap"
               + " join GovActionProposalInfo gapi on gapi.txHash = gap.txHash and gapi.index = gap.index"
               + " where gap.txHash = :txHash and gap.index = :index")

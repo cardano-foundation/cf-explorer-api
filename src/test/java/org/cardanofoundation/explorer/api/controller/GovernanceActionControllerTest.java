@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
@@ -138,30 +140,31 @@ public class GovernanceActionControllerTest {
         .andExpect(jsonPath("$.anchorHash").value("1111"));
   }
 
-  //  @Test
-  //  void getVotingChartByGovAction() throws Exception {
-  //    String txHash = "61435ac83ffac3353f6845ea17133a6cc93587ae3f28528b2316cc9cbee442d7";
-  //    int index = 0;
-  //
-  //    VotingChartResponse votingChartResponse =
-  //        VotingChartResponse.builder()
-  //            .numberOfNoVotes(0L)
-  //            .numberOfYesVote(1L)
-  //            .numberOfAbstainVotes(2L)
-  //            .txHash(txHash)
-  //            .index(index)
-  //            .build();
-  //
-  //    when(governanceActionService.getVotingChartByGovActionTxHashAndIndex(anyString(), any()))
-  //        .thenReturn(votingChartResponse);
-  //    mockMvc
-  //        .perform(
-  //            get("/api/v1/gov-actions/voting-chart")
-  //                .param("txHash", txHash)
-  //                .param("index", Integer.toString(index))
-  //                .accept(MediaType.APPLICATION_JSON))
-  //        .andExpect(status().isOk())
-  //        .andExpect(content().string(containsString(txHash)))
-  //        .andExpect(jsonPath("$.numberOfYesVote").value(1L));
-  //  }
+    @Test
+    void getVotingChartByGovAction() throws Exception {
+      String txHash = "61435ac83ffac3353f6845ea17133a6cc93587ae3f28528b2316cc9cbee442d7";
+      int index = 0;
+
+      VotingChartResponse votingChartResponse =
+          VotingChartResponse.builder()
+              .txHash(txHash)
+              .activeVoteStake(BigInteger.TEN)
+              .totalYesVoteStake(BigInteger.ONE)
+              .totalNoVoteStake(BigInteger.TWO)
+              .abstainVoteStake(BigInteger.ZERO)
+              .build();
+
+      when(governanceActionService.getVotingChartByGovActionTxHashAndIndex(anyString(), any(), any()))
+          .thenReturn(votingChartResponse);
+      mockMvc
+          .perform(
+              get("/api/v1/gov-actions/voting-chart")
+                  .param("txHash", txHash)
+                  .param("index", Integer.toString(index))
+                  .param("voterType", VoterType.DREP_KEY_HASH.toString())
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(content().string(containsString(txHash)))
+          .andExpect(jsonPath("$.activeVoteStake").value(BigInteger.TEN));
+    }
 }
