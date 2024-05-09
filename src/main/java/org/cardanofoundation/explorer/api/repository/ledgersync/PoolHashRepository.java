@@ -18,6 +18,7 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDet
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolListProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRegistrationProjection;
+import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.PoolRangeProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
 
@@ -191,6 +192,16 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
               + " join Delegation d on d.poolHash.id = ph.id"
               + " where ph.hashRaw =:poolHash")
   Long getSlotNoWhenFirstDelegationByPoolHash(@Param("poolHash") String poolHash);
+
+  @Query(
+      value =
+          """
+    select min(d.slotNo) as createdAt, ph.hashRaw as poolHash, ph.id as poolId from PoolHash ph
+    join Delegation d on d.poolHash.id = ph.id
+    group by ph.hashRaw, ph.id
+    order by ph.id desc
+""")
+  List<PoolOverviewProjection> getSlotCreatedAtGroupByPoolHash();
 
   @Query(value = "select ph.hashRaw from PoolHash ph where ph.view = :view")
   Optional<String> getHashRawByView(@Param("view") String view);
