@@ -40,7 +40,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   @Query(
       value =
-          "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, ttc.txCount as txCount,"
+          "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, coalesce(ttc.txCount,0) as txCount,"
               + " ma.fingerprint as fingerprint, ma.supply as supply, ma.time as time,"
               + " LENGTH(ma.nameView) as nameViewLength, "
               + " am.url as url, am.ticker as ticker, am.decimals as decimals, "
@@ -73,11 +73,15 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   List<MultiAsset> findAllByIdIn(@Param("ids") Collection<Long> ids);
 
-  //  @Query(
-  //      "SELECT b.time FROM Tx tx JOIN Block b ON b.id = tx.blockId "
-  //          + "WHERE tx.id = (SELECT max(adt.txId) FROM AddressToken adt WHERE adt.multiAsset =
-  // :multiAsset)")
-  //  Timestamp getLastActivityTimeOfToken(@Param("multiAsset") MultiAsset multiAsset);
+  @Query(
+      value =
+          """
+          SELECT ttc.txCount
+                FROM MultiAsset ma
+                LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id
+                WHERE ma.fingerprint = :fingerprint
+      """)
+  Optional<Long> getTokenTxCount(@Param("fingerprint") String fingerprint);
 
   @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE CONCAT('%', :query, '%') ")
   List<MultiAsset> findByNameViewLike(@Param("query") String query, Pageable pageable);

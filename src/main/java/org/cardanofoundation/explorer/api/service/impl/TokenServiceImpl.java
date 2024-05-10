@@ -146,6 +146,7 @@ public class TokenServiceImpl implements TokenService {
 
           if (tokenInfo == null) {
             ma.setNumberOfHolders(0L);
+            ma.setTotalVolume(String.valueOf(BigInteger.ZERO));
             ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
           } else {
             if (tokenInfo.getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
@@ -153,6 +154,7 @@ public class TokenServiceImpl implements TokenService {
             } else {
               ma.setVolumeIn24h(String.valueOf(tokenInfo.getVolume24h()));
             }
+            ma.setTotalVolume(String.valueOf(tokenInfo.getTotalVolume()));
             ma.setNumberOfHolders(tokenInfo.getNumberOfHolders());
           }
         });
@@ -189,19 +191,23 @@ public class TokenServiceImpl implements TokenService {
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-
+    Long tokenTxCount =
+        multiAssetRepository.getTokenTxCount(multiAsset.getFingerprint()).orElse(0L);
+    tokenResponse.setTxCount(tokenTxCount.intValue());
     var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
     var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
     if (tokenInfo.isEmpty()) {
       tokenResponse.setNumberOfHolders(0L);
       tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+      tokenResponse.setTotalVolume(String.valueOf(BigInteger.ZERO));
     } else {
       if (tokenInfo.get().getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
         tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
       } else {
         tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
       }
+      tokenResponse.setTotalVolume(String.valueOf(tokenInfo.get().getTotalVolume()));
       tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
     }
 

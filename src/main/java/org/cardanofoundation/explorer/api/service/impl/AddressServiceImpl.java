@@ -153,8 +153,7 @@ public class AddressServiceImpl implements AddressService {
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByAddress(
-                  addr.getAddress(), dates.get(0).minusDays(1).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByAddress(addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
 
@@ -178,8 +177,7 @@ public class AddressServiceImpl implements AddressService {
 
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByAddress(
-                  addr.getAddress(), dates.get(0).minusDays(1).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByAddress(addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
 
