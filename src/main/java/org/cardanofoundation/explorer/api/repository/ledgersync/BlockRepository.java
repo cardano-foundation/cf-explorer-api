@@ -99,7 +99,7 @@ public interface BlockRepository
   @Query(
       value =
           """
-          select b.blockNo as blockNo, ph.view as poolView, po.poolName as poolName, po.tickerName as poolTicker
+          select b.blockNo as blockNo, ph.view as poolView, po.poolName as poolName, po.tickerName as poolTicker, sl.description as description
           from Block b
           left join SlotLeader sl on sl.id = b.slotLeaderId
           left join PoolHash ph on ph.id = sl.poolHashId
