@@ -87,6 +87,7 @@ public class BlockServiceImpl implements BlockService {
     blockResponse.setPoolName(poolMintBlockProjection.getPoolName());
     blockResponse.setPoolView(poolMintBlockProjection.getPoolView());
     blockResponse.setPoolTicker(poolMintBlockProjection.getPoolTicker());
+    blockResponse.setDescription(poolMintBlockProjection.getDescription());
     Integer currentBlockNo =
         blockRepository
             .findCurrentBlock()
