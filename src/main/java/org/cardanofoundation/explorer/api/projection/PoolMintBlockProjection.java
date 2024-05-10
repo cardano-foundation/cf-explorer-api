@@ -8,4 +8,6 @@ public interface PoolMintBlockProjection {
   String getPoolName();
 
   Long getBlockNo();
+
+  String getDescription();
 }
