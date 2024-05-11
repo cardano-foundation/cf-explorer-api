@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.service.GenesisService;
 import org.cardanofoundation.explorer.common.model.ByronGenesis;
+import org.cardanofoundation.explorer.common.model.ConwayGenesis;
 import org.cardanofoundation.explorer.common.model.ShelleyGenesis;
 import org.cardanofoundation.explorer.common.utils.GenesisUtils;
 
@@ -29,6 +30,14 @@ public class GenesisFileServiceImpl implements GenesisService {
       return GenesisUtils.fillContentUrlToByron(source);
     }
     return GenesisUtils.fillContentFileToByron(source);
+  }
+
+  @Override
+  public ConwayGenesis fillContentConway(String source) {
+    if (isURL(source)) {
+      return GenesisUtils.fillContentUrlToConway(source);
+    }
+    return GenesisUtils.fillContentFileToConway(source);
   }
 
   private boolean isURL(String input) {
