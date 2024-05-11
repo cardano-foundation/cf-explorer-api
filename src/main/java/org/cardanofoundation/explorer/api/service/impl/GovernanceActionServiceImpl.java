@@ -55,6 +55,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProc
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
+import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.ProtocolParamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.CommitteeState;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
@@ -86,6 +87,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final CommitteeRegistrationRepository committeeRegistrationRepository;
   private final DelegationRepository delegationRepository;
+  private final ProtocolParamService protocolParamService;
 
   private final EpochMapper epochMapper;
   private final EpochRepository epochRepository;
@@ -515,7 +517,14 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       EpochParam epochParam,
       GovActionDetailsProjection govActionDetailsProjection,
       CommitteeState committeeState) {
-    votingChartResponse.setThreshold(null);
+    List<GovActionType> govActionTypesThatNotAllowedVoteByCC =
+        List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
+    if (govActionTypesThatNotAllowedVoteByCC.contains(govActionDetailsProjection.getType())) {
+      votingChartResponse.setThreshold(null);
+    } else {
+      Double threshold = protocolParamService.getCCThresholdFromConwayGenesis();
+      votingChartResponse.setThreshold(Objects.isNull(threshold) ? null : threshold);
+    }
     List<VotingCCProjection> votingCCProjections =
         committeeRegistrationRepository.findByTxHashAndIndex(
             govActionDetailsProjection.getTxHash(),
