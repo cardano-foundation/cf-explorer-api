@@ -166,6 +166,7 @@ public class TxServiceImpl implements TxService {
   public static final long DAY_IN_TWO_WEEK = DAY_IN_WEEK * 2;
   public static final long DAYS_IN_MONTH = 32;
 
+  private static final String UNIT_LOVELACE = "lovelace";
   private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
   private final TokenTxCountRepository tokenTxCountRepository;
 
@@ -315,23 +316,26 @@ public class TxServiceImpl implements TxService {
             .stream()
             .collect(Collectors.toMap(AssetMetadata::getFingerprint, Function.identity()));
 
-    Map<String, Map<String, AddressTxAmount>> addressTxAmountMap =
+    Map<String, Map<String, List<AddressTxAmount>>> addressTxAmountMap =
         addressTxAmounts.stream()
             .collect(
                 Collectors.groupingBy(
-                    AddressTxAmount::getTxHash,
-                    Collectors.toMap(AddressTxAmount::getUnit, Function.identity())));
+                    AddressTxAmount::getTxHash, Collectors.groupingBy(AddressTxAmount::getUnit)));
 
     txList.forEach(
         tx -> {
           TxFilterResponse txFilterResponse = new TxFilterResponse();
           String txHash = tx.getHash();
           Block block = blockMap.get(tx.getBlockId());
-          AddressTxAmount addressTxBalance = addressTxAmountMap.get(txHash).get("lovelace");
+          BigInteger balance =
+              addressTxAmountMap.get(txHash).get(UNIT_LOVELACE).stream()
+                  .reduce(BigInteger.ZERO, (a, b) -> a.add(b.getQuantity()), BigInteger::add);
+
           List<AddressTxAmount> tokenQuantityChange =
-              addressTxAmountMap.get(txHash).values().parallelStream()
-                  .filter(addressTxAmount -> !addressTxAmount.getUnit().equals("lovelace"))
-                  .toList();
+              addressTxAmountMap.get(txHash).entrySet().stream()
+                  .filter(entry -> !entry.getKey().equals(UNIT_LOVELACE))
+                  .flatMap(entry -> entry.getValue().stream())
+                  .collect(Collectors.toList());
 
           txFilterResponse.setHash(txHash);
           txFilterResponse.setTime(block.getTime().toLocalDateTime());
@@ -340,7 +344,7 @@ public class TxServiceImpl implements TxService {
           txFilterResponse.setSlot(block.getSlotNo().intValue());
           txFilterResponse.setEpochSlotNo(block.getEpochSlotNo());
           txFilterResponse.setFee(tx.getFee());
-          txFilterResponse.setBalance(addressTxBalance.getQuantity());
+          txFilterResponse.setBalance(balance);
           txFilterResponse.setTotalOutput(tx.getOutSum());
           txFilterResponse.setTokens(
               getTokenQuantityChangeResponse(
