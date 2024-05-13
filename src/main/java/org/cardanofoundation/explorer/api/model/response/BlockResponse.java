@@ -39,4 +39,6 @@ public class BlockResponse {
   private String poolTicker;
 
   private String poolName;
+
+  private String description;
 }
