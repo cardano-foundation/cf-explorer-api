@@ -112,7 +112,6 @@ public class AddressController {
               sort = {Tx_.ID},
               direction = Sort.Direction.DESC)
           @PaginationValid
-          @PageZeroValid
           @Valid
           Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByAddress(address, pagination.toPageable()));
