@@ -17,6 +17,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
@@ -24,6 +25,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -92,22 +94,29 @@ public class AddressController {
     return ResponseEntity.ok(addressService.getAddressAnalytics(address, type));
   }
 
-  //  @GetMapping("/{address}/txs")
-  //  @LogMessage
-  //  @Operation(
-  //      summary = "Get list transaction by address",
-  //      tags = {"address"})
-  //  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-  //      @PathVariable
-  //          @Parameter(
-  //              description =
-  //                  "The human readable encoding of the output address."
-  //                      + " Will be Base58 for Byron era addresses and Bech32 for Shelley era.")
-  //          String address,
-  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-  //    return ResponseEntity.ok(txService.getTransactionsByAddress(address,
-  // pagination.toPageable()));
-  //  }
+  @GetMapping("/{address}/txs")
+  @LogMessage
+  @Operation(
+      summary = "Get list transaction by address",
+      tags = {"address"})
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
+      @PathVariable
+          @Parameter(
+              description =
+                  "The human readable encoding of the output address."
+                      + " Will be Base58 for Byron era addresses and Bech32 for Shelley era.")
+          String address,
+      @ParameterObject
+          @PaginationDefault(
+              size = 20,
+              sort = {Tx_.ID},
+              direction = Sort.Direction.DESC)
+          @PaginationValid
+          @PageZeroValid
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(txService.getTransactionsByAddress(address, pagination.toPageable()));
+  }
 
   @GetMapping("/{address}/tokens")
   @LogMessage
