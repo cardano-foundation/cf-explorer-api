@@ -127,6 +127,7 @@ To ensure the stability and reliability of this project, unit and mutation tests
 ### Configuration of the genesis file path:
   - `SHELLEY_GENESIS_FILE`: Shelley file path
   - `BYRON_GENESIS_FILE`: Byron file path
+  - `CONWAY_GENESIS_FILE`: Conway file path
 
 ## 🍀 Local Environments Tests
 
