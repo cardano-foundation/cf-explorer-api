@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
 import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
@@ -42,19 +41,19 @@ import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjection;
 import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
-import org.cardanofoundation.explorer.api.projection.VotingCCProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
+import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.ProtocolParamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.CommitteeState;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
@@ -86,9 +85,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final CommitteeRegistrationRepository committeeRegistrationRepository;
   private final DelegationRepository delegationRepository;
-
-  private final EpochMapper epochMapper;
-  private final EpochRepository epochRepository;
+  private final ProtocolParamService protocolParamService;
+  private final CommitteInfoRepository committeInfoRepository;
 
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
@@ -515,26 +513,34 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       EpochParam epochParam,
       GovActionDetailsProjection govActionDetailsProjection,
       CommitteeState committeeState) {
-    votingChartResponse.setThreshold(null);
-    List<VotingCCProjection> votingCCProjections =
-        committeeRegistrationRepository.findByTxHashAndIndex(
+    List<GovActionType> govActionTypesThatNotAllowedVoteByCC =
+        List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
+    if (govActionTypesThatNotAllowedVoteByCC.contains(govActionDetailsProjection.getType())) {
+      votingChartResponse.setThreshold(null);
+    } else {
+      Double threshold = protocolParamService.getCCThresholdFromConwayGenesis();
+      votingChartResponse.setThreshold(Objects.isNull(threshold) ? null : threshold);
+    }
+    Long count =
+        committeInfoRepository.countByCreatedAtLessThan(govActionDetailsProjection.getBlockTime());
+    List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
+        latestVotingProcedureRepository.getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
             govActionDetailsProjection.getTxHash(),
             govActionDetailsProjection.getIndex(),
             List.of(
                 VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH,
-                VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH));
-    List<VotingCCProjection> votingCCProjectionsFiltered =
-        votingCCProjections.stream()
-            .filter(votingCCProjection -> Objects.nonNull(votingCCProjection.getVote()))
-            .toList();
+                VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH),
+            govActionDetailsProjection.getBlockTime());
+
     Map<Vote, Long> voteCount =
-        votingCCProjectionsFiltered.stream()
-            .collect(Collectors.groupingBy(VotingCCProjection::getVote, Collectors.counting()));
-    Long numberCCCanVote = (long) votingCCProjections.size();
+        latestVotingProcedureProjections.stream()
+            .collect(
+                Collectors.groupingBy(
+                    LatestVotingProcedureProjection::getVote, Collectors.counting()));
     votingChartResponse.setYesCcMembers(voteCount.getOrDefault(Vote.YES, 0L));
     votingChartResponse.setNoCcMembers(voteCount.getOrDefault(Vote.NO, 0L));
     votingChartResponse.setAbstainCcMembers(voteCount.getOrDefault(Vote.ABSTAIN, 0L));
-    votingChartResponse.setCcMembers(numberCCCanVote);
+    votingChartResponse.setCcMembers(count);
   }
 
   private int getGovActionLifetime(BigInteger govActionLifetime) {
