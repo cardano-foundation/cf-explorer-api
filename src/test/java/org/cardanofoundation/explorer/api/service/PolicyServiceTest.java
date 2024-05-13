@@ -39,7 +39,6 @@ public class PolicyServiceTest {
   @Mock private MultiAssetRepository multiAssetRepository;
   @Mock private AssetMetadataRepository assetMetadataRepository;
   @Mock private AddressRepository addressRepository;
-  //  @Mock private AddressTokenBalanceRepository addressTokenBalanceRepository;
   @Mock private AssetMetadataMapper assetMetadataMapper;
   @Mock private TokenMapper tokenMapper;
   @Mock private ScriptRepository scriptRepository;
@@ -129,41 +128,4 @@ public class PolicyServiceTest {
     assertEquals(response.getData().get(0).getMetadata().getLogo(), "logo");
     assertEquals(response.getData().get(0).getMetadata().getDescription(), "description");
   }
-
-  //  @Test
-  //  void testGetHolders_thenReturn() {
-  //    String policyId = "1";
-  //    Pageable pageable = PageRequest.of(0, 10);
-  //    AddressTokenProjection projection = Mockito.mock(AddressTokenProjection.class);
-  //    when(projection.getAddressId()).thenReturn(1L);
-  //    when(projection.getPolicy()).thenReturn("policy");
-  //    when(projection.getTokenName()).thenReturn("token");
-  //
-  //    when(addressTokenBalanceRepository.findAddressAndBalanceByMultiAssetIn(policyId, pageable))
-  //        .thenReturn(new PageImpl<>(List.of(projection)));
-  //    when(addressRepository.findAddressByIdIn(Set.of(1L)))
-  //        .thenReturn(List.of(Address.builder().id(1L).build()));
-  //    when(tokenMapper.fromAddressTokenProjection(any()))
-  //        .thenReturn(
-  //            TokenAddressResponse.builder().addressId(1L).policy("policy").name("name").build());
-  //    when(assetMetadataRepository.findBySubjectIn(any()))
-  //        .thenReturn(List.of(AssetMetadata.builder().subject("subject").build()));
-  //    when(assetMetadataMapper.fromAssetMetadata(any()))
-  //        .thenReturn(
-  //            TokenMetadataResponse.builder()
-  //                .url("url")
-  //                .logo("logo")
-  //                .description("description")
-  //                .build());
-  //
-  //    var response = policyService.getHolders(policyId, pageable);
-  //    assertEquals(response.getTotalItems(), 1);
-  //    assertEquals(response.getTotalPages(), 1);
-  //    assertEquals(response.getCurrentPage(), 0);
-  //    assertEquals(response.getData().get(0).getName(), "name");
-  //    assertEquals(response.getData().get(0).getPolicy(), "policy");
-  //    assertEquals(response.getData().get(0).getMetadata().getUrl(), "url");
-  //    assertEquals(response.getData().get(0).getMetadata().getLogo(), "logo");
-  //    assertEquals(response.getData().get(0).getMetadata().getDescription(), "description");
-  //  }
 }

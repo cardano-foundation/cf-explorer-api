@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
-import org.cardanofoundation.explorer.api.mapper.AddressMapper;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
@@ -36,7 +34,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepositor
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
@@ -55,8 +52,6 @@ class AddressServiceTest {
   @Mock AddressRepository addressRepository;
   @Mock ScriptRepository scriptRepository;
 
-  @Mock AddressMapper addressMapper;
-
   @Mock LatestAddressBalanceRepository latestAddressBalanceRepository;
 
   @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
@@ -68,10 +63,6 @@ class AddressServiceTest {
   @Mock AddressTxAmountRepository addressTxAmountRepository;
 
   @Mock TokenMapper tokenMapper;
-
-  @Mock AssetMetadataRepository assetMetadataRepository;
-
-  @Mock AssetMetadataMapper assetMetadataMapper;
 
   @InjectMocks AddressServiceImpl addressService;
 
@@ -237,22 +228,6 @@ class AddressServiceTest {
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
   }
-
-  //  @Test
-  //  void getContracts_shouldReturn() {
-  //    String addr =
-  //
-  // "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-  //    Pageable pageable = PageRequest.of(0, 10);
-  //    Page<Address> contractPage =
-  //        new PageImpl<>(List.of(Address.builder().id(1L).address(addr).build()));
-  //    when(addressRepository.findAllByAddressHasScriptIsTrue(pageable)).thenReturn(contractPage);
-  //    when(addressMapper.fromAddressToContractFilter(any()))
-  //        .thenReturn(ContractFilterResponse.builder().address(addr).build());
-  //    var response = addressService.getContracts(pageable);
-  //    var expect = List.of(ContractFilterResponse.builder().address(addr).build());
-  //    Assertions.assertEquals(expect.size(), response.getData().size());
-  //  }
 
   @Test
   void getTopAddress_shouldReturn() {

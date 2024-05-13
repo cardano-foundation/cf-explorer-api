@@ -14,6 +14,7 @@ import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.common.entity.compositeKey.AddressTxAmountId;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 
 public interface AddressTxAmountRepository
     extends JpaRepository<AddressTxAmount, AddressTxAmountId> {
@@ -137,4 +138,52 @@ public interface AddressTxAmountRepository
       @Param("fromDate") Long fromDate,
       @Param("toDate") Long toDate,
       Pageable pageable);
+
+  @Query(
+      value =
+          "SELECT tx from Tx tx WHERE "
+              + "tx.hash IN (SELECT DISTINCT(atm.txHash) FROM AddressTxAmount atm WHERE atm.address = :address)")
+  List<Tx> findAllTxByAddress(@Param("address") String address, Pageable pageable);
+
+  @Query(
+      value =
+          "SELECT tx from Tx tx WHERE "
+              + "tx.hash IN (SELECT DISTINCT(atm.txHash) FROM AddressTxAmount atm WHERE atm.stakeAddress = :stakeAddress)")
+  List<Tx> findAllTxByStakeAddress(@Param("stakeAddress") String stakeAddress, Pageable pageable);
+
+  @Query(
+      value =
+          "SELECT tx from Tx tx WHERE "
+              + "tx.hash IN (SELECT DISTINCT(atm.txHash) FROM AddressTxAmount atm WHERE atm.unit = :unit)")
+  List<Tx> findAllTxByUnit(@Param("unit") String unit, Pageable pageable);
+
+  @Query(
+      value =
+          """
+              SELECT atm FROM AddressTxAmount atm
+              WHERE atm.address = :address
+              AND atm.txHash IN :txHashes
+          """)
+  List<AddressTxAmount> findAllByAddressAndTxHashIn(
+      @Param("address") String address, @Param("txHashes") List<String> txHashes);
+
+  @Query(
+      value =
+          """
+              SELECT atm FROM AddressTxAmount atm
+              WHERE atm.stakeAddress = :stakeAddress
+              AND atm.txHash IN :txHashes
+          """)
+  List<AddressTxAmount> findAllByStakeAddressAndTxHashIn(
+      @Param("stakeAddress") String stakeAddress, @Param("txHashes") List<String> txHashes);
+
+  @Query(
+      value =
+          """
+              SELECT atm FROM AddressTxAmount atm
+              WHERE atm.unit = :unit
+              AND atm.txHash IN :txHashes
+          """)
+  List<AddressTxAmount> findAllByUnitAndTxHashIn(
+      @Param("unit") String unit, @Param("txHashes") List<String> txHashes);
 }
