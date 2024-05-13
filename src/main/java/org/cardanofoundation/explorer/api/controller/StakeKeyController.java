@@ -25,6 +25,7 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.controller.validation.StakeKeyLengthValid;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
+import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
@@ -41,6 +42,7 @@ import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -113,19 +115,26 @@ public class StakeKeyController {
     return ResponseEntity.ok(stakeService.getStake(stakeKey));
   }
 
-  //  @GetMapping("/{stakeKey}/txs")
-  //  @LogMessage
-  //  @Operation(summary = "Get transactions of stake key", tags = "stake-key")
-  //  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
-  //      @PathVariable
-  //          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
-  //          @StakeKeyLengthValid
-  //          @Parameter(description = "The Bech32 encoded version of the stake address.")
-  //          String stakeKey,s
-  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-  //    return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey,
-  // pagination.toPageable()));
-  //  }
+  @GetMapping("/{stakeKey}/txs")
+  @LogMessage
+  @Operation(summary = "Get transactions of stake key", tags = "stake-key")
+  public ResponseEntity<BaseFilterResponse<TxFilterResponse>> getTransactions(
+      @PathVariable
+          @PrefixedValid(CommonConstant.PREFIXED_STAKE_KEY)
+          @StakeKeyLengthValid
+          @Parameter(description = "The Bech32 encoded version of the stake address.")
+          String stakeKey,
+      @ParameterObject
+          @PaginationDefault(
+              size = 20,
+              sort = {Tx_.ID},
+              direction = Sort.Direction.DESC)
+          @PaginationValid
+          @PageZeroValid
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pagination.toPageable()));
+  }
 
   @GetMapping("/{stakeKey}/delegation-history")
   @LogMessage

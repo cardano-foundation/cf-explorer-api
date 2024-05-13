@@ -14,4 +14,6 @@ public interface AssetMetadataRepository extends JpaRepository<AssetMetadata, Lo
   Optional<AssetMetadata> findFirstBySubject(@Param("subject") String subject);
 
   List<AssetMetadata> findBySubjectIn(@Param("subjects") Set<String> subjects);
+
+  List<AssetMetadata> findByFingerprintIn(@Param("fingerprints") Set<String> fingerprints);
 }
