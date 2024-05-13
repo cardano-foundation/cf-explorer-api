@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import org.cardanofoundation.explorer.api.projection.CountVoteOnGovActionProjection;
 import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjection;
 import org.cardanofoundation.explorer.common.entity.compositeKey.LatestVotingProcedureId;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
@@ -19,14 +18,17 @@ public interface LatestVotingProcedureRepository
 
   @Query(
       value =
-          "select lvp.voterHash as voterHash, lvp.vote as vote, lvp.voterType as voterType"
-              + " from LatestVotingProcedure lvp"
-              + " where lvp.govActionTxHash = :govActionTxHash and lvp.govActionIndex = :govActionIndex"
-              + " and lvp.voterType = :voterType")
-  List<CountVoteOnGovActionProjection> getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
+          """
+              SELECT lvp.voterHash as voterHash, lvp.vote as vote, lvp.voterType as voterType
+              FROM LatestVotingProcedure lvp
+              JOIN CommitteeInfo ci ON lvp.voterHash = ci.hotKey and ci.createdAt <= :blockTime
+              WHERE lvp.govActionTxHash = :govActionTxHash and lvp.govActionIndex = :govActionIndex
+              and lvp.voterType in :voterType""")
+  List<LatestVotingProcedureProjection> getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
       @Param("govActionTxHash") String govActionTxHash,
       @Param("govActionIndex") Integer govActionIndex,
-      @Param("voterType") VoterType voterType);
+      @Param("voterType") List<VoterType> voterType,
+      @Param("blockTime") Long blockTime);
 
   @Query(
       value =
