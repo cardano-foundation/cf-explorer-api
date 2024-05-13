@@ -78,6 +78,9 @@ public abstract class TokenMapper {
   }
 
   AddressType getAddressType(String address) {
+    if(StringUtils.isEmpty(address)) {
+      return null;
+    }
     return address.startsWith("stake") ? AddressType.STAKE_ADDRESS : AddressType.PAYMENT_ADDRESS;
   }
 
