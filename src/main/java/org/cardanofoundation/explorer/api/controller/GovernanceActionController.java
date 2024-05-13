@@ -26,6 +26,7 @@ import org.cardanofoundation.explorer.api.model.response.governanceAction.Govern
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
+import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -82,8 +83,9 @@ public class GovernanceActionController {
       tags = {"gov-actions"})
   public ResponseEntity<VotingChartResponse> getVotingChartByGovAction(
       @RequestParam @Parameter(description = "The tx hash of governance action") String txHash,
-      @RequestParam @Parameter(description = "The index of governance action") Integer index) {
+      @RequestParam @Parameter(description = "The index of governance action") Integer index,
+      @RequestParam @Parameter(description = "The type of voter") VoterType voterType) {
     return ResponseEntity.ok(
-        governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index));
+        governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index, voterType));
   }
 }

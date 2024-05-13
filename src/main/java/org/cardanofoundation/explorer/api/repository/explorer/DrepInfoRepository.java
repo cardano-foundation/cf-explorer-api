@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
+import org.cardanofoundation.explorer.api.projection.DRepInfoProjection;
 import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
@@ -28,6 +29,15 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
 
   @Query("SELECT SUM(dri.delegators) from DRepInfo dri")
   Long getDelegateCount();
+
+  @Query(
+      value =
+          """
+    SELECT dri.drepHash as drepHash, dri.activeVoteStake as activeVoteStake
+    FROM DRepInfo dri
+    WHERE dri.createdAt <= :blockTime and dri.status != 'RETIRED'
+    """)
+  List<DRepInfoProjection> findDRepByCreatedAt(@Param("blockTime") Long blockTime);
 
   @Query(
       value =
