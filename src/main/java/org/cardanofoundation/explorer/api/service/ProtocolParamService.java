@@ -42,4 +42,6 @@ public interface ProtocolParamService {
    * @return
    */
   Map<String, String> getGenesisDelegateKeysMap();
+
+  Double getCCThresholdFromConwayGenesis();
 }
