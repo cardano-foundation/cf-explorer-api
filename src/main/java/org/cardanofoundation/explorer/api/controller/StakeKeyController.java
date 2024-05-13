@@ -130,7 +130,6 @@ public class StakeKeyController {
               sort = {Tx_.ID},
               direction = Sort.Direction.DESC)
           @PaginationValid
-          @PageZeroValid
           @Valid
           Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pagination.toPageable()));
