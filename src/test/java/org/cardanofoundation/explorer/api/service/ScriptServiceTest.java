@@ -23,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,7 +49,6 @@ import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRe
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
@@ -83,12 +81,10 @@ class ScriptServiceTest {
   @Mock MultiAssetRepository multiAssetRepository;
   @Mock NativeScriptInfoRepository nativeScriptInfoRepository;
   @Mock BlockRepository blockRepository;
-  @Mock AssetMetadataRepository assetMetadataRepository;
   @Mock SmartContractInfoRepository smartContractInfoRepository;
   @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
   @Mock VerifiedScriptRepository verifiedScriptRepository;
   @Mock TxService txService;
-  @Mock NativeScript nativeScript;
   @Mock MaTxMintRepository maTxMintRepository;
   @InjectMocks ScriptServiceImpl scriptService;
 

@@ -128,4 +128,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       @Param("scriptHashes") List<String> scriptHashes);
 
   Slice<MultiAsset> getSliceByPolicy(@Param("policy") String policy, Pageable pageable);
+
+  @Query("SELECT ma FROM MultiAsset ma WHERE ma.unit IN :units")
+  List<MultiAsset> findAllByUnitIn(@Param("units") Collection<String> units);
 }

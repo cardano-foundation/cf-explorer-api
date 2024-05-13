@@ -18,6 +18,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResp
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 
 @Mapper(
@@ -50,16 +51,16 @@ public abstract class TokenMapper {
   public abstract TokenAddressResponse fromAddressTokenProjection(
       AddressTokenProjection projection);
 
-  //  @Mapping(
-  //      target = "displayName",
-  //      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
-  //  @Mapping(target = "policy", source = "multiAsset.policy")
-  //  @Mapping(target = "fingerprint", source = "multiAsset.fingerprint")
-  //  @Mapping(target = "quantity", source = "addressToken.balance")
-  //  @Mapping(target = "address", ignore = true)
-  //  @Mapping(target = "addressId", ignore = true)
-  //  public abstract TokenAddressResponse fromMultiAssetAndAddressToken(
-  //      MultiAsset multiAsset, AddressToken addressToken);
+  @Mapping(
+      target = "displayName",
+      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
+  @Mapping(target = "policy", source = "multiAsset.policy")
+  @Mapping(target = "fingerprint", source = "multiAsset.fingerprint")
+  @Mapping(target = "quantity", source = "addressTxAmount.quantity")
+  @Mapping(target = "address", ignore = true)
+  @Mapping(target = "addressId", ignore = true)
+  public abstract TokenAddressResponse fromMultiAssetAndAddressToken(
+      MultiAsset multiAsset, AddressTxAmount addressTxAmount);
 
   LocalDateTime fromTimestamp(Timestamp timestamp) {
     return timestamp == null ? null : timestamp.toLocalDateTime();
