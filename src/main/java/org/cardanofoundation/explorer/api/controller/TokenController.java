@@ -25,9 +25,9 @@ import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.BaseEntity_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Tx_;
 import org.cardanofoundation.explorer.common.validation.length.LengthValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -115,7 +115,7 @@ public class TokenController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {Tx_.ID},
+              sort = {AddressTxAmount_.BLOCK_TIME},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {
