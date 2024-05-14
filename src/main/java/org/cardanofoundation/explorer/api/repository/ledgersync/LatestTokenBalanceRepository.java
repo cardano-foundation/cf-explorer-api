@@ -69,16 +69,6 @@ public interface LatestTokenBalanceRepository
   @Query(
       value =
           """
-    SELECT max(ltb.block_time)
-    FROM latest_token_balance ltb
-    WHERE ltb.unit = :unit
-    """,
-      nativeQuery = true)
-  Long getLastActivityTimeOfToken(@Param("unit") String unit);
-
-  @Query(
-      value =
-          """
     select (case when ltb.stakeAddress is null then ltb.address else ltb.stakeAddress end) as address, ltb.quantity as quantity
     from LatestTokenBalance ltb
     where ltb.unit = :unit

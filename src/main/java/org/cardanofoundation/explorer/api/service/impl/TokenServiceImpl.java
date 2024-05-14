@@ -219,7 +219,7 @@ public class TokenServiceImpl implements TokenService {
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
 
     Long latestEpochTime =
-        latestTokenBalanceRepository.getLastActivityTimeOfToken(multiAsset.getUnit());
+        addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit());
     tokenResponse.setTokenLastActivity(
         Timestamp.valueOf(
             LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC)));

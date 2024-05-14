@@ -193,10 +193,8 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-              SELECT atm FROM AddressTxAmount atm
+              SELECT max(atm.blockTime) FROM AddressTxAmount atm
               WHERE atm.unit = :unit
-              AND atm.txHash IN :txHashes
           """)
-  List<AddressTxAmount> findAllByUnitAndTxHashIn(
-      @Param("unit") String unit, @Param("txHashes") List<String> txHashes);
+  Long getLastActivityTimeOfToken(@Param("unit") String unit);
 }
