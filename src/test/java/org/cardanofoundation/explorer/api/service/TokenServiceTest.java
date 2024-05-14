@@ -243,13 +243,10 @@ class TokenServiceTest {
     final Timestamp latestTimestamp =
         Timestamp.valueOf(
             LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
-    when(latestTokenBalanceRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
+    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
         .thenReturn(latestEpochTime);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any())).thenReturn(null);
-
-    when(latestTokenBalanceRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
-        .thenReturn(latestEpochTime);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any())).thenReturn(null);
 
@@ -315,7 +312,7 @@ class TokenServiceTest {
     final Timestamp latestTimestamp =
         Timestamp.valueOf(
             LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
-    when(latestTokenBalanceRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
+    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
         .thenReturn(latestEpochTime);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any()))
@@ -385,7 +382,7 @@ class TokenServiceTest {
     final Timestamp latestTimestamp =
         Timestamp.valueOf(
             LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
-    when(latestTokenBalanceRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
+    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
         .thenReturn(latestEpochTime);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any()))
