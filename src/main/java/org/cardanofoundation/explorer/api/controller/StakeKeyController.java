@@ -39,10 +39,10 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Tx_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -127,7 +127,7 @@ public class StakeKeyController {
       @ParameterObject
           @PaginationDefault(
               size = 20,
-              sort = {Tx_.ID},
+              sort = {AddressTxAmount_.BLOCK_TIME},
               direction = Sort.Direction.DESC)
           @PaginationValid
           @Valid
