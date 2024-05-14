@@ -57,7 +57,7 @@ public interface LatestTokenBalanceRepository
   @Query(
       value =
           """
-      SELECT ltb.address as address, ltb.quantity as quantity, ma.nameView as tokenName, ma.fingerprint as fingerprint
+      SELECT ltb.address as address, ltb.quantity as quantity, ma.name as tokenName, ma.fingerprint as fingerprint
       FROM LatestTokenBalance ltb
                inner JOIN MultiAsset ma ON ma.unit = ltb.unit
       WHERE ma.policy = :policy
