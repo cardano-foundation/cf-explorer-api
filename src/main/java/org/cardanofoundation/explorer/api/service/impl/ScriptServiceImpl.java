@@ -104,7 +104,7 @@ public class ScriptServiceImpl implements ScriptService {
     firstShellyBlock =
         blockRepository
             .findFirstShellyBlock()
-            .orElseThrow(() -> new BusinessException(BusinessCode.BLOCK_NOT_FOUND));
+            .orElse(null);
     firstBlock =
         blockRepository
             .findFirstBlock()
