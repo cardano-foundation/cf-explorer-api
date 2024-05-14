@@ -24,8 +24,8 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Tx_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -109,7 +109,7 @@ public class AddressController {
       @ParameterObject
           @PaginationDefault(
               size = 20,
-              sort = {Tx_.ID},
+              sort = {AddressTxAmount_.BLOCK_TIME},
               direction = Sort.Direction.DESC)
           @PaginationValid
           @Valid

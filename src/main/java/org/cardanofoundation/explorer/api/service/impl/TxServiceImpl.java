@@ -279,14 +279,15 @@ public class TxServiceImpl implements TxService {
     AddressTxCount addressTxCount =
         addressTxCountRepository.findById(address).orElse(new AddressTxCount(address, 0L));
 
-    List<Tx> txs = addressTxAmountRepository.findAllTxByAddress(address, pageable);
-    List<String> txHashes = txs.stream().map(Tx::getHash).toList();
+    List<TxProjection> txProjections =
+        addressTxAmountRepository.findAllTxByAddress(address, pageable);
+    List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
     List<AddressTxAmount> addressTxAmounts =
         addressTxAmountRepository.findAllByAddressAndTxHashIn(address, txHashes);
 
     Page<TxFilterResponse> txFilterResponsePage =
         new PageImpl<>(
-            mapTxDataFromAddressTxAmount(txs, addressTxAmounts),
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
             addressTxCount.getTxCount());
 
@@ -294,15 +295,22 @@ public class TxServiceImpl implements TxService {
   }
 
   private List<TxFilterResponse> mapTxDataFromAddressTxAmount(
-      List<Tx> txList, List<AddressTxAmount> addressTxAmounts) {
+      List<TxProjection> txProjections, List<AddressTxAmount> addressTxAmounts) {
+
     List<TxFilterResponse> txFilterResponses = new ArrayList<>();
+    List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
+
+    Map<String, Tx> txMap =
+        txRepository.findAllByHashIn(txHashes).stream()
+            .collect(Collectors.toMap(Tx::getHash, Function.identity()));
+
     List<MultiAsset> multiAssets =
         multiAssetRepository.findAllByUnitIn(
             addressTxAmounts.stream().map(AddressTxAmount::getUnit).collect(Collectors.toSet()));
 
     Map<Long, Block> blockMap =
         blockRepository
-            .findAllByIdIn(txList.stream().map(Tx::getBlockId).collect(Collectors.toList()))
+            .findAllByIdIn(txMap.values().stream().map(Tx::getBlockId).collect(Collectors.toList()))
             .stream()
             .collect(Collectors.toMap(Block::getId, Function.identity()));
 
@@ -322,9 +330,10 @@ public class TxServiceImpl implements TxService {
                 Collectors.groupingBy(
                     AddressTxAmount::getTxHash, Collectors.groupingBy(AddressTxAmount::getUnit)));
 
-    txList.forEach(
-        tx -> {
+    txProjections.forEach(
+        txProjection -> {
           TxFilterResponse txFilterResponse = new TxFilterResponse();
+          Tx tx = txMap.get(txProjection.getTxHash());
           String txHash = tx.getHash();
           Block block = blockMap.get(tx.getBlockId());
           BigInteger balance =
@@ -396,7 +405,11 @@ public class TxServiceImpl implements TxService {
             .findById(multiAsset.getId())
             .orElse(new TokenTxCount(multiAsset.getId(), 0L));
 
-    List<Tx> txs = addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
+    List<TxProjection> txsProjection =
+        addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
+    List<Tx> txs =
+        txRepository.findAllByHashIn(
+            txsProjection.stream().map(TxProjection::getTxHash).collect(Collectors.toList()));
     Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount.getTxCount());
 
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
@@ -415,14 +428,15 @@ public class TxServiceImpl implements TxService {
             .findById(stakeKey)
             .orElse(new StakeAddressTxCount(stakeKey, 0L));
 
-    List<Tx> txs = addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
-    List<String> txHashes = txs.stream().map(Tx::getHash).toList();
+    List<TxProjection> txProjections =
+        addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
+    List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
     List<AddressTxAmount> addressTxAmounts =
         addressTxAmountRepository.findAllByStakeAddressAndTxHashIn(stakeKey, txHashes);
 
     Page<TxFilterResponse> txFilterResponsePage =
         new PageImpl<>(
-            mapTxDataFromAddressTxAmount(txs, addressTxAmounts),
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
             addressTxCount.getTxCount());
 
