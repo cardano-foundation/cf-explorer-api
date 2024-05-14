@@ -31,6 +31,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterRespon
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestStakeAddressBalanceRepository;
@@ -76,6 +77,7 @@ public class StakeKeyServiceTest {
   @Mock private TxRepository txRepository;
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
   @Mock private LatestStakeAddressBalanceRepository latestStakeAddressBalanceRepository;
+  @Mock private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   @Test
   void testGetDataForStakeKeyRegistration_thenReturn() {
