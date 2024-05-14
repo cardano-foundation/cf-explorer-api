@@ -1198,6 +1198,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   @Override
   public Double getCCThresholdFromConwayGenesis() {
+    log.info("Read protocol data from url {}", conwayUrl);
     ConwayGenesis conwayGenesis = genesisService.fillContentConway(conwayUrl);
     if (conwayGenesis != null && conwayGenesis.getCommittee() != null) {
       try {
@@ -1220,5 +1221,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     setLatestParamHistoryMethods();
     loadFixedProtocols();
     deleteProtocolHistoryCache();
+    getCCThresholdFromConwayGenesis();
   }
 }
