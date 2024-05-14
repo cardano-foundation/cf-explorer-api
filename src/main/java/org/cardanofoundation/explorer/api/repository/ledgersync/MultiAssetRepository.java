@@ -27,7 +27,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
               + " am.logo as logo, am.description as description, am.subject as subject"
               + " FROM MultiAsset ma"
               + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint"
-              + " LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id "
+              + " INNER JOIN TokenTxCount ttc on ttc.ident = ma.id "
               + " WHERE ma.fingerprint = :query OR LOWER(ma.nameView) LIKE CONCAT('%', :query, '%')")
   List<TokenProjection> findAll(@Param("query") String query, Pageable pageable);
 
@@ -47,7 +47,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
               + " am.logo as logo, am.description as description, am.subject as subject"
               + " FROM MultiAsset ma"
               + " LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint"
-              + " LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id")
+              + " INNER JOIN TokenTxCount ttc on ttc.ident = ma.id")
   List<TokenProjection> findMultiAssets(Pageable pageable);
 
   Optional<MultiAsset> findByFingerprint(@Param("fingerprint") String fingerprint);
@@ -65,7 +65,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
                 am.decimals as decimals, am.logo as logo, am.description as description
                 FROM MultiAsset ma
                 LEFT JOIN AssetMetadata am ON am.fingerprint = ma.fingerprint
-                LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id
+                INNER JOIN TokenTxCount ttc on ttc.ident = ma.id
                 WHERE ma.policy = :scriptHash
       """)
   List<TokenProjection> findTokenInfoByScriptHash(
