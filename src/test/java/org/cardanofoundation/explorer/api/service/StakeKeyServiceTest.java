@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -31,6 +32,7 @@ import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterRespon
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestStakeAddressBalanceRepository;
@@ -76,6 +78,7 @@ public class StakeKeyServiceTest {
   @Mock private TxRepository txRepository;
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
   @Mock private LatestStakeAddressBalanceRepository latestStakeAddressBalanceRepository;
+  @Mock private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   @Test
   void testGetDataForStakeKeyRegistration_thenReturn() {
@@ -494,7 +497,18 @@ public class StakeKeyServiceTest {
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ONE);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
+    AggregateAddressBalanceProjection projection =
+        Mockito.mock(AggregateAddressBalanceProjection.class);
+
+    when(projection.getBalance()).thenReturn(BigInteger.TEN);
+    when(projection.getDay()).thenReturn(LocalDateTime.now().minusDays(1).toLocalDate());
+
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
+    when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
+        .thenReturn(Optional.of(BigInteger.ZERO));
+    when(aggregateAddressTxBalanceRepository.findAllByStakeAddressIdAndDayBetween(
+            any(), any(), any()))
+        .thenReturn(List.of(projection));
     when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
 
@@ -511,11 +525,18 @@ public class StakeKeyServiceTest {
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ONE);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
+    AggregateAddressBalanceProjection projection =
+        Mockito.mock(AggregateAddressBalanceProjection.class);
+
+    when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
+        .thenReturn(Optional.of(BigInteger.ZERO));
+
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
 
     var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
+    Assertions.assertEquals(BigInteger.ZERO, response.getLowestBalance());
     assertNotNull(response);
   }
 
@@ -529,6 +550,8 @@ public class StakeKeyServiceTest {
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
+    when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
+        .thenReturn(Optional.of(BigInteger.ZERO));
     when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any(), any()))
         .thenReturn(Optional.of(BigInteger.ZERO));
     when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
