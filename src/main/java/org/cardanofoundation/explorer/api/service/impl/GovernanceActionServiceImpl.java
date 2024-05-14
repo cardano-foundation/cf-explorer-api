@@ -9,12 +9,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -25,10 +25,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
 import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
+import org.cardanofoundation.explorer.api.model.ProtocolParamUpdate;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -366,6 +371,11 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       case HARD_FORK_INITIATION_ACTION:
         votingChartResponse.setThreshold(epochParam.getPvtHardForkInitiation());
         break;
+      case INFO_ACTION:
+        /* CIP 1694
+         * The two thresholds for the Info action are set to 100% since setting it any lower would result in not being able to poll above the threshold. */
+        votingChartResponse.setThreshold(1.0);
+        break;
       default:
         votingChartResponse.setThreshold(null);
     }
@@ -448,10 +458,16 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         votingChartResponse.setThreshold(epochParam.getDvtHardForkInitiation());
         break;
       case PARAMETER_CHANGE_ACTION:
-        votingChartResponse.setThreshold(getParameterChangeActionThreshold(epochParam));
+        votingChartResponse.setThreshold(
+            getParameterChangeActionThreshold(epochParam, govActionDetailsProjection.getDetails()));
         break;
       case TREASURY_WITHDRAWALS_ACTION:
         votingChartResponse.setThreshold(epochParam.getDvtTreasuryWithdrawal());
+        break;
+      case INFO_ACTION:
+        /* CIP 1694
+         * The two thresholds for the Info action are set to 100% since setting it any lower would result in not being able to poll above the threshold. */
+        votingChartResponse.setThreshold(1.0);
         break;
       default:
         votingChartResponse.setThreshold(null);
@@ -547,23 +563,44 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     return govActionLifetime == null ? 0 : govActionLifetime.intValue();
   }
 
-  private Double getParameterChangeActionThreshold(EpochParam epochParam) {
-    List<ProtocolParamGroup> protocolParamGroups =
-        ProtocolParamUtil.getGroupsWithNonNullField(epochParam);
+  private Double getParameterChangeActionThreshold(EpochParam epochParam, JsonNode description) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode protocolParamUpdateJsonNode = description.get("protocolParamUpdate");
+    try {
+      ProtocolParamUpdate protocolParamUpdate =
+          objectMapper.treeToValue(protocolParamUpdateJsonNode, ProtocolParamUpdate.class);
+      List<ProtocolParamGroup> protocolParamGroups =
+          ProtocolParamUtil.getGroupsWithNonNullField(protocolParamUpdate);
 
-    Map<ProtocolParamGroup, Supplier<Double>> groupToThresholdMapping = new HashMap<>();
-    groupToThresholdMapping.put(ProtocolParamGroup.ECONOMIC, epochParam::getDvtPPEconomicGroup);
-    groupToThresholdMapping.put(ProtocolParamGroup.NETWORK, epochParam::getDvtPPNetworkGroup);
-    groupToThresholdMapping.put(ProtocolParamGroup.TECHNICAL, epochParam::getDvtPPTechnicalGroup);
-    groupToThresholdMapping.put(ProtocolParamGroup.GOVERNANCE, epochParam::getDvtPPGovGroup);
-
-    return protocolParamGroups.stream()
-        .map(groupToThresholdMapping::get)
-        .filter(Objects::nonNull)
-        .map(Supplier::get)
-        .filter(Objects::nonNull)
-        .mapToDouble(Double::doubleValue)
-        .max()
-        .orElse(0);
+      Set<Double> doubleSet = new HashSet<>();
+      if (protocolParamGroups.contains(ProtocolParamGroup.ECONOMIC)) {
+        doubleSet.add(
+            Objects.isNull(epochParam.getDvtPPEconomicGroup())
+                ? -1
+                : epochParam.getDvtPPEconomicGroup());
+      } else if (protocolParamGroups.contains(ProtocolParamGroup.NETWORK)) {
+        doubleSet.add(
+            Objects.isNull(epochParam.getDvtPPNetworkGroup())
+                ? -1
+                : epochParam.getDvtPPNetworkGroup());
+      } else if (protocolParamGroups.contains(ProtocolParamGroup.TECHNICAL)) {
+        doubleSet.add(
+            Objects.isNull(epochParam.getDvtPPTechnicalGroup())
+                ? -1
+                : epochParam.getDvtPPTechnicalGroup());
+      } else if (protocolParamGroups.contains(ProtocolParamGroup.GOVERNANCE)) {
+        doubleSet.add(
+            Objects.isNull(epochParam.getDvtPPGovGroup()) ? -1 : epochParam.getDvtPPGovGroup());
+      }
+      if (doubleSet.isEmpty()) {
+        return null;
+      } else {
+        Double threshold = doubleSet.stream().max(Double::compare).orElse(null);
+        return threshold.equals(-1.0) ? null : threshold;
+      }
+    } catch (JsonProcessingException e) {
+      log.error("Error while parsing protocolParamUpdate from description: {}", description);
+    }
+    return null;
   }
 }
