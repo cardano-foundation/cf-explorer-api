@@ -101,10 +101,7 @@ public class ScriptServiceImpl implements ScriptService {
 
   @PostConstruct
   private void init() {
-    firstShellyBlock =
-        blockRepository
-            .findFirstShellyBlock()
-            .orElse(null);
+    firstShellyBlock = blockRepository.findFirstShellyBlock().orElse(null);
     firstBlock =
         blockRepository
             .findFirstBlock()
