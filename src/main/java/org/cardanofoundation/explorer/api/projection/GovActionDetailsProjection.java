@@ -22,6 +22,8 @@ public interface GovActionDetailsProjection {
 
   Long getBlockTime();
 
+  Long getSlot();
+
   Integer getEpoch();
 
   GovActionStatus getStatus();

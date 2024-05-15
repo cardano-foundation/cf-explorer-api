@@ -46,6 +46,9 @@ import org.springframework.util.ObjectUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolStatus;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolType;
@@ -72,6 +75,7 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.cardanofoundation.explorer.common.model.ByronGenesis;
+import org.cardanofoundation.explorer.common.model.ConwayGenesis;
 import org.cardanofoundation.explorer.common.model.ShelleyGenesis;
 
 @Service
@@ -109,6 +113,9 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   @Value("${genesis.byron}")
   String byronUrl;
+
+  @Value("${genesis.conway}")
+  String conwayUrl;
   // key::ProtocolType, value::getter>
   Map<ProtocolType, Method> epochParamMethods;
 
@@ -1189,6 +1196,22 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     return fixedProtocol;
   }
 
+  @Override
+  public Double getCCThresholdFromConwayGenesis() {
+    log.info("Read protocol data from url {}", conwayUrl);
+    ConwayGenesis conwayGenesis = genesisService.fillContentConway(conwayUrl);
+    if (conwayGenesis != null && conwayGenesis.getCommittee() != null) {
+      try {
+        JsonElement jsonElement = JsonParser.parseString(conwayGenesis.getCommittee().toString());
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        return Double.valueOf(jsonObject.get("threshold").getAsString());
+      } catch (Exception e) {
+        log.error("Cannot get CC threshold from conway genesis");
+      }
+    }
+    return null;
+  }
+
   @PostConstruct
   public void setup() {
     setProtocolMethodMap();
@@ -1198,5 +1221,6 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
     setLatestParamHistoryMethods();
     loadFixedProtocols();
     deleteProtocolHistoryCache();
+    getCCThresholdFromConwayGenesis();
   }
 }

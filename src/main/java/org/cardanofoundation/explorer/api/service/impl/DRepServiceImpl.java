@@ -2,7 +2,6 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Comparator;
@@ -35,10 +34,12 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResp
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepRangeValuesResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
+import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
@@ -229,18 +230,13 @@ public class DRepServiceImpl implements DRepService {
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
     fromDate = fromDate < 0 ? 0 : fromDate;
-    long toDate =
-        Timestamp.from(
-                    LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
-                        .toInstant(ZoneOffset.UTC))
-                .getTime()
-            / 1000;
+    long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(dRepFilterRequest.getFromDate())) {
-      fromDate = Timestamp.from(dRepFilterRequest.getFromDate().toInstant()).getTime() / 1000;
+      fromDate = dRepFilterRequest.getFromDate().toEpochSecond(ZoneOffset.UTC);
     }
     if (Objects.nonNull(dRepFilterRequest.getToDate())) {
-      long to = Timestamp.from(dRepFilterRequest.getToDate().toInstant()).getTime() / 1000;
+      long to = dRepFilterRequest.getToDate().toEpochSecond(ZoneOffset.UTC);
       toDate = Math.min(to, toDate);
     }
 
@@ -276,6 +272,12 @@ public class DRepServiceImpl implements DRepService {
             .map(dRepMapper::fromDRepInfo);
 
     return new BaseFilterResponse<>(dRepInfoPage);
+  }
+
+  @Override
+  public DRepRangeValuesResponse getDRepRangeValues() {
+    DRepRangeProjection projection = drepInfoRepository.getDRepRangeValues();
+    return dRepMapper.fromDRepRangeProjection(projection);
   }
 
   @Override
