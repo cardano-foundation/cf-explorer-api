@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -100,7 +101,14 @@ public class ScriptController {
       description = "Get all holders of all tokens of policy")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
       @PathVariable @Parameter(description = "The native script hash") String scriptHash,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @ParameterObject
+      @PaginationValid
+      @PaginationDefault(
+          size = 20,
+          sort = {LatestTokenBalance_.QUANTITY},
+          direction = Sort.Direction.DESC)
+      @Valid
+      Pagination pagination) {
     return ResponseEntity.ok(
         scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
   }
