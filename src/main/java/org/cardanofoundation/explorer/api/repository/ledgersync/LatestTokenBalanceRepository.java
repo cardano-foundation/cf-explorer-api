@@ -59,9 +59,9 @@ public interface LatestTokenBalanceRepository
           """
       SELECT ltb.address as address, ltb.quantity as quantity, ma.name as tokenName, ma.fingerprint as fingerprint
       FROM LatestTokenBalance ltb
-               inner JOIN MultiAsset ma ON ma.unit = ltb.unit
+               INNER JOIN MultiAsset ma ON ma.unit = ltb.unit
       WHERE ma.policy = :policy
-      order by ltb.quantity desc
+      AND ltb.quantity > 0
       """)
   List<AddressTokenProjection> findAddressAndBalanceByPolicy(
       @Param("policy") String policy, Pageable pageable);
