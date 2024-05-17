@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -31,6 +30,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -102,13 +102,13 @@ public class ScriptController {
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
       @PathVariable @Parameter(description = "The native script hash") String scriptHash,
       @ParameterObject
-      @PaginationValid
-      @PaginationDefault(
-          size = 20,
-          sort = {LatestTokenBalance_.QUANTITY},
-          direction = Sort.Direction.DESC)
-      @Valid
-      Pagination pagination) {
+          @PaginationValid
+          @PaginationDefault(
+              size = 20,
+              sort = {LatestTokenBalance_.QUANTITY},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
     return ResponseEntity.ok(
         scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
   }
