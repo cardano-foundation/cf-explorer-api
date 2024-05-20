@@ -16,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -244,8 +245,10 @@ public class AddressServiceImpl implements AddressService {
   //  }
   @Override
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
+    List<LatestAddressBalance> latestAddressBalances =
+        latestAddressBalanceRepository.findAllLatestAddressBalance(pageable);
     Page<LatestAddressBalance> latestAddressBalancePage =
-        latestAddressBalanceRepository.findAll(pageable);
+        new PageImpl<>(latestAddressBalances, pageable, pageable.getPageSize());
 
     Map<String, Long> addressTxCountMap =
         addressTxCountRepository
