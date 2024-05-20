@@ -237,14 +237,13 @@ class AddressServiceTest {
     LatestAddressBalance latestAddressBalance =
         LatestAddressBalance.builder().address(addr).quantity(BigInteger.TEN).build();
 
-    when(latestAddressBalanceRepository.findAll(pageable))
-        .thenReturn(new PageImpl<>(List.of(latestAddressBalance)));
+    when(latestAddressBalanceRepository.findAllLatestAddressBalance(pageable))
+        .thenReturn(List.of(latestAddressBalance));
 
     when(addressTxCountRepository.findAllByAddressIn(List.of(addr)))
         .thenReturn(List.of(AddressTxCount.builder().address(addr).txCount(1L).build()));
 
     var response = addressService.getTopAddress(pageable);
-    Assertions.assertEquals(response.getTotalItems(), 1);
     Assertions.assertEquals(response.getData().get(0).getAddress(), addr);
     Assertions.assertEquals(response.getData().get(0).getTxCount(), 1);
     Assertions.assertEquals(response.getData().get(0).getBalance(), BigInteger.TEN);
