@@ -54,16 +54,4 @@ public class PolicyController {
       @ParameterObject @PaginationValid @Valid Pagination pagination) {
     return ResponseEntity.ok(policyService.getTokens(policyId, pagination.toPageable()));
   }
-
-  //  @GetMapping("/{policyId}/holders")
-  //  @LogMessage
-  //  @Operation(
-  //      summary = "Get holders by policy",
-  //      description = "Get all holders of all tokens of policy",
-  //      tags = {"policies"})
-  //  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
-  //      @PathVariable @Parameter(description = "The policy hash") String policyId,
-  //      @ParameterObject @PaginationValid @Valid Pagination pagination) {
-  //    return ResponseEntity.ok(policyService.getHolders(policyId, pagination.toPageable()));
-  //  }
 }
