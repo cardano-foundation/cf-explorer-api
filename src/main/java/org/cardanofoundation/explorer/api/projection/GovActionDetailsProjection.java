@@ -29,4 +29,6 @@ public interface GovActionDetailsProjection {
   GovActionStatus getStatus();
 
   BigInteger getVotingPower();
+
+  BigInteger getIndexType();
 }

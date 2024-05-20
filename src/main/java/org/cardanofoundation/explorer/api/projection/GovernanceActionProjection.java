@@ -13,6 +13,8 @@ public interface GovernanceActionProjection {
 
   GovActionType getType();
 
+  BigInteger getIndexType();
+
   Integer getSlot();
 
   Vote getVote();
