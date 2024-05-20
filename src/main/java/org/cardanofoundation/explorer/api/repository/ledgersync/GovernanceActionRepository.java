@@ -23,24 +23,26 @@ public interface GovernanceActionRepository
     extends JpaRepository<GovActionProposal, GovActionProposalId> {
   @Query(
       value =
-          "select gap.txHash as txHash, gap.index as index, vp.vote as vote, vp.slot as slot, "
-              + "gap.type as type, vp.repeatVote as repeatVote, "
-              + "gapInfo.status as status, gapInfo.votingPower as votingPower "
-              + "from GovActionProposal gap "
-              + " join GovActionProposalInfo gapInfo on (gap.txHash = gapInfo.txHash and gap.index = gapInfo.index)"
-              + " left join LatestVotingProcedure vp on ("
-              + " vp.govActionTxHash = gap.txHash"
-              + " and vp.govActionIndex = gap.index"
-              + " and vp.voterHash = :voterHash)"
-              + " where (:vote is null or (vp.vote = :vote) or (:isVoteNone = true and vp is null))"
-              + " and (:isRepeatVote is null or (vp.repeatVote = :isRepeatVote))"
-              + " and (:gapStatus is null or (gapInfo.status = :gapStatus))"
-              + " and gap.type in (:type)"
-              + " and (gap.slot >= :slot)"
-              + " and (gap.blockTime >= :from)"
-              + " and (gap.blockTime <= :to)"
-              + " and (:txHash is null or gap.txHash = :txHash)"
-              + " and (:anchorText is null or gap.anchorUrl like %:anchorText% or gap.anchorHash like %:anchorText%)")
+          """
+    SELECT gap.txHash as txHash, gap.index as index, vp.vote as vote, vp.slot as slot,
+              gap.type as type, vp.repeatVote as repeatVote,
+              gapInfo.status as status, gapInfo.votingPower as votingPower, gapInfo.indexType as indexType
+              FROM GovActionProposal gap
+              LEFT JOIN GovActionProposalInfo gapInfo ON (gap.txHash = gapInfo.txHash and gap.index = gapInfo.index)
+              LEFT JOIN LatestVotingProcedure vp ON (
+              vp.govActionTxHash = gap.txHash
+              AND vp.govActionIndex = gap.index
+              AND vp.voterHash = :voterHash)
+              WHERE (:vote is null or (vp.vote = :vote) or (:isVoteNone = true and vp is null))
+              AND (:isRepeatVote is null or (vp.repeatVote = :isRepeatVote))
+              AND (:gapStatus is null or (gapInfo.status = :gapStatus))
+              AND gap.type in (:type)
+              AND (gap.slot >= :slot)
+              AND (gap.blockTime >= :from)
+              AND (gap.blockTime <= :to)
+              AND (:txHash is null or gap.txHash = :txHash)
+              AND (:anchorText is null or gap.anchorUrl like %:anchorText% or gap.anchorHash like %:anchorText%)
+""")
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,
@@ -57,11 +59,14 @@ public interface GovernanceActionRepository
 
   @Query(
       value =
-          "select gap.txHash as txHash, gap.index as index, gap.anchorHash as anchorHash, gap.anchorUrl as anchorUrl,"
-              + " gap.type as type, gap.details as details, gap.epoch as epoch, gap.blockTime as blockTime,gap.slot as slot, gapi.status as status, gapi.votingPower as votingPower"
-              + " from GovActionProposal gap"
-              + " join GovActionProposalInfo gapi on gapi.txHash = gap.txHash and gapi.index = gap.index"
-              + " where gap.txHash = :txHash and gap.index = :index")
+          """
+    SELECT gap.txHash as txHash, gap.index as index, gap.anchorHash as anchorHash, gap.anchorUrl as anchorUrl,
+    gap.type as type, gap.details as details, gap.epoch as epoch, gap.blockTime as blockTime,
+    gap.slot as slot, gapi.status as status, gapi.votingPower as votingPower, gapi.indexType as indexType
+    FROM GovActionProposal gap
+    JOIN GovActionProposalInfo gapi ON gapi.txHash = gap.txHash AND gapi.index = gap.index
+    WHERE gap.txHash = :txHash AND gap.index = :index
+""")
   Optional<GovActionDetailsProjection> getGovActionDetailsByTxHashAndIndex(
       @Param("txHash") String txHash, @Param("index") Integer index);
 
