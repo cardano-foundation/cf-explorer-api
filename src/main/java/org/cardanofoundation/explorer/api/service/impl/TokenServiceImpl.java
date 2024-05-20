@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,11 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.apache.commons.lang3.StringUtils;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
-import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
@@ -42,14 +39,13 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenFilterRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
@@ -62,13 +58,12 @@ import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressToken;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -80,9 +75,9 @@ public class TokenServiceImpl implements TokenService {
   private final MultiAssetRepository multiAssetRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final AssetMetadataRepository assetMetadataRepository;
-  private final AddressTokenRepository addressTokenRepository;
+  private final LatestTokenBalanceRepository latestTokenBalanceRepository;
   private final AddressRepository addressRepository;
-  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
+  private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final ScriptRepository scriptRepository;
 
@@ -107,7 +102,7 @@ public class TokenServiceImpl implements TokenService {
     if (isQueryEmpty) {
       pageable =
           createPageableWithSort(
-              pageable, Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT, MultiAsset_.SUPPLY));
+              pageable, Sort.by(Sort.Direction.DESC, TokenTxCount_.TX_COUNT, MultiAsset_.SUPPLY));
       multiAssets =
           new PageImpl<>(multiAssetRepository.findMultiAssets(pageable), pageable, tokenCount);
     } else {
@@ -119,7 +114,7 @@ public class TokenServiceImpl implements TokenService {
           createPageableWithSort(
               pageable,
               Sort.by(Sort.Direction.ASC, lengthOfNameView, MultiAsset_.NAME_VIEW)
-                  .and(Sort.by(Sort.Direction.DESC, MultiAsset_.TX_COUNT)));
+                  .and(Sort.by(Sort.Direction.DESC, TokenTxCount_.TX_COUNT)));
       Long count = multiAssetRepository.countAllByQuery(query.toLowerCase());
       multiAssets =
           new PageImpl<>(
@@ -151,6 +146,7 @@ public class TokenServiceImpl implements TokenService {
 
           if (tokenInfo == null) {
             ma.setNumberOfHolders(0L);
+            ma.setTotalVolume(String.valueOf(BigInteger.ZERO));
             ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
           } else {
             if (tokenInfo.getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
@@ -158,6 +154,7 @@ public class TokenServiceImpl implements TokenService {
             } else {
               ma.setVolumeIn24h(String.valueOf(tokenInfo.getVolume24h()));
             }
+            ma.setTotalVolume(String.valueOf(tokenInfo.getTotalVolume()));
             ma.setNumberOfHolders(tokenInfo.getNumberOfHolders());
           }
         });
@@ -194,19 +191,23 @@ public class TokenServiceImpl implements TokenService {
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-
+    Long tokenTxCount =
+        multiAssetRepository.getTokenTxCount(multiAsset.getFingerprint()).orElse(0L);
+    tokenResponse.setTxCount(tokenTxCount.intValue());
     var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
     var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
     if (tokenInfo.isEmpty()) {
       tokenResponse.setNumberOfHolders(0L);
       tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
+      tokenResponse.setTotalVolume(String.valueOf(BigInteger.ZERO));
     } else {
       if (tokenInfo.get().getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
         tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
       } else {
         tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
       }
+      tokenResponse.setTotalVolume(String.valueOf(tokenInfo.get().getTotalVolume()));
       tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
     }
 
@@ -216,7 +217,12 @@ public class TokenServiceImpl implements TokenService {
             .orElse(null);
 
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
-    tokenResponse.setTokenLastActivity(multiAssetRepository.getLastActivityTimeOfToken(multiAsset));
+
+    Long latestEpochTime =
+        addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit());
+    tokenResponse.setTokenLastActivity(
+        Timestamp.valueOf(
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC)));
     setTxMetadataJson(tokenResponse, multiAsset);
     return tokenResponse;
   }
@@ -232,48 +238,23 @@ public class TokenServiceImpl implements TokenService {
     MultiAsset multiAsset =
         multiAssetRepository
             .findByFingerprint(tokenId)
-            .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
-    List<AddressTokenProjection> tokenAddresses =
-        addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(multiAsset, pageable);
+            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
-    var numberOfHoldersHaveStakeKey =
-        addressTokenBalanceRepository.countAddressNotHaveStakeByMultiAsset(multiAsset).orElse(0L);
-    var numberOfHoldersNotHaveStakeKe =
-        addressTokenBalanceRepository.countStakeByMultiAsset(multiAsset).orElse(0L);
-    var numberOfHolder = numberOfHoldersHaveStakeKey + numberOfHoldersNotHaveStakeKe;
-    Set<Long> stakeAddressIds =
-        tokenAddresses.stream()
-            .map(AddressTokenProjection::getAddressId)
-            .filter(addressId -> addressId > 0L)
-            .collect(Collectors.toSet());
-    List<StakeAddress> stakeAddressList = stakeAddressRepository.findByIdIn(stakeAddressIds);
-    Map<Long, StakeAddress> stakeAddressMap =
-        stakeAddressList.stream()
-            .collect(Collectors.toMap(StakeAddress::getId, Function.identity()));
-    Set<Long> addressIds =
-        tokenAddresses.stream()
-            .filter(item -> item.getAddressId() < 0L)
-            .map(item -> item.getAddressId() * -1L)
-            .collect(Collectors.toSet());
-    List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
-    Map<Long, Address> addressMap =
-        addressList.stream().collect(Collectors.toMap(Address::getId, Function.identity()));
+    long numberOfHolders =
+        tokenInfoRepository
+            .findTokenInfoByMultiAssetId(multiAsset.getId())
+            .map(TokenInfo::getNumberOfHolders)
+            .orElse(0L);
+
     List<TokenAddressResponse> tokenAddressResponses =
-        tokenAddresses.stream().map(tokenMapper::fromAddressTokenProjection).toList();
-    tokenAddressResponses.forEach(
-        tokenAddress -> {
-          if (tokenAddress.getAddressId() < 0L) {
-            tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId() * -1L).getAddress());
-            tokenAddress.setAddressType(AddressType.PAYMENT_ADDRESS);
-          } else {
-            tokenAddress.setAddress(stakeAddressMap.get(tokenAddress.getAddressId()).getView());
-            tokenAddress.setAddressType(AddressType.STAKE_ADDRESS);
-          }
-          tokenAddress.setAddressId(null);
-        });
-    Page<TokenAddressResponse> response =
-        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolder);
-    return new BaseFilterResponse<>(response);
+        latestTokenBalanceRepository.getTopHolderOfToken(multiAsset.getUnit(), pageable).stream()
+            .map(tokenMapper::fromAddressTokenProjection)
+            .collect(Collectors.toList());
+
+    Page<TokenAddressResponse> tokenAddressResponsePage =
+        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolders);
+
+    return new BaseFilterResponse<>(tokenAddressResponsePage);
   }
 
   @Override
@@ -283,7 +264,7 @@ public class TokenServiceImpl implements TokenService {
     MultiAsset multiAsset =
         multiAssetRepository
             .findByFingerprint(tokenId)
-            .orElseThrow(() -> new NoContentException(BusinessCode.TOKEN_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     List<LocalDateTime> dates = DateUtils.getListDateAnalytic(type);
 
@@ -291,11 +272,11 @@ public class TokenServiceImpl implements TokenService {
     if (AnalyticType.ONE_DAY.equals(type)) {
       for (int i = 0; i < dates.size() - 1; i++) {
         BigInteger balance =
-            addressTokenRepository
-                .sumBalanceBetweenTx(
-                    multiAsset,
-                    Timestamp.valueOf(dates.get(i)),
-                    Timestamp.valueOf(dates.get(i + 1)))
+            addressTxAmountRepository
+                .sumBalanceBetweenTime(
+                    multiAsset.getUnit(),
+                    dates.get(i).toInstant(ZoneOffset.UTC).getEpochSecond(),
+                    dates.get(i + 1).toInstant(ZoneOffset.UTC).getEpochSecond())
                 .orElse(BigInteger.ZERO);
         responses.add(new TokenVolumeAnalyticsResponse(dates.get(i), balance));
       }

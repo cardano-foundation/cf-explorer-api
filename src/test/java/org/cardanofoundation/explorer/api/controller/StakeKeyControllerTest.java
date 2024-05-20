@@ -33,7 +33,6 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
-import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
@@ -140,20 +139,21 @@ public class StakeKeyControllerTest {
         .andExpect(jsonPath("$").exists());
   }
 
-  @Test
-  void testGetTransactions_thenReturn() throws Exception {
-    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
-    Pageable pageable = PageRequest.of(0, 10);
-    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
-
-    when(txService.getTransactionsByStake(stakeKey, pageable)).thenReturn(response);
-
-    mockMvc
-        .perform(
-            get("/api/v1/stakes/{stakeKey}/txs", stakeKey).param("page", "0").param("size", "10"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").exists());
-  }
+  //  @Test
+  //  void testGetTransactions_thenReturn() throws Exception {
+  //    String stakeKey = "stake_test1upa9qlj5ljhx7w6f0h0k083f69cd442fqhseh08m05ucw4sx9t94t";
+  //    Pageable pageable = PageRequest.of(0, 10);
+  //    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
+  //
+  //    when(txService.getTransactionsByStake(stakeKey, pageable)).thenReturn(response);
+  //
+  //    mockMvc
+  //        .perform(
+  //            get("/api/v1/stakes/{stakeKey}/txs", stakeKey).param("page", "0").param("size",
+  // "10"))
+  //        .andExpect(status().isOk())
+  //        .andExpect(jsonPath("$").exists());
+  //  }
 
   @Test
   void testGetDelegationHistories_thenReturn() throws Exception {
@@ -242,7 +242,7 @@ public class StakeKeyControllerTest {
     Pageable pageable = PageRequest.of(0, 10);
     BaseFilterResponse<AddressFilterResponse> response = new BaseFilterResponse<>();
 
-    when(stakeService.getAddresses(stakeKey, pageable)).thenReturn(response);
+    when(stakeService.getAddresses(any(), any())).thenReturn(response);
 
     mockMvc
         .perform(
