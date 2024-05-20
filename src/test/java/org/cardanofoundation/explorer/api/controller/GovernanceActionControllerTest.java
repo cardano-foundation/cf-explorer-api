@@ -147,11 +147,11 @@ public class GovernanceActionControllerTest {
 
     VotingChartResponse votingChartResponse =
         VotingChartResponse.builder()
-            .txHash(txHash)
             .activeVoteStake(BigInteger.TEN)
             .totalYesVoteStake(BigInteger.ONE)
             .totalNoVoteStake(BigInteger.TWO)
             .abstainVoteStake(BigInteger.ZERO)
+            .txHash(txHash)
             .build();
 
     when(governanceActionService.getVotingChartByGovActionTxHashAndIndex(anyString(), any(), any()))

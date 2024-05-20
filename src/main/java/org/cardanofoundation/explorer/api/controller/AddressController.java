@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,11 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 
 @RestController
@@ -61,7 +65,15 @@ public class AddressController {
       summary = "Get top address by balance",
       tags = {"address"})
   public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-      @ParameterObject @PaginationValid @PageZeroValid @Valid Pagination pagination) {
+      @ParameterObject
+          @PaginationDefault(
+              size = 20,
+              sort = {LatestTokenBalance_.QUANTITY},
+              direction = Sort.Direction.DESC)
+          @PaginationValid
+          @PageZeroValid
+          @Valid
+          Pagination pagination) {
     return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
   }
 
@@ -94,7 +106,14 @@ public class AddressController {
                   "The human readable encoding of the output address."
                       + " Will be Base58 for Byron era addresses and Bech32 for Shelley era.")
           String address,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @ParameterObject
+          @PaginationDefault(
+              size = 20,
+              sort = {AddressTxAmount_.BLOCK_TIME},
+              direction = Sort.Direction.DESC)
+          @PaginationValid
+          @Valid
+          Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByAddress(address, pagination.toPageable()));
   }
 

@@ -195,7 +195,7 @@ public class ScriptControllerTest {
             .fingerprint("fingerprint")
             .build();
 
-    when(scriptService.getNativeScriptHolders(scriptHash, PageRequest.of(0, 1)))
+    when(scriptService.getNativeScriptHolders(any(), any()))
         .thenReturn(new BaseFilterResponse<>(List.of(response), 1));
 
     mockMvc
@@ -207,7 +207,8 @@ public class ScriptControllerTest {
         .andExpect(jsonPath("$.data[0].name").value("name"))
         .andExpect(jsonPath("$.data[0].fingerprint").value("fingerprint"));
 
-    verify(scriptService).getNativeScriptHolders(scriptHash, PageRequest.of(0, 1));
+    verify(scriptService)
+        .getNativeScriptHolders(scriptHash, PageRequest.of(0, 1, Sort.by("quantity").descending()));
   }
 
   @Test

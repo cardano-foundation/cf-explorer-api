@@ -23,17 +23,12 @@ import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.PolicyResponse;
 import org.cardanofoundation.explorer.api.model.response.token.PolicyScriptResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.PolicyService;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
@@ -44,8 +39,6 @@ public class PolicyServiceImpl implements PolicyService {
 
   private final MultiAssetRepository multiAssetRepository;
   private final AssetMetadataRepository assetMetadataRepository;
-  private final AddressRepository addressRepository;
-  private final AddressTokenBalanceRepository addressTokenBalanceRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
@@ -106,37 +99,5 @@ public class PolicyServiceImpl implements PolicyService {
                 assetMetadataMapper.fromAssetMetadata(
                     assetMetadataMap.get(ma.getPolicy() + ma.getName()))));
     return new BaseFilterResponse<>(multiAssetResponsesList);
-  }
-
-  @Override
-  public BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable) {
-    Page<AddressTokenProjection> multiAssetPage =
-        addressTokenBalanceRepository.findAddressAndBalanceByMultiAssetIn(policyId, pageable);
-    Set<Long> addressIds =
-        multiAssetPage.stream()
-            .map(AddressTokenProjection::getAddressId)
-            .collect(Collectors.toSet());
-    List<Address> addressList = addressRepository.findAddressByIdIn(addressIds);
-    Map<Long, Address> addressMap =
-        addressList.stream().collect(Collectors.toMap(Address::getId, Function.identity()));
-    Page<TokenAddressResponse> tokenAddressResponses =
-        multiAssetPage.map(tokenMapper::fromAddressTokenProjection);
-    Set<String> subjects =
-        multiAssetPage.stream()
-            .map(ma -> ma.getPolicy() + ma.getTokenName())
-            .collect(Collectors.toSet());
-    List<AssetMetadata> assetMetadataList = assetMetadataRepository.findBySubjectIn(subjects);
-    Map<String, AssetMetadata> assetMetadataMap =
-        assetMetadataList.stream()
-            .collect(Collectors.toMap(AssetMetadata::getSubject, Function.identity()));
-    tokenAddressResponses.forEach(
-        tokenAddress -> {
-          tokenAddress.setAddress(addressMap.get(tokenAddress.getAddressId()).getAddress());
-          tokenAddress.setMetadata(
-              assetMetadataMapper.fromAssetMetadata(
-                  assetMetadataMap.get(tokenAddress.getPolicy() + tokenAddress.getName())));
-          tokenAddress.setAddressId(null);
-        });
-    return new BaseFilterResponse<>(tokenAddressResponses);
   }
 }

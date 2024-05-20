@@ -46,7 +46,7 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       "SELECT new org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse"
           + "(rw.spendableEpoch, epoch.startTime, rw.amount, rw.type, ph.view, ph.hashRaw)"
           + " FROM Reward rw"
-          + " INNER JOIN Epoch epoch ON rw.spendableEpoch = epoch.no"
+          + " INNER JOIN Epoch epoch ON epoch.no = rw.spendableEpoch"
           + " LEFT JOIN PoolHash ph ON rw.pool.id = ph.id"
           + " WHERE rw.addr = :stakeAddress"
           + " AND (epoch.startTime >= :fromDate )"
