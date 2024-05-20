@@ -24,13 +24,4 @@ public interface PolicyService {
    * @return list token in this page
    */
   BaseFilterResponse<TokenFilterResponse> getTokens(String policyId, Pageable pageable);
-
-  /**
-   * Get list holder by policy
-   *
-   * @param policyId policy hash
-   * @param pageable page info
-   * @return list holders in this page
-   */
-  //  BaseFilterResponse<TokenAddressResponse> getHolders(String policyId, Pageable pageable);
 }
