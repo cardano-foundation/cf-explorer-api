@@ -54,7 +54,6 @@ import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
@@ -73,8 +72,8 @@ import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -91,8 +90,10 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TokenTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
@@ -131,9 +132,10 @@ public class TxServiceImpl implements TxService {
   private final DelegationMapper delegationMapper;
   private final MaTxMintRepository maTxMintRepository;
   private final MaTxMintMapper maTxMintMapper;
-  private final AddressTxBalanceRepository addressTxBalanceRepository;
+  private final AddressTxAmountRepository addressTxAmountRepository;
   private final MultiAssetRepository multiAssetRepository;
-  private final AddressTokenRepository addressTokenRepository;
+  private final AddressTxCountRepository addressTxCountRepository;
+  private final StakeAddressTxCountRepository stakeAddressTxCountRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final StakeRegistrationRepository stakeRegistrationRepository;
@@ -164,7 +166,9 @@ public class TxServiceImpl implements TxService {
   public static final long DAY_IN_TWO_WEEK = DAY_IN_WEEK * 2;
   public static final long DAYS_IN_MONTH = 32;
 
+  private static final String UNIT_LOVELACE = "lovelace";
   private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
+  private final TokenTxCountRepository tokenTxCountRepository;
 
   @Value("${application.network}")
   private String network;
@@ -268,43 +272,175 @@ public class TxServiceImpl implements TxService {
   @Override
   public BaseFilterResponse<TxFilterResponse> getTransactionsByAddress(
       String address, Pageable pageable) {
-    Address addr =
-        addressRepository
-            .findFirstByAddress(address)
-            .orElseThrow(() -> new NoContentException(BusinessCode.ADDRESS_NOT_FOUND));
-    List<Tx> txList = addressTxBalanceRepository.findAllByAddress(addr, pageable);
+    addressRepository
+        .findFirstByAddress(address)
+        .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
-    Page<Tx> txPage = new PageImpl<>(txList, pageable, addr.getTxCount());
-    return new BaseFilterResponse<>(txPage, mapDataFromTxByAddressListToResponses(txPage, addr));
+    AddressTxCount addressTxCount =
+        addressTxCountRepository.findById(address).orElse(new AddressTxCount(address, 0L));
+
+    List<TxProjection> txProjections =
+        addressTxAmountRepository.findAllTxByAddress(address, pageable);
+    List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
+    List<AddressTxAmount> addressTxAmounts =
+        addressTxAmountRepository.findAllByAddressAndTxHashIn(address, txHashes);
+
+    Page<TxFilterResponse> txFilterResponsePage =
+        new PageImpl<>(
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
+            pageable,
+            addressTxCount.getTxCount());
+
+    return new BaseFilterResponse<>(txFilterResponsePage);
+  }
+
+  private List<TxFilterResponse> mapTxDataFromAddressTxAmount(
+      List<TxProjection> txProjections, List<AddressTxAmount> addressTxAmounts) {
+
+    List<TxFilterResponse> txFilterResponses = new ArrayList<>();
+    List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
+
+    Map<String, Tx> txMap =
+        txRepository.findAllByHashIn(txHashes).stream()
+            .collect(Collectors.toMap(Tx::getHash, Function.identity()));
+
+    List<MultiAsset> multiAssets =
+        multiAssetRepository.findAllByUnitIn(
+            addressTxAmounts.stream().map(AddressTxAmount::getUnit).collect(Collectors.toSet()));
+
+    Map<Long, Block> blockMap =
+        blockRepository
+            .findAllByIdIn(txMap.values().stream().map(Tx::getBlockId).collect(Collectors.toList()))
+            .stream()
+            .collect(Collectors.toMap(Block::getId, Function.identity()));
+
+    Map<String, MultiAsset> unitMultiAssetMap =
+        multiAssets.stream().collect(Collectors.toMap(MultiAsset::getUnit, Function.identity()));
+
+    Map<String, AssetMetadata> fingerprintAssetMetadataMap =
+        assetMetadataRepository
+            .findByFingerprintIn(
+                multiAssets.stream().map(MultiAsset::getFingerprint).collect(Collectors.toSet()))
+            .stream()
+            .collect(Collectors.toMap(AssetMetadata::getFingerprint, Function.identity()));
+
+    Map<String, Map<String, List<AddressTxAmount>>> addressTxAmountMap =
+        addressTxAmounts.stream()
+            .collect(
+                Collectors.groupingBy(
+                    AddressTxAmount::getTxHash, Collectors.groupingBy(AddressTxAmount::getUnit)));
+
+    txProjections.forEach(
+        txProjection -> {
+          TxFilterResponse txFilterResponse = new TxFilterResponse();
+          Tx tx = txMap.get(txProjection.getTxHash());
+          String txHash = tx.getHash();
+          Block block = blockMap.get(tx.getBlockId());
+          BigInteger balance =
+              addressTxAmountMap.get(txHash).get(UNIT_LOVELACE).stream()
+                  .reduce(BigInteger.ZERO, (a, b) -> a.add(b.getQuantity()), BigInteger::add);
+
+          List<AddressTxAmount> tokenQuantityChange =
+              addressTxAmountMap.get(txHash).entrySet().stream()
+                  .filter(entry -> !entry.getKey().equals(UNIT_LOVELACE))
+                  .flatMap(entry -> entry.getValue().stream())
+                  .collect(Collectors.toList());
+
+          txFilterResponse.setHash(txHash);
+          txFilterResponse.setTime(block.getTime().toLocalDateTime());
+          txFilterResponse.setBlockNo(block.getBlockNo());
+          txFilterResponse.setEpochNo(block.getEpochNo());
+          txFilterResponse.setSlot(block.getSlotNo().intValue());
+          txFilterResponse.setEpochSlotNo(block.getEpochSlotNo());
+          txFilterResponse.setFee(tx.getFee());
+          txFilterResponse.setBalance(balance);
+          txFilterResponse.setTotalOutput(tx.getOutSum());
+          txFilterResponse.setTokens(
+              getTokenQuantityChangeResponse(
+                  tokenQuantityChange, unitMultiAssetMap, fingerprintAssetMetadataMap));
+
+          txFilterResponses.add(txFilterResponse);
+        });
+
+    return txFilterResponses;
+  }
+
+  private List<TokenAddressResponse> getTokenQuantityChangeResponse(
+      List<AddressTxAmount> tokenQuantityChange,
+      Map<String, MultiAsset> unitMultiAssetMap,
+      Map<String, AssetMetadata> fingerprintAssetMetadataMap) {
+
+    List<TokenAddressResponse> tokenAddressResponses = new ArrayList<>();
+    tokenQuantityChange.forEach(
+        addressTxAmount -> {
+          if (BigInteger.ZERO.equals(addressTxAmount.getQuantity())) {
+            return;
+          }
+          MultiAsset multiAsset = unitMultiAssetMap.get(addressTxAmount.getUnit());
+          TokenAddressResponse tokenAddressResponse = new TokenAddressResponse();
+          if (!Objects.isNull(multiAsset)) {
+            tokenAddressResponse =
+                tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressTxAmount);
+            tokenAddressResponse.setMetadata(
+                assetMetadataMapper.fromAssetMetadata(
+                    fingerprintAssetMetadataMap.get(multiAsset.getFingerprint())));
+          }
+          tokenAddressResponses.add(tokenAddressResponse);
+        });
+
+    return tokenAddressResponses;
   }
 
   @Override
   public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(
       String tokenId, Pageable pageable) {
-    BaseFilterResponse<TxFilterResponse> response = new BaseFilterResponse<>();
-    Optional<MultiAsset> multiAsset = multiAssetRepository.findByFingerprint(tokenId);
-    if (multiAsset.isPresent()) {
-      List<Long> txIds = addressTokenRepository.findTxsByMultiAsset(multiAsset.get(), pageable);
-      List<Tx> txList = txRepository.findByIdIn(txIds);
-      Page<Tx> txPage = new PageImpl<>(txList, pageable, multiAsset.get().getTxCount());
-      List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
-      response = new BaseFilterResponse<>(txPage, txFilterResponses);
-    }
-    return response;
+
+    MultiAsset multiAsset =
+        multiAssetRepository
+            .findByFingerprint(tokenId)
+            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+
+    TokenTxCount tokenTxCount =
+        tokenTxCountRepository
+            .findById(multiAsset.getId())
+            .orElse(new TokenTxCount(multiAsset.getId(), 0L));
+
+    List<TxProjection> txsProjection =
+        addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
+    List<Tx> txs =
+        txRepository.findAllByHashIn(
+            txsProjection.stream().map(TxProjection::getTxHash).collect(Collectors.toList()));
+    Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount.getTxCount());
+
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   @Override
   public BaseFilterResponse<TxFilterResponse> getTransactionsByStake(
       String stakeKey, Pageable pageable) {
-    StakeAddress stakeAddress =
-        stakeAddressRepository
-            .findByView(stakeKey)
-            .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
-    Page<Tx> txPage = addressTxBalanceRepository.findAllByStake(stakeAddress.getId(), pageable);
-    List<TxFilterResponse> data =
-        mapDataFromTxByStakeListToResponseList(txPage, stakeAddress.getId());
-    return new BaseFilterResponse<>(txPage, data);
+    stakeAddressRepository
+        .findByView(stakeKey)
+        .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
+
+    StakeAddressTxCount addressTxCount =
+        stakeAddressTxCountRepository
+            .findById(stakeKey)
+            .orElse(new StakeAddressTxCount(stakeKey, 0L));
+
+    List<TxProjection> txProjections =
+        addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
+    List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
+    List<AddressTxAmount> addressTxAmounts =
+        addressTxAmountRepository.findAllByStakeAddressAndTxHashIn(stakeKey, txHashes);
+
+    Page<TxFilterResponse> txFilterResponsePage =
+        new PageImpl<>(
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
+            pageable,
+            addressTxCount.getTxCount());
+
+    return new BaseFilterResponse<>(txFilterResponsePage);
   }
 
   /**
@@ -363,81 +499,6 @@ public class TxServiceImpl implements TxService {
     return txFilterResponses;
   }
 
-  private List<TxFilterResponse> mapDataFromTxByAddressListToResponses(
-      Page<Tx> txPage, Address address) {
-    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
-
-    Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
-
-    // get address tx balance
-    List<AddressTxBalance> addressTxBalances =
-        addressTxBalanceRepository.findByTxIdInAndByAddress(txIdList, address.getAddress());
-    Map<Long, List<AddressTxBalance>> addressTxBalanceMap =
-        addressTxBalances.stream().collect(Collectors.groupingBy(AddressTxBalance::getTxId));
-
-    // get address token
-    List<AddressToken> addressTokens =
-        addressTokenRepository.findByTxIdInAndByAddress(txIdList, address.getAddress());
-    Map<Long, List<AddressToken>> addressTokenMap =
-        addressTokens.stream()
-            .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
-            .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
-
-    // get metadata and multi asset
-    List<Long> multiAssetIdList =
-        addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
-
-    Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
-        getMapMetadataAndMapAsset(multiAssetIdList);
-
-    txFilterResponses.forEach(
-        tx ->
-            setAdditionalData(
-                addressTxBalanceMap,
-                addressTokenMap,
-                getMapMetadataAndMapAsset.getFirst(),
-                getMapMetadataAndMapAsset.getSecond(),
-                tx));
-    return txFilterResponses;
-  }
-
-  private List<TxFilterResponse> mapDataFromTxByStakeListToResponseList(
-      Page<Tx> txPage, Long stakeId) {
-    List<TxFilterResponse> txFilterResponses = mapDataFromTxListToResponseList(txPage);
-    Set<Long> txIdList = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
-
-    // get address tx balance
-    List<AddressTxBalance> addressTxBalances =
-        addressTxBalanceRepository.findByTxIdInAndStakeId(txIdList, stakeId);
-
-    Map<Long, List<AddressTxBalance>> addressTxBalanceMap =
-        addressTxBalances.stream().collect(Collectors.groupingBy(AddressTxBalance::getTxId));
-
-    List<AddressToken> addressTokens =
-        addressTokenRepository.findByTxIdInAndStakeId(txIdList, stakeId);
-    Map<Long, List<AddressToken>> addressTokenMap =
-        addressTokens.stream()
-            .filter(addressToken -> !BigInteger.ZERO.equals(addressToken.getBalance()))
-            .collect(Collectors.groupingBy(addressToken -> addressToken.getTx().getId()));
-
-    // get metadata and multi asset
-    List<Long> multiAssetIdList =
-        addressTokens.stream().map(AddressToken::getMultiAssetId).toList();
-
-    Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset =
-        getMapMetadataAndMapAsset(multiAssetIdList);
-
-    txFilterResponses.forEach(
-        tx ->
-            setAdditionalData(
-                addressTxBalanceMap,
-                addressTokenMap,
-                getMapMetadataAndMapAsset.getFirst(),
-                getMapMetadataAndMapAsset.getSecond(),
-                tx));
-    return txFilterResponses;
-  }
-
   private Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset(
       List<Long> multiAssetIdList) {
     List<MultiAsset> multiAssets = multiAssetRepository.findAllByIdIn(multiAssetIdList);
@@ -452,42 +513,6 @@ public class TxServiceImpl implements TxService {
         multiAssets.stream().collect(Collectors.toMap(MultiAsset::getId, Function.identity()));
 
     return Pair.of(assetMetadataMap, multiAssetMap);
-  }
-
-  private void setAdditionalData(
-      Map<Long, List<AddressTxBalance>> addressTxBalanceMap,
-      Map<Long, List<AddressToken>> addressTokenMap,
-      Map<String, AssetMetadata> assetMetadataMap,
-      Map<Long, MultiAsset> multiAssetMap,
-      TxFilterResponse tx) {
-
-    if (addressTxBalanceMap.containsKey(tx.getId())) {
-      BigInteger balance =
-          addressTxBalanceMap.get(tx.getId()).stream()
-              .map(AddressTxBalance::getBalance)
-              .reduce(BigInteger.ZERO, BigInteger::add);
-      tx.setBalance(balance);
-    }
-
-    if (addressTokenMap.containsKey(tx.getId())) {
-      List<TokenAddressResponse> tokenAddressResponses =
-          addressTokenMap.get(tx.getId()).stream()
-              .map(
-                  addressToken -> {
-                    MultiAsset multiAsset = multiAssetMap.get(addressToken.getMultiAssetId());
-                    TokenAddressResponse taResponse = new TokenAddressResponse();
-                    if (!Objects.isNull(multiAsset)) {
-                      taResponse =
-                          tokenMapper.fromMultiAssetAndAddressToken(multiAsset, addressToken);
-                      String subject = multiAsset.getPolicy() + multiAsset.getName();
-                      taResponse.setMetadata(
-                          assetMetadataMapper.fromAssetMetadata(assetMetadataMap.get(subject)));
-                    }
-                    return taResponse;
-                  })
-              .toList();
-      tx.setTokens(tokenAddressResponses);
-    }
   }
 
   @Override

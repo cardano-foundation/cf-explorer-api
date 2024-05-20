@@ -11,13 +11,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import org.cardanofoundation.explorer.api.common.enumeration.AddressType;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressToken;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 
 @Mapper(
@@ -46,6 +47,7 @@ public abstract class TokenMapper {
       expression = "java(HexUtils.fromHex(projection.getTokenName(), projection.getFingerprint()))")
   @Mapping(target = "name", source = "tokenName")
   @Mapping(target = "metadata", expression = "java(getMetadata(projection))")
+  @Mapping(target = "addressType", expression = "java(getAddressType(projection.getAddress()))")
   public abstract TokenAddressResponse fromAddressTokenProjection(
       AddressTokenProjection projection);
 
@@ -54,11 +56,11 @@ public abstract class TokenMapper {
       expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
   @Mapping(target = "policy", source = "multiAsset.policy")
   @Mapping(target = "fingerprint", source = "multiAsset.fingerprint")
-  @Mapping(target = "quantity", source = "addressToken.balance")
+  @Mapping(target = "quantity", source = "addressTxAmount.quantity")
   @Mapping(target = "address", ignore = true)
   @Mapping(target = "addressId", ignore = true)
   public abstract TokenAddressResponse fromMultiAssetAndAddressToken(
-      MultiAsset multiAsset, AddressToken addressToken);
+      MultiAsset multiAsset, AddressTxAmount addressTxAmount);
 
   LocalDateTime fromTimestamp(Timestamp timestamp) {
     return timestamp == null ? null : timestamp.toLocalDateTime();
@@ -73,6 +75,13 @@ public abstract class TokenMapper {
   @Named("getTokenLogoURL")
   String getTokenLogoEndpoint(String logo) {
     return Objects.isNull(logo) ? null : (tokenLogoEndpoint + logo);
+  }
+
+  AddressType getAddressType(String address) {
+    if (StringUtils.isEmpty(address)) {
+      return null;
+    }
+    return address.startsWith("stake") ? AddressType.STAKE_ADDRESS : AddressType.PAYMENT_ADDRESS;
   }
 
   TokenMetadataResponse getMetadata(AddressTokenProjection projection) {

@@ -180,8 +180,9 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   @Query(
       value =
           """
-      select sum(sa.balance) as balance, d.poolHash.hashRaw as poolHash from Delegation d
+      select sum(lsab.quantity) as balance, d.poolHash.hashRaw as poolHash from Delegation d
       join StakeAddress sa on sa.id = d.stakeAddressId
+      JOIN LatestStakeAddressBalance lsab on lsab.address = sa.view
       where d.poolHash.id in :poolIds
       group by d.poolHash.hashRaw
     """)

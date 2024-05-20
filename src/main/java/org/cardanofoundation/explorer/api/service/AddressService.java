@@ -7,7 +7,6 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
-import org.cardanofoundation.explorer.api.model.response.contract.ContractFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 
 public interface AddressService {
@@ -35,7 +34,7 @@ public interface AddressService {
    * @param pageable page information
    * @return list contract information in this page
    */
-  BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable);
+  //  BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable);
 
   /**
    * Get top address

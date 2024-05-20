@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import jakarta.validation.Valid;
 
@@ -40,6 +39,8 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
@@ -123,7 +124,14 @@ public class StakeKeyController {
           @StakeKeyLengthValid
           @Parameter(description = "The Bech32 encoded version of the stake address.")
           String stakeKey,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @ParameterObject
+          @PaginationDefault(
+              size = 20,
+              sort = {AddressTxAmount_.BLOCK_TIME},
+              direction = Sort.Direction.DESC)
+          @PaginationValid
+          @Valid
+          Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByStake(stakeKey, pagination.toPageable()));
   }
 
@@ -200,7 +208,12 @@ public class StakeKeyController {
           @StakeKeyLengthValid
           @Parameter(description = "The Bech32 encoded version of the stake address.")
           String stakeKey,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @PaginationDefault(
+              size = 20,
+              sort = {LatestAddressBalance_.QUANTITY},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
     return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
   }
 
@@ -220,8 +233,7 @@ public class StakeKeyController {
           @StakeKeyLengthValid
           @Parameter(description = "The Bech32 encoded version of the stake address.")
           String stakeKey,
-      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type)
-      throws ExecutionException, InterruptedException {
+      @PathVariable @Parameter(description = "Type analytics: 1d, 1w, 1m, 3m") AnalyticType type) {
     return ResponseEntity.ok(stakeService.getStakeBalanceAnalytics(stakeKey, type));
   }
 
