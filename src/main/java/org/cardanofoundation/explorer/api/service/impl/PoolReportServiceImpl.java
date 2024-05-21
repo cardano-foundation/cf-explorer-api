@@ -84,7 +84,7 @@ public class PoolReportServiceImpl implements PoolReportService {
             .reportHistory(poolReportHistory.getReportHistory())
             .timePattern(poolReportCreateRequest.getTimePattern())
             .zoneOffset(poolReportCreateRequest.getZoneOffset())
-            //            .dateFormat(poolReportCreateRequest.getDateFormat())
+            .dateFormat(poolReportCreateRequest.getDateFormat())
             .build();
 
     Boolean isSuccess = kafkaService.sendReportHistory(reportMessage);
