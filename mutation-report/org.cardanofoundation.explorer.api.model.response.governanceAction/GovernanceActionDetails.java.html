@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>GovernanceActionDetails.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.model.response.governanceAction;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.math.BigInteger;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Date;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.AllArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Getter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.NoArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Setter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.experimental.SuperBuilder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.annotation.JsonIgnore;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.databind.JsonNode;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.cardanofoundation.explorer.common.entity.enumeration.Vote;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Getter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@Setter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_21'/>
+21
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_21'>21</a>
+<span>
+1. details : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::details &rarr; SURVIVED<br/>
+2. poolName : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::poolName &rarr; NO_COVERAGE<br/>
+3. submissionDate : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::submissionDate &rarr; SURVIVED<br/>
+4. status : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::status &rarr; SURVIVED<br/>
+5. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::toString &rarr; NO_COVERAGE<br/>
+6. govActionType : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::govActionType &rarr; SURVIVED<br/>
+7. voteType : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::voteType &rarr; NO_COVERAGE<br/>
+8. self : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilderImpl::self &rarr; NO_COVERAGE<br/>
+9. blockTime : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::blockTime &rarr; SURVIVED<br/>
+10. epoch : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::epoch &rarr; SURVIVED<br/>
+11. voterHash : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::voterHash &rarr; NO_COVERAGE<br/>
+12. allowedVoteByCC : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::allowedVoteByCC &rarr; NO_COVERAGE<br/>
+13. build : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilderImpl::build &rarr; NO_COVERAGE<br/>
+14. expiryDate : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::expiryDate &rarr; NO_COVERAGE<br/>
+15. builder : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::builder &rarr; NO_COVERAGE<br/>
+16. allowedVoteBySPO : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::allowedVoteBySPO &rarr; NO_COVERAGE<br/>
+17. votingPower : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::votingPower &rarr; SURVIVED<br/>
+18. txHash : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::txHash &rarr; KILLED<br/>
+19. anchorUrl : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::anchorUrl &rarr; KILLED<br/>
+20. index : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::index &rarr; KILLED<br/>
+21. anchorHash : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::anchorHash &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@SuperBuilder</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@AllArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@NoArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class GovernanceActionDetails {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_25'/>
+25
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_25'>1</a>
+<span>
+1. getTxHash : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getTxHash &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  String txHash;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_27'/>
+27
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_27'>1</a>
+<span>
+1. getIndex : replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getIndex &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Long index;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_29'/>
+29
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_29'>1</a>
+<span>
+1. getGovActionType : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getGovActionType &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  GovActionType govActionType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_31'/>
+31
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_31'>1</a>
+<span>
+1. getAnchorHash : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAnchorHash &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  String anchorHash;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_33'/>
+33
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_33'>1</a>
+<span>
+1. getAnchorUrl : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAnchorUrl &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  String anchorUrl;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_35'/>
+35
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_35'>1</a>
+<span>
+1. getDetails : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getDetails &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  JsonNode details;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_37'/>
+37
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_37'>1</a>
+<span>
+1. getEpoch : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getEpoch &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  @JsonIgnore Integer epoch;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_39'/>
+39
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_39'>1</a>
+<span>
+1. getBlockTime : replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getBlockTime &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  @JsonIgnore Long blockTime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_41'/>
+41
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_41'>1</a>
+<span>
+1. getVoteType : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getVoteType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>  Vote voteType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_43'/>
+43
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_43'>1</a>
+<span>
+1. getVoterHash : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getVoterHash &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  String voterHash;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_45'/>
+45
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_45'>1</a>
+<span>
+1. getStatus : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getStatus &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  GovActionStatus status;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_47'/>
+47
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_47'>1</a>
+<span>
+1. getVotingPower : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getVotingPower &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  BigInteger votingPower;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_49'/>
+49
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_49'>1</a>
+<span>
+1. getSubmissionDate : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getSubmissionDate &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Date submissionDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_51'/>
+51
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_51'>1</a>
+<span>
+1. getExpiryDate : replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getExpiryDate &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Date expiryDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_53'/>
+53
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_53'>1</a>
+<span>
+1. getPoolName : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getPoolName &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  String poolName;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_55'/>
+55
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_55'>2</a>
+<span>
+1. getAllowedVoteBySPO : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAllowedVoteBySPO &rarr; SURVIVED<br/>
+2. getAllowedVoteBySPO : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAllowedVoteBySPO &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Boolean allowedVoteBySPO;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_57'/>
+57
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_57'>2</a>
+<span>
+1. getAllowedVoteByCC : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAllowedVoteByCC &rarr; SURVIVED<br/>
+2. getAllowedVoteByCC : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAllowedVoteByCC &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Boolean allowedVoteByCC;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@631654cb_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_58'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_21'>21</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_21'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>details<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::details &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>poolName<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::poolName &rarr; NO_COVERAGE</p> <p class='SURVIVED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>submissionDate<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::submissionDate &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>status<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::status &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::toString &rarr; NO_COVERAGE</p> <p class='SURVIVED'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>govActionType<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::govActionType &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>voteType<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::voteType &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>self<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilderImpl::self &rarr; NO_COVERAGE</p> <p class='SURVIVED'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>blockTime<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::blockTime &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>epoch<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::epoch &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>voterHash<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::voterHash &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>allowedVoteByCC<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::allowedVoteByCC &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>txHash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest]/[method:testGetVotingProcedureChart()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::txHash &rarr; KILLED</p> <p class='KILLED'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>anchorUrl<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest]/[method:testGetVotingProcedureChart()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::anchorUrl &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>build<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilderImpl::build &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>expiryDate<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::expiryDate &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>17.<span><b>17</b><br/><b>Location : </b>index<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest]/[method:testGetVotingProcedureChart()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::index &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>18.<span><b>18</b><br/><b>Location : </b>builder<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::builder &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>19.<span><b>19</b><br/><b>Location : </b>anchorHash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest]/[method:testGetVotingProcedureChart()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::anchorHash &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>20.<span><b>20</b><br/><b>Location : </b>allowedVoteBySPO<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::allowedVoteBySPO &rarr; NO_COVERAGE</p> <p class='SURVIVED'><span class='pop'>21.<span><b>21</b><br/><b>Location : </b>votingPower<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails$GovernanceActionDetailsBuilder::votingPower &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_25'>25</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_25'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTxHash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.GovActionServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.GovActionServiceTest]/[method:getGovActionDetails_withPoolView()]</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getTxHash &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_27'>27</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_27'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getIndex<br/><b>Killed by : </b>none</span></span> replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getIndex &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_29'>29</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_29'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getGovActionType<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getGovActionType &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_31'>31</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_31'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAnchorHash<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest]/[method:testGetVotingProcedureChart()]</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAnchorHash &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_33'>33</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_33'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAnchorUrl<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAnchorUrl &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_35'>35</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_35'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getDetails<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getDetails &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_37'>37</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_37'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEpoch<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getEpoch &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_39'>39</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_39'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getBlockTime<br/><b>Killed by : </b>none</span></span> replaced Long return value with 0L for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getBlockTime &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_41'>41</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_41'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getVoteType<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.GovActionServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.GovActionServiceTest]/[method:getGovActionDetails_withPoolView()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getVoteType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_43'>43</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_43'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getVoterHash<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getVoterHash &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_45'>45</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_45'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getStatus<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getStatus &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_47'>47</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_47'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getVotingPower<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getVotingPower &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_49'>49</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_49'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getSubmissionDate<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getSubmissionDate &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_51'>51</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_51'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getExpiryDate<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getExpiryDate &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_53'>53</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_53'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getPoolName<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getPoolName &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_55'>55</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_55'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAllowedVoteBySPO<br/><b>Killed by : </b>none</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAllowedVoteBySPO &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getAllowedVoteBySPO<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAllowedVoteBySPO &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@631654cb_57'>57</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@631654cb_57'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getAllowedVoteByCC<br/><b>Killed by : </b>none</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAllowedVoteByCC &rarr; SURVIVED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getAllowedVoteByCC<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/response/governanceAction/GovernanceActionDetails::getAllowedVoteByCC &rarr; SURVIVED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.service.GovActionServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.GovActionServiceTest]/[method:getGovActionDetails_withPoolView()] (12 ms)</li><li>org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.GovernanceActionControllerTest]/[method:testGetVotingProcedureChart()] (45 ms)</li><li>org.cardanofoundation.explorer.api.service.GovActionServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.GovActionServiceTest]/[method:getGovActionDetails()] (13 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
