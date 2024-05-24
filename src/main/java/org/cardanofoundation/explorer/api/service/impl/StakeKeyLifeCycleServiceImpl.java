@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
-import org.cardanofoundation.explorer.api.common.enumeration.StakeTxType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
@@ -34,7 +32,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
@@ -42,14 +40,12 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -64,8 +60,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final StakeAddressRepository stakeAddressRepository;
   private final RewardRepository rewardRepository;
   private final WithdrawalRepository withdrawalRepository;
-  private final AddressTxBalanceRepository addressTxBalanceRepository;
-  private final TxRepository txRepository;
+  private final AddressTxAmountRepository addressTxAmountRepository;
   private final TxOutRepository txOutRepository;
   private final FetchRewardDataService fetchRewardDataService;
   private final EpochParamRepository epochParamRepository;
@@ -221,8 +216,10 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
             .findDelegationByAddressAndTx(stakeAddress, hash)
             .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_DELEGATION_NOT_FOUND));
     var totalBalance =
-        addressTxBalanceRepository
-            .getBalanceByStakeAddressAndTime(stakeAddress, delegation.getTime())
+        addressTxAmountRepository
+            .getBalanceByStakeAddressAndTime(
+                stakeAddress.getView(),
+                delegation.getTime().toLocalDateTime().toEpochSecond(ZoneOffset.UTC))
             .orElse(BigInteger.ZERO);
     return StakeDelegationDetailResponse.builder()
         .fee(delegation.getFee())
@@ -323,8 +320,10 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
             .getWithdrawalByAddressAndTx(stakeAddress, hash)
             .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
     var totalBalance =
-        addressTxBalanceRepository
-            .getBalanceByStakeAddressAndTime(stakeAddress, withdrawal.getTime())
+        addressTxAmountRepository
+            .getBalanceByStakeAddressAndTime(
+                stakeAddress.getView(),
+                withdrawal.getTime().toLocalDateTime().toEpochSecond(ZoneOffset.UTC))
             .orElse(BigInteger.ZERO);
     BigInteger rewardAvailable = null;
 
@@ -426,11 +425,33 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         stakeAddressRepository
             .findByView(stakeKey)
             .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    var txAmountList =
-        addressTxBalanceRepository.findTxAndAmountByStake(stakeAddress.getView(), pageable);
-    List<StakeWalletActivityResponse> response =
-        getStakeWalletActivitiesContent(stakeAddress, txAmountList);
-    return new BaseFilterResponse<>(txAmountList, response);
+    Page<StakeTxProjection> txAmountList =
+        addressTxAmountRepository.findTxAndAmountByStake(stakeAddress.getView(), pageable);
+
+    return new BaseFilterResponse<>(txAmountList, getContentWalletActivityResponse(txAmountList));
+  }
+
+  private List<StakeWalletActivityResponse> getContentWalletActivityResponse(
+      Page<StakeTxProjection> txAmountList) {
+    List<StakeWalletActivityResponse> response = new ArrayList<>();
+    txAmountList
+        .getContent()
+        .forEach(
+            item -> {
+              StakeWalletActivityResponse stakeWalletActivity = new StakeWalletActivityResponse();
+              stakeWalletActivity.setTxHash(item.getTxHash());
+              stakeWalletActivity.setAmount(item.getAmount());
+              stakeWalletActivity.setTime(
+                  LocalDateTime.ofInstant(Instant.ofEpochSecond(item.getTime()), ZoneOffset.UTC));
+              if (Boolean.TRUE.equals(item.getValidContract())) {
+                stakeWalletActivity.setStatus(TxStatus.SUCCESS);
+              } else {
+                stakeWalletActivity.setStatus(TxStatus.FAILED);
+              }
+              response.add(stakeWalletActivity);
+            });
+
+    return response;
   }
 
   @Override
@@ -505,94 +526,12 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
       toDate = Timestamp.from(condition.getToDate().toInstant());
     }
     var txAmountList =
-        addressTxBalanceRepository.findTxAndAmountByStakeAndDateRange(
-            stakeAddress.getView(), fromDate, toDate, pageable);
+        addressTxAmountRepository.findTxAndAmountByStakeAndDateRange(
+            stakeAddress.getView(),
+            fromDate.toLocalDateTime().toInstant(ZoneOffset.UTC).getEpochSecond(),
+            toDate.toLocalDateTime().toInstant(ZoneOffset.UTC).getEpochSecond(),
+            pageable);
 
-    List<StakeWalletActivityResponse> response =
-        getStakeWalletActivitiesContent(stakeAddress, txAmountList);
-    return new BaseFilterResponse<>(txAmountList, response);
-  }
-
-  private List<StakeWalletActivityResponse> getStakeWalletActivitiesContent(
-      StakeAddress stakeAddress, Page<StakeTxProjection> txAmountList) {
-    List<StakeWalletActivityResponse> response = new ArrayList<>();
-    List<Long> txIds =
-        txAmountList.getContent().stream()
-            .map(StakeTxProjection::getTxId)
-            .collect(Collectors.toList());
-    var txList = txRepository.findByIdIn(txIds);
-    var registrationList =
-        stakeRegistrationRepository.getStakeRegistrationsByAddressAndTxIn(stakeAddress, txIds);
-    var deregistrationList =
-        stakeDeRegistrationRepository.getStakeDeRegistrationsByAddressAndTxIn(stakeAddress, txIds);
-    var delegationList = delegationRepository.findDelegationByAddressAndTxIn(stakeAddress, txIds);
-    var withdrawList = withdrawalRepository.getWithdrawalByAddressAndTxIn(stakeAddress, txIds);
-    Map<Long, Tx> txMap = txList.stream().collect(Collectors.toMap(Tx::getId, Function.identity()));
-    txAmountList
-        .getContent()
-        .forEach(
-            item -> {
-              StakeWalletActivityResponse stakeWalletActivity = new StakeWalletActivityResponse();
-              stakeWalletActivity.setTxHash(txMap.get(item.getTxId()).getHash());
-              stakeWalletActivity.setAmount(item.getAmount());
-              stakeWalletActivity.setTime(item.getTime().toLocalDateTime());
-              stakeWalletActivity.setFee(txMap.get(item.getTxId()).getFee());
-              if (Boolean.TRUE.equals(txMap.get(item.getTxId()).getValidContract())) {
-                stakeWalletActivity.setStatus(TxStatus.SUCCESS);
-              } else {
-                stakeWalletActivity.setStatus(TxStatus.FAILED);
-              }
-
-              stakeWalletActivity.setType(
-                  getStakeTxType(
-                      stakeWalletActivity,
-                      txMap.get(item.getTxId()),
-                      registrationList,
-                      deregistrationList,
-                      delegationList,
-                      withdrawList));
-              response.add(stakeWalletActivity);
-            });
-    return response;
-  }
-
-  private StakeTxType getStakeTxType(
-      StakeWalletActivityResponse stakeWalletActivity,
-      Tx tx,
-      List<Long> registrationList,
-      List<Long> deregistrationList,
-      List<Long> delegationList,
-      List<Long> withdrawList) {
-    boolean isRegistration = registrationList.contains(tx.getId());
-    boolean isDeRegistration = deregistrationList.contains(tx.getId());
-    boolean isDelegation = delegationList.contains(tx.getId());
-    boolean isWithdraw = withdrawList.contains(tx.getId());
-    BigInteger fee = tx.getFee();
-    BigInteger amount = stakeWalletActivity.getAmount();
-    if (isWithdraw) {
-      if (isRegistration) {
-        return StakeTxType.REWARD_WITHDRAWN_AND_CERTIFICATE_HOLD_PAID;
-      } else if (isDeRegistration) {
-        return StakeTxType.REWARD_WITHDRAWN_AND_CERTIFICATE_HOLD_DEPOSIT_REFUNDED;
-      } else {
-        return StakeTxType.REWARD_WITHDRAWN;
-      }
-    } else {
-      if (isRegistration) {
-        return StakeTxType.CERTIFICATE_HOLD_PAID;
-      } else if (isDeRegistration) {
-        return StakeTxType.CERTIFICATE_HOLD_DEPOSIT_REFUNDED;
-      } else if (isDelegation) {
-        return StakeTxType.CERTIFICATE_FEE_PAID;
-      } else if (Objects.nonNull(fee)
-          && fee.abs().compareTo(stakeWalletActivity.getAmount().abs()) == 0) {
-        return StakeTxType.FEE_PAID;
-      } else if (amount != null && amount.compareTo(BigInteger.ZERO) < 0) {
-        return StakeTxType.SENT;
-      } else if (amount != null && amount.compareTo(BigInteger.ZERO) > 0) {
-        return StakeTxType.RECEIVED;
-      }
-    }
-    return StakeTxType.UNKNOWN;
+    return new BaseFilterResponse<>(txAmountList, getContentWalletActivityResponse(txAmountList));
   }
 }

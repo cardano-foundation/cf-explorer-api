@@ -51,4 +51,8 @@ public class GovernanceActionDetails {
   Date expiryDate;
 
   String poolName;
+
+  Boolean allowedVoteBySPO;
+
+  Boolean allowedVoteByCC;
 }

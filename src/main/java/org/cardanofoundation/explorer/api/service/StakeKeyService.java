@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import org.springframework.data.domain.Pageable;
 
@@ -119,8 +118,7 @@ public interface StakeKeyService {
    * @param type type of analytics (day, week, month, 3month)
    * @return list balance value by stake
    */
-  AddressChartBalanceResponse getStakeBalanceAnalytics(String stakeKey, AnalyticType type)
-      throws ExecutionException, InterruptedException;
+  AddressChartBalanceResponse getStakeBalanceAnalytics(String stakeKey, AnalyticType type);
 
   /**
    * Get stake reward analytics

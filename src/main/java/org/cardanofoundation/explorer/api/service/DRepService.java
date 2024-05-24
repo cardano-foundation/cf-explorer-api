@@ -9,6 +9,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepDelegatorsResp
 import org.cardanofoundation.explorer.api.model.response.drep.DRepDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.DRepOverviewResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.DRepRangeValuesResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 
@@ -28,4 +29,6 @@ public interface DRepService {
 
   BaseFilterResponse<DRepFilterResponse> getDRepsByFilter(
       DRepFilterRequest dRepFilterRequest, Pageable pageable);
+
+  DRepRangeValuesResponse getDRepRangeValues();
 }
