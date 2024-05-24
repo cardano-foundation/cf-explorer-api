@@ -30,7 +30,8 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
+import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -85,7 +86,7 @@ public class ScriptController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {MultiAsset_.TX_COUNT},
+              sort = {TokenTxCount_.TX_COUNT},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {
@@ -100,7 +101,14 @@ public class ScriptController {
       description = "Get all holders of all tokens of policy")
   public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getHolders(
       @PathVariable @Parameter(description = "The native script hash") String scriptHash,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 20,
+              sort = {LatestTokenBalance_.QUANTITY},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
     return ResponseEntity.ok(
         scriptService.getNativeScriptHolders(scriptHash, pagination.toPageable()));
   }

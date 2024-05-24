@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,23 +147,24 @@ public class GovernanceActionControllerTest {
 
     VotingChartResponse votingChartResponse =
         VotingChartResponse.builder()
-            .numberOfNoVotes(0L)
-            .numberOfYesVote(1L)
-            .numberOfAbstainVotes(2L)
+            .activeVoteStake(BigInteger.TEN)
+            .totalYesVoteStake(BigInteger.ONE)
+            .totalNoVoteStake(BigInteger.TWO)
+            .abstainVoteStake(BigInteger.ZERO)
             .txHash(txHash)
-            .index(index)
             .build();
 
-    when(governanceActionService.getVotingChartByGovActionTxHashAndIndex(anyString(), any()))
+    when(governanceActionService.getVotingChartByGovActionTxHashAndIndex(anyString(), any(), any()))
         .thenReturn(votingChartResponse);
     mockMvc
         .perform(
             get("/api/v1/gov-actions/voting-chart")
                 .param("txHash", txHash)
                 .param("index", Integer.toString(index))
+                .param("voterType", VoterType.DREP_KEY_HASH.toString())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString(txHash)))
-        .andExpect(jsonPath("$.numberOfYesVote").value(1L));
+        .andExpect(jsonPath("$.activeVoteStake").value(BigInteger.TEN));
   }
 }

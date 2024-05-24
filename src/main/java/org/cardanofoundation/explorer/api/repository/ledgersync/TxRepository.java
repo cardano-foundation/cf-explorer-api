@@ -100,4 +100,6 @@ public interface TxRepository extends JpaRepository<Tx, Long>, JpaSpecificationE
           + " AND r.scriptHash = :scriptHash")
   List<SmartContractTxProjection> getSmartContractTxsPurpose(
       @Param("txIds") Collection<Long> txIds, @Param("scriptHash") String scriptHash);
+
+  List<Tx> findAllByHashIn(List<String> txHashes);
 }

@@ -23,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.bloxbean.cardano.client.transaction.spec.script.NativeScript;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,9 +49,8 @@ import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRe
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
@@ -83,12 +81,10 @@ class ScriptServiceTest {
   @Mock MultiAssetRepository multiAssetRepository;
   @Mock NativeScriptInfoRepository nativeScriptInfoRepository;
   @Mock BlockRepository blockRepository;
-  @Mock AssetMetadataRepository assetMetadataRepository;
   @Mock SmartContractInfoRepository smartContractInfoRepository;
-  @Mock AddressTokenBalanceRepository addressTokenBalanceRepository;
+  @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
   @Mock VerifiedScriptRepository verifiedScriptRepository;
   @Mock TxService txService;
-  @Mock NativeScript nativeScript;
   @Mock MaTxMintRepository maTxMintRepository;
   @InjectMocks ScriptServiceImpl scriptService;
 
@@ -500,15 +496,17 @@ class ScriptServiceTest {
     AddressTokenProjection projection = mock(AddressTokenProjection.class);
     when(projection.getPolicy()).thenReturn(scriptHash);
     when(projection.getAddressId()).thenReturn(addressId);
-    when(addressTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
+    when(projection.getAddress()).thenReturn("address");
+    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
         .thenReturn(List.of(projection));
-    when(addressRepository.findAddressByIdIn(Set.of(addressId))).thenReturn(List.of(address));
+    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
+        .thenReturn(List.of(projection));
 
     var actual = scriptService.getNativeScriptHolders(scriptHash, pageable);
 
     Assertions.assertTrue(actual.getData().get(0).getPolicy().equals(scriptHash));
     Assertions.assertEquals(1, actual.getTotalItems());
-    Assertions.assertNull(actual.getData().get(0).getAddressId());
+    Assertions.assertNotNull(actual.getData().get(0).getAddressId());
   }
 
   @Test
@@ -595,6 +593,7 @@ class ScriptServiceTest {
     when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
     when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
         .thenReturn(Optional.of(nativeScriptInfo));
+
     when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
     var actual = scriptService.getNativeScriptDetail(scriptHash);
 
@@ -634,6 +633,7 @@ class ScriptServiceTest {
     when(scriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(script));
     when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
         .thenReturn(Optional.of(nativeScriptInfo));
+
     when(verifiedScriptRepository.findByHash(scriptHash)).thenReturn(Optional.of(verifiedScript));
 
     Slice<MultiAsset> multiAssetSlice =

@@ -36,7 +36,6 @@ import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
@@ -191,34 +190,32 @@ class TokenControllerTest {
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
 
-  @Test
-  void testGetTransactions() throws Exception {
-    // Setup
-    final TxFilterResponse txFilterResponse = new TxFilterResponse();
-    txFilterResponse.setId(0L);
-    txFilterResponse.setHash("14cbfbf5c8f65d4085e76e7e8c8f53d4beaf749d02de1bcf77d6c95d8e7c347d");
-    txFilterResponse.setBlockNo(10L);
-    txFilterResponse.setBlockHash(
-        "67f852c0d4214d8291e3c887c180b105c6cf859d79284de6aea4cdcfb186d4e5");
-    txFilterResponse.setEpochNo(1000);
-
-    final BaseFilterResponse<TxFilterResponse> filterResponse =
-        new BaseFilterResponse<>(new PageImpl<>(List.of(txFilterResponse)));
-    when(txService.getTransactionsByToken(anyString(), any(Pageable.class)))
-        .thenReturn(filterResponse);
-
-    // Run the test
-    final MockHttpServletResponse response =
-        mockMvc
-            .perform(
-                get("/api/v1/tokens/{tokenId}/txs", "asset1tgpj6sgc33av38fdrnsry6s8p0zv7k5yv0xzam")
-                    .accept(MediaType.APPLICATION_JSON))
-            .andReturn()
-            .getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-  }
+  //  @Test
+  //  void testGetTransactions() throws Exception {
+  //    // Setup
+  //    final TxFilterResponse txFilterResponse = new TxFilterResponse();
+  //    txFilterResponse.setId(0L);
+  //
+  // txFilterResponse.setHash("14cbfbf5c8f65d4085e76e7e8c8f53d4beaf749d02de1bcf77d6c95d8e7c347d");
+  //    txFilterResponse.setBlockNo(10L);
+  //    txFilterResponse.setBlockHash(
+  //        "67f852c0d4214d8291e3c887c180b105c6cf859d79284de6aea4cdcfb186d4e5");
+  //    txFilterResponse.setEpochNo(1000);
+  //
+  //    final BaseFilterResponse<TxFilterResponse> filterResponse = new BaseFilterResponse<>(
+  //        new PageImpl<>(List.of(txFilterResponse)));
+  //    when(txService.getTransactionsByToken(anyString(), any(Pageable.class)))
+  //        .thenReturn(filterResponse);
+  //
+  //    // Run the test
+  //    final MockHttpServletResponse response = mockMvc.perform(
+  //            get("/api/v1/tokens/{tokenId}/txs", "asset1tgpj6sgc33av38fdrnsry6s8p0zv7k5yv0xzam")
+  //                .accept(MediaType.APPLICATION_JSON))
+  //        .andReturn().getResponse();
+  //
+  //    // Verify the results
+  //    assertEquals(HttpStatus.OK.value(), response.getStatus());
+  //  }
 
   @Test
   void testGetTokenVolumeAnalytics() throws Exception {

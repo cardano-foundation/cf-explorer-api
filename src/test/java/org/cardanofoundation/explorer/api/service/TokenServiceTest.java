@@ -6,14 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +35,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
-import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
@@ -49,10 +49,10 @@ import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
@@ -62,12 +62,10 @@ import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
 import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressToken;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -77,9 +75,9 @@ class TokenServiceTest {
   @Mock private MultiAssetRepository multiAssetRepository;
   @Mock private MaTxMintRepository maTxMintRepository;
   @Mock private AssetMetadataRepository assetMetadataRepository;
-  @Mock private AddressTokenRepository addressTokenRepository;
+  @Mock private LatestTokenBalanceRepository latestTokenBalanceRepository;
   @Mock private AddressRepository addressRepository;
-  @Mock private AddressTokenBalanceRepository addressTokenBalanceRepository;
+  @Mock private AddressTxAmountRepository addressTxAmountRepository;
   @Mock private TokenInfoRepository tokenInfoRepository;
   @Mock private TokenMapper tokenMapper;
   @Mock private MaTxMintMapper maTxMintMapper;
@@ -205,6 +203,7 @@ class TokenServiceTest {
             .name("PARA0043")
             .nameView("PARA0043")
             .fingerprint("asset1kz0wkuzt8293x5jsz7tryyjdvs6mh7rcupf9nz")
+            .unit("unit")
             .supply(BigInteger.ONE)
             .build();
 
@@ -222,6 +221,7 @@ class TokenServiceTest {
             .volume24h(new BigInteger("100"))
             .updateTime(Timestamp.valueOf(LocalDateTime.now()))
             .build();
+
     when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
 
     final AssetMetadata metadata =
@@ -239,8 +239,14 @@ class TokenServiceTest {
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
-    final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0));
-    when(multiAssetRepository.getLastActivityTimeOfToken(multiAsset)).thenReturn(timestamp);
+    final long latestEpochTime = 1715133010;
+    final Timestamp latestTimestamp =
+        Timestamp.valueOf(
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
+    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
+        .thenReturn(latestEpochTime);
+
+    when(maTxMintRepository.getTxMetadataToken(anyString(), any())).thenReturn(null);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any())).thenReturn(null);
 
@@ -252,7 +258,7 @@ class TokenServiceTest {
     assertEquals("100", result.getVolumeIn24h());
     assertEquals(TokenType.NFT, result.getTokenType());
     assertNull(result.getMetadataJson());
-    assertEquals(timestamp, result.getTokenLastActivity());
+    assertEquals(latestTimestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
   }
 
@@ -284,6 +290,7 @@ class TokenServiceTest {
             .volume24h(new BigInteger("100"))
             .updateTime(Timestamp.valueOf(LocalDateTime.now()))
             .build();
+
     when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
 
     final AssetMetadata metadata =
@@ -301,8 +308,12 @@ class TokenServiceTest {
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
-    final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0));
-    when(multiAssetRepository.getLastActivityTimeOfToken(multiAsset)).thenReturn(timestamp);
+    final long latestEpochTime = 1715133010;
+    final Timestamp latestTimestamp =
+        Timestamp.valueOf(
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
+    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
+        .thenReturn(latestEpochTime);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any()))
         .thenReturn(
@@ -317,7 +328,7 @@ class TokenServiceTest {
         "{\"0495e7467b9f8285ef79fca99fe1ed85ca19faba5b7d4dd425c3d884\":{\"ElephantSecretAvatars215\":{\"image\":\"ipfs://QmNvjyj4o7p7UXMEbxnx9ZY5ZLFMJcy9sjMXaTiFRgC4nJ\",\"name\":\"ElephantSecretAvatars#0215\",\"files\":[{\"src\":\"ipfs://QmaRoAcJcHunUsEEE1FSiPm5SWe47PQbexwQpHZdbTLzde\",\"name\":\"ElephantSecretAvatars#0215\",\"mediaType\":\"model/gltf-binary\"}],\"Animation\":\"Idle\",\"Skin\":\"Pink\",\"mediaType\":\"image/png\"}}}",
         result.getMetadataJson());
     assertEquals(TokenType.NFT, result.getTokenType());
-    assertEquals(timestamp, result.getTokenLastActivity());
+    assertEquals(latestTimestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
   }
 
@@ -349,6 +360,7 @@ class TokenServiceTest {
             .volume24h(new BigInteger("100"))
             .updateTime(Timestamp.valueOf(LocalDateTime.now()))
             .build();
+
     when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
 
     final AssetMetadata metadata =
@@ -366,8 +378,12 @@ class TokenServiceTest {
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
-    final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0));
-    when(multiAssetRepository.getLastActivityTimeOfToken(multiAsset)).thenReturn(timestamp);
+    final long latestEpochTime = 1715133010;
+    final Timestamp latestTimestamp =
+        Timestamp.valueOf(
+            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
+    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
+        .thenReturn(latestEpochTime);
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any()))
         .thenReturn(
@@ -382,7 +398,7 @@ class TokenServiceTest {
     assertEquals(
         "{\"2aec93fa65aaedaf2fc0aa46c3ace89c0c8e091ed5f39b8f8127e664\":{\"Promises2239\":{\"Candidate\":\"RichardTrixson\",\"image\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"Series\":\"CampaignMaterials\",\"Promise\":\"Correct\",\"Number\":\"2239\",\"Banner\":\"Modern\",\"Asset\":\"Promises2239\",\"files\":[{\"src\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"},{\"src\":\"ipfs://QmTWuebKD7FC8kKh8tBoPsVedyhJg38g92dBopnb7fM98C\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"}],\"Collection\":\"OldMoney\",\"mediaType\":\"image/jpeg\",\"Name\":\"Promises\"}},\"version\":\"1.0\"}",
         result.getMetadataJson());
-    assertEquals(timestamp, result.getTokenLastActivity());
+    assertEquals(latestTimestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
   }
 
@@ -432,58 +448,47 @@ class TokenServiceTest {
             .policy("policy")
             .name("name")
             .nameView("nameView")
+            .unit("unit")
             .fingerprint("fingerprint")
             .build();
+
+    final TokenInfo tokenInfo = TokenInfo.builder().multiAssetId(0L).numberOfHolders(1L).build();
+
+    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
-    // Configure AddressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(...).
-    when(addressTokenBalanceRepository.findAddressAndBalanceByMultiAsset(
-            eq(multiAsset), any(Pageable.class)))
-        .thenReturn(List.of(AddressTokenProjectionImpl.builder().addressId(1L).build()));
-
-    // Configure AddressRepository.findAddressByIdIn(...).
-    final Address address =
-        Address.builder()
-            .id(0L)
-            .address("address")
-            .txCount(10L)
-            .balance(new BigInteger("100"))
-            .build();
-    final List<Address> addresses = List.of(address);
-    when(addressRepository.findAddressByIdIn(anyCollection())).thenReturn(addresses);
-
-    // Configure TokenMapper.fromAddressTokenProjection(...).
     final TokenAddressResponse tokenAddressResponse =
-        TokenAddressResponse.builder()
-            .address(address.getAddress())
-            .addressId(address.getId())
-            .build();
-    final StakeAddress stakeAddress = StakeAddress.builder().id(0L).view("address").build();
-    when(stakeAddressRepository.findByIdIn(anyCollection())).thenReturn(List.of(stakeAddress));
+        TokenAddressResponse.builder().address("address").quantity(BigInteger.TEN).build();
 
     when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
         .thenReturn(tokenAddressResponse);
 
-    // Run the test
-    final BaseFilterResponse<TokenAddressResponse> result =
-        tokenService.getTopHolders("tokenId", PageRequest.of(0, 1));
+    when(latestTokenBalanceRepository.getTopHolderOfToken(anyString(), any(Pageable.class)))
+        .thenReturn(
+            List.of(
+                AddressTokenProjectionImpl.builder()
+                    .address("address")
+                    .quantity(BigInteger.TEN)
+                    .build()));
 
-    // Verify the results
-    assertEquals(address.getAddress(), result.getData().get(0).getAddress());
+    var response = tokenService.getTopHolders("tokenId", PageRequest.of(0, 1));
+
+    assertEquals(1, response.getTotalItems());
+    assertEquals("address", response.getData().get(0).getAddress());
+    assertEquals(BigInteger.TEN, response.getData().get(0).getQuantity());
   }
 
   @Test
   void testGetTopHolders_WhenTokenNotFound() {
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(Optional.empty());
     assertThrows(
-        NoContentException.class,
-        () -> tokenService.getTopHolders("tokenId", PageRequest.of(0, 1)));
+        BusinessException.class, () -> tokenService.getTopHolders("tokenId", PageRequest.of(0, 1)));
   }
 
   @Test
-  void testGetTokenVolumeAnalytic_WhenTokenFound_WithOneDayRange() throws Exception {
+  void testGetTokenVolumeAnalytic_WhenTokenFound_WithOneDayRange() {
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset =
@@ -492,13 +497,14 @@ class TokenServiceTest {
             .policy("policy")
             .name("name")
             .nameView("nameView")
+            .unit("unit")
             .fingerprint("fingerprint")
             .build();
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
-    when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class), any(), any()))
+    when(addressTxAmountRepository.sumBalanceBetweenTime(anyString(), any(), any()))
         .thenReturn(Optional.of(new BigInteger("100")));
 
     // Run the test
@@ -521,6 +527,7 @@ class TokenServiceTest {
             .policy("policy")
             .name("name")
             .nameView("nameView")
+            .unit("unit")
             .fingerprint("fingerprint")
             .build();
 
@@ -528,7 +535,7 @@ class TokenServiceTest {
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
-    when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class), any(), any()))
+    when(addressTxAmountRepository.sumBalanceBetweenTime(anyString(), any(), any()))
         .thenReturn(Optional.of(new BigInteger("0")));
 
     // Run the test
@@ -561,14 +568,17 @@ class TokenServiceTest {
     List<AggregateAddressToken> aggregateAddressTokens = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
       aggregateAddressTokens.add(
-          new AggregateAddressToken(0L, new BigInteger("100"), LocalDate.now().minusDays(i)));
+          AggregateAddressToken.builder()
+              .balance(new BigInteger("100"))
+              .day(LocalDate.now().minusDays(i))
+              .build());
     }
     Collections.reverse(aggregateAddressTokens);
     when(aggregateAddressTokenRepository.findAllByIdentAndDayBetween(any(), any(), any()))
         .thenReturn(aggregateAddressTokens);
 
     lenient()
-        .when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class), any(), any()))
+        .when(addressTxAmountRepository.sumBalanceBetweenTime(anyString(), any(), any()))
         .thenReturn(Optional.of(new BigInteger("100")));
 
     // Run the test
@@ -592,6 +602,7 @@ class TokenServiceTest {
             .policy("policy")
             .name("name")
             .nameView("nameView")
+            .unit("unit")
             .fingerprint("fingerprint")
             .build();
 
@@ -599,7 +610,7 @@ class TokenServiceTest {
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
     lenient()
-        .when(addressTokenRepository.sumBalanceBetweenTx(any(MultiAsset.class), any(), any()))
+        .when(addressTxAmountRepository.sumBalanceBetweenTime(anyString(), any(), any()))
         .thenReturn(Optional.of(new BigInteger("0")));
 
     // Run the test
@@ -614,7 +625,7 @@ class TokenServiceTest {
   void testGetTokenVolumeAnalytic_WhenTokenNotFound() {
     when(multiAssetRepository.findByFingerprint("tokenId")).thenReturn(Optional.empty());
     assertThrows(
-        NoContentException.class,
+        BusinessException.class,
         () -> tokenService.getTokenVolumeAnalytic("tokenId", AnalyticType.ONE_DAY));
   }
 }

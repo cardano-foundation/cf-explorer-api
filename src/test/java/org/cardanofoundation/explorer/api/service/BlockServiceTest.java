@@ -14,6 +14,7 @@ import org.springframework.data.domain.*;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import org.cardanofoundation.explorer.api.mapper.BlockMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
+import org.cardanofoundation.explorer.api.projection.PoolMintBlockProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.SlotLeaderRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
@@ -52,11 +54,14 @@ public class BlockServiceTest {
     block.setBlockNo(123L);
     BlockResponse expectedResponse = new BlockResponse();
 
+    PoolMintBlockProjection projection = Mockito.mock(PoolMintBlockProjection.class);
+
     // Mock repository method
     when(blockRepository.findFirstByBlockNo(123L)).thenReturn(Optional.of(block));
     when(blockMapper.blockToBlockResponse(block)).thenReturn(expectedResponse);
     when(txRepository.findAllByBlock(block)).thenReturn(new ArrayList<>());
     when(blockRepository.findCurrentBlock()).thenReturn(Optional.of(0));
+    when(blockRepository.getPoolInfoThatMintedBlock(any())).thenReturn(projection);
 
     // Call the service method
     BlockResponse response = blockService.getBlockDetailByBlockId(blockId);
@@ -85,11 +90,17 @@ public class BlockServiceTest {
     Block block = new Block();
     BlockResponse expectedResponse = new BlockResponse();
 
+    PoolMintBlockProjection projection = Mockito.mock(PoolMintBlockProjection.class);
+    when(projection.getPoolView()).thenReturn("poolView");
+    when(projection.getPoolTicker()).thenReturn("poolTicker");
+    when(projection.getPoolName()).thenReturn("poolName");
+
     // Mock repository method
     when(blockRepository.findFirstByHash("hash123")).thenReturn(Optional.of(block));
     when(blockMapper.blockToBlockResponse(block)).thenReturn(expectedResponse);
     when(txRepository.findAllByBlock(block)).thenReturn(new ArrayList<>());
     when(blockRepository.findCurrentBlock()).thenReturn(Optional.of(0));
+    when(blockRepository.getPoolInfoThatMintedBlock(any())).thenReturn(projection);
 
     // Call the service method
     BlockResponse response = blockService.getBlockDetailByBlockId(blockId);
@@ -97,6 +108,7 @@ public class BlockServiceTest {
     // Verify the repository method was called and the response is correct
     verify(blockRepository).findFirstByHash("hash123");
     assertEquals(expectedResponse, response);
+    assertEquals(response.getPoolView(), "poolView");
   }
 
   @Test
@@ -117,12 +129,14 @@ public class BlockServiceTest {
     String blockId = "hash123";
     Block block = new Block();
     BlockResponse expectedResponse = new BlockResponse();
+    PoolMintBlockProjection projection = Mockito.mock(PoolMintBlockProjection.class);
 
     // Mock repository method
     when(blockRepository.findFirstByHash("hash123")).thenReturn(Optional.of(block));
     when(blockMapper.blockToBlockResponse(block)).thenReturn(expectedResponse);
     when(txRepository.findAllByBlock(block)).thenReturn(new ArrayList<>());
     when(blockRepository.findCurrentBlock()).thenReturn(Optional.empty());
+    when(blockRepository.getPoolInfoThatMintedBlock(any())).thenReturn(projection);
 
     // Verify the repository method was called and the response is correct
     assertThrows(BusinessException.class, () -> blockService.getBlockDetailByBlockId(blockId));
