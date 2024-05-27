@@ -35,7 +35,6 @@ import org.cardanofoundation.explorer.api.repository.explorer.StakeKeyReportHist
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
-import org.cardanofoundation.explorer.api.service.KafkaService;
 import org.cardanofoundation.explorer.api.service.ReportHistoryService;
 import org.cardanofoundation.explorer.api.service.RoleService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
@@ -46,8 +45,6 @@ import org.cardanofoundation.explorer.common.entity.enumeration.ReportStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
 import org.cardanofoundation.explorer.common.entity.explorer.StakeKeyReportHistory;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
-import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
-import org.cardanofoundation.explorer.common.model.ReportMessage;
 
 @Service
 @RequiredArgsConstructor
@@ -61,33 +58,13 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
   private final StakeKeyReportMapper stakeKeyReportMapper;
   private final StakeAddressRepository stakeAddressRepository;
   private final StorageService storageService;
-  private final KafkaService kafkaService;
   private final FetchRewardDataService fetchRewardDataService;
   private final ReportHistoryService reportHistoryService;
   private final RoleService roleService;
 
   @Override
-  public StakeKeyReportHistoryResponse generateStakeKeyReport(
-      StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal) {
-    StakeKeyReportHistory stakeKeyReportHistory = save(stakeKeyReportRequest, userPrincipal);
-    ReportMessage reportMessage =
-        ReportMessage.builder()
-            .reportHistory(stakeKeyReportHistory.getReportHistory())
-            .timePattern(stakeKeyReportRequest.getTimePattern())
-            .zoneOffset(stakeKeyReportRequest.getZoneOffset())
-            .dateFormat(stakeKeyReportRequest.getDateFormat())
-            .build();
-
-    Boolean isSuccess = kafkaService.sendReportHistory(reportMessage);
-    if (Boolean.FALSE.equals(isSuccess)) {
-      stakeKeyReportHistoryRepository.delete(stakeKeyReportHistory);
-      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
-    }
-    return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(stakeKeyReportHistory);
-  }
-
   @Transactional
-  public StakeKeyReportHistory save(
+  public StakeKeyReportHistoryResponse generateStakeKeyReport(
       StakeKeyReportRequest stakeKeyReportRequest, UserPrincipal userPrincipal) {
     stakeAddressRepository
         .findByView(stakeKeyReportRequest.getStakeKey())
@@ -112,7 +89,16 @@ public class StakeKeyReportServiceImpl implements StakeKeyReportService {
     stakeKeyReportHistory.getReportHistory().setStatus(ReportStatus.IN_PROGRESS);
     stakeKeyReportHistory.getReportHistory().setType(ReportType.STAKE_KEY);
     stakeKeyReportHistory.getReportHistory().setUsername(userPrincipal.getUsername());
-    return stakeKeyReportHistoryRepository.saveAndFlush(stakeKeyReportHistory);
+    stakeKeyReportHistory.getReportHistory().setDateFormat(stakeKeyReportRequest.getDateFormat());
+    stakeKeyReportHistory.getReportHistory().setZoneOffset(stakeKeyReportRequest.getZoneOffset());
+    stakeKeyReportHistory.getReportHistory().setTimePattern(stakeKeyReportRequest.getTimePattern());
+    try {
+      StakeKeyReportHistory successReport =
+          stakeKeyReportHistoryRepository.saveAndFlush(stakeKeyReportHistory);
+      return stakeKeyReportMapper.toStakeKeyReportHistoryResponse(successReport);
+    } catch (Exception e) {
+      throw new BusinessException(BusinessCode.CREATE_REPORT_ERROR);
+    }
   }
 
   @Override
