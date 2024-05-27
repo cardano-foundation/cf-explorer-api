@@ -40,7 +40,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolRep
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.repository.explorer.PoolReportRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepository;
 import org.cardanofoundation.explorer.api.service.impl.PoolReportServiceImpl;
@@ -50,13 +49,11 @@ import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 import org.cardanofoundation.explorer.common.entity.explorer.ReportHistory;
 import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
-import org.cardanofoundation.explorer.common.model.ReportMessage;
 
 @ExtendWith(MockitoExtension.class)
 public class PoolReportServiceTest {
 
   @Mock PoolReportRepository poolReportRepository;
-  @Mock EpochStakeRepository epochStakeRepository;
   @Mock StorageService storageService;
   @Mock PoolLifecycleService poolLifecycleService;
   @Mock PoolHashRepository poolHashRepository;
@@ -64,7 +61,6 @@ public class PoolReportServiceTest {
   @Mock FetchRewardDataService fetchRewardDataService;
   @InjectMocks PoolReportServiceImpl poolReportService;
 
-  @Mock KafkaService kafkaService;
   @Mock ReportHistoryService reportHistoryService;
   @Mock PoolHistoryRepository poolHistoryRepository;
 
@@ -146,7 +142,6 @@ public class PoolReportServiceTest {
     when(poolReportRepository.saveAndFlush(any(PoolReportHistory.class))).thenReturn(saved);
     when(reportHistoryService.isLimitReached(username, 1)).thenReturn(false);
     when(roleService.getReportLimit(roleDescriptions)).thenReturn(1);
-    when(kafkaService.sendReportHistory(any(ReportMessage.class))).thenReturn(true);
     Assertions.assertTrue(
         poolReportService.create(
             request,
