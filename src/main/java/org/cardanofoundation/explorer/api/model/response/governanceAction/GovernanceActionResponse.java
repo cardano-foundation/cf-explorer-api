@@ -30,5 +30,7 @@ public class GovernanceActionResponse {
 
   BigInteger votingPower;
 
+  BigInteger indexType;
+
   Boolean isRepeatVote;
 }
