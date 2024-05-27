@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepRangeValuesRes
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -94,7 +96,12 @@ public class DRepController {
       tags = {"dRep"})
   public ResponseEntity<BaseFilterResponse<DRepDelegatorsResponse>> getDRepDelegation(
       @Valid @PathVariable @Parameter(description = "dRepHashOrDRepId") String dRepHashOrDRepId,
-      @ParameterObject @PaginationValid @Valid Pagination pagination) {
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              sort = {Tx_.ID},
+              direction = Direction.DESC)
+          Pagination pagination) {
     return ResponseEntity.ok(
         dRepService.getDRepDelegators(dRepHashOrDRepId, pagination.toPageable()));
   }
