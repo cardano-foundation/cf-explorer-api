@@ -21,14 +21,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.config.RsaConfig;
 import org.cardanofoundation.explorer.api.exception.UnauthorizedException;
 import org.cardanofoundation.explorer.api.interceptor.auth.Request;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleConfigurationMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.interceptor.auth.UserPrincipal;
+import org.cardanofoundation.explorer.api.service.AuthService;
 import org.cardanofoundation.explorer.api.util.JwtUtils;
+import org.cardanofoundation.explorer.common.entity.enumeration.TokenAuthType;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
@@ -44,6 +45,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   private final RedisTemplate<String, Object> redisTemplate;
 
+  private final AuthService authService;
+
   private List<AntPathRequestMatcher> matchers;
 
   private Map<String, Request> authorEndpoint;
@@ -51,10 +54,12 @@ public class AuthInterceptor implements HandlerInterceptor {
   public AuthInterceptor(
       RoleFilterMapper roleFilterMapper,
       RsaConfig rsaConfig,
-      RedisTemplate<String, Object> redisTemplate) {
+      RedisTemplate<String, Object> redisTemplate,
+      AuthService authService) {
     this.roleConf = roleFilterMapper;
     this.rsaConfig = rsaConfig;
     this.redisTemplate = redisTemplate;
+    this.authService = authService;
   }
 
   @PostConstruct
@@ -164,6 +169,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {
       throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
     }
-    return redisTemplate.hasKey(CommonConstant.JWT + token);
+    return authService.isBlacklistToken(token, TokenAuthType.ACCESS_TOKEN);
   }
 }
