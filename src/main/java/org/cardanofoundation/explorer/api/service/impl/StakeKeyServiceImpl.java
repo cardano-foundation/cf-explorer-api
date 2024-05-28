@@ -101,7 +101,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyDeRegistration(Pageable pageable) {
-
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     Page<StakeDeregistration> stakeDeregistrationPage =
         stakeDeRegistrationRepository.findAll(pageable);
     Page<StakeTxResponse> stakeTxResponsePage = stakeDeregistrationPage.map(StakeTxResponse::new);
