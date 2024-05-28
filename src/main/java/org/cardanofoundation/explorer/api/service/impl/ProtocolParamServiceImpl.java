@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -70,6 +71,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.service.GenesisService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.CostModel;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Epoch;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
@@ -384,6 +386,11 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   @Override
   public Protocols getLatestChange() {
 
+    Epoch firstEpoch =
+        epochRepository
+            .findFirstByNo(BigInteger.ZERO.intValue())
+            .orElseThrow(() -> new BusinessException(BusinessCode.EPOCH_NOT_FOUND));
+
     List<LatestParamHistory> changeHistories = getParamHistories();
     final Protocols protocols = new Protocols();
     Map<Long, String> costModelMap =
@@ -410,15 +417,19 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                                     .invoke(changeHistory);
                             final var oldValue = (ProtocolHistory) protocolGetter.invoke(protocols);
 
+                            final var epochTime = changeHistory.getEpochTime();
+                            LocalDateTime firstEpochStartTime =
+                                firstEpoch.getStartTime().toLocalDateTime();
+                            LocalDateTime time =
+                                LocalDateTime.of(
+                                    epochTime.getYear(),
+                                    epochTime.getMonth(),
+                                    epochTime.getDayOfMonth(),
+                                    firstEpochStartTime.getHour(),
+                                    firstEpochStartTime.getMinute(),
+                                    firstEpochStartTime.getSecond());
                             final var changeTime =
-                                ((boolean)
-                                        latestParamHistoryMethods
-                                            .get(protocolType)
-                                            .getSecond()
-                                            .invoke(changeHistory))
-                                    ? changeHistory.getBlockTime()
-                                    : changeHistory.getEpochTime();
-
+                                Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
                             if (protocolType.equals(ProtocolType.COST_MODEL)) {
                               changeValue = costModelMap.get(changeValue);
                             }
