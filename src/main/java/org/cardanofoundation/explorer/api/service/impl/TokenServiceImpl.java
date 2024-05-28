@@ -92,6 +92,9 @@ public class TokenServiceImpl implements TokenService {
   @Override
   @Transactional(readOnly = true)
   public BaseFilterResponse<TokenFilterResponse> filterToken(String query, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     int tokenCount = aggregatedDataCacheService.getTokenCount();
 
     if (tokenCount == 0) {
@@ -229,12 +232,18 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public BaseFilterResponse<TokenMintTxResponse> getMintTxs(String tokenId, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     Page<MaTxMint> maTxMints = maTxMintRepository.findByIdent(tokenId, pageable);
     return new BaseFilterResponse<>(maTxMints.map(maTxMintMapper::fromMaTxMintToTokenMintTx));
   }
 
   @Override
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     MultiAsset multiAsset =
         multiAssetRepository
             .findByFingerprint(tokenId)

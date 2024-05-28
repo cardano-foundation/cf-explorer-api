@@ -37,6 +37,9 @@ public class PoolCertificateServiceImpl implements PoolCertificateService {
   @Override
   public BaseFilterResponse<TxPoolCertificateHistory> getTxPoolCertificateHistory(
       String poolViewOrHash, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
 
     List<TxPoolCertificateHistory> txCertificateHistories =
         getAllPoolCertificateHistories(poolViewOrHash).stream()

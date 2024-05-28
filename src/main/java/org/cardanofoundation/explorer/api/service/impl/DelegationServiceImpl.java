@@ -142,6 +142,9 @@ public class DelegationServiceImpl implements DelegationService {
 
   @Override
   public BaseFilterResponse<DelegationResponse> getDelegations(Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     Page<Long> txIdPage = delegationRepository.findAllDelegations(pageable);
     List<TxIOProjection> txs = txRepository.findTxIn(txIdPage.getContent());
     Map<Long, TxIOProjection> txMap =
@@ -233,6 +236,9 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolResponse> getDataForPoolTable(
       Pageable pageable, PoolListFilter filter) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     BaseFilterResponse<PoolResponse> response = new BaseFilterResponse<>();
     Set<Long> poolRetiredIds = new HashSet<>();
     if (!Boolean.TRUE.equals(filter.getIsShowRetired())) {
@@ -531,6 +537,9 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolDetailEpochResponse> getEpochListForPoolDetail(
       Pageable pageable, String poolViewOrHash) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     BaseFilterResponse<PoolDetailEpochResponse> epochRes = new BaseFilterResponse<>();
     boolean useKoiOs = fetchRewardDataService.useKoios();
     if (!useKoiOs) {
@@ -656,6 +665,9 @@ public class DelegationServiceImpl implements DelegationService {
   @Override
   public BaseFilterResponse<PoolDetailDelegatorResponse> getDelegatorsForPoolDetail(
       Pageable pageable, String poolViewOrHash) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     if (pageable.getSort().isUnsorted()) {
       pageable =
           PageRequest.of(

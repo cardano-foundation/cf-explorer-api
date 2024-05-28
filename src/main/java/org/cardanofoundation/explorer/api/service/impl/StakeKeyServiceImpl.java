@@ -90,7 +90,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
-
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     Page<StakeRegistration> stakeRegistrationPage = stakeRegistrationRepository.findAll(pageable);
     Page<StakeTxResponse> stakeTxResponsePage = stakeRegistrationPage.map(StakeTxResponse::new);
     getDetailInfoStakeTxResponse(stakeTxResponsePage);
@@ -293,6 +295,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     Pageable pageableDouble =
         PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
     var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageableDouble);

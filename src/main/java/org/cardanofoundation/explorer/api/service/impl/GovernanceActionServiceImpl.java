@@ -96,6 +96,9 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
       String dRepHashOrPoolHash, GovernanceActionFilter governanceActionFilter, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     BaseFilterResponse<GovernanceActionResponse> govActionResponse = new BaseFilterResponse<>();
     govActionResponse.setData(List.of());
 

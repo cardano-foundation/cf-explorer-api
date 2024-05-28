@@ -100,6 +100,9 @@ public class BlockServiceImpl implements BlockService {
 
   @Override
   public BaseFilterResponse<BlockFilterResponse> filterBlock(Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     long totalElements = blockRepository.countAllBlock();
     Direction direction = null;
     String sortField = null;
@@ -294,6 +297,9 @@ public class BlockServiceImpl implements BlockService {
 
   @Override
   public BaseFilterResponse<BlockFilterResponse> getBlockByEpoch(String no, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     try {
       Integer epochNo = Integer.parseInt(no);
       Page<Block> blocks = blockRepository.findBlockByEpochNo(epochNo, pageable);

@@ -37,6 +37,9 @@ public class InstantaneousRewardsServiceImpl implements InstantaneousRewardsServ
 
   @Override
   public BaseFilterResponse<InstantaneousRewardsResponse> getAll(Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     var instantaneousRewards = reserveRepository.findAllTx();
     instantaneousRewards.addAll(treasuryRepository.findAllTx());
     sortInstantaneousRewards(pageable.getSort(), instantaneousRewards);

@@ -67,6 +67,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
 
   @Override
   public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     StakeAddress stakeAddress =
         stakeAddressRepository
             .findByView(stakeKey)
@@ -237,6 +240,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   @Override
   public BaseFilterResponse<StakeRewardResponse> getStakeRewards(
       String stakeKey, Date fromDate, Date toDate, RewardType type, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     StakeAddress stakeAddress =
         stakeAddressRepository
             .findByView(stakeKey)
@@ -269,6 +275,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   @Override
   public BaseFilterResponse<StakeWithdrawalFilterResponse> getStakeWithdrawals(
       String stakeKey, StakeLifeCycleFilterRequest condition, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     StakeAddress stakeAddress =
         stakeAddressRepository
             .findByView(stakeKey)

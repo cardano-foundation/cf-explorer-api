@@ -77,6 +77,9 @@ public class DRepServiceImpl implements DRepService {
   @Override
   public BaseFilterResponse<DRepCertificateHistoryResponse> getTxDRepCertificateHistory(
       String drepHashOrDrepId, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     List<DRepCertificateProjection> dRepCertificateProjections =
         dRepRegistrationRepository.getDRepCertificateByDRepIdOrHash(drepHashOrDrepId);
     List<DRepCertificateHistoryResponse> dRepCertificateHistoryResponses =
@@ -225,6 +228,9 @@ public class DRepServiceImpl implements DRepService {
   @Override
   public BaseFilterResponse<DRepFilterResponse> getDRepsByFilter(
       DRepFilterRequest dRepFilterRequest, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
     fromDate = fromDate < 0 ? 0 : fromDate;
@@ -281,6 +287,9 @@ public class DRepServiceImpl implements DRepService {
   @Override
   public BaseFilterResponse<DRepDelegatorsResponse> getDRepDelegators(
       String drepHashOrDrepId, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     Sort sort = pageable.getSort();
     for (Sort.Order order : sort) {
       if (order.getProperty().equals("createdAt")) {

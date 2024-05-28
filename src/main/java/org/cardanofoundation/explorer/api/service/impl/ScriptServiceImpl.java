@@ -111,6 +111,9 @@ public class ScriptServiceImpl implements ScriptService {
   @Override
   public BaseFilterResponse<NativeScriptFilterResponse> getNativeScripts(
       NativeScriptFilterRequest filterRequest, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     Block currrentBlock =
         blockRepository
             .findLatestBlock()
@@ -385,6 +388,9 @@ public class ScriptServiceImpl implements ScriptService {
   @Override
   public BaseFilterResponse<SmartContractFilterResponse> getSmartContracts(
       SmartContractFilterRequest filterRequest, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     scriptMapper.setScriptTxPurpose(filterRequest);
     Page<SmartContractInfo> smartContractProjections =
         smartContractInfoRepository.findAllByFilterRequest(

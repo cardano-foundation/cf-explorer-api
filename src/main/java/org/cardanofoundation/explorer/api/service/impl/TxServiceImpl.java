@@ -259,6 +259,9 @@ public class TxServiceImpl implements TxService {
   @Override
   public BaseFilterResponse<TxFilterResponse> getTransactionsByBlock(
       String blockId, Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     Page<Tx> txPage;
     try {
       Long blockNo = Long.parseLong(blockId);
@@ -394,7 +397,9 @@ public class TxServiceImpl implements TxService {
   @Override
   public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(
       String tokenId, Pageable pageable) {
-
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     MultiAsset multiAsset =
         multiAssetRepository
             .findByFingerprint(tokenId)

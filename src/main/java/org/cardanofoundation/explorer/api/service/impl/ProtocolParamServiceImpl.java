@@ -140,6 +140,9 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
   @Override
   public HistoriesProtocol getHistoryProtocolParameters(
       List<ProtocolType> protocolTypesInput, BigInteger startTime, BigInteger endTime) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     final String redisKey = getHistoryProtocolParametersKey();
 
     boolean isGetAll = Boolean.FALSE;

@@ -245,6 +245,9 @@ public class AddressServiceImpl implements AddressService {
   //  }
   @Override
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     List<LatestAddressBalance> latestAddressBalances =
         latestAddressBalanceRepository.findAllLatestAddressBalance(pageable);
     Page<LatestAddressBalance> latestAddressBalancePage =

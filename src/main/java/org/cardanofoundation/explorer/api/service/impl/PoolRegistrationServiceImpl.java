@@ -43,6 +43,9 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
 
   @Override
   public BaseFilterResponse<PoolTxResponse> getDataForPoolRegistration(Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     BaseFilterResponse<PoolTxResponse> response = new BaseFilterResponse<>();
     Page<TxBlockEpochProjection> trxBlockEpochPage =
         poolUpdateRepository.getDataForPoolRegistration(pageable);
@@ -57,6 +60,9 @@ public class PoolRegistrationServiceImpl implements PoolRegistrationService {
 
   @Override
   public BaseFilterResponse<PoolTxResponse> getDataForPoolDeRegistration(Pageable pageable) {
+    if (Boolean.TRUE) {
+      throw new RuntimeException("An error occurred while processing the request");
+    }
     BaseFilterResponse<PoolTxResponse> response = new BaseFilterResponse<>();
     Page<TxBlockEpochProjection> trxBlockEpochPage =
         poolRetireRepository.getDataForPoolDeRegistration(pageable);
