@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.projection;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public interface LatestParamHistory {
@@ -65,7 +66,7 @@ public interface LatestParamHistory {
 
   Date getBlockTime();
 
-  Date getEpochTime();
+  LocalDateTime getEpochTime();
 
   String getHash();
 
