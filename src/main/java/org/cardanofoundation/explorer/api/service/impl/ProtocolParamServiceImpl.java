@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -428,8 +427,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                                     firstEpochStartTime.getHour(),
                                     firstEpochStartTime.getMinute(),
                                     firstEpochStartTime.getSecond());
-                            final var changeTime =
-                                Date.from(time.toInstant(ZoneOffset.UTC));
+                            final var changeTime = Date.from(time.toInstant(ZoneOffset.UTC));
                             if (protocolType.equals(ProtocolType.COST_MODEL)) {
                               changeValue = costModelMap.get(changeValue);
                             }
