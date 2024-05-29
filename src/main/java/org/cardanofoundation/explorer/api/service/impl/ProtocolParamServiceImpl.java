@@ -429,7 +429,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
                                     firstEpochStartTime.getMinute(),
                                     firstEpochStartTime.getSecond());
                             final var changeTime =
-                                Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
+                                Date.from(time.toInstant(ZoneOffset.UTC));
                             if (protocolType.equals(ProtocolType.COST_MODEL)) {
                               changeValue = costModelMap.get(changeValue);
                             }
