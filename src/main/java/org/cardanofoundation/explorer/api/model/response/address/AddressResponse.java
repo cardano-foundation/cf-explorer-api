@@ -8,12 +8,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.cardanofoundation.explorer.api.projection.AddressResponseProjection;
+
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressResponse {
+public class AddressResponse implements AddressResponseProjection {
   private String address;
   private Long txCount;
   private BigInteger balance;
@@ -22,14 +24,20 @@ public class AddressResponse {
   private boolean isAssociatedSmartContract;
   private boolean isAssociatedNativeScript;
 
-  public AddressResponse(String address, Long txCount, BigInteger balance) {
-    this.address = address;
-    this.txCount = txCount;
-    this.balance = balance;
-  }
-
   public AddressResponse(String address, BigInteger balance) {
     this.address = address;
     this.balance = balance;
+  }
+
+  public static AddressResponse fromProjection(AddressResponseProjection projection) {
+    if (projection == null) {
+      return null;
+    }
+
+    return AddressResponse.builder()
+        .address(projection.getAddress())
+        .txCount(projection.getTxCount())
+        .balance(projection.getBalance())
+        .build();
   }
 }
