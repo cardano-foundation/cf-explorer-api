@@ -155,14 +155,17 @@ public class StakeKeyServiceImpl implements StakeKeyService {
             .findByView(stake)
             .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
+    StakeAddressBalanceProjection stakeAddressBalanceProjection =
+        latestStakeAddressBalanceRepository.findLatestBalanceByStakeAddress(stakeAddress.getView());
+
     LatestStakeAddressBalance latestStakeAddressBalance =
-        latestStakeAddressBalanceRepository
-            .findByStakeAddress(stake)
-            .orElse(
-                LatestStakeAddressBalance.builder()
-                    .address(stake)
-                    .quantity(BigInteger.ZERO)
-                    .build());
+        LatestStakeAddressBalance.builder()
+            .address(stakeAddress.getView())
+            .quantity(
+                stakeAddressBalanceProjection == null
+                    ? BigInteger.ZERO
+                    : stakeAddressBalanceProjection.getBalance())
+            .build();
 
     if (!fetchRewardDataService.checkRewardAvailable(stake)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stake);
