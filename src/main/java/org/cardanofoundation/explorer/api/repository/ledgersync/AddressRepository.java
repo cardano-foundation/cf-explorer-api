@@ -50,7 +50,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
                                      abv.quantity
                               from address_balance_view abv
                               where abv.address = :address
-                                and quantity > 0) ab ON ab.address = addr.address
+                                and abv.unit = 'lovelace') ab ON ab.address = addr.address
           WHERE addr.address = :address
           """,
       nativeQuery = true)
