@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
+import org.cardanofoundation.explorer.api.projection.AddressResponseProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 
 public interface AddressRepository extends JpaRepository<Address, Long> {
@@ -42,12 +43,16 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   @Query(
       value =
           """
-          SELECT new org.cardanofoundation.explorer.api.model.response.address.AddressResponse
-          (addr.address, CAST(COALESCE(addrTxCount.txCount, 0) AS long), CAST(COALESCE(latestAddrBalance.quantity, 0) AS biginteger))
-          FROM Address addr
-          LEFT JOIN AddressTxCount addrTxCount ON addr.address = addrTxCount.address
-          LEFT JOIN LatestAddressBalance latestAddrBalance ON addr.address = latestAddrBalance.address
+          SELECT addr.address as address, coalesce(atc.tx_count, 0) as txCount, coalesce(ab.quantity, 0) as balance
+          FROM address addr
+                   LEFT JOIN address_tx_count atc ON addr.address = atc.address
+                   LEFT JOIN (SELECT abv.address,
+                                     abv.quantity
+                              from address_balance_view abv
+                              where abv.address = :address
+                                and abv.unit = 'lovelace') ab ON ab.address = addr.address
           WHERE addr.address = :address
-          """)
-  AddressResponse getAddressDetail(@Param("address") String address);
+          """,
+      nativeQuery = true)
+  AddressResponseProjection getAddressDetail(@Param("address") String address);
 }

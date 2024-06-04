@@ -79,7 +79,8 @@ public class AddressServiceImpl implements AddressService {
       throw new BusinessException(BusinessCode.ADDRESS_NOT_FOUND);
     }
 
-    AddressResponse addressResponse = addressRepository.getAddressDetail(address);
+    AddressResponse addressResponse =
+        AddressResponse.fromProjection(addressRepository.getAddressDetail(address));
 
     if (addressResponse == null) {
       addressResponse =
