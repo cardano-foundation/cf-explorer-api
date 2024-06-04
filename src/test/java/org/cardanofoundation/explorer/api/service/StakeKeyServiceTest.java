@@ -49,7 +49,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestStakeAddressBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
@@ -182,11 +181,14 @@ public class StakeKeyServiceTest {
     String address =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
-    StakeAddress stakeAddress = StakeAddress.builder().build();
+    StakeAddress stakeAddress = StakeAddress.builder().view(stakeKey).build();
     StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
     when(sdp.getPoolId()).thenReturn("1");
     when(sdp.getPoolData()).thenReturn("poolData");
     when(sdp.getTickerName()).thenReturn("tickerName");
+
+    StakeAddressBalanceProjection sabp = Mockito.mock(StakeAddressBalanceProjection.class);
+    when(sabp.getBalance()).thenReturn(BigInteger.ONE);
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(true);
@@ -195,10 +197,8 @@ public class StakeKeyServiceTest {
     when(stakeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(stakeDeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(poolUpdateRepository.findPoolByRewardAccount(any())).thenReturn(List.of("pool"));
-    when(latestStakeAddressBalanceRepository.findByStakeAddress(
-            "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx"))
-        .thenReturn(
-            Optional.of(LatestStakeAddressBalance.builder().quantity(BigInteger.ONE).build()));
+    when(latestStakeAddressBalanceRepository.findLatestBalanceByStakeAddress(stakeKey))
+        .thenReturn(sabp);
     var response = stakeKeyService.getStakeByAddress(address);
     assertEquals(response.getStatus(), StakeAddressStatus.DEACTIVATED);
     assertEquals(response.getStakeAddress(), stakeKey);
