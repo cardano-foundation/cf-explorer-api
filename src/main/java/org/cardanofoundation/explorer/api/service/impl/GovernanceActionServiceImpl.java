@@ -435,6 +435,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     votingChartResponse.setTotalNoVoteStake(voteStake.getOrDefault(Vote.NO, BigInteger.ZERO));
     votingChartResponse.setAbstainVoteStake(voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO));
   }
+
   // TODO: Active vote stake of DRep type is not available.
   private void getVotingChartResponseForDRep(
       VotingChartResponse votingChartResponse,

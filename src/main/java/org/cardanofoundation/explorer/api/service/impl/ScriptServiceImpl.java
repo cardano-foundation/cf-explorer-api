@@ -153,6 +153,7 @@ public class ScriptServiceImpl implements ScriptService {
             });
     return new BaseFilterResponse<>(nativeScriptPageResponse);
   }
+
   /**
    * Explain native script
    *

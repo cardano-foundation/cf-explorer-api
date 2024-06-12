@@ -70,6 +70,7 @@ public interface LatestParamHistory {
   String getHash();
 
   Integer getEpochNo();
+
   // check protocol param is changed or not
   boolean getMinFeeAProposal();
 

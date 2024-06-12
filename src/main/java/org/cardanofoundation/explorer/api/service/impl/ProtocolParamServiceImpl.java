@@ -116,6 +116,7 @@ public class ProtocolParamServiceImpl implements ProtocolParamService {
 
   @Value("${genesis.conway}")
   String conwayUrl;
+
   // key::ProtocolType, value::getter>
   Map<ProtocolType, Method> epochParamMethods;
 

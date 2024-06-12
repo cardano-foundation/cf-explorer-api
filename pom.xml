@@ -81,8 +81,8 @@
         <version.com.google.crypto.tink>1.9.0</version.com.google.crypto.tink>
         <version.json-canonicalization>1.1</version.json-canonicalization>
         <version.java-cid>v1.3.3</version.java-cid>
-        <version.spotless-maven-plugin>2.36.0</version.spotless-maven-plugin>
-        <version.google-java-format>1.15.0</version.google-java-format>
+        <version.spotless-maven-plugin>2.43.0</version.spotless-maven-plugin>
+        <version.google-java-format>1.17.0</version.google-java-format>
     </properties>
 
     <repositories>
