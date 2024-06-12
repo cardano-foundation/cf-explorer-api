@@ -1,4 +1,4 @@
-FROM openjdk:18-jdk-slim AS build
+FROM openjdk:21-jdk-slim AS build
 RUN apt update -qq && apt install -y gettext-base
 ARG PRIVATE_MVN_REGISTRY_URL
 ARG PRIVATE_MVN_REGISTRY_USER
@@ -14,7 +14,7 @@ RUN ./mvnw verify clean --fail-never
 COPY . /app
 RUN ./mvnw clean package -DskipTests
 
-FROM openjdk:18-jdk-slim AS runtime
+FROM openjdk:21-jdk-slim AS runtime
 COPY --from=build /app/target/*.jar /app/app.jar
 COPY --from=build /app/src/main/resources/networks /app/genesis
 COPY --from=build /app/src/main/resources/permission /app/permission
