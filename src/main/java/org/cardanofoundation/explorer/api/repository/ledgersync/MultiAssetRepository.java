@@ -105,7 +105,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
               + " CROSS JOIN LATERAL"
               + " (SELECT ma.name as name, ma.name_view as name_view, ma.policy as policy, ma.fingerprint as fingerprint"
               + " FROM multi_asset ma "
-              + " JOIN token_tx_count ttc on ttc.ident = ma.id"
+              + " JOIN token_tx_count ttc on ttc.unit = ma.unit"
               + " WHERE ma.policy = s.hash ORDER BY ttc.tx_count DESC LIMIT 5)"
               + " AS topMultiAsset WHERE s.hash IN :scriptHashes)"
               + " SELECT firstResult.policy as policy, firstResult.name as name, firstResult.name_view as nameView, firstResult.fingerprint as fingerprint,"
