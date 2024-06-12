@@ -139,7 +139,7 @@ redis:
       port: ${REDIS_SENTINEL_PORT:26379}
 
 application:
-  network: ${DB_SCHEMA:mainnet}
+  network: ${NETWORK:mainnet}
   epoch:
     days: ${EPOCH_DAYS:5}
   api.news:
