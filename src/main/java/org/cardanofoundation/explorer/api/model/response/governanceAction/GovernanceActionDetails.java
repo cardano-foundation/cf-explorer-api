@@ -52,6 +52,8 @@ public class GovernanceActionDetails {
 
   String poolName;
 
+  BigInteger indexType;
+
   Boolean allowedVoteBySPO;
 
   Boolean allowedVoteByCC;
