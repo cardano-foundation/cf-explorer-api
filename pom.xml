@@ -42,18 +42,18 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.java>17</version.java>
-        <version.maven-compiler-plugin>3.10.0</version.maven-compiler-plugin>
-        <version.maven-surefire-plugin>3.0.0-M5</version.maven-surefire-plugin>
-        <version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
-        <version.flatten-maven-plugin>1.2.7</version.flatten-maven-plugin>
-        <version.maven-pmd-plugin>3.17.0</version.maven-pmd-plugin>
+        <version.java>21</version.java>
+        <version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
+        <version.maven-surefire-plugin>3.2.5</version.maven-surefire-plugin>
+        <version.jacoco-maven-plugin>0.8.11</version.jacoco-maven-plugin>
+        <version.flatten-maven-plugin>1.3.0</version.flatten-maven-plugin>
+        <version.maven-pmd-plugin>3.22.0</version.maven-pmd-plugin>
         <version.sonarcube-maven-plugin>3.9.1.2184</version.sonarcube-maven-plugin>
         <version.maven-project-info-reports-plugin>3.3.0</version.maven-project-info-reports-plugin>
         <version.maven-site-plugin>4.0.0-M2</version.maven-site-plugin>
         <version.spring-boot>3.1.6</version.spring-boot>
         <version.bloxbean>0.5.1</version.bloxbean>
-        <version.lombok>1.18.26</version.lombok>
+        <version.lombok>1.18.30</version.lombok>
         <version.springdoc-starter>2.1.0</version.springdoc-starter>
         <version.springdoc-openapi-ui>1.7.0</version.springdoc-openapi-ui>
         <version.swagger-annotations>2.2.8</version.swagger-annotations>
@@ -81,8 +81,8 @@
         <version.com.google.crypto.tink>1.9.0</version.com.google.crypto.tink>
         <version.json-canonicalization>1.1</version.json-canonicalization>
         <version.java-cid>v1.3.3</version.java-cid>
-        <version.spotless-maven-plugin>2.36.0</version.spotless-maven-plugin>
-        <version.google-java-format>1.15.0</version.google-java-format>
+        <version.spotless-maven-plugin>2.43.0</version.spotless-maven-plugin>
+        <version.google-java-format>1.17.0</version.google-java-format>
     </properties>
 
     <repositories>
@@ -480,7 +480,7 @@
                     <linkXRef>false</linkXRef>
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                     <minimumTokens>100</minimumTokens>
-                    <targetJdk>18</targetJdk>
+                    <targetJdk>${java.version}</targetJdk>
                     <excludes>
                         <exclude>**/*Bean.java</exclude>
                         <exclude>**/generated/*.java</exclude>

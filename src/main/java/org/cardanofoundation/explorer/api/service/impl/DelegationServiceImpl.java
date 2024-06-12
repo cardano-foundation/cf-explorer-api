@@ -319,6 +319,7 @@ public class DelegationServiceImpl implements DelegationService {
     response.setTotalPages(poolInfoProjections.getTotalPages());
     return new PageImpl<>(poolResponseList, pageable, poolInfoProjections.getTotalElements());
   }
+
   /**
    * Map aggregate pool info for pool response
    *

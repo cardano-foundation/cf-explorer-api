@@ -45,6 +45,7 @@ public class ProtocolParamUpdate {
 
   @JsonProperty("costModelsHash")
   private String costModelsHash;
+
   //  Economic group
   @JsonProperty("minFeeA")
   private Integer minFeeA;
@@ -66,6 +67,7 @@ public class ProtocolParamUpdate {
 
   @JsonProperty("priceStep")
   private Double priceStep;
+
   //  Network group
   @JsonProperty("maxBlockSize")
   private Integer maxBlockSize;
@@ -93,6 +95,7 @@ public class ProtocolParamUpdate {
 
   @JsonProperty("maxCollateralInputs")
   private Integer maxCollateralInputs;
+
   //  Technical group
   @JsonProperty("nopt")
   private Integer nopt;
@@ -105,6 +108,7 @@ public class ProtocolParamUpdate {
 
   @JsonProperty("collateralPercent")
   private Double collateralPercent;
+
   //  governance group
   @JsonProperty("drepVotingThresholds")
   private Object drepVotingThresholds;
@@ -129,6 +133,7 @@ public class ProtocolParamUpdate {
 
   @JsonProperty("committeeMaxTermLength")
   private BigInteger committeeMaxTermLength;
+
   //  security group
   @JsonProperty("minFeeRefScriptCostPerByte")
   private BigInteger minFeeRefScriptCostPerByte;

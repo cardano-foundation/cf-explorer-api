@@ -67,6 +67,7 @@ public interface PoolReportService {
    */
   BaseFilterResponse<PoolReportDetailResponse.EpochSize> fetchEpochSize(
       Long reportId, Pageable pageable, String username);
+
   /**
    * Get pool registration detail by report id
    *
