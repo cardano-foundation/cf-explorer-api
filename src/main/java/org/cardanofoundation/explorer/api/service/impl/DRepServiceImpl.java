@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +53,6 @@ import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
-import org.cardanofoundation.explorer.common.entity.ledgersync.DelegationVote_;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -283,23 +281,15 @@ public class DRepServiceImpl implements DRepService {
   @Override
   public BaseFilterResponse<DRepDelegatorsResponse> getDRepDelegators(
       String drepHashOrDrepId, Pageable pageable) {
-    if (pageable.getSort().isUnsorted()) {
-      pageable =
-          PageRequest.of(
-              pageable.getPageNumber(),
-              pageable.getPageSize(),
-              Sort.by(Direction.DESC, DelegationVote_.BLOCK_TIME));
-    } else {
-      Sort sort = pageable.getSort();
-      for (Sort.Order order : sort) {
-        if (order.getProperty().equals("createdAt")) {
-          pageable =
-              PageRequest.of(
-                  pageable.getPageNumber(),
-                  pageable.getPageSize(),
-                  Sort.by(order.getDirection(), DelegationVote_.BLOCK_TIME));
-          break;
-        }
+    Sort sort = pageable.getSort();
+    for (Sort.Order order : sort) {
+      if (order.getProperty().equals("createdAt")) {
+        pageable =
+            PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(order.getDirection(), "t.id"));
+        break;
       }
     }
 
