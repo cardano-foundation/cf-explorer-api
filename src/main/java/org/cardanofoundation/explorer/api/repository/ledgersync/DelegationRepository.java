@@ -54,12 +54,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(
       @Param("poolIds") Set<Long> poolIds);
 
-  @Query(
-      "SELECT delegation.tx.id"
-          + " FROM Delegation delegation"
-          + " WHERE delegation.address = :stakeKey AND delegation.tx.id IN :txIds")
-  List<Long> findDelegationByAddressAndTxIn(
-      @Param("stakeKey") StakeAddress stakeKey, @Param("txIds") Collection<Long> txIds);
 
   @Query(
       "SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo, block.slotNo as slotNo,"
@@ -180,11 +174,9 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
   @Query(
       value =
           """
-      select sum(lsab.quantity) as balance, d.poolHash.hashRaw as poolHash from Delegation d
-      join StakeAddress sa on sa.id = d.stakeAddressId
-      JOIN LatestStakeAddressBalance lsab on lsab.address = sa.view
-      where d.poolHash.id in :poolIds
-      group by d.poolHash.hashRaw
-    """)
-  List<PoolOverviewProjection> getBalanceByPoolIdIn(@Param("poolIds") List<Long> poolIds);
+                select distinct(sa.view) from Delegation d
+                      join StakeAddress sa on sa.id = d.stakeAddressId
+                      where d.poolHash.view in :poolHashes
+              """)
+  Set<String> getStakeAddressDelegatorsByPoolIds(@Param("poolHashes") Collection<String> poolHashes);
 }

@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.repository.ledgersync;
+package org.cardanofoundation.explorer.api.repository.ledgersyncagg;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.api.projection.TxProjection;
 import org.cardanofoundation.explorer.common.entity.compositeKey.AddressTxAmountId;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount;
 
 public interface AddressTxAmountRepository
     extends JpaRepository<AddressTxAmount, AddressTxAmountId> {
@@ -71,17 +71,16 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-      SELECT tx.id                     as txId,
-             sum(addTxAmount.quantity) as amount,
-             addTxAmount.blockTime     as time
-      FROM AddressTxAmount addTxAmount
-               JOIN Tx tx ON addTxAmount.txHash = tx.hash
-      WHERE tx.id > :fromTxId
-        AND addTxAmount.stakeAddress = :stakeAddress
-      GROUP BY tx.id, addTxAmount.blockTime
+          SELECT addTxAmount.txHash        as txHash,
+                 sum(addTxAmount.quantity) as amount,
+                 addTxAmount.blockTime     as time
+          FROM AddressTxAmount addTxAmount
+          WHERE addTxAmount.blockTime > :fromBlockTime
+            AND addTxAmount.stakeAddress = :stakeAddress
+          GROUP BY addTxAmount.txHash, addTxAmount.blockTime
       """)
   List<StakeTxProjection> findTxAndAmountByStake(
-      @Param("stakeAddress") String stakeAddress, @Param(("fromTxId")) Long fromTxId);
+      @Param("stakeAddress") String stakeAddress, @Param(("fromBlockTime")) Long fromBlockTime);
 
   @Query(
       value =
@@ -114,11 +113,10 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-    SELECT tx.id AS txId, SUM(atm.quantity) AS amount, atm.blockTime AS time, atm.txHash as txHash, tx.validContract as validContract
-    FROM AddressTxAmount atm
-    INNER JOIN Tx tx on atm.txHash = tx.hash
-    WHERE atm.unit = 'lovelace' AND atm.stakeAddress = :stakeAddressView
-    GROUP BY tx.id, atm.blockTime, atm.txHash, tx.validContract
+      SELECT atm.txHash as txHash, SUM(atm.quantity) AS amount, atm.blockTime AS time
+      FROM AddressTxAmount atm
+      WHERE atm.unit = 'lovelace' AND atm.stakeAddress = :stakeAddressView
+      GROUP BY atm.txHash, atm.blockTime, atm.txHash
     """)
   Page<StakeTxProjection> findTxAndAmountByStake(
       @Param("stakeAddressView") String stakeAddressView, Pageable pageable);
@@ -126,12 +124,11 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-    SELECT tx.id AS txId, SUM(atm.quantity) AS amount, atm.blockTime AS time, atm.txHash as txHash, tx.validContract as validContract
-    FROM AddressTxAmount atm
-    INNER JOIN Tx tx on atm.txHash = tx.hash
-    WHERE atm.unit = 'lovelace' AND atm.stakeAddress = :stakeAddressView
-    AND atm.blockTime > :fromDate AND atm.blockTime <= :toDate
-    GROUP BY tx.id, atm.blockTime, atm.txHash, tx.validContract
+      SELECT atm.txHash, SUM(atm.quantity) AS amount, atm.blockTime AS time
+      FROM AddressTxAmount atm
+      WHERE atm.unit = 'lovelace' AND atm.stakeAddress = :stakeAddressView
+      AND atm.blockTime > :fromDate AND atm.blockTime <= :toDate
+      GROUP BY atm.txHash, atm.blockTime
     """)
   Page<StakeTxProjection> findTxAndAmountByStakeAndDateRange(
       @Param("stakeAddressView") String stakeAddressView,

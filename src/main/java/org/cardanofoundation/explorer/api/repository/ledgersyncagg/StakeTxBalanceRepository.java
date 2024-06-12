@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.repository.ledgersync;
+package org.cardanofoundation.explorer.api.repository.ledgersyncagg;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -8,9 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
-import org.cardanofoundation.explorer.common.entity.ledgersync.StakeTxBalance;
+import org.cardanofoundation.explorer.common.entity.compositeKey.StakeAddressTxBalanceId;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeTxBalance;
 
-public interface StakeTxBalanceRepository extends JpaRepository<StakeTxBalance, Long> {
+public interface StakeTxBalanceRepository extends JpaRepository<StakeTxBalance, StakeAddressTxBalanceId> {
 
   @Query(
       value =
@@ -32,8 +33,8 @@ public interface StakeTxBalanceRepository extends JpaRepository<StakeTxBalance, 
 
   @Query(
       value =
-          "select MAX(stb.txId)"
+          "select MAX(stb.time)"
               + " from StakeTxBalance stb "
-              + " where stb.stakeAddressId = :stakeAddressId ")
-  Optional<Long> findMaxTxIdByStakeAddressId(@Param("stakeAddressId") Long stakeAddressId);
+              + " where stb.stakeAddress = :stakeAddress ")
+  Optional<Long> findMaxBlockTimeByStakeAddress(@Param("stakeAddress") String stakeAddress);
 }
