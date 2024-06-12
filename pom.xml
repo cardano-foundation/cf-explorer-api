@@ -83,6 +83,10 @@
         <version.java-cid>v1.3.3</version.java-cid>
         <version.spotless-maven-plugin>2.36.0</version.spotless-maven-plugin>
         <version.google-java-format>1.15.0</version.google-java-format>
+        <test.exclusions>
+            **/entity/**,
+        </test.exclusions>
+        <sonar.coverage.exclusions>${test.exclusions}</sonar.coverage.exclusions>
     </properties>
 
     <repositories>
