@@ -71,9 +71,9 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -90,7 +90,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressTxCountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TokenTxCountRepository;
@@ -108,6 +108,9 @@ import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.*;
 import org.cardanofoundation.explorer.common.entity.ledgersync.*;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressTxCount;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -402,8 +405,8 @@ public class TxServiceImpl implements TxService {
 
     TokenTxCount tokenTxCount =
         tokenTxCountRepository
-            .findById(multiAsset.getId())
-            .orElse(new TokenTxCount(multiAsset.getId(), 0L));
+            .findById(multiAsset.getUnit())
+            .orElse(TokenTxCount.builder().unit(multiAsset.getUnit()).txCount(0L).build());
 
     List<TxProjection> txsProjection =
         addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);

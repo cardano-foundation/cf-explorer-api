@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressBalance_;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
@@ -39,8 +41,6 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
@@ -210,7 +210,7 @@ public class StakeKeyController {
           String stakeKey,
       @PaginationDefault(
               size = 20,
-              sort = {LatestAddressBalance_.QUANTITY},
+              sort = {AddressBalance_.QUANTITY},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {
