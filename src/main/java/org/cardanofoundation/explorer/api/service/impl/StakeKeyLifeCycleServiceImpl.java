@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.*;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
@@ -40,12 +41,14 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepo
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyLifeCycleService;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -64,6 +67,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final TxOutRepository txOutRepository;
   private final FetchRewardDataService fetchRewardDataService;
   private final EpochParamRepository epochParamRepository;
+  private final TxRepository txRepository;
 
   @Override
   public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
@@ -434,6 +438,11 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private List<StakeWalletActivityResponse> getContentWalletActivityResponse(
       Page<StakeTxProjection> txAmountList) {
     List<StakeWalletActivityResponse> response = new ArrayList<>();
+    Map<String, Tx> txMap = txRepository.findAllByHashIn(
+        txAmountList.getContent().stream().map(StakeTxProjection::getTxHash)
+            .collect(Collectors.toList()))
+            .stream().collect(Collectors.toMap(Tx::getHash, Function.identity()));
+
     txAmountList
         .getContent()
         .forEach(
@@ -443,7 +452,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
               stakeWalletActivity.setAmount(item.getAmount());
               stakeWalletActivity.setTime(
                   LocalDateTime.ofInstant(Instant.ofEpochSecond(item.getTime()), ZoneOffset.UTC));
-              if (Boolean.TRUE.equals(item.getValidContract())) {
+              if (Boolean.TRUE.equals(txMap.get(item.getTxHash()).getValidContract())) {
                 stakeWalletActivity.setStatus(TxStatus.SUCCESS);
               } else {
                 stakeWalletActivity.setStatus(TxStatus.FAILED);

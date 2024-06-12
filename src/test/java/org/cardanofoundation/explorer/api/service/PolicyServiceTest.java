@@ -24,7 +24,7 @@ import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;

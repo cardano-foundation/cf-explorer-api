@@ -21,15 +21,13 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   @Query(
       value =
-          "SELECT sa.id as id, sa.view as stakeAddress, lsab.quantity as totalStake"
+          "SELECT sa.id as id, sa.view as stakeAddress"
               + " FROM StakeAddress sa"
-              + " LEFT JOIN LatestStakeAddressBalance lsab ON sa.view = lsab.address"
-              + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
+              + " WHERE sa.view IN :stakeAddresses "
+              + " AND EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
               + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = sa) >"
-              + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)"
-              + " AND lsab.quantity IS NOT NULL"
-              + " ORDER BY totalStake DESC")
-  List<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
+              + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)")
+  List<StakeAddressProjection> findStakeAddressOrderByBalance(@Param("stakeAddresses") Collection<String> stakeAddresses);
 
   @Query(
       value =
@@ -51,7 +49,17 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   @Query(
       value =
-          "SELECT COALESCE(SUM(lsab.quantity), 0) FROM LatestStakeAddressBalance lsab WHERE lsab.address IN :views")
+          """
+              SELECT coalesce(sum(sab.quantity), 0)
+              FROM stake_address_view sav
+              CROSS JOIN LATERAL ( SELECT tmp.address,
+                                    tmp.quantity
+                             FROM stake_address_balance tmp
+                             WHERE tmp.address = sav.stake_address
+                             ORDER BY tmp.slot DESC
+                             LIMIT 1) sab
+              WHERE sav.stake_address IN :views
+              """, nativeQuery = true)
   BigInteger getBalanceByView(@Param("views") List<String> views);
 
   @Query(value = "SELECT sa.view FROM StakeAddress sa WHERE sa.scriptHash = :scriptHash")

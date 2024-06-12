@@ -36,7 +36,7 @@ import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.model.response.tx.TxInfoResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.TxResponse;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;

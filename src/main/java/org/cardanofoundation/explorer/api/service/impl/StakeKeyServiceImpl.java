@@ -14,7 +14,6 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +28,11 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.*;
 import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.*;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestStakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
@@ -42,7 +40,9 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopStakeAddressBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
@@ -52,10 +52,11 @@ import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestStakeAddressBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopStakeAddressBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -86,7 +87,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final FetchRewardDataService fetchRewardDataService;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
-  private final LatestStakeAddressBalanceRepository latestStakeAddressBalanceRepository;
+  private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
+  private final TopStakeAddressBalanceRepository topStakeAddressBalanceRepository;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -156,10 +158,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
             .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
     StakeAddressBalanceProjection stakeAddressBalanceProjection =
-        latestStakeAddressBalanceRepository.findLatestBalanceByStakeAddress(stakeAddress.getView());
+        stakeAddressBalanceRepository.findLatestBalanceByStakeAddress(stakeAddress.getView());
 
-    LatestStakeAddressBalance latestStakeAddressBalance =
-        LatestStakeAddressBalance.builder()
+    StakeAddressBalance stakeAddressBalance =
+        StakeAddressBalance.builder()
             .address(stakeAddress.getView())
             .quantity(
                 stakeAddressBalanceProjection == null
@@ -182,17 +184,17 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
       stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
       stakeAddressResponse.setTotalStake(
-          latestStakeAddressBalance
+          stakeAddressBalance
               .getQuantity()
               .add(stakeAvailableReward)
               .subtract(stakeRewardWithdrawn));
     }
 
     if (stakeAddressResponse.getRewardAvailable() == null) {
-      stakeAddressResponse.setTotalStake(latestStakeAddressBalance.getQuantity());
+      stakeAddressResponse.setTotalStake(stakeAddressBalance.getQuantity());
     } else {
       stakeAddressResponse.setTotalStake(
-          latestStakeAddressBalance.getQuantity().add(stakeAddressResponse.getRewardAvailable()));
+          stakeAddressBalance.getQuantity().add(stakeAddressResponse.getRewardAvailable()));
     }
 
     StakeDelegationProjection poolData =
@@ -296,23 +298,32 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    Pageable pageableDouble =
-        PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-    var stakeList = stakeAddressRepository.findStakeAddressOrderByBalance(pageableDouble);
-    Set<String> stakeAddressList =
-        StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getStakeAddress);
+    List<TopStakeAddressBalance>
+        latestStakeAddressBalances = topStakeAddressBalanceRepository.findAll();
+
+    Map<String, BigInteger> stakeAddressBalanceMap =
+        StreamUtil.toMap(
+            latestStakeAddressBalances, TopStakeAddressBalance::getAddress,
+            TopStakeAddressBalance::getQuantity);
+
+    var stakeAddressDelegatorList = stakeAddressRepository
+        .findStakeAddressOrderByBalance(stakeAddressBalanceMap.keySet());
+
+    Set<String> stakeAddressDelegatorSet =
+        StreamUtil.mapApplySet(stakeAddressDelegatorList, StakeAddressProjection::getStakeAddress);
+
     if (!fetchRewardDataService.useKoios()) {
       return new BaseFilterResponse<>();
     }
 
-    if (!fetchRewardDataService.checkRewardAvailable(stakeAddressList.stream().toList())) {
+    if (!fetchRewardDataService.checkRewardAvailable(stakeAddressDelegatorSet.stream().toList())) {
       boolean fetchRewardResponse =
-          fetchRewardDataService.fetchReward(stakeAddressList.stream().toList());
+          fetchRewardDataService.fetchReward(stakeAddressDelegatorSet.stream().toList());
       if (!fetchRewardResponse) {
         throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
       }
     }
-    var stakeIdList = StreamUtil.mapApplySet(stakeList, StakeAddressProjection::getId);
+    var stakeIdList = StreamUtil.mapApplySet(stakeAddressDelegatorList, StakeAddressProjection::getId);
     var stakeWithdrawals = withdrawalRepository.getRewardWithdrawnByAddrIn(stakeIdList);
     var mapStakeWithdrawnByStakeId =
         StreamUtil.toMap(
@@ -325,12 +336,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
             stakeTotalRewards,
             StakeRewardProjection::getStakeAddressId,
             StakeRewardProjection::getAmount);
-    var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressList);
+    var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressDelegatorSet);
     var mapPoolByStakeAddress =
         StreamUtil.toMap(poolData, StakeDelegationProjection::getStakeAddress);
 
     List<StakeFilterResponse> content = new ArrayList<>();
-    for (var stake : stakeList) {
+    for (var stake : stakeAddressDelegatorList) {
       StakeDelegationProjection delegation = mapPoolByStakeAddress.get(stake.getStakeAddress());
       StakeFilterResponse stakeResponse =
           stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
@@ -339,10 +350,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       var stakeTotalReward =
           mapStakeAvailableRewardsByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
       var availableReward = stakeTotalReward.subtract(stakeWithdrawn);
+      var stakeBalance = stakeAddressBalanceMap.getOrDefault(stake.getStakeAddress(),
+                                                             BigInteger.ZERO);
       if (availableReward.compareTo(BigInteger.ZERO) < 0) {
         availableReward = BigInteger.ZERO;
       }
-      stakeResponse.setBalance(stake.getTotalStake().add(availableReward));
+      stakeResponse.setBalance(stakeBalance.add(availableReward));
       content.add(stakeResponse);
     }
     content.sort(Comparator.comparing(StakeFilterResponse::getBalance).reversed());
@@ -426,7 +439,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
       List<AggregateAddressBalanceProjection> aggregateAddressTxBalances =
           aggregateAddressTxBalanceRepository.findAllByStakeAddressIdAndDayBetween(
-              addr.getId(), dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
+              addr.getView(), dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance =
@@ -475,11 +488,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     } else {
       response.setLowestBalance(fromBalance);
     }
-    Long maxTxId =
-        stakeTxBalanceRepository.findMaxTxIdByStakeAddressId(addr.getId()).orElse(Long.MAX_VALUE);
-    if (!maxTxId.equals(Long.MAX_VALUE)) {
+    Long maxBlockTime =
+        stakeTxBalanceRepository.findMaxBlockTimeByStakeAddress(addr.getView()).orElse(Long.MAX_VALUE);
+    if (!maxBlockTime.equals(Long.MAX_VALUE)) {
       List<StakeTxProjection> stakeTxList =
-          addressTxAmountRepository.findTxAndAmountByStake(addr.getView(), maxTxId);
+          addressTxAmountRepository.findTxAndAmountByStake(addr.getView(), maxBlockTime);
       for (StakeTxProjection stakeTx : stakeTxList) {
         if (response
                 .getHighestBalance()
