@@ -46,7 +46,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `SPRING_PROFILES_ACTIVE`: Spring profiles are `dev`, `prod`, `test` and `local`. There are more profiles managing the rewards and redis configurations (scroll down for . Default is `dev`. The `local` profile should match the most use-cases.
 
 - `PORT`: Port of application. Default is 8080.
-- `DB_SCHEMA`: Schema of database
+- `NETWORK`: Network of blockchain. Default is `mainnet`.
+
 - `DB_MAXIUM_POOL_SIZE`: Maximum pool size of database connection pool. Default is 32.
 - `LEDGER_SYNC_HOST`: Ledger-sync database host.
 - `LEDGER_SYNC_PORT`: Ledger-sync database port

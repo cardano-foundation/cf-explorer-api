@@ -14,6 +14,7 @@ services:
 
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - NETWORK=${NETWORK}
 
       - DB_MAXIUM_POOL_SIZE=${DB_MAXIUM_POOL_SIZE}
 
