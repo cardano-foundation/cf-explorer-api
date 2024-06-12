@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - feat/add-sonarcloud-reports
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
