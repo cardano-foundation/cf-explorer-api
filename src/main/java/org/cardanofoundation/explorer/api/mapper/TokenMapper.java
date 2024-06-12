@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -18,7 +19,6 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResp
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 
 @Mapper(
@@ -50,6 +50,17 @@ public abstract class TokenMapper {
   @Mapping(target = "addressType", expression = "java(getAddressType(projection.getAddress()))")
   public abstract TokenAddressResponse fromAddressTokenProjection(
       AddressTokenProjection projection);
+
+  @Mapping(
+      target = "displayName",
+      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
+  @Mapping(target = "name", source = "multiAsset.name")
+  @Mapping(target = "metadata", expression = "java(getMetadata(projection))")
+  @Mapping(target = "addressType", expression = "java(getAddressType(projection.getAddress()))")
+  @Mapping(target = "policy", source = "multiAsset.policy")
+  @Mapping(target = "fingerprint", source = "multiAsset.fingerprint")
+  public abstract TokenAddressResponse fromAddressTokenProjectionAndMultiAsset(
+      AddressTokenProjection projection, MultiAsset multiAsset);
 
   @Mapping(
       target = "displayName",
