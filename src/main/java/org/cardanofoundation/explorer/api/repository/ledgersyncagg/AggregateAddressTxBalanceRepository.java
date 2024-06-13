@@ -29,7 +29,7 @@ public interface AggregateAddressTxBalanceRepository
       value =
           "SELECT sum(aatb.balance) as balance, aatb.day as day "
               + "FROM AggregateAddressTxBalance aatb "
-              + "WHERE aatb.stakeAddress = :stakeAddressId "
+              + "WHERE aatb.stakeAddress = :stakeAddress "
               + "AND aatb.day >= :from "
               + "AND aatb.day < :to "
               + "GROUP BY aatb.day "
