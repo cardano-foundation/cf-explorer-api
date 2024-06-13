@@ -6,5 +6,4 @@ import org.cardanofoundation.explorer.common.entity.compositeKey.StakeAddressBal
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopStakeAddressBalance;
 
 public interface TopStakeAddressBalanceRepository
-    extends JpaRepository<TopStakeAddressBalance, StakeAddressBalanceId> {
-}
+    extends JpaRepository<TopStakeAddressBalance, StakeAddressBalanceId> {}

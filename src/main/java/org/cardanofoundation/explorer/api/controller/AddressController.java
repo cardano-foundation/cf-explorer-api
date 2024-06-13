@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance_;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
@@ -26,6 +24,8 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;

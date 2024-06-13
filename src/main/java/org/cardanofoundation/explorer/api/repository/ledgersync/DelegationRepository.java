@@ -17,7 +17,6 @@ import org.springframework.stereotype.Repository;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolDetailDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
-import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 
@@ -53,7 +52,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
               + "WHERE ph.id IN :poolIds")
   List<PoolDelegationSummaryProjection> findDelegationPoolsSummary(
       @Param("poolIds") Set<Long> poolIds);
-
 
   @Query(
       "SELECT tx.hash as txHash, block.time as time, block.epochSlotNo as epochSlotNo, block.slotNo as slotNo,"
@@ -178,5 +176,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
                       join StakeAddress sa on sa.id = d.stakeAddressId
                       where d.poolHash.view in :poolHashes
               """)
-  Set<String> getStakeAddressDelegatorsByPoolIds(@Param("poolHashes") Collection<String> poolHashes);
+  Set<String> getStakeAddressDelegatorsByPoolIds(
+      @Param("poolHashes") Collection<String> poolHashes);
 }

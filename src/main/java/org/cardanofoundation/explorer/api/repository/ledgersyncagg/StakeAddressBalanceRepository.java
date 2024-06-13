@@ -11,7 +11,8 @@ import org.cardanofoundation.explorer.api.projection.StakeAddressBalanceProjecti
 import org.cardanofoundation.explorer.common.entity.compositeKey.StakeAddressBalanceId;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressBalance;
 
-public interface StakeAddressBalanceRepository extends JpaRepository<StakeAddressBalance, StakeAddressBalanceId> {
+public interface StakeAddressBalanceRepository
+    extends JpaRepository<StakeAddressBalance, StakeAddressBalanceId> {
 
   @Query(
       value =
@@ -37,6 +38,7 @@ public interface StakeAddressBalanceRepository extends JpaRepository<StakeAddres
                                  ORDER BY tmp.slot DESC
                                  LIMIT 1) sab
                   WHERE sav.stake_address IN :stakeAddresses
-              """, nativeQuery = true)
+              """,
+      nativeQuery = true)
   BigInteger sumBalanceByStakeAddressIn(@Param("stakeAddresses") Collection<String> stakeAddresses);
 }

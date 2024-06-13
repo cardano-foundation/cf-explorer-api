@@ -7,7 +7,6 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -20,6 +19,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount;
 
 @Mapper(
     componentModel = "spring",
