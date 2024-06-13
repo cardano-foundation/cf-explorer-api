@@ -29,37 +29,69 @@ public class Protocols {
   @JsonIgnore EpochChange epochChange;
   ProtocolHistory minFeeA;
   ProtocolHistory minFeeB;
+
+  @JsonProperty("maxBBSize")
   ProtocolHistory maxBlockSize;
+
   ProtocolHistory maxTxSize;
+
+  @JsonProperty("maxBHSize")
   ProtocolHistory maxBhSize;
   ProtocolHistory keyDeposit;
   ProtocolHistory poolDeposit;
+
+  @JsonProperty("eMax")
   ProtocolHistory maxEpoch;
+
+  @JsonProperty("nOpt")
   ProtocolHistory optimalPoolCount;
+
+  @JsonProperty("a0")
   ProtocolHistory influence;
+
+  @JsonProperty("rho")
   ProtocolHistory monetaryExpandRate;
+
+  @JsonProperty("tau")
   ProtocolHistory treasuryGrowthRate;
+
   ProtocolHistory decentralisation;
   ProtocolHistory entropy;
   ProtocolHistory protocolMajor;
   ProtocolHistory protocolMinor;
   ProtocolHistory minUtxoValue;
   ProtocolHistory minPoolCost;
+
+  @JsonProperty("constModels")
   ProtocolHistory costModel;
+
   ProtocolHistory priceMem;
   ProtocolHistory priceStep;
   ProtocolHistory maxTxExMem;
+
+  @JsonProperty("maxTxExUnits")
   ProtocolHistory maxTxExSteps;
+
   ProtocolHistory maxBlockExMem;
+
+  @JsonProperty("maxBlockExUnits")
   ProtocolHistory maxBlockExSteps;
+
   ProtocolHistory maxValSize;
+
+  @JsonProperty("collateralPercentage")
   ProtocolHistory collateralPercent;
+
   ProtocolHistory maxCollateralInputs;
   ProtocolHistory drepDeposit;
   ProtocolHistory drepActivity;
   ProtocolHistory govActionDeposit;
   ProtocolHistory govActionLifetime;
+
+  @JsonProperty("ccMaxTermLength")
   ProtocolHistory committeeMaxTermLength;
+
+  @JsonProperty("ccMinSize")
   ProtocolHistory committeeMinSize;
 
   @JsonProperty("coinsPerUTxOByte")
