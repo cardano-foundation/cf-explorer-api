@@ -37,6 +37,7 @@ public class Protocols {
 
   @JsonProperty("maxBHSize")
   ProtocolHistory maxBhSize;
+
   ProtocolHistory keyDeposit;
   ProtocolHistory poolDeposit;
 
