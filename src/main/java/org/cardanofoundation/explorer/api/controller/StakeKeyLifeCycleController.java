@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
@@ -281,7 +282,7 @@ public class StakeKeyLifeCycleController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {"tx.id"},
+              sort = {AddressTxAmount_.BLOCK_TIME},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {
