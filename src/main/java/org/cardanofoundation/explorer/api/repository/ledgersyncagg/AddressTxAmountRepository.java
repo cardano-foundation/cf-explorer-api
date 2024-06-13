@@ -116,7 +116,7 @@ public interface AddressTxAmountRepository
       SELECT atm.txHash as txHash, SUM(atm.quantity) AS amount, atm.blockTime AS time
       FROM AddressTxAmount atm
       WHERE atm.unit = 'lovelace' AND atm.stakeAddress = :stakeAddressView
-      GROUP BY atm.txHash, atm.blockTime, atm.txHash
+      GROUP BY atm.txHash, atm.blockTime
     """)
   Page<StakeTxProjection> findTxAndAmountByStake(
       @Param("stakeAddressView") String stakeAddressView, Pageable pageable);
@@ -124,7 +124,7 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-      SELECT atm.txHash, SUM(atm.quantity) AS amount, atm.blockTime AS time
+      SELECT atm.txHash as txHash, SUM(atm.quantity) AS amount, atm.blockTime AS time
       FROM AddressTxAmount atm
       WHERE atm.unit = 'lovelace' AND atm.stakeAddress = :stakeAddressView
       AND atm.blockTime > :fromDate AND atm.blockTime <= :toDate
