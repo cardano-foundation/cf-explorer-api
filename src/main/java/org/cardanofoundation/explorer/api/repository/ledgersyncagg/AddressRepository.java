@@ -28,6 +28,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
                          ORDER BY tmp.slot DESC
                          LIMIT 1) ab
           WHERE addr.stake_address = :stakeAddress
+          ORDER BY ab.quantity DESC
           """, nativeQuery = true)
   Page<AddressResponseProjection> findByStakeAddress(
       @Param("stakeAddress") String stakeAddress, Pageable pageable);

@@ -208,10 +208,7 @@ public class StakeKeyController {
           @StakeKeyLengthValid
           @Parameter(description = "The Bech32 encoded version of the stake address.")
           String stakeKey,
-      @PaginationDefault(
-              size = 20,
-              sort = {AddressBalance_.QUANTITY},
-              direction = Sort.Direction.DESC)
+      @ParameterObject
           @Valid
           Pagination pagination) {
     return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
