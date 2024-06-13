@@ -474,7 +474,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       AddressChartBalanceResponse response) {
     var minMaxBalance =
         stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(
-            addr.getId(),
+            addr.getView(),
             fromBalance,
             dates.get(0).toEpochSecond(ZoneOffset.UTC),
             dates.get(dates.size() - 1).toEpochSecond(ZoneOffset.UTC));
