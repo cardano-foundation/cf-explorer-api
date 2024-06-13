@@ -34,13 +34,13 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DataUtil;
@@ -184,7 +184,9 @@ public class AddressServiceImpl implements AddressService {
 
       List<AggregateAddressTxBalance> aggregateAddressTxBalances =
           aggregateAddressTxBalanceRepository.findAllByAddressIdAndDayBetween(
-              addr.getAddress(), dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
+              addr.getAddress(),
+              dates.get(0).toLocalDate(),
+              dates.get(dates.size() - 1).toLocalDate());
 
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
@@ -284,32 +286,33 @@ public class AddressServiceImpl implements AddressService {
     Set<String> unitSet =
         latestTokenBalances.stream().map(LatestTokenBalance::getUnit).collect(Collectors.toSet());
 
-    Map<String, AddressTokenProjection> tokenMetadataMap
-        = multiAssetRepository.findTokenMetadataByUnitIn(unitSet).stream()
+    Map<String, AddressTokenProjection> tokenMetadataMap =
+        multiAssetRepository.findTokenMetadataByUnitIn(unitSet).stream()
             .collect(Collectors.toMap(AddressTokenProjection::getUnit, Function.identity()));
 
     boolean isSearchByDisplayName;
-    if(!DataUtil.isNullOrEmpty(displayName)) {
+    if (!DataUtil.isNullOrEmpty(displayName)) {
       isSearchByDisplayName = true;
       displayName = displayName.trim().toLowerCase();
     } else {
       isSearchByDisplayName = false;
     }
 
-    for(LatestTokenBalance latestTokenBalance : latestTokenBalances) {
+    for (LatestTokenBalance latestTokenBalance : latestTokenBalances) {
       AddressTokenProjection projection = tokenMetadataMap.get(latestTokenBalance.getUnit());
-      TokenAddressResponse tokenAddressResponse = tokenMapper.fromAddressTokenProjection(projection);
+      TokenAddressResponse tokenAddressResponse =
+          tokenMapper.fromAddressTokenProjection(projection);
       tokenAddressResponse.setQuantity(latestTokenBalance.getQuantity());
       tokenAddressResponse.setAddress(address);
 
-      if(!isSearchByDisplayName) {
+      if (!isSearchByDisplayName) {
         tokenListResponse.add(tokenAddressResponse);
-      } else if(tokenAddressResponse.getDisplayName().toLowerCase().contains(displayName)) {
+      } else if (tokenAddressResponse.getDisplayName().toLowerCase().contains(displayName)
+          || tokenAddressResponse.getFingerprint().equals(displayName)) {
         tokenListResponse.add(tokenAddressResponse);
       }
     }
 
-    return new BaseFilterResponse<>(
-        BaseFilterResponse.getPageImpl(tokenListResponse, pageable));
+    return new BaseFilterResponse<>(BaseFilterResponse.getPageImpl(tokenListResponse, pageable));
   }
 }

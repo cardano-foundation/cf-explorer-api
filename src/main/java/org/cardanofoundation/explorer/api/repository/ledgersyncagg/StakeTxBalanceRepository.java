@@ -11,7 +11,8 @@ import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.common.entity.compositeKey.StakeAddressTxBalanceId;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeTxBalance;
 
-public interface StakeTxBalanceRepository extends JpaRepository<StakeTxBalance, StakeAddressTxBalanceId> {
+public interface StakeTxBalanceRepository
+    extends JpaRepository<StakeTxBalance, StakeAddressTxBalanceId> {
 
   @Query(
       value =

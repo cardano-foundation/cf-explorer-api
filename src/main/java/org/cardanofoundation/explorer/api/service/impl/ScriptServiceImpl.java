@@ -377,10 +377,11 @@ public class ScriptServiceImpl implements ScriptService {
     List<AddressTokenProjection> addressTokenMap =
         latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable);
 
-    Map<String, MultiAsset> multiAssetMap = multiAssetRepository.findAllByUnitIn(
-        addressTokenMap.stream().map(AddressTokenProjection::getUnit).toList())
-        .stream()
-        .collect(Collectors.toMap(MultiAsset::getUnit, Function.identity()));
+    Map<String, MultiAsset> multiAssetMap =
+        multiAssetRepository
+            .findAllByUnitIn(addressTokenMap.stream().map(AddressTokenProjection::getUnit).toList())
+            .stream()
+            .collect(Collectors.toMap(MultiAsset::getUnit, Function.identity()));
 
     Page<AddressTokenProjection> addressTokenPage =
         new PageImpl<>(addressTokenMap, pageable, nativeScriptInfo.getNumberOfAssetHolders());
@@ -389,7 +390,8 @@ public class ScriptServiceImpl implements ScriptService {
         addressTokenPage.map(
             addressTokenProjection -> {
               MultiAsset multiAsset = multiAssetMap.get(addressTokenProjection.getUnit());
-              return tokenMapper.fromAddressTokenProjectionAndMultiAsset(addressTokenProjection, multiAsset);
+              return tokenMapper.fromAddressTokenProjectionAndMultiAsset(
+                  addressTokenProjection, multiAsset);
             });
 
     return new BaseFilterResponse<>(tokenAddressResponses);

@@ -28,9 +28,6 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.*;
 import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.*;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
@@ -40,12 +37,15 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopStakeAddressBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopStakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
@@ -298,16 +298,17 @@ public class StakeKeyServiceImpl implements StakeKeyService {
 
   @Override
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    List<TopStakeAddressBalance>
-        latestStakeAddressBalances = topStakeAddressBalanceRepository.findAll();
+    List<TopStakeAddressBalance> latestStakeAddressBalances =
+        topStakeAddressBalanceRepository.findAll();
 
     Map<String, BigInteger> stakeAddressBalanceMap =
         StreamUtil.toMap(
-            latestStakeAddressBalances, TopStakeAddressBalance::getAddress,
+            latestStakeAddressBalances,
+            TopStakeAddressBalance::getAddress,
             TopStakeAddressBalance::getQuantity);
 
-    var stakeAddressDelegatorList = stakeAddressRepository
-        .findStakeAddressOrderByBalance(stakeAddressBalanceMap.keySet());
+    var stakeAddressDelegatorList =
+        stakeAddressRepository.findStakeAddressOrderByBalance(stakeAddressBalanceMap.keySet());
 
     Set<String> stakeAddressDelegatorSet =
         StreamUtil.mapApplySet(stakeAddressDelegatorList, StakeAddressProjection::getStakeAddress);
@@ -323,7 +324,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
       }
     }
-    var stakeIdList = StreamUtil.mapApplySet(stakeAddressDelegatorList, StakeAddressProjection::getId);
+    var stakeIdList =
+        StreamUtil.mapApplySet(stakeAddressDelegatorList, StakeAddressProjection::getId);
     var stakeWithdrawals = withdrawalRepository.getRewardWithdrawnByAddrIn(stakeIdList);
     var mapStakeWithdrawnByStakeId =
         StreamUtil.toMap(
@@ -350,8 +352,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       var stakeTotalReward =
           mapStakeAvailableRewardsByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
       var availableReward = stakeTotalReward.subtract(stakeWithdrawn);
-      var stakeBalance = stakeAddressBalanceMap.getOrDefault(stake.getStakeAddress(),
-                                                             BigInteger.ZERO);
+      var stakeBalance =
+          stakeAddressBalanceMap.getOrDefault(stake.getStakeAddress(), BigInteger.ZERO);
       if (availableReward.compareTo(BigInteger.ZERO) < 0) {
         availableReward = BigInteger.ZERO;
       }
@@ -439,7 +441,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
       List<AggregateAddressBalanceProjection> aggregateAddressTxBalances =
           aggregateAddressTxBalanceRepository.findAllByStakeAddressIdAndDayBetween(
-              addr.getView(), dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
+              addr.getView(),
+              dates.get(0).toLocalDate(),
+              dates.get(dates.size() - 1).toLocalDate());
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance =
@@ -489,7 +493,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       response.setLowestBalance(fromBalance);
     }
     Long maxBlockTime =
-        stakeTxBalanceRepository.findMaxBlockTimeByStakeAddress(addr.getView()).orElse(Long.MAX_VALUE);
+        stakeTxBalanceRepository
+            .findMaxBlockTimeByStakeAddress(addr.getView())
+            .orElse(Long.MAX_VALUE);
     if (!maxBlockTime.equals(Long.MAX_VALUE)) {
       List<StakeTxProjection> stakeTxList =
           addressTxAmountRepository.findTxAndAmountByStake(addr.getView(), maxBlockTime);

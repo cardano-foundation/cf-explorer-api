@@ -8,8 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopAddressBalance;
 
-public interface TopAddressBalanceRepository
-    extends JpaRepository<TopAddressBalance, String> {
+public interface TopAddressBalanceRepository extends JpaRepository<TopAddressBalance, String> {
 
   @Query(value = "SELECT tab FROM TopAddressBalance tab")
   List<TopAddressBalance> findAllLatestAddressBalance(Pageable pageable);

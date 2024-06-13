@@ -19,7 +19,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   @Query(
       value =
           """
-          SELECT ab.address, ab.quantity FROM address addr
+          SELECT ab.address, ab.quantity as balance FROM address addr
           CROSS JOIN LATERAL ( SELECT tmp.address,
                                 tmp.quantity
                          FROM address_balance tmp
@@ -29,7 +29,8 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
                          LIMIT 1) ab
           WHERE addr.stake_address = :stakeAddress
           ORDER BY ab.quantity DESC
-          """, nativeQuery = true)
+          """,
+      nativeQuery = true)
   Page<AddressResponseProjection> findByStakeAddress(
       @Param("stakeAddress") String stakeAddress, Pageable pageable);
 

@@ -77,6 +77,7 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 public class GovernanceActionServiceImpl implements GovernanceActionService {
 
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
+
   @Value("${application.epoch.days}")
   public long epochDays;
 
@@ -404,13 +405,16 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         latestVotingProcedureProjections.stream()
             .collect(Collectors.groupingBy(LatestVotingProcedureProjection::getVote));
 
-    Map<Vote, BigInteger> voteStake = voteCount.entrySet().stream()
-        .collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> getTotalActiveStakeByPoolIds(
-                entry.getValue().stream()
-                    .map(LatestVotingProcedureProjection::getVoterHash)
-                    .collect(Collectors.toList()))));
+    Map<Vote, BigInteger> voteStake =
+        voteCount.entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry ->
+                        getTotalActiveStakeByPoolIds(
+                            entry.getValue().stream()
+                                .map(LatestVotingProcedureProjection::getVoterHash)
+                                .collect(Collectors.toList()))));
 
     votingChartResponse.setActiveVoteStake(totalActiveVoteStake);
     votingChartResponse.setTotalYesVoteStake(voteStake.getOrDefault(Vote.YES, BigInteger.ZERO));
