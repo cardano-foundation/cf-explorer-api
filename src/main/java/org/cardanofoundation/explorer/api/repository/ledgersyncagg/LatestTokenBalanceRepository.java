@@ -18,7 +18,7 @@ public interface LatestTokenBalanceRepository
   @Query(
       value =
           """
-      SELECT ltb.address as address, ltb.quantity as quantity
+      SELECT ltb.address as address, ltb.quantity as quantity, ltb.unit as unit
       FROM LatestTokenBalance ltb
       WHERE ltb.policy = :policy
       AND ltb.quantity > 0
