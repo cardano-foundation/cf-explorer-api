@@ -19,7 +19,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   @Query(
       value =
           """
-          SELECT ab.address, ab.quantity FROM address addr
+          SELECT ab.address, ab.quantity as balance FROM address addr
           CROSS JOIN LATERAL ( SELECT tmp.address,
                                 tmp.quantity
                          FROM address_balance tmp
