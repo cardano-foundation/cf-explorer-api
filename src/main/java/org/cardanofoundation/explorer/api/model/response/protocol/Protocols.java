@@ -55,6 +55,12 @@ public class Protocols {
   ProtocolHistory maxValSize;
   ProtocolHistory collateralPercent;
   ProtocolHistory maxCollateralInputs;
+  ProtocolHistory drepDeposit;
+  ProtocolHistory drepActivity;
+  ProtocolHistory govActionDeposit;
+  ProtocolHistory govActionLifetime;
+  ProtocolHistory committeeMaxTermLength;
+  ProtocolHistory committeeMinSize;
 
   @JsonProperty("coinsPerUTxOByte")
   ProtocolHistory coinsPerUtxoSize;
@@ -119,7 +125,13 @@ public class Protocols {
         maxValSize,
         collateralPercent,
         maxCollateralInputs,
-        coinsPerUtxoSize);
+        coinsPerUtxoSize,
+        drepDeposit,
+        drepActivity,
+        govActionDeposit,
+        govActionLifetime,
+        committeeMaxTermLength,
+        committeeMinSize);
   }
 
   @JsonIgnore
@@ -152,6 +164,12 @@ public class Protocols {
         && Objects.isNull(maxValSize)
         && Objects.isNull(collateralPercent)
         && Objects.isNull(maxCollateralInputs)
-        && Objects.isNull(coinsPerUtxoSize);
+        && Objects.isNull(coinsPerUtxoSize)
+        && Objects.isNull(drepDeposit)
+        && Objects.isNull(drepActivity)
+        && Objects.isNull(govActionDeposit)
+        && Objects.isNull(govActionLifetime)
+        && Objects.isNull(committeeMaxTermLength)
+        && Objects.isNull(committeeMinSize);
   }
 }
