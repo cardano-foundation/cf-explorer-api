@@ -125,13 +125,13 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
   @Query(
       value =
           """
-          SELECT ma.fingerprint as fingerprint,
+          SELECT ma.fingerprint as fingerprint, ma.unit as unit,
           ma.policy as policy,
           ma.name as tokenName,
           am.url as url, am.decimals as decimals, am.ticker as ticker,
           am.logo as logo, am.description as description, am.subject as subject
           FROM MultiAsset ma
-          LEFT JOIN AssetMetadata am ON ma.fingerprint = ma.fingerprint
+          LEFT JOIN AssetMetadata am ON ma.fingerprint = am.fingerprint
           WHERE ma.unit in :units
           """)
   List<AddressTokenProjection> findTokenMetadataByUnitIn(@Param("units") Collection<String> units);
