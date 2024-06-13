@@ -37,6 +37,19 @@ public enum ProtocolType {
   MAX_COLLATERAL_INPUTS(EpochParam_.MAX_COLLATERAL_INPUTS),
   ENTROPY(ParamProposal_.ENTROPY),
   COST_MODEL(EpochParam_.COST_MODEL),
+
+  DREP_DEPOSIT(EpochParam_.DREP_DEPOSIT),
+
+  DREP_ACTIVITY(EpochParam_.DREP_ACTIVITY),
+
+  GOV_ACTION_DEPOSIT(EpochParam_.GOV_ACTION_DEPOSIT),
+
+  GOV_ACTION_LIFETIME(EpochParam_.GOV_ACTION_LIFETIME),
+
+  COMMITTEE_MIN_SIZE(EpochParam_.COMMITTEE_MIN_SIZE),
+
+  COMMITTEE_MAX_TERM_LENGTH(EpochParam_.COMMITTEE_MAX_TERM_LENGTH),
+
   ALL("ALL");
 
   private final String fieldName;
@@ -110,6 +123,18 @@ public enum ProtocolType {
         return ENTROPY;
       case EpochParam_.COST_MODEL:
         return COST_MODEL;
+      case EpochParam_.DREP_DEPOSIT:
+        return DREP_DEPOSIT;
+      case EpochParam_.DREP_ACTIVITY:
+        return DREP_ACTIVITY;
+      case EpochParam_.GOV_ACTION_DEPOSIT:
+        return GOV_ACTION_DEPOSIT;
+      case EpochParam_.GOV_ACTION_LIFETIME:
+        return GOV_ACTION_LIFETIME;
+      case EpochParam_.COMMITTEE_MAX_TERM_LENGTH:
+        return COMMITTEE_MAX_TERM_LENGTH;
+      case EpochParam_.COMMITTEE_MIN_SIZE:
+        return COMMITTEE_MIN_SIZE;
       default:
         throw new BusinessException(BusinessCode.PROTOCOL_FIELD_NOT_FOUND);
     }
@@ -145,6 +170,12 @@ public enum ProtocolType {
         COLLATERAL_PERCENT,
         MAX_COLLATERAL_INPUTS,
         ENTROPY,
-        COST_MODEL);
+        COST_MODEL,
+        DREP_DEPOSIT,
+        DREP_ACTIVITY,
+        GOV_ACTION_DEPOSIT,
+        GOV_ACTION_LIFETIME,
+        COMMITTEE_MIN_SIZE,
+        COMMITTEE_MAX_TERM_LENGTH);
   }
 }
