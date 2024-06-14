@@ -26,6 +26,7 @@ public class AddressTokenProjectionImpl implements AddressTokenProjection {
   String description;
   String subject;
   String unit;
+  String holder;
 
   @Override
   public BigInteger getQuantity() {
@@ -95,5 +96,10 @@ public class AddressTokenProjectionImpl implements AddressTokenProjection {
   @Override
   public String getUnit() {
     return this.unit;
+  }
+
+  @Override
+  public String getHolder() {
+    return this.holder;
   }
 }

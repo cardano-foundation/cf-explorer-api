@@ -47,7 +47,10 @@ public abstract class TokenMapper {
       expression = "java(HexUtils.fromHex(projection.getTokenName(), projection.getFingerprint()))")
   @Mapping(target = "name", source = "tokenName")
   @Mapping(target = "metadata", expression = "java(getMetadata(projection))")
-  @Mapping(target = "addressType", expression = "java(getAddressType(projection.getAddress()))")
+  @Mapping(target = "addressType", expression = "java(getAddressType(projection.getHolder()))")
+  @Mapping(
+      target = "address",
+      expression = "java(getAddress(projection.getAddress(), projection.getHolder()))")
   public abstract TokenAddressResponse fromAddressTokenProjection(
       AddressTokenProjection projection);
 
@@ -86,6 +89,10 @@ public abstract class TokenMapper {
   @Named("getTokenLogoURL")
   String getTokenLogoEndpoint(String logo) {
     return Objects.isNull(logo) ? null : (tokenLogoEndpoint + logo);
+  }
+
+  String getAddress(String address, String holder) {
+    return StringUtils.isEmpty(address) ? holder : address;
   }
 
   AddressType getAddressType(String address) {
