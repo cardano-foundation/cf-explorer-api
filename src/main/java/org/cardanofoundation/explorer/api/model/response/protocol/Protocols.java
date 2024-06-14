@@ -63,7 +63,7 @@ public class Protocols {
   ProtocolHistory minUtxoValue;
   ProtocolHistory minPoolCost;
 
-  @JsonProperty("constModels")
+  @JsonProperty("costModels")
   ProtocolHistory costModel;
 
   ProtocolHistory priceMem;
