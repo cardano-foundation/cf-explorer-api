@@ -29,4 +29,6 @@ public interface AddressTokenProjection {
   String getDescription();
 
   String getSubject();
+
+  String getHolder();
 }
