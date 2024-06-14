@@ -31,4 +31,6 @@ public interface AddressTokenProjection {
   String getSubject();
 
   String getUnit();
+
+  String getHolder();
 }
