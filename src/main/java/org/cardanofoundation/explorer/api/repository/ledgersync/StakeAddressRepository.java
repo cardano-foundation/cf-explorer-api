@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -47,22 +46,6 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   @Query("SELECT stake.view" + " FROM StakeAddress stake" + " WHERE stake.scriptHash = :scriptHash")
   List<String> getStakeAssociatedAddress(@Param("scriptHash") String scriptHash);
-
-  @Query(
-      value =
-          """
-              SELECT coalesce(sum(sab.quantity), 0)
-              FROM stake_address_view sav
-              CROSS JOIN LATERAL ( SELECT tmp.address,
-                                    tmp.quantity
-                             FROM stake_address_balance tmp
-                             WHERE tmp.address = sav.stake_address
-                             ORDER BY tmp.slot DESC
-                             LIMIT 1) sab
-              WHERE sav.stake_address IN :views
-              """,
-      nativeQuery = true)
-  BigInteger getBalanceByView(@Param("views") List<String> views);
 
   @Query(value = "SELECT sa.view FROM StakeAddress sa WHERE sa.scriptHash = :scriptHash")
   List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
