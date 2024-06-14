@@ -69,10 +69,11 @@ public interface LatestTokenBalanceRepository
   @Query(
       value =
           """
-    select (case when ltb.stakeAddress is null then ltb.address else ltb.stakeAddress end) as address, ltb.quantity as quantity
+    select (case when ltb.stakeAddress is null then ltb.address else ltb.stakeAddress end) as holder, sum(ltb.quantity) as quantity
     from LatestTokenBalance ltb
     where ltb.unit = :unit
     and ltb.quantity > 0
+    group by holder
     """)
   List<AddressTokenProjection> getTopHolderOfToken(@Param("unit") String unit, Pageable pageable);
 }
