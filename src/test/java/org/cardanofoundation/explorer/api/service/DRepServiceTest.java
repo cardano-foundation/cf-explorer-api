@@ -112,7 +112,8 @@ public class DRepServiceTest {
             .createdAt(1000L)
             .build();
     when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(Optional.of(dRepInfo));
-    when(governanceActionRepository.countGovActionThatAllowedToVoteByDRep(dRepInfo.getCreatedAt()))
+    when(governanceActionRepository.countGovActionThatAllowedToVoteByBlockTimeGreaterThan(
+            dRepInfo.getCreatedAt()))
         .thenReturn(0L);
 
     var actual = dRepCertificateService.getDRepDetails(drepHash);
