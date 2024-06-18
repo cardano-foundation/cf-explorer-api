@@ -162,7 +162,8 @@ public class DRepServiceImpl implements DRepService {
         latestVotingProcedureRepository.countVoteByDRepHash(
             dRepInfo.getDrepHash(), createdAtOfDRep);
     Long totalGovActionAllowedToVote =
-        governanceActionRepository.countGovActionThatAllowedToVoteByDRep(createdAtOfDRep);
+        governanceActionRepository.countGovActionThatAllowedToVoteByBlockTimeGreaterThan(
+            createdAtOfDRep);
     response.setVotingParticipation(
         totalGovActionAllowedToVote == 0
             ? null

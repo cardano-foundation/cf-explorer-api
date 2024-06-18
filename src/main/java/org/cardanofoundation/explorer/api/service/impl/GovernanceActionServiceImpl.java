@@ -28,12 +28,14 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
 import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
 import org.cardanofoundation.explorer.api.model.ProtocolParamUpdate;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.GovCommitteeHistoryFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -49,6 +51,7 @@ import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteInfoRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeMemberRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -92,31 +95,34 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final DelegationRepository delegationRepository;
   private final ProtocolParamService protocolParamService;
   private final CommitteInfoRepository committeInfoRepository;
+  private final CommitteeMemberRepository committeeMemberRepository;
 
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
-      String dRepHashOrPoolHash, GovernanceActionFilter governanceActionFilter, Pageable pageable) {
+      String voterHash, GovernanceActionFilter governanceActionFilter, Pageable pageable) {
     BaseFilterResponse<GovernanceActionResponse> govActionResponse = new BaseFilterResponse<>();
     govActionResponse.setData(List.of());
 
-    if (dRepHashOrPoolHash.toLowerCase().startsWith("pool")) {
-      dRepHashOrPoolHash =
-          poolHashRepository
-              .getHashRawByView(dRepHashOrPoolHash)
-              .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
-    } else if (dRepHashOrPoolHash.toLowerCase().startsWith("drep")) {
-      DRepInfo dRepInfo =
-          drepInfoRepository
-              .findByDRepHashOrDRepId(dRepHashOrPoolHash)
-              .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
-      dRepHashOrPoolHash = dRepInfo.getDrepHash();
-    }
+    List<String> voterHashes =
+        getActualVoterHashes(voterHash, governanceActionFilter.getVoterType());
 
     Long slot = null;
-    if (governanceActionFilter.getVoterType().equals(VoterType.DREP_KEY_HASH)) {
-      slot = dRepRegistrationRepository.getSlotOfDRepRegistration(dRepHashOrPoolHash);
+    if (governanceActionFilter.getVoterType().equals(VoterType.DREP_KEY_HASH)
+        || governanceActionFilter.getVoterType().equals(VoterType.DREP_SCRIPT_HASH)) {
+      slot = dRepRegistrationRepository.getSlotOfDRepRegistration(voterHashes.get(0));
     } else if (governanceActionFilter.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)) {
-      slot = poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(dRepHashOrPoolHash);
+      slot = poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(voterHashes.get(0));
+    } else if (governanceActionFilter
+            .getVoterType()
+            .equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
+        || governanceActionFilter
+            .getVoterType()
+            .equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH)) {
+      if (StringUtils.isEmpty(voterHash)) {
+        slot = committeeMemberRepository.getMinSlotOfCommitteeMembers();
+      } else {
+        slot = committeeMemberRepository.getSlotOfCommitteeMemberByColdKey(voterHash);
+      }
     }
 
     Boolean isVoteNone = governanceActionFilter.getVoteType().equals(Vote.NONE);
@@ -158,7 +164,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             governanceActionFilter.getIsRepeatVote(),
             govActionStatus,
             vote,
-            dRepHashOrPoolHash,
+            voterHashes,
             govActionTypeList,
             fromDate,
             toDate,
@@ -183,6 +189,31 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     return govActionResponse;
   }
 
+  private List<String> getActualVoterHashes(String voterHash, VoterType voterType) {
+    List<String> voteHashes = new ArrayList<>();
+    if (StringUtils.isEmpty(voterHash)
+        && (voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
+            || voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH))) {
+      return committeeMemberRepository.getHotKeyOfCommitteeMember();
+    }
+
+    if (voterHash.toLowerCase().startsWith("pool")) {
+      voteHashes.add(
+          poolHashRepository
+              .getHashRawByView(voterHash)
+              .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND)));
+    } else if (voterHash.toLowerCase().startsWith("drep")) {
+      DRepInfo dRepInfo =
+          drepInfoRepository
+              .findByDRepHashOrDRepId(voterHash)
+              .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
+      voteHashes.add(dRepInfo.getDrepHash());
+    } else {
+      voteHashes.add(committeeMemberRepository.getHotKeyOfCommitteeMemberByColdKey(voterHash));
+    }
+    return voteHashes;
+  }
+
   private List<GovActionType> getGovActionTypeByVoterType(
       VoterType voterType, GovActionType govActionType) {
     List<GovActionType> govActionTypeList = new ArrayList<>(Arrays.asList(GovActionType.values()));
@@ -192,6 +223,12 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         govActionTypeList.remove(GovActionType.NEW_CONSTITUTION);
         govActionTypeList.remove(GovActionType.PARAMETER_CHANGE_ACTION);
         govActionTypeList.remove(GovActionType.TREASURY_WITHDRAWALS_ACTION);
+      }
+
+      if (voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
+          || voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH)) {
+        govActionTypeList.removeAll(
+            List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE));
       }
     } else {
       govActionTypeList = new ArrayList<>();
@@ -209,7 +246,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
   @Override
   public GovernanceActionDetailsResponse getGovernanceActionDetails(
-      String dRepHashOrPoolHashOrPoolView, GovernanceActionRequest governanceActionRequest) {
+      String voterHash, GovernanceActionRequest governanceActionRequest) {
     Optional<GovActionDetailsProjection> govActionDetailsProjections =
         governanceActionRepository.getGovActionDetailsByTxHashAndIndex(
             governanceActionRequest.getTxHash(), governanceActionRequest.getIndex());
@@ -231,18 +268,19 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
     Boolean allowedVoteBySPO = !govActionTypeListAllowedVoteBySPO.contains(govActionType);
     Boolean allowedVoteByCC = !govActionTypeListAllowedVoteByCc.contains(govActionType);
-    if (dRepHashOrPoolHashOrPoolView.toLowerCase().startsWith("pool")) {
-      dRepHashOrPoolHashOrPoolView =
+    if (voterHash.toLowerCase().startsWith("pool")) {
+      voterHash =
           poolHashRepository
-              .getHashRawByView(dRepHashOrPoolHashOrPoolView)
+              .getHashRawByView(voterHash)
               .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
-    } else if (dRepHashOrPoolHashOrPoolView.toLowerCase().startsWith("drep")) {
+    } else if (voterHash.toLowerCase().startsWith("drep")) {
       DRepInfo dRepInfo =
           drepInfoRepository
-              .findByDRepHashOrDRepId(dRepHashOrPoolHashOrPoolView)
+              .findByDRepHashOrDRepId(voterHash)
               .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
-      dRepHashOrPoolHashOrPoolView = dRepInfo.getDrepHash();
+      voterHash = dRepInfo.getDrepHash();
     }
+
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
         && govActionTypeListAllowedVoteBySPO.contains(govActionType)) {
       return GovernanceActionDetailsResponse.builder()
@@ -256,8 +294,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     response.setAllowedVoteBySPO(allowedVoteBySPO);
     // get pool name for SPO
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)) {
-      Optional<String> poolName =
-          poolHashRepository.getPoolNameByPoolHashOrPoolView(dRepHashOrPoolHashOrPoolView);
+      Optional<String> poolName = poolHashRepository.getPoolNameByPoolHashOrPoolView(voterHash);
       response.setPoolName(poolName.orElse(null));
     }
 
@@ -278,7 +315,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
             governanceActionRequest.getTxHash(),
             governanceActionRequest.getIndex(),
-            dRepHashOrPoolHashOrPoolView,
+            voterHash,
             voterTypes);
     setExpiryDateOfGovAction(response);
     // no vote procedure found = none vote
@@ -349,6 +386,48 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       default:
         return votingChartResponse;
     }
+  }
+
+  @Override
+  public BaseFilterResponse<GovernanceActionResponse> getGovCommitteeStatusHistory(
+      GovCommitteeHistoryFilter govCommitteeHistoryFilter, Pageable pageable) {
+
+    List<GovActionType> govActionTypeList = new ArrayList<>();
+    if (govCommitteeHistoryFilter.getActionType().equals(GovActionType.ALL)) {
+      govActionTypeList = List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
+    } else {
+      govActionTypeList = List.of(govCommitteeHistoryFilter.getActionType());
+    }
+
+    long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
+    fromDate = fromDate < 0 ? 0 : fromDate;
+    long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+
+    if (Objects.nonNull(govCommitteeHistoryFilter.getFromDate())) {
+      fromDate = govCommitteeHistoryFilter.getFromDate().toEpochSecond(ZoneOffset.UTC);
+    }
+    if (Objects.nonNull(govCommitteeHistoryFilter.getToDate())) {
+      long to = govCommitteeHistoryFilter.getToDate().toEpochSecond(ZoneOffset.UTC);
+      toDate = Math.min(to, toDate);
+    }
+
+    String anchorText =
+        govCommitteeHistoryFilter.getAnchorText() == null
+            ? null
+            : govCommitteeHistoryFilter.getAnchorText().toLowerCase();
+
+    Page<GovernanceActionResponse> governanceActionProjections =
+        governanceActionRepository
+            .getAllGovCommitteeHistory(
+                govActionTypeList,
+                fromDate,
+                toDate,
+                govCommitteeHistoryFilter.getGovernanceActionTxHash(),
+                anchorText,
+                pageable)
+            .map(governanceActionMapper::fromGovernanceActionProjection);
+
+    return new BaseFilterResponse<>(governanceActionProjections);
   }
 
   // TODO: Active vote stake of Pool type is not available.
