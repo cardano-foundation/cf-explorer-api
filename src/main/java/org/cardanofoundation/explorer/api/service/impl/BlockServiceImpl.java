@@ -85,7 +85,7 @@ public class BlockServiceImpl implements BlockService {
     blockResponse.setTotalFees(
         txList.stream().map(Tx::getFee).reduce(BigInteger.ZERO, BigInteger::add));
 
-    if (poolMintBlockProjection != null) {
+    if (!Objects.isNull(poolMintBlockProjection)) {
       blockResponse.setPoolName(poolMintBlockProjection.getPoolName());
       blockResponse.setPoolView(poolMintBlockProjection.getPoolView());
       blockResponse.setPoolTicker(poolMintBlockProjection.getPoolTicker());
