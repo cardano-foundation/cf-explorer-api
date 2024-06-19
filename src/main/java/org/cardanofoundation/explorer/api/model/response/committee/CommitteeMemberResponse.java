@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.committee;
 
+import java.util.Date;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +21,13 @@ import org.cardanofoundation.explorer.api.common.enumeration.CommitteeStatus;
 public class CommitteeMemberResponse {
 
   String publicKey;
+  String scriptHash;
   CommitteeStatus status;
   Integer expiredEpoch;
   Integer activeEpoch;
+
+  Date registeredAt;
+  Integer termDuration;
+  Float votingParticipation;
+  String resignationInfo;
 }

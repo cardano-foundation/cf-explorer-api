@@ -125,7 +125,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       if (StringUtils.isEmpty(voterHash)) {
         slot = committeeMemberRepository.getMinSlotOfCommitteeMembers();
       } else {
-        slot = committeeMemberRepository.getSlotOfCommitteeMemberByColdKey(voterHash);
+        slot = committeeMemberRepository.getSlotOfCommitteeMemberByHotKey(voterHash);
       }
     }
 
@@ -213,7 +213,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
               .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
       voteHashes.add(dRepInfo.getDrepHash());
     } else {
-      voteHashes.add(committeeMemberRepository.getHotKeyOfCommitteeMemberByColdKey(voterHash));
+      voteHashes.add(voterHash);
     }
     return voteHashes;
   }

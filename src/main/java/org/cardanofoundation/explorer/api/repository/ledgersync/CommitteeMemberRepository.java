@@ -21,8 +21,12 @@ public interface CommitteeMemberRepository extends JpaRepository<CommitteeMember
   @Query(value = "SELECT MIN(cm.slot) FROM CommitteeMember cm")
   Long getMinSlotOfCommitteeMembers();
 
-  @Query(value = "SELECT MIN(cm.slot) FROM CommitteeMember cm WHERE cm.hash = :coldKey")
-  Long getSlotOfCommitteeMemberByColdKey(@Param("coldKey") String coldKey);
+  @Query(
+      value =
+          "SELECT MIN(cm.slot) FROM CommitteeMember cm "
+              + "JOIN CommitteeRegistration cr ON cm.hash = cr.coldKey "
+              + "WHERE cr.hotKey = :hotKey")
+  Long getSlotOfCommitteeMemberByHotKey(@Param("hotKey") String hotKey);
 
   @Query(
       value =
