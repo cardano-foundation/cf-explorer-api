@@ -84,10 +84,14 @@ public class BlockServiceImpl implements BlockService {
         txList.stream().map(Tx::getOutSum).reduce(BigInteger.ZERO, BigInteger::add));
     blockResponse.setTotalFees(
         txList.stream().map(Tx::getFee).reduce(BigInteger.ZERO, BigInteger::add));
-    blockResponse.setPoolName(poolMintBlockProjection.getPoolName());
-    blockResponse.setPoolView(poolMintBlockProjection.getPoolView());
-    blockResponse.setPoolTicker(poolMintBlockProjection.getPoolTicker());
-    blockResponse.setDescription(poolMintBlockProjection.getDescription());
+
+    if (poolMintBlockProjection != null) {
+      blockResponse.setPoolName(poolMintBlockProjection.getPoolName());
+      blockResponse.setPoolView(poolMintBlockProjection.getPoolView());
+      blockResponse.setPoolTicker(poolMintBlockProjection.getPoolTicker());
+      blockResponse.setDescription(poolMintBlockProjection.getDescription());
+    }
+
     Integer currentBlockNo =
         blockRepository
             .findCurrentBlock()
