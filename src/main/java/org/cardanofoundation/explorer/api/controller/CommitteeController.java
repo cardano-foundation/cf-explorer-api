@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
@@ -34,6 +35,7 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationVal
 public class CommitteeController {
 
   private final CCommitteeService cCommitteeService;
+  private final GovernanceActionService governanceActionService;
 
   @GetMapping("/overview")
   @LogMessage
@@ -50,20 +52,6 @@ public class CommitteeController {
       summary = "Get committee members",
       tags = {"committee"})
   public ResponseEntity<BaseFilterResponse<CommitteeMemberResponse>> getCommitteeMembers(
-      @ParameterObject
-          @Valid
-          @PaginationValid
-          @PaginationDefault(sort = CommitteeMember_.EXPIRED_EPOCH, direction = Sort.Direction.DESC)
-          Pagination pagination) {
-    return ResponseEntity.ok(cCommitteeService.getCommitteeMembers(pagination.toPageable()));
-  }
-
-  @GetMapping("/status-history")
-  @LogMessage
-  @Operation(
-      summary = "Get committee members",
-      tags = {"committee"})
-  public ResponseEntity<BaseFilterResponse<CommitteeMemberResponse>> getGovStatusHistory(
       @ParameterObject
           @Valid
           @PaginationValid
