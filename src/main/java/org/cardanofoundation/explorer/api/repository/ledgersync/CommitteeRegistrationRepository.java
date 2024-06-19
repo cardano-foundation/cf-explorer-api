@@ -22,4 +22,9 @@ public interface CommitteeRegistrationRepository
       value = "SELECT DISTINCT cr from CommitteeRegistration cr " + "WHERE cr.coldKey IN :coldKeys")
   List<CommitteeRegistration> getHotKeyOfCommitteeMemberByColdKeyIn(
       @Param("coldKeys") List<String> coldKeys);
+
+  @Query(
+      value =
+          "SELECT cr from CommitteeRegistration cr WHERE cr.hotKey = :hotKey ORDER BY cr.slot DESC LIMIT 1")
+  CommitteeRegistration getCommitteeRegistrationByHotKey(@Param("hotKey") String hotKey);
 }
