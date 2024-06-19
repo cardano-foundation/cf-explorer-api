@@ -29,5 +29,5 @@ public class CommitteeMemberResponse {
   Date registeredAt;
   Integer termDuration;
   Float votingParticipation;
-  String resignationInfo;
+  Date resignedAt;
 }

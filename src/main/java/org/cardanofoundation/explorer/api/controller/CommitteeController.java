@@ -10,18 +10,22 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.committee.CommitteeMemberResponse;
 import org.cardanofoundation.explorer.api.model.response.committee.CommitteeOverviewResponse;
+import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.service.CCommitteeService;
+import org.cardanofoundation.explorer.api.service.GovernanceActionService;
+import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.CommitteeMember_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -68,5 +72,18 @@ public class CommitteeController {
   public ResponseEntity<CommitteeMemberResponse> getCommitteeDetail(
       @PathVariable String publicKey) {
     return ResponseEntity.ok(cCommitteeService.getCommitteeMemberDetail(publicKey));
+  }
+
+  @GetMapping("/{publicKey}/vote-procedure-chart")
+  @LogMessage
+  @Operation(
+      summary = "Get chart of committee vote on Governance Action",
+      tags = {"committee"})
+  public ResponseEntity<VotingProcedureChartResponse> getChartOfDRepVotesOnGovernanceAction(
+      @PathVariable @Parameter(description = "CC public key") String publicKey,
+      @RequestParam(value = "govActionType")
+          @Parameter(description = "The type of Governance Action")
+          GovActionType govActionType) {
+    return ResponseEntity.ok(cCommitteeService.getVoteProcedureChart(publicKey, govActionType));
   }
 }
