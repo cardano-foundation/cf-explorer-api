@@ -180,6 +180,8 @@ public class CCommitteeServiceImpl implements CCommitteeService {
                 : CommitteeStatus.EXPIRED)
         .registeredAt(new Date(activeEpochSecondTime * 1000))
         .resignedAt(resignedBlockTime == null ? null : new Date(resignedBlockTime * 1000))
+        .activeEpoch(activeEpoch)
+        .expiredEpoch(committeeMember.getExpiredEpoch())
         .termDuration(currentEpochParam.getCommitteeMaxTermLength().intValue())
         .votingParticipation(votingParticipation)
         .build();
