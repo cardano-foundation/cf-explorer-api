@@ -255,7 +255,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 3; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -344,7 +344,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 3; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -435,7 +435,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 3; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -555,7 +555,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne, txGraphCurrent);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 4; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -675,7 +675,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne, txGraphCurrent);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 4; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -737,9 +737,12 @@ class TransactionGraphTest {
     when(txChartRepository.getTransactionGraphDayGreaterThan(any(BigInteger.class)))
         .thenReturn(projections);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual =
+        txService.getTransactionChartByRange(TxChartRange.ONE_MONTH).stream()
+            .sorted(Comparator.comparing(TxGraph::getDate).reversed())
+            .toList();
 
-    Assertions.assertEquals(List.of(expect.get(0)), actual);
+    Assertions.assertEquals(expect, actual);
   }
 
   @Test
@@ -795,12 +798,10 @@ class TransactionGraphTest {
     when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
         .thenReturn(expectPrepare);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.THREE_MONTH);
 
     final var expect =
-        expectPrepare.subList(0, 7).stream()
-            .sorted(Comparator.comparing(TxGraph::getDate))
-            .toList();
+        expectPrepare.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
 
     Assertions.assertEquals(expect, actual);
   }
@@ -862,7 +863,7 @@ class TransactionGraphTest {
     List<TxGraphProjection> dataMissingProjections = new ArrayList<>();
     List<TxGraph> dataMissingTxGraph = new ArrayList<>();
 
-    IntStream.range(3, 34)
+    IntStream.range(5, 34)
         .forEach(
             index -> {
               final var timeDayOne =
@@ -899,14 +900,10 @@ class TransactionGraphTest {
     when(txChartRepository.getTransactionGraphDayGreaterThan(any(BigInteger.class)))
         .thenReturn(dataMissingProjections);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     List<TxGraph> expected =
-        List.of(
-            dataMissingTxGraph.get(3),
-            dataMissingTxGraph.get(2),
-            dataMissingTxGraph.get(1),
-            dataMissingTxGraph.get(0));
+        dataMissingTxGraph.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
 
     Assertions.assertEquals(expected, actual);
   }
