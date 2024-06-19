@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -69,5 +70,15 @@ public class CommitteeController {
           @PaginationDefault(sort = CommitteeMember_.EXPIRED_EPOCH, direction = Sort.Direction.DESC)
           Pagination pagination) {
     return ResponseEntity.ok(cCommitteeService.getCommitteeMembers(pagination.toPageable()));
+  }
+
+  @GetMapping("{publicKey}")
+  @LogMessage
+  @Operation(
+      summary = "Get committee members",
+      tags = {"committee"})
+  public ResponseEntity<CommitteeMemberResponse> getCommitteeDetail(
+      @PathVariable String publicKey) {
+    return ResponseEntity.ok(cCommitteeService.getCommitteeMemberDetail(publicKey));
   }
 }

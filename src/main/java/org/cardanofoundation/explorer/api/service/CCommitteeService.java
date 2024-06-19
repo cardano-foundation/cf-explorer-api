@@ -11,4 +11,6 @@ public interface CCommitteeService {
   CommitteeOverviewResponse getCommitteeOverview();
 
   BaseFilterResponse<CommitteeMemberResponse> getCommitteeMembers(Pageable pageable);
+
+  CommitteeMemberResponse getCommitteeMemberDetail(String publicKey);
 }
