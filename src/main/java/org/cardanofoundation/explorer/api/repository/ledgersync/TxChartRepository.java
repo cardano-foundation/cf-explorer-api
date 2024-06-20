@@ -47,8 +47,8 @@ public interface TxChartRepository extends JpaRepository<TxChart, Long> {
           + " SUM(tx.txWithMetadataWithoutSc) AS  metadata,"
           + "SUM(tx.txWithSc) AS smartContract, "
           + "tx.month AS time FROM TxChart tx "
-          + "WHERE :day is null or (tx.day >= :day) "
+          + "WHERE :month is null or (tx.month >= :month) "
           + "GROUP BY tx.month "
           + "ORDER BY tx.month ASC")
-  List<TxGraphProjection> getTransactionGraphMonthGreaterThan(@Param("day") BigInteger day);
+  List<TxGraphProjection> getTransactionGraphMonthGreaterThan(@Param("month") BigInteger month);
 }
