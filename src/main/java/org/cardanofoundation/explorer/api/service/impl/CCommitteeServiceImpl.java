@@ -63,7 +63,7 @@ public class CCommitteeServiceImpl implements CCommitteeService {
 
     CommitteeState committeeState =
         activeMembers >= currentEpochParam.getCommitteeMinSize().intValue()
-            ? CommitteeState.NORMAL
+            ? CommitteeState.CONFIDENCE
             : CommitteeState.NO_CONFIDENCE;
 
     // TODO: get activeEpoch from lsv2 once implemented
