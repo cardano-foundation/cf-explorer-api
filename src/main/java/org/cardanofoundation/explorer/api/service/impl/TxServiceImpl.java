@@ -237,10 +237,6 @@ public class TxServiceImpl implements TxService {
 
   @Override
   public List<TxGraph> getTransactionChartByRange(TxChartRange range) {
-    if (range.equals(TxChartRange.ONE_DAY)) {
-      return getTransactionChartInOneDay();
-    }
-
     if (range.equals(TxChartRange.ONE_YEAR)) {
       return getTransactionChartInMonthRange(MONTHS_IN_YEAR);
     }
@@ -1400,7 +1396,7 @@ public class TxServiceImpl implements TxService {
     List<TxGraph> txGraphs =
         toTxGraph(txChartRepository.getTransactionGraphMonthGreaterThan(previousMonthsInSeconds));
 
-    List<TxGraph> txCharts = getAllMonths(txGraphs, currentLocalDate);
+    List<TxGraph> txCharts = getAllMonths(txGraphs, currentLocalDate, previousMonths);
     txCharts.addAll(txGraphs);
 
     return txCharts.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
@@ -1417,13 +1413,13 @@ public class TxServiceImpl implements TxService {
 
     List<TxGraph> txGraphs = toTxGraph(txChartRepository.getTransactionGraphMonthGreaterThan(null));
 
-    List<TxGraph> txCharts = getAllMonths(txGraphs, currentLocalDate);
+    List<TxGraph> txCharts = getAllMonths(txGraphs, currentLocalDate, null);
     txCharts.addAll(txGraphs);
 
     return txCharts.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
   }
 
-  private List<TxGraph> getAllMonths(List<TxGraph> txGraphs, LocalDateTime currentLocalDate) {
+  private List<TxGraph> getAllMonths(List<TxGraph> txGraphs, LocalDateTime currentLocalDate, LocalDateTime previous) {
     LocalDateTime startDate =
         LocalDateTime.ofInstant(txGraphs.get(0).getDate().toInstant(), ZoneOffset.UTC);
 
@@ -1464,6 +1460,21 @@ public class TxServiceImpl implements TxService {
                   Date.from(
                       OffsetDateTime.ofInstant(
                               currentLocalDate.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
+                          .toInstant()))
+              .simpleTransactions(BigInteger.ZERO)
+              .metadata(BigInteger.ZERO)
+              .smartContract(BigInteger.ZERO)
+              .build());
+    }
+
+    if (Objects.nonNull(previous) && !LocalDateTime.ofInstant(txGraphs.get(0).getDate().toInstant(), ZoneOffset.UTC)
+            .equals(previous)) {
+      txCharts.add(
+          TxGraph.builder()
+              .date(
+                  Date.from(
+                      OffsetDateTime.ofInstant(
+                              previous.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
                           .toInstant()))
               .simpleTransactions(BigInteger.ZERO)
               .metadata(BigInteger.ZERO)
