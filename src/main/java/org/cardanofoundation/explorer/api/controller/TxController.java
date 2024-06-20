@@ -92,7 +92,7 @@ public class TxController {
 
   @GetMapping("/graph/{range}")
   @LogMessage
-  @Operation(summary = "Get transaction chart (1D, 1M, 3M, 1Y, 3Y, MAX)")
+  @Operation(summary = "Get transaction chart (1M, 3M, 1Y, 3Y, MAX)")
   public ResponseEntity<List<TxGraph>> getTransactionChart(
       @PathVariable("range") @Parameter(description = "Type for chart") TxChartRange range) {
     return ResponseEntity.ok(txService.getTransactionChartByRange(range));
