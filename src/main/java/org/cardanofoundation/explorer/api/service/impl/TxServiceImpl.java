@@ -1419,7 +1419,8 @@ public class TxServiceImpl implements TxService {
     return txCharts.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
   }
 
-  private List<TxGraph> getAllMonths(List<TxGraph> txGraphs, LocalDateTime currentLocalDate, LocalDateTime previous) {
+  private List<TxGraph> getAllMonths(
+      List<TxGraph> txGraphs, LocalDateTime currentLocalDate, LocalDateTime previous) {
     LocalDateTime startDate =
         LocalDateTime.ofInstant(txGraphs.get(0).getDate().toInstant(), ZoneOffset.UTC);
 
@@ -1467,14 +1468,14 @@ public class TxServiceImpl implements TxService {
               .build());
     }
 
-    if (Objects.nonNull(previous) && !LocalDateTime.ofInstant(txGraphs.get(0).getDate().toInstant(), ZoneOffset.UTC)
+    if (Objects.nonNull(previous)
+        && !LocalDateTime.ofInstant(txGraphs.get(0).getDate().toInstant(), ZoneOffset.UTC)
             .equals(previous)) {
       txCharts.add(
           TxGraph.builder()
               .date(
                   Date.from(
-                      OffsetDateTime.ofInstant(
-                              previous.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
+                      OffsetDateTime.ofInstant(previous.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
                           .toInstant()))
               .simpleTransactions(BigInteger.ZERO)
               .metadata(BigInteger.ZERO)
