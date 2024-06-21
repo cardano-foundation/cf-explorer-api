@@ -32,7 +32,4 @@ public class DRepOverviewResponse {
   private Long noConfidenceDReps;
   private Long registeredDReps;
   private BigInteger totalAdaStaked;
-
-  private Double minGovParticipationRate;
-  private Double maxGovParticipationRate;
 }
