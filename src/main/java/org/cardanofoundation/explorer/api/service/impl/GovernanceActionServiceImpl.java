@@ -355,15 +355,13 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             .orElseThrow(() -> new BusinessException(BusinessCode.GOVERNANCE_ACTION_NOT_FOUND));
 
     EpochParam epochParam = epochParamRepository.findByEpochNo(govActionProjection.getEpoch());
+    EpochParam currentEpochParam = epochParamRepository.findCurrentEpochParam();
+    long activeMembers =
+        committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(
+            currentEpochParam.getEpochNo());
 
-    int expiredEpoch =
-        govActionProjection.getEpoch() + getGovActionLifetime(epochParam.getGovActionLifetime());
-
-    Integer committeeTotalCount =
-        committeeRegistrationRepository.countByExpiredEpochNo(expiredEpoch);
     CommitteeState committeeState =
-        epochParam.getCommitteeMinSize() == null
-                || committeeTotalCount >= epochParam.getCommitteeMinSize().intValue()
+        activeMembers >= currentEpochParam.getCommitteeMinSize().intValue()
             ? CommitteeState.CONFIDENCE
             : CommitteeState.NO_CONFIDENCE;
 
@@ -381,7 +379,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         return votingChartResponse;
       case CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH:
         getVotingChartResponseForCCType(
-            votingChartResponse, epochParam, govActionProjection, committeeState);
+            votingChartResponse, epochParam, govActionProjection, activeMembers);
         return votingChartResponse;
       default:
         return votingChartResponse;
@@ -607,17 +605,19 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       VotingChartResponse votingChartResponse,
       EpochParam epochParam,
       GovActionDetailsProjection govActionDetailsProjection,
-      CommitteeState committeeState) {
+      Long activeMembers) {
     List<GovActionType> govActionTypesThatNotAllowedVoteByCC =
         List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
     if (govActionTypesThatNotAllowedVoteByCC.contains(govActionDetailsProjection.getType())) {
       votingChartResponse.setThreshold(null);
     } else {
-      Double threshold = protocolParamService.getCCThresholdFromConwayGenesis();
-      votingChartResponse.setThreshold(Objects.isNull(threshold) ? null : threshold);
+      Double threshold = epochParam.getCcThreshold();
+      if (threshold == null) {
+        threshold = protocolParamService.getCCThresholdFromConwayGenesis();
+      }
+      votingChartResponse.setThreshold(threshold);
     }
-    Long count =
-        committeInfoRepository.countByCreatedAtLessThan(govActionDetailsProjection.getBlockTime());
+
     List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
         latestVotingProcedureRepository.getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
             govActionDetailsProjection.getTxHash(),
@@ -635,11 +635,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     votingChartResponse.setYesCcMembers(voteCount.getOrDefault(Vote.YES, 0L));
     votingChartResponse.setNoCcMembers(voteCount.getOrDefault(Vote.NO, 0L));
     votingChartResponse.setAbstainCcMembers(voteCount.getOrDefault(Vote.ABSTAIN, 0L));
-    votingChartResponse.setCcMembers(count);
-  }
-
-  private int getGovActionLifetime(BigInteger govActionLifetime) {
-    return govActionLifetime == null ? 0 : govActionLifetime.intValue();
+    votingChartResponse.setCcMembers(activeMembers);
   }
 
   private Double getParameterChangeActionThreshold(EpochParam epochParam, JsonNode description) {
