@@ -174,7 +174,7 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           """
                 select distinct(sa.view) from Delegation d
                       join StakeAddress sa on sa.id = d.stakeAddressId
-                      where d.poolHash.view in :poolHashes
+                      where d.poolHash.hashRaw in :poolHashes
               """)
   Set<String> getStakeAddressDelegatorsByPoolIds(
       @Param("poolHashes") Collection<String> poolHashes);
