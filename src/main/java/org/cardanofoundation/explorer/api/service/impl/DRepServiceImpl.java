@@ -37,6 +37,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepRangeValuesRes
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCertificateProjection;
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
+import org.cardanofoundation.explorer.api.model.response.drep.projection.GovParticipationRangeProjection;
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
@@ -206,6 +207,9 @@ public class DRepServiceImpl implements DRepService {
     BigInteger activeStake = null;
     Long delegators = drepInfoRepository.getDelegateCount();
 
+    GovParticipationRangeProjection govParticipationRange =
+        drepInfoRepository.findRangeGovernanceParticipationRate();
+
     return DRepOverviewResponse.builder()
         .epochNo(epochSummary.getNo())
         .countDownEndTime(countDownTime)
@@ -219,6 +223,8 @@ public class DRepServiceImpl implements DRepService {
         .abstainDReps(abstainDReps)
         .noConfidenceDReps(noConfidenceDReps)
         .registeredDReps(registeredDReps)
+        .minGovParticipationRate(govParticipationRange.getMinDrepParticipationRate())
+        .maxGovParticipationRate(govParticipationRange.getMaxDrepParticipationRate())
         .build();
   }
 
@@ -266,6 +272,8 @@ public class DRepServiceImpl implements DRepService {
                 dRepFilterRequest.getDrepStatus(),
                 fromDate,
                 toDate,
+                dRepFilterRequest.getMinGovParticipationRate(),
+                dRepFilterRequest.getMaxGovParticipationRate(),
                 pageable)
             .map(dRepMapper::fromDRepInfo);
 
