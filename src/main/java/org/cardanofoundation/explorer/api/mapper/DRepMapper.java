@@ -26,6 +26,7 @@ public interface DRepMapper {
 
   @Mapping(target = "createdAt", expression = "java(fromLong(dRepInfo.getCreatedAt()))")
   @Mapping(target = "updatedAt", expression = "java(fromLong(dRepInfo.getUpdatedAt()))")
+  @Mapping(target = "participationRate", expression = "dRepInfo.getGovParticipationRate()")
   DRepFilterResponse fromDRepInfo(DRepInfo dRepInfo);
 
   DRepRangeValuesResponse fromDRepRangeProjection(DRepRangeProjection dRepRangeProjection);
