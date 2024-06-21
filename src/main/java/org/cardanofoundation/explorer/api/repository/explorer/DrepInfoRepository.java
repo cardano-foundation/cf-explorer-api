@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
-import org.cardanofoundation.explorer.api.model.response.drep.projection.GovParticipationRangeProjection;
 import org.cardanofoundation.explorer.api.projection.DRepInfoProjection;
 import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
@@ -68,14 +67,8 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
       value =
           """
       select max(dri.votingPower) as maxVotingPower , max(dri.activeVoteStake) as maxActiveVoteStake,
-       min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake from DRepInfo dri
+       min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake,
+       min(dri.govParticipationRate) as minGovParticipationRate, max(dri.govParticipationRate) as maxGovParticipationRate from DRepInfo dri
           """)
   DRepRangeProjection getDRepRangeValues();
-
-  @Query(
-      value =
-          "select max(dri.govParticipationRate) as maxDrepParticipationRate, "
-              + " min(dri.govParticipationRate) as minDrepParticipationRate "
-              + " from DRepInfo dri")
-  GovParticipationRangeProjection findRangeGovernanceParticipationRate();
 }
