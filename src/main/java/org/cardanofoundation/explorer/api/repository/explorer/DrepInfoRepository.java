@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
+import org.cardanofoundation.explorer.api.model.response.drep.projection.GovParticipationRangeProjection;
 import org.cardanofoundation.explorer.api.projection.DRepInfoProjection;
 import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
@@ -47,6 +48,7 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
               + " and (coalesce(dri.activeVoteStake,0) >= :activeStakeFrom and coalesce(dri.activeVoteStake,0) <= :activeStakeTo)"
               + " and (coalesce(dri.votingPower,0) >= :votingPowerFrom and coalesce(dri.votingPower,0) <= :votingPowerTo)"
               + " and (:dRepStatus is null or dri.status = :dRepStatus)"
+              + " and (dri.govParticipationRate >= :minGovParticipationRate and dri.govParticipationRate <= :maxGovParticipationRate)"
               + " and (dri.createdAt >= :fromDate and dri.createdAt <= :toDate)")
   Page<DRepInfo> getDRepInfoByFilterRequest(
       @Param("dRepHashOrDRepId") String dRepHashOrDRepId,
@@ -58,6 +60,8 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
       @Param("dRepStatus") DRepStatus dRepStatus,
       @Param("fromDate") Long fromDate,
       @Param("toDate") Long toDate,
+      @Param("minGovParticipationRate") Double minGovParticipationRate,
+      @Param("maxGovParticipationRate") Double maxGovParticipationRate,
       Pageable pageable);
 
   @Query(
@@ -67,4 +71,11 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
        min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake from DRepInfo dri
           """)
   DRepRangeProjection getDRepRangeValues();
+
+  @Query(
+      value =
+          "select max(dri.govParticipationRate) as maxDrepParticipationRate, "
+              + " min(dri.govParticipationRate) as minDrepParticipationRate "
+              + " from DRepInfo dri")
+  GovParticipationRangeProjection findRangeGovernanceParticipationRate();
 }
