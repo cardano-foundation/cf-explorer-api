@@ -31,6 +31,10 @@ public class DRepFilterRequest {
 
   private DRepStatus drepStatus;
 
+  private Double minGovParticipationRate;
+
+  private Double maxGovParticipationRate;
+
   @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss")
   private LocalDateTime fromDate;
 

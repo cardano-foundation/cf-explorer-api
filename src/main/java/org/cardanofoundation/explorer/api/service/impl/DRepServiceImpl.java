@@ -267,6 +267,8 @@ public class DRepServiceImpl implements DRepService {
                 dRepFilterRequest.getDrepStatus(),
                 fromDate,
                 toDate,
+                dRepFilterRequest.getMinGovParticipationRate(),
+                dRepFilterRequest.getMaxGovParticipationRate(),
                 pageable)
             .map(dRepMapper::fromDRepInfo);
 
