@@ -199,7 +199,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
     select min(d.slotNo) as createdAt, ph.hashRaw as poolHash, ph.id as poolId from PoolHash ph
     join Delegation d on d.poolHash.id = ph.id
     group by ph.hashRaw, ph.id
-    having min(d.slotNo) >= :slot
+    having min(d.slotNo) <= :slot
     order by ph.id desc
 """)
   List<PoolOverviewProjection> getSlotCreatedAtGroupByPoolHash(@Param("slot") Long slot);

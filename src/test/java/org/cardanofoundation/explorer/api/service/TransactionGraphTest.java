@@ -49,16 +49,6 @@ class TransactionGraphTest {
   @Mock private ListOperations listOperations;
 
   @Test
-  void testEmptyTransactionsInOneDay() {
-    when(txChartRepository.getTransactionGraphByHour(anyList()))
-        .thenReturn(Collections.emptyList());
-
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_DAY);
-
-    Assertions.assertEquals(Collections.emptyList(), actual);
-  }
-
-  @Test
   void testEmptyTransactionsByRangeRedisSizeZero() {
 
     when(redisTemplate.opsForList()).thenReturn(listOperations);
@@ -82,94 +72,6 @@ class TransactionGraphTest {
     List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     Assertions.assertTrue(ObjectUtils.isEmpty(actual));
-  }
-
-  // transaction graph in day
-  @Test
-  void testTransactionInOneDate() {
-    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
-
-    final LocalDateTime currentLoaLocalDateTime =
-        LocalDateTime.of(
-            LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
-            LocalTime.of(localDate.getHour(), BigInteger.ZERO.intValue()));
-
-    final var timeDayOne = currentLoaLocalDateTime.toInstant(ZoneOffset.UTC).getEpochSecond();
-    final var dayOne =
-        TxGraphProjectionImp.builder()
-            .simpleTransactions(BigInteger.valueOf(200))
-            .metadata(BigInteger.valueOf(200))
-            .smartContract(BigInteger.valueOf(200))
-            .time(BigInteger.valueOf(timeDayOne))
-            .build();
-
-    final var timeDayTwo =
-        currentLoaLocalDateTime.minusHours(1L).toInstant(ZoneOffset.UTC).getEpochSecond();
-    final var dayTwo =
-        TxGraphProjectionImp.builder()
-            .simpleTransactions(BigInteger.valueOf(100))
-            .metadata(BigInteger.valueOf(100))
-            .smartContract(BigInteger.valueOf(100))
-            .time(BigInteger.valueOf(timeDayTwo))
-            .build();
-
-    final var timeDayThree =
-        currentLoaLocalDateTime.minusHours(2L).toInstant(ZoneOffset.UTC).getEpochSecond();
-    final var dayThree =
-        TxGraphProjectionImp.builder()
-            .simpleTransactions(BigInteger.valueOf(50))
-            .metadata(BigInteger.valueOf(50))
-            .smartContract(BigInteger.valueOf(50))
-            .time(BigInteger.valueOf(timeDayThree))
-            .build();
-
-    List<TxGraphProjection> txGraphs = List.of(dayThree, dayTwo, dayOne);
-
-    when(txChartRepository.getTransactionGraphByHour(anyList())).thenReturn(txGraphs);
-
-    TxGraph txGraphDayOne =
-        TxGraph.builder()
-            .date(
-                Date.from(
-                    OffsetDateTime.ofInstant(
-                            Instant.ofEpochSecond(dayOne.getTime().longValue()), ZoneOffset.UTC)
-                        .toInstant()))
-            .simpleTransactions(dayOne.getSimpleTransactions())
-            .metadata(dayOne.getMetadata())
-            .smartContract(dayOne.getSmartContract())
-            .build();
-
-    TxGraph txGraphDayTwo =
-        TxGraph.builder()
-            .date(
-                Date.from(
-                    OffsetDateTime.ofInstant(
-                            Instant.ofEpochSecond(dayTwo.getTime().longValue()), ZoneOffset.UTC)
-                        .toInstant()))
-            .simpleTransactions(dayTwo.getSimpleTransactions())
-            .metadata(dayTwo.getMetadata())
-            .smartContract(dayTwo.getSmartContract())
-            .build();
-
-    TxGraph txGraphDayThree =
-        TxGraph.builder()
-            .date(
-                Date.from(
-                    OffsetDateTime.ofInstant(
-                            Instant.ofEpochSecond(dayThree.getTime().longValue()), ZoneOffset.UTC)
-                        .toInstant()))
-            .simpleTransactions(dayThree.getSimpleTransactions())
-            .metadata(dayThree.getMetadata())
-            .smartContract(dayThree.getSmartContract())
-            .build();
-
-    List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne);
-
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_DAY);
-
-    for (int i = 0; i < 3; i++) {
-      Assertions.assertEquals(expect.get(i), actual.get(i));
-    }
   }
 
   // transaction graph in range
@@ -255,7 +157,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 3; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -344,7 +246,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 3; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -435,7 +337,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 3; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -555,7 +457,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne, txGraphCurrent);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 4; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -675,7 +577,7 @@ class TransactionGraphTest {
 
     List<TxGraph> expect = List.of(txGraphDayThree, txGraphDayTwo, txGraphDayOne, txGraphCurrent);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     for (int i = 0; i < 4; i++) {
       Assertions.assertEquals(expect.get(i), actual.get(i));
@@ -737,9 +639,12 @@ class TransactionGraphTest {
     when(txChartRepository.getTransactionGraphDayGreaterThan(any(BigInteger.class)))
         .thenReturn(projections);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual =
+        txService.getTransactionChartByRange(TxChartRange.ONE_MONTH).stream()
+            .sorted(Comparator.comparing(TxGraph::getDate).reversed())
+            .toList();
 
-    Assertions.assertEquals(List.of(expect.get(0)), actual);
+    Assertions.assertEquals(expect, actual);
   }
 
   @Test
@@ -795,12 +700,10 @@ class TransactionGraphTest {
     when(listOperations.range(any(String.class), any(Long.class), any(Long.class)))
         .thenReturn(expectPrepare);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.THREE_MONTH);
 
     final var expect =
-        expectPrepare.subList(0, 7).stream()
-            .sorted(Comparator.comparing(TxGraph::getDate))
-            .toList();
+        expectPrepare.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
 
     Assertions.assertEquals(expect, actual);
   }
@@ -862,7 +765,7 @@ class TransactionGraphTest {
     List<TxGraphProjection> dataMissingProjections = new ArrayList<>();
     List<TxGraph> dataMissingTxGraph = new ArrayList<>();
 
-    IntStream.range(3, 34)
+    IntStream.range(5, 34)
         .forEach(
             index -> {
               final var timeDayOne =
@@ -899,14 +802,10 @@ class TransactionGraphTest {
     when(txChartRepository.getTransactionGraphDayGreaterThan(any(BigInteger.class)))
         .thenReturn(dataMissingProjections);
 
-    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_WEEK);
+    List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
     List<TxGraph> expected =
-        List.of(
-            dataMissingTxGraph.get(3),
-            dataMissingTxGraph.get(2),
-            dataMissingTxGraph.get(1),
-            dataMissingTxGraph.get(0));
+        dataMissingTxGraph.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
 
     Assertions.assertEquals(expected, actual);
   }

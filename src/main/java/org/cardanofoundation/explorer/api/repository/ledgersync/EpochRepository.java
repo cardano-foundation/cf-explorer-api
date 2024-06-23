@@ -15,6 +15,11 @@ public interface EpochRepository extends JpaRepository<Epoch, Long> {
 
   Optional<Epoch> findFirstByNo(@Param("no") Integer no);
 
+  @Query(
+      value = "select extract(epoch from e.start_time) from epoch e where e.no = :epochNo",
+      nativeQuery = true)
+  Long getEpochSecondTimeByEpochNo(@Param("epochNo") Integer epochNo);
+
   @Query(value = "SELECT max(no) FROM Epoch")
   Optional<Integer> findCurrentEpochNo();
 
