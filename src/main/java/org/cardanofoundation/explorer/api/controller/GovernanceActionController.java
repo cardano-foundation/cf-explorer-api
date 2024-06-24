@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.GovCommitteeHistoryFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -40,14 +41,34 @@ public class GovernanceActionController {
 
   private final GovernanceActionService governanceActionService;
 
-  @GetMapping("{dRepHashOrPoolHash}")
+  @GetMapping("{voterHash}")
   @LogMessage
   @Operation(
-      summary = "Get governance action that vote by DRep or pool",
+      summary = "Get governance action that vote by voter hash",
+      tags = {"gov-actions"})
+  public ResponseEntity<BaseFilterResponse<GovernanceActionResponse>>
+      getGovActionByVoterHashAndFilter(
+          @PathVariable @Parameter(description = "The Voter Hash") String voterHash,
+          @ParameterObject GovernanceActionFilter governanceActionFilter,
+          @ParameterObject
+              @PaginationValid
+              @PaginationDefault(
+                  size = 20,
+                  sort = {"blockTime"},
+                  direction = Sort.Direction.DESC)
+              @Valid
+              Pagination pagination) {
+    return ResponseEntity.ok(
+        governanceActionService.getGovernanceActions(
+            voterHash, governanceActionFilter, pagination.toPageable()));
+  }
+
+  @GetMapping
+  @LogMessage
+  @Operation(
+      summary = "Get governance action by filter",
       tags = {"gov-actions"})
   public ResponseEntity<BaseFilterResponse<GovernanceActionResponse>> getGovActionByFilter(
-      @PathVariable @Parameter(description = "The DRep hash or pool hash or pool view")
-          String dRepHashOrPoolHash,
       @ParameterObject GovernanceActionFilter governanceActionFilter,
       @ParameterObject
           @PaginationValid
@@ -59,21 +80,40 @@ public class GovernanceActionController {
           Pagination pagination) {
     return ResponseEntity.ok(
         governanceActionService.getGovernanceActions(
-            dRepHashOrPoolHash, governanceActionFilter, pagination.toPageable()));
+            null, governanceActionFilter, pagination.toPageable()));
   }
 
-  @GetMapping("{dRepHashOrPoolHash}/voting-procedure-detail")
+  @GetMapping("committee-history")
   @LogMessage
   @Operation(
-      summary = "Get governance action that vote by DRep or pool",
+      summary = "Get governance action committee history by filter",
+      tags = {"gov-actions"})
+  public ResponseEntity<BaseFilterResponse<GovernanceActionResponse>>
+      getGovActionCommitteeHistoryByFilter(
+          @ParameterObject GovCommitteeHistoryFilter govCommitteeHistoryFilter,
+          @ParameterObject
+              @PaginationValid
+              @PaginationDefault(
+                  size = 20,
+                  sort = {"blockTime"},
+                  direction = Sort.Direction.DESC)
+              @Valid
+              Pagination pagination) {
+    return ResponseEntity.ok(
+        governanceActionService.getGovCommitteeStatusHistory(
+            govCommitteeHistoryFilter, pagination.toPageable()));
+  }
+
+  @GetMapping("{voterHash}/voting-procedure-detail")
+  @LogMessage
+  @Operation(
+      summary = "Get governance action that vote by voter hash",
       tags = {"gov-actions"})
   public ResponseEntity<GovernanceActionDetailsResponse> getGovActionByTxHashAndVoterHash(
-      @PathVariable @Parameter(description = "The DRep hash or pool hash")
-          String dRepHashOrPoolHash,
+      @PathVariable @Parameter(description = "The voterHash") String voterHash,
       @ParameterObject GovernanceActionRequest governanceActionRequest) {
     return ResponseEntity.ok(
-        governanceActionService.getGovernanceActionDetails(
-            dRepHashOrPoolHash, governanceActionRequest));
+        governanceActionService.getGovernanceActionDetails(voterHash, governanceActionRequest));
   }
 
   @GetMapping("voting-chart")
