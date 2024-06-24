@@ -159,10 +159,11 @@ public class DRepServiceImpl implements DRepService {
     DRepDetailsResponse response = dRepMapper.fromDrepInfo(dRepInfo);
     Long createdAtOfDRep = dRepInfo.getCreatedAt();
     Long count =
-        latestVotingProcedureRepository.countVoteByDRepHash(
+        latestVotingProcedureRepository.countVoteByVoterHash(
             dRepInfo.getDrepHash(), createdAtOfDRep);
     Long totalGovActionAllowedToVote =
-        governanceActionRepository.countGovActionThatAllowedToVoteByDRep(createdAtOfDRep);
+        governanceActionRepository.countGovActionThatAllowedToVoteByBlockTimeGreaterThan(
+            createdAtOfDRep);
     response.setVotingParticipation(
         totalGovActionAllowedToVote == 0
             ? null
