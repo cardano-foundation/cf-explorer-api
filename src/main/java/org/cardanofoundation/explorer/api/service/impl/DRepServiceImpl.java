@@ -255,6 +255,14 @@ public class DRepServiceImpl implements DRepService {
       dRepFilterRequest.setVotingPowerTo(1.0);
     }
 
+    if (dRepFilterRequest.getMinGovParticipationRate() == null) {
+      dRepFilterRequest.setMinGovParticipationRate(0.0);
+    }
+
+    if (dRepFilterRequest.getMaxGovParticipationRate() == null) {
+      dRepFilterRequest.setMaxGovParticipationRate(1.0);
+    }
+
     Page<DRepFilterResponse> dRepInfoPage =
         drepInfoRepository
             .getDRepInfoByFilterRequest(
@@ -267,6 +275,8 @@ public class DRepServiceImpl implements DRepService {
                 dRepFilterRequest.getDrepStatus(),
                 fromDate,
                 toDate,
+                dRepFilterRequest.getMinGovParticipationRate(),
+                dRepFilterRequest.getMaxGovParticipationRate(),
                 pageable)
             .map(dRepMapper::fromDRepInfo);
 

@@ -39,10 +39,9 @@ import org.cardanofoundation.explorer.api.projection.StakeInstantaneousRewardsPr
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.service.TxService;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -208,12 +207,7 @@ public class StakeKeyController {
           @StakeKeyLengthValid
           @Parameter(description = "The Bech32 encoded version of the stake address.")
           String stakeKey,
-      @PaginationDefault(
-              size = 20,
-              sort = {LatestAddressBalance_.QUANTITY},
-              direction = Sort.Direction.DESC)
-          @Valid
-          Pagination pagination) {
+      @ParameterObject @Valid Pagination pagination) {
     return ResponseEntity.ok(stakeService.getAddresses(stakeKey, pagination.toPageable()));
   }
 

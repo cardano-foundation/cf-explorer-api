@@ -199,9 +199,10 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
     select min(d.slotNo) as createdAt, ph.hashRaw as poolHash, ph.id as poolId from PoolHash ph
     join Delegation d on d.poolHash.id = ph.id
     group by ph.hashRaw, ph.id
+    having min(d.slotNo) <= :slot
     order by ph.id desc
 """)
-  List<PoolOverviewProjection> getSlotCreatedAtGroupByPoolHash();
+  List<PoolOverviewProjection> getSlotCreatedAtGroupByPoolHash(@Param("slot") Long slot);
 
   @Query(value = "select ph.hashRaw from PoolHash ph where ph.view = :view")
   Optional<String> getHashRawByView(@Param("view") String view);

@@ -228,7 +228,18 @@ public class DRepServiceTest {
             .build();
 
     when(drepInfoRepository.getDRepInfoByFilterRequest(
-            any(), any(), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class)))
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of(response1, response2)));
 
     var actual = dRepCertificateService.getDRepsByFilter(filter, PageRequest.of(0, 2));
