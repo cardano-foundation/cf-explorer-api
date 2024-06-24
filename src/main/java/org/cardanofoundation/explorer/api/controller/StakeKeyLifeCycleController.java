@@ -31,6 +31,7 @@ import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.BaseEntity_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Delegation_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration_;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
 import org.cardanofoundation.explorer.common.validation.date.DatePattern;
 import org.cardanofoundation.explorer.common.validation.date.param.DateValid;
 import org.cardanofoundation.explorer.common.validation.length.LengthValid;
@@ -281,7 +282,7 @@ public class StakeKeyLifeCycleController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {"tx.id"},
+              sort = {AddressTxAmount_.BLOCK_TIME},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {

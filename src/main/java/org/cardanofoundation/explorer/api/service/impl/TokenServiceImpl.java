@@ -41,15 +41,15 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTokenRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -64,7 +64,7 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressToken;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AggregateAddressToken;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -283,8 +283,8 @@ public class TokenServiceImpl implements TokenService {
     } else {
       dates.remove(dates.size() - 1);
       List<AggregateAddressToken> aggregateAddressTokens =
-          aggregateAddressTokenRepository.findAllByIdentAndDayBetween(
-              multiAsset.getId(),
+          aggregateAddressTokenRepository.findAllByUnitAndDayBetween(
+              multiAsset.getUnit(),
               dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());
       Map<LocalDate, BigInteger> aggregateAddressTokenMap =

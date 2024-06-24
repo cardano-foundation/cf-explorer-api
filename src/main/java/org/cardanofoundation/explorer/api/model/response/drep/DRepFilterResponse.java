@@ -27,6 +27,7 @@ public class DRepFilterResponse {
   BigInteger activeVoteStake;
   Double votingPower;
   DRepStatus status;
+  Double govParticipationRate;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   Date createdAt;

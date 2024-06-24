@@ -30,8 +30,8 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.common.entity.explorer.NativeScriptInfo_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance_;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
