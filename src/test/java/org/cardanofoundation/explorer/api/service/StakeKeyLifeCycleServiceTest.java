@@ -32,7 +32,6 @@ import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeWithdrawalProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
@@ -42,6 +41,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistratio
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxOutRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
@@ -756,19 +756,16 @@ class StakeKeyLifeCycleServiceTest {
     when(projection1.getTxHash()).thenReturn("txHash1");
     when(projection1.getAmount()).thenReturn(BigInteger.valueOf(72960943));
     when(projection1.getTime()).thenReturn(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-    when(projection1.getValidContract()).thenReturn(true);
 
     StakeTxProjection projection2 = Mockito.mock(StakeTxProjection.class);
     when(projection2.getTxHash()).thenReturn("txHash2");
     when(projection2.getAmount()).thenReturn(BigInteger.valueOf(-2174301));
     when(projection2.getTime()).thenReturn(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-    when(projection2.getValidContract()).thenReturn(true);
 
     StakeTxProjection projection3 = Mockito.mock(StakeTxProjection.class);
     when(projection3.getTxHash()).thenReturn("txHash3");
     when(projection3.getAmount()).thenReturn(BigInteger.valueOf(2174301));
     when(projection3.getTime()).thenReturn(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-    when(projection3.getValidContract()).thenReturn(true);
 
     Page<StakeTxProjection> page =
         new PageImpl<>(List.of(projection1, projection2, projection3), pageable, 3);
@@ -1032,7 +1029,6 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getTxHash()).thenReturn("hash");
     when(projection.getAmount()).thenReturn(BigInteger.ONE);
     when(projection.getTime()).thenReturn(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-    when(projection.getValidContract()).thenReturn(true);
     StakeAddress stakeAddress = StakeAddress.builder().view("view").build();
     List<Long> txIds = List.of(100L);
 

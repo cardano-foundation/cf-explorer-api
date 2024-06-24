@@ -1,6 +1,5 @@
-package org.cardanofoundation.explorer.api.repository.ledgersync;
+package org.cardanofoundation.explorer.api.repository.ledgersyncagg;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,32 +9,30 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressResponseProjection;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
 
 public interface AddressRepository extends JpaRepository<Address, Long> {
-
-  //  @Query("SELECT address FROM Address address" + " WHERE address.addressHasScript = true")
-  //  Page<Address> findAllByAddressHasScriptIsTrue(Pageable pageable);
-  //  @Query("SELECT address FROM Address address" + " ORDER BY address.balance DESC")
-  //  List<Address> findAllOrderByBalance(Pageable pageable);
 
   Optional<Address> findFirstByAddress(@Param("address") String address);
 
   @Query(
       value =
           """
-          SELECT new org.cardanofoundation.explorer.api.model.response.address.AddressResponse
-          (addr.address, CAST(COALESCE(latestAddrBalance.quantity, 0) AS biginteger))
-          FROM LatestAddressBalance latestAddrBalance
-          RIGHT JOIN Address addr ON addr.address = latestAddrBalance.address
-          WHERE addr.stakeAddress = :stakeAddress
-          """)
-  Page<AddressResponse> findByStakeAddress(
+          SELECT ab.address, ab.quantity as balance FROM address addr
+          CROSS JOIN LATERAL ( SELECT tmp.address,
+                                tmp.quantity
+                         FROM address_balance tmp
+                         WHERE tmp.address = addr.address
+                           AND tmp.unit = 'lovelace'
+                         ORDER BY tmp.slot DESC
+                         LIMIT 1) ab
+          WHERE addr.stake_address = :stakeAddress
+          ORDER BY ab.quantity DESC
+          """,
+      nativeQuery = true)
+  Page<AddressResponseProjection> findByStakeAddress(
       @Param("stakeAddress") String stakeAddress, Pageable pageable);
-
-  List<Address> findAddressByIdIn(@Param("idList") Collection<Long> idList);
 
   @Query(value = "SELECT addr.address FROM Address addr WHERE addr.paymentCredential = :scriptHash")
   List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);
@@ -48,9 +45,9 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
                    LEFT JOIN address_tx_count atc ON addr.address = atc.address
                    LEFT JOIN (SELECT abv.address,
                                      abv.quantity
-                              from address_balance_view abv
-                              where abv.address = :address
-                                and abv.unit = 'lovelace') ab ON ab.address = addr.address
+                              FROM address_balance_view abv
+                              WHERE abv.address = :address
+                                AND abv.unit = 'lovelace') ab ON ab.address = addr.address
           WHERE addr.address = :address
           """,
       nativeQuery = true)

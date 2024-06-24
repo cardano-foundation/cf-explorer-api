@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -57,6 +58,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceAction
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.ProtocolParamUtil;
@@ -73,6 +75,8 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 @RequiredArgsConstructor
 @Log4j2
 public class GovernanceActionServiceImpl implements GovernanceActionService {
+
+  private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
   @Value("${application.epoch.days}")
   public long epochDays;
@@ -379,31 +383,17 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       default:
         votingChartResponse.setThreshold(null);
     }
-    List<PoolOverviewProjection> createdAtList =
-        poolHashRepository.getSlotCreatedAtGroupByPoolHash();
     List<PoolOverviewProjection> poolCanVoteList =
-        createdAtList.stream()
-            .filter(e -> e.getCreatedAt() <= govActionDetailsProjection.getSlot())
-            .toList();
+        poolHashRepository.getSlotCreatedAtGroupByPoolHash(govActionDetailsProjection.getSlot());
+
     Map<String, Long> poolHashByPoolIdMap =
         poolCanVoteList.stream()
             .collect(
                 Collectors.toMap(
                     PoolOverviewProjection::getPoolHash, PoolOverviewProjection::getPoolId));
-    List<Long> poolIds = poolHashByPoolIdMap.values().stream().toList();
-    List<PoolOverviewProjection> poolOverviewProjections =
-        delegationRepository.getBalanceByPoolIdIn(poolIds);
-    Map<String, BigInteger> activeVoteStakeByPoolMap =
-        poolOverviewProjections.stream()
-            .collect(
-                Collectors.toMap(
-                    PoolOverviewProjection::getPoolHash, PoolOverviewProjection::getBalance));
-    BigInteger totalActiveVoteStake =
-        poolOverviewProjections.stream()
-            .map(PoolOverviewProjection::getBalance)
-            .filter(Objects::nonNull)
-            .reduce(BigInteger::add)
-            .orElse(BigInteger.ZERO);
+
+    BigInteger totalActiveVoteStake = getTotalActiveStakeByPoolIds(poolHashByPoolIdMap.keySet());
+
     List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
         latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
             govActionDetailsProjection.getTxHash(),
@@ -421,20 +411,22 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 Collectors.toMap(
                     Map.Entry::getKey,
                     entry ->
-                        entry.getValue().stream()
-                            .map( // get active vote stake of Pool
-                                latestVotingProcedureProjection ->
-                                    activeVoteStakeByPoolMap.getOrDefault(
-                                        latestVotingProcedureProjection.getVoterHash(),
-                                        BigInteger.ZERO))
-                            .filter(Objects::nonNull)
-                            .reduce(BigInteger::add)
-                            .orElse(BigInteger.ZERO)));
+                        getTotalActiveStakeByPoolIds(
+                            entry.getValue().stream()
+                                .map(LatestVotingProcedureProjection::getVoterHash)
+                                .collect(Collectors.toList()))));
+
     votingChartResponse.setActiveVoteStake(totalActiveVoteStake);
     votingChartResponse.setTotalYesVoteStake(voteStake.getOrDefault(Vote.YES, BigInteger.ZERO));
     votingChartResponse.setTotalNoVoteStake(voteStake.getOrDefault(Vote.NO, BigInteger.ZERO));
     votingChartResponse.setAbstainVoteStake(voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO));
   }
+
+  private BigInteger getTotalActiveStakeByPoolIds(Collection<String> poolIds) {
+    Set<String> stakeView = delegationRepository.getStakeAddressDelegatorsByPoolIds(poolIds);
+    return stakeAddressBalanceRepository.sumBalanceByStakeAddressIn(stakeView);
+  }
+
   // TODO: Active vote stake of DRep type is not available.
   private void getVotingChartResponseForDRep(
       VotingChartResponse votingChartResponse,
