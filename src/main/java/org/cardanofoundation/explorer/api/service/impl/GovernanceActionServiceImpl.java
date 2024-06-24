@@ -331,7 +331,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     CommitteeState committeeState =
         epochParam.getCommitteeMinSize() == null
                 || committeeTotalCount >= epochParam.getCommitteeMinSize().intValue()
-            ? CommitteeState.NORMAL
+            ? CommitteeState.CONFIDENCE
             : CommitteeState.NO_CONFIDENCE;
 
     VotingChartResponse votingChartResponse =
@@ -368,7 +368,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         break;
       case UPDATE_COMMITTEE:
         votingChartResponse.setThreshold(
-            CommitteeState.NORMAL.equals(committeeState)
+            CommitteeState.CONFIDENCE.equals(committeeState)
                 ? epochParam.getPvtCommitteeNormal()
                 : epochParam.getPvtCommitteeNoConfidence());
         break;
@@ -439,7 +439,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         break;
       case UPDATE_COMMITTEE:
         votingChartResponse.setThreshold(
-            CommitteeState.NORMAL.equals(committeeState)
+            CommitteeState.CONFIDENCE.equals(committeeState)
                 ? epochParam.getDvtCommitteeNormal()
                 : epochParam.getDvtCommitteeNoConfidence());
         break;
