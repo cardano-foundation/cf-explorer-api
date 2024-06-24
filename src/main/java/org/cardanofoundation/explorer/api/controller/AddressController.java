@@ -24,8 +24,8 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestTokenBalance_;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance_;
 import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;

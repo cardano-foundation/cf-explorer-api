@@ -461,7 +461,7 @@ class DelegationServiceTest {
     ownerAddress.add("address");
     when(poolUpdateRepository.getCreatedTimeOfPool(poolId)).thenReturn(timestamp);
     when(poolUpdateRepository.findOwnerAccountByPool(poolId)).thenReturn(ownerAddress);
-    when(stakeAddressRepository.getBalanceByView(ownerAddress)).thenReturn(BigInteger.TEN);
+    //    when(stakeAddressRepository.getBalanceByView(ownerAddress)).thenReturn(BigInteger.TEN);
     when(rewardRepository.getAvailableRewardByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress))
         .thenReturn(BigInteger.TEN);

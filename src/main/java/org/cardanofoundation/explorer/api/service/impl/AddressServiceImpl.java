@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -23,8 +25,6 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.AddressMapper;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
@@ -32,23 +32,25 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressChartBal
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxCount;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance;
-import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressTxBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AggregateAddressTxBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopAddressBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -56,18 +58,15 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 @Log4j2
 public class AddressServiceImpl implements AddressService {
 
-  //  private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final AddressRepository addressRepository;
-  private final AssetMetadataRepository assetMetadataRepository;
-  private final LatestAddressBalanceRepository latestAddressBalanceRepository;
+  private final TopAddressBalanceRepository topAddressBalanceRepository;
   private final LatestTokenBalanceRepository latestTokenBalanceRepository;
   private final TokenMapper tokenMapper;
-  private final AddressMapper addressMapper;
-  private final AssetMetadataMapper assetMetadataMapper;
   private final ScriptRepository scriptRepository;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
   private final AddressTxCountRepository addressTxCountRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
+  private final MultiAssetRepository multiAssetRepository;
 
   @Value("${application.network}")
   private String network;
@@ -185,7 +184,9 @@ public class AddressServiceImpl implements AddressService {
 
       List<AggregateAddressTxBalance> aggregateAddressTxBalances =
           aggregateAddressTxBalanceRepository.findAllByAddressIdAndDayBetween(
-              addr.getId(), dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
+              addr.getAddress(),
+              dates.get(0).toLocalDate(),
+              dates.get(dates.size() - 1).toLocalDate());
 
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
@@ -237,24 +238,17 @@ public class AddressServiceImpl implements AddressService {
     }
   }
 
-  //  @Override
-  //  public BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable) {
-  //    Page<Address> contractPage = addressRepository.findAllByAddressHasScriptIsTrue(pageable);
-  //    Page<ContractFilterResponse> pageResponse =
-  //        contractPage.map(addressMapper::fromAddressToContractFilter);
-  //    return new BaseFilterResponse<>(pageResponse);
-  //  }
   @Override
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
-    List<LatestAddressBalance> latestAddressBalances =
-        latestAddressBalanceRepository.findAllLatestAddressBalance(pageable);
-    Page<LatestAddressBalance> latestAddressBalancePage =
+    List<TopAddressBalance> latestAddressBalances =
+        topAddressBalanceRepository.findAllLatestAddressBalance(pageable);
+    Page<TopAddressBalance> latestAddressBalancePage =
         new PageImpl<>(latestAddressBalances, pageable, pageable.getPageSize());
 
     Map<String, Long> addressTxCountMap =
         addressTxCountRepository
             .findAllByAddressIn(
-                latestAddressBalancePage.stream().map(LatestAddressBalance::getAddress).toList())
+                latestAddressBalancePage.stream().map(TopAddressBalance::getAddress).toList())
             .stream()
             .collect(Collectors.toMap(AddressTxCount::getAddress, AddressTxCount::getTxCount));
 
@@ -284,20 +278,41 @@ public class AddressServiceImpl implements AddressService {
   @Override
   public BaseFilterResponse<TokenAddressResponse> getTokenByDisplayName(
       Pageable pageable, String address, String displayName) {
-    Page<TokenAddressResponse> tokenListResponse;
 
-    if (DataUtil.isNullOrEmpty(displayName)) {
-      tokenListResponse =
-          latestTokenBalanceRepository
-              .findTokenAndBalanceByAddress(address, pageable)
-              .map(tokenMapper::fromAddressTokenProjection);
-    } else {
+    List<TokenAddressResponse> tokenListResponse = new ArrayList<>();
+    List<LatestTokenBalance> latestTokenBalances =
+        latestTokenBalanceRepository.findAllByAddress(address);
+
+    Set<String> unitSet =
+        latestTokenBalances.stream().map(LatestTokenBalance::getUnit).collect(Collectors.toSet());
+
+    Map<String, AddressTokenProjection> tokenMetadataMap =
+        multiAssetRepository.findTokenMetadataByUnitIn(unitSet).stream()
+            .collect(Collectors.toMap(AddressTokenProjection::getUnit, Function.identity()));
+
+    boolean isSearchByDisplayName;
+    if (!DataUtil.isNullOrEmpty(displayName)) {
+      isSearchByDisplayName = true;
       displayName = displayName.trim().toLowerCase();
-      tokenListResponse =
-          latestTokenBalanceRepository
-              .findTokenAndBalanceByAddressAndNameView(address, displayName, pageable)
-              .map(tokenMapper::fromAddressTokenProjection);
+    } else {
+      isSearchByDisplayName = false;
     }
-    return new BaseFilterResponse<>(tokenListResponse);
+
+    for (LatestTokenBalance latestTokenBalance : latestTokenBalances) {
+      AddressTokenProjection projection = tokenMetadataMap.get(latestTokenBalance.getUnit());
+      TokenAddressResponse tokenAddressResponse =
+          tokenMapper.fromAddressTokenProjection(projection);
+      tokenAddressResponse.setQuantity(latestTokenBalance.getQuantity());
+      tokenAddressResponse.setAddress(address);
+
+      if (!isSearchByDisplayName) {
+        tokenListResponse.add(tokenAddressResponse);
+      } else if (tokenAddressResponse.getDisplayName().toLowerCase().contains(displayName)
+          || tokenAddressResponse.getFingerprint().equals(displayName)) {
+        tokenListResponse.add(tokenAddressResponse);
+      }
+    }
+
+    return new BaseFilterResponse<>(BaseFilterResponse.getPageImpl(tokenListResponse, pageable));
   }
 }
