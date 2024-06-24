@@ -10,4 +10,8 @@ public interface DRepRangeProjection {
   Double getMinVotingPower();
 
   Double getMaxVotingPower();
+
+  Double getMinGovParticipationRate();
+
+  Double getMaxGovParticipationRate();
 }

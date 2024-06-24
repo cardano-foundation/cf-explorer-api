@@ -14,4 +14,8 @@ public class DRepRangeValuesResponse {
   BigInteger maxActiveVoteStake;
 
   BigInteger minActiveVoteStake;
+
+  Double minGovParticipationRate;
+
+  Double maxGovParticipationRate;
 }
