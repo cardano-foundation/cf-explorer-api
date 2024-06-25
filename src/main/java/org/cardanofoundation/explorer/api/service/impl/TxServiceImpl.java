@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
@@ -164,13 +162,13 @@ public class TxServiceImpl implements TxService {
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
-  public static final long HOURS_IN_DAY = 24;
-  public static final long DAY_IN_WEEK = 7;
-  public static final long DAY_IN_TWO_WEEK = DAY_IN_WEEK * 2;
   public static final long DAYS_IN_MONTH = 32;
-
+  public static final long DAYS_IN_THREE_MONTH = 93;
+  public static final long MONTHS_IN_YEAR = 12;
+  public static final long MONTHS_IN_THREE_YEAR = MONTHS_IN_YEAR * 3;
+  private static final long DAY_STEP_EPOCH_SECOND = 86400;
+  private static final long MONTH_STEP_EPOCH_SECOND = 2592000;
   private static final String UNIT_LOVELACE = "lovelace";
-  private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
   private final TokenTxCountRepository tokenTxCountRepository;
 
   @Value("${application.network}")
@@ -239,16 +237,24 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
+  //  @SingletonCall(typeToken = TypeTokenGson.TX_CHART, expireAfterSeconds = 300)
   public List<TxGraph> getTransactionChartByRange(TxChartRange range) {
-    if (range.equals(TxChartRange.ONE_DAY)) {
-      return getTransactionChartInOneDay();
+    if (range.equals(TxChartRange.ONE_YEAR)) {
+      return getTransactionChartInMonthRange(MONTHS_IN_YEAR);
     }
-    long day = DAY_IN_WEEK;
 
-    if (range.equals(TxChartRange.TWO_WEEK)) {
-      day = DAY_IN_TWO_WEEK;
-    } else if (range.equals(TxChartRange.ONE_MONTH)) {
-      day = DAYS_IN_MONTH;
+    if (range.equals(TxChartRange.THREE_YEAR)) {
+      return getTransactionChartInMonthRange(MONTHS_IN_THREE_YEAR);
+    }
+
+    if (range.equals(TxChartRange.ALL_TIME)) {
+      return getTransactionChartInAllRange();
+    }
+
+    long day = DAYS_IN_MONTH;
+
+    if (range.equals(TxChartRange.THREE_MONTH)) {
+      day = DAYS_IN_THREE_MONTH;
     }
     return getTransactionChartInRange(day);
   }
@@ -1375,6 +1381,62 @@ public class TxServiceImpl implements TxService {
     return stakeAddressTxInputList;
   }
 
+  private List<TxGraph> getTransactionChartInMonthRange(long month) {
+    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+
+    final LocalDateTime currentLocalDate =
+        LocalDateTime.of(
+            LocalDate.of(
+                localDate.getYear(), localDate.getMonth(), LocalDateTime.MIN.getDayOfMonth()),
+            LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
+
+    final LocalDateTime previousMonths = currentLocalDate.minusMonths(month);
+    final BigInteger currentMonthsInSeconds =
+        BigInteger.valueOf(currentLocalDate.toInstant(ZoneOffset.UTC).getEpochSecond());
+    final BigInteger previousMonthsInSeconds =
+        BigInteger.valueOf(previousMonths.toInstant(ZoneOffset.UTC).getEpochSecond());
+
+    List<TxGraph> txGraphs =
+        toTxGraph(
+            txChartRepository.getTransactionGraphMonthGreaterThan(previousMonthsInSeconds),
+            previousMonthsInSeconds.longValue(),
+            currentMonthsInSeconds.longValue(),
+            MONTH_STEP_EPOCH_SECOND);
+
+    return txGraphs.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
+  }
+
+  private List<TxGraph> getTransactionChartInAllRange() {
+    Long startTime = blockRepository.getMinBlockTime();
+    // round to the first day of the month
+    startTime =
+        OffsetDateTime.ofInstant(Instant.ofEpochSecond(startTime), ZoneOffset.UTC)
+            .withDayOfMonth(1)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .toEpochSecond();
+
+    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+
+    final LocalDateTime currentLocalDate =
+        LocalDateTime.of(
+            LocalDate.of(
+                localDate.getYear(), localDate.getMonth(), LocalDateTime.MIN.getDayOfMonth()),
+            LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
+
+    final BigInteger currentMonthsInSeconds =
+        BigInteger.valueOf(currentLocalDate.toInstant(ZoneOffset.UTC).getEpochSecond());
+
+    List<TxGraph> txGraphs =
+        toTxGraph(
+            txChartRepository.getTransactionGraphMonthGreaterThan(null),
+            startTime,
+            currentMonthsInSeconds.longValue(),
+            MONTH_STEP_EPOCH_SECOND);
+    return txGraphs.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
+  }
+
   /**
    * get transaction graph in month with day unit
    *
@@ -1382,7 +1444,6 @@ public class TxServiceImpl implements TxService {
    * @return
    */
   private List<TxGraph> getTransactionChartInRange(long day) {
-    final String key = getRedisKey(TRANSACTION_GRAPH_MONTH_KEY);
     LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
     final LocalDateTime currentLocalDate =
@@ -1390,107 +1451,22 @@ public class TxServiceImpl implements TxService {
             LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
             LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
 
-    final LocalDateTime previousMonth =
-        currentLocalDate
-            .minusMonths(BigInteger.ONE.longValue())
-            .minusDays(BigInteger.ONE.longValue());
+    final LocalDateTime previousDays = currentLocalDate.minusMonths(day == DAYS_IN_MONTH ? 1 : 3);
 
-    final BigInteger previousMonthInSeconds =
-        BigInteger.valueOf(previousMonth.toInstant(ZoneOffset.UTC).getEpochSecond());
+    final BigInteger currentDaysInSeconds =
+        BigInteger.valueOf(currentLocalDate.toInstant(ZoneOffset.UTC).getEpochSecond());
 
-    long maxDay = ChronoUnit.DAYS.between(previousMonth, currentLocalDate);
+    final BigInteger previousDaysInSeconds =
+        BigInteger.valueOf(previousDays.toInstant(ZoneOffset.UTC).getEpochSecond());
 
-    if (maxDay < day) {
-      day = maxDay;
-    }
+    List<TxGraph> txCharts =
+        toTxGraph(
+            txChartRepository.getTransactionGraphDayGreaterThan(previousDaysInSeconds),
+            previousDaysInSeconds.longValue(),
+            currentDaysInSeconds.longValue(),
+            DAY_STEP_EPOCH_SECOND);
 
-    var keySize = redisTemplate.opsForList().size(key);
-    // if key not exists or empty
-    if (Objects.isNull(keySize) || keySize.equals(BigInteger.ZERO.longValue())) {
-      List<TxGraph> txCharts =
-          toTxGraph(txChartRepository.getTransactionGraphDayGreaterThan(previousMonthInSeconds));
-      updateRedisTxGraph(txCharts, key, Boolean.TRUE);
-
-      return getTxGraphsByDayRange(
-          (int) day,
-          txCharts.stream().sorted(Comparator.comparing(TxGraph::getDate).reversed()).toList());
-    }
-
-    // txGraphsRedis will not empty
-    List<TxGraph> txGraphsRedis =
-        redisTemplate.opsForList().range(key, BigInteger.ZERO.longValue(), DAYS_IN_MONTH);
-
-    final var latestDay = txGraphsRedis.get(BigInteger.ZERO.intValue()).getDate();
-    final var latestLocalDateTime =
-        Instant.ofEpochMilli(latestDay.getTime()).atZone(ZoneOffset.UTC).toLocalDateTime();
-
-    while (ChronoUnit.DAYS.between(
-            LocalDateTime.ofInstant(
-                txGraphsRedis.get(txGraphsRedis.size() - 1).getDate().toInstant(), ZoneOffset.UTC),
-            currentLocalDate)
-        > DAYS_IN_MONTH) {
-      redisTemplate.opsForList().rightPop(key);
-      txGraphsRedis.remove(txGraphsRedis.size() - BigInteger.ONE.intValue());
-    }
-
-    var distanceFromRealAndCache = ChronoUnit.DAYS.between(latestLocalDateTime, currentLocalDate);
-
-    if (distanceFromRealAndCache >= BigInteger.TWO.longValue()) {
-      final long dayMissingData = day - distanceFromRealAndCache;
-      if (dayMissingData <= BigInteger.ZERO.longValue()) {
-        return Collections.emptyList();
-      }
-
-      List<TxGraph> txCharts =
-          toTxGraph(txChartRepository.getTransactionGraphDayGreaterThan(previousMonthInSeconds));
-      updateRedisTxGraph(txCharts, key, Boolean.TRUE);
-      return getTxGraphsByDayRange(
-          (int) (day - distanceFromRealAndCache),
-          txCharts.stream().sorted(Comparator.comparing(TxGraph::getDate).reversed()).toList());
-    }
-    // get 2 days: today and yesterday
-    List<BigInteger> days =
-        LongStream.range(BigInteger.ZERO.intValue(), BigInteger.TWO.longValue())
-            .boxed()
-            .map(
-                dayMinus -> {
-                  var markDay = currentLocalDate.minusDays(dayMinus);
-                  return BigInteger.valueOf(markDay.toInstant(ZoneOffset.UTC).getEpochSecond());
-                })
-            .toList();
-
-    List<TxGraph> txs = toTxGraph(txChartRepository.getTransactionGraphByDay(days));
-
-    if (ObjectUtils.isEmpty(txs)) {
-      return getTxGraphsByDayRange((int) day, txGraphsRedis);
-    }
-
-    final var txGraphs = new ArrayList<TxGraph>();
-    // this mean that there are no transaction in latest day at time this api was call
-    if (txs.size() == BigInteger.ONE.intValue()) {
-      return getTxGraphsByDayRange((int) day, txGraphsRedis);
-    }
-
-    var latestChart = txs.get(BigInteger.ONE.intValue());
-    var previousChart = txs.get(BigInteger.ZERO.intValue());
-
-    if (distanceFromRealAndCache == BigInteger.ONE.longValue()
-        && txs.size() == BigInteger.TWO.intValue()) {
-      redisTemplate.opsForList().set(key, BigInteger.ZERO.intValue(), previousChart);
-      redisTemplate.opsForList().leftPush(key, latestChart);
-
-      txGraphs.add(latestChart);
-      txGraphs.add(previousChart);
-      txGraphs.addAll(txGraphsRedis.subList(BigInteger.ONE.intValue(), txGraphsRedis.size()));
-
-      return getTxGraphsByDayRange((int) day, txGraphs);
-    }
-
-    txGraphs.add(latestChart);
-    txGraphs.add(previousChart);
-    txGraphs.addAll(txGraphsRedis.subList(BigInteger.TWO.intValue(), txGraphsRedis.size()));
-
-    return getTxGraphsByDayRange((int) day, txGraphs);
+    return getTxGraphsByDayRange((int) day, txCharts);
   }
 
   private static List<TxGraph> getTxGraphsByDayRange(int day, List<TxGraph> txCharts) {
@@ -1505,56 +1481,66 @@ public class TxServiceImpl implements TxService {
   }
 
   /**
-   * sum transaction in 24 hours in order to draw graph
-   *
-   * @return
-   */
-  private List<TxGraph> getTransactionChartInOneDay() {
-    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
-
-    final LocalDateTime currentLoaLocalDateTime =
-        LocalDateTime.of(
-            LocalDate.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth()),
-            LocalTime.of(localDate.getHour(), BigInteger.ZERO.intValue()));
-
-    List<BigInteger> hours =
-        LongStream.range(BigInteger.ZERO.intValue(), HOURS_IN_DAY)
-            .boxed()
-            .map(currentLoaLocalDateTime::minusHours)
-            .map(hour -> BigInteger.valueOf(hour.toInstant(ZoneOffset.UTC).getEpochSecond()))
-            .toList();
-
-    List<TxGraphProjection> txs = txChartRepository.getTransactionGraphByHour(hours);
-
-    if (CollectionUtils.isEmpty(txs)) {
-      return Collections.emptyList();
-    }
-
-    return toTxGraph(txs).stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
-  }
-
-  /**
    * Mapping projection to TxGraph
    *
    * @param txs
    * @return
    */
-  private static List<TxGraph> toTxGraph(List<TxGraphProjection> txs) {
-    return txs.stream()
-        .map(
-            txChart ->
-                TxGraph.builder()
-                    .date(
-                        Date.from(
-                            OffsetDateTime.ofInstant(
-                                    Instant.ofEpochSecond(txChart.getTime().longValue()),
-                                    ZoneOffset.UTC)
-                                .toInstant()))
-                    .simpleTransactions(txChart.getSimpleTransactions())
-                    .smartContract(txChart.getSmartContract())
-                    .metadata(txChart.getMetadata())
-                    .build())
-        .toList();
+  private static List<TxGraph> toTxGraph(
+      List<TxGraphProjection> txs,
+      long epochSecondStartTime,
+      long currentEpochSecondTime,
+      long epochStep) {
+    Map<BigInteger, TxGraphProjection> txGraphMap =
+        txs.stream().collect(Collectors.toMap(TxGraphProjection::getTime, Function.identity()));
+
+    BigInteger minTxTime =
+        txs.stream()
+            .map(TxGraphProjection::getTime)
+            .min(BigInteger::compareTo)
+            .orElse(BigInteger.ZERO);
+
+    List<TxGraph> txGraphs = new ArrayList<>();
+    while (epochSecondStartTime <= currentEpochSecondTime) {
+      TxGraphProjection txChart = txGraphMap.get(BigInteger.valueOf(epochSecondStartTime));
+      OffsetDateTime offsetDateTime =
+          OffsetDateTime.ofInstant(Instant.ofEpochSecond(epochSecondStartTime), ZoneOffset.UTC);
+      OffsetDateTime nextOffsetDateTime =
+          epochStep == MONTH_STEP_EPOCH_SECOND
+              ? offsetDateTime.plusMonths(1)
+              : offsetDateTime.plusDays(1);
+
+      if (txChart == null) {
+        txGraphs.add(
+            TxGraph.builder()
+                .date(
+                    Date.from(
+                        OffsetDateTime.ofInstant(
+                                Instant.ofEpochSecond(epochSecondStartTime), ZoneOffset.UTC)
+                            .toInstant()))
+                .simpleTransactions(BigInteger.ZERO)
+                .smartContract(BigInteger.ZERO)
+                .metadata(BigInteger.ZERO)
+                .build());
+      } else {
+        txGraphs.add(
+            TxGraph.builder()
+                .date(
+                    Date.from(
+                        OffsetDateTime.ofInstant(
+                                Instant.ofEpochSecond(txChart.getTime().longValue()),
+                                ZoneOffset.UTC)
+                            .toInstant()))
+                .simpleTransactions(txChart.getSimpleTransactions())
+                .smartContract(txChart.getSmartContract())
+                .metadata(txChart.getMetadata())
+                .build());
+      }
+
+      epochSecondStartTime = nextOffsetDateTime.toEpochSecond();
+    }
+
+    return txGraphs;
   }
 
   /**

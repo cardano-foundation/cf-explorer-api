@@ -365,8 +365,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             currentEpochParam.getEpochNo());
 
     CommitteeState committeeState =
-        epochParam.getCommitteeMinSize() == null
-                || activeMembers >= epochParam.getCommitteeMinSize().intValue()
+        activeMembers >= currentEpochParam.getCommitteeMinSize().intValue()
             ? CommitteeState.CONFIDENCE
             : CommitteeState.NO_CONFIDENCE;
 
