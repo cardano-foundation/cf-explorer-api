@@ -70,12 +70,10 @@ public class Protocols {
   ProtocolHistory priceStep;
   ProtocolHistory maxTxExMem;
 
-  @JsonProperty("maxTxExUnits")
   ProtocolHistory maxTxExSteps;
 
   ProtocolHistory maxBlockExMem;
 
-  @JsonProperty("maxBlockExUnits")
   ProtocolHistory maxBlockExSteps;
 
   ProtocolHistory maxValSize;
