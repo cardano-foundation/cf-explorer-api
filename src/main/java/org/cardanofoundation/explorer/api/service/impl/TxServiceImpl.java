@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,8 +51,6 @@ import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
-import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
-import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.*;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -169,6 +166,8 @@ public class TxServiceImpl implements TxService {
   public static final long DAYS_IN_THREE_MONTH = 93;
   public static final long MONTHS_IN_YEAR = 12;
   public static final long MONTHS_IN_THREE_YEAR = MONTHS_IN_YEAR * 3;
+  private static final long DAY_STEP_EPOCH_SECOND = 86400;
+  private static final long MONTH_STEP_EPOCH_SECOND = 2592000;
   private static final String UNIT_LOVELACE = "lovelace";
   private final TokenTxCountRepository tokenTxCountRepository;
 
@@ -238,7 +237,7 @@ public class TxServiceImpl implements TxService {
   }
 
   @Override
-  @SingletonCall(typeToken = TypeTokenGson.TX_CHART, expireAfterSeconds = 300)
+  //  @SingletonCall(typeToken = TypeTokenGson.TX_CHART, expireAfterSeconds = 300)
   public List<TxGraph> getTransactionChartByRange(TxChartRange range) {
     if (range.equals(TxChartRange.ONE_YEAR)) {
       return getTransactionChartInMonthRange(MONTHS_IN_YEAR);
@@ -1392,22 +1391,49 @@ public class TxServiceImpl implements TxService {
             LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
 
     final LocalDateTime previousMonths = currentLocalDate.minusMonths(month);
-
+    final BigInteger currentMonthsInSeconds =
+        BigInteger.valueOf(currentLocalDate.toInstant(ZoneOffset.UTC).getEpochSecond());
     final BigInteger previousMonthsInSeconds =
         BigInteger.valueOf(previousMonths.toInstant(ZoneOffset.UTC).getEpochSecond());
 
     List<TxGraph> txGraphs =
         toTxGraph(
             txChartRepository.getTransactionGraphMonthGreaterThan(previousMonthsInSeconds),
-            previousMonthsInSeconds.longValue());
+            previousMonthsInSeconds.longValue(),
+            currentMonthsInSeconds.longValue(),
+            MONTH_STEP_EPOCH_SECOND);
 
     return txGraphs.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
   }
 
   private List<TxGraph> getTransactionChartInAllRange() {
     Long startTime = blockRepository.getMinBlockTime();
+    // round to the first day of the month
+    startTime =
+        OffsetDateTime.ofInstant(Instant.ofEpochSecond(startTime), ZoneOffset.UTC)
+            .withDayOfMonth(1)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .toEpochSecond();
+
+    LocalDateTime localDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+
+    final LocalDateTime currentLocalDate =
+        LocalDateTime.of(
+            LocalDate.of(
+                localDate.getYear(), localDate.getMonth(), LocalDateTime.MIN.getDayOfMonth()),
+            LocalTime.of(BigInteger.ZERO.intValue(), BigInteger.ZERO.intValue()));
+
+    final BigInteger currentMonthsInSeconds =
+        BigInteger.valueOf(currentLocalDate.toInstant(ZoneOffset.UTC).getEpochSecond());
+
     List<TxGraph> txGraphs =
-        toTxGraph(txChartRepository.getTransactionGraphMonthGreaterThan(null), startTime);
+        toTxGraph(
+            txChartRepository.getTransactionGraphMonthGreaterThan(null),
+            startTime,
+            currentMonthsInSeconds.longValue(),
+            MONTH_STEP_EPOCH_SECOND);
     return txGraphs.stream().sorted(Comparator.comparing(TxGraph::getDate)).toList();
   }
 
@@ -1427,13 +1453,18 @@ public class TxServiceImpl implements TxService {
 
     final LocalDateTime previousDays = currentLocalDate.minusMonths(day == DAYS_IN_MONTH ? 1 : 3);
 
+    final BigInteger currentDaysInSeconds =
+        BigInteger.valueOf(currentLocalDate.toInstant(ZoneOffset.UTC).getEpochSecond());
+
     final BigInteger previousDaysInSeconds =
         BigInteger.valueOf(previousDays.toInstant(ZoneOffset.UTC).getEpochSecond());
 
     List<TxGraph> txCharts =
         toTxGraph(
             txChartRepository.getTransactionGraphDayGreaterThan(previousDaysInSeconds),
-            previousDaysInSeconds.longValue());
+            previousDaysInSeconds.longValue(),
+            currentDaysInSeconds.longValue(),
+            DAY_STEP_EPOCH_SECOND);
 
     return getTxGraphsByDayRange((int) day, txCharts);
   }
@@ -1455,50 +1486,58 @@ public class TxServiceImpl implements TxService {
    * @param txs
    * @return
    */
-  private static List<TxGraph> toTxGraph(List<TxGraphProjection> txs, long epochStartTime) {
-    AtomicBoolean isChartExistStartPoint = new AtomicBoolean(false);
+  private static List<TxGraph> toTxGraph(
+      List<TxGraphProjection> txs,
+      long epochSecondStartTime,
+      long currentEpochSecondTime,
+      long epochStep) {
+    Map<BigInteger, TxGraphProjection> txGraphMap =
+        txs.stream().collect(Collectors.toMap(TxGraphProjection::getTime, Function.identity()));
 
-    BigInteger minTime =
+    BigInteger minTxTime =
         txs.stream()
             .map(TxGraphProjection::getTime)
             .min(BigInteger::compareTo)
             .orElse(BigInteger.ZERO);
 
-    List<TxGraph> txGraphs =
-        txs.stream()
-            .map(
-                txChart -> {
-                  if (epochStartTime == txChart.getTime().longValue()) {
-                    isChartExistStartPoint.set(true);
-                  }
+    List<TxGraph> txGraphs = new ArrayList<>();
+    while (epochSecondStartTime <= currentEpochSecondTime) {
+      TxGraphProjection txChart = txGraphMap.get(BigInteger.valueOf(epochSecondStartTime));
+      OffsetDateTime offsetDateTime =
+          OffsetDateTime.ofInstant(Instant.ofEpochSecond(epochSecondStartTime), ZoneOffset.UTC);
+      OffsetDateTime nextOffsetDateTime =
+          epochStep == MONTH_STEP_EPOCH_SECOND
+              ? offsetDateTime.plusMonths(1)
+              : offsetDateTime.plusDays(1);
 
-                  return TxGraph.builder()
-                      .date(
-                          Date.from(
-                              OffsetDateTime.ofInstant(
-                                      Instant.ofEpochSecond(txChart.getTime().longValue()),
-                                      ZoneOffset.UTC)
-                                  .toInstant()))
-                      .simpleTransactions(txChart.getSimpleTransactions())
-                      .smartContract(txChart.getSmartContract())
-                      .metadata(txChart.getMetadata())
-                      .build();
-                })
-            .collect(Collectors.toList());
+      if (txChart == null) {
+        txGraphs.add(
+            TxGraph.builder()
+                .date(
+                    Date.from(
+                        OffsetDateTime.ofInstant(
+                                Instant.ofEpochSecond(epochSecondStartTime), ZoneOffset.UTC)
+                            .toInstant()))
+                .simpleTransactions(BigInteger.ZERO)
+                .smartContract(BigInteger.ZERO)
+                .metadata(BigInteger.ZERO)
+                .build());
+      } else {
+        txGraphs.add(
+            TxGraph.builder()
+                .date(
+                    Date.from(
+                        OffsetDateTime.ofInstant(
+                                Instant.ofEpochSecond(txChart.getTime().longValue()),
+                                ZoneOffset.UTC)
+                            .toInstant()))
+                .simpleTransactions(txChart.getSimpleTransactions())
+                .smartContract(txChart.getSmartContract())
+                .metadata(txChart.getMetadata())
+                .build());
+      }
 
-    // if start point not exist in chart, add it on top of tx graph
-    if (!isChartExistStartPoint.get() && epochStartTime <= minTime.longValue()) {
-      txGraphs.add(
-          TxGraph.builder()
-              .date(
-                  Date.from(
-                      OffsetDateTime.ofInstant(
-                              Instant.ofEpochSecond(epochStartTime), ZoneOffset.UTC)
-                          .toInstant()))
-              .simpleTransactions(BigInteger.ZERO)
-              .smartContract(BigInteger.ZERO)
-              .metadata(BigInteger.ZERO)
-              .build());
+      epochSecondStartTime = nextOffsetDateTime.toEpochSecond();
     }
 
     return txGraphs;
