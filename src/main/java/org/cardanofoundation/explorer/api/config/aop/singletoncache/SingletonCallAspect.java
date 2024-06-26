@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,9 @@ import org.aspectj.lang.reflect.CodeSignature;
 @Log4j2
 @RequiredArgsConstructor
 public class SingletonCallAspect {
+
+  @Value("${application.network}")
+  private String network;
 
   private static final String LOCKED = "LOCKED";
   private static final String PREFIX_KEY = "METHOD_CACHE:";
@@ -117,6 +121,6 @@ public class SingletonCallAspect {
       str.append(sigParamNames[i]).append(":").append(sigParamValues[i]);
       if (i < sigParamNames.length - 1) str.append("_");
     }
-    return PREFIX_KEY + methodName + ":" + str.toString().hashCode();
+    return network + "-" + PREFIX_KEY + methodName + ":" + str.toString().hashCode();
   }
 }
