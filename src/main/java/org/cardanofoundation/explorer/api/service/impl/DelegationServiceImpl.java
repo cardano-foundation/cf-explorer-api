@@ -80,6 +80,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
@@ -123,6 +124,7 @@ public class DelegationServiceImpl implements DelegationService {
   private final StakeAddressRepository stakeAddressRepository;
 
   private final WithdrawalRepository withdrawalRepository;
+  private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
   private final TxRepository txRepository;
 
@@ -518,8 +520,8 @@ public class DelegationServiceImpl implements DelegationService {
       BigDecimal stakeLimit = getPoolSaturation(projection.getReserves(), projection.getParamK());
       poolDetailResponse.setStakeLimit(stakeLimit);
       BigInteger totalBalanceOfPoolOwners =
-          stakeAddressRepository
-              .getBalanceByView(ownerAddress)
+          stakeAddressBalanceRepository
+              .sumBalanceByStakeAddressIn(ownerAddress)
               .add(rewardRepository.getAvailableRewardByAddressList(ownerAddress))
               .subtract(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress));
       poolDetailResponse.setTotalBalanceOfPoolOwners(totalBalanceOfPoolOwners);

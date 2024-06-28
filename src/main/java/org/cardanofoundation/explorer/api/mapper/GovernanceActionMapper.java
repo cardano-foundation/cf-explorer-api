@@ -15,6 +15,9 @@ public interface GovernanceActionMapper {
 
   @Mapping(source = "status", target = "status")
   @Mapping(source = "repeatVote", target = "isRepeatVote")
+  @Mapping(
+      target = "createdAt",
+      expression = "java(fromLong(governanceActionProjection.getCreatedAt()))")
   GovernanceActionResponse fromGovernanceActionProjection(
       GovernanceActionProjection governanceActionProjection);
 

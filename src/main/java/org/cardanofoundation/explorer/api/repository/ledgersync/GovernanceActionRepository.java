@@ -24,15 +24,15 @@ public interface GovernanceActionRepository
   @Query(
       value =
           """
-    SELECT gap.txHash as txHash, gap.index as index, vp.vote as vote, vp.slot as slot,
-              gap.type as type, vp.repeatVote as repeatVote,
+    SELECT gap.txHash as txHash, gap.index as index, vp.vote as vote, vp.slot as slot, vp.voterHash as voterHash,
+              gap.type as type, gap.blockTime as createdAt, vp.repeatVote as repeatVote,
               gapInfo.status as status, gapInfo.votingPower as votingPower, gapInfo.indexType as indexType
               FROM GovActionProposal gap
               LEFT JOIN GovActionProposalInfo gapInfo ON (gap.txHash = gapInfo.txHash and gap.index = gapInfo.index)
               LEFT JOIN LatestVotingProcedure vp ON (
               vp.govActionTxHash = gap.txHash
               AND vp.govActionIndex = gap.index
-              AND vp.voterHash = :voterHash)
+              AND vp.voterHash in :voterHashes)
               WHERE (:vote is null or (vp.vote = :vote) or (:isVoteNone = true and vp is null))
               AND (:isRepeatVote is null or (vp.repeatVote = :isRepeatVote))
               AND (:gapStatus is null or (gapInfo.status = :gapStatus))
@@ -42,12 +42,12 @@ public interface GovernanceActionRepository
               AND (gap.blockTime <= :to)
               AND (:txHash is null or gap.txHash = :txHash)
               AND (:anchorText is null or gap.anchorUrl like %:anchorText% or gap.anchorHash like %:anchorText%)
-""")
+  """)
   Page<GovernanceActionProjection> getAllByFilter(
       @Param("isRepeatVote") Boolean isRepeatVote,
       @Param("gapStatus") GovActionStatus gapStatus,
       @Param("vote") Vote vote,
-      @Param("voterHash") String dRepHash,
+      @Param("voterHashes") List<String> voterHashes,
       @Param("type") List<GovActionType> type,
       @Param("from") Long from,
       @Param("to") Long to,
@@ -55,6 +55,27 @@ public interface GovernanceActionRepository
       @Param("txHash") String txHash,
       @Param("anchorText") String anchorText,
       @Param("isVoteNone") Boolean isVoteNone,
+      Pageable pageable);
+
+  @Query(
+      """
+      SELECT gap.txHash as txHash, gap.index as index, gap.blockTime as createdAt,
+      gapInfo.status as status, gap.type as type
+      FROM GovActionProposal gap
+      JOIN GovActionProposalInfo gapInfo ON (gap.txHash = gapInfo.txHash and gap.index = gapInfo.index)
+      WHERE gap.type in :type
+      AND gapInfo.status = 'ENACTED'
+      AND (gap.blockTime >= :from)
+      AND (gap.blockTime <= :to)
+      AND (:txHash is null or gap.txHash = :txHash)
+      AND (:anchorText is null or gap.anchorUrl like %:anchorText% or gap.anchorHash like %:anchorText%)
+  """)
+  Page<GovernanceActionProjection> getAllGovCommitteeHistory(
+      @Param("type") List<GovActionType> type,
+      @Param("from") Long from,
+      @Param("to") Long to,
+      @Param("txHash") String txHash,
+      @Param("anchorText") String anchorText,
       Pageable pageable);
 
   @Query(
@@ -71,5 +92,12 @@ public interface GovernanceActionRepository
       @Param("txHash") String txHash, @Param("index") Integer index);
 
   @Query(value = "select count(*) from GovActionProposal gap where gap.blockTime >= :blockTime")
-  Long countGovActionThatAllowedToVoteByDRep(@Param("blockTime") Long blockTime);
+  Long countGovActionThatAllowedToVoteByBlockTimeGreaterThan(@Param("blockTime") Long blockTime);
+
+  @Query(
+      value =
+          "select count(*) from GovActionProposal gap where gap.blockTime >= :blockTime "
+              + "and gap.type in :govTypes ")
+  Long countGovThatAllowedToVoteByBlockTimeGreaterThanAndGovType(
+      @Param("blockTime") Long blockTime, @Param("govTypes") List<GovActionType> govTypes);
 }

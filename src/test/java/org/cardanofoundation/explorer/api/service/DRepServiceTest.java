@@ -112,7 +112,8 @@ public class DRepServiceTest {
             .createdAt(1000L)
             .build();
     when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(Optional.of(dRepInfo));
-    when(governanceActionRepository.countGovActionThatAllowedToVoteByDRep(dRepInfo.getCreatedAt()))
+    when(governanceActionRepository.countGovActionThatAllowedToVoteByBlockTimeGreaterThan(
+            dRepInfo.getCreatedAt()))
         .thenReturn(0L);
 
     var actual = dRepCertificateService.getDRepDetails(drepHash);
@@ -227,7 +228,18 @@ public class DRepServiceTest {
             .build();
 
     when(drepInfoRepository.getDRepInfoByFilterRequest(
-            any(), any(), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class)))
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of(response1, response2)));
 
     var actual = dRepCertificateService.getDRepsByFilter(filter, PageRequest.of(0, 2));

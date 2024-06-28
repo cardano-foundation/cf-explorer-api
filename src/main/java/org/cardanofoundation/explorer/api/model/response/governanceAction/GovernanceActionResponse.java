@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.model.response.governanceAction;
 
 import java.math.BigInteger;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,18 +20,13 @@ import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
 @NoArgsConstructor
 public class GovernanceActionResponse {
   String txHash;
-
   Long index;
-
   GovActionType type;
-
   Vote vote;
-
   GovActionStatus status;
-
   BigInteger votingPower;
-
   BigInteger indexType;
-
   Boolean isRepeatVote;
+  String voterHash;
+  Date createdAt;
 }

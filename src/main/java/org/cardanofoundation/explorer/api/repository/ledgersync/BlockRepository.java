@@ -89,6 +89,9 @@ public interface BlockRepository
   @Query("SELECT b FROM Block b WHERE b.blockNo IS NOT NULL ORDER BY b.blockNo ASC LIMIT 1")
   Optional<Block> findFirstBlock();
 
+  @Query(value = "select extract(epoch from min(b.time)) from block b", nativeQuery = true)
+  Long getMinBlockTime();
+
   @Query(
       "SELECT b FROM Block b"
           + " INNER JOIN Epoch e ON e.no = b.epochNo"

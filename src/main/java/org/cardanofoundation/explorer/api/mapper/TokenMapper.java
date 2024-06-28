@@ -18,8 +18,8 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResp
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.util.HexUtils;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount;
 
 @Mapper(
     componentModel = "spring",
@@ -47,9 +47,23 @@ public abstract class TokenMapper {
       expression = "java(HexUtils.fromHex(projection.getTokenName(), projection.getFingerprint()))")
   @Mapping(target = "name", source = "tokenName")
   @Mapping(target = "metadata", expression = "java(getMetadata(projection))")
-  @Mapping(target = "addressType", expression = "java(getAddressType(projection.getAddress()))")
+  @Mapping(target = "addressType", expression = "java(getAddressType(projection.getHolder()))")
+  @Mapping(
+      target = "address",
+      expression = "java(getAddress(projection.getAddress(), projection.getHolder()))")
   public abstract TokenAddressResponse fromAddressTokenProjection(
       AddressTokenProjection projection);
+
+  @Mapping(
+      target = "displayName",
+      expression = "java(HexUtils.fromHex(multiAsset.getName(), multiAsset.getFingerprint()))")
+  @Mapping(target = "name", source = "multiAsset.name")
+  @Mapping(target = "metadata", expression = "java(getMetadata(projection))")
+  @Mapping(target = "addressType", expression = "java(getAddressType(projection.getAddress()))")
+  @Mapping(target = "policy", source = "multiAsset.policy")
+  @Mapping(target = "fingerprint", source = "multiAsset.fingerprint")
+  public abstract TokenAddressResponse fromAddressTokenProjectionAndMultiAsset(
+      AddressTokenProjection projection, MultiAsset multiAsset);
 
   @Mapping(
       target = "displayName",
@@ -75,6 +89,10 @@ public abstract class TokenMapper {
   @Named("getTokenLogoURL")
   String getTokenLogoEndpoint(String logo) {
     return Objects.isNull(logo) ? null : (tokenLogoEndpoint + logo);
+  }
+
+  String getAddress(String address, String holder) {
+    return StringUtils.isEmpty(address) ? holder : address;
   }
 
   AddressType getAddressType(String address) {

@@ -47,6 +47,7 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
               + " and (coalesce(dri.activeVoteStake,0) >= :activeStakeFrom and coalesce(dri.activeVoteStake,0) <= :activeStakeTo)"
               + " and (coalesce(dri.votingPower,0) >= :votingPowerFrom and coalesce(dri.votingPower,0) <= :votingPowerTo)"
               + " and (:dRepStatus is null or dri.status = :dRepStatus)"
+              + " and (dri.govParticipationRate >= :minGovParticipationRate and dri.govParticipationRate <= :maxGovParticipationRate)"
               + " and (dri.createdAt >= :fromDate and dri.createdAt <= :toDate)")
   Page<DRepInfo> getDRepInfoByFilterRequest(
       @Param("dRepHashOrDRepId") String dRepHashOrDRepId,
@@ -58,13 +59,16 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
       @Param("dRepStatus") DRepStatus dRepStatus,
       @Param("fromDate") Long fromDate,
       @Param("toDate") Long toDate,
+      @Param("minGovParticipationRate") Double minGovParticipationRate,
+      @Param("maxGovParticipationRate") Double maxGovParticipationRate,
       Pageable pageable);
 
   @Query(
       value =
           """
       select max(dri.votingPower) as maxVotingPower , max(dri.activeVoteStake) as maxActiveVoteStake,
-       min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake from DRepInfo dri
+       min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake,
+       min(dri.govParticipationRate) as minGovParticipationRate, max(dri.govParticipationRate) as maxGovParticipationRate from DRepInfo dri
           """)
   DRepRangeProjection getDRepRangeValues();
 }

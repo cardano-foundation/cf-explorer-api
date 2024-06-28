@@ -64,6 +64,18 @@ public interface LatestParamHistory {
 
   Object getCostModel();
 
+  Object getDrepDeposit();
+
+  Object getDrepActivity();
+
+  Object getCommitteeMinSize();
+
+  Object getCommitteeMaxTermLength();
+
+  Object getGovActionLifetime();
+
+  Object getGovActionDeposit();
+
   Date getBlockTime();
 
   LocalDateTime getEpochTime();
@@ -129,4 +141,16 @@ public interface LatestParamHistory {
   boolean getEntropyProposal();
 
   boolean getCostModelProposal();
+
+  boolean getDrepDepositProposal();
+
+  boolean getDrepActivityProposal();
+
+  boolean getCommitteeMinSizeProposal();
+
+  boolean getCommitteeMaxTermLengthProposal();
+
+  boolean getGovActionLifetimeProposal();
+
+  boolean getGovActionDepositProposal();
 }

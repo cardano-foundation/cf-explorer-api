@@ -57,6 +57,8 @@ import org.cardanofoundation.explorer.api.repository.explorer.NativeScriptInfoRe
 import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoRepository;
 import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.*;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.service.ScriptService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.specification.NativeScriptInfoSpecification;
@@ -235,7 +237,7 @@ public class ScriptServiceImpl implements ScriptService {
                     NativeScriptInfo.builder()
                         .numberOfTokens(multiAssetRepository.countMultiAssetByPolicy(scriptHash))
                         .numberOfAssetHolders(
-                            multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
+                            latestTokenBalanceRepository.countAssetHoldersByPolicy(scriptHash))
                         .build());
     nativeScriptResponse.setScriptHash(scriptHash);
     List<String> associatedAddressList =
@@ -370,15 +372,28 @@ public class ScriptServiceImpl implements ScriptService {
                 () ->
                     NativeScriptInfo.builder()
                         .numberOfAssetHolders(
-                            multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
+                            latestTokenBalanceRepository.countAssetHoldersByPolicy(scriptHash))
                         .build());
-    List<AddressTokenProjection> multiAssetList =
+    List<AddressTokenProjection> addressTokenMap =
         latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable);
-    Page<AddressTokenProjection> multiAssetPage =
-        new PageImpl<>(multiAssetList, pageable, nativeScriptInfo.getNumberOfAssetHolders());
+
+    Map<String, MultiAsset> multiAssetMap =
+        multiAssetRepository
+            .findAllByUnitIn(addressTokenMap.stream().map(AddressTokenProjection::getUnit).toList())
+            .stream()
+            .collect(Collectors.toMap(MultiAsset::getUnit, Function.identity()));
+
+    Page<AddressTokenProjection> addressTokenPage =
+        new PageImpl<>(addressTokenMap, pageable, nativeScriptInfo.getNumberOfAssetHolders());
 
     Page<TokenAddressResponse> tokenAddressResponses =
-        multiAssetPage.map(tokenMapper::fromAddressTokenProjection);
+        addressTokenPage.map(
+            addressTokenProjection -> {
+              MultiAsset multiAsset = multiAssetMap.get(addressTokenProjection.getUnit());
+              return tokenMapper.fromAddressTokenProjectionAndMultiAsset(
+                  addressTokenProjection, multiAsset);
+            });
+
     return new BaseFilterResponse<>(tokenAddressResponses);
   }
 

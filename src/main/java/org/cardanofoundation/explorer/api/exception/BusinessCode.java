@@ -35,6 +35,7 @@ public enum BusinessCode implements ErrorCode {
 
   GOVERNANCE_ACTION_NOT_FOUND("404-GOVERNANCE_ACTION_NOT_FOUND", "Governance action not found"),
   DREP_NOT_FOUND("404-DREP_NOT_FOUND", "DRep not found"),
+  COMMITTEE_MEMBER_NOT_FOUND("404-COMMITTEE_MEMBER_NOT_FOUND", "Committee member not found"),
   CREATE_REPORT_ERROR("400-CREATE_REPORT_ERROR", "Create report error");
 
   private final String code;

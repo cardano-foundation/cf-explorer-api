@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -21,15 +20,14 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   @Query(
       value =
-          "SELECT sa.id as id, sa.view as stakeAddress, lsab.quantity as totalStake"
+          "SELECT sa.id as id, sa.view as stakeAddress"
               + " FROM StakeAddress sa"
-              + " LEFT JOIN LatestStakeAddressBalance lsab ON sa.view = lsab.address"
-              + " WHERE EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
+              + " WHERE sa.view IN :stakeAddresses "
+              + " AND EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
               + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = sa) >"
-              + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)"
-              + " AND lsab.quantity IS NOT NULL"
-              + " ORDER BY totalStake DESC")
-  List<StakeAddressProjection> findStakeAddressOrderByBalance(Pageable pageable);
+              + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)")
+  List<StakeAddressProjection> findStakeAddressOrderByBalance(
+      @Param("stakeAddresses") Collection<String> stakeAddresses);
 
   @Query(
       value =
@@ -48,11 +46,6 @@ public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long
 
   @Query("SELECT stake.view" + " FROM StakeAddress stake" + " WHERE stake.scriptHash = :scriptHash")
   List<String> getStakeAssociatedAddress(@Param("scriptHash") String scriptHash);
-
-  @Query(
-      value =
-          "SELECT COALESCE(SUM(lsab.quantity), 0) FROM LatestStakeAddressBalance lsab WHERE lsab.address IN :views")
-  BigInteger getBalanceByView(@Param("views") List<String> views);
 
   @Query(value = "SELECT sa.view FROM StakeAddress sa WHERE sa.scriptHash = :scriptHash")
   List<String> getAssociatedAddress(@Param("scriptHash") String scriptHash);

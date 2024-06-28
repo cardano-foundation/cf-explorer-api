@@ -2,7 +2,7 @@
 multi-datasource: #specified for HikariDataSource
   datasourceLedgerSync:
     hikariConfig:
-      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.112}:${LEDGER_SYNC_PORT:54323}/${LEDGER_SYNC_DB:explorer_api}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_HOST:10.4.10.112}:${LEDGER_SYNC_PORT:54323}/${LEDGER_SYNC_DB:explorer_api}?currentSchema=${LEDGER_SYNC_SCHEMA:preprod}
       username: ${LEDGER_SYNC_USER:cardano-read}
       password: ${LEDGER_SYNC_PASSWORD:1}
       driverClassName: org.postgresql.Driver
@@ -26,9 +26,35 @@ multi-datasource: #specified for HikariDataSource
         elideSetAutoCommits: true
         maintainTimeStats: false
 
+  datasourceLedgerSyncAgg:
+    hikariConfig:
+      jdbcUrl: jdbc:postgresql://${LEDGER_SYNC_AGG_HOST:10.4.10.112}:${LEDGER_SYNC_AGG_PORT:54321}/${LEDGER_SYNC_AGG_DB:explorer_api}?currentSchema=${LEDGER_SYNC_AGG_SCHEMA:preprod}
+      username: ${LEDGER_SYNC_AGG_USER:cardano-read}
+      password: ${LEDGER_SYNC_AGG_PASSWORD:1}
+      driverClassName: org.postgresql.Driver
+      poolName: explorer-schedule-ledgersync-agg-pool
+      minimumIdle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
+      maximumPoolSize: ${MAXIMUM_POOL_SIZE:48} #maximum pool size
+      idleTimeout: 300000 #maximum idle time for connection
+      maxLifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      connectionTimeout: 50000 #maximum number of milliseconds that a client will wait for a connection
+      autoCommit: false #default auto-commit behavior.
+      connectionInitSql: SELECT 1
+      dataSourceProperties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
   datasourceExplorer:
     hikariConfig:
-      jdbcUrl: jdbc:postgresql://${EXPLORER_HOST:10.4.10.112}:${EXPLORER_PORT:54323}/${EXPLORER_DB:explorer_api}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+      jdbcUrl: jdbc:postgresql://${EXPLORER_HOST:10.4.10.112}:${EXPLORER_PORT:54323}/${EXPLORER_DB:explorer_api}?currentSchema=${EXPLORER_SCHEMA:preprod}
       username: ${EXPLORER_USER:cardano-master}
       password: ${EXPLORER_PASSWORD:Y2FyZGFuby1kYXRhYmFzZS1tYXN0ZXI=}
       driverClassName: org.postgresql.Driver
@@ -57,13 +83,12 @@ spring:
   jpa:
     open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: ${DB_SCHEMA:dev}
         show_sql: false
         format_sql: true
   flyway:
@@ -75,29 +100,6 @@ spring:
         max-page-size: 100
   jackson:
     default-property-inclusion: ${JACKSON_INCLUSION:ALWAYS}
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:127.0.0.1:29092}
-    useSsl: ${KAFKA_USE_SSL:false}
-    #client-id:  crawler
-    producer:
-      acks: all
-      retries: 3
-      retryBackoff: 1000
-      properties:
-        enable:
-          idempotence: true
-        max:
-          pool:
-            interval: 60000
-          block:
-            ms: 3000
-          in:
-            flight:
-              requests:
-                per:
-                  connection: 1
-    topics:
-      reports: ${KAFKA_REPORTS_TOPIC:dev.explorer.api.mainnet.reports}
 
 redis:
   databaseIndex: 0
@@ -114,7 +116,7 @@ redis:
       port: ${REDIS_SENTINEL_PORT:26379}
 
 application:
-  network: ${DB_SCHEMA:mainnet}
+  network: ${NETWORK:mainnet}
   epoch:
     days: ${EPOCH_DAYS:5}
   api.news:
@@ -206,12 +208,6 @@ logging:
           EC2MetadataUtils: error
 
 ---
-# Redis pubsub topic
-spring:
-  redis:
-    pubsub:
-      topic: ${REDIS_PUBSUB_TOPIC:block-sync-topic}
-
 genesis:
   shelley: ${SHELLEY_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/shelley-genesis.json}
   byron: ${BYRON_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/byron-genesis.json}

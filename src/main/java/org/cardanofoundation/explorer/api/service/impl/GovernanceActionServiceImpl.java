@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -28,12 +29,14 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
 import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
 import org.cardanofoundation.explorer.api.model.ProtocolParamUpdate;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.GovCommitteeHistoryFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -49,6 +52,7 @@ import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteInfoRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeMemberRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -57,6 +61,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceAction
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.ProtocolParamUtil;
@@ -73,6 +78,8 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 @RequiredArgsConstructor
 @Log4j2
 public class GovernanceActionServiceImpl implements GovernanceActionService {
+
+  private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
   @Value("${application.epoch.days}")
   public long epochDays;
@@ -92,31 +99,34 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final DelegationRepository delegationRepository;
   private final ProtocolParamService protocolParamService;
   private final CommitteInfoRepository committeInfoRepository;
+  private final CommitteeMemberRepository committeeMemberRepository;
 
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
-      String dRepHashOrPoolHash, GovernanceActionFilter governanceActionFilter, Pageable pageable) {
+      String voterHash, GovernanceActionFilter governanceActionFilter, Pageable pageable) {
     BaseFilterResponse<GovernanceActionResponse> govActionResponse = new BaseFilterResponse<>();
     govActionResponse.setData(List.of());
 
-    if (dRepHashOrPoolHash.toLowerCase().startsWith("pool")) {
-      dRepHashOrPoolHash =
-          poolHashRepository
-              .getHashRawByView(dRepHashOrPoolHash)
-              .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
-    } else if (dRepHashOrPoolHash.toLowerCase().startsWith("drep")) {
-      DRepInfo dRepInfo =
-          drepInfoRepository
-              .findByDRepHashOrDRepId(dRepHashOrPoolHash)
-              .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
-      dRepHashOrPoolHash = dRepInfo.getDrepHash();
-    }
+    List<String> voterHashes =
+        getActualVoterHashes(voterHash, governanceActionFilter.getVoterType());
 
     Long slot = null;
-    if (governanceActionFilter.getVoterType().equals(VoterType.DREP_KEY_HASH)) {
-      slot = dRepRegistrationRepository.getSlotOfDRepRegistration(dRepHashOrPoolHash);
+    if (governanceActionFilter.getVoterType().equals(VoterType.DREP_KEY_HASH)
+        || governanceActionFilter.getVoterType().equals(VoterType.DREP_SCRIPT_HASH)) {
+      slot = dRepRegistrationRepository.getSlotOfDRepRegistration(voterHashes.get(0));
     } else if (governanceActionFilter.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)) {
-      slot = poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(dRepHashOrPoolHash);
+      slot = poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(voterHashes.get(0));
+    } else if (governanceActionFilter
+            .getVoterType()
+            .equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
+        || governanceActionFilter
+            .getVoterType()
+            .equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH)) {
+      if (StringUtils.isEmpty(voterHash)) {
+        slot = committeeMemberRepository.getMinSlotOfCommitteeMembers();
+      } else {
+        slot = committeeMemberRepository.getSlotOfCommitteeMemberByHotKey(voterHash);
+      }
     }
 
     Boolean isVoteNone = governanceActionFilter.getVoteType().equals(Vote.NONE);
@@ -158,7 +168,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             governanceActionFilter.getIsRepeatVote(),
             govActionStatus,
             vote,
-            dRepHashOrPoolHash,
+            voterHashes,
             govActionTypeList,
             fromDate,
             toDate,
@@ -183,6 +193,31 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     return govActionResponse;
   }
 
+  private List<String> getActualVoterHashes(String voterHash, VoterType voterType) {
+    List<String> voteHashes = new ArrayList<>();
+    if (StringUtils.isEmpty(voterHash)
+        && (voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
+            || voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH))) {
+      return committeeMemberRepository.getHotKeyOfCommitteeMember();
+    }
+
+    if (voterHash.toLowerCase().startsWith("pool")) {
+      voteHashes.add(
+          poolHashRepository
+              .getHashRawByView(voterHash)
+              .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND)));
+    } else if (voterHash.toLowerCase().startsWith("drep")) {
+      DRepInfo dRepInfo =
+          drepInfoRepository
+              .findByDRepHashOrDRepId(voterHash)
+              .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
+      voteHashes.add(dRepInfo.getDrepHash());
+    } else {
+      voteHashes.add(voterHash);
+    }
+    return voteHashes;
+  }
+
   private List<GovActionType> getGovActionTypeByVoterType(
       VoterType voterType, GovActionType govActionType) {
     List<GovActionType> govActionTypeList = new ArrayList<>(Arrays.asList(GovActionType.values()));
@@ -192,6 +227,12 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         govActionTypeList.remove(GovActionType.NEW_CONSTITUTION);
         govActionTypeList.remove(GovActionType.PARAMETER_CHANGE_ACTION);
         govActionTypeList.remove(GovActionType.TREASURY_WITHDRAWALS_ACTION);
+      }
+
+      if (voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
+          || voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH)) {
+        govActionTypeList.removeAll(
+            List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE));
       }
     } else {
       govActionTypeList = new ArrayList<>();
@@ -209,7 +250,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
   @Override
   public GovernanceActionDetailsResponse getGovernanceActionDetails(
-      String dRepHashOrPoolHashOrPoolView, GovernanceActionRequest governanceActionRequest) {
+      String voterHash, GovernanceActionRequest governanceActionRequest) {
     Optional<GovActionDetailsProjection> govActionDetailsProjections =
         governanceActionRepository.getGovActionDetailsByTxHashAndIndex(
             governanceActionRequest.getTxHash(), governanceActionRequest.getIndex());
@@ -231,18 +272,19 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
     Boolean allowedVoteBySPO = !govActionTypeListAllowedVoteBySPO.contains(govActionType);
     Boolean allowedVoteByCC = !govActionTypeListAllowedVoteByCc.contains(govActionType);
-    if (dRepHashOrPoolHashOrPoolView.toLowerCase().startsWith("pool")) {
-      dRepHashOrPoolHashOrPoolView =
+    if (voterHash.toLowerCase().startsWith("pool")) {
+      voterHash =
           poolHashRepository
-              .getHashRawByView(dRepHashOrPoolHashOrPoolView)
+              .getHashRawByView(voterHash)
               .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
-    } else if (dRepHashOrPoolHashOrPoolView.toLowerCase().startsWith("drep")) {
+    } else if (voterHash.toLowerCase().startsWith("drep")) {
       DRepInfo dRepInfo =
           drepInfoRepository
-              .findByDRepHashOrDRepId(dRepHashOrPoolHashOrPoolView)
+              .findByDRepHashOrDRepId(voterHash)
               .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
-      dRepHashOrPoolHashOrPoolView = dRepInfo.getDrepHash();
+      voterHash = dRepInfo.getDrepHash();
     }
+
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
         && govActionTypeListAllowedVoteBySPO.contains(govActionType)) {
       return GovernanceActionDetailsResponse.builder()
@@ -256,8 +298,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     response.setAllowedVoteBySPO(allowedVoteBySPO);
     // get pool name for SPO
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)) {
-      Optional<String> poolName =
-          poolHashRepository.getPoolNameByPoolHashOrPoolView(dRepHashOrPoolHashOrPoolView);
+      Optional<String> poolName = poolHashRepository.getPoolNameByPoolHashOrPoolView(voterHash);
       response.setPoolName(poolName.orElse(null));
     }
 
@@ -278,7 +319,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         votingProcedureRepository.getVotingProcedureByTxHashAndIndexAndVoterHash(
             governanceActionRequest.getTxHash(),
             governanceActionRequest.getIndex(),
-            dRepHashOrPoolHashOrPoolView,
+            voterHash,
             voterTypes);
     setExpiryDateOfGovAction(response);
     // no vote procedure found = none vote
@@ -318,16 +359,15 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             .orElseThrow(() -> new BusinessException(BusinessCode.GOVERNANCE_ACTION_NOT_FOUND));
 
     EpochParam epochParam = epochParamRepository.findByEpochNo(govActionProjection.getEpoch());
+    EpochParam currentEpochParam = epochParamRepository.findCurrentEpochParam();
+    long activeMembers =
+        committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(
+            currentEpochParam.getEpochNo());
 
-    int expiredEpoch =
-        govActionProjection.getEpoch() + getGovActionLifetime(epochParam.getGovActionLifetime());
-
-    Integer committeeTotalCount =
-        committeeRegistrationRepository.countByExpiredEpochNo(expiredEpoch);
     CommitteeState committeeState =
         epochParam.getCommitteeMinSize() == null
-                || committeeTotalCount >= epochParam.getCommitteeMinSize().intValue()
-            ? CommitteeState.NORMAL
+                || activeMembers >= epochParam.getCommitteeMinSize().intValue()
+            ? CommitteeState.CONFIDENCE
             : CommitteeState.NO_CONFIDENCE;
 
     VotingChartResponse votingChartResponse =
@@ -344,11 +384,53 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         return votingChartResponse;
       case CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH:
         getVotingChartResponseForCCType(
-            votingChartResponse, epochParam, govActionProjection, committeeState);
+            votingChartResponse, epochParam, govActionProjection, activeMembers);
         return votingChartResponse;
       default:
         return votingChartResponse;
     }
+  }
+
+  @Override
+  public BaseFilterResponse<GovernanceActionResponse> getGovCommitteeStatusHistory(
+      GovCommitteeHistoryFilter govCommitteeHistoryFilter, Pageable pageable) {
+
+    List<GovActionType> govActionTypeList = new ArrayList<>();
+    if (govCommitteeHistoryFilter.getActionType().equals(GovActionType.ALL)) {
+      govActionTypeList = List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
+    } else {
+      govActionTypeList = List.of(govCommitteeHistoryFilter.getActionType());
+    }
+
+    long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
+    fromDate = fromDate < 0 ? 0 : fromDate;
+    long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+
+    if (Objects.nonNull(govCommitteeHistoryFilter.getFromDate())) {
+      fromDate = govCommitteeHistoryFilter.getFromDate().toEpochSecond(ZoneOffset.UTC);
+    }
+    if (Objects.nonNull(govCommitteeHistoryFilter.getToDate())) {
+      long to = govCommitteeHistoryFilter.getToDate().toEpochSecond(ZoneOffset.UTC);
+      toDate = Math.min(to, toDate);
+    }
+
+    String anchorText =
+        govCommitteeHistoryFilter.getAnchorText() == null
+            ? null
+            : govCommitteeHistoryFilter.getAnchorText().toLowerCase();
+
+    Page<GovernanceActionResponse> governanceActionProjections =
+        governanceActionRepository
+            .getAllGovCommitteeHistory(
+                govActionTypeList,
+                fromDate,
+                toDate,
+                govCommitteeHistoryFilter.getGovernanceActionTxHash(),
+                anchorText,
+                pageable)
+            .map(governanceActionMapper::fromGovernanceActionProjection);
+
+    return new BaseFilterResponse<>(governanceActionProjections);
   }
 
   // TODO: Active vote stake of Pool type is not available.
@@ -364,7 +446,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         break;
       case UPDATE_COMMITTEE:
         votingChartResponse.setThreshold(
-            CommitteeState.NORMAL.equals(committeeState)
+            CommitteeState.CONFIDENCE.equals(committeeState)
                 ? epochParam.getPvtCommitteeNormal()
                 : epochParam.getPvtCommitteeNoConfidence());
         break;
@@ -379,31 +461,17 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       default:
         votingChartResponse.setThreshold(null);
     }
-    List<PoolOverviewProjection> createdAtList =
-        poolHashRepository.getSlotCreatedAtGroupByPoolHash();
     List<PoolOverviewProjection> poolCanVoteList =
-        createdAtList.stream()
-            .filter(e -> e.getCreatedAt() <= govActionDetailsProjection.getSlot())
-            .toList();
+        poolHashRepository.getSlotCreatedAtGroupByPoolHash(govActionDetailsProjection.getSlot());
+
     Map<String, Long> poolHashByPoolIdMap =
         poolCanVoteList.stream()
             .collect(
                 Collectors.toMap(
                     PoolOverviewProjection::getPoolHash, PoolOverviewProjection::getPoolId));
-    List<Long> poolIds = poolHashByPoolIdMap.values().stream().toList();
-    List<PoolOverviewProjection> poolOverviewProjections =
-        delegationRepository.getBalanceByPoolIdIn(poolIds);
-    Map<String, BigInteger> activeVoteStakeByPoolMap =
-        poolOverviewProjections.stream()
-            .collect(
-                Collectors.toMap(
-                    PoolOverviewProjection::getPoolHash, PoolOverviewProjection::getBalance));
-    BigInteger totalActiveVoteStake =
-        poolOverviewProjections.stream()
-            .map(PoolOverviewProjection::getBalance)
-            .filter(Objects::nonNull)
-            .reduce(BigInteger::add)
-            .orElse(BigInteger.ZERO);
+
+    BigInteger totalActiveVoteStake = getTotalActiveStakeByPoolIds(poolHashByPoolIdMap.keySet());
+
     List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
         latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
             govActionDetailsProjection.getTxHash(),
@@ -421,20 +489,22 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 Collectors.toMap(
                     Map.Entry::getKey,
                     entry ->
-                        entry.getValue().stream()
-                            .map( // get active vote stake of Pool
-                                latestVotingProcedureProjection ->
-                                    activeVoteStakeByPoolMap.getOrDefault(
-                                        latestVotingProcedureProjection.getVoterHash(),
-                                        BigInteger.ZERO))
-                            .filter(Objects::nonNull)
-                            .reduce(BigInteger::add)
-                            .orElse(BigInteger.ZERO)));
+                        getTotalActiveStakeByPoolIds(
+                            entry.getValue().stream()
+                                .map(LatestVotingProcedureProjection::getVoterHash)
+                                .collect(Collectors.toList()))));
+
     votingChartResponse.setActiveVoteStake(totalActiveVoteStake);
     votingChartResponse.setTotalYesVoteStake(voteStake.getOrDefault(Vote.YES, BigInteger.ZERO));
     votingChartResponse.setTotalNoVoteStake(voteStake.getOrDefault(Vote.NO, BigInteger.ZERO));
     votingChartResponse.setAbstainVoteStake(voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO));
   }
+
+  private BigInteger getTotalActiveStakeByPoolIds(Collection<String> poolIds) {
+    Set<String> stakeView = delegationRepository.getStakeAddressDelegatorsByPoolIds(poolIds);
+    return stakeAddressBalanceRepository.sumBalanceByStakeAddressIn(stakeView);
+  }
+
   // TODO: Active vote stake of DRep type is not available.
   private void getVotingChartResponseForDRep(
       VotingChartResponse votingChartResponse,
@@ -447,7 +517,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         break;
       case UPDATE_COMMITTEE:
         votingChartResponse.setThreshold(
-            CommitteeState.NORMAL.equals(committeeState)
+            CommitteeState.CONFIDENCE.equals(committeeState)
                 ? epochParam.getDvtCommitteeNormal()
                 : epochParam.getDvtCommitteeNoConfidence());
         break;
@@ -528,17 +598,19 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       VotingChartResponse votingChartResponse,
       EpochParam epochParam,
       GovActionDetailsProjection govActionDetailsProjection,
-      CommitteeState committeeState) {
+      Long activeMembers) {
     List<GovActionType> govActionTypesThatNotAllowedVoteByCC =
         List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
     if (govActionTypesThatNotAllowedVoteByCC.contains(govActionDetailsProjection.getType())) {
       votingChartResponse.setThreshold(null);
     } else {
-      Double threshold = protocolParamService.getCCThresholdFromConwayGenesis();
-      votingChartResponse.setThreshold(Objects.isNull(threshold) ? null : threshold);
+      Double threshold = epochParam.getCcThreshold();
+      if (threshold == null) {
+        threshold = protocolParamService.getCCThresholdFromConwayGenesis();
+      }
+      votingChartResponse.setThreshold(threshold);
     }
-    Long count =
-        committeInfoRepository.countByCreatedAtLessThan(govActionDetailsProjection.getBlockTime());
+
     List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
         latestVotingProcedureRepository.getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
             govActionDetailsProjection.getTxHash(),
@@ -556,11 +628,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     votingChartResponse.setYesCcMembers(voteCount.getOrDefault(Vote.YES, 0L));
     votingChartResponse.setNoCcMembers(voteCount.getOrDefault(Vote.NO, 0L));
     votingChartResponse.setAbstainCcMembers(voteCount.getOrDefault(Vote.ABSTAIN, 0L));
-    votingChartResponse.setCcMembers(count);
-  }
-
-  private int getGovActionLifetime(BigInteger govActionLifetime) {
-    return govActionLifetime == null ? 0 : govActionLifetime.intValue();
+    votingChartResponse.setCcMembers(activeMembers);
   }
 
   private Double getParameterChangeActionThreshold(EpochParam epochParam, JsonNode description) {

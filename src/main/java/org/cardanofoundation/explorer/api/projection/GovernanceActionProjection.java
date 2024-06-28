@@ -24,4 +24,8 @@ public interface GovernanceActionProjection {
   GovActionStatus getStatus();
 
   BigInteger getVotingPower();
+
+  String getVoterHash();
+
+  Long getCreatedAt();
 }

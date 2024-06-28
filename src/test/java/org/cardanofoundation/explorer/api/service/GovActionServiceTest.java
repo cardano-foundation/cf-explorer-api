@@ -33,6 +33,7 @@ import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeMemberRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
@@ -61,6 +62,7 @@ public class GovActionServiceTest {
   @Mock DrepInfoRepository drepInfoRepository;
   @Mock EpochParamRepository epochParamRepository;
   @Mock CommitteeRegistrationRepository committeeRegistrationRepository;
+  @Mock CommitteeMemberRepository committeeMemberRepository;
 
   @Spy
   private GovernanceActionMapper governanceActionMapper =
@@ -267,13 +269,17 @@ public class GovActionServiceTest {
             .committeeMinSize(BigInteger.valueOf(5))
             .dvtCommitteeNormal(0.51)
             .govActionLifetime(BigInteger.TEN)
+            .ccThreshold(0.66)
+            .epochNo(200)
             .build();
 
     when(governanceActionRepository.getGovActionDetailsByTxHashAndIndex(txHash, index))
         .thenReturn(Optional.of(govActionDetailsProjection));
 
-    when(committeeRegistrationRepository.countByExpiredEpochNo(any())).thenReturn(5);
     when(epochParamRepository.findByEpochNo(any())).thenReturn(epochParam);
+    when(epochParamRepository.findCurrentEpochParam()).thenReturn(epochParam);
+
+    when(committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(200)).thenReturn(5L);
 
     DRepInfoProjection projection1 = Mockito.mock(DRepInfoProjection.class);
     when(projection1.getDrepHash()).thenReturn("drep1");

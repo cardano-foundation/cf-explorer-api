@@ -9,9 +9,7 @@ import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +31,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.dashboard.TxGraph;
 import org.cardanofoundation.explorer.api.model.response.dashboard.TxSummary;
 import org.cardanofoundation.explorer.api.model.response.tx.CollateralResponse;
 import org.cardanofoundation.explorer.api.model.response.tx.SummaryResponse;
@@ -164,46 +160,6 @@ class TxControllerTest {
     final MockHttpServletResponse response =
         mockMvc
             .perform(get("/api/v1/txs/current").accept(MediaType.APPLICATION_JSON))
-            .andReturn()
-            .getResponse();
-
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-    assertEquals("[]", response.getContentAsString());
-  }
-
-  @Test
-  void testGetTransactionChart() throws Exception {
-    final List<TxGraph> txGraphs =
-        List.of(
-            new TxGraph(
-                new GregorianCalendar(2020, Calendar.JANUARY, 1).getTime(),
-                new BigInteger("100"),
-                new BigInteger("100"),
-                new BigInteger("100")));
-    when(mockTxService.getTransactionChartByRange(TxChartRange.ONE_DAY)).thenReturn(txGraphs);
-
-    final MockHttpServletResponse response =
-        mockMvc
-            .perform(
-                get("/api/v1/txs/graph/{range}", TxChartRange.ONE_DAY)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andReturn()
-            .getResponse();
-
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-    assertEquals(asJsonString(txGraphs), response.getContentAsString());
-  }
-
-  @Test
-  void testGetTransactionChart_TxServiceReturnsNoItems() throws Exception {
-    when(mockTxService.getTransactionChartByRange(TxChartRange.ONE_DAY))
-        .thenReturn(Collections.emptyList());
-
-    final MockHttpServletResponse response =
-        mockMvc
-            .perform(
-                get("/api/v1/txs/graph/{range}", TxChartRange.ONE_DAY)
-                    .accept(MediaType.APPLICATION_JSON))
             .andReturn()
             .getResponse();
 
