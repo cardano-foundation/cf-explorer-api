@@ -1396,10 +1396,20 @@ public class TxServiceImpl implements TxService {
     final BigInteger previousMonthsInSeconds =
         BigInteger.valueOf(previousMonths.toInstant(ZoneOffset.UTC).getEpochSecond());
 
+    Long startTime = blockRepository.getMinBlockTime();
+    // round to the first day of the month
+    startTime =
+        OffsetDateTime.ofInstant(Instant.ofEpochSecond(startTime), ZoneOffset.UTC)
+            .withDayOfMonth(1)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .toEpochSecond();
+
     List<TxGraph> txGraphs =
         toTxGraph(
             txChartRepository.getTransactionGraphMonthGreaterThan(previousMonthsInSeconds),
-            previousMonthsInSeconds.longValue(),
+            Math.max(previousMonthsInSeconds.longValue(), startTime),
             currentMonthsInSeconds.longValue(),
             MONTH_STEP_EPOCH_SECOND);
 
