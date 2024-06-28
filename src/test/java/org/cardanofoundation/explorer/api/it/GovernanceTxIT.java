@@ -303,7 +303,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     var treasuryWithdrawalsAction = new TreasuryWithdrawalsAction();
     treasuryWithdrawalsAction.addWithdrawal(
-        new Withdrawal(sender1.stakeAddress(), adaToLovelace(1000)));
+        new Withdrawal(sender1.stakeAddress(), adaToLovelace(50000)));
     var anchor =
         new Anchor(
             "https://shorturl.at/vBIJ8",
@@ -313,7 +313,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
     Tx tx =
         new Tx()
             .createProposal(
-                treasuryWithdrawalsAction, adaToLovelace(1000), sender1.stakeAddress(), anchor)
+                treasuryWithdrawalsAction, adaToLovelace(50000), sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -333,10 +333,10 @@ public class GovernanceTxIT extends QuickTxBaseIT {
     QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
 
     var parameterChange = new ParameterChangeAction();
-    parameterChange.setPrevGovActionId(
-        new GovActionId("950d4b364840a27afeba929324d51dec0fac80b00cf7ca37905de08e3eae5ca6", 0));
+//    parameterChange.setPrevGovActionId(
+//        new GovActionId("950d4b364840a27afeba929324d51dec0fac80b00cf7ca37905de08e3eae5ca6", 0));
     parameterChange.setProtocolParamUpdate(
-        ProtocolParamUpdate.builder().keyDeposit(adaToLovelace(50000)).build());
+        ProtocolParamUpdate.builder().keyDeposit(new BigInteger("50000000000")).build());
 
     var anchor =
         new Anchor(
@@ -346,7 +346,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(parameterChange, adaToLovelace(50000), sender1.stakeAddress(), anchor)
+            .createProposal(parameterChange, new BigInteger("50000000000"), sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -447,7 +447,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(updateCommittee, adaToLovelace(1000), sender1.stakeAddress(), anchor)
+            .createProposal(updateCommittee, adaToLovelace(50000), sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -482,7 +482,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(hardforkInitiation, adaToLovelace(1000), sender1.stakeAddress(), anchor)
+            .createProposal(hardforkInitiation, adaToLovelace(50000), sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -505,7 +505,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
             HexUtil.decodeHexString(
                 "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
     var govActionId =
-        new GovActionId("75738ba6fd156234c5ade130e24c9d44746d0be2585bfbc4d8175a6e27e8a704", 0);
+        new GovActionId("c99298a017b72988a00be57dd1aab195eaa263f654bb58e8490d685843fba861", 0);
 
     createVote(govActionId, Vote.YES, anchor, sender1);
     createVote(govActionId, Vote.NO, anchor, sender3);
