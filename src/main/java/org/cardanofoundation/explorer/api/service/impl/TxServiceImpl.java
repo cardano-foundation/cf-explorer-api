@@ -1396,8 +1396,6 @@ public class TxServiceImpl implements TxService {
     final BigInteger previousMonthsInSeconds =
         BigInteger.valueOf(previousMonths.toInstant(ZoneOffset.UTC).getEpochSecond());
 
-    Long startTime = blockRepository.getMinBlockTime();
-    // round to the first day of the month
     startTime =
         OffsetDateTime.ofInstant(Instant.ofEpochSecond(startTime), ZoneOffset.UTC)
             .withDayOfMonth(1)
