@@ -333,8 +333,9 @@ public class GovernanceTxIT extends QuickTxBaseIT {
     QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
 
     var parameterChange = new ParameterChangeAction();
-//    parameterChange.setPrevGovActionId(
-//        new GovActionId("950d4b364840a27afeba929324d51dec0fac80b00cf7ca37905de08e3eae5ca6", 0));
+    //    parameterChange.setPrevGovActionId(
+    //        new GovActionId("950d4b364840a27afeba929324d51dec0fac80b00cf7ca37905de08e3eae5ca6",
+    // 0));
     parameterChange.setProtocolParamUpdate(
         ProtocolParamUpdate.builder().keyDeposit(new BigInteger("50000000000")).build());
 
@@ -346,7 +347,8 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(parameterChange, new BigInteger("50000000000"), sender1.stakeAddress(), anchor)
+            .createProposal(
+                parameterChange, new BigInteger("50000000000"), sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -371,13 +373,15 @@ public class GovernanceTxIT extends QuickTxBaseIT {
             HexUtil.decodeHexString(
                 "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
     var govAction = new NewConstitution();
-//    govAction.setPrevGovActionId(
-//        new GovActionId("597686b8c917ba2c74cd0018f3fb325bddf0f1fe747038170c41373376c03b5c", 0));
+    //    govAction.setPrevGovActionId(
+    //        new GovActionId("597686b8c917ba2c74cd0018f3fb325bddf0f1fe747038170c41373376c03b5c",
+    // 0));
     govAction.setConstitution(Constitution.builder().anchor(anchor).build());
 
     Tx tx =
         new Tx()
-            .createProposal(govAction, new BigInteger("50000000000"), sender1.stakeAddress(), anchor)
+            .createProposal(
+                govAction, new BigInteger("50000000000"), sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -482,7 +486,8 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(hardforkInitiation, adaToLovelace(50000), sender1.stakeAddress(), anchor)
+            .createProposal(
+                hardforkInitiation, adaToLovelace(50000), sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
