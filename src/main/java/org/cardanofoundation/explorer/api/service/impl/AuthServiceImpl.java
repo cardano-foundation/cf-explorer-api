@@ -1,7 +1,5 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -19,10 +17,13 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public Boolean isBlacklistToken(String token, TokenAuthType tokenAuthType) {
-    Optional<TokenAuth> tokenAuth = tokenAuthRepository.findByToken(token, tokenAuthType);
-    if (tokenAuth.isEmpty()) {
+    try {
+      return tokenAuthRepository
+          .findByToken(token, tokenAuthType)
+          .map(TokenAuth::getBlackList)
+          .orElse(Boolean.FALSE);
+    } catch (Exception e) {
       return Boolean.FALSE;
     }
-    return tokenAuth.get().getBlackList();
   }
 }
