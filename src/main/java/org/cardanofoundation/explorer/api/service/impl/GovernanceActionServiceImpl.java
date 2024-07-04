@@ -24,13 +24,16 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
@@ -42,6 +45,7 @@ import org.cardanofoundation.explorer.api.model.request.governanceAction.Governa
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.HistoryVote;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
 import org.cardanofoundation.explorer.api.projection.DRepInfoProjection;
@@ -51,9 +55,7 @@ import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjec
 import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeMemberRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
@@ -66,6 +68,7 @@ import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.ProtocolParamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.CommitteeState;
+import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
@@ -79,13 +82,6 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 @Log4j2
 public class GovernanceActionServiceImpl implements GovernanceActionService {
 
-  private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
-
-  @Value("${application.epoch.days}")
-  public long epochDays;
-
-  public static final String MIN_TIME = "1970-01-01 00:00:00";
-
   private final DRepRegistrationRepository dRepRegistrationRepository;
   private final GovernanceActionRepository governanceActionRepository;
   private final PoolHashRepository poolHashRepository;
@@ -95,44 +91,31 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final DrepInfoRepository drepInfoRepository;
   private final EpochParamRepository epochParamRepository;
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
-  private final CommitteeRegistrationRepository committeeRegistrationRepository;
   private final DelegationRepository delegationRepository;
   private final ProtocolParamService protocolParamService;
-  private final CommitteInfoRepository committeInfoRepository;
   private final CommitteeMemberRepository committeeMemberRepository;
+  private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
+
+  private final RedisTemplate<String, Integer> redisTemplate;
+
+  @Value("${application.network}")
+  private String network;
+
+  @Value("${application.epoch.days}")
+  public long epochDays;
+
+  public static final String MIN_TIME = "1970-01-01 00:00:00";
 
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
       String voterHash, GovernanceActionFilter governanceActionFilter, Pageable pageable) {
-    BaseFilterResponse<GovernanceActionResponse> govActionResponse = new BaseFilterResponse<>();
-    govActionResponse.setData(List.of());
-
     List<String> voterHashes =
         getActualVoterHashes(voterHash, governanceActionFilter.getVoterType());
-
-    Long slot = null;
-    if (governanceActionFilter.getVoterType().equals(VoterType.DREP_KEY_HASH)
-        || governanceActionFilter.getVoterType().equals(VoterType.DREP_SCRIPT_HASH)) {
-      slot = dRepRegistrationRepository.getSlotOfDRepRegistration(voterHashes.get(0));
-    } else if (governanceActionFilter.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)) {
-      slot = poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(voterHashes.get(0));
-    } else if (governanceActionFilter
-            .getVoterType()
-            .equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
-        || governanceActionFilter
-            .getVoterType()
-            .equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH)) {
-      if (StringUtils.isEmpty(voterHash)) {
-        slot = committeeMemberRepository.getMinSlotOfCommitteeMembers();
-      } else {
-        slot = committeeMemberRepository.getSlotOfCommitteeMemberByHotKey(voterHash);
-      }
-    }
-
-    Boolean isVoteNone = governanceActionFilter.getVoteType().equals(Vote.NONE);
+    Long slot = getSlotCheckpoint(voterHash, governanceActionFilter.getVoterType(), voterHashes);
+    Boolean isVoteNone = Vote.NONE.equals(governanceActionFilter.getVoteType());
 
     Vote vote =
-        governanceActionFilter.getVoteType().equals(Vote.ANY)
+        Vote.ANY.equals(governanceActionFilter.getVoteType())
             ? null
             : governanceActionFilter.getVoteType();
 
@@ -153,7 +136,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
 
     org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus govActionStatus =
-        governanceActionFilter.getActionStatus().equals(GovActionStatus.ANY)
+        GovActionStatus.ANY.equals(governanceActionFilter.getActionStatus())
+                || governanceActionFilter.getActionStatus() == null
             ? null
             : org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus.valueOf(
                 governanceActionFilter.getActionStatus().name());
@@ -163,38 +147,70 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             ? null
             : governanceActionFilter.getAnchorText().toLowerCase();
 
-    Page<GovernanceActionProjection> governanceActionProjections =
-        governanceActionRepository.getAllByFilter(
-            governanceActionFilter.getIsRepeatVote(),
-            govActionStatus,
-            vote,
-            voterHashes,
-            govActionTypeList,
-            fromDate,
-            toDate,
-            slot,
-            governanceActionFilter.getGovernanceActionTxHash(),
-            anchorText,
-            isVoteNone,
-            pageable);
+    Page<GovernanceActionProjection> governanceActionProjectionPage;
+
+    // get gov info include voter info
+    if (vote != null && !CollectionUtils.isEmpty(voterHashes)) {
+      governanceActionProjectionPage =
+          governanceActionRepository.getAllByFilter(
+              governanceActionFilter.getIsRepeatVote(),
+              govActionStatus,
+              vote,
+              voterHashes,
+              govActionTypeList,
+              fromDate,
+              toDate,
+              slot,
+              governanceActionFilter.getGovernanceActionTxHash(),
+              anchorText,
+              isVoteNone,
+              pageable);
+    } else { // get gov info only
+      governanceActionProjectionPage =
+          governanceActionRepository.getAllByFilter(
+              govActionStatus,
+              govActionTypeList,
+              fromDate,
+              toDate,
+              governanceActionFilter.getGovernanceActionTxHash(),
+              anchorText,
+              pageable);
+    }
 
     List<GovernanceActionResponse> governanceActionResponses =
-        governanceActionProjections.stream()
+        governanceActionProjectionPage.stream()
             .map(governanceActionMapper::fromGovernanceActionProjection)
             .collect(Collectors.toList());
 
-    if (governanceActionResponses.isEmpty()) {
-      return govActionResponse;
+    return new BaseFilterResponse<>(governanceActionProjectionPage, governanceActionResponses);
+  }
+
+  private Long getSlotCheckpoint(String voterHash, VoterType voterType, List<String> voterHashes) {
+    Long slot = null;
+    if (voterType == null) {
+      return slot;
     }
-    govActionResponse.setTotalItems(governanceActionProjections.getTotalElements());
-    govActionResponse.setData(governanceActionResponses);
-    govActionResponse.setTotalPages(governanceActionProjections.getTotalPages());
-    govActionResponse.setCurrentPage(pageable.getPageNumber());
-    return govActionResponse;
+
+    if (voterType.equals(VoterType.DREP_KEY_HASH) || voterType.equals(VoterType.DREP_SCRIPT_HASH)) {
+      slot = dRepRegistrationRepository.getSlotOfDRepRegistration(voterHashes.get(0));
+    } else if (voterType.equals(VoterType.STAKING_POOL_KEY_HASH)) {
+      slot = poolHashRepository.getSlotNoWhenFirstDelegationByPoolHash(voterHashes.get(0));
+    } else if (voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
+        || voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH)) {
+      if (StringUtils.isEmpty(voterHash)) {
+        slot = committeeMemberRepository.getMinSlotOfCommitteeMembers();
+      } else {
+        slot = committeeMemberRepository.getSlotOfCommitteeMemberByHotKey(voterHash);
+      }
+    }
+    return slot;
   }
 
   private List<String> getActualVoterHashes(String voterHash, VoterType voterType) {
     List<String> voteHashes = new ArrayList<>();
+    if (voterType == null) {
+      return voteHashes;
+    }
     if (StringUtils.isEmpty(voterHash)
         && (voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH)
             || voterType.equals(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_SCRIPT_HASH))) {
@@ -221,6 +237,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private List<GovActionType> getGovActionTypeByVoterType(
       VoterType voterType, GovActionType govActionType) {
     List<GovActionType> govActionTypeList = new ArrayList<>(Arrays.asList(GovActionType.values()));
+
+    if (voterType == null) {
+      return govActionTypeList;
+    }
 
     if (govActionType.equals(GovActionType.ALL)) {
       if (voterType.equals(VoterType.STAKING_POOL_KEY_HASH)) {
@@ -431,6 +451,42 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             .map(governanceActionMapper::fromGovernanceActionProjection);
 
     return new BaseFilterResponse<>(governanceActionProjections);
+  }
+
+  @Override
+  public GovernanceOverviewResponse getGovernanceOverview() {
+    EpochParam currentEpochParam = epochParamRepository.findCurrentEpochParam();
+
+    Long activeDReps = drepInfoRepository.countByStatus(DRepStatus.ACTIVE);
+    Long activeSPOs =
+        Objects.requireNonNull(
+                redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_ACTIVATE + network))
+            .longValue();
+    Long activeCommittees =
+        committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(
+            currentEpochParam.getEpochNo());
+
+    Map<GovActionType, Long> govActionTypeMap =
+        governanceActionRepository.getGovActionGroupByGovActionType().stream()
+            .collect(
+                Collectors.toMap(
+                    GovernanceActionProjection::getType, GovernanceActionProjection::getGovCount));
+
+    Map<GovActionStatus, Long> govActionStatusMap =
+        governanceActionRepository.getGovActionGroupByGovActionStatus().stream()
+            .collect(
+                Collectors.toMap(
+                    GovernanceActionProjection::getStatus,
+                    GovernanceActionProjection::getGovCount));
+
+    return GovernanceOverviewResponse.builder()
+        .activeDReps(activeDReps)
+        .activeSPOs(activeSPOs)
+        .activeCommittees(activeCommittees)
+        .totalGovActions(govActionTypeMap.values().stream().reduce(0L, Long::sum))
+        .govCountMap(govActionTypeMap)
+        .govStatusMap(govActionStatusMap)
+        .build();
   }
 
   // TODO: Active vote stake of Pool type is not available.
