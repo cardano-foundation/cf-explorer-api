@@ -8,9 +8,12 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.projection.ProjectionFactory;
+import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import org.mockito.InjectMocks;
@@ -35,7 +38,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountR
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestStakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
@@ -49,7 +51,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestStakeAddressBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
@@ -77,7 +78,7 @@ public class StakeKeyServiceTest {
   @Mock private FetchRewardDataService fetchRewardDataService;
   @Mock private TxRepository txRepository;
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
-  @Mock private LatestStakeAddressBalanceRepository latestStakeAddressBalanceRepository;
+  @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
   @Mock private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   @Test
@@ -195,10 +196,10 @@ public class StakeKeyServiceTest {
     when(stakeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(stakeDeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(poolUpdateRepository.findPoolByRewardAccount(any())).thenReturn(List.of("pool"));
-    when(latestStakeAddressBalanceRepository.findByStakeAddress(
-            "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx"))
-        .thenReturn(
-            Optional.of(LatestStakeAddressBalance.builder().quantity(BigInteger.ONE).build()));
+    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
+    AddressQuantityProjection projection = factory.createProjection(AddressQuantityProjection.class);
+    projection.setQuantity(BigInteger.ONE);
+    when(stakeAddressBalanceRepository.findByAddress(stakeKey)).thenReturn(Optional.of(projection));
     var response = stakeKeyService.getStakeByAddress(address);
     assertEquals(response.getStatus(), StakeAddressStatus.DEACTIVATED);
     assertEquals(response.getStakeAddress(), stakeKey);
@@ -234,10 +235,10 @@ public class StakeKeyServiceTest {
     var response = stakeKeyService.getDelegationHistories(stakeKey, pageable);
     assertEquals(response.getTotalItems(), 1);
     assertEquals(response.getTotalPages(), 1);
-    assertEquals(response.getCurrentPage(), 0);
-    assertEquals(response.getData().get(0).getPoolId(), "1");
-    assertEquals(response.getData().get(0).getPoolData(), "poolData");
-    assertEquals(response.getData().get(0).getTickerName(), "tickerName");
+    assertEquals(0, response.getCurrentPage());
+    assertEquals("1", response.getData().get(0).getPoolId());
+    assertEquals("poolData", response.getData().get(0).getPoolData());
+    assertEquals("tickerName", response.getData().get(0).getTickerName());
   }
 
   @Test
@@ -426,8 +427,8 @@ public class StakeKeyServiceTest {
     when(poolInfoRepository.getTotalLiveStake(400)).thenReturn(BigInteger.TWO);
 
     var response = stakeKeyService.getStakeAnalytics();
-    assertEquals(response.getActiveStake(), BigInteger.ONE);
-    assertEquals(response.getLiveStake(), BigInteger.TWO);
+    assertEquals(BigInteger.ONE, response.getActiveStake());
+    assertEquals(BigInteger.TWO, response.getLiveStake());
   }
 
   @Test

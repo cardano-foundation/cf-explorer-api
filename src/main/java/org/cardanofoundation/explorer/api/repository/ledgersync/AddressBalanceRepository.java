@@ -18,7 +18,7 @@ public interface AddressBalanceRepository extends JpaRepository<AddressBalance, 
 //            ORDER BY a.quantity DESC LIMIT :count
 //            """)
     @Query(value = """
-            SELECT a.address as address, a.slot, a.quantity as quantity FROM AddressBalance a
+            SELECT a.address as address, a.quantity as quantity FROM AddressBalance a
             WHERE a.slot = (SELECT max(slot) FROM AddressBalance b WHERE b.address = a.address)
             AND unit = 'lovelace'
             ORDER BY quantity DESC LIMIT :count
