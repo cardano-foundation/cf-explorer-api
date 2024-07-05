@@ -37,7 +37,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportD
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportExportResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.report.PoolReportListResponse;
 import org.cardanofoundation.explorer.api.repository.explorer.PoolReportRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepository;
 import org.cardanofoundation.explorer.api.service.*;
@@ -47,8 +46,6 @@ import org.cardanofoundation.explorer.common.entity.enumeration.ReportType;
 import org.cardanofoundation.explorer.common.entity.explorer.PoolReportHistory;
 import org.cardanofoundation.explorer.common.entity.explorer.ReportHistory;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
-import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
-import org.cardanofoundation.explorer.common.model.ReportMessage;
 
 @Service
 @RequiredArgsConstructor
@@ -57,14 +54,11 @@ public class PoolReportServiceImpl implements PoolReportService {
 
   private final PoolReportRepository poolReportRepository;
 
-  private final EpochStakeRepository epochStakeRepository;
-
   private final StorageService storageService;
 
   private final PoolLifecycleService poolLifecycleService;
 
   private final PoolHashRepository poolHashRepository;
-  private final KafkaService kafkaService;
 
   private final FetchRewardDataService fetchRewardDataService;
 
@@ -75,29 +69,8 @@ public class PoolReportServiceImpl implements PoolReportService {
   private final RoleService roleService;
 
   @Override
-  public Boolean create(
-      PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal) {
-    PoolReportHistory poolReportHistory = saveToDb(poolReportCreateRequest, userPrincipal);
-
-    ReportMessage reportMessage =
-        ReportMessage.builder()
-            .reportHistory(poolReportHistory.getReportHistory())
-            .timePattern(poolReportCreateRequest.getTimePattern())
-            .zoneOffset(poolReportCreateRequest.getZoneOffset())
-            .dateFormat(poolReportCreateRequest.getDateFormat())
-            .build();
-
-    Boolean isSuccess = kafkaService.sendReportHistory(reportMessage);
-    if (Boolean.FALSE.equals(isSuccess)) {
-      poolReportRepository.delete(poolReportHistory);
-      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
-    }
-
-    return true;
-  }
-
   @Transactional
-  public PoolReportHistory saveToDb(
+  public Boolean create(
       PoolReportCreateRequest poolReportCreateRequest, UserPrincipal userPrincipal) {
     poolHashRepository
         .findByViewOrHashRaw(poolReportCreateRequest.getPoolId())
@@ -109,9 +82,14 @@ public class PoolReportServiceImpl implements PoolReportService {
         throw new BusinessException(BusinessCode.REPORT_LIMIT_REACHED);
       }
     }
-    ReportHistory reportHistory =
-        initReportHistory(poolReportCreateRequest, userPrincipal.getUsername());
-    return poolReportRepository.saveAndFlush(poolReportCreateRequest.toEntity(reportHistory));
+    try {
+      ReportHistory reportHistory =
+          initReportHistory(poolReportCreateRequest, userPrincipal.getUsername());
+      poolReportRepository.saveAndFlush(poolReportCreateRequest.toEntity(reportHistory));
+      return true;
+    } catch (Exception e) {
+      throw new BusinessException(BusinessCode.CREATE_REPORT_ERROR);
+    }
   }
 
   @Override
@@ -288,6 +266,9 @@ public class PoolReportServiceImpl implements PoolReportService {
         .type(ReportType.POOL_ID)
         .username(username)
         .createdAt(Timestamp.valueOf(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)))
+        .timePattern(poolReportCreateRequest.getTimePattern())
+        .dateFormat(poolReportCreateRequest.getDateFormat())
+        .zoneOffset(poolReportCreateRequest.getZoneOffset())
         .build();
   }
 

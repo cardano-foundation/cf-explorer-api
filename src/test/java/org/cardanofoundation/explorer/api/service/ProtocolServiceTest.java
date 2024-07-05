@@ -3371,6 +3371,8 @@ class ProtocolServiceTest {
 
   @Test
   void testEmptyProposalProtocols() {
+    when(epochRepository.findFirstByNo(any()))
+        .thenReturn(Optional.of(Epoch.builder().no(0).build()));
     when(paramProposalRepository.findMaxEpochChange()).thenReturn(BigInteger.ONE.intValue());
 
     Protocols expect = new Protocols();
@@ -3380,6 +3382,8 @@ class ProtocolServiceTest {
 
   @Test
   void testEmptyProtocols() {
+    when(epochRepository.findFirstByNo(any()))
+        .thenReturn(Optional.of(Epoch.builder().no(0).build()));
     when(paramProposalRepository.findMaxEpochChange()).thenReturn(null);
     Protocols expect = new Protocols();
     Protocols actual = protocolParamService.getLatestChange();
@@ -7090,9 +7094,17 @@ class ProtocolServiceTest {
 
   @Test
   void testGetLatestChange_thenReturn() {
+    when(epochRepository.findFirstByNo(any()))
+        .thenReturn(
+            Optional.of(
+                Epoch.builder()
+                    .no(0)
+                    .startTime(Timestamp.valueOf("2017-09-23 21:44:51.000000"))
+                    .build()));
 
     LatestParamHistory lph = Mockito.mock(LatestParamHistory.class);
     when(lph.getEpochNo()).thenReturn(1);
+    when(lph.getEpochTime()).thenReturn(LocalDateTime.of(2020, 07, 29, 21, 44, 51));
 
     when(paramProposalRepository.findMaxEpochChange()).thenReturn(1);
     when(paramProposalRepository.findProtocolsChange(1)).thenReturn(List.of(lph));

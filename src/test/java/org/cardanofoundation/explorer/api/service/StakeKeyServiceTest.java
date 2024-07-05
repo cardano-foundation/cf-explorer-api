@@ -183,11 +183,14 @@ public class StakeKeyServiceTest {
     String address =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     String stakeKey = "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx";
-    StakeAddress stakeAddress = StakeAddress.builder().build();
+    StakeAddress stakeAddress = StakeAddress.builder().view(stakeKey).build();
     StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
     when(sdp.getPoolId()).thenReturn("1");
     when(sdp.getPoolData()).thenReturn("poolData");
     when(sdp.getTickerName()).thenReturn("tickerName");
+
+    StakeAddressBalanceProjection sabp = Mockito.mock(StakeAddressBalanceProjection.class);
+    when(sabp.getBalance()).thenReturn(BigInteger.ONE);
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(true);
