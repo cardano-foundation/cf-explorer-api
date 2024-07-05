@@ -490,7 +490,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   @Override
   public List<StakeAnalyticRewardResponse> getStakeRewardAnalytics(String stakeKey) {
     if (Boolean.FALSE.equals(fetchRewardDataService.useKoios())) {
-      return Collections.emptyList();
+      return null;
     }
 
     if (!fetchRewardDataService.checkRewardAvailable(stakeKey)) {

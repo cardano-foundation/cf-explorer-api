@@ -189,9 +189,6 @@ public class StakeKeyServiceTest {
     when(sdp.getPoolData()).thenReturn("poolData");
     when(sdp.getTickerName()).thenReturn("tickerName");
 
-    StakeAddressBalanceProjection sabp = Mockito.mock(StakeAddressBalanceProjection.class);
-    when(sabp.getBalance()).thenReturn(BigInteger.ONE);
-
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(fetchRewardDataService.checkRewardAvailable(stakeKey)).thenReturn(true);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
