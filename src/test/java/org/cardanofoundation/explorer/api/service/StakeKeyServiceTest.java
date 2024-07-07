@@ -12,8 +12,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBala
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.projection.ProjectionFactory;
-import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import org.mockito.InjectMocks;
@@ -196,10 +194,7 @@ public class StakeKeyServiceTest {
     when(stakeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(stakeDeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(poolUpdateRepository.findPoolByRewardAccount(any())).thenReturn(List.of("pool"));
-    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
-    AddressQuantityProjection projection = factory.createProjection(AddressQuantityProjection.class);
-    projection.setQuantity(BigInteger.ONE);
-    when(stakeAddressBalanceRepository.findByAddress(stakeKey)).thenReturn(Optional.of(projection));
+    when(stakeAddressBalanceRepository.findStakeQuantityByAddress(stakeKey)).thenReturn(Optional.of(BigInteger.ONE));
     var response = stakeKeyService.getStakeByAddress(address);
     assertEquals(response.getStatus(), StakeAddressStatus.DEACTIVATED);
     assertEquals(response.getStakeAddress(), stakeKey);
