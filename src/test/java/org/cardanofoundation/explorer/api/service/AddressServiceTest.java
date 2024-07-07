@@ -8,13 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.cardanofoundation.explorer.api.projection.AddressQuantityProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressBalanceRepository;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.projection.ProjectionFactory;
-import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
@@ -38,6 +34,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepositor
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
@@ -45,6 +42,7 @@ import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxCount;
+import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -54,7 +52,7 @@ class AddressServiceTest {
   @Mock AddressRepository addressRepository;
   @Mock ScriptRepository scriptRepository;
 
-  @Mock AddressBalanceRepository addressBalanceRepository;
+  @Mock LatestAddressBalanceRepository latestAddressBalanceRepository;
 
   @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
 
@@ -97,7 +95,7 @@ class AddressServiceTest {
     AddressResponse response = addressService.getAddressDetail(addr);
     Assertions.assertTrue(response.isAssociatedNativeScript());
     Assertions.assertEquals(
-            "4791b8567a68cab7332f158f766c536adf9cf70170079918de473826", response.getScriptHash());
+        response.getScriptHash(), "4791b8567a68cab7332f158f766c536adf9cf70170079918de473826");
   }
 
   @Test
@@ -112,7 +110,7 @@ class AddressServiceTest {
     AddressResponse response = addressService.getAddressDetail(addr);
     Assertions.assertTrue(response.isAssociatedSmartContract());
     Assertions.assertEquals(
-            "002059fc75b038a85b33ba4fdfaced4bed1247fbad24c538dd45245a", response.getScriptHash());
+        response.getScriptHash(), "002059fc75b038a85b33ba4fdfaced4bed1247fbad24c538dd45245a");
   }
 
   @Test
@@ -185,8 +183,8 @@ class AddressServiceTest {
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertEquals(response.getData(), List.of());
-    Assertions.assertEquals(BigInteger.ZERO, response.getHighestBalance());
-    Assertions.assertEquals(BigInteger.ZERO, response.getLowestBalance());
+    Assertions.assertEquals(response.getHighestBalance(), BigInteger.ZERO);
+    Assertions.assertEquals(response.getLowestBalance(), BigInteger.ZERO);
   }
 
   @Test
@@ -236,21 +234,19 @@ class AddressServiceTest {
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     Pageable pageable = PageRequest.of(0, 10);
-    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
-    AddressQuantityProjection addressQuantityProjection = factory.createProjection(AddressQuantityProjection.class);
-    addressQuantityProjection.setAddress(addr);
-    addressQuantityProjection.setQuantity(BigInteger.TEN);
+    LatestAddressBalance latestAddressBalance =
+        LatestAddressBalance.builder().address(addr).quantity(BigInteger.TEN).build();
 
-    when(addressBalanceRepository.findTopAddresses(pageable.getPageSize()))
-        .thenReturn(List.of(addressQuantityProjection));
+    when(latestAddressBalanceRepository.findAllLatestAddressBalance(pageable))
+        .thenReturn(List.of(latestAddressBalance));
 
     when(addressTxCountRepository.findAllByAddressIn(List.of(addr)))
         .thenReturn(List.of(AddressTxCount.builder().address(addr).txCount(1L).build()));
 
     var response = addressService.getTopAddress(pageable);
-    Assertions.assertEquals(addr, response.getData().get(0).getAddress());
-    Assertions.assertEquals(1, response.getData().get(0).getTxCount());
-    Assertions.assertEquals(BigInteger.TEN, response.getData().get(0).getBalance());
+    Assertions.assertEquals(response.getData().get(0).getAddress(), addr);
+    Assertions.assertEquals(response.getData().get(0).getTxCount(), 1);
+    Assertions.assertEquals(response.getData().get(0).getBalance(), BigInteger.TEN);
   }
 
   @Test
