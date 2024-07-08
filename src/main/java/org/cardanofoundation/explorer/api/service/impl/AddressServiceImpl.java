@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,8 +24,6 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.mapper.AddressMapper;
-import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
@@ -34,9 +33,7 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
@@ -46,7 +43,6 @@ import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxCount;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressTxBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
@@ -56,17 +52,12 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 @Log4j2
 public class AddressServiceImpl implements AddressService {
 
-  //  private final AddressTxBalanceRepository addressTxBalanceRepository;
   private final AddressRepository addressRepository;
-  private final AssetMetadataRepository assetMetadataRepository;
   private final LatestAddressBalanceRepository latestAddressBalanceRepository;
   private final LatestTokenBalanceRepository latestTokenBalanceRepository;
   private final TokenMapper tokenMapper;
-  private final AddressMapper addressMapper;
-  private final AssetMetadataMapper assetMetadataMapper;
   private final ScriptRepository scriptRepository;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
-  private final AddressTxCountRepository addressTxCountRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
 
   @Value("${application.network}")
@@ -136,12 +127,8 @@ public class AddressServiceImpl implements AddressService {
             .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
     AddressChartBalanceResponse response = new AddressChartBalanceResponse();
 
-    AddressTxCount addressTxCount =
-        addressTxCountRepository
-            .findById(address)
-            .orElse(AddressTxCount.builder().address(address).txCount(0L).build());
-
-    if (Long.valueOf(0).equals(addressTxCount.getTxCount())) {
+    Long txCount = addressTxAmountRepository.getTxCountForAddress(address).orElse(0L);
+    if (Long.valueOf(0).equals(txCount)) {
       return AddressChartBalanceResponse.builder()
           .highestBalance(BigInteger.ZERO)
           .lowestBalance(BigInteger.ZERO)
@@ -249,14 +236,9 @@ public class AddressServiceImpl implements AddressService {
         latestAddressBalanceRepository.findAllLatestAddressBalance(pageable);
     Page<LatestAddressBalance> latestAddressBalancePage =
         new PageImpl<>(latestAddressBalances, pageable, pageable.getPageSize());
-
-    Map<String, Long> addressTxCountMap =
-        addressTxCountRepository
-            .findAllByAddressIn(
-                latestAddressBalancePage.stream().map(LatestAddressBalance::getAddress).toList())
-            .stream()
-            .collect(Collectors.toMap(AddressTxCount::getAddress, AddressTxCount::getTxCount));
-
+    List<AddressTxCountProjection> addressTxCountProjections = addressTxAmountRepository.getTxCountListForAddresses(latestAddressBalancePage.stream().map(LatestAddressBalance::getAddress).toList());
+    Map<String, Long> addressTxCountMap = addressTxCountProjections
+            .stream().collect(Collectors.toMap(AddressTxCountProjection::getAddress, AddressTxCountProjection::getTxCount));
     List<AddressFilterResponse> addressFilterResponses =
         latestAddressBalancePage.stream()
             .map(

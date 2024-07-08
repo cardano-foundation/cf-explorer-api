@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.projection.ProjectionFactory;
+import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
@@ -32,8 +36,6 @@ import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
@@ -41,7 +43,6 @@ import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
 import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxCount;
 import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
@@ -56,13 +57,10 @@ class AddressServiceTest {
 
   @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
 
-  @Mock AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
-
-  @Mock AddressTxCountRepository addressTxCountRepository;
-
   @Mock AddressTxAmountRepository addressTxAmountRepository;
 
   @Mock TokenMapper tokenMapper;
+  @Mock AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   @InjectMocks AddressServiceImpl addressService;
 
@@ -137,13 +135,13 @@ class AddressServiceTest {
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
     Address address = Address.builder().address(addr).build();
-    AddressTxCount addressTxCount = AddressTxCount.builder().address(addr).txCount(1L).build();
+    ProjectionFactory projectionFactory = new SpelAwareProxyProjectionFactory();
     MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxCountRepository.findById(addr)).thenReturn(Optional.of(addressTxCount));
+    when(addressTxAmountRepository.getTxCountForAddress(addr)).thenReturn(Optional.of(1L));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
 
@@ -157,14 +155,14 @@ class AddressServiceTest {
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_MONTH;
     Address address = Address.builder().address(addr).build();
-    AddressTxCount addressTxCount = AddressTxCount.builder().address(addr).txCount(1L).build();
-
     MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(addressTxCountRepository.findById(addr)).thenReturn(Optional.of(addressTxCount));
+    when(aggregateAddressTxBalanceRepository.findAllByAddressIdAndDayBetween(any(), any(), any()))
+        .thenReturn(List.of());
+    when(addressTxAmountRepository.getTxCountForAddress(addr)).thenReturn(Optional.of(1L));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
     var response = addressService.getAddressAnalytics(addr, type);
@@ -177,8 +175,7 @@ class AddressServiceTest {
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
     Address address = Address.builder().address(addr).build();
-    AddressTxCount addressTxCount = AddressTxCount.builder().address(addr).txCount(0L).build();
-    when(addressTxCountRepository.findById(addr)).thenReturn(Optional.of(addressTxCount));
+    when(addressTxAmountRepository.getTxCountForAddress(addr)).thenReturn(Optional.of(0L));
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
 
     var response = addressService.getAddressAnalytics(addr, type);
@@ -194,12 +191,10 @@ class AddressServiceTest {
     AnalyticType type = AnalyticType.ONE_WEEK;
     Address address = Address.builder().address(addr).build();
 
-    AddressTxCount addressTxCount = AddressTxCount.builder().address(addr).txCount(1L).build();
     MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
-
-    when(addressTxCountRepository.findById(addr)).thenReturn(Optional.of(addressTxCount));
+    when(addressTxAmountRepository.getTxCountForAddress(addr)).thenReturn(Optional.of(1L));
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
@@ -213,14 +208,12 @@ class AddressServiceTest {
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
 
-    AddressTxCount addressTxCount = AddressTxCount.builder().address(addr).txCount(1L).build();
     AnalyticType type = AnalyticType.THREE_MONTH;
     Address address = Address.builder().address(addr).build();
     MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
-
-    when(addressTxCountRepository.findById(addr)).thenReturn(Optional.of(addressTxCount));
+    when(addressTxAmountRepository.getTxCountForAddress(addr)).thenReturn(Optional.of(1L));
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
@@ -239,10 +232,12 @@ class AddressServiceTest {
 
     when(latestAddressBalanceRepository.findAllLatestAddressBalance(pageable))
         .thenReturn(List.of(latestAddressBalance));
+    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
+    AddressTxCountProjection projection = factory.createProjection(AddressTxCountProjection.class);
+    projection.setTxCount(1L);
+    projection.setAddress(addr);
 
-    when(addressTxCountRepository.findAllByAddressIn(List.of(addr)))
-        .thenReturn(List.of(AddressTxCount.builder().address(addr).txCount(1L).build()));
-
+    when(addressTxAmountRepository.getTxCountListForAddresses(List.of(addr))).thenReturn(List.of(projection));
     var response = addressService.getTopAddress(pageable);
     Assertions.assertEquals(response.getData().get(0).getAddress(), addr);
     Assertions.assertEquals(response.getData().get(0).getTxCount(), 1);

@@ -73,7 +73,6 @@ import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -134,7 +133,6 @@ public class TxServiceImpl implements TxService {
   private final MaTxMintMapper maTxMintMapper;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final MultiAssetRepository multiAssetRepository;
-  private final AddressTxCountRepository addressTxCountRepository;
   private final StakeAddressTxCountRepository stakeAddressTxCountRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
@@ -276,8 +274,7 @@ public class TxServiceImpl implements TxService {
         .findFirstByAddress(address)
         .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
-    AddressTxCount addressTxCount =
-        addressTxCountRepository.findById(address).orElse(new AddressTxCount(address, 0L));
+    Long addressTxCount = addressTxAmountRepository.getTxCountForAddress(address).orElse(0L);
 
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByAddress(address, pageable);
@@ -289,7 +286,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-            addressTxCount.getTxCount());
+                addressTxCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }

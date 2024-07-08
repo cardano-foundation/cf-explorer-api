@@ -1,9 +1,11 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,6 +20,20 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.AddressTxAmount;
 
 public interface AddressTxAmountRepository
     extends JpaRepository<AddressTxAmount, AddressTxAmountId> {
+
+  @Query(
+          value = """
+                  SELECT ab.address as address, COUNT(ab.address) as txCount FROM AddressBalance ab
+                  WHERE ab.address IN :addresses GROUP BY ab.address
+                  """
+  )
+  List<AddressTxCountProjection> getTxCountListForAddresses(@Param("addresses") Collection<String> addressList);
+
+  @Query(value = """
+                SELECT COUNT(ab.address) FROM AddressBalance ab
+                  WHERE ab.address = :address GROUP BY ab.address
+                """)
+  Optional<Long> getTxCountForAddress(@Param("address") String address);
 
   @Query(
       value =
