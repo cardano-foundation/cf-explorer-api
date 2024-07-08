@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +36,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountR
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestStakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
@@ -77,7 +77,7 @@ public class StakeKeyServiceTest {
   @Mock private FetchRewardDataService fetchRewardDataService;
   @Mock private TxRepository txRepository;
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
-  @Mock private LatestStakeAddressBalanceRepository latestStakeAddressBalanceRepository;
+  @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
   @Mock private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   @Test
@@ -195,10 +195,8 @@ public class StakeKeyServiceTest {
     when(stakeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(stakeDeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(poolUpdateRepository.findPoolByRewardAccount(any())).thenReturn(List.of("pool"));
-    when(latestStakeAddressBalanceRepository.findByStakeAddress(
-            "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx"))
-        .thenReturn(
-            Optional.of(LatestStakeAddressBalance.builder().quantity(BigInteger.ONE).build()));
+    when(stakeAddressBalanceRepository.findStakeQuantityByAddress("stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx")).thenReturn(Optional.of(BigInteger.ONE));
+
     var response = stakeKeyService.getStakeByAddress(address);
     assertEquals(response.getStatus(), StakeAddressStatus.DEACTIVATED);
     assertEquals(response.getStakeAddress(), stakeKey);

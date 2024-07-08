@@ -232,26 +232,28 @@ public class AddressServiceImpl implements AddressService {
   //  }
   @Override
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
-    List<LatestAddressBalance> latestAddressBalances =
-        latestAddressBalanceRepository.findAllLatestAddressBalance(pageable);
-    Page<LatestAddressBalance> latestAddressBalancePage =
-        new PageImpl<>(latestAddressBalances, pageable, pageable.getPageSize());
-    List<AddressTxCountProjection> addressTxCountProjections = addressTxAmountRepository.getTxCountListForAddresses(latestAddressBalancePage.stream().map(LatestAddressBalance::getAddress).toList());
-    Map<String, Long> addressTxCountMap = addressTxCountProjections
-            .stream().collect(Collectors.toMap(AddressTxCountProjection::getAddress, AddressTxCountProjection::getTxCount));
-    List<AddressFilterResponse> addressFilterResponses =
-        latestAddressBalancePage.stream()
-            .map(
-                latestAddressBalance ->
-                    AddressFilterResponse.builder()
-                        .address(latestAddressBalance.getAddress())
-                        .balance(latestAddressBalance.getQuantity())
-                        .txCount(
-                            addressTxCountMap.getOrDefault(latestAddressBalance.getAddress(), 0L))
-                        .build())
-            .collect(Collectors.toList());
+    // TODO will be removed for release 1.3, need to be fixed in next release
 
-    return new BaseFilterResponse<>(latestAddressBalancePage, addressFilterResponses);
+//    List<LatestAddressBalance> latestAddressBalances =
+//        latestAddressBalanceRepository.findAllLatestAddressBalance(pageable);
+//    Page<LatestAddressBalance> latestAddressBalancePage =
+//        new PageImpl<>(latestAddressBalances, pageable, pageable.getPageSize());
+//    List<AddressTxCountProjection> addressTxCountProjections = addressTxAmountRepository.getTxCountListForAddresses(latestAddressBalancePage.stream().map(LatestAddressBalance::getAddress).toList());
+//    Map<String, Long> addressTxCountMap = addressTxCountProjections
+//            .stream().collect(Collectors.toMap(AddressTxCountProjection::getAddress, AddressTxCountProjection::getTxCount));
+//    List<AddressFilterResponse> addressFilterResponses =
+//        latestAddressBalancePage.stream()
+//            .map(
+//                latestAddressBalance ->
+//                    AddressFilterResponse.builder()
+//                        .address(latestAddressBalance.getAddress())
+//                        .balance(latestAddressBalance.getQuantity())
+//                        .txCount(
+//                            addressTxCountMap.getOrDefault(latestAddressBalance.getAddress(), 0L))
+//                        .build())
+//            .collect(Collectors.toList());
+//    return new BaseFilterResponse<>(latestAddressBalancePage, addressFilterResponses);
+    return new BaseFilterResponse<>();
   }
 
   /**
