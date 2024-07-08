@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,7 +39,6 @@ import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
 import org.cardanofoundation.explorer.api.util.HexUtils;
@@ -56,7 +56,8 @@ class AddressServiceTest {
 
   @Mock LatestAddressBalanceRepository latestAddressBalanceRepository;
 
-  @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
+  @Mock
+  MultiAssetRepository multiAssetRepository;
 
   @Mock AddressTxAmountRepository addressTxAmountRepository;
 
@@ -268,7 +269,7 @@ class AddressServiceTest {
             .displayName(HexUtils.fromHex("token", "fingerprint"))
             .build();
 
-    when(latestTokenBalanceRepository.findTokenAndBalanceByAddressAndNameView(any(), any(), any()))
+    when(multiAssetRepository.findTokenAndBalanceByAddressAndNameView(any(), any(), any()))
         .thenReturn(new PageImpl<>(addressTokenProjections));
     when(tokenMapper.fromAddressTokenProjection(any())).thenReturn(tokenAddressResponse);
 
@@ -287,7 +288,7 @@ class AddressServiceTest {
     AddressTokenProjection projection = Mockito.mock(AddressTokenProjection.class);
     addressTokenProjections.add(projection);
 
-    when(latestTokenBalanceRepository.findTokenAndBalanceByAddress(addr, pageable))
+    when(multiAssetRepository.findTokenAndBalanceByAddress(addr, pageable))
         .thenReturn(new PageImpl<>(addressTokenProjections));
     when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
         .thenReturn(

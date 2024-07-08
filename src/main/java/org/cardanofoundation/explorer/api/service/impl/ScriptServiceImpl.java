@@ -82,7 +82,6 @@ public class ScriptServiceImpl implements ScriptService {
   private final RedeemerRepository redeemerRepository;
   private final TxRepository txRepository;
   private final AddressRepository addressRepository;
-  private final LatestTokenBalanceRepository latestTokenBalanceRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final BlockRepository blockRepository;
   private final VerifiedScriptRepository verifiedScriptRepository;
@@ -373,7 +372,7 @@ public class ScriptServiceImpl implements ScriptService {
                             multiAssetRepository.countAssetHoldersByPolicy(scriptHash))
                         .build());
     List<AddressTokenProjection> multiAssetList =
-        latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable);
+        multiAssetRepository.findAddressAndBalanceByPolicy(scriptHash, pageable);
     Page<AddressTokenProjection> multiAssetPage =
         new PageImpl<>(multiAssetList, pageable, nativeScriptInfo.getNumberOfAssetHolders());
 

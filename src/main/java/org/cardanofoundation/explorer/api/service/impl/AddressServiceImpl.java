@@ -14,10 +14,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +33,6 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenAddressRespo
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
@@ -43,7 +40,6 @@ import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressTxBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -53,8 +49,7 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 public class AddressServiceImpl implements AddressService {
 
   private final AddressRepository addressRepository;
-  private final LatestAddressBalanceRepository latestAddressBalanceRepository;
-  private final LatestTokenBalanceRepository latestTokenBalanceRepository;
+  private final MultiAssetRepository multiAssetRepository;
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
@@ -272,13 +267,13 @@ public class AddressServiceImpl implements AddressService {
 
     if (DataUtil.isNullOrEmpty(displayName)) {
       tokenListResponse =
-          latestTokenBalanceRepository
+              multiAssetRepository
               .findTokenAndBalanceByAddress(address, pageable)
               .map(tokenMapper::fromAddressTokenProjection);
     } else {
       displayName = displayName.trim().toLowerCase();
       tokenListResponse =
-          latestTokenBalanceRepository
+          multiAssetRepository
               .findTokenAndBalanceByAddressAndNameView(address, displayName, pageable)
               .map(tokenMapper::fromAddressTokenProjection);
     }

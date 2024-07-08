@@ -45,7 +45,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepositor
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
@@ -75,7 +74,6 @@ public class TokenServiceImpl implements TokenService {
   private final MultiAssetRepository multiAssetRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final AssetMetadataRepository assetMetadataRepository;
-  private final LatestTokenBalanceRepository latestTokenBalanceRepository;
   private final AddressRepository addressRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressRepository stakeAddressRepository;
@@ -233,28 +231,30 @@ public class TokenServiceImpl implements TokenService {
     return new BaseFilterResponse<>(maTxMints.map(maTxMintMapper::fromMaTxMintToTokenMintTx));
   }
 
+  // TODO function will be removed in this release
   @Override
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
-    MultiAsset multiAsset =
-        multiAssetRepository
-            .findByFingerprint(tokenId)
-            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-
-    long numberOfHolders =
-        tokenInfoRepository
-            .findTokenInfoByMultiAssetId(multiAsset.getId())
-            .map(TokenInfo::getNumberOfHolders)
-            .orElse(0L);
-
-    List<TokenAddressResponse> tokenAddressResponses =
-        latestTokenBalanceRepository.getTopHolderOfToken(multiAsset.getUnit(), pageable).stream()
-            .map(tokenMapper::fromAddressTokenProjection)
-            .collect(Collectors.toList());
-
-    Page<TokenAddressResponse> tokenAddressResponsePage =
-        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolders);
-
-    return new BaseFilterResponse<>(tokenAddressResponsePage);
+//    MultiAsset multiAsset =
+//        multiAssetRepository
+//            .findByFingerprint(tokenId)
+//            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+//
+//    long numberOfHolders =
+//        tokenInfoRepository
+//            .findTokenInfoByMultiAssetId(multiAsset.getId())
+//            .map(TokenInfo::getNumberOfHolders)
+//            .orElse(0L);
+//
+//    List<TokenAddressResponse> tokenAddressResponses =
+//        latestTokenBalanceRepository.getTopHolderOfToken(multiAsset.getUnit(), pageable).stream()
+//            .map(tokenMapper::fromAddressTokenProjection)
+//            .collect(Collectors.toList());
+//
+//    Page<TokenAddressResponse> tokenAddressResponsePage =
+//        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolders);
+//
+//    return new BaseFilterResponse<>(tokenAddressResponsePage);
+    return new BaseFilterResponse<>();
   }
 
   @Override

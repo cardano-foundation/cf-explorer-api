@@ -50,7 +50,6 @@ import org.cardanofoundation.explorer.api.repository.explorer.SmartContractInfoR
 import org.cardanofoundation.explorer.api.repository.explorer.VerifiedScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerRepository;
@@ -82,7 +81,6 @@ class ScriptServiceTest {
   @Mock NativeScriptInfoRepository nativeScriptInfoRepository;
   @Mock BlockRepository blockRepository;
   @Mock SmartContractInfoRepository smartContractInfoRepository;
-  @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
   @Mock VerifiedScriptRepository verifiedScriptRepository;
   @Mock TxService txService;
   @Mock MaTxMintRepository maTxMintRepository;
@@ -497,9 +495,9 @@ class ScriptServiceTest {
     when(projection.getPolicy()).thenReturn(scriptHash);
     when(projection.getAddressId()).thenReturn(addressId);
     when(projection.getAddress()).thenReturn("address");
-    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
+    when(multiAssetRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
         .thenReturn(List.of(projection));
-    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
+    when(multiAssetRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
         .thenReturn(List.of(projection));
 
     var actual = scriptService.getNativeScriptHolders(scriptHash, pageable);
