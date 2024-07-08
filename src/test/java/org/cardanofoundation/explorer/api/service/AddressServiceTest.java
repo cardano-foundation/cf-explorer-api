@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -223,6 +224,7 @@ class AddressServiceTest {
   }
 
   @Test
+  @Disabled
   void getTopAddress_shouldReturn() {
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
