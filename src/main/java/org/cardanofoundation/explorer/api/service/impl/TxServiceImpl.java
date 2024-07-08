@@ -91,7 +91,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepositor
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TokenTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
@@ -164,7 +163,6 @@ public class TxServiceImpl implements TxService {
 
   private static final String UNIT_LOVELACE = "lovelace";
   private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
-  private final TokenTxCountRepository tokenTxCountRepository;
 
   @Value("${application.network}")
   private String network;
@@ -395,17 +393,14 @@ public class TxServiceImpl implements TxService {
             .findByFingerprint(tokenId)
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
-    TokenTxCount tokenTxCount =
-        tokenTxCountRepository
-            .findById(multiAsset.getId())
-            .orElse(new TokenTxCount(multiAsset.getId(), 0L));
+    Long tokenTxCount = addressTxAmountRepository.getTxCountForTokenByMultiAssetId(multiAsset.getId()).orElse(0L);
 
     List<TxProjection> txsProjection =
         addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
     List<Tx> txs =
         txRepository.findAllByHashIn(
             txsProjection.stream().map(TxProjection::getTxHash).collect(Collectors.toList()));
-    Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount.getTxCount());
+    Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount);
 
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }

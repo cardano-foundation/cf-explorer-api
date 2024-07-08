@@ -38,7 +38,7 @@ import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
+//import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
 import org.cardanofoundation.explorer.api.util.HexUtils;
@@ -54,7 +54,7 @@ class AddressServiceTest {
   @Mock AddressRepository addressRepository;
   @Mock ScriptRepository scriptRepository;
 
-  @Mock LatestAddressBalanceRepository latestAddressBalanceRepository;
+//  @Mock LatestAddressBalanceRepository latestAddressBalanceRepository;
 
   @Mock
   MultiAssetRepository multiAssetRepository;
@@ -233,8 +233,8 @@ class AddressServiceTest {
     LatestAddressBalance latestAddressBalance =
         LatestAddressBalance.builder().address(addr).quantity(BigInteger.TEN).build();
 
-    when(latestAddressBalanceRepository.findAllLatestAddressBalance(pageable))
-        .thenReturn(List.of(latestAddressBalance));
+//    when(latestAddressBalanceRepository.findAllLatestAddressBalance(pageable))
+//        .thenReturn(List.of(latestAddressBalance));
     ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
     AddressTxCountProjection projection = factory.createProjection(AddressTxCountProjection.class);
     projection.setTxCount(1L);

@@ -41,6 +41,12 @@ public interface AddressTxAmountRepository
                 """)
   Optional<Long> getTxCountForStakeAddress(@Param("stakeAddress") String stakeAddress);
 
+  @Query(value = """
+                SELECT COUNT(DISTINCT(ab.txHash)) FROM AddressTxAmount ab
+                  INNER JOIN MultiAsset ma ON ab.unit = ma.unit WHERE ma.id = :multiAssetId
+                """)
+  Optional<Long> getTxCountForTokenByMultiAssetId(@Param("multiAssetId") Long multiAssetId);
+
   @Query(
       value =
           """
