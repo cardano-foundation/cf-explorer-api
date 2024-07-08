@@ -30,10 +30,16 @@ public interface AddressTxAmountRepository
   List<AddressTxCountProjection> getTxCountListForAddresses(@Param("addresses") Collection<String> addressList);
 
   @Query(value = """
-                SELECT COUNT(ab.address) FROM AddressBalance ab
+                SELECT COUNT(ab.address) FROM AddressTxAmount ab
                   WHERE ab.address = :address GROUP BY ab.address
                 """)
   Optional<Long> getTxCountForAddress(@Param("address") String address);
+
+  @Query(value = """
+                SELECT COUNT(ab.stakeAddress) FROM AddressTxAmount ab
+                  WHERE ab.stakeAddress = :stakeAddress GROUP BY ab.address
+                """)
+  Optional<Long> getTxCountForStakeAddress(@Param("stakeAddress") String stakeAddress);
 
   @Query(
       value =

@@ -89,7 +89,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TokenTxCountRepository;
@@ -133,7 +132,6 @@ public class TxServiceImpl implements TxService {
   private final MaTxMintMapper maTxMintMapper;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final MultiAssetRepository multiAssetRepository;
-  private final StakeAddressTxCountRepository stakeAddressTxCountRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final StakeRegistrationRepository stakeRegistrationRepository;
@@ -419,11 +417,7 @@ public class TxServiceImpl implements TxService {
     stakeAddressRepository
         .findByView(stakeKey)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-
-    StakeAddressTxCount addressTxCount =
-        stakeAddressTxCountRepository
-            .findById(stakeKey)
-            .orElse(new StakeAddressTxCount(stakeKey, 0L));
+    Long stakeTxCount = addressTxAmountRepository.getTxCountForStakeAddress(stakeKey).orElse(0L);
 
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
@@ -435,7 +429,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-            addressTxCount.getTxCount());
+                stakeTxCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
