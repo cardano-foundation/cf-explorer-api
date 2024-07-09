@@ -48,7 +48,6 @@ import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjec
 import org.cardanofoundation.explorer.api.projection.PoolOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -91,7 +90,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final CommitteeRegistrationRepository committeeRegistrationRepository;
   private final DelegationRepository delegationRepository;
   private final ProtocolParamService protocolParamService;
-  private final CommitteInfoRepository committeInfoRepository;
 
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
@@ -538,7 +536,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       votingChartResponse.setThreshold(Objects.isNull(threshold) ? null : threshold);
     }
     Long count =
-        committeInfoRepository.countByCreatedAtLessThan(govActionDetailsProjection.getBlockTime());
+        committeeRegistrationRepository.CountByCreatedAtLessThanAndStillActive(govActionDetailsProjection.getBlockTime());
     List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
         latestVotingProcedureRepository.getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
             govActionDetailsProjection.getTxHash(),

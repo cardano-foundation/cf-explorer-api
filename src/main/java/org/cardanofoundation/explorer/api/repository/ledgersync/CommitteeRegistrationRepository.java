@@ -15,4 +15,11 @@ public interface CommitteeRegistrationRepository
               + "JOIN EpochParam ep ON cr.epoch = ep.epochNo "
               + "WHERE (ep.epochNo + ep.committeeMaxTermLength) >= :expiredEpoch")
   Integer countByExpiredEpochNo(@Param("expiredEpoch") Integer expiredEpoch);
+
+  @Query(value =  """
+          SELECT COUNT(1) FROM CommitteeRegistration cr 
+          WHERE not exists (SELECT 1 FROM CommitteeDeRegistration cd WHERE cd.coldKey = cr.coldKey and cd.blockTime> (
+          SELECT MAX(cr2.blockTime) FROM CommitteeRegistration cr2 WHERE cr2.hotKey = cr.hotKey))
+          """)
+  Long CountByCreatedAtLessThanAndStillActive(@Param("createdAt") Long createdAt);
 }
