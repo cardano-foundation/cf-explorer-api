@@ -251,4 +251,18 @@ public interface AddressTxAmountRepository
                       GROUP BY atm.address, day 
                   """)
   List<AddressQuantityDayProjection> findAllByStakeAddressAndDayBetween(@Param("stakeAddress") String stakeAddress, @Param("from") LocalDate from, @Param("to") LocalDate to);
+
+  @Query(
+          value =
+                  """
+                      SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.blockTime)) as day 
+                      FROM AddressTxAmount atm
+                      INNER JOIN MultiAsset ma ON atm.unit = ma.unit
+                      WHERE ma.id = :multiAssetId
+                      AND atm.blockTime >= :from
+                      AND atm.blockTime <= :to
+                      GROUP BY atm.address, day
+                  """
+  )
+  List<AddressQuantityDayProjection> findAllByTokenIdAndDayBetween(@Param("tokenId") Long tokenId, @Param("from") LocalDate from, @Param("to") LocalDate to);
 }

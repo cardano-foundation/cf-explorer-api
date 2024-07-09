@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -43,7 +44,6 @@ import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
@@ -63,7 +63,6 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset_;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.entity.ledgersync.TokenTxCount_;
-import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressToken;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -82,7 +81,6 @@ public class TokenServiceImpl implements TokenService {
   private final TokenMapper tokenMapper;
   private final MaTxMintMapper maTxMintMapper;
   private final AssetMetadataMapper assetMetadataMapper;
-  private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
   private final AggregatedDataCacheService aggregatedDataCacheService;
   private final TokenInfoRepository tokenInfoRepository;
   private static final int MAX_TOTAL_ELEMENTS = 1000;
@@ -282,16 +280,15 @@ public class TokenServiceImpl implements TokenService {
       }
     } else {
       dates.remove(dates.size() - 1);
-      List<AggregateAddressToken> aggregateAddressTokens =
-          aggregateAddressTokenRepository.findAllByIdentAndDayBetween(
-              multiAsset.getId(),
+      List<AddressQuantityDayProjection> allByTokenIdAndDayBetween = addressTxAmountRepository.findAllByTokenIdAndDayBetween(multiAsset.getId(),
               dates.get(0).toLocalDate(),
               dates.get(dates.size() - 1).toLocalDate());
+
       Map<LocalDate, BigInteger> aggregateAddressTokenMap =
           StreamUtil.toMap(
-              aggregateAddressTokens,
-              AggregateAddressToken::getDay,
-              AggregateAddressToken::getBalance);
+                  allByTokenIdAndDayBetween,
+              AddressQuantityDayProjection::getDay,
+              AddressQuantityDayProjection::getQuantity);
       for (LocalDateTime date : dates) {
         TokenVolumeAnalyticsResponse tokenVolume =
             new TokenVolumeAnalyticsResponse(
