@@ -265,4 +265,12 @@ public interface AddressTxAmountRepository
                   """
   )
   List<AddressQuantityDayProjection> findAllByTokenIdAndDayBetween(@Param("tokenId") Long tokenId, @Param("from") LocalDate from, @Param("to") LocalDate to);
+
+  @Query(
+          value = """
+                  SELECT MAX(tx.id) FROM AddressTxAmount atm INNER JOIN Tx tx ON atm.txHash = tx.hash
+                  WHERE atm.stakeAddress = :stakeAddress
+                  """
+  )
+  Optional<Long> findMaxTxIdByStakeAddress(@Param("stakeAddress") String stakeAddress);
 }

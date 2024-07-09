@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +43,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
@@ -74,7 +74,7 @@ public class StakeKeyServiceTest {
   @Mock private PoolInfoRepository poolInfoRepository;
   @Mock private FetchRewardDataService fetchRewardDataService;
   @Mock private TxRepository txRepository;
-  @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
+  @Mock private AddressBalanceRepository addressBalanceRepository;
   @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
   @Test
@@ -437,7 +437,7 @@ public class StakeKeyServiceTest {
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
         .thenReturn(Optional.of(BigInteger.ONE));
-    when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
+    when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any()))
         .thenReturn(min);
 
     var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
@@ -457,7 +457,7 @@ public class StakeKeyServiceTest {
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
         .thenReturn(Optional.of(BigInteger.ONE));
-    when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
+    when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any()))
         .thenReturn(minMaxProjection);
 
     var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
@@ -476,7 +476,7 @@ public class StakeKeyServiceTest {
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     //    when(addressTxBalanceRepository.getBalanceByStakeAddressAndTime(any(), any(), any()))
     //        .thenReturn(Optional.of(BigInteger.ZERO));
-    when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
+    when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any()))
         .thenReturn(minMaxProjection);
 
     var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
@@ -504,7 +504,7 @@ public class StakeKeyServiceTest {
     when(addressTxAmountRepository.findAllByStakeAddressAndDayBetween(
             any(), any(), any()))
         .thenReturn(List.of(projection));
-    when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
+    when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any()))
         .thenReturn(minMaxProjection);
 
     var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
@@ -527,7 +527,7 @@ public class StakeKeyServiceTest {
         .thenReturn(Optional.of(BigInteger.ZERO));
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-    when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
+    when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any()))
         .thenReturn(minMaxProjection);
 
     var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
@@ -549,7 +549,7 @@ public class StakeKeyServiceTest {
         .thenReturn(Optional.of(BigInteger.ZERO));
     when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any(), any()))
         .thenReturn(Optional.of(BigInteger.ZERO));
-    when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
+    when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any()))
         .thenReturn(minMaxProjection);
 
     var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -41,7 +42,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
@@ -51,7 +51,6 @@ import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
-import org.cardanofoundation.explorer.common.entity.ledgersync.LatestStakeAddressBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
@@ -78,7 +77,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final StakeAddressMapper stakeAddressMapper;
   private final EpochRepository epochRepository;
   private final TxRepository txRepository;
-  private final StakeTxBalanceRepository stakeTxBalanceRepository;
+  private final AddressBalanceRepository addressBalanceRepository;
 
   private final PoolInfoRepository poolInfoRepository;
 
@@ -446,12 +445,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       BigInteger fromBalance,
       List<LocalDateTime> dates,
       AddressChartBalanceResponse response) {
-    var minMaxBalance =
-        stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(
-            addr.getId(),
-            fromBalance,
+    MinMaxProjection minMaxBalance = addressBalanceRepository.findMinMaxBalanceByAddress(addr.getView(),
             dates.get(0).toEpochSecond(ZoneOffset.UTC),
             dates.get(dates.size() - 1).toEpochSecond(ZoneOffset.UTC));
+
     if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
       response.setHighestBalance(minMaxBalance.getMaxVal());
     } else {
@@ -463,7 +460,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       response.setLowestBalance(fromBalance);
     }
     Long maxTxId =
-        stakeTxBalanceRepository.findMaxTxIdByStakeAddressId(addr.getId()).orElse(Long.MAX_VALUE);
+        addressTxAmountRepository.findMaxTxIdByStakeAddress(addr.getView()).orElse(Long.MAX_VALUE);
     if (!maxTxId.equals(Long.MAX_VALUE)) {
       List<StakeTxProjection> stakeTxList =
           addressTxAmountRepository.findTxAndAmountByStake(addr.getView(), maxTxId);
