@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.data.domain.PageImpl;
@@ -54,15 +53,12 @@ class AddressServiceTest {
   @Mock AddressRepository addressRepository;
   @Mock ScriptRepository scriptRepository;
 
-//  @Mock LatestAddressBalanceRepository latestAddressBalanceRepository;
-
   @Mock
   MultiAssetRepository multiAssetRepository;
 
   @Mock AddressTxAmountRepository addressTxAmountRepository;
 
   @Mock TokenMapper tokenMapper;
-  @Mock AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
 
   @InjectMocks AddressServiceImpl addressService;
 
@@ -162,7 +158,7 @@ class AddressServiceTest {
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(aggregateAddressTxBalanceRepository.findAllByAddressIdAndDayBetween(any(), any(), any()))
+    when(addressTxAmountRepository.findAllByAddressAndDayBetween(any(), any(), any()))
         .thenReturn(List.of());
     when(addressTxAmountRepository.getTxCountForAddress(addr)).thenReturn(Optional.of(1L));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))

@@ -1,10 +1,12 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
 import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -225,4 +227,28 @@ public interface AddressTxAmountRepository
               WHERE atm.unit = :unit
           """)
   Long getLastActivityTimeOfToken(@Param("unit") String unit);
+
+  @Query(
+      value =
+          """
+              SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.blockTime)) as day 
+              FROM AddressTxAmount atm
+              WHERE atm.address = :address
+              AND atm.blockTime >= :from
+              AND atm.blockTime <= :to
+              GROUP BY atm.address, day 
+          """)
+  List<AddressQuantityDayProjection> findAllByAddressAndDayBetween(@Param("address") String address, @Param("from") LocalDate from, @Param("to") LocalDate to);
+
+  @Query(
+          value =
+                  """
+                      SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.blockTime)) as day 
+                      FROM AddressTxAmount atm
+                      WHERE atm.stakeAddress = :stakeAddress
+                      AND atm.blockTime >= :from
+                      AND atm.blockTime <= :to
+                      GROUP BY atm.address, day 
+                  """)
+  List<AddressQuantityDayProjection> findAllByStakeAddressAndDayBetween(@Param("stakeAddress") String stakeAddress, @Param("from") LocalDate from, @Param("to") LocalDate to);
 }

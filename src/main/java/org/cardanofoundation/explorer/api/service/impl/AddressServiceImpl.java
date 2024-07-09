@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,6 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressResponse
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
@@ -40,7 +40,6 @@ import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersync.aggregation.AggregateAddressTxBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -52,7 +51,6 @@ public class AddressServiceImpl implements AddressService {
   private final MultiAssetRepository multiAssetRepository;
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
-  private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
 
   @Value("${application.network}")
@@ -164,19 +162,17 @@ public class AddressServiceImpl implements AddressService {
               .sumBalanceByAddress(addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
-
-      List<AggregateAddressTxBalance> aggregateAddressTxBalances =
-          aggregateAddressTxBalanceRepository.findAllByAddressIdAndDayBetween(
-              addr.getId(), dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
+      List<AddressQuantityDayProjection> allByAddressAndDayBetween = addressTxAmountRepository.findAllByAddressAndDayBetween(addr.getAddress(),
+              dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
 
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance =
-          aggregateAddressTxBalances.stream()
-              .collect(
-                  Collectors.toMap(
-                      balance -> balance.getDay().plusDays(1),
-                      AggregateAddressTxBalance::getBalance));
+              allByAddressAndDayBetween.stream()
+                      .collect(
+                              Collectors.toMap(
+                                      aggBalance -> aggBalance.getDay().plusDays(1),
+                                      AddressQuantityDayProjection::getQuantity));
       for (LocalDateTime date : dates) {
         if (mapBalance.containsKey(date.toLocalDate())) {
           fromBalance = fromBalance.add(mapBalance.get(date.toLocalDate()));

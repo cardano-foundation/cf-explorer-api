@@ -32,7 +32,6 @@ import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
@@ -84,7 +83,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final PoolInfoRepository poolInfoRepository;
 
   private final FetchRewardDataService fetchRewardDataService;
-  private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
@@ -414,17 +412,16 @@ public class StakeKeyServiceImpl implements StakeKeyService {
               .sumBalanceByStakeAddress(addr.getView(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
-      List<AggregateAddressBalanceProjection> aggregateAddressTxBalances =
-          aggregateAddressTxBalanceRepository.findAllByStakeAddressIdAndDayBetween(
-              addr.getId(), dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
+      List<AddressQuantityDayProjection> allByStakeAddressAndDayBetween = addressTxAmountRepository.findAllByStakeAddressAndDayBetween(addr.getView(),
+              dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance =
-          aggregateAddressTxBalances.stream()
+              allByStakeAddressAndDayBetween.stream()
               .collect(
                   Collectors.toMap(
-                      balance -> balance.getDay().plusDays(1),
-                      AggregateAddressBalanceProjection::getBalance));
+                      aggBalance -> aggBalance.getDay().plusDays(1),
+                      AddressQuantityDayProjection::getQuantity));
       for (LocalDateTime date : dates) {
         if (mapBalance.containsKey(date.toLocalDate())) {
           fromBalance = fromBalance.add(mapBalance.get(date.toLocalDate()));
