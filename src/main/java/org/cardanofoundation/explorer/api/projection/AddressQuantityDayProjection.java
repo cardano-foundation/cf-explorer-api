@@ -1,13 +1,13 @@
 package org.cardanofoundation.explorer.api.projection;
 
 import java.math.BigInteger;
-import java.time.LocalDate;
+import java.time.Instant;
 
 public interface AddressQuantityDayProjection {
 
     BigInteger getQuantity();
-    LocalDate getDay();
+    Instant getDay();
 
     void setQuantity(BigInteger quantity);
-    void setDay(LocalDate day);
+    void setDay(Instant day);
 }

@@ -412,14 +412,14 @@ public class StakeKeyServiceImpl implements StakeKeyService {
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
       List<AddressQuantityDayProjection> allByStakeAddressAndDayBetween = addressTxAmountRepository.findAllByStakeAddressAndDayBetween(addr.getView(),
-              dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
+              dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(), dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance =
               allByStakeAddressAndDayBetween.stream()
               .collect(
                   Collectors.toMap(
-                      aggBalance -> aggBalance.getDay().plusDays(1),
+                      aggBalance -> aggBalance.getDay().atZone(ZoneOffset.UTC).toLocalDate().plusDays(1),
                       AddressQuantityDayProjection::getQuantity));
       for (LocalDateTime date : dates) {
         if (mapBalance.containsKey(date.toLocalDate())) {

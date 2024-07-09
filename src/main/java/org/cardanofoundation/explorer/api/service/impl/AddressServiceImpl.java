@@ -162,8 +162,10 @@ public class AddressServiceImpl implements AddressService {
               .sumBalanceByAddress(addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
+      long from = dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond();
+      long to = dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond();
       List<AddressQuantityDayProjection> allByAddressAndDayBetween = addressTxAmountRepository.findAllByAddressAndDayBetween(addr.getAddress(),
-              dates.get(0).toLocalDate(), dates.get(dates.size() - 1).toLocalDate());
+              from , to);
 
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
@@ -171,7 +173,7 @@ public class AddressServiceImpl implements AddressService {
               allByAddressAndDayBetween.stream()
                       .collect(
                               Collectors.toMap(
-                                      aggBalance -> aggBalance.getDay().plusDays(1),
+                                      aggBalance -> aggBalance.getDay().atZone(ZoneOffset.UTC).toLocalDate().plusDays(1),
                                       AddressQuantityDayProjection::getQuantity));
       for (LocalDateTime date : dates) {
         if (mapBalance.containsKey(date.toLocalDate())) {

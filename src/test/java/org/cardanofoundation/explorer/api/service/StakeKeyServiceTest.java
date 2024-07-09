@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressBalanceRepository;
@@ -496,7 +497,7 @@ public class StakeKeyServiceTest {
         Mockito.mock(AddressQuantityDayProjection.class);
 
     when(projection.getQuantity()).thenReturn(BigInteger.TEN);
-    when(projection.getDay()).thenReturn(LocalDateTime.now().minusDays(1).toLocalDate());
+    when(projection.getDay()).thenReturn(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC));
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))

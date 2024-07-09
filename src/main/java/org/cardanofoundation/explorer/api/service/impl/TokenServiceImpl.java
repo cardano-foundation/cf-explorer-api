@@ -281,13 +281,13 @@ public class TokenServiceImpl implements TokenService {
     } else {
       dates.remove(dates.size() - 1);
       List<AddressQuantityDayProjection> allByTokenIdAndDayBetween = addressTxAmountRepository.findAllByTokenIdAndDayBetween(multiAsset.getId(),
-              dates.get(0).toLocalDate(),
-              dates.get(dates.size() - 1).toLocalDate());
+              dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(),
+              dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
 
       Map<LocalDate, BigInteger> aggregateAddressTokenMap =
           StreamUtil.toMap(
                   allByTokenIdAndDayBetween,
-              AddressQuantityDayProjection::getDay,
+              addressQuantityDayProjection -> addressQuantityDayProjection.getDay().atZone(ZoneOffset.UTC).toLocalDate(),
               AddressQuantityDayProjection::getQuantity);
       for (LocalDateTime date : dates) {
         TokenVolumeAnalyticsResponse tokenVolume =

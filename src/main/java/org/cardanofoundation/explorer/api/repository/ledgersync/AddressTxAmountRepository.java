@@ -227,44 +227,46 @@ public interface AddressTxAmountRepository
               WHERE atm.unit = :unit
           """)
   Long getLastActivityTimeOfToken(@Param("unit") String unit);
-
   @Query(
       value =
           """
-              SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.blockTime)) as day 
-              FROM AddressTxAmount atm
+              SELECT atm.address, SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time) ) as day
+              FROM address_tx_amount atm
               WHERE atm.address = :address
-              AND atm.blockTime >= :from
-              AND atm.blockTime <= :to
+              AND atm.block_time >= :from
+              AND atm.block_time <= :to
               GROUP BY atm.address, day 
-          """)
-  List<AddressQuantityDayProjection> findAllByAddressAndDayBetween(@Param("address") String address, @Param("from") LocalDate from, @Param("to") LocalDate to);
+          """,
+      nativeQuery = true)
+  List<AddressQuantityDayProjection> findAllByAddressAndDayBetween(@Param("address") String address, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
           value =
                   """
-                      SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.blockTime)) as day 
-                      FROM AddressTxAmount atm
+                      SELECT atm.address, SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time))as day
+                      FROM address_tx_amount atm
                       WHERE atm.stakeAddress = :stakeAddress
-                      AND atm.blockTime >= :from
-                      AND atm.blockTime <= :to
+                      AND atm.block_time >= :from
+                      AND atm.block_time <= :to
                       GROUP BY atm.address, day 
-                  """)
-  List<AddressQuantityDayProjection> findAllByStakeAddressAndDayBetween(@Param("stakeAddress") String stakeAddress, @Param("from") LocalDate from, @Param("to") LocalDate to);
+                  """,
+          nativeQuery = true)
+  List<AddressQuantityDayProjection> findAllByStakeAddressAndDayBetween(@Param("stakeAddress") String stakeAddress, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
           value =
                   """
-                      SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.blockTime)) as day 
-                      FROM AddressTxAmount atm
-                      INNER JOIN MultiAsset ma ON atm.unit = ma.unit
-                      WHERE ma.id = :multiAssetId
-                      AND atm.blockTime >= :from
-                      AND atm.blockTime <= :to
+                      SELECT atm.address, SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time )) as day
+                      FROM address_tx_amount atm
+                      INNER JOIN multi_asset ma ON atm.unit = ma.unit
+                      WHERE ma.id = :tokenId
+                      AND atm.block_time >= :from
+                      AND atm.block_time <= :to
                       GROUP BY atm.address, day
-                  """
+                  """,
+          nativeQuery = true
   )
-  List<AddressQuantityDayProjection> findAllByTokenIdAndDayBetween(@Param("tokenId") Long tokenId, @Param("from") LocalDate from, @Param("to") LocalDate to);
+  List<AddressQuantityDayProjection> findAllByTokenIdAndDayBetween(@Param("tokenId") Long tokenId, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
           value = """
