@@ -1,9 +1,11 @@
 package org.cardanofoundation.explorer.api.projection;
 
 public interface AddressTxCountProjection {
-    String getAddress();
-    Long getTxCount();
+  String getAddress();
 
-    void setAddress(String address);
-    void setTxCount(Long txCount);
+  Long getTxCount();
+
+  void setAddress(String address);
+
+  void setTxCount(Long txCount);
 }

@@ -20,18 +20,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
-import org.junit.jupiter.api.Disabled;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.projection.ProjectionFactory;
+import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -47,6 +48,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResp
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
+import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
@@ -56,7 +58,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
@@ -66,8 +67,6 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
-import org.springframework.data.projection.ProjectionFactory;
-import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {
@@ -462,13 +461,13 @@ class TokenServiceTest {
     when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
         .thenReturn(tokenAddressResponse);
 
-//    when(latestTokenBalanceRepository.getTopHolderOfToken(anyString(), any(Pageable.class)))
-//        .thenReturn(
-//            List.of(
-//                AddressTokenProjectionImpl.builder()
-//                    .address("address")
-//                    .quantity(BigInteger.TEN)
-//                    .build()));
+    //    when(latestTokenBalanceRepository.getTopHolderOfToken(anyString(), any(Pageable.class)))
+    //        .thenReturn(
+    //            List.of(
+    //                AddressTokenProjectionImpl.builder()
+    //                    .address("address")
+    //                    .quantity(BigInteger.TEN)
+    //                    .build()));
 
     var response = tokenService.getTopHolders("tokenId", PageRequest.of(0, 1));
 
@@ -566,7 +565,8 @@ class TokenServiceTest {
     List<AddressQuantityDayProjection> addressQuantityDayProjections = new ArrayList<>();
     ProjectionFactory factor = new SpelAwareProxyProjectionFactory();
     for (int i = 0; i < 10; i++) {
-      AddressQuantityDayProjection projection = factor.createProjection(AddressQuantityDayProjection.class);
+      AddressQuantityDayProjection projection =
+          factor.createProjection(AddressQuantityDayProjection.class);
       projection.setQuantity(new BigInteger("100"));
       projection.setDay(LocalDate.now().minusDays(i).atStartOfDay().toInstant(ZoneOffset.UTC));
       addressQuantityDayProjections.add(projection);

@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +39,7 @@ import org.cardanofoundation.explorer.api.model.response.token.TokenFilterRespon
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
+import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
@@ -232,26 +232,27 @@ public class TokenServiceImpl implements TokenService {
   // TODO function will be removed in this release
   @Override
   public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
-//    MultiAsset multiAsset =
-//        multiAssetRepository
-//            .findByFingerprint(tokenId)
-//            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-//
-//    long numberOfHolders =
-//        tokenInfoRepository
-//            .findTokenInfoByMultiAssetId(multiAsset.getId())
-//            .map(TokenInfo::getNumberOfHolders)
-//            .orElse(0L);
-//
-//    List<TokenAddressResponse> tokenAddressResponses =
-//        latestTokenBalanceRepository.getTopHolderOfToken(multiAsset.getUnit(), pageable).stream()
-//            .map(tokenMapper::fromAddressTokenProjection)
-//            .collect(Collectors.toList());
-//
-//    Page<TokenAddressResponse> tokenAddressResponsePage =
-//        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolders);
-//
-//    return new BaseFilterResponse<>(tokenAddressResponsePage);
+    //    MultiAsset multiAsset =
+    //        multiAssetRepository
+    //            .findByFingerprint(tokenId)
+    //            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
+    //
+    //    long numberOfHolders =
+    //        tokenInfoRepository
+    //            .findTokenInfoByMultiAssetId(multiAsset.getId())
+    //            .map(TokenInfo::getNumberOfHolders)
+    //            .orElse(0L);
+    //
+    //    List<TokenAddressResponse> tokenAddressResponses =
+    //        latestTokenBalanceRepository.getTopHolderOfToken(multiAsset.getUnit(),
+    // pageable).stream()
+    //            .map(tokenMapper::fromAddressTokenProjection)
+    //            .collect(Collectors.toList());
+    //
+    //    Page<TokenAddressResponse> tokenAddressResponsePage =
+    //        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolders);
+    //
+    //    return new BaseFilterResponse<>(tokenAddressResponsePage);
     return new BaseFilterResponse<>();
   }
 
@@ -280,14 +281,17 @@ public class TokenServiceImpl implements TokenService {
       }
     } else {
       dates.remove(dates.size() - 1);
-      List<AddressQuantityDayProjection> allByTokenIdAndDayBetween = addressTxAmountRepository.findAllByTokenIdAndDayBetween(multiAsset.getId(),
+      List<AddressQuantityDayProjection> allByTokenIdAndDayBetween =
+          addressTxAmountRepository.findAllByTokenIdAndDayBetween(
+              multiAsset.getId(),
               dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(),
               dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
 
       Map<LocalDate, BigInteger> aggregateAddressTokenMap =
           StreamUtil.toMap(
-                  allByTokenIdAndDayBetween,
-              addressQuantityDayProjection -> addressQuantityDayProjection.getDay().atZone(ZoneOffset.UTC).toLocalDate(),
+              allByTokenIdAndDayBetween,
+              addressQuantityDayProjection ->
+                  addressQuantityDayProjection.getDay().atZone(ZoneOffset.UTC).toLocalDate(),
               AddressQuantityDayProjection::getQuantity);
       for (LocalDateTime date : dates) {
         TokenVolumeAnalyticsResponse tokenVolume =

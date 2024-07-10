@@ -282,7 +282,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-                addressTxCount);
+            addressTxCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -393,7 +393,8 @@ public class TxServiceImpl implements TxService {
             .findByFingerprint(tokenId)
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
-    Long tokenTxCount = addressTxAmountRepository.getTxCountForTokenByMultiAssetId(multiAsset.getId()).orElse(0L);
+    Long tokenTxCount =
+        addressTxAmountRepository.getTxCountForTokenByMultiAssetId(multiAsset.getId()).orElse(0L);
 
     List<TxProjection> txsProjection =
         addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
@@ -422,9 +423,7 @@ public class TxServiceImpl implements TxService {
 
     Page<TxFilterResponse> txFilterResponsePage =
         new PageImpl<>(
-            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
-            pageable,
-                stakeTxCount);
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts), pageable, stakeTxCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }

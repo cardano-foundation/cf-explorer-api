@@ -1,19 +1,18 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
-import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
+import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.projection.StakeTxProjection;
 import org.cardanofoundation.explorer.api.projection.TxProjection;
@@ -24,26 +23,33 @@ public interface AddressTxAmountRepository
     extends JpaRepository<AddressTxAmount, AddressTxAmountId> {
 
   @Query(
-          value = """
+      value =
+          """
                   SELECT ab.address as address, COUNT(ab.address) as txCount FROM AddressBalance ab
                   WHERE ab.address IN :addresses GROUP BY ab.address
-                  """
-  )
-  List<AddressTxCountProjection> getTxCountListForAddresses(@Param("addresses") Collection<String> addressList);
+                  """)
+  List<AddressTxCountProjection> getTxCountListForAddresses(
+      @Param("addresses") Collection<String> addressList);
 
-  @Query(value = """
+  @Query(
+      value =
+          """
                 SELECT COUNT(ab.address) FROM AddressTxAmount ab
                   WHERE ab.address = :address GROUP BY ab.address
                 """)
   Optional<Long> getTxCountForAddress(@Param("address") String address);
 
-  @Query(value = """
+  @Query(
+      value =
+          """
                 SELECT COUNT(ab.stakeAddress) FROM AddressTxAmount ab
                   WHERE ab.stakeAddress = :stakeAddress GROUP BY ab.address
                 """)
   Optional<Long> getTxCountForStakeAddress(@Param("stakeAddress") String stakeAddress);
 
-  @Query(value = """
+  @Query(
+      value =
+          """
                 SELECT COUNT(DISTINCT(ab.txHash)) FROM AddressTxAmount ab
                   INNER JOIN MultiAsset ma ON ab.unit = ma.unit WHERE ma.id = :multiAssetId
                 """)
@@ -227,6 +233,7 @@ public interface AddressTxAmountRepository
               WHERE atm.unit = :unit
           """)
   Long getLastActivityTimeOfToken(@Param("unit") String unit);
+
   @Query(
       value =
           """
@@ -235,27 +242,29 @@ public interface AddressTxAmountRepository
               WHERE atm.address = :address
               AND atm.block_time >= :from
               AND atm.block_time <= :to
-              GROUP BY atm.address, day 
+              GROUP BY atm.address, day
           """,
       nativeQuery = true)
-  List<AddressQuantityDayProjection> findAllByAddressAndDayBetween(@Param("address") String address, @Param("from") Long from, @Param("to") Long to);
+  List<AddressQuantityDayProjection> findAllByAddressAndDayBetween(
+      @Param("address") String address, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
-          value =
-                  """
+      value =
+          """
                       SELECT atm.address, SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time))as day
                       FROM address_tx_amount atm
                       WHERE atm.stakeAddress = :stakeAddress
                       AND atm.block_time >= :from
                       AND atm.block_time <= :to
-                      GROUP BY atm.address, day 
+                      GROUP BY atm.address, day
                   """,
-          nativeQuery = true)
-  List<AddressQuantityDayProjection> findAllByStakeAddressAndDayBetween(@Param("stakeAddress") String stakeAddress, @Param("from") Long from, @Param("to") Long to);
+      nativeQuery = true)
+  List<AddressQuantityDayProjection> findAllByStakeAddressAndDayBetween(
+      @Param("stakeAddress") String stakeAddress, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
-          value =
-                  """
+      value =
+          """
                       SELECT atm.address, SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time )) as day
                       FROM address_tx_amount atm
                       INNER JOIN multi_asset ma ON atm.unit = ma.unit
@@ -264,15 +273,15 @@ public interface AddressTxAmountRepository
                       AND atm.block_time <= :to
                       GROUP BY atm.address, day
                   """,
-          nativeQuery = true
-  )
-  List<AddressQuantityDayProjection> findAllByTokenIdAndDayBetween(@Param("tokenId") Long tokenId, @Param("from") Long from, @Param("to") Long to);
+      nativeQuery = true)
+  List<AddressQuantityDayProjection> findAllByTokenIdAndDayBetween(
+      @Param("tokenId") Long tokenId, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
-          value = """
+      value =
+          """
                   SELECT MAX(tx.id) FROM AddressTxAmount atm INNER JOIN Tx tx ON atm.txHash = tx.hash
                   WHERE atm.stakeAddress = :stakeAddress
-                  """
-  )
+                  """)
   Optional<Long> findMaxTxIdByStakeAddress(@Param("stakeAddress") String stakeAddress);
 }

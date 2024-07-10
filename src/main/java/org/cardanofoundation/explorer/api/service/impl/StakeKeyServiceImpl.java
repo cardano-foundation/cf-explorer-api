@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +29,7 @@ import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.*;
 import org.cardanofoundation.explorer.api.model.response.stake.*;
 import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -39,6 +38,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
@@ -152,8 +152,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
             .findByView(stake)
             .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
-    BigInteger stakeQuantity = stakeAddressBalanceRepository.findStakeQuantityByAddress(stake).orElse(BigInteger.ZERO);
-
+    BigInteger stakeQuantity =
+        stakeAddressBalanceRepository.findStakeQuantityByAddress(stake).orElse(BigInteger.ZERO);
 
     if (!fetchRewardDataService.checkRewardAvailable(stake)) {
       boolean fetchRewardResponse = fetchRewardDataService.fetchReward(stake);
@@ -170,16 +170,14 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       stakeAddressResponse.setRewardWithdrawn(stakeRewardWithdrawn);
       stakeAddressResponse.setRewardAvailable(stakeAvailableReward.subtract(stakeRewardWithdrawn));
       stakeAddressResponse.setTotalStake(
-              stakeQuantity
-              .add(stakeAvailableReward)
-              .subtract(stakeRewardWithdrawn));
+          stakeQuantity.add(stakeAvailableReward).subtract(stakeRewardWithdrawn));
     }
 
     if (stakeAddressResponse.getRewardAvailable() == null) {
       stakeAddressResponse.setTotalStake(stakeQuantity);
     } else {
       stakeAddressResponse.setTotalStake(
-              stakeQuantity.add(stakeAddressResponse.getRewardAvailable()));
+          stakeQuantity.add(stakeAddressResponse.getRewardAvailable()));
     }
 
     StakeDelegationProjection poolData =
@@ -411,15 +409,19 @@ public class StakeKeyServiceImpl implements StakeKeyService {
               .sumBalanceByStakeAddress(addr.getView(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
-      List<AddressQuantityDayProjection> allByStakeAddressAndDayBetween = addressTxAmountRepository.findAllByStakeAddressAndDayBetween(addr.getView(),
-              dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(), dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
+      List<AddressQuantityDayProjection> allByStakeAddressAndDayBetween =
+          addressTxAmountRepository.findAllByStakeAddressAndDayBetween(
+              addr.getView(),
+              dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(),
+              dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance =
-              allByStakeAddressAndDayBetween.stream()
+          allByStakeAddressAndDayBetween.stream()
               .collect(
                   Collectors.toMap(
-                      aggBalance -> aggBalance.getDay().atZone(ZoneOffset.UTC).toLocalDate().plusDays(1),
+                      aggBalance ->
+                          aggBalance.getDay().atZone(ZoneOffset.UTC).toLocalDate().plusDays(1),
                       AddressQuantityDayProjection::getQuantity));
       for (LocalDateTime date : dates) {
         if (mapBalance.containsKey(date.toLocalDate())) {
@@ -445,7 +447,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       BigInteger fromBalance,
       List<LocalDateTime> dates,
       AddressChartBalanceResponse response) {
-    MinMaxProjection minMaxBalance = addressBalanceRepository.findMinMaxBalanceByAddress(addr.getView(),
+    MinMaxProjection minMaxBalance =
+        addressBalanceRepository.findMinMaxBalanceByAddress(
+            addr.getView(),
             dates.get(0).toEpochSecond(ZoneOffset.UTC),
             dates.get(dates.size() - 1).toEpochSecond(ZoneOffset.UTC));
 

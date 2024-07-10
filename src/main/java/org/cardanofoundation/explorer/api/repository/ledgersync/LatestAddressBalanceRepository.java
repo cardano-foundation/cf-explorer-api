@@ -1,17 +1,17 @@
-//package org.cardanofoundation.explorer.api.repository.ledgersync;
+// package org.cardanofoundation.explorer.api.repository.ledgersync;
 //
-//import java.util.List;
+// import java.util.List;
 //
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.data.jpa.repository.JpaRepository;
-//import org.springframework.data.jpa.repository.Query;
+// import org.springframework.data.domain.Pageable;
+// import org.springframework.data.jpa.repository.JpaRepository;
+// import org.springframework.data.jpa.repository.Query;
 //
-//import org.cardanofoundation.explorer.common.entity.compositeKey.AddressBalanceId;
-//import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance;
+// import org.cardanofoundation.explorer.common.entity.compositeKey.AddressBalanceId;
+// import org.cardanofoundation.explorer.common.entity.ledgersync.LatestAddressBalance;
 //
-//public interface LatestAddressBalanceRepository
+// public interface LatestAddressBalanceRepository
 //    extends JpaRepository<LatestAddressBalance, AddressBalanceId> {
 //
 //  @Query(value = "SELECT lab FROM LatestAddressBalance lab")
 //  List<LatestAddressBalance> findAllLatestAddressBalance(Pageable pageable);
-//}
+// }

@@ -5,9 +5,11 @@ import java.time.Instant;
 
 public interface AddressQuantityDayProjection {
 
-    BigInteger getQuantity();
-    Instant getDay();
+  BigInteger getQuantity();
 
-    void setQuantity(BigInteger quantity);
-    void setDay(Instant day);
+  Instant getDay();
+
+  void setQuantity(BigInteger quantity);
+
+  void setDay(Instant day);
 }

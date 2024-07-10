@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
-import org.junit.jupiter.api.Disabled;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -34,10 +32,11 @@ import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
+import org.cardanofoundation.explorer.api.projection.AddressTxCountProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-//import org.cardanofoundation.explorer.api.repository.ledgersync.LatestAddressBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
 import org.cardanofoundation.explorer.api.util.HexUtils;
@@ -53,8 +52,7 @@ class AddressServiceTest {
   @Mock AddressRepository addressRepository;
   @Mock ScriptRepository scriptRepository;
 
-  @Mock
-  MultiAssetRepository multiAssetRepository;
+  @Mock MultiAssetRepository multiAssetRepository;
 
   @Mock AddressTxAmountRepository addressTxAmountRepository;
 
@@ -229,14 +227,15 @@ class AddressServiceTest {
     LatestAddressBalance latestAddressBalance =
         LatestAddressBalance.builder().address(addr).quantity(BigInteger.TEN).build();
 
-//    when(latestAddressBalanceRepository.findAllLatestAddressBalance(pageable))
-//        .thenReturn(List.of(latestAddressBalance));
+    //    when(latestAddressBalanceRepository.findAllLatestAddressBalance(pageable))
+    //        .thenReturn(List.of(latestAddressBalance));
     ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
     AddressTxCountProjection projection = factory.createProjection(AddressTxCountProjection.class);
     projection.setTxCount(1L);
     projection.setAddress(addr);
 
-    when(addressTxAmountRepository.getTxCountListForAddresses(List.of(addr))).thenReturn(List.of(projection));
+    when(addressTxAmountRepository.getTxCountListForAddresses(List.of(addr)))
+        .thenReturn(List.of(projection));
     var response = addressService.getTopAddress(pageable);
     Assertions.assertEquals(response.getData().get(0).getAddress(), addr);
     Assertions.assertEquals(response.getData().get(0).getTxCount(), 1);

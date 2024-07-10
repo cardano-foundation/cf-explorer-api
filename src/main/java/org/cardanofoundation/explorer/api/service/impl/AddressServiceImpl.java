@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,8 +29,10 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressChartBal
 import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
+import org.cardanofoundation.explorer.api.projection.AddressQuantityDayProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
@@ -164,17 +164,18 @@ public class AddressServiceImpl implements AddressService {
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
       long from = dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond();
       long to = dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond();
-      List<AddressQuantityDayProjection> allByAddressAndDayBetween = addressTxAmountRepository.findAllByAddressAndDayBetween(addr.getAddress(),
-              from , to);
+      List<AddressQuantityDayProjection> allByAddressAndDayBetween =
+          addressTxAmountRepository.findAllByAddressAndDayBetween(addr.getAddress(), from, to);
 
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance =
-              allByAddressAndDayBetween.stream()
-                      .collect(
-                              Collectors.toMap(
-                                      aggBalance -> aggBalance.getDay().atZone(ZoneOffset.UTC).toLocalDate().plusDays(1),
-                                      AddressQuantityDayProjection::getQuantity));
+          allByAddressAndDayBetween.stream()
+              .collect(
+                  Collectors.toMap(
+                      aggBalance ->
+                          aggBalance.getDay().atZone(ZoneOffset.UTC).toLocalDate().plusDays(1),
+                      AddressQuantityDayProjection::getQuantity));
       for (LocalDateTime date : dates) {
         if (mapBalance.containsKey(date.toLocalDate())) {
           fromBalance = fromBalance.add(mapBalance.get(date.toLocalDate()));
@@ -228,25 +229,28 @@ public class AddressServiceImpl implements AddressService {
   public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
     // TODO will be removed for release 1.3, need to be fixed in next release
 
-//    List<LatestAddressBalance> latestAddressBalances =
-//        latestAddressBalanceRepository.findAllLatestAddressBalance(pageable);
-//    Page<LatestAddressBalance> latestAddressBalancePage =
-//        new PageImpl<>(latestAddressBalances, pageable, pageable.getPageSize());
-//    List<AddressTxCountProjection> addressTxCountProjections = addressTxAmountRepository.getTxCountListForAddresses(latestAddressBalancePage.stream().map(LatestAddressBalance::getAddress).toList());
-//    Map<String, Long> addressTxCountMap = addressTxCountProjections
-//            .stream().collect(Collectors.toMap(AddressTxCountProjection::getAddress, AddressTxCountProjection::getTxCount));
-//    List<AddressFilterResponse> addressFilterResponses =
-//        latestAddressBalancePage.stream()
-//            .map(
-//                latestAddressBalance ->
-//                    AddressFilterResponse.builder()
-//                        .address(latestAddressBalance.getAddress())
-//                        .balance(latestAddressBalance.getQuantity())
-//                        .txCount(
-//                            addressTxCountMap.getOrDefault(latestAddressBalance.getAddress(), 0L))
-//                        .build())
-//            .collect(Collectors.toList());
-//    return new BaseFilterResponse<>(latestAddressBalancePage, addressFilterResponses);
+    //    List<LatestAddressBalance> latestAddressBalances =
+    //        latestAddressBalanceRepository.findAllLatestAddressBalance(pageable);
+    //    Page<LatestAddressBalance> latestAddressBalancePage =
+    //        new PageImpl<>(latestAddressBalances, pageable, pageable.getPageSize());
+    //    List<AddressTxCountProjection> addressTxCountProjections =
+    // addressTxAmountRepository.getTxCountListForAddresses(latestAddressBalancePage.stream().map(LatestAddressBalance::getAddress).toList());
+    //    Map<String, Long> addressTxCountMap = addressTxCountProjections
+    //            .stream().collect(Collectors.toMap(AddressTxCountProjection::getAddress,
+    // AddressTxCountProjection::getTxCount));
+    //    List<AddressFilterResponse> addressFilterResponses =
+    //        latestAddressBalancePage.stream()
+    //            .map(
+    //                latestAddressBalance ->
+    //                    AddressFilterResponse.builder()
+    //                        .address(latestAddressBalance.getAddress())
+    //                        .balance(latestAddressBalance.getQuantity())
+    //                        .txCount(
+    //                            addressTxCountMap.getOrDefault(latestAddressBalance.getAddress(),
+    // 0L))
+    //                        .build())
+    //            .collect(Collectors.toList());
+    //    return new BaseFilterResponse<>(latestAddressBalancePage, addressFilterResponses);
     return new BaseFilterResponse<>();
   }
 
@@ -265,7 +269,7 @@ public class AddressServiceImpl implements AddressService {
 
     if (DataUtil.isNullOrEmpty(displayName)) {
       tokenListResponse =
-              multiAssetRepository
+          multiAssetRepository
               .findTokenAndBalanceByAddress(address, pageable)
               .map(tokenMapper::fromAddressTokenProjection);
     } else {

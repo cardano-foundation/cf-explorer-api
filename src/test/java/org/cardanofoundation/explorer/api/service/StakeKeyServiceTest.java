@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +31,7 @@ import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.projection.*;
+import org.cardanofoundation.explorer.api.repository.ledgersync.AddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -41,6 +40,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
@@ -193,7 +193,9 @@ public class StakeKeyServiceTest {
     when(stakeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(stakeDeRegistrationRepository.findMaxTxIdByStake(any())).thenReturn(Optional.of(1L));
     when(poolUpdateRepository.findPoolByRewardAccount(any())).thenReturn(List.of("pool"));
-    when(stakeAddressBalanceRepository.findStakeQuantityByAddress("stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx")).thenReturn(Optional.of(BigInteger.ONE));
+    when(stakeAddressBalanceRepository.findStakeQuantityByAddress(
+            "stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx"))
+        .thenReturn(Optional.of(BigInteger.ONE));
 
     var response = stakeKeyService.getStakeByAddress(address);
     assertEquals(response.getStatus(), StakeAddressStatus.DEACTIVATED);
@@ -438,8 +440,7 @@ public class StakeKeyServiceTest {
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
         .thenReturn(Optional.of(BigInteger.ONE));
-    when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any()))
-        .thenReturn(min);
+    when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any())).thenReturn(min);
 
     var response = stakeKeyService.getStakeBalanceAnalytics(stakeKey, type);
     assertNotNull(response);
@@ -493,17 +494,16 @@ public class StakeKeyServiceTest {
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ONE);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
-    AddressQuantityDayProjection projection =
-        Mockito.mock(AddressQuantityDayProjection.class);
+    AddressQuantityDayProjection projection = Mockito.mock(AddressQuantityDayProjection.class);
 
     when(projection.getQuantity()).thenReturn(BigInteger.TEN);
-    when(projection.getDay()).thenReturn(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC));
+    when(projection.getDay())
+        .thenReturn(LocalDateTime.now().minusDays(1).toInstant(ZoneOffset.UTC));
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
     when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
         .thenReturn(Optional.of(BigInteger.ZERO));
-    when(addressTxAmountRepository.findAllByStakeAddressAndDayBetween(
-            any(), any(), any()))
+    when(addressTxAmountRepository.findAllByStakeAddressAndDayBetween(any(), any(), any()))
         .thenReturn(List.of(projection));
     when(addressBalanceRepository.findMinMaxBalanceByAddress(any(), any(), any()))
         .thenReturn(minMaxProjection);

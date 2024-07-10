@@ -536,7 +536,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       votingChartResponse.setThreshold(Objects.isNull(threshold) ? null : threshold);
     }
     Long count =
-        committeeRegistrationRepository.CountByCreatedAtLessThanAndStillActive(govActionDetailsProjection.getBlockTime());
+        committeeRegistrationRepository.CountByCreatedAtLessThanAndStillActive(
+            govActionDetailsProjection.getBlockTime());
     List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
         latestVotingProcedureRepository.getLatestVotingProcedureByGovActionTxHashAndGovActionIndex(
             govActionDetailsProjection.getTxHash(),
