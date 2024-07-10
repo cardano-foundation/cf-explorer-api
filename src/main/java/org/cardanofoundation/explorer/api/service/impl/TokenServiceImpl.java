@@ -10,12 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo_;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -129,7 +131,7 @@ public class TokenServiceImpl implements TokenService {
             .findAllByHashIn(
                 multiAssets.getContent().stream()
                     .map(TokenProjection::getPolicy)
-                    .collect(Collectors.toList()))
+                    .toList())
             .stream()
             .collect(Collectors.toMap(Script::getHash, Function.identity()));
 
@@ -187,11 +189,12 @@ public class TokenServiceImpl implements TokenService {
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-    Long tokenTxCount =
-        multiAssetRepository.getTokenTxCount(multiAsset.getFingerprint()).orElse(0L);
+    Optional<TokenInfo> tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
+
+    Long tokenTxCount = tokenInfo.map(TokenInfo::getTxCount).orElse(0L);
     tokenResponse.setTxCount(tokenTxCount.intValue());
-    var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
-    var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+
+    LocalDateTime now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
     if (tokenInfo.isEmpty()) {
       tokenResponse.setNumberOfHolders(0L);
@@ -281,11 +284,13 @@ public class TokenServiceImpl implements TokenService {
       }
     } else {
       dates.remove(dates.size() - 1);
+      long from = dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond();
+      long to = dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond();
       List<AddressQuantityDayProjection> allByTokenIdAndDayBetween =
           addressTxAmountRepository.findAllByTokenIdAndDayBetween(
               multiAsset.getId(),
-              dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(),
-              dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
+              from ,
+              to);
 
       Map<LocalDate, BigInteger> aggregateAddressTokenMap =
           StreamUtil.toMap(

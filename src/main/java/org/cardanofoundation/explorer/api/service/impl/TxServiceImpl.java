@@ -28,6 +28,8 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
+import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -153,6 +155,7 @@ public class TxServiceImpl implements TxService {
   private final ReferenceTxInRepository referenceTxInRepository;
   private final TxReferenceInputMapper txReferenceInputMapper;
   private final BolnisiMetadataService bolnisiMetadataService;
+  private final TokenInfoRepository tokenInfoRepository;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -393,14 +396,13 @@ public class TxServiceImpl implements TxService {
             .findByFingerprint(tokenId)
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
-    Long tokenTxCount =
-        addressTxAmountRepository.getTxCountForTokenByMultiAssetId(multiAsset.getId()).orElse(0L);
+    Long tokenTxCount = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId()).map(TokenInfo::getTxCount).orElse(0L);
 
     List<TxProjection> txsProjection =
         addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
     List<Tx> txs =
         txRepository.findAllByHashIn(
-            txsProjection.stream().map(TxProjection::getTxHash).collect(Collectors.toList()));
+            txsProjection.stream().map(TxProjection::getTxHash).toList());
     Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount);
 
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));

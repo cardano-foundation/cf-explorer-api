@@ -50,14 +50,6 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-                SELECT COUNT(DISTINCT(ab.txHash)) FROM AddressTxAmount ab
-                  INNER JOIN MultiAsset ma ON ab.unit = ma.unit WHERE ma.id = :multiAssetId
-                """)
-  Optional<Long> getTxCountForTokenByMultiAssetId(@Param("multiAssetId") Long multiAssetId);
-
-  @Query(
-      value =
-          """
           select :fromBalance + coalesce(min(calculated_balances.sum_balance), 0) as minVal,
                  :fromBalance + coalesce(max(calculated_balances.sum_balance), 0) as maxVal
           from (select sum(ata.quantity) over (order by ata.slot rows unbounded PRECEDING) as sum_balance
@@ -199,10 +191,8 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-              SELECT tmp.txHash as txHash, tmp.blockTime as blockTime
-              FROM
-              (SELECT DISTINCT(atm.txHash) as txHash, atm.blockTime as blockTime
-                            FROM AddressTxAmount atm WHERE atm.unit = :unit) as tmp
+              SELECT DISTINCT(atm.txHash) as txHash, atm.blockTime as blockTime
+              FROM AddressTxAmount atm WHERE atm.unit = :unit
               """)
   List<TxProjection> findAllTxByUnit(@Param("unit") String unit, Pageable pageable);
 
@@ -237,12 +227,12 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-              SELECT atm.address, SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time) ) as day
+              SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time) ) as day
               FROM address_tx_amount atm
               WHERE atm.address = :address
               AND atm.block_time >= :from
               AND atm.block_time <= :to
-              GROUP BY atm.address, day
+              GROUP BY day
           """,
       nativeQuery = true)
   List<AddressQuantityDayProjection> findAllByAddressAndDayBetween(
@@ -251,12 +241,12 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-                      SELECT atm.address, SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time))as day
+                      SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time)) as day
                       FROM address_tx_amount atm
                       WHERE atm.stakeAddress = :stakeAddress
                       AND atm.block_time >= :from
                       AND atm.block_time <= :to
-                      GROUP BY atm.address, day
+                      GROUP BY day
                   """,
       nativeQuery = true)
   List<AddressQuantityDayProjection> findAllByStakeAddressAndDayBetween(
@@ -265,13 +255,13 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-                      SELECT atm.address, SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time )) as day
+                      SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time )) as day
                       FROM address_tx_amount atm
                       INNER JOIN multi_asset ma ON atm.unit = ma.unit
                       WHERE ma.id = :tokenId
                       AND atm.block_time >= :from
                       AND atm.block_time <= :to
-                      GROUP BY atm.address, day
+                      GROUP BY day
                   """,
       nativeQuery = true)
   List<AddressQuantityDayProjection> findAllByTokenIdAndDayBetween(

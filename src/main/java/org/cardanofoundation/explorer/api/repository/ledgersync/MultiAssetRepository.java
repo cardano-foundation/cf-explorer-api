@@ -73,16 +73,6 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   List<MultiAsset> findAllByIdIn(@Param("ids") Collection<Long> ids);
 
-  @Query(
-      value =
-          """
-          SELECT ttc.txCount
-                FROM MultiAsset ma
-                LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id
-                WHERE ma.fingerprint = :fingerprint
-      """)
-  Optional<Long> getTokenTxCount(@Param("fingerprint") String fingerprint);
-
   @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE CONCAT('%', :query, '%') ")
   List<MultiAsset> findByNameViewLike(@Param("query") String query, Pageable pageable);
 
