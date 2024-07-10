@@ -568,7 +568,7 @@ class TokenServiceTest {
     for (int i = 0; i < 10; i++) {
       AddressQuantityDayProjection projection = factor.createProjection(AddressQuantityDayProjection.class);
       projection.setQuantity(new BigInteger("100"));
-      projection.setDay(LocalDate.now().minusDays(i));
+      projection.setDay(LocalDate.now().minusDays(i).atStartOfDay().toInstant(ZoneOffset.UTC));
       addressQuantityDayProjections.add(projection);
     }
     Collections.reverse(addressQuantityDayProjections);
