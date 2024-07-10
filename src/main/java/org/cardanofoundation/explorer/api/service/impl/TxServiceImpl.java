@@ -28,8 +28,6 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
-import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -73,6 +71,7 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
@@ -106,6 +105,7 @@ import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.*;
+import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -396,13 +396,16 @@ public class TxServiceImpl implements TxService {
             .findByFingerprint(tokenId)
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
-    Long tokenTxCount = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId()).map(TokenInfo::getTxCount).orElse(0L);
+    Long tokenTxCount =
+        tokenInfoRepository
+            .findTokenInfoByMultiAssetId(multiAsset.getId())
+            .map(TokenInfo::getTxCount)
+            .orElse(0L);
 
     List<TxProjection> txsProjection =
         addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
     List<Tx> txs =
-        txRepository.findAllByHashIn(
-            txsProjection.stream().map(TxProjection::getTxHash).toList());
+        txRepository.findAllByHashIn(txsProjection.stream().map(TxProjection::getTxHash).toList());
     Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount);
 
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));

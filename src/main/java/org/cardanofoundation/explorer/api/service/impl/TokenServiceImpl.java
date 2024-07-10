@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo_;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -129,9 +128,7 @@ public class TokenServiceImpl implements TokenService {
     Map<String, Script> scriptMap =
         scriptRepository
             .findAllByHashIn(
-                multiAssets.getContent().stream()
-                    .map(TokenProjection::getPolicy)
-                    .toList())
+                multiAssets.getContent().stream().map(TokenProjection::getPolicy).toList())
             .stream()
             .collect(Collectors.toMap(Script::getHash, Function.identity()));
 
@@ -189,7 +186,8 @@ public class TokenServiceImpl implements TokenService {
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
-    Optional<TokenInfo> tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
+    Optional<TokenInfo> tokenInfo =
+        tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
 
     Long tokenTxCount = tokenInfo.map(TokenInfo::getTxCount).orElse(0L);
     tokenResponse.setTxCount(tokenTxCount.intValue());
@@ -287,10 +285,7 @@ public class TokenServiceImpl implements TokenService {
       long from = dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond();
       long to = dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond();
       List<AddressQuantityDayProjection> allByTokenIdAndDayBetween =
-          addressTxAmountRepository.findAllByTokenIdAndDayBetween(
-              multiAsset.getId(),
-              from ,
-              to);
+          addressTxAmountRepository.findAllByTokenIdAndDayBetween(multiAsset.getId(), from, to);
 
       Map<LocalDate, BigInteger> aggregateAddressTokenMap =
           StreamUtil.toMap(

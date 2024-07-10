@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,8 +17,6 @@ public interface TokenInfoRepository extends JpaRepository<TokenInfo, Long> {
 
   Optional<TokenInfo> findTokenInfoByMultiAssetId(Long multiAssetId);
 
-  @Query(
-      value =
-          "SELECT ti.id FROM TokenInfo ti ORDER BY ti.txCount DESC LIMIT :pageSize")
+  @Query(value = "SELECT ti.id FROM TokenInfo ti ORDER BY ti.txCount DESC LIMIT :pageSize")
   List<Long> findOrderedByTxCount(@Param("pageSize") int pageSize);
 }
