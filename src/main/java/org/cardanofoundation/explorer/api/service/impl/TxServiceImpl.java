@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
@@ -156,6 +157,8 @@ public class TxServiceImpl implements TxService {
   private final TxReferenceInputMapper txReferenceInputMapper;
   private final BolnisiMetadataService bolnisiMetadataService;
   private final TokenInfoRepository tokenInfoRepository;
+
+  private final CardanoConverters converters;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;

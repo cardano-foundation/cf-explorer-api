@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -52,6 +53,8 @@ public class AddressServiceImpl implements AddressService {
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
+
+  private final CardanoConverters converters;
 
   @Value("${application.network}")
   private String network;
@@ -135,17 +138,18 @@ public class AddressServiceImpl implements AddressService {
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByAddress(addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByAddressToSlot(
+                  addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
 
       data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
         Optional<BigInteger> balance =
-            addressTxAmountRepository.getBalanceByAddressAndTime(
+            addressTxAmountRepository.getBalanceByAddressAndSlotRange(
                 addr.getAddress(),
-                dates.get(i - 1).toInstant(ZoneOffset.UTC).getEpochSecond(),
-                dates.get(i).toInstant(ZoneOffset.UTC).getEpochSecond());
+                converters.time().toSlot(dates.get(i - 1)),
+                converters.time().toSlot(dates.get(i)));
 
         if (balance.isPresent()) {
           fromBalance = fromBalance.add(balance.get());
@@ -159,13 +163,14 @@ public class AddressServiceImpl implements AddressService {
 
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByAddress(addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByAddressToSlot(addr.getAddress(), converters.time().toSlot(dates.get(0)))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
-      long from = dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond();
-      long to = dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond();
+      long from = converters.time().toSlot(dates.get(0));
+      long to = converters.time().toSlot(dates.get(dates.size() - 1));
+
       List<AddressQuantityDayProjection> allByAddressAndDayBetween =
-          addressTxAmountRepository.findAllByAddressAndDayBetween(addr.getAddress(), from, to);
+          addressTxAmountRepository.findAllByAddressAndSlotBetween(addr.getAddress(), from, to);
 
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
@@ -201,11 +206,11 @@ public class AddressServiceImpl implements AddressService {
       List<LocalDateTime> dates,
       AddressChartBalanceResponse response) {
     var minMaxBalance =
-        addressTxAmountRepository.findMinMaxBalanceByAddress(
+        addressTxAmountRepository.findMinMaxBalanceByAddressAndSlotRange(
             addr.getAddress(),
             fromBalance,
-            dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(),
-            dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
+            converters.time().toSlot(dates.get(0)),
+            converters.time().toSlot(dates.get(dates.size() - 1)));
     if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
       response.setHighestBalance(minMaxBalance.getMaxVal());
     } else {

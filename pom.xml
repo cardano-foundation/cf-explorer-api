@@ -117,6 +117,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.cardanofoundation</groupId>
+            <artifactId>cf-cardano-conversions-java</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>

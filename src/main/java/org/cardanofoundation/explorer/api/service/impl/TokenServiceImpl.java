@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
@@ -84,6 +85,8 @@ public class TokenServiceImpl implements TokenService {
   private final AssetMetadataMapper assetMetadataMapper;
   private final AggregatedDataCacheService aggregatedDataCacheService;
   private final TokenInfoRepository tokenInfoRepository;
+
+  private final CardanoConverters converters;
   private static final int MAX_TOTAL_ELEMENTS = 1000;
 
   @Override
@@ -273,19 +276,19 @@ public class TokenServiceImpl implements TokenService {
       for (int i = 0; i < dates.size() - 1; i++) {
         BigInteger balance =
             addressTxAmountRepository
-                .sumBalanceBetweenTime(
+                .sumBalanceBetweenSlotRange(
                     multiAsset.getUnit(),
-                    dates.get(i).toInstant(ZoneOffset.UTC).getEpochSecond(),
-                    dates.get(i + 1).toInstant(ZoneOffset.UTC).getEpochSecond())
+                    converters.time().toSlot(dates.get(i)),
+                    converters.time().toSlot(dates.get(i + 1)))
                 .orElse(BigInteger.ZERO);
         responses.add(new TokenVolumeAnalyticsResponse(dates.get(i), balance));
       }
     } else {
       dates.remove(dates.size() - 1);
-      long from = dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond();
-      long to = dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond();
+      long from = converters.time().toSlot(dates.get(0));
+      long to = converters.time().toSlot(dates.get(dates.size() - 1));
       List<AddressQuantityDayProjection> allByTokenIdAndDayBetween =
-          addressTxAmountRepository.findAllByTokenIdAndDayBetween(multiAsset.getId(), from, to);
+          addressTxAmountRepository.findAllByTokenIdAndSlotBetween(multiAsset.getId(), from, to);
 
       Map<LocalDate, BigInteger> aggregateAddressTokenMap =
           StreamUtil.toMap(

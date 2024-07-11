@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -84,6 +85,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final FetchRewardDataService fetchRewardDataService;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
+
+  private final CardanoConverters converters;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -383,7 +386,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByStakeAddress(addr.getView(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByStakeAddressToSlot(
+                  addr.getView(), converters.time().toSlot(dates.get(0)))
               .orElse(BigInteger.ZERO);
 
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
@@ -391,10 +395,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
         Optional<BigInteger> balance =
-            addressTxAmountRepository.getBalanceByStakeAddressAndTime(
+            addressTxAmountRepository.getBalanceByStakeAddressAndSlotRange(
                 addr.getView(),
-                dates.get(i - 1).toEpochSecond(ZoneOffset.UTC),
-                dates.get(i).toEpochSecond(ZoneOffset.UTC));
+                converters.time().toSlot(dates.get(i - 1)),
+                converters.time().toSlot(dates.get(i)));
         if (balance.isPresent()) {
           fromBalance = fromBalance.add(balance.get());
         }
@@ -406,14 +410,15 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       dates.remove(0);
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByStakeAddress(addr.getView(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByStakeAddressToSlot(
+                  addr.getView(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
       List<AddressQuantityDayProjection> allByStakeAddressAndDayBetween =
-          addressTxAmountRepository.findAllByStakeAddressAndDayBetween(
+          addressTxAmountRepository.findAllByStakeAddressAndSlotBetween(
               addr.getView(),
-              dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(),
-              dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
+              converters.time().toSlot(dates.get(0)),
+              converters.time().toSlot(dates.get(dates.size() - 1)));
       // Data in aggregate_address_tx_balance save at end of day, but we will display start of day
       // So we need to add 1 day to display correct data
       Map<LocalDate, BigInteger> mapBalance =
@@ -447,11 +452,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       BigInteger fromBalance,
       List<LocalDateTime> dates,
       AddressChartBalanceResponse response) {
+    ;
     MinMaxProjection minMaxBalance =
-        addressBalanceRepository.findMinMaxBalanceByAddress(
+        addressBalanceRepository.findMinMaxBalanceByAddressInSlotRange(
             addr.getView(),
-            dates.get(0).toEpochSecond(ZoneOffset.UTC),
-            dates.get(dates.size() - 1).toEpochSecond(ZoneOffset.UTC));
+            converters.time().toSlot(dates.get(0)),
+            converters.time().toSlot(dates.get(dates.size() - 1)));
 
     if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
       response.setHighestBalance(minMaxBalance.getMaxVal());

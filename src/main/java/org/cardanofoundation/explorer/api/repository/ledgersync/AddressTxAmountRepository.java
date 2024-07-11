@@ -56,11 +56,11 @@ public interface AddressTxAmountRepository
                 from address_tx_amount ata
                 where ata.address = :address
                   and ata.unit = 'lovelace'
-                  and ata.block_time > :fromDate
-                  and ata.block_time <= :toDate) as calculated_balances
+                  and ata.slot > :fromDate
+                  and ata.slot <= :toDate) as calculated_balances
           """,
       nativeQuery = true)
-  MinMaxProjection findMinMaxBalanceByAddress(
+  MinMaxProjection findMinMaxBalanceByAddressAndSlotRange(
       @Param("address") String address,
       @Param("fromBalance") BigInteger fromBalance,
       @Param("fromDate") Long fromDate,
@@ -69,8 +69,8 @@ public interface AddressTxAmountRepository
   @Query(
       "SELECT sum(addressTxBalance.quantity) FROM AddressTxAmount addressTxBalance"
           + " WHERE addressTxBalance.address = :address"
-          + " AND addressTxBalance.blockTime > :from and addressTxBalance.blockTime <= :to")
-  Optional<BigInteger> getBalanceByAddressAndTime(
+          + " AND addressTxBalance.slot > :from and addressTxBalance.slot <= :to")
+  Optional<BigInteger> getBalanceByAddressAndSlotRange(
       @Param("address") String address, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
@@ -80,9 +80,10 @@ public interface AddressTxAmountRepository
         FROM AddressTxAmount ata
         WHERE ata.address = :address
           AND ata.unit = 'lovelace'
-          AND ata.blockTime <= :to
+          AND ata.slot <= :to
       """)
-  Optional<BigInteger> sumBalanceByAddress(@Param("address") String address, @Param("to") Long to);
+  Optional<BigInteger> sumBalanceByAddressToSlot(
+      @Param("address") String address, @Param("to") Long to);
 
   @Query(
       value =
@@ -90,10 +91,10 @@ public interface AddressTxAmountRepository
     SELECT sum(ata.quantity) FROM AddressTxAmount ata
     WHERE ata.unit = :unit
     AND ata.quantity > 0
-    AND ata.blockTime > :from
-    AND ata.blockTime < :to
+    AND ata.slot > :from
+    AND ata.slot < :to
     """)
-  Optional<BigInteger> sumBalanceBetweenTime(
+  Optional<BigInteger> sumBalanceBetweenSlotRange(
       @Param("unit") String unit, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
@@ -118,17 +119,17 @@ public interface AddressTxAmountRepository
             FROM AddressTxAmount ata
             WHERE ata.stakeAddress = :stakeAddress
               AND ata.unit = 'lovelace'
-              AND ata.blockTime <= :to
+              AND ata.slot <= :to
           """)
-  Optional<BigInteger> sumBalanceByStakeAddress(
+  Optional<BigInteger> sumBalanceByStakeAddressToSlot(
       @Param("stakeAddress") String stakeAddress, @Param("to") Long to);
 
   @Query(
       "SELECT sum(addressTxAmount.quantity) FROM AddressTxAmount addressTxAmount"
           + " WHERE addressTxAmount.stakeAddress = :stakeAddress"
           + " AND addressTxAmount.unit = 'lovelace'"
-          + " AND addressTxAmount.blockTime > :from and addressTxAmount.blockTime <= :to")
-  Optional<BigInteger> getBalanceByStakeAddressAndTime(
+          + " AND addressTxAmount.slot > :from and addressTxAmount.slot <= :to")
+  Optional<BigInteger> getBalanceByStakeAddressAndSlotRange(
       @Param("stakeAddress") String stakeAddress, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
@@ -136,7 +137,7 @@ public interface AddressTxAmountRepository
           + " WHERE addressTxAmount.stakeAddress = :stakeAddress"
           + " AND addressTxAmount.unit = 'lovelace'"
           + " AND addressTxAmount.blockTime <= :time")
-  Optional<BigInteger> getBalanceByStakeAddressAndTime(
+  Optional<BigInteger> getBalanceByStakeAddressAndSlotRange(
       @Param("stakeAddress") String stakeAddress, @Param("time") Long time);
 
   @Query(
@@ -158,10 +159,10 @@ public interface AddressTxAmountRepository
     FROM AddressTxAmount atm
     INNER JOIN Tx tx on atm.txHash = tx.hash
     WHERE atm.unit = 'lovelace' AND atm.stakeAddress = :stakeAddressView
-    AND atm.blockTime > :fromDate AND atm.blockTime <= :toDate
+    AND atm.slot > :fromDate AND atm.slot <= :toDate
     GROUP BY tx.id, atm.blockTime, atm.txHash, tx.validContract
     """)
-  Page<StakeTxProjection> findTxAndAmountByStakeAndDateRange(
+  Page<StakeTxProjection> findTxAndAmountByStakeAndSlotRange(
       @Param("stakeAddressView") String stakeAddressView,
       @Param("fromDate") Long fromDate,
       @Param("toDate") Long toDate,
@@ -230,26 +231,26 @@ public interface AddressTxAmountRepository
               SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time) ) as day
               FROM address_tx_amount atm
               WHERE atm.address = :address
-              AND atm.block_time >= :from
-              AND atm.block_time <= :to
+              AND atm.slot >= :from
+              AND atm.slot <= :to
               GROUP BY day
           """,
       nativeQuery = true)
-  List<AddressQuantityDayProjection> findAllByAddressAndDayBetween(
+  List<AddressQuantityDayProjection> findAllByAddressAndSlotBetween(
       @Param("address") String address, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
       value =
           """
-                      SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time)) as day
-                      FROM address_tx_amount atm
-                      WHERE atm.stakeAddress = :stakeAddress
-                      AND atm.block_time >= :from
-                      AND atm.block_time <= :to
-                      GROUP BY day
+                  SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time)) as day
+                  FROM address_tx_amount atm
+                  WHERE atm.stakeAddress = :stakeAddress
+                  AND atm.slot >= :from
+                  AND atm.slot <= :to
+                  GROUP BY day
                   """,
       nativeQuery = true)
-  List<AddressQuantityDayProjection> findAllByStakeAddressAndDayBetween(
+  List<AddressQuantityDayProjection> findAllByStakeAddressAndSlotBetween(
       @Param("stakeAddress") String stakeAddress, @Param("from") Long from, @Param("to") Long to);
 
   @Query(
@@ -259,12 +260,12 @@ public interface AddressTxAmountRepository
                       FROM address_tx_amount atm
                       INNER JOIN multi_asset ma ON atm.unit = ma.unit
                       WHERE ma.id = :tokenId
-                      AND atm.block_time >= :from
-                      AND atm.block_time <= :to
+                      AND atm.slot >= :from
+                      AND atm.slot <= :to
                       GROUP BY day
                   """,
       nativeQuery = true)
-  List<AddressQuantityDayProjection> findAllByTokenIdAndDayBetween(
+  List<AddressQuantityDayProjection> findAllByTokenIdAndSlotBetween(
       @Param("tokenId") Long tokenId, @Param("from") Long from, @Param("to") Long to);
 
   @Query(

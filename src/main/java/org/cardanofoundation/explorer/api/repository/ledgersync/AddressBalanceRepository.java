@@ -16,12 +16,12 @@ public interface AddressBalanceRepository extends JpaRepository<AddressBalance, 
                     SELECT address, MIN(quantity) as minVal, MAX(quantity) as maxVal
                     FROM AddressBalance
                     WHERE address = :address
-                    AND blockTime > :fromDate
-                    AND blockTime <= :toDate
+                    AND slot > :fromDate
+                    AND slot <= :toDate
                     AND unit = 'lovelace'
                     GROUP BY address
                     """)
-  MinMaxProjection findMinMaxBalanceByAddress(
+  MinMaxProjection findMinMaxBalanceByAddressInSlotRange(
       @Param("address") String address,
       @Param("fromDate") Long fromDate,
       @Param("toDate") Long toDate);
