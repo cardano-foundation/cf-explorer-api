@@ -2,8 +2,6 @@ package org.cardanofoundation.explorer.api.model.request.governanceAction;
 
 import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,18 +23,12 @@ import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 public class GovernanceActionFilter {
 
   Boolean isRepeatVote;
-
   String governanceActionTxHash;
-
   String anchorText;
-
-  @NotNull GovActionType actionType;
-
-  @NotNull GovActionStatus actionStatus;
-
-  @NotNull Vote voteType;
-
-  @NotNull VoterType voterType;
+  GovActionType actionType;
+  GovActionStatus actionStatus;
+  Vote voteType;
+  VoterType voterType;
 
   @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss")
   private LocalDateTime fromDate;
