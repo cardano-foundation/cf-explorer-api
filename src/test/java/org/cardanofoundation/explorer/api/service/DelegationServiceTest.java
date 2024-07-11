@@ -63,11 +63,9 @@ import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregatePoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
@@ -75,6 +73,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHistoryRepos
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
@@ -97,9 +96,7 @@ class DelegationServiceTest {
 
   @Mock private PoolHashRepository poolHashRepository;
 
-  @Mock private AdaPotsRepository adaPotsRepository;
-
-  @Mock private EpochParamRepository epochParamRepository;
+  @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
   @Mock private PoolUpdateRepository poolUpdateRepository;
 
@@ -461,7 +458,7 @@ class DelegationServiceTest {
     ownerAddress.add("address");
     when(poolUpdateRepository.getCreatedTimeOfPool(poolId)).thenReturn(timestamp);
     when(poolUpdateRepository.findOwnerAccountByPool(poolId)).thenReturn(ownerAddress);
-    when(stakeAddressRepository.getBalanceByView(ownerAddress)).thenReturn(BigInteger.TEN);
+    when(stakeAddressBalanceRepository.getBalanceByView(ownerAddress)).thenReturn(BigInteger.TEN);
     when(rewardRepository.getAvailableRewardByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress))
         .thenReturn(BigInteger.TEN);
