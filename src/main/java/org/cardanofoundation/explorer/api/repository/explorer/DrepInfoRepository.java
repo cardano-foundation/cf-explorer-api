@@ -27,6 +27,9 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
   @Query("SELECT dri.status as status, count(dri) as cnt from DRepInfo dri group by dri.status")
   List<DRepStatusCountProjection> getDRepStatusCount();
 
+  @Query("SELECT count(dri) from DRepInfo dri where dri.status = :status")
+  Long countByStatus(@Param("status") DRepStatus status);
+
   @Query("SELECT SUM(dri.delegators) from DRepInfo dri")
   Long getDelegateCount();
 

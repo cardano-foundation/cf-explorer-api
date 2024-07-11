@@ -25,6 +25,7 @@ import org.cardanofoundation.explorer.api.model.request.governanceAction.Governa
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
@@ -40,6 +41,15 @@ import org.cardanofoundation.explorer.common.validation.pagination.PaginationVal
 public class GovernanceActionController {
 
   private final GovernanceActionService governanceActionService;
+
+  @GetMapping("overview")
+  @LogMessage
+  @Operation(
+      summary = "Get governance overview",
+      tags = {"gov-actions"})
+  public ResponseEntity<GovernanceOverviewResponse> getGovOverview() {
+    return ResponseEntity.ok(governanceActionService.getGovernanceOverview());
+  }
 
   @GetMapping("{voterHash}")
   @LogMessage

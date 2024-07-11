@@ -59,6 +59,33 @@ public interface GovernanceActionRepository
 
   @Query(
       """
+      SELECT gap.txHash          AS txHash,
+             gap.index           AS index,
+             gap.type            AS type,
+             gap.blockTime       AS createdAt,
+             gapInfo.status      AS status,
+             gapInfo.votingPower AS votingPower,
+             gapInfo.indexType   AS indexType
+      FROM GovActionProposal gap
+               LEFT JOIN GovActionProposalInfo gapInfo ON (gap.txHash = gapInfo.txHash and gap.index = gapInfo.index)
+          WHERE (:gapStatus is null or (gapInfo.status = :gapStatus))
+          AND gap.type in (:type)
+          AND (gap.blockTime >= :from)
+          AND (gap.blockTime <= :to)
+          AND (:txHash is null or gap.txHash = :txHash)
+          AND (:anchorText is null or gap.anchorUrl like %:anchorText% or gap.anchorHash like %:anchorText%)
+      """)
+  Page<GovernanceActionProjection> getAllByFilter(
+      @Param("gapStatus") GovActionStatus gapStatus,
+      @Param("type") List<GovActionType> type,
+      @Param("from") Long from,
+      @Param("to") Long to,
+      @Param("txHash") String txHash,
+      @Param("anchorText") String anchorText,
+      Pageable pageable);
+
+  @Query(
+      """
       SELECT gap.txHash as txHash, gap.index as index, gap.blockTime as createdAt,
       gapInfo.status as status, gap.type as type
       FROM GovActionProposal gap
@@ -100,4 +127,20 @@ public interface GovernanceActionRepository
               + "and gap.type in :govTypes ")
   Long countGovThatAllowedToVoteByBlockTimeGreaterThanAndGovType(
       @Param("blockTime") Long blockTime, @Param("govTypes") List<GovActionType> govTypes);
+
+  @Query(
+      """
+        SELECT gap.type AS type, COUNT(gap) AS govCount
+        FROM GovActionProposal gap
+        GROUP BY gap.type
+        """)
+  List<GovernanceActionProjection> getGovActionGroupByGovActionType();
+
+  @Query(
+      """
+        SELECT gapi.status AS status, COUNT(gapi) AS govCount
+        FROM GovActionProposalInfo gapi
+        GROUP BY gapi.status
+        """)
+  List<GovernanceActionProjection> getGovActionGroupByGovActionStatus();
 }
