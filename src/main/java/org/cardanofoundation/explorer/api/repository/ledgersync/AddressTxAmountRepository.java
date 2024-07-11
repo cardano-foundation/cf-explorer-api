@@ -192,7 +192,7 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-              SELECT DISTINCT(atm.txHash) as txHash, atm.blockTime as blockTime
+              SELECT DISTINCT(atm.txHash) as txHash, atm.slot as blockTime
               FROM AddressTxAmount atm WHERE atm.unit = :unit
               """)
   List<TxProjection> findAllTxByUnit(@Param("unit") String unit, Pageable pageable);
@@ -220,10 +220,18 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-              SELECT max(atm.blockTime) FROM AddressTxAmount atm
+              SELECT max(atm.slot) FROM AddressTxAmount atm
               WHERE atm.unit = :unit
           """)
-  Long getLastActivityTimeOfToken(@Param("unit") String unit);
+  Long getLastSlotOfToken(@Param("unit") String unit);
+
+  @Query(
+      value =
+          """
+              SELECT max(atm.blockTime) FROM AddressTxAmount atm
+              WHERE atm.slot = :slot
+          """)
+  Long getBlockTime(@Param("slot") Long slot);
 
   @Query(
       value =

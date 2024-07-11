@@ -394,21 +394,24 @@ public class TxServiceImpl implements TxService {
   public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(
       String tokenId, Pageable pageable) {
 
+    log.info("a");
     MultiAsset multiAsset =
         multiAssetRepository
             .findByFingerprint(tokenId)
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-
+    log.info("b");
     Long tokenTxCount =
         tokenInfoRepository
             .findTokenInfoByMultiAssetId(multiAsset.getId())
             .map(TokenInfo::getTxCount)
             .orElse(0L);
-
+    log.info("c");
     List<TxProjection> txsProjection =
         addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
+    log.info("d");
     List<Tx> txs =
         txRepository.findAllByHashIn(txsProjection.stream().map(TxProjection::getTxHash).toList());
+    log.info("e");
     Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount);
 
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));

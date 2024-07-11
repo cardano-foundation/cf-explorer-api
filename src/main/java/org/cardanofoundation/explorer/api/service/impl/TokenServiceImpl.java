@@ -183,15 +183,17 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public TokenResponse getTokenDetail(String tokenId) {
+    log.info("a");
     MultiAsset multiAsset =
         multiAssetRepository
             .findByFingerprint(tokenId)
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
 
+    log.info("b");
     TokenResponse tokenResponse = tokenMapper.fromMultiAssetToResponse(multiAsset);
     Optional<TokenInfo> tokenInfo =
         tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
-
+    log.info("c");
     Long tokenTxCount = tokenInfo.map(TokenInfo::getTxCount).orElse(0L);
     tokenResponse.setTxCount(tokenTxCount.intValue());
 
@@ -210,16 +212,19 @@ public class TokenServiceImpl implements TokenService {
       tokenResponse.setTotalVolume(String.valueOf(tokenInfo.get().getTotalVolume()));
       tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
     }
-
+    log.info("c");
     AssetMetadata assetMetadata =
         assetMetadataRepository
             .findFirstBySubject(multiAsset.getPolicy() + multiAsset.getName())
             .orElse(null);
-
+    log.info("d");
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
+    log.info("d1");
 
-    Long latestEpochTime =
-        addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit());
+    var slot = addressTxAmountRepository.getLastSlotOfToken(multiAsset.getUnit());
+
+    Long latestEpochTime =        addressTxAmountRepository.getBlockTime(slot);
+    log.info("e");
     tokenResponse.setTokenLastActivity(
         Timestamp.valueOf(
             LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC)));
