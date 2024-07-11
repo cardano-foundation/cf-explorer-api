@@ -223,7 +223,7 @@ public class TokenServiceImpl implements TokenService {
 
     var slot = addressTxAmountRepository.getLastSlotOfToken(multiAsset.getUnit());
 
-    Long latestEpochTime =        addressTxAmountRepository.getBlockTime(slot);
+    Long latestEpochTime = addressTxAmountRepository.getBlockTime(slot);
     log.info("e");
     tokenResponse.setTokenLastActivity(
         Timestamp.valueOf(
