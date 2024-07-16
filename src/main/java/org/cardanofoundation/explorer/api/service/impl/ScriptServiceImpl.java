@@ -448,7 +448,7 @@ public class ScriptServiceImpl implements ScriptService {
   public BaseFilterResponse<SmartContractTxResponse> getSmartContractTxs(
       String scriptHash, Pageable pageable) {
 
-    long txCount = smartContractInfoRepository.getTxCountByScriptHash(scriptHash);
+    long txCount = smartContractInfoRepository.getTxCountByScriptHash(scriptHash).orElse(0L);
     Page<Long> txIds =
         new PageImpl<>(
             redeemerRepository.findTxIdsInteractWithContract(scriptHash, pageable),
@@ -496,7 +496,7 @@ public class ScriptServiceImpl implements ScriptService {
         txService.getTxDetailByHash(txHash).getContracts();
     contractResponseList.forEach(
         contractResponse -> {
-          if (contractResponse.getScriptHash().equals(scriptHash)) {
+          if (scriptHash.equals(contractResponse.getScriptHash())) {
             if (!CollectionUtils.isEmpty(contractResponse.getExecutionInputs())) {
               contractExecutions.addAll(contractResponse.getExecutionInputs());
             }
