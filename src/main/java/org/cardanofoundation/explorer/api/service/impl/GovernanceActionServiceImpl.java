@@ -150,7 +150,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     Page<GovernanceActionProjection> governanceActionProjectionPage;
 
     // get gov info include voter info
-    if (vote != null && !CollectionUtils.isEmpty(voterHashes)) {
+    if (!CollectionUtils.isEmpty(voterHashes)) {
       governanceActionProjectionPage =
           governanceActionRepository.getAllByFilter(
               governanceActionFilter.getIsRepeatVote(),
