@@ -332,7 +332,8 @@ class ScriptServiceTest {
 
     when(txRepository.getSmartContractTxsByTxIds(txIds.getContent()))
         .thenReturn(List.of(smartContractTxProjection));
-    when(smartContractInfoRepository.getTxCountByScriptHash(scriptHash)).thenReturn(1L);
+    when(smartContractInfoRepository.getTxCountByScriptHash(scriptHash))
+        .thenReturn(Optional.of(1L));
     when(redeemerRepository.findTxIdsInteractWithContract(scriptHash, pageable))
         .thenReturn(txIds.getContent());
 
