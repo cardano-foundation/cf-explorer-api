@@ -252,7 +252,7 @@ public interface AddressTxAmountRepository
           """
                   SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time)) as day
                   FROM address_tx_amount atm
-                  WHERE atm.stakeAddress = :stakeAddress
+                  WHERE atm.stake_address = :stakeAddress
                   AND atm.slot >= :from
                   AND atm.slot <= :to
                   GROUP BY day
