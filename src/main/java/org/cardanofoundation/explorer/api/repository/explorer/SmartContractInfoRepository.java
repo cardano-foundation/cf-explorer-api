@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.repository.explorer;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,5 +37,5 @@ public interface SmartContractInfoRepository extends JpaRepository<SmartContract
       Pageable pageable);
 
   @Query("SELECT sci.txCount FROM SmartContractInfo sci WHERE sci.scriptHash = :scriptHash")
-  Long getTxCountByScriptHash(@Param("scriptHash") String scriptHash);
+  Optional<Long> getTxCountByScriptHash(@Param("scriptHash") String scriptHash);
 }
