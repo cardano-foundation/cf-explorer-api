@@ -452,19 +452,22 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       BigInteger fromBalance,
       List<LocalDateTime> dates,
       AddressChartBalanceResponse response) {
-    ;
-    MinMaxProjection minMaxBalance =
-        addressBalanceRepository.findMinMaxBalanceByAddressInSlotRange(
-            addr.getView(),
-            converters.time().toSlot(dates.get(0)),
-            converters.time().toSlot(dates.get(dates.size() - 1)));
 
-    if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
+    var slotFrom = converters.time().toSlot(dates.get(0));
+    var slotTo = converters.time().toSlot(dates.get(dates.size() - 1));
+    log.info("slotFrom: {}, slotTo: {}, address: {}",  slotFrom, slotTo,addr.getView());
+    MinMaxProjection minMaxBalance =
+            stakeAddressBalanceRepository.findMinMaxBalanceByAddressInSlotRange(
+            addr.getView(),
+                    slotFrom,
+            slotTo);
+
+    if (minMaxBalance != null && minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
       response.setHighestBalance(minMaxBalance.getMaxVal());
     } else {
       response.setHighestBalance(fromBalance);
     }
-    if (minMaxBalance.getMinVal().compareTo(fromBalance) < 0) {
+    if (minMaxBalance != null &&  minMaxBalance.getMinVal().compareTo(fromBalance) < 0) {
       response.setLowestBalance(minMaxBalance.getMinVal());
     } else {
       response.setLowestBalance(fromBalance);

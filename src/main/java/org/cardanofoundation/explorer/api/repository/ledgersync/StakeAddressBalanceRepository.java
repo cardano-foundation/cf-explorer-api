@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
+import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,21 @@ public interface StakeAddressBalanceRepository
                     AND a.address IN :addresses
                     """)
   BigInteger getBalanceByView(@Param("addresses") List<String> stakeAddress);
+
+
+  @Query(
+          value =
+                  """
+                            SELECT address, MIN(quantity) as minVal, MAX(quantity) as maxVal
+                            FROM StakeAddressBalance
+                            WHERE address = :address
+                            AND slot > :fromDate
+                            AND slot <= :toDate
+                            GROUP BY address
+                            """)
+  MinMaxProjection findMinMaxBalanceByAddressInSlotRange(
+          @Param("address") String address,
+          @Param("fromDate") Long fromDate,
+          @Param("toDate") Long toDate);
+
 }
