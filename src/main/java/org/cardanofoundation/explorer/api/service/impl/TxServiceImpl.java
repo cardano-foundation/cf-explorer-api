@@ -359,7 +359,9 @@ public class TxServiceImpl implements TxService {
           txFilterResponse.setTime(block.getTime().toLocalDateTime());
           txFilterResponse.setBlockNo(block.getBlockNo());
           txFilterResponse.setEpochNo(block.getEpochNo());
-          txFilterResponse.setSlot(block.getSlotNo().intValue());
+          if (block.getSlotNo() != null) {
+            txFilterResponse.setSlot(block.getSlotNo().intValue());
+          }
           txFilterResponse.setEpochSlotNo(block.getEpochSlotNo());
           txFilterResponse.setFee(tx.getFee());
           txFilterResponse.setBalance(balance);
