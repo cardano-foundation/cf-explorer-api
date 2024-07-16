@@ -123,8 +123,10 @@ public class AddressServiceImpl implements AddressService {
   private boolean checkNetworkAddress(String address) {
     if (address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
       return !network.equals(CommonConstant.MAINNET_NETWORK);
-    } else {
+    } else if (address.startsWith(CommonConstant.ADDRESS_PREFIX)) {
       return network.equals(CommonConstant.MAINNET_NETWORK);
+    } else { // Genesis address
+      return true;
     }
   }
 
