@@ -43,7 +43,7 @@ public interface AddressTxAmountRepository
       value =
           """
                 SELECT COUNT(ab.stakeAddress) FROM AddressTxAmount ab
-                  WHERE ab.stakeAddress = :stakeAddress GROUP BY ab.address
+                  WHERE ab.stakeAddress = :stakeAddress
                 """)
   Optional<Long> getTxCountForStakeAddress(@Param("stakeAddress") String stakeAddress);
 
