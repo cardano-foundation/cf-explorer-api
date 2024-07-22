@@ -231,10 +231,10 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
   @Query(
       value =
           """
-    select round(avg(cte.active)) from
-    (select count(distinct b.slotLeaderId) as active from Block b
-    where b.epochNo < :epochNo and b.epochNo >= :epochNo - 3
-    group by b.epochNo) as cte
-    """)
+            SELECT ROUND(AVG(cte.active)) FROM
+            (SELECT COUNT (DISTINCT b.slotLeaderId) AS active FROM Block b
+            WHERE b.epochNo < :epochNo AND b.epochNo >= :epochNo - 3
+            GROUP BY b.epochNo) AS cte
+            """)
   Long getNumberOfActivePool(@Param("epochNo") Integer epochNo);
 }

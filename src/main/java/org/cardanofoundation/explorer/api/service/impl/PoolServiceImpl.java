@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.mapper.PoolMapper;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolRangeValuesResponse;
-import org.cardanofoundation.explorer.api.model.response.pool.RegisteredStakePoolsChartResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.StakePoolsChartResponse;
 import org.cardanofoundation.explorer.api.projection.PoolRangeProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
@@ -54,7 +54,7 @@ public class PoolServiceImpl implements PoolService {
   }
 
   @Override
-  public RegisteredStakePoolsChartResponse getRegisteredStakePoolsChart() {
+  public StakePoolsChartResponse getStakePoolsChart() {
     Integer currentEpoch = epochRepository.findCurrentEpochNo().orElseThrow();
 
     Long registered =
@@ -64,9 +64,6 @@ public class PoolServiceImpl implements PoolService {
 
     Long active = poolUpdateRepository.getNumberOfActivePool(currentEpoch);
 
-    return RegisteredStakePoolsChartResponse.builder()
-        .registered(registered)
-        .active(active)
-        .build();
+    return StakePoolsChartResponse.builder().registeredPool(registered).activePool(active).build();
   }
 }
