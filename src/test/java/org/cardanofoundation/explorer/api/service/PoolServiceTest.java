@@ -66,9 +66,9 @@ public class PoolServiceTest {
     when(epochRepository.findCurrentEpochNo()).thenReturn(java.util.Optional.of(20));
     when(poolUpdateRepository.getNumberOfActivePool(anyInt())).thenReturn(30L);
 
-    var actual = poolServiceImpl.getRegisteredStakePoolsChart();
+    var actual = poolServiceImpl.getStakePoolsChart();
     Assertions.assertNotNull(actual);
-    Assertions.assertEquals(10, actual.getRegistered());
-    Assertions.assertEquals(30, actual.getActive());
+    Assertions.assertEquals(10, actual.getRegisteredPool());
+    Assertions.assertEquals(30, actual.getActivePool());
   }
 }
