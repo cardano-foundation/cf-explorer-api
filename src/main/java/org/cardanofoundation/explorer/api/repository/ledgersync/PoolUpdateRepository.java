@@ -227,4 +227,14 @@ public interface PoolUpdateRepository extends JpaRepository<PoolUpdate, Long> {
               + "LIMIT 1")
   PoolCertificateProjection getLastPoolUpdateByPoolHash(
       @Param("poolViewOrHash") String poolViewOrHash);
+
+  @Query(
+      value =
+          """
+    select round(avg(cte.active)) from
+    (select count(distinct b.slotLeaderId) as active from Block b
+    where b.epochNo < :epochNo and b.epochNo >= :epochNo - 3
+    group by b.epochNo) as cte
+    """)
+  Long getNumberOfActivePool(@Param("epochNo") Integer epochNo);
 }
