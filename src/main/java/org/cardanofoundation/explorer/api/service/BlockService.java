@@ -1,9 +1,13 @@
 package org.cardanofoundation.explorer.api.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 
+import org.cardanofoundation.explorer.api.common.enumeration.BlockPropagationChartType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.BlockPropagationResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
 
 public interface BlockService {
@@ -32,4 +36,7 @@ public interface BlockService {
    * @return list block of this epoch
    */
   BaseFilterResponse<BlockFilterResponse> getBlockByEpoch(String no, Pageable pageable);
+
+  List<BlockPropagationResponse> getBlockPropagation(
+      BlockPropagationChartType type, Pageable pageable);
 }

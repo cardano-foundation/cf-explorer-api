@@ -20,13 +20,17 @@ import org.springframework.stereotype.Service;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.explorer.api.common.enumeration.BlockPropagationChartType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.BlockMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.BlockPropagationResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
 import org.cardanofoundation.explorer.api.projection.PoolMintBlockProjection;
+import org.cardanofoundation.explorer.api.repository.explorer.BlockStatisticsDailyRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.BlockStatisticsPerEpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CustomBlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.SlotLeaderRepository;
@@ -50,6 +54,8 @@ public class BlockServiceImpl implements BlockService {
   private final SlotLeaderRepository slotLeaderRepository;
   private final BlockMapper blockMapper;
   private final CustomBlockRepository customBlockRepository;
+  private final BlockStatisticsPerEpochRepository blockStatisticsPerEpochRepository;
+  private final BlockStatisticsDailyRepository blockStatisticsDailyRepository;
 
   @Override
   public BlockResponse getBlockDetailByBlockId(String blockId) {
@@ -304,6 +310,38 @@ public class BlockServiceImpl implements BlockService {
       return mapperBlockToBlockFilterResponse(blocks);
     } catch (NumberFormatException e) {
       throw new NoContentException(BusinessCode.EPOCH_NOT_FOUND);
+    }
+  }
+
+  @Override
+  public List<BlockPropagationResponse> getBlockPropagation(
+      BlockPropagationChartType type, Pageable pageable) {
+    if (type == null || type.equals(BlockPropagationChartType.EPOCH)) {
+      return blockStatisticsPerEpochRepository.findAllByOrderByEpochNoDesc(pageable).stream()
+          .map(
+              blockStatisticsPerEpoch ->
+                  BlockPropagationResponse.builder()
+                      .epochNo(blockStatisticsPerEpoch.getEpochNo())
+                      .blockPropMean(blockStatisticsPerEpoch.getBlockPropMean())
+                      .blockPropMedian(blockStatisticsPerEpoch.getBlockPropMedian())
+                      .blockPropP90(blockStatisticsPerEpoch.getBlockPropP90())
+                      .blockPropP95(blockStatisticsPerEpoch.getBlockPropP95())
+                      .time(blockStatisticsPerEpoch.getTime())
+                      .build())
+          .collect(Collectors.toList());
+    } else {
+      return blockStatisticsDailyRepository.findAllByOrderByTimeDesc(pageable).stream()
+          .map(
+              blockStatisticsPerEpoch ->
+                  BlockPropagationResponse.builder()
+                      .epochNo(blockStatisticsPerEpoch.getEpochNo())
+                      .blockPropMean(blockStatisticsPerEpoch.getBlockPropMean())
+                      .blockPropMedian(blockStatisticsPerEpoch.getBlockPropMedian())
+                      .blockPropP90(blockStatisticsPerEpoch.getBlockPropP90())
+                      .blockPropP95(blockStatisticsPerEpoch.getBlockPropP95())
+                      .time(blockStatisticsPerEpoch.getTime())
+                      .build())
+          .collect(Collectors.toList());
     }
   }
 
