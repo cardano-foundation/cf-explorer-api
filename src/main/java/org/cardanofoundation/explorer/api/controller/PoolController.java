@@ -21,6 +21,7 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolRangeValuesResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.StakePoolsChartResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.TxPoolCertificateHistory;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolRegistrationService;
@@ -105,5 +106,14 @@ public class PoolController {
       tags = {"pools"})
   public ResponseEntity<PoolRangeValuesResponse> getPoolRangeValues() {
     return ResponseEntity.ok(poolService.getPoolRangeValues());
+  }
+
+  @GetMapping("/stake-pools-chart")
+  @LogMessage
+  @Operation(
+      summary = "Get number of registered and active stake pools",
+      tags = {"pools"})
+  public ResponseEntity<StakePoolsChartResponse> getStakepoolsChart() {
+    return ResponseEntity.ok(poolService.getStakePoolsChart());
   }
 }
