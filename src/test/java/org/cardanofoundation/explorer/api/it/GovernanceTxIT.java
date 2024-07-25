@@ -1,20 +1,33 @@
 package org.cardanofoundation.explorer.api.it;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import static com.bloxbean.cardano.client.common.ADAConversionUtil.adaToLovelace;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.math.BigInteger;
-
 import com.bloxbean.cardano.client.account.Account;
+import com.bloxbean.cardano.client.api.ProtocolParamsSupplier;
+import com.bloxbean.cardano.client.api.exception.ApiException;
+import com.bloxbean.cardano.client.api.impl.StaticTransactionEvaluator;
 import com.bloxbean.cardano.client.api.model.Result;
 import com.bloxbean.cardano.client.backend.api.BackendService;
+import com.bloxbean.cardano.client.backend.api.DefaultProtocolParamsSupplier;
+import com.bloxbean.cardano.client.backend.api.DefaultTransactionProcessor;
+import com.bloxbean.cardano.client.backend.api.DefaultUtxoSupplier;
 import com.bloxbean.cardano.client.backend.blockfrost.common.Constants;
 import com.bloxbean.cardano.client.backend.blockfrost.service.BFBackendService;
 import com.bloxbean.cardano.client.common.model.Networks;
 import com.bloxbean.cardano.client.crypto.cip1852.DerivationPath;
+import com.bloxbean.cardano.client.exception.CborSerializationException;
 import com.bloxbean.cardano.client.function.helper.SignerProviders;
 import com.bloxbean.cardano.client.governance.DRepId;
+import com.bloxbean.cardano.client.plutus.spec.BigIntPlutusData;
+import com.bloxbean.cardano.client.plutus.spec.ExUnits;
+import com.bloxbean.cardano.client.plutus.spec.PlutusV3Script;
 import com.bloxbean.cardano.client.quicktx.QuickTxBuilder;
+import com.bloxbean.cardano.client.quicktx.ScriptTx;
 import com.bloxbean.cardano.client.quicktx.Tx;
 import com.bloxbean.cardano.client.spec.UnitInterval;
 import com.bloxbean.cardano.client.transaction.spec.ProtocolParamUpdate;
@@ -36,13 +49,16 @@ import com.bloxbean.cardano.client.transaction.spec.governance.actions.Parameter
 import com.bloxbean.cardano.client.transaction.spec.governance.actions.TreasuryWithdrawalsAction;
 import com.bloxbean.cardano.client.transaction.spec.governance.actions.UpdateCommittee;
 import com.bloxbean.cardano.client.util.HexUtil;
+import com.bloxbean.cardano.client.util.JsonUtil;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 @Disabled
 public class GovernanceTxIT extends QuickTxBaseIT {
+
   BackendService backendService;
   Account sender1; // dRep1
   Account sender2; // delegate to dRep1
@@ -77,7 +93,6 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   @BeforeEach
   void setup() {
     backendService = getBackendService();
-    quickTxBuilder = new QuickTxBuilder(backendService);
 
     // mnemonic of wallet account
     // create a wallet account using Eternal wallet extension and use the mnemonic phrase
@@ -123,15 +138,15 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void registerDrep() {
+  void registerDrep() throws ApiException {
     var anchor =
         new Anchor(
             "https://shorturl.at/vBIJ8",
             HexUtil.decodeHexString(
                 "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
-    registerDrep(sender1, anchor);
-    //    registerDrep(sender3, anchor);
-    //    registerDrep(sender5, anchor);
+    //    registerDrep(sender1, anchor);
+    registerDrep(sender3, anchor);
+    registerDrep(sender5, anchor);
   }
 
   @Test
@@ -152,8 +167,16 @@ public class GovernanceTxIT extends QuickTxBaseIT {
     //    voteDelegation(sender5, sender6);
   }
 
-  void registerDrep(Account drep, Anchor anchor) {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+  void registerDrep(Account drep, Anchor anchor) throws ApiException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setDrepDeposit(adaToLovelace(500));
+    //    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder =
+        new QuickTxBuilder(
+            new DefaultUtxoSupplier(backendService.getUtxoService()),
+            () -> protocolParam,
+            new DefaultTransactionProcessor(backendService.getTransactionService()));
 
     Tx drepRegTx = new Tx().registerDRep(drep, anchor).from(drep.baseAddress());
 
@@ -162,9 +185,10 @@ public class GovernanceTxIT extends QuickTxBaseIT {
             .compose(drepRegTx)
             .withSigner(SignerProviders.signerFrom(drep))
             .withSigner(SignerProviders.signerFrom(drep.drepHdKeyPair()))
-            .complete();
+            .withTxInspector(transaction -> System.out.println(JsonUtil.getPrettyJson(transaction)))
+            .completeAndWait(System.out::println);
 
-    System.out.println("DRepId : " + drep.drepId());
+    System.out.println("DRepId : " + sender1.drepId());
 
     System.out.println(result);
     assertTrue(result.isSuccessful());
@@ -216,17 +240,26 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void deRegisterDrep() {
+  void deRegisterDrep() throws ApiException {
     deRegisterDrep(sender1);
   }
 
-  void deRegisterDrep(Account drep) {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
-    Tx tx = new Tx().unregisterDRep(drep.drepCredential()).from(drep.baseAddress());
+  void deRegisterDrep(Account drep) throws ApiException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setDrepDeposit(adaToLovelace(500));
+    //    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder =
+        new QuickTxBuilder(
+            new DefaultUtxoSupplier(backendService.getUtxoService()),
+            () -> protocolParam,
+            new DefaultTransactionProcessor(backendService.getTransactionService()));
+
+    Tx drepDeRegTx = new Tx().unregisterDRep(drep.drepCredential()).from(drep.baseAddress());
 
     Result<String> result =
         quickTxBuilder
-            .compose(tx)
+            .compose(drepDeRegTx)
             .withSigner(SignerProviders.drepKeySignerFrom(drep))
             .withSigner(SignerProviders.signerFrom(drep))
             .complete();
@@ -270,8 +303,15 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void createProposal_infoAction() {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+  void createProposal_infoAction() throws ApiException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(
+        new DefaultUtxoSupplier(backendService.getUtxoService()),
+        () -> protocolParam,
+        new DefaultTransactionProcessor(backendService.getTransactionService())
+    );
 
     var govAction = new InfoAction();
     var anchor =
@@ -282,7 +322,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(govAction, adaToLovelace(50000), sender1.stakeAddress(), anchor)
+            .createProposal(govAction, sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -290,7 +330,8 @@ public class GovernanceTxIT extends QuickTxBaseIT {
             .compose(tx)
             .withSigner(SignerProviders.drepKeySignerFrom(sender1))
             .withSigner(SignerProviders.signerFrom(sender1))
-            .completeAndWait(s -> System.out.println(s));
+            .withTxInspector(transaction -> System.out.println(JsonUtil.getPrettyJson(transaction)))
+            .completeAndWait(System.out::println);
 
     System.out.println(result);
     assertTrue(result.isSuccessful());
@@ -298,30 +339,32 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void createProposal_treasuryWithdrawalAction() {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+  void createProposal_treasuryWithdrawalAction() throws ApiException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(
+        new DefaultUtxoSupplier(backendService.getUtxoService()),
+        () -> protocolParam,
+        new DefaultTransactionProcessor(backendService.getTransactionService())
+    );
 
     var treasuryWithdrawalsAction = new TreasuryWithdrawalsAction();
     treasuryWithdrawalsAction.addWithdrawal(
-        new Withdrawal(sender1.stakeAddress(), adaToLovelace(50000)));
-    var anchor =
-        new Anchor(
-            "https://shorturl.at/vBIJ8",
-            HexUtil.decodeHexString(
-                "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
+        new Withdrawal("stake_test1ur6l9f5l9jw44kl2nf6nm5kca3nwqqkccwynnjm0h2cv60ccngdwa",
+                       adaToLovelace(20)));
+    var anchor = new Anchor("https://xyz.com",
+                            HexUtil.decodeHexString(
+                                "daeef700c0039a2efb056a665b3a8bcd94f8670b88d659f7f3db68340f6f0937"));
 
-    Tx tx =
-        new Tx()
-            .createProposal(
-                treasuryWithdrawalsAction, adaToLovelace(50000), sender1.stakeAddress(), anchor)
-            .from(sender1Addr);
+    Tx tx = new Tx()
+        .createProposal(treasuryWithdrawalsAction, sender1.stakeAddress(), anchor)
+        .from(sender1Addr);
 
-    Result<String> result =
-        quickTxBuilder
-            .compose(tx)
-            .withSigner(SignerProviders.drepKeySignerFrom(sender1))
-            .withSigner(SignerProviders.signerFrom(sender1))
-            .completeAndWait(s -> System.out.println(s));
+    Result<String> result = quickTxBuilder.compose(tx)
+        .withSigner(SignerProviders.drepKeySignerFrom(sender1))
+        .withSigner(SignerProviders.signerFrom(sender1))
+        .completeAndWait(s -> System.out.println(s));
 
     System.out.println(result);
     assertTrue(result.isSuccessful());
@@ -329,16 +372,24 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void createProposal_parameterChangeAction() {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+  void createProposal_parameterChangeAction() throws ApiException, CborSerializationException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(
+        new DefaultUtxoSupplier(backendService.getUtxoService()),
+        () -> protocolParam,
+        new DefaultTransactionProcessor(backendService.getTransactionService())
+    );
+
 
     var parameterChange = new ParameterChangeAction();
-    //    parameterChange.setPrevGovActionId(
-    //        new GovActionId("950d4b364840a27afeba929324d51dec0fac80b00cf7ca37905de08e3eae5ca6",
-    // 0));
-    parameterChange.setProtocolParamUpdate(
-        ProtocolParamUpdate.builder().keyDeposit(new BigInteger("50000000000")).build());
-
+    //  parameterChange.setPrevGovActionId(new GovActionId("529736be1fac33431667f2b66231b7b66d4c7a3975319ddac7cfb17dcb5c4145", 0));
+    parameterChange.setProtocolParamUpdate(ProtocolParamUpdate.builder()
+                                               .minPoolCost(adaToLovelace(300))
+                                               .build()
+    );
+    parameterChange.setPolicyHash(HexUtil.decodeHexString("edcd84c10e36ae810dc50847477083069db796219b39ccde790484e0"));
     var anchor =
         new Anchor(
             "https://shorturl.at/vBIJ8",
@@ -347,13 +398,13 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(
-                parameterChange, new BigInteger("50000000000"), sender1.stakeAddress(), anchor)
+            .createProposal(parameterChange, sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
         quickTxBuilder
             .compose(tx)
+            .feePayer(sender1Addr)
             .withSigner(SignerProviders.drepKeySignerFrom(sender1))
             .withSigner(SignerProviders.signerFrom(sender1))
             .completeAndWait(s -> System.out.println(s));
@@ -364,8 +415,15 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void createProposal_newConstitutionAction() {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+  void createProposal_newConstitutionAction() throws ApiException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(
+        new DefaultUtxoSupplier(backendService.getUtxoService()),
+        () -> protocolParam,
+        new DefaultTransactionProcessor(backendService.getTransactionService())
+    );
 
     var anchor =
         new Anchor(
@@ -373,15 +431,11 @@ public class GovernanceTxIT extends QuickTxBaseIT {
             HexUtil.decodeHexString(
                 "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
     var govAction = new NewConstitution();
-    //    govAction.setPrevGovActionId(
-    //        new GovActionId("597686b8c917ba2c74cd0018f3fb325bddf0f1fe747038170c41373376c03b5c",
-    // 0));
     govAction.setConstitution(Constitution.builder().anchor(anchor).build());
 
     Tx tx =
         new Tx()
-            .createProposal(
-                govAction, new BigInteger("50000000000"), sender1.stakeAddress(), anchor)
+            .createProposal(govAction, sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -397,13 +451,20 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void createProposal_noConfidence() {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+  void createProposal_noConfidence() throws ApiException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(
+        new DefaultUtxoSupplier(backendService.getUtxoService()),
+        () -> protocolParam,
+        new DefaultTransactionProcessor(backendService.getTransactionService())
+    );
 
     var noConfidence = new NoConfidence();
     // if there is no previous action id, then set it to null
     //    noConfidence.setPrevGovActionId(
-    //        new GovActionId("e86050ac376fc4df7c76635f648c963f44702e13beb81a5c9971a418013c74dc",
+    //        newGovActionId("e86050ac376fc4df7c76635f648c963f44702e13beb81a5c9971a418013c74dc",
     // 0));
 
     var anchor =
@@ -414,7 +475,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(noConfidence, adaToLovelace(50000), sender1.stakeAddress(), anchor)
+            .createProposal(noConfidence, sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -430,8 +491,15 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void createProposal_updateCommittee() {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+  void createProposal_updateCommittee() throws ApiException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(
+        new DefaultUtxoSupplier(backendService.getUtxoService()),
+        () -> protocolParam,
+        new DefaultTransactionProcessor(backendService.getTransactionService())
+    );
 
     var updateCommittee = new UpdateCommittee();
 
@@ -451,7 +519,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
 
     Tx tx =
         new Tx()
-            .createProposal(updateCommittee, adaToLovelace(50000), sender1.stakeAddress(), anchor)
+            .createProposal(updateCommittee, sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -467,14 +535,21 @@ public class GovernanceTxIT extends QuickTxBaseIT {
   }
 
   @Test
-  void createProposal_hardforkInitiation() {
-    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(backendService);
+  void createProposal_hardforkInitiation() throws ApiException {
+    var protocolParam = backendService.getEpochService().getProtocolParameters().getValue();
+    protocolParam.setGovActionDeposit(adaToLovelace(100000));
+
+    QuickTxBuilder quickTxBuilder = new QuickTxBuilder(
+        new DefaultUtxoSupplier(backendService.getUtxoService()),
+        () -> protocolParam,
+        new DefaultTransactionProcessor(backendService.getTransactionService())
+    );
 
     var hardforkInitiation = new HardForkInitiationAction();
 
     // if there is no previous action id, then set it to null
     //    hardforkInitiation.setPrevGovActionId(
-    //        new GovActionId("416f7f01c548a85546aa5bbd155b34bb2802df68e08db4e843ef6da764cd8f7e",
+    //        newGovActionId("416f7f01c548a85546aa5bbd155b34bb2802df68e08db4e843ef6da764cd8f7e",
     // 0));
     hardforkInitiation.setProtocolVersion(new ProtocolVersion(10, 0));
 
@@ -487,7 +562,7 @@ public class GovernanceTxIT extends QuickTxBaseIT {
     Tx tx =
         new Tx()
             .createProposal(
-                hardforkInitiation, adaToLovelace(50000), sender1.stakeAddress(), anchor)
+                hardforkInitiation, sender1.stakeAddress(), anchor)
             .from(sender1Addr);
 
     Result<String> result =
@@ -510,11 +585,11 @@ public class GovernanceTxIT extends QuickTxBaseIT {
             HexUtil.decodeHexString(
                 "6dd65423ea0754ddf8a1a142dfc8152797b6fb4a4cd174a0cd3028f681a0c755"));
     var govActionId =
-        new GovActionId("c99298a017b72988a00be57dd1aab195eaa263f654bb58e8490d685843fba861", 0);
+        new GovActionId("faa59578fcda33a62e9147d25de9f9cc02920814f7b9d28f4ce518081d885786", 0);
 
-    createVote(govActionId, Vote.YES, anchor, sender1);
-    createVote(govActionId, Vote.NO, anchor, sender3);
-    createVote(govActionId, Vote.ABSTAIN, anchor, sender5);
+    createVote(govActionId, Vote.NO, anchor, sender1);
+//    createVote(govActionId, Vote.NO, anchor, sender3);
+//    createVote(govActionId, Vote.ABSTAIN, anchor, sender5);
   }
 
   void createVote(GovActionId govActionId, Vote vote, Anchor anchor, Account drep) {
