@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +26,9 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import reactor.netty.http.client.HttpClient;
 
+import org.cardanofoundation.conversions.CardanoConverters;
+import org.cardanofoundation.conversions.ClasspathConversionsFactory;
+import org.cardanofoundation.conversions.domain.NetworkType;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.Request;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
@@ -93,5 +97,15 @@ public class WebConfig implements WebMvcConfigurer {
         .clientConnector(new ReactorClientHttpConnector(httpClient))
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .build();
+  }
+
+  @Bean
+  public CardanoConverters cardanoConverters(@Value("${application.network}") String network) {
+    return switch (network) {
+      case "preprod" -> ClasspathConversionsFactory.createConverters(NetworkType.PREPROD);
+      case "preview" -> ClasspathConversionsFactory.createConverters(NetworkType.PREVIEW);
+      case "sanchonet" -> ClasspathConversionsFactory.createConverters(NetworkType.SANCHONET);
+      default -> ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    };
   }
 }
