@@ -1510,12 +1510,6 @@ public class TxServiceImpl implements TxService {
     Map<BigInteger, TxGraphProjection> txGraphMap =
         txs.stream().collect(Collectors.toMap(TxGraphProjection::getTime, Function.identity()));
 
-    BigInteger minTxTime =
-        txs.stream()
-            .map(TxGraphProjection::getTime)
-            .min(BigInteger::compareTo)
-            .orElse(BigInteger.ZERO);
-
     List<TxGraph> txGraphs = new ArrayList<>();
     while (epochSecondStartTime <= currentEpochSecondTime) {
       TxGraphProjection txChart = txGraphMap.get(BigInteger.valueOf(epochSecondStartTime));
