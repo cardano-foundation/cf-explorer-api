@@ -8,6 +8,7 @@ import org.cardanofoundation.explorer.api.model.request.governanceAction.Governa
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 
@@ -23,4 +24,6 @@ public interface GovernanceActionService {
 
   BaseFilterResponse<GovernanceActionResponse> getGovCommitteeStatusHistory(
       GovCommitteeHistoryFilter govCommitteeHistoryFilter, Pageable pageable);
+
+  GovernanceOverviewResponse getGovernanceOverview();
 }

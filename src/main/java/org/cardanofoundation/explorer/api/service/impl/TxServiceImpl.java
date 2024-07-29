@@ -359,7 +359,9 @@ public class TxServiceImpl implements TxService {
           txFilterResponse.setTime(block.getTime().toLocalDateTime());
           txFilterResponse.setBlockNo(block.getBlockNo());
           txFilterResponse.setEpochNo(block.getEpochNo());
-          txFilterResponse.setSlot(block.getSlotNo().intValue());
+          if (block.getSlotNo() != null) {
+            txFilterResponse.setSlot(block.getSlotNo().intValue());
+          }
           txFilterResponse.setEpochSlotNo(block.getEpochSlotNo());
           txFilterResponse.setFee(tx.getFee());
           txFilterResponse.setBalance(balance);
@@ -890,8 +892,10 @@ public class TxServiceImpl implements TxService {
    * @param contractResponse
    */
   private void setCertContractResponse(ContractResponse contractResponse) {
-    contractResponse.setExecutionInputs(List.of(contractResponse.getStakeAddress()));
-    contractResponse.setExecutionOutputs(List.of(contractResponse.getStakeAddress()));
+    if (contractResponse.getStakeAddress() != null) {
+      contractResponse.setExecutionInputs(List.of(contractResponse.getStakeAddress()));
+      contractResponse.setExecutionOutputs(List.of(contractResponse.getStakeAddress()));
+    }
   }
 
   /**
@@ -912,7 +916,9 @@ public class TxServiceImpl implements TxService {
    * @param contractResponse
    */
   private void setSpendContractResponse(ContractResponse contractResponse) {
-    contractResponse.setExecutionInputs(List.of(contractResponse.getAddress()));
+    if (contractResponse.getAddress() != null) {
+      contractResponse.setExecutionInputs(List.of(contractResponse.getAddress()));
+    }
   }
 
   /**

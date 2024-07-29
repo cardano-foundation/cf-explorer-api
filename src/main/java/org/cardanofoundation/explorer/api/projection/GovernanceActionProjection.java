@@ -28,4 +28,6 @@ public interface GovernanceActionProjection {
   String getVoterHash();
 
   Long getCreatedAt();
+
+  Long getGovCount();
 }
