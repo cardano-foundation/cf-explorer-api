@@ -74,29 +74,7 @@ spring:
         max-page-size: 100
   jackson:
     default-property-inclusion: ${JACKSON_INCLUSION:ALWAYS}
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:127.0.0.1:29092}
-    useSsl: ${KAFKA_USE_SSL:false}
-    #client-id:  crawler
-    producer:
-      acks: all
-      retries: 3
-      retryBackoff: 1000
-      properties:
-        enable:
-          idempotence: true
-        max:
-          pool:
-            interval: 60000
-          block:
-            ms: 3000
-          in:
-            flight:
-              requests:
-                per:
-                  connection: 1
-    topics:
-      reports: ${KAFKA_REPORTS_TOPIC:dev.explorer.api.mainnet.reports}
+
 
 redis:
   databaseIndex: 0
@@ -113,7 +91,7 @@ redis:
       port: ${REDIS_SENTINEL_PORT:26379}
 
 application:
-  network: ${DB_SCHEMA:mainnet}
+  network: ${NETWORK:mainnet}
   epoch:
     days: ${EPOCH_DAYS:5}
   api.news:
@@ -205,12 +183,6 @@ logging:
           EC2MetadataUtils: error
 
 ---
-# Redis pubsub topic
-spring:
-  redis:
-    pubsub:
-      topic: ${REDIS_PUBSUB_TOPIC:block-sync-topic}
-
 genesis:
   shelley: ${SHELLEY_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/shelley-genesis.json}
   byron: ${BYRON_GENESIS_FILE:src/main/resources/networks/${SCHEMA:mainnet}/byron-genesis.json}

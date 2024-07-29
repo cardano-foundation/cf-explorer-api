@@ -29,32 +29,69 @@ public class Protocols {
   @JsonIgnore EpochChange epochChange;
   ProtocolHistory minFeeA;
   ProtocolHistory minFeeB;
+
+  @JsonProperty("maxBBSize")
   ProtocolHistory maxBlockSize;
+
   ProtocolHistory maxTxSize;
+
+  @JsonProperty("maxBHSize")
   ProtocolHistory maxBhSize;
+
   ProtocolHistory keyDeposit;
   ProtocolHistory poolDeposit;
+
+  @JsonProperty("eMax")
   ProtocolHistory maxEpoch;
+
+  @JsonProperty("nOpt")
   ProtocolHistory optimalPoolCount;
+
+  @JsonProperty("a0")
   ProtocolHistory influence;
+
+  @JsonProperty("rho")
   ProtocolHistory monetaryExpandRate;
+
+  @JsonProperty("tau")
   ProtocolHistory treasuryGrowthRate;
+
   ProtocolHistory decentralisation;
   ProtocolHistory entropy;
   ProtocolHistory protocolMajor;
   ProtocolHistory protocolMinor;
   ProtocolHistory minUtxoValue;
   ProtocolHistory minPoolCost;
+
+  @JsonProperty("costModels")
   ProtocolHistory costModel;
+
   ProtocolHistory priceMem;
   ProtocolHistory priceStep;
   ProtocolHistory maxTxExMem;
+
   ProtocolHistory maxTxExSteps;
+
   ProtocolHistory maxBlockExMem;
+
   ProtocolHistory maxBlockExSteps;
+
   ProtocolHistory maxValSize;
+
+  @JsonProperty("collateralPercentage")
   ProtocolHistory collateralPercent;
+
   ProtocolHistory maxCollateralInputs;
+  ProtocolHistory drepDeposit;
+  ProtocolHistory drepActivity;
+  ProtocolHistory govActionDeposit;
+  ProtocolHistory govActionLifetime;
+
+  @JsonProperty("ccMaxTermLength")
+  ProtocolHistory committeeMaxTermLength;
+
+  @JsonProperty("ccMinSize")
+  ProtocolHistory committeeMinSize;
 
   @JsonProperty("coinsPerUTxOByte")
   ProtocolHistory coinsPerUtxoSize;
@@ -119,7 +156,13 @@ public class Protocols {
         maxValSize,
         collateralPercent,
         maxCollateralInputs,
-        coinsPerUtxoSize);
+        coinsPerUtxoSize,
+        drepDeposit,
+        drepActivity,
+        govActionDeposit,
+        govActionLifetime,
+        committeeMaxTermLength,
+        committeeMinSize);
   }
 
   @JsonIgnore
@@ -152,6 +195,12 @@ public class Protocols {
         && Objects.isNull(maxValSize)
         && Objects.isNull(collateralPercent)
         && Objects.isNull(maxCollateralInputs)
-        && Objects.isNull(coinsPerUtxoSize);
+        && Objects.isNull(coinsPerUtxoSize)
+        && Objects.isNull(drepDeposit)
+        && Objects.isNull(drepActivity)
+        && Objects.isNull(govActionDeposit)
+        && Objects.isNull(govActionLifetime)
+        && Objects.isNull(committeeMaxTermLength)
+        && Objects.isNull(committeeMinSize);
   }
 }
