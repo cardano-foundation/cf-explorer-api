@@ -40,14 +40,19 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   @Query(
       value =
           """
-          SELECT addr.address as address, coalesce(atc.tx_count, 0) as txCount, coalesce(ab.quantity, 0) as balance
+          SELECT addr.address              as address,
+                 coalesce(atc.tx_count, 0) as txCount,
+                 coalesce(ab.quantity, 0)  as balance
           FROM address addr
                    LEFT JOIN address_tx_count atc ON addr.address = atc.address
-                   LEFT JOIN (SELECT abv.address,
-                                     abv.quantity
-                              FROM address_balance_view abv
-                              WHERE abv.address = :address
-                                AND abv.unit = 'lovelace') ab ON ab.address = addr.address
+                   LEFT JOIN LATERAL (SELECT tmp.address,
+                                             tmp.quantity
+                                      FROM address_balance tmp
+                                      WHERE tmp.address = addr.address
+                                        AND tmp.unit = 'lovelace'
+                                      ORDER BY tmp.slot DESC
+                                      LIMIT 1) ab
+                             ON ab.address = addr.address
           WHERE addr.address = :address
           """,
       nativeQuery = true)
