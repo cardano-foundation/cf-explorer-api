@@ -144,11 +144,14 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-          SELECT tmp.txHash as txHash, tmp.blockTime as blockTime
-          FROM
-          (SELECT DISTINCT(atm.txHash) as txHash, atm.blockTime as blockTime
-          FROM AddressTxAmount atm WHERE atm.address = :address) as tmp
-      """)
+          WITH address_tx_temp AS (SELECT ata.tx_hash, ata.slot
+                                   FROM address_tx_amount ata
+                                   WHERE ata.address = :address
+                                   GROUP BY ata.tx_hash, ata.slot)
+          SELECT address_tx_temp.tx_hash as txHash, address_tx_temp.slot as slot
+          FROM address_tx_temp
+      """,
+      nativeQuery = true)
   List<TxProjection> findAllTxByAddress(@Param("address") String address, Pageable pageable);
 
   @Query(
