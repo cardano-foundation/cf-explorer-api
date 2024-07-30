@@ -418,9 +418,20 @@ public class TxServiceImpl implements TxService {
 
     List<TxProjection> txsProjection =
         addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
-    List<Tx> txs =
-        txRepository.findAllByHashIn(
-            txsProjection.stream().map(TxProjection::getTxHash).collect(Collectors.toList()));
+
+    Map<String, Tx> txMap =
+        txRepository
+            .findAllByHashIn(txsProjection.stream().map(TxProjection::getTxHash).toList())
+            .stream()
+            .collect(Collectors.toMap(Tx::getHash, Function.identity()));
+
+    List<Tx> txs = new ArrayList<>();
+    for (TxProjection txProjection : txsProjection) {
+      if (txMap.containsKey(txProjection.getTxHash())) {
+        txs.add(txMap.get(txProjection.getTxHash()));
+      }
+    }
+
     Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount.getTxCount());
 
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
