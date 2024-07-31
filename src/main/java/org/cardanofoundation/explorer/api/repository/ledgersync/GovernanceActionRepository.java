@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
+import org.cardanofoundation.explorer.api.projection.GovernanceActionOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 import org.cardanofoundation.explorer.common.entity.compositeKey.GovActionProposalId;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
@@ -143,4 +144,17 @@ public interface GovernanceActionRepository
         GROUP BY gapi.status
         """)
   List<GovernanceActionProjection> getGovActionGroupByGovActionStatus();
+
+  @Query(
+      """
+      SELECT gap.txHash as txHash, gap.index as index, gapi.blockTime as dateCreated, gapi.type as actionType, gapi.status as status,
+      gapi.indexType as indexType, oc.abstractData as abstract, oc.motivation as motivation, oc.rationale as rationale,
+      gap.anchorUrl as anchorUrl, gap.anchorHash as anchorHash, oc.rawData as rawData
+      FROM GovActionProposal gap
+      LEFT JOIN GovActionProposalInfo gapi ON gapi.txHash = gap.txHash AND gapi.index = gap.index
+      LEFT JOIN OffChainVoteGovActionData oc ON oc.anchorHash = gap.anchorHash AND oc.anchorUrl = gap.anchorUrl
+      WHERE gap.txHash = :txHash and gap.index = :index
+    """)
+  GovernanceActionOverviewProjection getGovernanceActionOverviewByTxHashAndIndex(
+      @Param("txHash") String txHash, @Param("index") Integer index);
 }
