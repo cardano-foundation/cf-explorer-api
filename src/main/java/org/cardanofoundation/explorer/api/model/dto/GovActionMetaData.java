@@ -14,15 +14,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @AllArgsConstructor
 @Builder
 public class GovActionMetaData {
-  @JsonProperty("@context")
-  Object context;
-
-  @JsonProperty("hashAlgorithm")
-  String hashAlgorithm;
-
-  @JsonProperty("body")
-  GovActionMetaDataBody body;
-
   @JsonProperty("authors")
   List<GovActionMetaDataAuthor> authors;
 }
