@@ -29,4 +29,5 @@ public class GovernanceActionResponse {
   Boolean isRepeatVote;
   String voterHash;
   Date createdAt;
+  String govActionName;
 }
