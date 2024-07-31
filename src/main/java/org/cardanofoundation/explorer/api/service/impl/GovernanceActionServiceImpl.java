@@ -14,7 +14,6 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -503,7 +502,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         offChainVoteGovActionDataRepository.getRawDataByAnchorUrlAndAnchorHash(
             anchorUrl, anchorHash);
     if (Objects.isNull(rawData)) {
-      return new BaseFilterResponse<>(new PageImpl<>(new ArrayList<>(), pageable, 0));
+      return new BaseFilterResponse<>(Page.empty(pageable));
     }
     ObjectMapper mapper = new ObjectMapper();
     // ensure that: the field which missing in the json string will not throw exception
@@ -511,7 +510,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     try {
       GovActionMetaData govActionMetaData = mapper.readValue(rawData, GovActionMetaData.class);
       if (govActionMetaData.getAuthors() == null || govActionMetaData.getAuthors().isEmpty()) {
-        return new BaseFilterResponse<>(new PageImpl<>(new ArrayList<>()));
+        return new BaseFilterResponse<>(Page.empty(pageable));
       }
       List<AuthorResponse> authorResponses =
           govActionMetaData.getAuthors().stream()
@@ -528,7 +527,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       return new BaseFilterResponse<>(BaseFilterResponse.getPageImpl(authorResponses, pageable));
     } catch (JsonProcessingException e) {
       log.error("Error when parsing raw data to GovActionMetaData: {}", e.getMessage());
-      return null;
+      return new BaseFilterResponse<>(Page.empty(pageable));
     }
   }
 
