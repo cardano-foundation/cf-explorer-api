@@ -525,16 +525,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                           .build())
               .collect(Collectors.toList());
       authorResponses.sort(Comparator.comparing(AuthorResponse::getName));
-      int totalElements = authorResponses.size();
-      final int start = (int) pageable.getOffset();
-      final int end = Math.min((start + pageable.getPageSize()), totalElements);
-      if (start >= end) {
-        return new BaseFilterResponse<>(new PageImpl<>(new ArrayList<>(), pageable, totalElements));
-      } else {
-        authorResponses.subList(start, end);
-        Page<AuthorResponse> responses = new PageImpl<>(authorResponses, pageable, totalElements);
-        return new BaseFilterResponse<>(responses);
-      }
+      return new BaseFilterResponse<>(BaseFilterResponse.getPageImpl(authorResponses, pageable));
     } catch (JsonProcessingException e) {
       log.error("Error when parsing raw data to GovActionMetaData: {}", e.getMessage());
       return null;
