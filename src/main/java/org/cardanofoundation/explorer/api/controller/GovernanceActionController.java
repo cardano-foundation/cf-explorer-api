@@ -23,10 +23,7 @@ import org.cardanofoundation.explorer.api.model.request.governanceAction.GovComm
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceOverviewResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.*;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
@@ -137,5 +134,40 @@ public class GovernanceActionController {
       @RequestParam @Parameter(description = "The type of voter") VoterType voterType) {
     return ResponseEntity.ok(
         governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index, voterType));
+  }
+
+  @GetMapping("/information")
+  @LogMessage
+  @Operation(
+      summary = "Get governance action that vote by voter hash",
+      tags = {"gov-actions"})
+  public ResponseEntity<GovernanceActionOverViewResponse> getGovActionDetails(
+      @RequestParam @Parameter(description = "The hash of transaction governance action")
+          String txHash,
+      @RequestParam @Parameter(description = "The index of transaction governance action")
+          Integer index) {
+    return ResponseEntity.ok(governanceActionService.getGovernanceActionInfo(txHash, index));
+  }
+
+  @GetMapping("/authors")
+  @LogMessage
+  @Operation(
+      summary = "Get voting on governance action",
+      tags = {"gov-actions"})
+  public ResponseEntity<BaseFilterResponse<AuthorResponse>> getAuthorsByAnchorUrlAndAnchorHash(
+      @RequestParam @Parameter(description = "The anchor url of transaction governance action")
+          String anchorUrl,
+      @RequestParam @Parameter(description = "The anchor hash of transaction governance action")
+          String anchorHash,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 6,
+              sort = {"name"},
+              direction = Sort.Direction.ASC)
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(
+        governanceActionService.getAuthorsByAnchor(anchorUrl, anchorHash, pagination.toPageable()));
   }
 }
