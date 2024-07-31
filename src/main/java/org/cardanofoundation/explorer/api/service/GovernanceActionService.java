@@ -6,10 +6,7 @@ import org.cardanofoundation.explorer.api.model.request.governanceAction.GovComm
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceOverviewResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.*;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 
 public interface GovernanceActionService {
@@ -26,4 +23,9 @@ public interface GovernanceActionService {
       GovCommitteeHistoryFilter govCommitteeHistoryFilter, Pageable pageable);
 
   GovernanceOverviewResponse getGovernanceOverview();
+
+  GovernanceActionOverViewResponse getGovernanceActionInfo(String txHash, Integer index);
+
+  BaseFilterResponse<AuthorResponse> getAuthorsByAnchor(
+      String anchorUrl, String anchorHash, Pageable pageable);
 }
