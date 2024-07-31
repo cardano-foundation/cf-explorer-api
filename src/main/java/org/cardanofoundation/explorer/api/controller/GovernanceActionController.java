@@ -136,15 +136,15 @@ public class GovernanceActionController {
         governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index, voterType));
   }
 
-  @GetMapping("/information")
+  @GetMapping("/{txHash}/{index}")
   @LogMessage
   @Operation(
-      summary = "Get governance action that vote by voter hash",
+      summary = "Get governance action details",
       tags = {"gov-actions"})
   public ResponseEntity<GovernanceActionOverViewResponse> getGovActionDetails(
-      @RequestParam @Parameter(description = "The hash of transaction governance action")
+      @PathVariable @Parameter(description = "The hash of transaction governance action")
           String txHash,
-      @RequestParam @Parameter(description = "The index of transaction governance action")
+      @PathVariable @Parameter(description = "The index of transaction governance action")
           Integer index) {
     return ResponseEntity.ok(governanceActionService.getGovernanceActionInfo(txHash, index));
   }
@@ -152,7 +152,7 @@ public class GovernanceActionController {
   @GetMapping("/authors")
   @LogMessage
   @Operation(
-      summary = "Get voting on governance action",
+      summary = "Get authors who create governance action",
       tags = {"gov-actions"})
   public ResponseEntity<BaseFilterResponse<AuthorResponse>> getAuthorsByAnchorUrlAndAnchorHash(
       @RequestParam @Parameter(description = "The anchor url of transaction governance action")
