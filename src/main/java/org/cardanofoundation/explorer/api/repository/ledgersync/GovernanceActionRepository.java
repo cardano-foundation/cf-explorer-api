@@ -69,7 +69,7 @@ public interface GovernanceActionRepository
              offChain.title      AS govActionName
       FROM GovActionProposal gap
           LEFT JOIN GovActionProposalInfo gapInfo ON (gap.txHash = gapInfo.txHash and gap.index = gapInfo.index)
-          LEFT JOIN OffChainVoteGovActionData offChain ON offChain.anchorUrl = gap.anchorUrl
+          LEFT JOIN OffChainVoteGovActionData offChain ON offChain.anchorUrl = gap.anchorUrl AND offChain.anchorHash = gap.anchorHash
       WHERE (:gapStatus is null or (gapInfo.status = :gapStatus))
           AND gap.type in (:type)
           AND (gap.blockTime >= :from)
