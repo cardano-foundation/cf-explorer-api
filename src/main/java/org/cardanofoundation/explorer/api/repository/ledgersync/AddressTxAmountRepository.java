@@ -234,6 +234,14 @@ public interface AddressTxAmountRepository
   Long getBlockTime(@Param("slot") Long slot);
 
   @Query(
+          value =
+                  """
+                      SELECT max(atm.blockTime) FROM AddressTxAmount atm
+                      WHERE atm.unit = :unit
+                  """)
+  Long getLastActivityTimeOfToken(@Param("unit") String unit);
+
+  @Query(
       value =
           """
               SELECT SUM(atm.quantity) as quantity, date_trunc('day', to_timestamp(atm.block_time) ) as day
