@@ -190,4 +190,13 @@ public class GovernanceActionController {
     return ResponseEntity.ok(
         governanceActionService.getVotingOnGovAction(voteFilter, pagination.toPageable()));
   }
+
+  @GetMapping("/range-values")
+  @LogMessage
+  @Operation(
+      summary = "Get range value to filter on votes overview section",
+      tags = {"gov-actions"})
+  public ResponseEntity<RangeFilterVoteResponse> getRangeFilterForVoteSection() {
+    return ResponseEntity.ok(governanceActionService.getRangeFilterVoteResponse());
+  }
 }
