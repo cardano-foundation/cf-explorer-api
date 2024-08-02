@@ -115,7 +115,7 @@ public class TokenController {
           @PaginationValid
           @PaginationDefault(
               size = 20,
-              sort = {AddressTxAmount_.BLOCK_TIME},
+              sort = {AddressTxAmount_.SLOT},
               direction = Sort.Direction.DESC)
           @Valid
           Pagination pagination) {

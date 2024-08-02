@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -33,6 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.conversions.CardanoConverters;
+import org.cardanofoundation.conversions.ClasspathConversionsFactory;
+import org.cardanofoundation.conversions.domain.NetworkType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
 import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
@@ -489,6 +493,10 @@ class TokenServiceTest {
 
   @Test
   void testGetTokenVolumeAnalytic_WhenTokenFound_WithOneDayRange() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
+
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset =
@@ -504,7 +512,7 @@ class TokenServiceTest {
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
-    when(addressTxAmountRepository.sumBalanceBetweenTime(anyString(), any(), any()))
+    when(addressTxAmountRepository.sumBalanceByUnitAndSlotBetween(anyString(), any(), any()))
         .thenReturn(Optional.of(new BigInteger("100")));
 
     // Run the test
@@ -519,6 +527,10 @@ class TokenServiceTest {
 
   @Test
   void testGetTokenVolumeAnalytic_WhenTokenFound_WithOneDayRangeAndExistsZeroBalance() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
+
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset =
@@ -535,7 +547,7 @@ class TokenServiceTest {
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
     // Configure AddressTokenRepository.sumBalanceBetweenTx(...).
-    when(addressTxAmountRepository.sumBalanceBetweenTime(anyString(), any(), any()))
+    when(addressTxAmountRepository.sumBalanceByUnitAndSlotBetween(anyString(), any(), any()))
         .thenReturn(Optional.of(new BigInteger("0")));
 
     // Run the test
@@ -578,7 +590,7 @@ class TokenServiceTest {
         .thenReturn(aggregateAddressTokens);
 
     lenient()
-        .when(addressTxAmountRepository.sumBalanceBetweenTime(anyString(), any(), any()))
+        .when(addressTxAmountRepository.sumBalanceByUnitAndSlotBetween(anyString(), any(), any()))
         .thenReturn(Optional.of(new BigInteger("100")));
 
     // Run the test
@@ -610,7 +622,7 @@ class TokenServiceTest {
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
     lenient()
-        .when(addressTxAmountRepository.sumBalanceBetweenTime(anyString(), any(), any()))
+        .when(addressTxAmountRepository.sumBalanceByUnitAndSlotBetween(anyString(), any(), any()))
         .thenReturn(Optional.of(new BigInteger("0")));
 
     // Run the test

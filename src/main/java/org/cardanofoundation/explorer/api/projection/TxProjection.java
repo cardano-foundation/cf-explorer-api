@@ -4,4 +4,6 @@ public interface TxProjection {
   String getTxHash();
 
   Long getBlockTime();
+
+  Long getSlot();
 }
