@@ -31,4 +31,8 @@ public interface LatestVotingProcedureProjection {
   BigInteger getBlockTime();
 
   Boolean getRepeatVote();
+
+  BigInteger getVotingStake();
+
+  Double getVotingPower();
 }
