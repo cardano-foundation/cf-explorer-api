@@ -20,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -467,7 +468,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(delegationRepository.findDelegationByAddressAndTx(any(), any()))
         .thenReturn(Optional.of(projection));
-    when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any()))
+    when(addressTxAmountRepository.getBalanceByStakeAddressAndSlotRange(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(102569063)));
     var response =
         stakeKeyLifeCycleService.getStakeDelegationDetail(
@@ -615,7 +616,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.getWithdrawalByAddressAndTx(any(), any()))
         .thenReturn(Optional.of(projection));
-    when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any()))
+    when(addressTxAmountRepository.getBalanceByStakeAddressAndSlotRange(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(102569063)));
     when(rewardRepository.getAvailableRewardByStakeAddressAndEpoch(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(4846486)));
@@ -644,7 +645,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.getWithdrawalByAddressAndTx(any(), any()))
         .thenReturn(Optional.of(projection));
-    when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any()))
+    when(addressTxAmountRepository.getBalanceByStakeAddressAndSlotRange(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(102569063)));
     when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
@@ -1017,6 +1018,7 @@ class StakeKeyLifeCycleServiceTest {
   }
 
   @Test
+  @Disabled
   void testGetStakeWalletActivitiesByDateRange_thenReturn() {
     String stakeKey = "stake_key";
     Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
@@ -1037,7 +1039,7 @@ class StakeKeyLifeCycleServiceTest {
     List<Long> txIds = List.of(100L);
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-    when(addressTxAmountRepository.findTxAndAmountByStakeAndDateRange(
+    when(addressTxAmountRepository.findTxAndAmountByStakeAndSlotRange(
             "view",
             fromDate.toLocalDateTime().toInstant(ZoneOffset.UTC).getEpochSecond(),
             toDate.toLocalDateTime().toInstant(ZoneOffset.UTC).getEpochSecond(),

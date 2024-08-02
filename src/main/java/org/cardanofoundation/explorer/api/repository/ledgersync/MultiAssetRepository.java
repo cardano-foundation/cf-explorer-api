@@ -73,16 +73,6 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   List<MultiAsset> findAllByIdIn(@Param("ids") Collection<Long> ids);
 
-  @Query(
-      value =
-          """
-          SELECT ttc.txCount
-                FROM MultiAsset ma
-                LEFT JOIN TokenTxCount ttc on ttc.ident = ma.id
-                WHERE ma.fingerprint = :fingerprint
-      """)
-  Optional<Long> getTokenTxCount(@Param("fingerprint") String fingerprint);
-
   @Query("SELECT ma FROM MultiAsset ma WHERE lower(ma.nameView) LIKE CONCAT('%', :query, '%') ")
   List<MultiAsset> findByNameViewLike(@Param("query") String query, Pageable pageable);
 
@@ -131,4 +121,40 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
 
   @Query("SELECT ma FROM MultiAsset ma WHERE ma.unit IN :units")
   List<MultiAsset> findAllByUnitIn(@Param("units") Collection<String> units);
+
+  @Query(
+      value =
+          """
+                  SELECT a.address as address, a.quantity as quantity, b.name as tokenName, b.fingerprint as fingerprint
+                  FROM AddressBalance a INNER JOIN MultiAsset b ON a.unit = b.unit
+                  WHERE b.policy = :policy
+                  """)
+  List<AddressTokenProjection> findAddressAndBalanceByPolicy(
+      @Param("policy") String policy, Pageable pageable);
+
+  @Query(
+      value =
+          """
+                  SELECT b.fingerprint, b.policy, b.name, a.quantity, c.url, c.decimals, c.ticker, c.logo, c.description, c.subject FROM AddressBalance a INNER JOIN MultiAsset b
+                  ON a.unit = b.unit
+                  INNER JOIN AssetMetadata c ON b.fingerprint = c.fingerprint
+                  WHERE a.address = :address
+                  """)
+  Page<AddressTokenProjection> findTokenAndBalanceByAddress(
+      @Param("address") String address, Pageable pageable);
+
+  @Query(
+      value =
+          """
+                  SELECT b.fingerprint, b.policy, b.name, a.quantity, c.url, c.decimals, c.ticker, c.logo, c.description, c.subject FROM AddressBalance a INNER JOIN MultiAsset b
+                  ON a.unit = b.unit
+                  INNER JOIN AssetMetadata c ON b.fingerprint = c.fingerprint
+                  WHERE a.address = :address
+                  AND (lower(b.nameView) LIKE CONCAT('%', :searchValue, '%') OR b.fingerprint = :searchValue)
+                  AND a.quantity > 0
+                  """)
+  Page<AddressTokenProjection> findTokenAndBalanceByAddressAndNameView(
+      @Param("address") String address,
+      @Param("searchValue") String searchValue,
+      Pageable pageable);
 }

@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
@@ -71,9 +72,9 @@ import org.cardanofoundation.explorer.api.projection.AddressInputOutputProjectio
 import org.cardanofoundation.explorer.api.projection.TxContractProjection;
 import org.cardanofoundation.explorer.api.projection.TxGraphProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
+import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -90,10 +91,8 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RedeemerReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReferenceTxInRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ReserveRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeDeRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.TokenTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TreasuryRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxBootstrapWitnessesRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxChartRepository;
@@ -107,6 +106,7 @@ import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.*;
+import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
@@ -134,8 +134,6 @@ public class TxServiceImpl implements TxService {
   private final MaTxMintMapper maTxMintMapper;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final MultiAssetRepository multiAssetRepository;
-  private final AddressTxCountRepository addressTxCountRepository;
-  private final StakeAddressTxCountRepository stakeAddressTxCountRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final StakeRegistrationRepository stakeRegistrationRepository;
@@ -158,6 +156,9 @@ public class TxServiceImpl implements TxService {
   private final ReferenceTxInRepository referenceTxInRepository;
   private final TxReferenceInputMapper txReferenceInputMapper;
   private final BolnisiMetadataService bolnisiMetadataService;
+  private final TokenInfoRepository tokenInfoRepository;
+
+  private final CardanoConverters converters;
 
   private final RedisTemplate<String, TxGraph> redisTemplate;
   private static final int SUMMARY_SIZE = 4;
@@ -168,7 +169,6 @@ public class TxServiceImpl implements TxService {
 
   private static final String UNIT_LOVELACE = "lovelace";
   private static final String TRANSACTION_GRAPH_MONTH_KEY = "TRANSACTION_GRAPH_MONTH";
-  private final TokenTxCountRepository tokenTxCountRepository;
 
   @Value("${application.network}")
   private String network;
@@ -276,8 +276,7 @@ public class TxServiceImpl implements TxService {
         .findFirstByAddress(address)
         .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
-    AddressTxCount addressTxCount =
-        addressTxCountRepository.findById(address).orElse(new AddressTxCount(address, 0L));
+    Long addressTxCount = addressTxAmountRepository.getTxCountForAddress(address).orElse(0L);
 
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByAddress(address, pageable);
@@ -289,7 +288,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-            addressTxCount.getTxCount());
+            addressTxCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -395,22 +394,25 @@ public class TxServiceImpl implements TxService {
   public BaseFilterResponse<TxFilterResponse> getTransactionsByToken(
       String tokenId, Pageable pageable) {
 
+    log.info("a");
     MultiAsset multiAsset =
         multiAssetRepository
             .findByFingerprint(tokenId)
             .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-
-    TokenTxCount tokenTxCount =
-        tokenTxCountRepository
-            .findById(multiAsset.getId())
-            .orElse(new TokenTxCount(multiAsset.getId(), 0L));
-
+    log.info("b");
+    Long tokenTxCount =
+        tokenInfoRepository
+            .findTokenInfoByMultiAssetId(multiAsset.getId())
+            .map(TokenInfo::getTxCount)
+            .orElse(0L);
+    log.info("c");
     List<TxProjection> txsProjection =
         addressTxAmountRepository.findAllTxByUnit(multiAsset.getUnit(), pageable);
+    log.info("d");
     List<Tx> txs =
-        txRepository.findAllByHashIn(
-            txsProjection.stream().map(TxProjection::getTxHash).collect(Collectors.toList()));
-    Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount.getTxCount());
+        txRepository.findAllByHashIn(txsProjection.stream().map(TxProjection::getTxHash).toList());
+    log.info("e");
+    Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount);
 
     return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
@@ -422,11 +424,7 @@ public class TxServiceImpl implements TxService {
     stakeAddressRepository
         .findByView(stakeKey)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-
-    StakeAddressTxCount addressTxCount =
-        stakeAddressTxCountRepository
-            .findById(stakeKey)
-            .orElse(new StakeAddressTxCount(stakeKey, 0L));
+    Long stakeTxCount = addressTxAmountRepository.getTxCountForStakeAddress(stakeKey).orElse(0L);
 
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
@@ -436,9 +434,7 @@ public class TxServiceImpl implements TxService {
 
     Page<TxFilterResponse> txFilterResponsePage =
         new PageImpl<>(
-            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
-            pageable,
-            addressTxCount.getTxCount());
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts), pageable, stakeTxCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
