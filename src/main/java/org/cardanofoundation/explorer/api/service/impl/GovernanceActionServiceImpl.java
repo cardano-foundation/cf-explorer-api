@@ -263,18 +263,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
     GovActionType govActionType = govActionDetailsProjections.get().getType();
 
-    // STAKING POOL not allowed to vote on treasury withdrawals, parameter change and update
-    // committee
-    List<GovActionType> govActionTypeListAllowedVoteBySPO =
-        List.of(
-            GovActionType.TREASURY_WITHDRAWALS_ACTION,
-            GovActionType.PARAMETER_CHANGE_ACTION,
-            GovActionType.NEW_CONSTITUTION);
-
-    List<GovActionType> govActionTypeListAllowedVoteByCc =
-        List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
-    Boolean allowedVoteBySPO = !govActionTypeListAllowedVoteBySPO.contains(govActionType);
-    Boolean allowedVoteByCC = !govActionTypeListAllowedVoteByCc.contains(govActionType);
+    Boolean allowedVoteBySPO = isAllowedVoteBySPO(govActionType);
+    Boolean allowedVoteByCC = isAllowedVoteByCC(govActionType);
     if (voterHash.toLowerCase().startsWith("pool")) {
       voterHash =
           poolHashRepository
@@ -289,7 +279,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
 
     if (governanceActionRequest.getVoterType().equals(VoterType.STAKING_POOL_KEY_HASH)
-        && govActionTypeListAllowedVoteBySPO.contains(govActionType)) {
+        && !allowedVoteBySPO) {
       return GovernanceActionDetailsResponse.builder()
           .allowedVoteBySPO(allowedVoteBySPO)
           .allowedVoteByCC(allowedVoteByCC)
@@ -337,6 +327,22 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     response.setVoteType(votingProcedureProjections.get(0).getVote());
     response.setHistoryVotes(historyVotes);
     return response;
+  }
+
+  // STAKING POOL not allowed to vote on treasury withdrawals, parameter change and update
+  private boolean isAllowedVoteBySPO(GovActionType govActionType) {
+    List<GovActionType> govActionTypeListAllowedVoteBySPO =
+        List.of(
+            GovActionType.TREASURY_WITHDRAWALS_ACTION,
+            GovActionType.PARAMETER_CHANGE_ACTION,
+            GovActionType.NEW_CONSTITUTION);
+    return !govActionTypeListAllowedVoteBySPO.contains(govActionType);
+  }
+
+  private boolean isAllowedVoteByCC(GovActionType govActionType) {
+    List<GovActionType> govActionTypeListAllowedVoteByCc =
+        List.of(GovActionType.NO_CONFIDENCE, GovActionType.UPDATE_COMMITTEE);
+    return !govActionTypeListAllowedVoteByCc.contains(govActionType);
   }
 
   void setExpiryDateOfGovAction(GovernanceActionDetailsResponse response) {
@@ -480,6 +486,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     GovernanceActionOverViewResponse response =
         governanceActionMapper.fromGovernanceActionOverviewProjection(
             governanceActionOverviewProjection);
+    GovActionType type = response.getActionType();
     if (Objects.nonNull(governanceActionOverviewProjection.getRawData())
         && Objects.nonNull(governanceActionOverviewProjection.getAnchorHash())) {
       String hash =
@@ -495,6 +502,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     } else {
       response.setIsValidHash(false);
     }
+    response.setAllowedVoteByCC(isAllowedVoteByCC(type));
+    response.setAllowedVoteBySPO(isAllowedVoteBySPO(type));
     return response;
   }
 
