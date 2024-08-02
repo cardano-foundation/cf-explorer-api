@@ -2,6 +2,8 @@ package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -52,4 +54,15 @@ public interface LatestVotingProcedureRepository
               + " where lvp.voterHash = :voterHash and lvp.blockTime >= :blockTime and gap.blockTime >= :blockTime")
   Long countVoteByVoterHash(
       @Param("voterHash") String voterHash, @Param("blockTime") Long blockTime);
+
+  @Query(
+      value =
+          """
+    SELECT lvp.voterHash as voterHash, lvp.vote as vote, lvp.voterType as voterType,
+    lvp.blockTime as blockTime, lvp.repeatVote as repeatVote
+    FROM LatestVotingProcedure lvp
+    WHERE lvp.govActionTxHash = :txHash AND lvp.govActionIndex = :index
+    """)
+  Page<LatestVotingProcedureProjection> getVoteOnGovActionByFilter(
+      @Param("txHash") String txHash, @Param("index") Integer index, Pageable pageable);
 }

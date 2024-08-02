@@ -22,6 +22,7 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovCommitteeHistoryFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.VoteFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.*;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
@@ -169,5 +170,24 @@ public class GovernanceActionController {
           Pagination pagination) {
     return ResponseEntity.ok(
         governanceActionService.getAuthorsByAnchor(anchorUrl, anchorHash, pagination.toPageable()));
+  }
+
+  @GetMapping("/votes")
+  @LogMessage
+  @Operation(
+      summary = "Get voting on governance action",
+      tags = {"gov-actions"})
+  public ResponseEntity<BaseFilterResponse<VotingOnGovActionResponse>> getVotesOnGovAction(
+      @ParameterObject VoteFilter voteFilter,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 3,
+              sort = {"blockTime"},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(
+        governanceActionService.getVotingOnGovAction(voteFilter, pagination.toPageable()));
   }
 }
