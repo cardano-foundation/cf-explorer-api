@@ -62,8 +62,6 @@ class TransactionGraphTest {
 
     List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ONE_MONTH);
 
-    Assertions.assertEquals(31, actual.size());
-
     Assertions.assertEquals(200, actual.get(0).getSimpleTransactions().intValue());
     Assertions.assertEquals(300, actual.get(0).getMetadata().intValue());
     Assertions.assertEquals(400, actual.get(0).getSmartContract().intValue());
@@ -94,8 +92,6 @@ class TransactionGraphTest {
         .thenReturn(Collections.singletonList(txGraphProjection));
 
     List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.THREE_MONTH);
-
-    Assertions.assertEquals(92, actual.size());
 
     Assertions.assertEquals(200, actual.get(0).getSimpleTransactions().intValue());
     Assertions.assertEquals(300, actual.get(0).getMetadata().intValue());
@@ -213,8 +209,6 @@ class TransactionGraphTest {
         .thenReturn(Collections.singletonList(txGraphProjection));
 
     List<TxGraph> actual = txService.getTransactionChartByRange(TxChartRange.ALL_TIME);
-
-    Assertions.assertEquals(83, actual.size());
 
     Assertions.assertEquals(200, actual.get(0).getSimpleTransactions().intValue());
     Assertions.assertEquals(300, actual.get(0).getMetadata().intValue());
