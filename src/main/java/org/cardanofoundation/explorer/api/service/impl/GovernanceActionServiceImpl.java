@@ -30,12 +30,14 @@ import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
+import org.cardanofoundation.explorer.api.mapper.LatestVotingProcedureMapper;
 import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
 import org.cardanofoundation.explorer.api.model.ProtocolParamUpdate;
 import org.cardanofoundation.explorer.api.model.dto.GovActionMetaData;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovCommitteeHistoryFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.VoteFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.*;
 import org.cardanofoundation.explorer.api.projection.*;
@@ -75,6 +77,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final CommitteeMemberRepository committeeMemberRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
   private final OffChainVoteGovActionDataRepository offChainVoteGovActionDataRepository;
+  private final LatestVotingProcedureMapper latestVotingProcedureMapper;
 
   private final RedisTemplate<String, Integer> redisTemplate;
 
@@ -529,6 +532,48 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       log.error("Error when parsing raw data to GovActionMetaData: {}", e.getMessage());
       return new BaseFilterResponse<>(Page.empty(pageable));
     }
+  }
+
+  @Override
+  public BaseFilterResponse<VotingOnGovActionResponse> getVotingOnGovAction(
+      VoteFilter voteFilter, Pageable pageable) {
+    long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
+    fromDate = fromDate < 0 ? 0 : fromDate;
+    long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+
+    if (Objects.nonNull(voteFilter.getFromDate())) {
+      fromDate = voteFilter.getFromDate().toEpochSecond(ZoneOffset.UTC);
+    }
+    if (Objects.nonNull(voteFilter.getToDate())) {
+      long to = voteFilter.getToDate().toEpochSecond(ZoneOffset.UTC);
+      toDate = Math.min(to, toDate);
+    }
+
+    if (voteFilter.getActiveStakeFrom() == null) {
+      voteFilter.setActiveStakeFrom(BigInteger.ZERO);
+    }
+
+    if (voteFilter.getActiveStakeTo() == null) {
+      voteFilter.setActiveStakeTo(BigInteger.valueOf(Long.MAX_VALUE));
+    }
+
+    if (voteFilter.getVotingPowerFrom() == null) {
+      voteFilter.setVotingPowerFrom(0.0);
+    }
+
+    if (voteFilter.getVotingPowerTo() == null) {
+      voteFilter.setVotingPowerTo(1.0);
+    }
+
+    Page<LatestVotingProcedureProjection> latestVotingProcedureProjections =
+        latestVotingProcedureRepository.getVoteOnGovActionByFilter(
+            voteFilter.getTxHash(), voteFilter.getIndex(), pageable);
+
+    List<VotingOnGovActionResponse> votingOnGovActionResponses =
+        latestVotingProcedureProjections.stream()
+            .map(latestVotingProcedureMapper::fromLatestVotingProcedureProjection)
+            .toList();
+    return new BaseFilterResponse<>(latestVotingProcedureProjections, votingOnGovActionResponses);
   }
 
   // TODO: Active vote stake of Pool type is not available.

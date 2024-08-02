@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovCommitteeHistoryFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.VoteFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.*;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
@@ -28,4 +29,7 @@ public interface GovernanceActionService {
 
   BaseFilterResponse<AuthorResponse> getAuthorsByAnchor(
       String anchorUrl, String anchorHash, Pageable pageable);
+
+  BaseFilterResponse<VotingOnGovActionResponse> getVotingOnGovAction(
+      VoteFilter voteFilter, Pageable pageable);
 }
