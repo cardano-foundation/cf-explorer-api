@@ -37,4 +37,8 @@ public class GovernanceActionOverViewResponse {
   String anchorHash;
 
   String anchorUrl;
+
+  Boolean allowedVoteBySPO;
+
+  Boolean allowedVoteByCC;
 }
