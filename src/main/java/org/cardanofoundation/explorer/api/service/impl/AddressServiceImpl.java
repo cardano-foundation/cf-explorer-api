@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant.NetworkType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
@@ -123,9 +124,9 @@ public class AddressServiceImpl implements AddressService {
    */
   private boolean checkNetworkAddress(String address) {
     if (address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
-      return !network.equals(CommonConstant.MAINNET_NETWORK);
+      return !network.equals(NetworkType.MAINNET);
     } else if (address.startsWith(CommonConstant.ADDRESS_PREFIX)) {
-      return network.equals(CommonConstant.MAINNET_NETWORK);
+      return network.equals(NetworkType.MAINNET);
     } else { // Genesis address
       return true;
     }
