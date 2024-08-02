@@ -180,8 +180,7 @@ public class PoolControllerTest {
     when(poolService.getStakePoolsChart()).thenReturn(response);
 
     mockMvc
-        .perform(
-            get("/api/v1/pools/registered-stake-pools-chart").accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/v1/pools/stake-pools-chart").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(poolService).getStakePoolsChart();
