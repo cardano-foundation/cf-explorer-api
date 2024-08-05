@@ -33,5 +33,5 @@ public interface GovernanceActionService {
   BaseFilterResponse<VotingOnGovActionResponse> getVotingOnGovAction(
       VoteFilter voteFilter, Pageable pageable);
 
-  RangeFilterVoteResponse getRangeFilterVoteResponse();
+  RangeFilterVoteResponse getRangeFilterVoteResponse(String txHash, Integer index);
 }
