@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.api.projection.LatestVotingProcedureProjection;
 import org.cardanofoundation.explorer.common.entity.compositeKey.LatestVotingProcedureId;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
@@ -95,4 +96,15 @@ public interface LatestVotingProcedureRepository
       @Param("votingStakeFrom") BigInteger votingStakeFrom,
       @Param("votingStakeTo") BigInteger votingStakeTo,
       Pageable pageable);
+
+  @Query("""
+    SELECT max(dri.votingPower) as maxVotingPower , max(dri.activeVoteStake) as maxActiveVoteStake,
+           min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake,
+           min(dri.govParticipationRate) as minGovParticipationRate, max(dri.govParticipationRate) as maxGovParticipationRate
+    FROM LatestVotingProcedure lvp
+    LEFT JOIN DRepInfo dri on lvp.voterHash = dri.drepHash
+    WHERE lvp.govActionTxHash = :txHash and lvp.govActionIndex = :index
+    """)
+  DRepRangeProjection getDRepRangeValuesForVotesFilter(
+      @Param("txHash") String txHash, @Param("index") Integer index);
 }

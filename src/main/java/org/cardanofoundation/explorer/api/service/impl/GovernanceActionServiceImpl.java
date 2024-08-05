@@ -558,8 +558,9 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   }
 
   @Override
-  public RangeFilterVoteResponse getRangeFilterVoteResponse() {
-    DRepRangeProjection dRepRangeProjection = drepInfoRepository.getDRepRangeValues();
+  public RangeFilterVoteResponse getRangeFilterVoteResponse(String txHash, Integer index) {
+    DRepRangeProjection dRepRangeProjection =
+        latestVotingProcedureRepository.getDRepRangeValuesForVotesFilter(txHash, index);
     return RangeFilterVoteResponse.builder()
         .maxActiveStake(dRepRangeProjection.getMaxActiveVoteStake())
         .minActiveStake(dRepRangeProjection.getMinActiveVoteStake())
