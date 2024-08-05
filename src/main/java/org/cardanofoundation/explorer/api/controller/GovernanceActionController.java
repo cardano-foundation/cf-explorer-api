@@ -190,4 +190,17 @@ public class GovernanceActionController {
     return ResponseEntity.ok(
         governanceActionService.getVotingOnGovAction(voteFilter, pagination.toPageable()));
   }
+
+  @GetMapping("/{txHash}/{index}/votes/range-values")
+  @LogMessage
+  @Operation(
+      summary = "Get range value to filter on votes overview section",
+      tags = {"gov-actions"})
+  public ResponseEntity<RangeFilterVoteResponse> getRangeFilterForVoteSection(
+      @PathVariable @Parameter(description = "The hash of transaction governance action")
+          String txHash,
+      @PathVariable @Parameter(description = "The index of transaction governance action")
+          Integer index) {
+    return ResponseEntity.ok(governanceActionService.getRangeFilterVoteResponse(txHash, index));
+  }
 }
