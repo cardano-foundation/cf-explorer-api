@@ -11,7 +11,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.DRepFilterResponse
 import org.cardanofoundation.explorer.api.model.response.drep.DRepRangeValuesResponse;
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
-import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.DRepInfo;
 
 @Mapper(componentModel = "spring")
 public interface DRepMapper {
