@@ -894,17 +894,20 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             Objects.isNull(epochParam.getDvtPPEconomicGroup())
                 ? -1
                 : epochParam.getDvtPPEconomicGroup());
-      } else if (protocolParamGroups.contains(ProtocolParamGroup.NETWORK)) {
+      }
+      if (protocolParamGroups.contains(ProtocolParamGroup.NETWORK)) {
         doubleSet.add(
             Objects.isNull(epochParam.getDvtPPNetworkGroup())
                 ? -1
                 : epochParam.getDvtPPNetworkGroup());
-      } else if (protocolParamGroups.contains(ProtocolParamGroup.TECHNICAL)) {
+      }
+      if (protocolParamGroups.contains(ProtocolParamGroup.TECHNICAL)) {
         doubleSet.add(
             Objects.isNull(epochParam.getDvtPPTechnicalGroup())
                 ? -1
                 : epochParam.getDvtPPTechnicalGroup());
-      } else if (protocolParamGroups.contains(ProtocolParamGroup.GOVERNANCE)) {
+      }
+      if (protocolParamGroups.contains(ProtocolParamGroup.GOVERNANCE)) {
         doubleSet.add(
             Objects.isNull(epochParam.getDvtPPGovGroup()) ? -1 : epochParam.getDvtPPGovGroup());
       }
