@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class VoteFilter {
   private String txHash;
   private Integer index;
