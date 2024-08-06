@@ -17,7 +17,7 @@ public class GovernanceActionOverViewResponse {
 
   String txHash;
 
-  String index;
+  Integer index;
 
   Date dateCreated;
 
