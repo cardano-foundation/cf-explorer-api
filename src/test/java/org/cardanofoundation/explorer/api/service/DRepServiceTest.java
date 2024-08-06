@@ -33,9 +33,9 @@ import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCer
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
-import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationVoteRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
@@ -44,7 +44,7 @@ import org.cardanofoundation.explorer.common.entity.enumeration.DRepActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
-import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.DRepInfo;
 
 @ExtendWith(MockitoExtension.class)
 public class DRepServiceTest {
