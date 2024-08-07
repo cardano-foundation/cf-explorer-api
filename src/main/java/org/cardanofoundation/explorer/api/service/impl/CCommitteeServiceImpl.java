@@ -24,15 +24,9 @@ import org.cardanofoundation.explorer.api.model.response.committee.CommitteeMemb
 import org.cardanofoundation.explorer.api.model.response.committee.CommitteeOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeDeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeMemberRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.CommitteeRegistrationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.CCommitteeService;
+import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.common.entity.enumeration.CommitteeState;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
@@ -53,6 +47,8 @@ public class CCommitteeServiceImpl implements CCommitteeService {
   private final EpochRepository epochRepository;
   private final VotingProcedureRepository votingProcedureRepository;
   private final CommitteeDeRegistrationRepository committeeDeRegistrationRepository;
+  private final CommitteeRepository committeeRepository;
+  private final ProtocolParamService protocolParamService;
 
   @Override
   public CommitteeOverviewResponse getCommitteeOverview() {
@@ -65,6 +61,11 @@ public class CCommitteeServiceImpl implements CCommitteeService {
         activeMembers >= currentEpochParam.getCommitteeMinSize().intValue()
             ? CommitteeState.CONFIDENCE
             : CommitteeState.NO_CONFIDENCE;
+
+    Double latestCCThreshold =
+        committeeRepository
+            .getLatestCCThreshold()
+            .orElseGet(protocolParamService::getCCThresholdFromConwayGenesis);
 
     // TODO: get activeEpoch from lsv2 once implemented
     Integer activeEpoch =
@@ -91,7 +92,7 @@ public class CCommitteeServiceImpl implements CCommitteeService {
         .currentState(committeeState)
         .proposalPolicy(proposalPolicy)
         .activeMembers(activeMembers)
-        .threshold(currentEpochParam.getCcThreshold())
+        .threshold(latestCCThreshold)
         .governanceVotes(governanceVotes)
         .lastUpdate(lastUpdate == null ? null : new Date(lastUpdate * 1000))
         .build();
