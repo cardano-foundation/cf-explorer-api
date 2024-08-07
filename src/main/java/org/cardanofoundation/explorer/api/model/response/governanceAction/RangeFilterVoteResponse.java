@@ -4,8 +4,7 @@ import java.math.BigInteger;
 
 import lombok.*;
 
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
