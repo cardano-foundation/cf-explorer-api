@@ -585,10 +585,7 @@ public class GovActionServiceTest {
     when(govActionDetailsProjection.getType()).thenReturn(GovActionType.PARAMETER_CHANGE_ACTION);
 
     EpochParam epochParam =
-        EpochParam.builder()
-            .epochNo(200)
-            .committeeMinSize(BigInteger.TEN)
-            .build();
+        EpochParam.builder().epochNo(200).committeeMinSize(BigInteger.TEN).build();
 
     when(committeeRepository.getLatestCCThreshold()).thenReturn(Optional.of(0.77));
     when(governanceActionRepository.getGovActionDetailsByTxHashAndIndex(txHash, index))

@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
-import org.cardanofoundation.explorer.api.repository.ledgersync.*;
-import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -26,7 +24,9 @@ import org.cardanofoundation.explorer.api.model.response.committee.CommitteeMemb
 import org.cardanofoundation.explorer.api.model.response.committee.CommitteeOverviewResponse;
 import org.cardanofoundation.explorer.api.model.response.drep.VotingProcedureChartResponse;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.service.CCommitteeService;
+import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.common.entity.enumeration.CommitteeState;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
@@ -51,7 +51,7 @@ public class CCommitteeServiceImpl implements CCommitteeService {
   private final ProtocolParamService protocolParamService;
 
   @Override
-  public CommitteeOverviewResponse  getCommitteeOverview() {
+  public CommitteeOverviewResponse getCommitteeOverview() {
     EpochParam currentEpochParam = epochParamRepository.findCurrentEpochParam();
     long activeMembers =
         committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(
@@ -62,7 +62,10 @@ public class CCommitteeServiceImpl implements CCommitteeService {
             ? CommitteeState.CONFIDENCE
             : CommitteeState.NO_CONFIDENCE;
 
-    Double latestCCThreshold = committeeRepository.getLatestCCThreshold().orElseGet(protocolParamService::getCCThresholdFromConwayGenesis);
+    Double latestCCThreshold =
+        committeeRepository
+            .getLatestCCThreshold()
+            .orElseGet(protocolParamService::getCCThresholdFromConwayGenesis);
 
     // TODO: get activeEpoch from lsv2 once implemented
     Integer activeEpoch =
