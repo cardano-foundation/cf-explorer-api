@@ -100,11 +100,12 @@ public interface LatestVotingProcedureRepository
   @Query(
       """
     SELECT max(dri.votingPower) as maxVotingPower , max(dri.activeVoteStake) as maxActiveVoteStake,
-         min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake,
-         min(dri.govParticipationRate) as minGovParticipationRate, max(dri.govParticipationRate) as maxGovParticipationRate
+           min(dri.votingPower) as minVotingPower , min(dri.activeVoteStake) as minActiveVoteStake,
+           min(dri.govParticipationRate) as minGovParticipationRate, max(dri.govParticipationRate) as maxGovParticipationRate
     FROM LatestVotingProcedure lvp
     LEFT JOIN DRepInfo dri on lvp.voterHash = dri.drepHash
-    WHERE lvp.govActionTxHash = :txHash and lvp.govActionIndex = :index""")
+    WHERE lvp.govActionTxHash = :txHash and lvp.govActionIndex = :index
+    """)
   DRepRangeProjection getDRepRangeValuesForVotesFilter(
       @Param("txHash") String txHash, @Param("index") Integer index);
 }

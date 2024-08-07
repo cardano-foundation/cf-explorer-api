@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant.NetworkType;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.search.AddressSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.PoolSearchResponse;
@@ -152,9 +153,9 @@ public class SearchServiceImpl implements SearchService {
    */
   private boolean checkNetworkAddress(String address) {
     if (address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
-      return !network.equals(CommonConstant.MAINNET_NETWORK);
+      return !network.equals(NetworkType.MAINNET);
     } else {
-      return network.equals(CommonConstant.MAINNET_NETWORK);
+      return network.equals(NetworkType.MAINNET);
     }
   }
 

@@ -29,6 +29,7 @@ import reactor.netty.http.client.HttpClient;
 import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.conversions.ClasspathConversionsFactory;
 import org.cardanofoundation.conversions.domain.NetworkType;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.Request;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
@@ -102,9 +103,12 @@ public class WebConfig implements WebMvcConfigurer {
   @Bean
   public CardanoConverters cardanoConverters(@Value("${application.network}") String network) {
     return switch (network) {
-      case "preprod" -> ClasspathConversionsFactory.createConverters(NetworkType.PREPROD);
-      case "preview" -> ClasspathConversionsFactory.createConverters(NetworkType.PREVIEW);
-      case "sanchonet" -> ClasspathConversionsFactory.createConverters(NetworkType.SANCHONET);
+      case CommonConstant.NetworkType.PREPROD -> ClasspathConversionsFactory.createConverters(
+          NetworkType.PREPROD);
+      case CommonConstant.NetworkType.PREVIEW -> ClasspathConversionsFactory.createConverters(
+          NetworkType.PREVIEW);
+      case CommonConstant.NetworkType.SANCHONET -> ClasspathConversionsFactory.createConverters(
+          NetworkType.SANCHONET);
       default -> ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
     };
   }
