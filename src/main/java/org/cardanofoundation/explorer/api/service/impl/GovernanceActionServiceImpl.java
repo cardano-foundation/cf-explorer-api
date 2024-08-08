@@ -108,7 +108,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             governanceActionFilter.getVoterType(), governanceActionFilter.getActionType());
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
-    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(governanceActionFilter.getFromDate())) {
@@ -413,7 +412,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
-    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(govCommitteeHistoryFilter.getFromDate())) {
@@ -572,7 +570,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private BaseFilterResponse<VotingOnGovActionResponse> getDataWithAnyTypeOrCCTypeOrSPOType(
       VoteFilter voteFilter, Pageable pageable) {
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
-    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(voteFilter.getFromDate())) {
@@ -643,7 +640,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       VoteFilter voteFilter, Pageable pageable) {
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
-    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(voteFilter.getFromDate())) {
