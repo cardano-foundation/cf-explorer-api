@@ -147,7 +147,8 @@ public class GovernanceActionController {
           String txHash,
       @PathVariable @Parameter(description = "The index of transaction governance action")
           Integer index) {
-    return ResponseEntity.ok(governanceActionService.getGovernanceActionInfo(txHash, index));
+    return ResponseEntity.ok(
+        governanceActionService.getGovernanceActionOverviewResponse(txHash, index));
   }
 
   @GetMapping("/authors")

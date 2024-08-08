@@ -25,7 +25,8 @@ public interface GovernanceActionService {
 
   GovernanceOverviewResponse getGovernanceOverview();
 
-  GovernanceActionOverViewResponse getGovernanceActionInfo(String txHash, Integer index);
+  GovernanceActionOverViewResponse getGovernanceActionOverviewResponse(
+      String txHash, Integer index);
 
   BaseFilterResponse<AuthorResponse> getAuthorsByAnchor(
       String anchorUrl, String anchorHash, Pageable pageable);
