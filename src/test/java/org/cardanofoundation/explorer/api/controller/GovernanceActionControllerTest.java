@@ -189,7 +189,7 @@ public class GovernanceActionControllerTest {
             .anchorUrl("1111")
             .build();
 
-    when(governanceActionService.getGovernanceActionInfo(anyString(), any()))
+    when(governanceActionService.getGovernanceActionOverviewResponse(anyString(), any()))
         .thenReturn(governanceActionOverViewResponse);
     mockMvc
         .perform(

@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.mapper;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 import org.mapstruct.Mapper;
@@ -19,7 +18,7 @@ public interface LatestVotingProcedureMapper {
   VotingOnGovActionResponse fromLatestVotingProcedureProjection(
       LatestVotingProcedureProjection latestVotingProcedureProjection);
 
-  default Date fromLong(BigInteger value) {
-    return value == null ? null : new Date(value.longValue() * 1000);
+  default Date fromLong(Long value) {
+    return value == null ? null : new Date(value * 1000);
   }
 }
