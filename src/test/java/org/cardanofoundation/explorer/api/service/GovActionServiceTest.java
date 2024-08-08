@@ -646,7 +646,7 @@ public class GovActionServiceTest {
     when(governanceActionRepository.getGovernanceActionOverviewByTxHashAndIndex(anyString(), any()))
         .thenReturn(projection);
 
-    var actual = governanceActionService.getGovernanceActionInfo(txHash, index);
+    var actual = governanceActionService.getGovernanceActionOverviewResponse(txHash, index);
 
     Assertions.assertEquals(txHash, actual.getTxHash());
     Assertions.assertEquals("abstract", actual.getAbstractContent());
@@ -692,7 +692,7 @@ public class GovActionServiceTest {
     when(governanceActionRepository.getGovernanceActionOverviewByTxHashAndIndex(anyString(), any()))
         .thenReturn(projection);
 
-    var actual = governanceActionService.getGovernanceActionInfo(txHash, index);
+    var actual = governanceActionService.getGovernanceActionOverviewResponse(txHash, index);
 
     Assertions.assertEquals(txHash, actual.getTxHash());
     Assertions.assertEquals("abstract", actual.getAbstractContent());
@@ -799,7 +799,7 @@ public class GovActionServiceTest {
     when(projection.getVoterHash()).thenReturn("voterHash1");
     when(projection.getVoterType()).thenReturn(VoterType.DREP_KEY_HASH);
     when(projection.getVote()).thenReturn(Vote.YES);
-    when(projection.getBlockTime()).thenReturn(BigInteger.ONE);
+    when(projection.getBlockTime()).thenReturn(Long.valueOf(1));
 
     LatestVotingProcedureProjection projection1 =
         Mockito.mock(LatestVotingProcedureProjection.class);
@@ -807,9 +807,9 @@ public class GovActionServiceTest {
     when(projection1.getVoterHash()).thenReturn("voterHash2");
     when(projection1.getVoterType()).thenReturn(VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH);
     when(projection1.getVote()).thenReturn(Vote.NO);
-    when(projection1.getBlockTime()).thenReturn(BigInteger.TEN);
+    when(projection1.getBlockTime()).thenReturn(Long.valueOf(10));
 
-    when(latestVotingProcedureRepository.getVoteOnGovActionByAnyType(
+    when(latestVotingProcedureRepository.getVoteOnGovActionByTypeIn(
             any(), any(), any(), any(), any(), any(), any()))
         .thenReturn(new PageImpl<>(List.of(projection, projection1), pageable, 2));
 
@@ -817,7 +817,8 @@ public class GovActionServiceTest {
     when(dRepInfoProjection.getDrepHash()).thenReturn("voterHash1");
     when(dRepInfoProjection.getActiveVoteStake()).thenReturn(BigInteger.TEN);
 
-    when(drepInfoRepository.findByDRepHashIn(anyList())).thenReturn(List.of(dRepInfoProjection));
+    when(drepInfoRepository.findDRepActiveStakeInHashList(anyList()))
+        .thenReturn(List.of(dRepInfoProjection));
 
     var actual = governanceActionService.getVotingOnGovAction(filter, pageable);
 
@@ -840,7 +841,7 @@ public class GovActionServiceTest {
     when(projection.getVoterHash()).thenReturn("voterHash1");
     when(projection.getVoterType()).thenReturn(VoterType.DREP_KEY_HASH);
     when(projection.getVote()).thenReturn(Vote.YES);
-    when(projection.getBlockTime()).thenReturn(BigInteger.ONE);
+    when(projection.getBlockTime()).thenReturn(Long.valueOf(1));
 
     LatestVotingProcedureProjection projection1 =
         Mockito.mock(LatestVotingProcedureProjection.class);
@@ -848,7 +849,7 @@ public class GovActionServiceTest {
     when(projection1.getVoterHash()).thenReturn("voterHash2");
     when(projection1.getVoterType()).thenReturn(VoterType.DREP_KEY_HASH);
     when(projection1.getVote()).thenReturn(Vote.NO);
-    when(projection1.getBlockTime()).thenReturn(BigInteger.TEN);
+    when(projection1.getBlockTime()).thenReturn(Long.valueOf(10));
 
     when(latestVotingProcedureRepository.getVoteOnGovActionByDRepType(
             any(), any(), any(), any(), any(), any(), any(), any(), any()))
