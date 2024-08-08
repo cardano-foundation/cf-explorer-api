@@ -108,7 +108,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
             governanceActionFilter.getVoterType(), governanceActionFilter.getActionType());
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
-    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(governanceActionFilter.getFromDate())) {
@@ -413,7 +412,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
-    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(govCommitteeHistoryFilter.getFromDate())) {
@@ -480,7 +478,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   }
 
   @Override
-  public GovernanceActionOverViewResponse getGovernanceActionInfo(String txHash, Integer index) {
+  public GovernanceActionOverViewResponse getGovernanceActionOverviewResponse(
+      String txHash, Integer index) {
 
     GovernanceActionOverviewProjection governanceActionOverviewProjection =
         governanceActionRepository.getGovernanceActionOverviewByTxHashAndIndex(txHash, index);
@@ -549,12 +548,12 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       VoteFilter voteFilter, Pageable pageable) {
     // if voter type is null, get all type of voter
     if (voteFilter.getVoterType() == null) {
-      return getDataWithAnyTypeOrCCType(voteFilter, pageable);
+      return getDataWithAnyTypeOrCCTypeOrSPOType(voteFilter, pageable);
     } else if (voteFilter.getVoterType().equals(VoterType.DREP_KEY_HASH)
         || voteFilter.getVoterType().equals(VoterType.DREP_SCRIPT_HASH)) {
       return getDataWithDRepType(voteFilter, pageable);
     } else {
-      return getDataWithAnyTypeOrCCType(voteFilter, pageable);
+      return getDataWithAnyTypeOrCCTypeOrSPOType(voteFilter, pageable);
     }
   }
 
@@ -568,10 +567,9 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
         .build();
   }
 
-  private BaseFilterResponse<VotingOnGovActionResponse> getDataWithAnyTypeOrCCType(
+  private BaseFilterResponse<VotingOnGovActionResponse> getDataWithAnyTypeOrCCTypeOrSPOType(
       VoteFilter voteFilter, Pageable pageable) {
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
-    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(voteFilter.getFromDate())) {
@@ -594,7 +592,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     }
 
     Page<LatestVotingProcedureProjection> latestVotingProcedureProjections =
-        latestVotingProcedureRepository.getVoteOnGovActionByAnyType(
+        latestVotingProcedureRepository.getVoteOnGovActionByTypeIn(
             voteFilter.getTxHash(),
             voteFilter.getIndex(),
             voteFilter.getVoterHash(),
@@ -624,7 +622,8 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                             .equals(VoterType.DREP_SCRIPT_HASH))
             .map(VotingOnGovActionResponse::getVoterHash)
             .collect(Collectors.toList());
-    List<DRepInfoProjection> dRepInfoProjections = drepInfoRepository.findByDRepHashIn(drepHashes);
+    List<DRepInfoProjection> dRepInfoProjections =
+        drepInfoRepository.findDRepActiveStakeInHashList(drepHashes);
     Map<String, BigInteger> activeVoteStakeMap =
         dRepInfoProjections.stream()
             .collect(
@@ -641,7 +640,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
       VoteFilter voteFilter, Pageable pageable) {
 
     long fromDate = Timestamp.valueOf(MIN_TIME).getTime() / 1000;
-    fromDate = fromDate < 0 ? 0 : fromDate;
     long toDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 
     if (Objects.nonNull(voteFilter.getFromDate())) {

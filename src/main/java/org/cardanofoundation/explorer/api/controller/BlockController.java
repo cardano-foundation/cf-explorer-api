@@ -88,7 +88,14 @@ public class BlockController {
   public ResponseEntity<List<BlockPropagationResponse>> getBlockPropagation(
       @Parameter(description = "The type of chart.") @RequestParam(required = false)
           BlockPropagationChartType type,
-      @ParameterObject @PaginationValid @PaginationDefault(size = 6) @Valid Pagination pagination) {
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 6,
+              sort = {"time"},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
     return ResponseEntity.ok(blockService.getBlockPropagation(type, pagination.toPageable()));
   }
 }
