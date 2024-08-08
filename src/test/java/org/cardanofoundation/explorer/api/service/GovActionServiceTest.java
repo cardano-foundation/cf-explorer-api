@@ -65,7 +65,8 @@ public class GovActionServiceTest {
   @Mock DelegationRepository delegationRepository;
   @Mock StakeAddressBalanceRepository stakeAddressBalanceRepository;
   @Mock OffChainVoteGovActionDataRepository offChainVoteGovActionDataRepository;
-
+  @Mock CommitteeRepository committeeRepository;
+  @Mock ProtocolParamService protocolParamService;
   @Mock RedisTemplate<String, Integer> redisTemplate;
 
   @Mock ValueOperations valueOperations;
@@ -370,7 +371,6 @@ public class GovActionServiceTest {
             .committeeMinSize(BigInteger.valueOf(5))
             .dvtCommitteeNormal(0.51)
             .govActionLifetime(BigInteger.TEN)
-            .ccThreshold(0.66)
             .epochNo(200)
             .build();
 
@@ -437,7 +437,6 @@ public class GovActionServiceTest {
             .committeeMinSize(BigInteger.valueOf(5))
             .dvtCommitteeNormal(0.51)
             .govActionLifetime(BigInteger.TEN)
-            .ccThreshold(0.66)
             .epochNo(200)
             .build();
 
@@ -512,6 +511,7 @@ public class GovActionServiceTest {
             .dvtPPNetworkGroup(0.6)
             .dvtPPTechnicalGroup(0.7)
             .dvtPPGovGroup(0.8)
+            .committeeMinSize(BigInteger.valueOf(8))
             .epochNo(200)
             .build();
 
@@ -572,12 +572,10 @@ public class GovActionServiceTest {
   }
 
   @Test
-  void testGetVotingChartByGovActionTxHashAndIndex_withCCType() throws JsonProcessingException {
+  void testGetVotingChartByGovActionTxHashAndIndex_withCCType() {
     String txHash = "4b5a77c3289a41f104e4a4c1fe82319fb047ce12f3d42ff2837caa2b0f2e93de";
     Integer index = 0;
     VoterType voterType = VoterType.CONSTITUTIONAL_COMMITTEE_HOT_KEY_HASH;
-
-    JsonNode node = getMetaDataOfGovAction();
 
     GovActionDetailsProjection govActionDetailsProjection =
         Mockito.mock(GovActionDetailsProjection.class);
@@ -586,8 +584,10 @@ public class GovActionServiceTest {
     when(govActionDetailsProjection.getEpoch()).thenReturn(5);
     when(govActionDetailsProjection.getType()).thenReturn(GovActionType.PARAMETER_CHANGE_ACTION);
 
-    EpochParam epochParam = EpochParam.builder().ccThreshold(0.66).epochNo(200).build();
+    EpochParam epochParam =
+        EpochParam.builder().epochNo(200).committeeMinSize(BigInteger.TEN).build();
 
+    when(committeeRepository.getLatestCCThreshold()).thenReturn(Optional.of(0.77));
     when(governanceActionRepository.getGovActionDetailsByTxHashAndIndex(txHash, index))
         .thenReturn(Optional.of(govActionDetailsProjection));
 

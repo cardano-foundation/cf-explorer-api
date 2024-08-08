@@ -78,6 +78,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
   private final OffChainVoteGovActionDataRepository offChainVoteGovActionDataRepository;
   private final LatestVotingProcedureMapper latestVotingProcedureMapper;
+  private final CommitteeRepository committeeRepository;
 
   private final RedisTemplate<String, Integer> redisTemplate;
 
@@ -853,10 +854,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     if (govActionTypesThatNotAllowedVoteByCC.contains(govActionDetailsProjection.getType())) {
       votingChartResponse.setThreshold(null);
     } else {
-      Double threshold = epochParam.getCcThreshold();
-      if (threshold == null) {
-        threshold = protocolParamService.getCCThresholdFromConwayGenesis();
-      }
+      Double threshold =
+          committeeRepository
+              .getLatestCCThreshold()
+              .orElseGet(protocolParamService::getCCThresholdFromConwayGenesis);
       votingChartResponse.setThreshold(threshold);
     }
 
