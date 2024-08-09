@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.junit.jupiter.api.Assertions;
@@ -67,7 +69,6 @@ import org.cardanofoundation.explorer.common.entity.explorer.VerifiedScript;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -490,24 +491,44 @@ class ScriptServiceTest {
 
   @Test
   void testGetNativeScriptHolders_thenReturn() {
+    TokenMapper tokenMapper = new TokenMapperImpl();
+    ReflectionTestUtils.setField(scriptService, "tokenMapper", tokenMapper);
+
     String scriptHash = "9fb550d631a4ca55d48756923652418be96641773bc7c6097defab79";
     Pageable pageable = PageRequest.of(0, 2);
-    Long addressId = 1L;
-    Address address = Address.builder().id(addressId).address("address").build();
-    AddressTokenProjection projection = mock(AddressTokenProjection.class);
-    when(projection.getPolicy()).thenReturn(scriptHash);
-    when(projection.getAddressId()).thenReturn(addressId);
-    when(projection.getAddress()).thenReturn("address");
-    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
-        .thenReturn(List.of(projection));
-    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
-        .thenReturn(List.of(projection));
 
-    var actual = scriptService.getNativeScriptHolders(scriptHash, pageable);
+    when(nativeScriptInfoRepository.findByScriptHash(scriptHash))
+        .thenReturn(
+            Optional.of(
+                NativeScriptInfo.builder()
+                    .scriptHash(scriptHash)
+                    .numberOfAssetHolders(1L)
+                    .build()));
 
-    Assertions.assertTrue(actual.getData().get(0).getPolicy().equals(scriptHash));
-    Assertions.assertEquals(1, actual.getTotalItems());
-    Assertions.assertNotNull(actual.getData().get(0).getAddressId());
+    AddressTokenProjection addressTokenProjection = Mockito.mock(AddressTokenProjection.class);
+    when(addressTokenProjection.getAddress()).thenReturn("addr1");
+    when(addressTokenProjection.getUnit()).thenReturn("unit1");
+    when(addressTokenProjection.getQuantity()).thenReturn(BigInteger.TWO);
+
+    when(latestTokenBalanceRepository.findAddressAndBalanceByPolicy(scriptHash, pageable))
+        .thenReturn(List.of(addressTokenProjection));
+
+    when(multiAssetRepository.findAllByUnitIn(anyList()))
+        .thenReturn(
+            List.of(
+                MultiAsset.builder()
+                    .fingerprint("fingerprint1")
+                    .unit("unit1")
+                    .name("name1")
+                    .build()));
+
+    var response = scriptService.getNativeScriptHolders(scriptHash, pageable);
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals("addr1", response.getData().get(0).getAddress());
+    Assertions.assertEquals(BigInteger.TWO, response.getData().get(0).getQuantity());
+    Assertions.assertEquals("fingerprint1", response.getData().get(0).getDisplayName());
   }
 
   @Test

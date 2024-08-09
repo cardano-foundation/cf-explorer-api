@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -17,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -89,6 +89,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
   private final TopStakeAddressBalanceRepository topStakeAddressBalanceRepository;
+  private final CardanoConverters cardanoConverters;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -413,7 +414,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByStakeAddress(addr.getView(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByStakeAddressAndSlotBefore(
+                  addr.getView(), cardanoConverters.time().toSlot(dates.get(0)))
               .orElse(BigInteger.ZERO);
 
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
@@ -421,10 +423,10 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
         Optional<BigInteger> balance =
-            addressTxAmountRepository.getBalanceByStakeAddressAndTime(
+            addressTxAmountRepository.getBalanceByStakeAddressAndSlotBetween(
                 addr.getView(),
-                dates.get(i - 1).toEpochSecond(ZoneOffset.UTC),
-                dates.get(i).toEpochSecond(ZoneOffset.UTC));
+                cardanoConverters.time().toSlot(dates.get((i - 1))),
+                cardanoConverters.time().toSlot(dates.get(i)));
         if (balance.isPresent()) {
           fromBalance = fromBalance.add(balance.get());
         }
@@ -436,7 +438,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       dates.remove(0);
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByStakeAddress(addr.getView(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByStakeAddressAndSlotBefore(
+                  addr.getView(), cardanoConverters.time().toSlot(dates.get(0)))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
       List<AggregateAddressBalanceProjection> aggregateAddressTxBalances =
@@ -480,8 +483,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(
             addr.getView(),
             fromBalance,
-            dates.get(0).toEpochSecond(ZoneOffset.UTC),
-            dates.get(dates.size() - 1).toEpochSecond(ZoneOffset.UTC));
+            cardanoConverters.time().toSlot(dates.get(0)),
+            cardanoConverters.time().toSlot(dates.get(dates.size() - 1)));
     if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
       response.setHighestBalance(minMaxBalance.getMaxVal());
     } else {
@@ -492,13 +495,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
     } else {
       response.setLowestBalance(fromBalance);
     }
-    Long maxBlockTime =
-        stakeTxBalanceRepository
-            .findMaxBlockTimeByStakeAddress(addr.getView())
-            .orElse(Long.MAX_VALUE);
-    if (!maxBlockTime.equals(Long.MAX_VALUE)) {
+    Long targetSlot =
+        stakeTxBalanceRepository.findMaxSlotByStakeAddress(addr.getView()).orElse(Long.MAX_VALUE);
+
+    if (!targetSlot.equals(Long.MAX_VALUE)) {
       List<StakeTxProjection> stakeTxList =
-          addressTxAmountRepository.findTxAndAmountByStake(addr.getView(), maxBlockTime);
+          addressTxAmountRepository.findTxAndAmountByStakeAndSlotAfter(addr.getView(), targetSlot);
       for (StakeTxProjection stakeTx : stakeTxList) {
         if (response
                 .getHighestBalance()

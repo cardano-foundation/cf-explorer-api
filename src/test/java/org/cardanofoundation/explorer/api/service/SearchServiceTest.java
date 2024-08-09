@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
-import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;

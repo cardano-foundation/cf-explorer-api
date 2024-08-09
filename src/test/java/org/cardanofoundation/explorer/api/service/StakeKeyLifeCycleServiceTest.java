@@ -13,6 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import org.springframework.data.domain.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,6 +24,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.conversions.CardanoConverters;
+import org.cardanofoundation.conversions.ClasspathConversionsFactory;
+import org.cardanofoundation.conversions.domain.NetworkType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
@@ -46,6 +50,7 @@ import org.cardanofoundation.explorer.api.service.impl.StakeKeyLifeCycleServiceI
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.EpochParam;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -454,6 +459,10 @@ class StakeKeyLifeCycleServiceTest {
 
   @Test
   void whenStakeAddressHaveDelegation_showReturnDelegationDetail() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyLifeCycleService, "cardanoConverters", cardanoConverters);
+
     StakeDelegationProjection projection = Mockito.mock(StakeDelegationProjection.class);
     when(projection.getTxHash())
         .thenReturn("bd80f5d56419eed99b45b45c58468213be28584ce64fcd2b6bd1300af8b6e488");
@@ -467,7 +476,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(delegationRepository.findDelegationByAddressAndTx(any(), any()))
         .thenReturn(Optional.of(projection));
-    when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any()))
+    when(addressTxAmountRepository.getBalanceByStakeAddressAndSlotAfter(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(102569063)));
     var response =
         stakeKeyLifeCycleService.getStakeDelegationDetail(
@@ -605,6 +614,10 @@ class StakeKeyLifeCycleServiceTest {
 
   @Test
   void whenStakeAddressHaveWithdrawal_showReturnWithdrawalDetail() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyLifeCycleService, "cardanoConverters", cardanoConverters);
+
     StakeWithdrawalProjection projection = Mockito.mock(StakeWithdrawalProjection.class);
     when(projection.getTxHash())
         .thenReturn("91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
@@ -615,7 +628,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.getWithdrawalByAddressAndTx(any(), any()))
         .thenReturn(Optional.of(projection));
-    when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any()))
+    when(addressTxAmountRepository.getBalanceByStakeAddressAndSlotAfter(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(102569063)));
     when(rewardRepository.getAvailableRewardByStakeAddressAndEpoch(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(4846486)));
@@ -635,6 +648,10 @@ class StakeKeyLifeCycleServiceTest {
 
   @Test
   void getStakeWithdrawalDetail_whenRewardNotAvailable_shouldReturnRewardDataNull() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyLifeCycleService, "cardanoConverters", cardanoConverters);
+
     StakeWithdrawalProjection projection = Mockito.mock(StakeWithdrawalProjection.class);
     when(projection.getTxHash())
         .thenReturn("91d4995345d7aa62f74167d22f596dbd10f486785be3605b0d3bc0ec1bd9c381");
@@ -644,7 +661,7 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(withdrawalRepository.getWithdrawalByAddressAndTx(any(), any()))
         .thenReturn(Optional.of(projection));
-    when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any()))
+    when(addressTxAmountRepository.getBalanceByStakeAddressAndSlotAfter(any(), any()))
         .thenReturn(Optional.of(BigInteger.valueOf(102569063)));
     when(fetchRewardDataService.checkRewardAvailable(anyString())).thenReturn(true);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
@@ -773,6 +790,11 @@ class StakeKeyLifeCycleServiceTest {
     when(stakeAddressRepository.findByView(anyString())).thenReturn(Optional.of(stakeAddress));
     when(addressTxAmountRepository.findTxAndAmountByStake(stakeAddress.getView(), pageable))
         .thenReturn(page);
+
+    Tx tx1 = Tx.builder().hash("txHash1").build();
+    Tx tx2 = Tx.builder().hash("txHash2").build();
+    Tx tx3 = Tx.builder().hash("txHash3").build();
+    when(txRepository.findAllByHashIn(any())).thenReturn(List.of(tx1, tx2, tx3));
 
     var response =
         stakeKeyLifeCycleService.getStakeWalletActivities(stakeAddress.getView(), pageable);
@@ -1015,8 +1037,12 @@ class StakeKeyLifeCycleServiceTest {
 
   @Test
   void testGetStakeWalletActivitiesByDateRange_thenReturn() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyLifeCycleService, "cardanoConverters", cardanoConverters);
+
     String stakeKey = "stake_key";
-    Timestamp fromDate = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp fromDate = Timestamp.valueOf("2022-01-01 00:00:00");
     Timestamp toDate =
         Timestamp.from(
             LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toInstant(ZoneOffset.UTC));
@@ -1030,14 +1056,11 @@ class StakeKeyLifeCycleServiceTest {
     when(projection.getAmount()).thenReturn(BigInteger.ONE);
     when(projection.getTime()).thenReturn(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
     StakeAddress stakeAddress = StakeAddress.builder().view("view").build();
-    List<Long> txIds = List.of(100L);
+    Tx tx1 = Tx.builder().hash("hash").build();
+    when(txRepository.findAllByHashIn(any())).thenReturn(List.of(tx1));
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-    when(addressTxAmountRepository.findTxAndAmountByStakeAndDateRange(
-            "view",
-            fromDate.toLocalDateTime().toInstant(ZoneOffset.UTC).getEpochSecond(),
-            toDate.toLocalDateTime().toInstant(ZoneOffset.UTC).getEpochSecond(),
-            pageable))
+    when(addressTxAmountRepository.findTxAndAmountByStakeAndDateRange(any(), any(), any(), any()))
         .thenReturn(new PageImpl<>(List.of(projection)));
 
     var response =

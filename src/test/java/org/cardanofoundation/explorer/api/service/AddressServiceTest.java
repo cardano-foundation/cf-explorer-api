@@ -1,10 +1,10 @@
 package org.cardanofoundation.explorer.api.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.bloxbean.cardano.client.util.HexUtil;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -22,25 +23,30 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.conversions.CardanoConverters;
+import org.cardanofoundation.conversions.ClasspathConversionsFactory;
+import org.cardanofoundation.conversions.domain.NetworkType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
+import org.cardanofoundation.explorer.api.mapper.TokenMapperImpl;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.MinMaxProjection;
+import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
-import org.cardanofoundation.explorer.api.util.HexUtils;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopAddressBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,17 +54,12 @@ class AddressServiceTest {
 
   @Mock AddressRepository addressRepository;
   @Mock ScriptRepository scriptRepository;
-
   @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
-
-  @Mock AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
-
+  @Mock TopAddressBalanceRepository topAddressBalanceRepository;
+  @Mock MultiAssetRepository multiAssetRepository;
   @Mock AddressTxCountRepository addressTxCountRepository;
-
   @Mock AddressTxAmountRepository addressTxAmountRepository;
-
-  @Mock TokenMapper tokenMapper;
-
+  @Mock AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
   @InjectMocks AddressServiceImpl addressService;
 
   @BeforeEach
@@ -128,6 +129,10 @@ class AddressServiceTest {
 
   @Test
   void getAddressAnalytics_shouldReturn() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(addressService, "cardanoConverters", cardanoConverters);
+
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
@@ -148,6 +153,10 @@ class AddressServiceTest {
 
   @Test
   void getAddressAnalytics_shouldReturnOneMonth() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(addressService, "cardanoConverters", cardanoConverters);
+
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_MONTH;
@@ -184,6 +193,10 @@ class AddressServiceTest {
 
   @Test
   void getAddressAnalytics_shouldReturnOneWeek() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(addressService, "cardanoConverters", cardanoConverters);
+
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_WEEK;
@@ -205,6 +218,10 @@ class AddressServiceTest {
 
   @Test
   void getAddressAnalytics_shouldReturnThreeMonth() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(addressService, "cardanoConverters", cardanoConverters);
+
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
 
@@ -226,74 +243,81 @@ class AddressServiceTest {
 
   @Test
   void getTopAddress_shouldReturn() {
-    //    String addr =
-    //
-    // "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
-    //    Pageable pageable = PageRequest.of(0, 10);
-    //    LatestAddressBalance latestAddressBalance =
-    //        LatestAddressBalance.builder().address(addr).quantity(BigInteger.TEN).build();
-    //
-    //    when(latestAddressBalanceRepository.findAllLatestAddressBalance(pageable))
-    //        .thenReturn(List.of(latestAddressBalance));
-    //
-    //    when(addressTxCountRepository.findAllByAddressIn(List.of(addr)))
-    //        .thenReturn(List.of(AddressTxCount.builder().address(addr).txCount(1L).build()));
-    //
-    //    var response = addressService.getTopAddress(pageable);
-    //    Assertions.assertEquals(response.getData().get(0).getAddress(), addr);
-    //    Assertions.assertEquals(response.getData().get(0).getTxCount(), 1);
-    //    Assertions.assertEquals(response.getData().get(0).getBalance(), BigInteger.TEN);
+    Pageable pageable = PageRequest.of(0, 10);
+    TopAddressBalance topAddressBalance =
+        TopAddressBalance.builder().address("addr1").quantity(BigInteger.TEN).build();
+
+    AddressTxCount addressTxCount = AddressTxCount.builder().address("addr1").txCount(1L).build();
+
+    when(topAddressBalanceRepository.findAllLatestAddressBalance(pageable))
+        .thenReturn(List.of(topAddressBalance));
+
+    when(addressTxCountRepository.findAllByAddressIn(anyList()))
+        .thenReturn(List.of(addressTxCount));
+
+    var response = addressService.getTopAddress(pageable);
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals(BigInteger.TEN, response.getData().get(0).getBalance());
+    Assertions.assertEquals(1L, response.getData().get(0).getTxCount());
+    Assertions.assertEquals("addr1", response.getData().get(0).getAddress());
   }
 
   @Test
-  void getTokenByDisplayName_shouldReturn() {
+  void getTokenByDisplayName_withNotEmptyDisplayName() {
+    TokenMapper customTokenMapper = new TokenMapperImpl();
+    ReflectionTestUtils.setField(addressService, "tokenMapper", customTokenMapper);
+
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
+    String displayName = "test";
     Pageable pageable = PageRequest.of(0, 10);
-    String displayName = "fingerprint";
 
-    List<AddressTokenProjection> addressTokenProjections = new ArrayList<>();
-    AddressTokenProjection projection = Mockito.mock(AddressTokenProjection.class);
-    addressTokenProjections.add(projection);
+    LatestTokenBalance latestTokenBalance =
+        LatestTokenBalance.builder().unit("unit1").address(addr).quantity(BigInteger.ONE).build();
 
-    TokenAddressResponse tokenAddressResponse =
-        TokenAddressResponse.builder()
-            .fingerprint("fingerprint")
-            .addressId(1L)
-            .address("address")
-            .policy("policy")
-            .fingerprint("fingerprint")
-            .quantity(BigInteger.ONE)
-            .displayName(HexUtils.fromHex("token", "fingerprint"))
-            .build();
+    AddressTokenProjection addressTokenProjection = Mockito.mock(AddressTokenProjection.class);
+    when(addressTokenProjection.getUnit()).thenReturn("unit1");
+    when(addressTokenProjection.getTokenName())
+        .thenReturn(HexUtil.encodeHexString("test1".getBytes()));
 
-    //    when(latestTokenBalanceRepository.findTokenAndBalanceByAddressAndNameView(any(), any(),
-    // any()))
-    //        .thenReturn(new PageImpl<>(addressTokenProjections));
-    when(tokenMapper.fromAddressTokenProjection(any())).thenReturn(tokenAddressResponse);
+    when(multiAssetRepository.findTokenMetadataByUnitIn(any()))
+        .thenReturn(List.of(addressTokenProjection));
+    when(latestTokenBalanceRepository.findAllByAddress(addr))
+        .thenReturn(List.of(latestTokenBalance));
 
     var response = addressService.getTokenByDisplayName(pageable, addr, displayName);
-    var expect = new BaseFilterResponse<>(List.of(tokenAddressResponse), 1);
-    Assertions.assertEquals(expect.getData(), response.getData());
-    Assertions.assertEquals(expect.getTotalItems(), response.getTotalItems());
+
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals(BigInteger.ONE, response.getData().get(0).getQuantity());
+    Assertions.assertTrue(response.getData().get(0).getDisplayName().contains(displayName));
+    Assertions.assertEquals(addr, response.getData().get(0).getAddress());
   }
 
   @Test
-  void getTokenByDisplayName_emptyDisplay() {
+  void getTokenByDisplayName_withEmptyDisplayName() {
+    TokenMapper customTokenMapper = new TokenMapperImpl();
+    ReflectionTestUtils.setField(addressService, "tokenMapper", customTokenMapper);
+
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     Pageable pageable = PageRequest.of(0, 10);
-    List<AddressTokenProjection> addressTokenProjections = new ArrayList<>();
-    AddressTokenProjection projection = Mockito.mock(AddressTokenProjection.class);
-    addressTokenProjections.add(projection);
 
-    //    when(latestTokenBalanceRepository.findTokenAndBalanceByAddress(addr, pageable))
-    //        .thenReturn(new PageImpl<>(addressTokenProjections));
-    when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
-        .thenReturn(
-            TokenAddressResponse.builder().addressId(1L).policy("sub").name("ject").build());
+    LatestTokenBalance latestTokenBalance =
+        LatestTokenBalance.builder().unit("unit1").address(addr).quantity(BigInteger.ONE).build();
+
+    AddressTokenProjection addressTokenProjection = Mockito.mock(AddressTokenProjection.class);
+    when(addressTokenProjection.getUnit()).thenReturn("unit1");
+
+    when(multiAssetRepository.findTokenMetadataByUnitIn(any()))
+        .thenReturn(List.of(addressTokenProjection));
+
+    when(latestTokenBalanceRepository.findAllByAddress(addr))
+        .thenReturn(List.of(latestTokenBalance));
 
     var response = addressService.getTokenByDisplayName(pageable, addr, "");
-    Assertions.assertNotNull(response);
+
+    Assertions.assertEquals(1, response.getData().size());
+    Assertions.assertEquals(BigInteger.ONE, response.getData().get(0).getQuantity());
+    Assertions.assertEquals(addr, response.getData().get(0).getAddress());
   }
 }

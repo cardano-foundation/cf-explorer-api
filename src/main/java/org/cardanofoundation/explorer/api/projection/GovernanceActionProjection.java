@@ -30,4 +30,6 @@ public interface GovernanceActionProjection {
   Long getCreatedAt();
 
   Long getGovCount();
+
+  String getGovActionName();
 }

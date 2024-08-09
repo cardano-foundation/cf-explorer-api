@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.apache.logging.log4j.util.Strings;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant.NetworkType;
 
 public class StakeKeyLengthValidator implements ConstraintValidator<StakeKeyLengthValid, String> {
 
@@ -33,7 +34,7 @@ public class StakeKeyLengthValidator implements ConstraintValidator<StakeKeyLeng
   }
 
   private int getStakeKeyLengthByNetwork(String network) {
-    if (network.equals(CommonConstant.MAINNET_NETWORK)) {
+    if (network.equals(NetworkType.MAINNET)) {
       return CommonConstant.STAKE_KEY_LENGTH_MAINNET;
     } else {
       return CommonConstant.STAKE_KEY_LENGTH_TESTNET;

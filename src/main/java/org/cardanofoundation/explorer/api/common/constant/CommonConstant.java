@@ -10,6 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonConstant {
 
+  public static final class NetworkType {
+    public static final String MAINNET = "mainnet";
+    public static final String PREVIEW = "preview";
+    public static final String PREPROD = "preprod";
+    public static final String SANCHONET = "sanchonet";
+  }
+
   public static final int SCALE = 6;
 
   public static final Integer ZERO = 0;
@@ -21,8 +28,6 @@ public class CommonConstant {
   public static final Double MAX_PERCENT = 1.0;
 
   public static final Double MIN_PERCENT = 0.0;
-
-  public static final String MAINNET_NETWORK = "mainnet";
 
   public static final String TESTNET_ADDRESS_PREFIX = "addr_test";
 

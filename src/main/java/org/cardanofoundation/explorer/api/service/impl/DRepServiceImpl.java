@@ -40,9 +40,9 @@ import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepSta
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
-import org.cardanofoundation.explorer.api.repository.explorer.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationVoteRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
@@ -52,7 +52,7 @@ import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
-import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.DRepInfo;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service

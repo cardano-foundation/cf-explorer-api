@@ -19,23 +19,23 @@ public interface StakeTxBalanceRepository
           """
         select :fromBalance + coalesce(min(calculated_balances.sum_balance), 0) as minVal,
                :fromBalance + coalesce(max(calculated_balances.sum_balance), 0) as maxVal
-        from (select sum(stb.balance_change) over (order by stb.time rows unbounded PRECEDING) as sum_balance
+        from (select sum(stb.balance_change) over (order by stb.slot rows unbounded PRECEDING) as sum_balance
               from stake_tx_balance stb
               where stb.stake_address = :stakeAddress
-                and stb.time > :fromDate
-                and stb.time <= :toDate) as calculated_balances
+                and stb.slot > :fromSlot
+                and stb.slot <= :toSlot) as calculated_balances
         """,
       nativeQuery = true)
   MinMaxProjection findMinMaxBalanceByStakeAddress(
       @Param("stakeAddress") String stakeAddress,
       @Param("fromBalance") BigInteger fromBalance,
-      @Param("fromDate") Long fromDate,
-      @Param("toDate") Long toDate);
+      @Param("fromSlot") Long fromSlot,
+      @Param("toSlot") Long toSlot);
 
   @Query(
       value =
-          "select MAX(stb.time)"
+          "select MAX(stb.slot)"
               + " from StakeTxBalance stb "
               + " where stb.stakeAddress = :stakeAddress ")
-  Optional<Long> findMaxBlockTimeByStakeAddress(@Param("stakeAddress") String stakeAddress);
+  Optional<Long> findMaxSlotByStakeAddress(@Param("stakeAddress") String stakeAddress);
 }

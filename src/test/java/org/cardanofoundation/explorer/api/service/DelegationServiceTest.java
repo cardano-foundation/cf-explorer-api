@@ -78,6 +78,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.impl.DelegationServiceImpl;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AggregatePoolInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Delegation_;
@@ -125,6 +126,8 @@ class DelegationServiceTest {
   @Mock private AggregatePoolInfoRepository aggregatePoolInfoRepository;
 
   @Mock private PoolCertificateService poolCertificateService;
+
+  @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
   @InjectMocks private DelegationServiceImpl delegationService;
 
@@ -461,7 +464,8 @@ class DelegationServiceTest {
     ownerAddress.add("address");
     when(poolUpdateRepository.getCreatedTimeOfPool(poolId)).thenReturn(timestamp);
     when(poolUpdateRepository.findOwnerAccountByPool(poolId)).thenReturn(ownerAddress);
-    //    when(stakeAddressRepository.getBalanceByView(ownerAddress)).thenReturn(BigInteger.TEN);
+    when(stakeAddressBalanceRepository.sumBalanceByStakeAddressIn(ownerAddress))
+        .thenReturn(BigInteger.TEN);
     when(rewardRepository.getAvailableRewardByAddressList(ownerAddress)).thenReturn(BigInteger.TEN);
     when(withdrawalRepository.getRewardWithdrawnByAddressList(ownerAddress))
         .thenReturn(BigInteger.TEN);

@@ -22,11 +22,9 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovCommitteeHistoryFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionFilter;
 import org.cardanofoundation.explorer.api.model.request.governanceAction.GovernanceActionRequest;
+import org.cardanofoundation.explorer.api.model.request.governanceAction.VoteFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceOverviewResponse;
-import org.cardanofoundation.explorer.api.model.response.governanceAction.VotingChartResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.*;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.common.entity.enumeration.VoterType;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
@@ -137,5 +135,73 @@ public class GovernanceActionController {
       @RequestParam @Parameter(description = "The type of voter") VoterType voterType) {
     return ResponseEntity.ok(
         governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index, voterType));
+  }
+
+  @GetMapping("/{txHash}/{index}")
+  @LogMessage
+  @Operation(
+      summary = "Get governance action details",
+      tags = {"gov-actions"})
+  public ResponseEntity<GovernanceActionOverViewResponse> getGovActionDetails(
+      @PathVariable @Parameter(description = "The hash of transaction governance action")
+          String txHash,
+      @PathVariable @Parameter(description = "The index of transaction governance action")
+          Integer index) {
+    return ResponseEntity.ok(
+        governanceActionService.getGovernanceActionOverviewResponse(txHash, index));
+  }
+
+  @GetMapping("/authors")
+  @LogMessage
+  @Operation(
+      summary = "Get authors who create governance action",
+      tags = {"gov-actions"})
+  public ResponseEntity<BaseFilterResponse<AuthorResponse>> getAuthorsByAnchorUrlAndAnchorHash(
+      @RequestParam @Parameter(description = "The anchor url of transaction governance action")
+          String anchorUrl,
+      @RequestParam @Parameter(description = "The anchor hash of transaction governance action")
+          String anchorHash,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 6,
+              sort = {"name"},
+              direction = Sort.Direction.ASC)
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(
+        governanceActionService.getAuthorsByAnchor(anchorUrl, anchorHash, pagination.toPageable()));
+  }
+
+  @GetMapping("/votes")
+  @LogMessage
+  @Operation(
+      summary = "Get voting on governance action",
+      tags = {"gov-actions"})
+  public ResponseEntity<BaseFilterResponse<VotingOnGovActionResponse>> getVotesOnGovAction(
+      @ParameterObject VoteFilter voteFilter,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 3,
+              sort = {"blockTime"},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(
+        governanceActionService.getVotingOnGovAction(voteFilter, pagination.toPageable()));
+  }
+
+  @GetMapping("/{txHash}/{index}/votes/range-values")
+  @LogMessage
+  @Operation(
+      summary = "Get range value to filter on votes overview section",
+      tags = {"gov-actions"})
+  public ResponseEntity<RangeFilterVoteResponse> getRangeFilterForVoteSection(
+      @PathVariable @Parameter(description = "The hash of transaction governance action")
+          String txHash,
+      @PathVariable @Parameter(description = "The index of transaction governance action")
+          Integer index) {
+    return ResponseEntity.ok(governanceActionService.getRangeFilterVoteResponse(txHash, index));
   }
 }
