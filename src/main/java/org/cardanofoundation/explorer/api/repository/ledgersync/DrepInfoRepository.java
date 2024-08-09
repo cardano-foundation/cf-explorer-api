@@ -81,5 +81,6 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
     FROM DRepInfo dri
     WHERE dri.drepHash in :dRepHashList
     """)
-  List<DRepInfoProjection> findByDRepHashIn(@Param("dRepHashList") List<String> drepHashList);
+  List<DRepInfoProjection> findDRepActiveStakeInHashList(
+      @Param("dRepHashList") List<String> drepHashList);
 }

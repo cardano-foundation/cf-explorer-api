@@ -11,10 +11,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +21,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.BlockPropagationCha
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.BlockMapper;
+import org.cardanofoundation.explorer.api.mapper.BlockPropagationMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockPropagationResponse;
@@ -56,6 +54,7 @@ public class BlockServiceImpl implements BlockService {
   private final CustomBlockRepository customBlockRepository;
   private final BlockStatisticsPerEpochRepository blockStatisticsPerEpochRepository;
   private final BlockStatisticsDailyRepository blockStatisticsDailyRepository;
+  private final BlockPropagationMapper blockPropagationMapper;
 
   @Override
   public BlockResponse getBlockDetailByBlockId(String blockId) {
@@ -316,31 +315,14 @@ public class BlockServiceImpl implements BlockService {
   @Override
   public List<BlockPropagationResponse> getBlockPropagation(
       BlockPropagationChartType type, Pageable pageable) {
+    // if type is null, will get block statistics per epoch as default
     if (type == null || type.equals(BlockPropagationChartType.EPOCH)) {
-      return blockStatisticsPerEpochRepository.findAllByOrderByEpochNoDesc(pageable).stream()
-          .map(
-              blockStatisticsPerEpoch ->
-                  BlockPropagationResponse.builder()
-                      .epochNo(blockStatisticsPerEpoch.getEpochNo())
-                      .blockPropMean(blockStatisticsPerEpoch.getBlockPropMean())
-                      .blockPropMedian(blockStatisticsPerEpoch.getBlockPropMedian())
-                      .blockPropP90(blockStatisticsPerEpoch.getBlockPropP90())
-                      .blockPropP95(blockStatisticsPerEpoch.getBlockPropP95())
-                      .time(blockStatisticsPerEpoch.getTime())
-                      .build())
+      return blockStatisticsPerEpochRepository.findBlockPropagation(pageable).stream()
+          .map(blockPropagationMapper::fromBlockPropagationProjection)
           .collect(Collectors.toList());
     } else {
-      return blockStatisticsDailyRepository.findAllByOrderByTimeDesc(pageable).stream()
-          .map(
-              blockStatisticsPerEpoch ->
-                  BlockPropagationResponse.builder()
-                      .epochNo(blockStatisticsPerEpoch.getEpochNo())
-                      .blockPropMean(blockStatisticsPerEpoch.getBlockPropMean())
-                      .blockPropMedian(blockStatisticsPerEpoch.getBlockPropMedian())
-                      .blockPropP90(blockStatisticsPerEpoch.getBlockPropP90())
-                      .blockPropP95(blockStatisticsPerEpoch.getBlockPropP95())
-                      .time(blockStatisticsPerEpoch.getTime())
-                      .build())
+      return blockStatisticsDailyRepository.findBlockPropagation(pageable).stream()
+          .map(blockPropagationMapper::fromBlockPropagationProjection)
           .collect(Collectors.toList());
     }
   }

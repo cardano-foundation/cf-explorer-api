@@ -66,7 +66,7 @@ public interface LatestVotingProcedureRepository
     AND (:voterHash is null or lvp.voterHash = :voterHash)
     AND (lvp.blockTime >= :from AND lvp.blockTime <= :to)
     AND lvp.voterType in :voterType""")
-  Page<LatestVotingProcedureProjection> getVoteOnGovActionByAnyType(
+  Page<LatestVotingProcedureProjection> getVoteOnGovActionByTypeIn(
       @Param("txHash") String txHash,
       @Param("index") Integer index,
       @Param("voterHash") String voterHash,
@@ -80,7 +80,7 @@ public interface LatestVotingProcedureRepository
     SELECT lvp.voterHash as voterHash, lvp.vote as vote, lvp.voterType as voterType,
     lvp.blockTime as blockTime, lvp.repeatVote as repeatVote, di.activeVoteStake AS votingStake
     FROM LatestVotingProcedure lvp
-    LEFT JOIN DRepInfo di ON lvp.voterHash = di.drepHash
+    INNER JOIN DRepInfo di ON lvp.voterHash = di.drepHash
     WHERE lvp.govActionTxHash = :txHash AND lvp.govActionIndex = :index
     AND (:voterHash is null or lvp.voterHash = :voterHash)
     AND (lvp.blockTime >= :from AND lvp.blockTime <= :to)
