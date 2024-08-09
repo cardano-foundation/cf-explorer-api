@@ -143,8 +143,12 @@ public class TokenServiceImpl implements TokenService {
     multiAssetResponsesList.forEach(
         ma -> {
           var tokenInfo = tokenInfoMap.getOrDefault(ma.getId(), null);
-          var script = scriptMap.get(ma.getPolicy());
-          ma.setPolicyIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
+          Script script = scriptMap.get(ma.getPolicy());
+          if (Objects.nonNull(script)) {
+            ma.setPolicyIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
+          } else {
+            ma.setPolicyIsNativeScript(true);
+          }
 
           if (tokenInfo == null) {
             ma.setNumberOfHolders(0L);
