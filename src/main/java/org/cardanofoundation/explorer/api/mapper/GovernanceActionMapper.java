@@ -6,8 +6,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionDetailsResponse;
+import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionOverViewResponse;
 import org.cardanofoundation.explorer.api.model.response.governanceAction.GovernanceActionResponse;
 import org.cardanofoundation.explorer.api.projection.GovActionDetailsProjection;
+import org.cardanofoundation.explorer.api.projection.GovernanceActionOverviewProjection;
 import org.cardanofoundation.explorer.api.projection.GovernanceActionProjection;
 
 @Mapper(componentModel = "spring")
@@ -27,6 +29,13 @@ public interface GovernanceActionMapper {
       expression = "java(fromLong(govActionDetailsProjection.getBlockTime()))")
   GovernanceActionDetailsResponse fromGovActionDetailsProjection(
       GovActionDetailsProjection govActionDetailsProjection);
+
+  @Mapping(source = "abstract", target = "abstractContent")
+  @Mapping(
+      target = "dateCreated",
+      expression = "java(fromLong(governanceActionOverviewProjection.getDateCreated()))")
+  GovernanceActionOverViewResponse fromGovernanceActionOverviewProjection(
+      GovernanceActionOverviewProjection governanceActionOverviewProjection);
 
   default Date fromLong(Long value) {
     return value == null ? null : new Date(value * 1000);

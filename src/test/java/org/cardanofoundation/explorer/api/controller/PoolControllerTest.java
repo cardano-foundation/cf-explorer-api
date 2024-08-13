@@ -41,6 +41,7 @@ import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolRangeValuesResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolTxResponse;
+import org.cardanofoundation.explorer.api.model.response.pool.StakePoolsChartResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.TxPoolCertificateHistory;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.TxBlockEpochProjection;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
@@ -170,5 +171,18 @@ public class PoolControllerTest {
         .andExpect(status().isOk());
 
     verify(poolService).getPoolRangeValues();
+  }
+
+  @Test
+  void testGetRegisteredStakePoolsChart() throws Exception {
+
+    StakePoolsChartResponse response = StakePoolsChartResponse.builder().build();
+    when(poolService.getStakePoolsChart()).thenReturn(response);
+
+    mockMvc
+        .perform(get("/api/v1/pools/stake-pools-chart").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(poolService).getStakePoolsChart();
   }
 }

@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
@@ -14,11 +16,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 
+import org.cardanofoundation.explorer.api.common.enumeration.BlockPropagationChartType;
 import org.cardanofoundation.explorer.api.config.LogMessage;
-import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.BlockResponse;
-import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.*;
 import org.cardanofoundation.explorer.api.service.BlockService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
@@ -78,5 +78,24 @@ public class BlockController {
           @Valid
           Pagination pagination) {
     return ResponseEntity.ok(txService.getTransactionsByBlock(blockId, pagination.toPageable()));
+  }
+
+  @GetMapping("/block-propagation")
+  @LogMessage
+  @Operation(
+      summary = "Get block propagation",
+      tags = {"block"})
+  public ResponseEntity<List<BlockPropagationResponse>> getBlockPropagation(
+      @Parameter(description = "The type of chart.") @RequestParam(required = false)
+          BlockPropagationChartType type,
+      @ParameterObject
+          @PaginationValid
+          @PaginationDefault(
+              size = 6,
+              sort = {"time"},
+              direction = Sort.Direction.DESC)
+          @Valid
+          Pagination pagination) {
+    return ResponseEntity.ok(blockService.getBlockPropagation(type, pagination.toPageable()));
   }
 }
