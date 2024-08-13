@@ -1,4 +1,4 @@
-package org.cardanofoundation.explorer.api.repository.explorer;
+package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepSta
 import org.cardanofoundation.explorer.api.projection.DRepInfoProjection;
 import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
-import org.cardanofoundation.explorer.common.entity.explorer.DRepInfo;
+import org.cardanofoundation.explorer.common.entity.ledgersync.DRepInfo;
 
 public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
 
@@ -74,4 +74,13 @@ public interface DrepInfoRepository extends JpaRepository<DRepInfo, Long> {
        min(dri.govParticipationRate) as minGovParticipationRate, max(dri.govParticipationRate) as maxGovParticipationRate from DRepInfo dri
           """)
   DRepRangeProjection getDRepRangeValues();
+
+  @Query(
+      """
+    SELECT dri.drepHash as drepHash, dri.activeVoteStake as activeVoteStake
+    FROM DRepInfo dri
+    WHERE dri.drepHash in :dRepHashList
+    """)
+  List<DRepInfoProjection> findDRepActiveStakeInHashList(
+      @Param("dRepHashList") List<String> drepHashList);
 }

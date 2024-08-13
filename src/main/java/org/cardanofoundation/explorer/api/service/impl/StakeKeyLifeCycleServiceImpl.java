@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeRewardType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -68,6 +69,7 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
   private final FetchRewardDataService fetchRewardDataService;
   private final EpochParamRepository epochParamRepository;
   private final TxRepository txRepository;
+  private final CardanoConverters cardanoConverters;
 
   @Override
   public StakeLifecycleResponse getStakeLifeCycle(String stakeKey) {
@@ -221,9 +223,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
             .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_DELEGATION_NOT_FOUND));
     var totalBalance =
         addressTxAmountRepository
-            .getBalanceByStakeAddressAndTime(
+            .getBalanceByStakeAddressAndSlotAfter(
                 stakeAddress.getView(),
-                delegation.getTime().toLocalDateTime().toEpochSecond(ZoneOffset.UTC))
+                cardanoConverters.time().toSlot(delegation.getTime().toLocalDateTime()))
             .orElse(BigInteger.ZERO);
     return StakeDelegationDetailResponse.builder()
         .fee(delegation.getFee())
@@ -325,9 +327,9 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
             .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_WITHDRAWAL_NOT_FOUND));
     var totalBalance =
         addressTxAmountRepository
-            .getBalanceByStakeAddressAndTime(
+            .getBalanceByStakeAddressAndSlotAfter(
                 stakeAddress.getView(),
-                withdrawal.getTime().toLocalDateTime().toEpochSecond(ZoneOffset.UTC))
+                cardanoConverters.time().toSlot(withdrawal.getTime().toLocalDateTime()))
             .orElse(BigInteger.ZERO);
     BigInteger rewardAvailable = null;
 
@@ -528,21 +530,19 @@ public class StakeKeyLifeCycleServiceImpl implements StakeKeyLifeCycleService {
         stakeAddressRepository
             .findByView(stakeKey)
             .orElseThrow(() -> new NoContentException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
-    Timestamp fromDate = Timestamp.valueOf(MIN_TIME);
-    Timestamp toDate =
-        Timestamp.from(
-            LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).toInstant(ZoneOffset.UTC));
+    LocalDateTime fromDate = cardanoConverters.genesisConfig().getStartTime();
+    LocalDateTime toDate = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     if (Objects.nonNull(condition.getFromDate())) {
-      fromDate = Timestamp.from(condition.getFromDate().toInstant());
+      fromDate = LocalDateTime.ofInstant(condition.getFromDate().toInstant(), ZoneOffset.UTC);
     }
     if (Objects.nonNull(condition.getToDate())) {
-      toDate = Timestamp.from(condition.getToDate().toInstant());
+      toDate = LocalDateTime.ofInstant(condition.getToDate().toInstant(), ZoneOffset.UTC);
     }
     var txAmountList =
         addressTxAmountRepository.findTxAndAmountByStakeAndDateRange(
             stakeAddress.getView(),
-            fromDate.toLocalDateTime().toInstant(ZoneOffset.UTC).getEpochSecond(),
-            toDate.toLocalDateTime().toInstant(ZoneOffset.UTC).getEpochSecond(),
+            cardanoConverters.time().toSlot(fromDate),
+            cardanoConverters.time().toSlot(toDate),
             pageable);
 
     return new BaseFilterResponse<>(txAmountList, getContentWalletActivityResponse(txAmountList));

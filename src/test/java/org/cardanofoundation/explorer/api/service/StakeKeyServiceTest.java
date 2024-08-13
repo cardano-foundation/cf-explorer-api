@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -22,6 +23,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.conversions.CardanoConverters;
+import org.cardanofoundation.conversions.ClasspathConversionsFactory;
+import org.cardanofoundation.conversions.domain.NetworkType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
@@ -47,11 +51,13 @@ import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmou
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeTxBalanceRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopStakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopStakeAddressBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,6 +84,7 @@ public class StakeKeyServiceTest {
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
   @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
   @Mock private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
+  @Mock private TopStakeAddressBalanceRepository topStakeAddressBalanceRepository;
 
   @Test
   void testGetDataForStakeKeyRegistration_thenReturn() {
@@ -337,7 +344,6 @@ public class StakeKeyServiceTest {
     StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
     when(sap.getStakeAddress()).thenReturn("address");
     when(sap.getId()).thenReturn(1L);
-    when(sap.getTotalStake()).thenReturn(BigInteger.ONE);
     StakeWithdrawalProjection swp = Mockito.mock(StakeWithdrawalProjection.class);
     when(swp.getStakeAddressId()).thenReturn(1L);
     when(swp.getAmount()).thenReturn(BigInteger.ONE);
@@ -347,9 +353,13 @@ public class StakeKeyServiceTest {
     StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
     when(sdp.getStakeAddress()).thenReturn("address");
 
+    TopStakeAddressBalance topStakeAddressBalance =
+        TopStakeAddressBalance.builder().address("address").quantity(BigInteger.ONE).build();
+
     when(fetchRewardDataService.useKoios()).thenReturn(true);
-    //
-    // when(stakeAddressRepository.findStakeAddressOrderByBalance(pageable)).thenReturn(List.of(sap));
+    when(topStakeAddressBalanceRepository.findAll()).thenReturn(List.of(topStakeAddressBalance));
+
+    when(stakeAddressRepository.findStakeAddressOrderByBalance(any())).thenReturn(List.of(sap));
     when(fetchRewardDataService.checkRewardAvailable(List.of("address"))).thenReturn(true);
     when(withdrawalRepository.getRewardWithdrawnByAddrIn(any())).thenReturn(List.of(swp));
     when(rewardRepository.getTotalRewardByStakeAddressIn(any())).thenReturn(List.of(srp));
@@ -367,24 +377,30 @@ public class StakeKeyServiceTest {
   @Test
   void getTopDelegators_whenRewardDataNotAvailable_shouldReturnEmptyRewardData() {
     Pageable pageable = PageRequest.of(0, 10);
+
+    TopStakeAddressBalance topStakeAddressBalance =
+        TopStakeAddressBalance.builder()
+            .address("stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx")
+            .quantity(BigInteger.ONE)
+            .build();
+
     StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
 
+    when(topStakeAddressBalanceRepository.findAll()).thenReturn(List.of(topStakeAddressBalance));
+    when(stakeAddressRepository.findStakeAddressOrderByBalance(any())).thenReturn(List.of(sap));
     when(fetchRewardDataService.useKoios()).thenReturn(false);
-    //
-    // when(stakeAddressRepository.findStakeAddressOrderByBalance(pageable)).thenReturn(List.of(sap));
 
     var response = stakeKeyService.getTopDelegators(pageable);
     assertNull(response.getData());
   }
 
   @Test
-  void testGetTopDelegators_thenReturnKoios() {
+  void testGetTopDelegators_thenReturnKoiosFetchRewardError() {
     Pageable pageable = PageRequest.of(0, 10);
     StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
     when(sap.getStakeAddress()).thenReturn("address");
 
-    //
-    // when(stakeAddressRepository.findStakeAddressOrderByBalance(pageable)).thenReturn(List.of(sap));
+    when(stakeAddressRepository.findStakeAddressOrderByBalance(any())).thenReturn(List.of(sap));
     when(fetchRewardDataService.checkRewardAvailable(List.of("address"))).thenReturn(false);
     when(fetchRewardDataService.fetchReward(List.of("address"))).thenReturn(false);
     when(fetchRewardDataService.useKoios()).thenReturn(true);
@@ -434,6 +450,10 @@ public class StakeKeyServiceTest {
 
   @Test
   void testGetStakeBalanceAnalytics_thenReturnV1() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyService, "cardanoConverters", cardanoConverters);
+
     String stakeKey = "stake_key";
     AnalyticType type = AnalyticType.ONE_DAY;
     StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
@@ -442,7 +462,7 @@ public class StakeKeyServiceTest {
     when(min.getMaxVal()).thenReturn(BigInteger.TEN);
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-    when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
+    when(addressTxAmountRepository.sumBalanceByStakeAddressAndSlotBefore(any(), any()))
         .thenReturn(Optional.of(BigInteger.ONE));
     when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
         .thenReturn(min);
@@ -453,6 +473,9 @@ public class StakeKeyServiceTest {
 
   @Test
   void testGetStakeBalanceAnalytics_thenReturnV2() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyService, "cardanoConverters", cardanoConverters);
 
     String stakeKey = "stake_key";
     AnalyticType type = AnalyticType.ONE_WEEK;
@@ -462,7 +485,7 @@ public class StakeKeyServiceTest {
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-    when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
+    when(addressTxAmountRepository.sumBalanceByStakeAddressAndSlotBefore(any(), any()))
         .thenReturn(Optional.of(BigInteger.ONE));
     when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
@@ -473,6 +496,10 @@ public class StakeKeyServiceTest {
 
   @Test
   void testGetStakeBalanceAnalytics_thenReturnV3() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyService, "cardanoConverters", cardanoConverters);
+
     String stakeKey = "stake_key";
     AnalyticType type = AnalyticType.ONE_DAY;
     StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
@@ -492,6 +519,10 @@ public class StakeKeyServiceTest {
 
   @Test
   void testGetStakeBalanceAnalytics_thenReturnV4() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyService, "cardanoConverters", cardanoConverters);
+
     String stakeKey = "stake_key";
     AnalyticType type = AnalyticType.ONE_WEEK;
     StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
@@ -506,7 +537,7 @@ public class StakeKeyServiceTest {
     when(projection.getDay()).thenReturn(LocalDateTime.now().minusDays(1).toLocalDate());
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-    when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
+    when(addressTxAmountRepository.sumBalanceByStakeAddressAndSlotBefore(any(), any()))
         .thenReturn(Optional.of(BigInteger.ZERO));
     when(aggregateAddressTxBalanceRepository.findAllByStakeAddressIdAndDayBetween(
             any(), any(), any()))
@@ -520,6 +551,10 @@ public class StakeKeyServiceTest {
 
   @Test
   void testGetStakeBalanceAnalytics_thenReturnBalanceZero() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyService, "cardanoConverters", cardanoConverters);
+
     String stakeKey = "stake_key";
     AnalyticType type = AnalyticType.ONE_WEEK;
     StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
@@ -530,7 +565,7 @@ public class StakeKeyServiceTest {
     AggregateAddressBalanceProjection projection =
         Mockito.mock(AggregateAddressBalanceProjection.class);
 
-    when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
+    when(addressTxAmountRepository.sumBalanceByStakeAddressAndSlotBefore(any(), any()))
         .thenReturn(Optional.of(BigInteger.ZERO));
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
@@ -544,6 +579,10 @@ public class StakeKeyServiceTest {
 
   @Test
   void testGetStakeBalanceAnalytics_thenReturnBalanceZeroV2() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(stakeKeyService, "cardanoConverters", cardanoConverters);
+
     String stakeKey = "stake_key";
     AnalyticType type = AnalyticType.ONE_DAY;
     StakeAddress stakeAddress = StakeAddress.builder().id(1L).build();
@@ -552,9 +591,9 @@ public class StakeKeyServiceTest {
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.TEN);
 
     when(stakeAddressRepository.findByView(stakeKey)).thenReturn(Optional.of(stakeAddress));
-    when(addressTxAmountRepository.sumBalanceByStakeAddress(any(), any()))
+    when(addressTxAmountRepository.sumBalanceByStakeAddressAndSlotBefore(any(), any()))
         .thenReturn(Optional.of(BigInteger.ZERO));
-    when(addressTxAmountRepository.getBalanceByStakeAddressAndTime(any(), any(), any()))
+    when(addressTxAmountRepository.getBalanceByStakeAddressAndSlotBetween(any(), any(), any()))
         .thenReturn(Optional.of(BigInteger.ZERO));
     when(stakeTxBalanceRepository.findMinMaxBalanceByStakeAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);

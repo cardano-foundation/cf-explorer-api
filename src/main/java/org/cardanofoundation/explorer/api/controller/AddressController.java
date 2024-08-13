@@ -109,7 +109,7 @@ public class AddressController {
       @ParameterObject
           @PaginationDefault(
               size = 20,
-              sort = {AddressTxAmount_.BLOCK_TIME},
+              sort = {AddressTxAmount_.SLOT},
               direction = Sort.Direction.DESC)
           @PaginationValid
           @Valid

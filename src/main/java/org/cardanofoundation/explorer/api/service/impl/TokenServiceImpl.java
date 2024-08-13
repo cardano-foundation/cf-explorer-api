@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.TokenType;
@@ -87,6 +88,7 @@ public class TokenServiceImpl implements TokenService {
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
   private final AggregatedDataCacheService aggregatedDataCacheService;
   private final TokenInfoRepository tokenInfoRepository;
+  private final CardanoConverters cardanoConverters;
   private static final int MAX_TOTAL_ELEMENTS = 1000;
 
   @Override
@@ -141,8 +143,12 @@ public class TokenServiceImpl implements TokenService {
     multiAssetResponsesList.forEach(
         ma -> {
           var tokenInfo = tokenInfoMap.getOrDefault(ma.getId(), null);
-          var script = scriptMap.get(ma.getPolicy());
-          ma.setPolicyIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
+          Script script = scriptMap.get(ma.getPolicy());
+          if (Objects.nonNull(script)) {
+            ma.setPolicyIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
+          } else {
+            ma.setPolicyIsNativeScript(true);
+          }
 
           if (tokenInfo == null) {
             ma.setNumberOfHolders(0L);
@@ -273,10 +279,10 @@ public class TokenServiceImpl implements TokenService {
       for (int i = 0; i < dates.size() - 1; i++) {
         BigInteger balance =
             addressTxAmountRepository
-                .sumBalanceBetweenTime(
+                .sumBalanceByUnitAndSlotBetween(
                     multiAsset.getUnit(),
-                    dates.get(i).toInstant(ZoneOffset.UTC).getEpochSecond(),
-                    dates.get(i + 1).toInstant(ZoneOffset.UTC).getEpochSecond())
+                    cardanoConverters.time().toSlot(dates.get(i)),
+                    cardanoConverters.time().toSlot(dates.get(i + 1)))
                 .orElse(BigInteger.ZERO);
         responses.add(new TokenVolumeAnalyticsResponse(dates.get(i), balance));
       }

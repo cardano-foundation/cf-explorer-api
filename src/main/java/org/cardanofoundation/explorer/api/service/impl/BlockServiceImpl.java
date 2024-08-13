@@ -11,22 +11,24 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.explorer.api.common.enumeration.BlockPropagationChartType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.BlockMapper;
+import org.cardanofoundation.explorer.api.mapper.BlockPropagationMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockFilterResponse;
+import org.cardanofoundation.explorer.api.model.response.BlockPropagationResponse;
 import org.cardanofoundation.explorer.api.model.response.BlockResponse;
 import org.cardanofoundation.explorer.api.projection.PoolMintBlockProjection;
+import org.cardanofoundation.explorer.api.repository.explorer.BlockStatisticsDailyRepository;
+import org.cardanofoundation.explorer.api.repository.explorer.BlockStatisticsPerEpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.CustomBlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.SlotLeaderRepository;
@@ -50,6 +52,9 @@ public class BlockServiceImpl implements BlockService {
   private final SlotLeaderRepository slotLeaderRepository;
   private final BlockMapper blockMapper;
   private final CustomBlockRepository customBlockRepository;
+  private final BlockStatisticsPerEpochRepository blockStatisticsPerEpochRepository;
+  private final BlockStatisticsDailyRepository blockStatisticsDailyRepository;
+  private final BlockPropagationMapper blockPropagationMapper;
 
   @Override
   public BlockResponse getBlockDetailByBlockId(String blockId) {
@@ -304,6 +309,21 @@ public class BlockServiceImpl implements BlockService {
       return mapperBlockToBlockFilterResponse(blocks);
     } catch (NumberFormatException e) {
       throw new NoContentException(BusinessCode.EPOCH_NOT_FOUND);
+    }
+  }
+
+  @Override
+  public List<BlockPropagationResponse> getBlockPropagation(
+      BlockPropagationChartType type, Pageable pageable) {
+    // if type is null, will get block statistics per epoch as default
+    if (type == null || type.equals(BlockPropagationChartType.EPOCH)) {
+      return blockStatisticsPerEpochRepository.findBlockPropagation(pageable).stream()
+          .map(blockPropagationMapper::fromBlockPropagationProjection)
+          .collect(Collectors.toList());
+    } else {
+      return blockStatisticsDailyRepository.findBlockPropagation(pageable).stream()
+          .map(blockPropagationMapper::fromBlockPropagationProjection)
+          .collect(Collectors.toList());
     }
   }
 

@@ -3,7 +3,6 @@ package org.cardanofoundation.explorer.api.service.impl;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +21,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant.NetworkType;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
@@ -67,6 +68,7 @@ public class AddressServiceImpl implements AddressService {
   private final AddressTxCountRepository addressTxCountRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final MultiAssetRepository multiAssetRepository;
+  private final CardanoConverters cardanoConverters;
 
   @Value("${application.network}")
   private String network;
@@ -122,9 +124,9 @@ public class AddressServiceImpl implements AddressService {
    */
   private boolean checkNetworkAddress(String address) {
     if (address.startsWith(CommonConstant.TESTNET_ADDRESS_PREFIX)) {
-      return !network.equals(CommonConstant.MAINNET_NETWORK);
+      return !network.equals(NetworkType.MAINNET);
     } else if (address.startsWith(CommonConstant.ADDRESS_PREFIX)) {
-      return network.equals(CommonConstant.MAINNET_NETWORK);
+      return network.equals(NetworkType.MAINNET);
     } else { // Genesis address
       return true;
     }
@@ -156,17 +158,18 @@ public class AddressServiceImpl implements AddressService {
     if (AnalyticType.ONE_DAY.equals(type)) {
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByAddress(addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByAddress(addr.getAddress(), cardanoConverters.time().toSlot(dates.get(0)))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
 
       data.add(new AddressChartBalanceData(dates.get(0), fromBalance));
       for (int i = 1; i < dates.size(); i++) {
+        long fromSlot = cardanoConverters.time().toSlot(dates.get(i - 1));
+        long toSlot = cardanoConverters.time().toSlot(dates.get(i));
+
         Optional<BigInteger> balance =
-            addressTxAmountRepository.getBalanceByAddressAndTime(
-                addr.getAddress(),
-                dates.get(i - 1).toInstant(ZoneOffset.UTC).getEpochSecond(),
-                dates.get(i).toInstant(ZoneOffset.UTC).getEpochSecond());
+            addressTxAmountRepository.getBalanceByAddressAndSlotBetween(
+                addr.getAddress(), fromSlot, toSlot);
 
         if (balance.isPresent()) {
           fromBalance = fromBalance.add(balance.get());
@@ -180,7 +183,7 @@ public class AddressServiceImpl implements AddressService {
 
       var fromBalance =
           addressTxAmountRepository
-              .sumBalanceByAddress(addr.getAddress(), dates.get(0).toEpochSecond(ZoneOffset.UTC))
+              .sumBalanceByAddress(addr.getAddress(), cardanoConverters.time().toSlot(dates.get(0)))
               .orElse(BigInteger.ZERO);
       getHighestAndLowestBalance(addr, fromBalance, dates, response);
 
@@ -222,12 +225,13 @@ public class AddressServiceImpl implements AddressService {
       BigInteger fromBalance,
       List<LocalDateTime> dates,
       AddressChartBalanceResponse response) {
+    long fromSlot = cardanoConverters.time().toSlot(dates.get(0));
+    long toSlot = cardanoConverters.time().toSlot(dates.get(dates.size() - 1));
+
     var minMaxBalance =
         addressTxAmountRepository.findMinMaxBalanceByAddress(
-            addr.getAddress(),
-            fromBalance,
-            dates.get(0).toInstant(ZoneOffset.UTC).getEpochSecond(),
-            dates.get(dates.size() - 1).toInstant(ZoneOffset.UTC).getEpochSecond());
+            addr.getAddress(), fromBalance, fromSlot, toSlot);
+
     if (minMaxBalance.getMaxVal().compareTo(fromBalance) > 0) {
       response.setHighestBalance(minMaxBalance.getMaxVal());
     } else {
