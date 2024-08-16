@@ -45,8 +45,8 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
                  coalesce(atc.tx_count, 0) as txCount,
                  coalesce(ab.quantity, 0)  as balance
           FROM address addr
-                   LEFT JOIN address_tx_count atc ON addr.address = atc.address
-                   LEFT JOIN LATERAL (SELECT tmp.address,
+                    JOIN address_tx_count atc ON addr.address = atc.address
+                    JOIN LATERAL (SELECT tmp.address,
                                              tmp.quantity
                                       FROM address_balance tmp
                                       WHERE tmp.address = addr.address
