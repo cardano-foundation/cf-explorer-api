@@ -34,4 +34,6 @@ public interface TokenProjection {
   String getLogo();
 
   String getDescription();
+
+  String getUnit();
 }

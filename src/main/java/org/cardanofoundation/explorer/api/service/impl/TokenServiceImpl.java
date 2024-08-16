@@ -46,8 +46,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
@@ -77,9 +75,7 @@ public class TokenServiceImpl implements TokenService {
   private final MaTxMintRepository maTxMintRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final LatestTokenBalanceRepository latestTokenBalanceRepository;
-  private final AddressRepository addressRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
-  private final StakeAddressRepository stakeAddressRepository;
   private final ScriptRepository scriptRepository;
 
   private final TokenMapper tokenMapper;
@@ -108,7 +104,7 @@ public class TokenServiceImpl implements TokenService {
       multiAssets =
           new PageImpl<>(multiAssetRepository.findMultiAssets(pageable), pageable, tokenCount);
     } else {
-      String lengthOfNameView = "nameViewLength";
+      final String lengthOfNameView = "nameViewLength";
       if (MAX_TOTAL_ELEMENTS / pageable.getPageSize() <= pageable.getPageNumber()) {
         throw new BusinessException(BusinessCode.OUT_OF_QUERY_LIMIT);
       }
@@ -122,13 +118,13 @@ public class TokenServiceImpl implements TokenService {
           new PageImpl<>(
               multiAssetRepository.findAll(query.toLowerCase(), pageable), pageable, count);
     }
-    var multiAssetResponsesList =
+    Page<TokenFilterResponse> multiAssetResponsesList =
         multiAssets.map(assetMetadataMapper::fromTokenProjectionToTokenFilterResponse);
-    List<Long> multiAssetIds =
-        StreamUtil.mapApply(multiAssets.getContent(), TokenProjection::getId);
-    var tokenInfos = tokenInfoRepository.findTokenInfosByMultiAssetIdIn(multiAssetIds);
-    var tokenInfoMap =
-        StreamUtil.toMap(tokenInfos, TokenInfo::getMultiAssetId, Function.identity());
+    List<String> multiAssetIds =
+        StreamUtil.mapApply(multiAssets.getContent(), TokenProjection::getUnit);
+    List<TokenInfo> tokenInfos = tokenInfoRepository.findTokenInfosByUnitIn(multiAssetIds);
+    Map<String, TokenInfo> tokenInfoMap =
+        StreamUtil.toMap(tokenInfos, TokenInfo::getUnit, Function.identity());
 
     Map<String, Script> scriptMap =
         scriptRepository
@@ -139,10 +135,10 @@ public class TokenServiceImpl implements TokenService {
             .stream()
             .collect(Collectors.toMap(Script::getHash, Function.identity()));
 
-    var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    LocalDateTime now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     multiAssetResponsesList.forEach(
         ma -> {
-          var tokenInfo = tokenInfoMap.getOrDefault(ma.getId(), null);
+          TokenInfo tokenInfo = tokenInfoMap.getOrDefault(ma.getUnit(), null);
           Script script = scriptMap.get(ma.getPolicy());
           if (Objects.nonNull(script)) {
             ma.setPolicyIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
@@ -155,7 +151,9 @@ public class TokenServiceImpl implements TokenService {
             ma.setTotalVolume(String.valueOf(BigInteger.ZERO));
             ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
           } else {
-            if (tokenInfo.getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+            LocalDateTime updatedTime =
+                cardanoConverters.slot().slotToTime(tokenInfo.getUpdatedSlot());
+            if (updatedTime.plusDays(1).isBefore(now)) {
               ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
             } else {
               ma.setVolumeIn24h(String.valueOf(tokenInfo.getVolume24h()));
@@ -200,7 +198,7 @@ public class TokenServiceImpl implements TokenService {
     Long tokenTxCount =
         multiAssetRepository.getTokenTxCount(multiAsset.getFingerprint()).orElse(0L);
     tokenResponse.setTxCount(tokenTxCount.intValue());
-    var tokenInfo = tokenInfoRepository.findTokenInfoByMultiAssetId(multiAsset.getId());
+    var tokenInfo = tokenInfoRepository.findTokenInfoByUnit(multiAsset.getUnit());
     var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
 
     if (tokenInfo.isEmpty()) {
@@ -208,7 +206,9 @@ public class TokenServiceImpl implements TokenService {
       tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
       tokenResponse.setTotalVolume(String.valueOf(BigInteger.ZERO));
     } else {
-      if (tokenInfo.get().getUpdateTime().toLocalDateTime().plusDays(1).isBefore(now)) {
+      LocalDateTime updatedTime =
+          cardanoConverters.slot().slotToTime(tokenInfo.get().getUpdatedSlot());
+      if (updatedTime.plusDays(1).isBefore(now)) {
         tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
       } else {
         tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
@@ -248,7 +248,7 @@ public class TokenServiceImpl implements TokenService {
 
     long numberOfHolders =
         tokenInfoRepository
-            .findTokenInfoByMultiAssetId(multiAsset.getId())
+            .findTokenInfoByUnit(multiAsset.getUnit())
             .map(TokenInfo::getNumberOfHolders)
             .orElse(0L);
 

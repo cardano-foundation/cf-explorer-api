@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import lombok.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -27,4 +28,5 @@ public class TokenFilterResponse {
   private Long numberOfHolders;
   private LocalDateTime createdOn;
   private TokenMetadataResponse metadata;
+  @JsonIgnore private String unit;
 }
