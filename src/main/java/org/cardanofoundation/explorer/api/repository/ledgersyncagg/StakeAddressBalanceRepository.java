@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository.ledgersyncagg;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -41,4 +42,16 @@ public interface StakeAddressBalanceRepository
               """,
       nativeQuery = true)
   BigInteger sumBalanceByStakeAddressIn(@Param("stakeAddresses") Collection<String> stakeAddresses);
+
+  @Query(
+      value =
+          """
+                  SELECT sab.address as address,
+                         sab.quantity as balance
+                  FROM stake_address_balance_view sab
+                  WHERE sab.address in :stakeAddress
+                """,
+      nativeQuery = true)
+  List<StakeAddressBalanceProjection> findLatestBalanceByStakeAddressIn(
+      @Param("stakeAddress") Collection<String> stakeAddress);
 }
