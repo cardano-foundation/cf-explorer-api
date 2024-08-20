@@ -17,6 +17,11 @@ public class CommonConstant {
     public static final String SANCHONET = "sanchonet";
   }
 
+  public static final class RedisKey {
+    public static final String PREDEFINED_ABSTAIN_DREP = "PREDEFINED_ABSTAIN_DREP";
+    public static final String PREDEFINED_NO_CONFIDENCE_DREP = "PREDEFINED_NO_CONFIDENCE_DREP";
+  }
+
   public static final int SCALE = 6;
 
   public static final Integer ZERO = 0;

@@ -300,7 +300,7 @@ public class GovActionServiceTest {
     when(drepInfoRepository.countByStatus(any())).thenReturn(5L);
 
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-    when(valueOperations.get(any())).thenReturn(5);
+    when(valueOperations.get(any())).thenReturn("5");
     when(committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(any()))
         .thenReturn(5L);
     when(committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(any()))
@@ -409,13 +409,20 @@ public class GovActionServiceTest {
             any(), any(), any(), any()))
         .thenReturn(List.of(prj1, prj2));
 
+    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    when(valueOperations.get(any())).thenReturn("100");
+
     var votingChartResponse =
         governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index, voterType);
 
     Assertions.assertNotNull(votingChartResponse);
     Assertions.assertEquals(BigInteger.valueOf(100), votingChartResponse.getTotalYesVoteStake());
-    Assertions.assertEquals(BigInteger.valueOf(100), votingChartResponse.getTotalNoVoteStake());
-    Assertions.assertEquals(BigInteger.valueOf(300), votingChartResponse.getActiveVoteStake());
+    Assertions.assertEquals(
+        BigInteger.valueOf(300),
+        votingChartResponse.getTotalNoVoteStake().add(BigInteger.valueOf(100)));
+    Assertions.assertEquals(
+        BigInteger.valueOf(500),
+        votingChartResponse.getActiveVoteStake().add(BigInteger.valueOf(100)));
     Assertions.assertEquals(Double.valueOf(0.51), votingChartResponse.getThreshold());
   }
 
@@ -554,13 +561,20 @@ public class GovActionServiceTest {
             any(), any(), any(), any()))
         .thenReturn(List.of(prj1, prj2, prj3));
 
+    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    when(valueOperations.get(any())).thenReturn("100");
+
     var votingChartResponse =
         governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index, voterType);
 
     Assertions.assertNotNull(votingChartResponse);
     Assertions.assertEquals(BigInteger.valueOf(100), votingChartResponse.getTotalYesVoteStake());
-    Assertions.assertEquals(BigInteger.valueOf(200), votingChartResponse.getTotalNoVoteStake());
-    Assertions.assertEquals(BigInteger.valueOf(300), votingChartResponse.getActiveVoteStake());
+    Assertions.assertEquals(
+        BigInteger.valueOf(400),
+        votingChartResponse.getTotalNoVoteStake().add(BigInteger.valueOf(100)));
+    Assertions.assertEquals(
+        BigInteger.valueOf(500),
+        votingChartResponse.getActiveVoteStake().add(BigInteger.valueOf(100)));
     Assertions.assertEquals(Double.valueOf(0.8), votingChartResponse.getThreshold());
   }
 
