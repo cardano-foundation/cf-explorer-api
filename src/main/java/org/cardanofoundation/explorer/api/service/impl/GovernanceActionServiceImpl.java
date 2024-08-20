@@ -84,7 +84,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final CommitteeRepository committeeRepository;
   private final DelegationVoteRepository delegationVoteRepository;
 
-  private final RedisTemplate<String, String> redisTemplate;
+  private final RedisTemplate<String, Object> redisTemplate;
 
   @Value("${application.network}")
   private String network;
@@ -450,10 +450,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     EpochParam currentEpochParam = epochParamRepository.findCurrentEpochParam();
 
     Long activeDReps = drepInfoRepository.countByStatus(DRepStatus.ACTIVE);
-    Long activeSPOs =
-        Long.valueOf(
+    Integer activeSPOs =
+        (Integer)
             Objects.requireNonNull(
-                redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_ACTIVATE + network)));
+                redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_ACTIVATE + network));
 
     Long activeCommittees =
         committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(
@@ -474,7 +474,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
     return GovernanceOverviewResponse.builder()
         .activeDReps(activeDReps)
-        .activeSPOs(activeSPOs)
+        .activeSPOs(activeSPOs.longValue())
         .activeCommittees(activeCommittees)
         .totalGovActions(govActionTypeMap.values().stream().reduce(0L, Long::sum))
         .govCountMap(govActionTypeMap)
@@ -872,7 +872,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     BigInteger predefinedAbstainDRepStake;
     // calculate predefined abstain DRep stake
     String predefinedAbstainDRepStakeReds =
-        redisTemplate.opsForValue().get(RedisKey.PREDEFINED_ABSTAIN_DREP + network);
+        (String) redisTemplate.opsForValue().get(RedisKey.PREDEFINED_ABSTAIN_DREP + network);
     if (predefinedAbstainDRepStakeReds == null) {
       List<String> abstainDRepHashes =
           delegationVoteRepository.getAllStakeAddressDelegatedToPredefinedDRep(DrepType.ABSTAIN);
@@ -893,7 +893,7 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     BigInteger predefinedNoConfidenceDRepStake;
     // calculate predefined no confidence DRep stake
     String predefinedNoConfidenceDRepStakeReds =
-        redisTemplate.opsForValue().get(RedisKey.PREDEFINED_NO_CONFIDENCE_DREP + network);
+        (String) redisTemplate.opsForValue().get(RedisKey.PREDEFINED_NO_CONFIDENCE_DREP + network);
     if (predefinedNoConfidenceDRepStakeReds == null) {
       List<String> noConfidenceDRepHashes =
           delegationVoteRepository.getAllStakeAddressDelegatedToPredefinedDRep(
