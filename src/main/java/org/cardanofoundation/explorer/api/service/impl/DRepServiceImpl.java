@@ -4,10 +4,7 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,6 +36,7 @@ import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepCer
 import org.cardanofoundation.explorer.api.model.response.drep.projection.DRepStatusCountProjection;
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
 import org.cardanofoundation.explorer.api.projection.DRepRangeProjection;
+import org.cardanofoundation.explorer.api.projection.StakeAddressBalanceProjection;
 import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationVoteRepository;
@@ -46,6 +44,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoReposito
 import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
 import org.cardanofoundation.explorer.api.service.EpochService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
@@ -71,6 +70,7 @@ public class DRepServiceImpl implements DRepService {
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final GovernanceActionRepository governanceActionRepository;
   private final DRepMapper dRepMapper;
+  private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
   private final EpochService epochService;
 
@@ -319,7 +319,22 @@ public class DRepServiceImpl implements DRepService {
     // TODO
     // for mainnet using Koios
     if (fetchRewardDataService.useKoios()) {
-      return delegatorResponse;
+      List<StakeAddressBalanceProjection> stakeAddressBalanceProjections =
+          stakeAddressBalanceRepository.findLatestBalanceByStakeAddressIn(
+              dRepDelegatorProjections.stream()
+                  .map(DRepDelegatorProjection::getStakeAddress)
+                  .collect(Collectors.toList()));
+      Map<String, BigInteger> stakeAddressBalanceMap =
+          stakeAddressBalanceProjections.stream()
+              .collect(
+                  Collectors.toMap(
+                      StakeAddressBalanceProjection::getAddress,
+                      StakeAddressBalanceProjection::getBalance));
+      dRepDelegatorsResponseList.forEach(
+          dRepDelegatorResponse -> {
+            dRepDelegatorResponse.setTotalStake(
+                stakeAddressBalanceMap.getOrDefault(dRepDelegatorResponse.getStakeAddress(), null));
+          });
     }
     delegatorResponse.setTotalItems(dRepDelegatorProjections.getTotalElements());
     delegatorResponse.setData(dRepDelegatorsResponseList);
