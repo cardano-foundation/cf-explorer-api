@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import org.cardanofoundation.explorer.api.projection.DRepDelegatorProjection;
 import org.cardanofoundation.explorer.common.entity.compositeKey.DelegationVoteId;
+import org.cardanofoundation.explorer.common.entity.enumeration.DrepType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.DelegationVote;
 
 @Repository
@@ -29,4 +32,12 @@ public interface DelegationVoteRepository extends JpaRepository<DelegationVote, 
                     AND t1.id > t.id)""")
   Page<DRepDelegatorProjection> getDelegationVoteByDRepHashOrDRepId(
       @Param("dRepHashOrDRepId") String dRepHashOrDRepId, Pageable pageable);
+
+  @Query(
+      """
+    SELECT DISTINCT (dv.address)
+    FROM DelegationVote dv
+    WHERE dv.drepType = :dRepType
+  """)
+  List<String> getAllStakeAddressDelegatedToPredefinedDRep(@Param("dRepType") DrepType dRepType);
 }

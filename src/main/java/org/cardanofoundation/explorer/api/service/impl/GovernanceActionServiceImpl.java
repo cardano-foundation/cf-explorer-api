@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.constant.CommonConstant.RedisKey;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
@@ -49,6 +51,7 @@ import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.util.ProtocolParamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.CommitteeState;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
+import org.cardanofoundation.explorer.common.entity.enumeration.DrepType;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionStatus;
 import org.cardanofoundation.explorer.common.entity.enumeration.GovActionType;
 import org.cardanofoundation.explorer.common.entity.enumeration.Vote;
@@ -79,8 +82,9 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final OffChainVoteGovActionDataRepository offChainVoteGovActionDataRepository;
   private final LatestVotingProcedureMapper latestVotingProcedureMapper;
   private final CommitteeRepository committeeRepository;
+  private final DelegationVoteRepository delegationVoteRepository;
 
-  private final RedisTemplate<String, Integer> redisTemplate;
+  private final RedisTemplate<String, String> redisTemplate;
 
   @Value("${application.network}")
   private String network;
@@ -446,9 +450,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
     Long activeDReps = drepInfoRepository.countByStatus(DRepStatus.ACTIVE);
     Long activeSPOs =
-        Objects.requireNonNull(
-                redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_ACTIVATE + network))
-            .longValue();
+        Long.valueOf(
+            Objects.requireNonNull(
+                redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_ACTIVATE + network)));
+
     Long activeCommittees =
         committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(
             currentEpochParam.getEpochNo());
@@ -834,10 +839,77 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                             .reduce(BigInteger::add)
                             .orElse(BigInteger.ZERO)));
 
-    votingChartResponse.setActiveVoteStake(totalActiveVoteStake);
+    calculatePreDefinedDRepStake(govActionDetailsProjection.getType(), voteStake);
+    votingChartResponse.setActiveVoteStake(
+        totalActiveVoteStake.add(getPredefinedNoConfidenceDRepStake()));
     votingChartResponse.setTotalYesVoteStake(voteStake.getOrDefault(Vote.YES, BigInteger.ZERO));
     votingChartResponse.setTotalNoVoteStake(voteStake.getOrDefault(Vote.NO, BigInteger.ZERO));
     votingChartResponse.setAbstainVoteStake(voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO));
+  }
+
+  // https://github.com/cardano-foundation/CIPs/tree/master/CIP-1694#pre-defined-voting-options
+  private void calculatePreDefinedDRepStake(
+      GovActionType govActionType, Map<Vote, BigInteger> voteStake) {
+    BigInteger predefinedAbstainDRepStake = getPredefinedAbstainDRepStake();
+    voteStake.put(
+        Vote.ABSTAIN,
+        voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO).add(predefinedAbstainDRepStake));
+
+    BigInteger predefinedNoConfidenceDRepStake = getPredefinedNoConfidenceDRepStake();
+    if (GovActionType.NO_CONFIDENCE.equals(govActionType)) {
+      voteStake.put(
+          Vote.YES,
+          voteStake.getOrDefault(Vote.YES, BigInteger.ZERO).add(predefinedNoConfidenceDRepStake));
+    } else {
+      voteStake.put(
+          Vote.NO,
+          voteStake.getOrDefault(Vote.NO, BigInteger.ZERO).add(predefinedNoConfidenceDRepStake));
+    }
+  }
+
+  private BigInteger getPredefinedAbstainDRepStake() {
+    BigInteger predefinedAbstainDRepStake;
+    // calculate predefined abstain DRep stake
+    String predefinedAbstainDRepStakeReds =
+        redisTemplate.opsForValue().get(RedisKey.PREDEFINED_ABSTAIN_DREP + network);
+    if (predefinedAbstainDRepStakeReds == null) {
+      List<String> abstainDRepHashes =
+          delegationVoteRepository.getAllStakeAddressDelegatedToPredefinedDRep(DrepType.ABSTAIN);
+      predefinedAbstainDRepStake =
+          stakeAddressBalanceRepository.sumBalanceByStakeAddressIn(abstainDRepHashes);
+      redisTemplate
+          .opsForValue()
+          .set(RedisKey.PREDEFINED_ABSTAIN_DREP + network, predefinedAbstainDRepStake.toString());
+      redisTemplate.expire(RedisKey.PREDEFINED_ABSTAIN_DREP + network, 1, TimeUnit.HOURS);
+    } else {
+      predefinedAbstainDRepStake = new BigInteger(predefinedAbstainDRepStakeReds);
+    }
+
+    return predefinedAbstainDRepStake;
+  }
+
+  private BigInteger getPredefinedNoConfidenceDRepStake() {
+    BigInteger predefinedNoConfidenceDRepStake;
+    // calculate predefined no confidence DRep stake
+    String predefinedNoConfidenceDRepStakeReds =
+        redisTemplate.opsForValue().get(RedisKey.PREDEFINED_NO_CONFIDENCE_DREP + network);
+    if (predefinedNoConfidenceDRepStakeReds == null) {
+      List<String> noConfidenceDRepHashes =
+          delegationVoteRepository.getAllStakeAddressDelegatedToPredefinedDRep(
+              DrepType.NO_CONFIDENCE);
+
+      predefinedNoConfidenceDRepStake =
+          stakeAddressBalanceRepository.sumBalanceByStakeAddressIn(noConfidenceDRepHashes);
+      redisTemplate
+          .opsForValue()
+          .set(
+              RedisKey.PREDEFINED_NO_CONFIDENCE_DREP + network,
+              predefinedNoConfidenceDRepStake.toString());
+      redisTemplate.expire(RedisKey.PREDEFINED_NO_CONFIDENCE_DREP + network, 1, TimeUnit.HOURS);
+    } else {
+      predefinedNoConfidenceDRepStake = new BigInteger(predefinedNoConfidenceDRepStakeReds);
+    }
+    return predefinedNoConfidenceDRepStake;
   }
 
   // TODO: Threshold for CC type is not available. It must be null for now.
