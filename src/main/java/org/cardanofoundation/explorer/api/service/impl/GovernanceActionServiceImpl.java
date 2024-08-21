@@ -842,7 +842,9 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
     calculatePreDefinedDRepStake(govActionDetailsProjection.getType(), voteStake);
     votingChartResponse.setActiveVoteStake(
-        totalActiveVoteStake.add(getPredefinedNoConfidenceDRepStake()));
+        totalActiveVoteStake
+            .add(getPredefinedNoConfidenceDRepStake())
+            .add(getPredefinedAbstainDRepStake()));
     votingChartResponse.setTotalYesVoteStake(voteStake.getOrDefault(Vote.YES, BigInteger.ZERO));
     votingChartResponse.setTotalNoVoteStake(voteStake.getOrDefault(Vote.NO, BigInteger.ZERO));
     votingChartResponse.setAbstainVoteStake(voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO));
