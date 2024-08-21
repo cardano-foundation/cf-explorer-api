@@ -316,8 +316,7 @@ public class DRepServiceImpl implements DRepService {
     if (dRepDelegatorProjections.isEmpty()) {
       return delegatorResponse;
     }
-    // TODO
-    // for mainnet using Koios
+    // for preview network using Koios
     if (fetchRewardDataService.useKoios()) {
       List<StakeAddressBalanceProjection> stakeAddressBalanceProjections =
           stakeAddressBalanceRepository.findLatestBalanceByStakeAddressIn(
