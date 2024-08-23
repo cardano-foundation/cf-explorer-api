@@ -362,9 +362,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
       content.add(stakeResponse);
     }
     content.sort(Comparator.comparing(StakeFilterResponse::getBalance).reversed());
-    Page<StakeFilterResponse> pageResponse =
-        new PageImpl<>(content, pageable, pageable.getPageSize());
-    return new BaseFilterResponse<>(pageResponse);
+    return new BaseFilterResponse<>(BaseFilterResponse.getPageImpl(content, pageable));
   }
 
   @Override

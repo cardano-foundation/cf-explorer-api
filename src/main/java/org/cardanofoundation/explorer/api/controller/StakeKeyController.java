@@ -194,7 +194,8 @@ public class StakeKeyController {
       description = "Get top delegators by stake amount",
       tags = "stake-key")
   public BaseFilterResponse<StakeFilterResponse> getTopDelegators(
-      @ParameterObject @PaginationValid @PageZeroValid @Valid Pagination pagination) {
+      @ParameterObject @PaginationValid @PageZeroValid @Valid @PaginationDefault(size = 50)
+          Pagination pagination) {
     return stakeService.getTopDelegators(pagination.toPageable());
   }
 
