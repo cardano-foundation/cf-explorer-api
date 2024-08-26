@@ -22,7 +22,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       value =
           "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, coalesce(ttc.txCount, 0) as txCount,"
               + " ma.fingerprint as fingerprint, ma.supply as supply, ma.time as time,"
-              + " LENGTH(ma.nameView) as nameViewLength, "
+              + " LENGTH(ma.nameView) as nameViewLength, ma.unit as unit, "
               + " am.url as url, am.ticker as ticker, am.decimals as decimals, "
               + " am.logo as logo, am.description as description, am.subject as subject"
               + " FROM MultiAsset ma"
@@ -42,7 +42,7 @@ public interface MultiAssetRepository extends JpaRepository<MultiAsset, Long> {
       value =
           "SELECT ma.id as id, ma.policy as policy, ma.name as name, ma.nameView as nameView, coalesce(ttc.txCount,0) as txCount,"
               + " ma.fingerprint as fingerprint, ma.supply as supply, ma.time as time,"
-              + " LENGTH(ma.nameView) as nameViewLength, "
+              + " LENGTH(ma.nameView) as nameViewLength, ma.unit as unit,"
               + " am.url as url, am.ticker as ticker, am.decimals as decimals, "
               + " am.logo as logo, am.description as description, am.subject as subject"
               + " FROM MultiAsset ma"

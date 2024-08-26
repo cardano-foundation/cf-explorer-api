@@ -11,7 +11,7 @@ import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
 
 @Repository
 public interface TokenInfoRepository extends JpaRepository<TokenInfo, Long> {
-  List<TokenInfo> findTokenInfosByMultiAssetIdIn(Collection<Long> multiAssetIds);
+  List<TokenInfo> findTokenInfosByUnitIn(Collection<String> multiAssetIds);
 
-  Optional<TokenInfo> findTokenInfoByMultiAssetId(Long multiAssetId);
+  Optional<TokenInfo> findTokenInfoByUnit(String multiAssetUnit);
 }
