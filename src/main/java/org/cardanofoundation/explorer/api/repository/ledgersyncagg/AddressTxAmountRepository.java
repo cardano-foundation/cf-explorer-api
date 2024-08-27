@@ -203,6 +203,7 @@ public interface AddressTxAmountRepository
               FROM AddressTxAmount
               WHERE unit = :unit
               AND slot = (SELECT slot FROM latest_token_slot)
+              LIMIT 1
           """)
   Long getLastActivityTimeOfToken(@Param("unit") String unit);
 }
