@@ -198,8 +198,11 @@ public interface AddressTxAmountRepository
   @Query(
       value =
           """
-              SELECT max(atm.blockTime) FROM AddressTxAmount atm
-              WHERE atm.unit = :unit
+              WITH latest_token_slot AS ( SELECT MAX(slot) AS slot FROM AddressTxAmount WHERE unit = :unit)
+              SELECT blockTime
+              FROM AddressTxAmount
+              WHERE unit = 'a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235484f534b59'
+              AND slot = (SELECT slot FROM latest_token_slot);
           """)
   Long getLastActivityTimeOfToken(@Param("unit") String unit);
 }
