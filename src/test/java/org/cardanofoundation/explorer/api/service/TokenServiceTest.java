@@ -243,12 +243,16 @@ class TokenServiceTest {
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
+
     final long latestEpochTime = 1715133010;
-    final Timestamp latestTimestamp =
-        Timestamp.valueOf(
-            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
-    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
-        .thenReturn(latestEpochTime);
+    final LocalDateTime latestEpochDateTime =
+        LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC);
+    final Timestamp latestTimestamp = Timestamp.valueOf(latestEpochDateTime);
+    when(addressTxAmountRepository.getLastActivitySlotOfToken(multiAsset.getUnit()))
+        .thenReturn(cardanoConverters.time().toSlot(latestEpochDateTime));
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any())).thenReturn(null);
 
@@ -312,12 +316,16 @@ class TokenServiceTest {
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
+
     final long latestEpochTime = 1715133010;
-    final Timestamp latestTimestamp =
-        Timestamp.valueOf(
-            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
-    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
-        .thenReturn(latestEpochTime);
+    final LocalDateTime latestEpochDateTime =
+        LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC);
+    final Timestamp latestTimestamp = Timestamp.valueOf(latestEpochDateTime);
+    when(addressTxAmountRepository.getLastActivitySlotOfToken(multiAsset.getUnit()))
+        .thenReturn(cardanoConverters.time().toSlot(latestEpochDateTime));
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any()))
         .thenReturn(
@@ -382,12 +390,16 @@ class TokenServiceTest {
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
 
     // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
+
     final long latestEpochTime = 1715133010;
-    final Timestamp latestTimestamp =
-        Timestamp.valueOf(
-            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC));
-    when(addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit()))
-        .thenReturn(latestEpochTime);
+    final LocalDateTime latestEpochDateTime =
+        LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC);
+    final Timestamp latestTimestamp = Timestamp.valueOf(latestEpochDateTime);
+    when(addressTxAmountRepository.getLastActivitySlotOfToken(multiAsset.getUnit()))
+        .thenReturn(cardanoConverters.time().toSlot(latestEpochDateTime));
 
     when(maTxMintRepository.getTxMetadataToken(anyString(), any()))
         .thenReturn(
