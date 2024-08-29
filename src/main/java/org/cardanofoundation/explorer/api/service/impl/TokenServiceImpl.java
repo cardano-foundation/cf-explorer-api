@@ -46,8 +46,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTokenRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
@@ -77,9 +75,7 @@ public class TokenServiceImpl implements TokenService {
   private final MaTxMintRepository maTxMintRepository;
   private final AssetMetadataRepository assetMetadataRepository;
   private final LatestTokenBalanceRepository latestTokenBalanceRepository;
-  private final AddressRepository addressRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
-  private final StakeAddressRepository stakeAddressRepository;
   private final ScriptRepository scriptRepository;
 
   private final TokenMapper tokenMapper;
@@ -224,11 +220,11 @@ public class TokenServiceImpl implements TokenService {
 
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
 
-    Long latestEpochTime =
-        addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit());
-    tokenResponse.setTokenLastActivity(
-        Timestamp.valueOf(
-            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC)));
+    Long latestSlot = addressTxAmountRepository.getLastActivitySlotOfToken(multiAsset.getUnit());
+
+    var latestEpochTime = cardanoConverters.slot().slotToTime(latestSlot);
+
+    tokenResponse.setTokenLastActivity(Timestamp.valueOf(latestEpochTime));
     setTxMetadataJson(tokenResponse, multiAsset);
     return tokenResponse;
   }
