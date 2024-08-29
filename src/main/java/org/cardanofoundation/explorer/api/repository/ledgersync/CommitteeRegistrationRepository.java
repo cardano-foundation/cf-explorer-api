@@ -19,7 +19,10 @@ public interface CommitteeRegistrationRepository
   Integer countByExpiredEpochNo(@Param("expiredEpoch") Integer expiredEpoch);
 
   @Query(
-      value = "SELECT DISTINCT cr from CommitteeRegistration cr " + "WHERE cr.coldKey IN :coldKeys")
+      """
+    SELECT cr from CommitteeRegistration cr WHERE cr.coldKey IN :coldKeys
+    AND NOT EXISTS (SELECT 1 FROM CommitteeRegistration cr2 WHERE cr2.coldKey = cr.coldKey AND cr2.slot > cr.slot)
+    """)
   List<CommitteeRegistration> getHotKeyOfCommitteeMemberByColdKeyIn(
       @Param("coldKeys") List<String> coldKeys);
 
