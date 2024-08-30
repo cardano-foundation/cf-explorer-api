@@ -224,11 +224,11 @@ public class TokenServiceImpl implements TokenService {
 
     tokenResponse.setMetadata(assetMetadataMapper.fromAssetMetadata(assetMetadata));
 
-    Long latestEpochTime =
-        addressTxAmountRepository.getLastActivityTimeOfToken(multiAsset.getUnit());
-    tokenResponse.setTokenLastActivity(
-        Timestamp.valueOf(
-            LocalDateTime.ofInstant(Instant.ofEpochSecond(latestEpochTime), ZoneOffset.UTC)));
+    Long latestSlot = addressTxAmountRepository.getLastActivitySlotOfToken(multiAsset.getUnit());
+
+    var latestEpochTime = cardanoConverters.slot().slotToTime(latestSlot);
+
+    tokenResponse.setTokenLastActivity(Timestamp.valueOf(latestEpochTime));
     setTxMetadataJson(tokenResponse, multiAsset);
     return tokenResponse;
   }
