@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class SupplyController {
             .toBigInteger()
             .subtract(latestAdaPots.getReserves())
             .subtract(latestAdaPots.getTreasury());
-    return ResponseEntity.ok(circulatingSupply.longValue());
+    return ResponseEntity.ok(circulatingSupply.divide(BigInteger.valueOf(1_000_000L)).longValue());
   }
 
   @GetMapping("/total")
@@ -58,6 +59,6 @@ public class SupplyController {
   public ResponseEntity<Long> getSupplyTotal() {
     AdaPots latestAdaPots = adaPotsRepository.findFirstByOrderByEpochNoDescSlotNoDesc();
     var supplyTotal = CommonConstant.TOTAL_ADA.toBigInteger().subtract(latestAdaPots.getReserves());
-    return ResponseEntity.ok(supplyTotal.longValue());
+    return ResponseEntity.ok(supplyTotal.divide(BigInteger.valueOf(1_000_000L)).longValue());
   }
 }
