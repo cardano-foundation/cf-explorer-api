@@ -40,7 +40,7 @@ public class SupplyController {
       description = "returns the ADA token circulating supply",
       tags = {"supply"})
   public ResponseEntity<Long> getSupplyCirculating() {
-    AdaPots latestAdaPots = adaPotsRepository.findFirstByOrderByEpochNoDescAndSlotNoDesc();
+    AdaPots latestAdaPots = adaPotsRepository.findFirstByOrderByEpochNoDescSlotNoDesc();
     BigInteger circulatingSupply =
         CommonConstant.TOTAL_ADA
             .toBigInteger()
@@ -56,7 +56,7 @@ public class SupplyController {
       description = "returns the ADA token total supply",
       tags = {"supply"})
   public ResponseEntity<Long> getSupplyTotal() {
-    AdaPots latestAdaPots = adaPotsRepository.findFirstByOrderByEpochNoDescAndSlotNoDesc();
+    AdaPots latestAdaPots = adaPotsRepository.findFirstByOrderByEpochNoDescSlotNoDesc();
     var supplyTotal = CommonConstant.TOTAL_ADA.toBigInteger().subtract(latestAdaPots.getReserves());
     return ResponseEntity.ok(supplyTotal.longValue());
   }
