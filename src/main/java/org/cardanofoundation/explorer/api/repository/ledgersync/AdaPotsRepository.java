@@ -16,4 +16,6 @@ public interface AdaPotsRepository extends JpaRepository<AdaPots, Long> {
 
   @Query(value = "SELECT ap.reserves FROM AdaPots ap WHERE ap.epochNo = :epochNo")
   BigInteger getReservesByEpochNo(@Param("epochNo") Integer epochNo);
+
+  AdaPots findFirstByOrderByEpochNoDescAndSlotNoDesc();
 }
