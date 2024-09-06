@@ -176,6 +176,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
                       join StakeAddress sa on sa.id = d.stakeAddressId
                       where d.poolHash.hashRaw in :poolHashes
               """)
-  Set<String> getStakeAddressDelegatorsByPoolIds(
+  List<String> getStakeAddressDelegatorsByPoolIds(
       @Param("poolHashes") Collection<String> poolHashes);
 }
