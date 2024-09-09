@@ -61,7 +61,8 @@ class BolnisiMetadataServiceTest {
     ReflectionTestUtils.setField(
         bolnisiMetadataService, "offChainMetadataUrl", offChainMetadataUrl);
     ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyFallbackUrl", publicKeyUrl);
-    ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyPrimaryUrl", publicKeyPrimaryUrl);
+    ReflectionTestUtils.setField(
+        bolnisiMetadataService, "publicKeyPrimaryUrl", publicKeyPrimaryUrl);
   }
 
   @Test
