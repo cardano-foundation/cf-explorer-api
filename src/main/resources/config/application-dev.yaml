@@ -141,8 +141,9 @@ application:
     inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
   api.bolnisi:
     off-chain: ${API_BOLNISI_OFFCHAIN_URL:https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/{cid}}
-    public-key: ${API_BOLNISI_PUBLIC_KEY_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
-    public-key-nwa: ${API_BOLNISI_PUBLIC_KEY_NWA_URL:https://cardano.mepa.gov.ge/api/v1/publickeys/winery/{wineryId}/v/0}
+    public-key:
+      primary: ${API_BOLNISI_PUBLIC_KEY_PRIMARY_URL:https://cardano.mepa.gov.ge/api/v1/publickeys/winery/{wineryId}/v/0}
+      fallback: ${API_BOLNISI_PUBLIC_KEY_FALLBACK_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
 
 springdoc:
   api-docs.path: /apidocs

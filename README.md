@@ -92,8 +92,8 @@ To ensure the stability and reliability of this project, unit and mutation tests
 - `API_NEWS_URL`: URL for get news data.
 - `API_NEWS_CACHE_TIME`: Cache time for news data. Default is 120s.
 - `API_BOLNISI_OFFCHAIN_URL`: URL for get bolnisi offchain data by cid.
-- `API_BOLNISI_PUBLIC_KEY_NWA_URL`: Primary URL for get bolnisi public key data by wineryId.
-- `API_BOLNISI_PUBLIC_KEY_URL`: Fallback URL for get bolnisi public key data by wineryId.
+- `API_BOLNISI_PUBLIC_KEY_PRIMARY_URL`: Primary URL for get bolnisi public key data by wineryId.
+- `API_BOLNISI_PUBLIC_KEY_FALLBACK_URL`: Fallback URL for get bolnisi public key data by wineryId.
 
 - `EPOCH_DAYS` : Number of days in an epoch. Default is 5.
 - `REPORT_LIMIT_PER_24HOURS`: Limit of reports per `24` hours for each user. Default is `2`.
