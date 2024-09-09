@@ -33,4 +33,16 @@ public class SearchController {
       @RequestParam @Parameter(description = "Query param for search") String query) {
     return searchService.search(query);
   }
+
+  @GetMapping("staking-lifecycle")
+  @LogMessage
+  @Operation(
+      summary = "Search for staking lifecycle",
+      description =
+          "Search like for a pool ticker, regular pool ids, addresses (grab by stake key)",
+      tags = {"search"})
+  public SearchResponse searchForStakingLifecycle(
+      @RequestParam @Parameter(description = "Query param for search") String query) {
+    return searchService.searchForStakingLifecycle(query);
+  }
 }

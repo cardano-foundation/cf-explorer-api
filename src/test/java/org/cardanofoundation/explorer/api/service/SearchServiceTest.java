@@ -1,5 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.junit.jupiter.api.Assertions;
@@ -152,5 +154,63 @@ public class SearchServiceTest {
     Assertions.assertEquals(actual.getScript().getScriptHash(), query);
     Assertions.assertEquals(actual.getScript().isSmartContract(), true);
     Assertions.assertEquals(actual.getScript().isNativeScript(), false);
+  }
+
+  @Test
+  void testSearchForLifeCycle_thenReturnPool() {
+    PoolInfoProjection poolInfoProjection = Mockito.mock(PoolInfoProjection.class);
+    when(poolInfoProjection.getPoolView()).thenReturn("poolView");
+    when(poolInfoProjection.getPoolName()).thenReturn("poolName");
+    when(poolInfoProjection.getIcon()).thenReturn("icon");
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+    when(poolHashRepository.findByPoolNameLike(any(), any()))
+        .thenReturn(List.of(poolInfoProjection));
+
+    var actual = searchService.searchForStakingLifecycle("query");
+
+    Assertions.assertEquals(actual.getPool().getPoolId(), "poolView");
+    Assertions.assertEquals(actual.getPool().getName(), "poolName");
+    Assertions.assertEquals(actual.getPool().getIcon(), "icon");
+  }
+
+  @Test
+  void testSearchLifeCycle_thenReturnAddress() {
+    String query =
+        "addr1q9cp6hfrsvqc0jn9eeskdtk3l7usqaa35lm925f7usqtzhnsr4wj8qcpsl9xtnnpv6hdrlaeqpmmrflk24gnaeqqk90qjgxgeq";
+
+    var actual = searchService.searchForStakingLifecycle(query);
+
+    Assertions.assertEquals(actual.getAddress().getAddress(), query);
+    Assertions.assertTrue(actual.getAddress().isPaymentAddress());
+    Assertions.assertFalse(actual.getAddress().isStakeAddress());
+  }
+
+  @Test
+  void testSearchLifeCycle_thenReturnAddressAndGrabStakeAddress() {
+    String query =
+        "addr1q9cp6hfrsvqc0jn9eeskdtk3l7usqaa35lm925f7usqtzhnsr4wj8qcpsl9xtnnpv6hdrlaeqpmmrflk24gnaeqqk90qjgxgeq";
+    String stakeAddress = "stake1u9cp6hfrsvqc0jn9eeskdtk3l7usqaa35lm925f7usqtzhsy472z0";
+
+    var actual = searchService.searchForStakingLifecycle(query);
+
+    Assertions.assertEquals(actual.getAddress().getAddress(), query);
+    Assertions.assertEquals(actual.getAddress().getStakeAddressView(), stakeAddress);
+    Assertions.assertFalse(actual.getAddress().isStakeAddress());
+    Assertions.assertTrue(actual.getAddress().isPaymentAddress());
+  }
+
+  @Test
+  void testSearchLifeCycle_thenReturnStakeAddress() {
+    String query = "stake1u9cp6hfrsvqc0jn9eeskdtk3l7usqaa35lm925f7usqtzhsy472z0";
+
+    when(stakeAddressRepository.findByView(any()))
+        .thenReturn(Optional.of(StakeAddress.builder().view(query).build()));
+
+    var actual = searchService.searchForStakingLifecycle(query);
+
+    Assertions.assertEquals(actual.getAddress().getAddress(), query);
+    Assertions.assertEquals(actual.getAddress().getStakeAddressView(), query);
+    Assertions.assertFalse(actual.getAddress().isPaymentAddress());
+    Assertions.assertTrue(actual.getAddress().isStakeAddress());
   }
 }
