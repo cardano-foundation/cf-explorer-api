@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -38,11 +40,14 @@ import org.cardanofoundation.explorer.common.utils.HexUtil;
 class BolnisiMetadataServiceTest {
 
   private static final String BOLNISI_METADATA_KEY = "BOLNISI_METADATA:";
+  private static final Logger log = LoggerFactory.getLogger(BolnisiMetadataServiceTest.class);
   final String network = "mainnet";
   final String offChainMetadataUrl =
       "https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/{cid}";
   final String publicKeyUrl =
       "https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}";
+  final String publicKeyPrimaryUrl =
+      "https://cardano.mepa.gov.ge/api/v1/publickeys/winery/{wineryId}/v/0";
   @Mock private TxMetadataRepository txMetadataRepository;
   @Mock private WebClient webClient;
   @Mock private WebClient.RequestHeadersSpec requestHeadersMock;
@@ -58,7 +63,8 @@ class BolnisiMetadataServiceTest {
     ReflectionTestUtils.setField(bolnisiMetadataService, "network", network);
     ReflectionTestUtils.setField(
         bolnisiMetadataService, "offChainMetadataUrl", offChainMetadataUrl);
-    ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyUrl", publicKeyUrl);
+    ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyFallbackUrl", publicKeyUrl);
+    ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyPrimaryUrl", publicKeyPrimaryUrl);
   }
 
   @Test
@@ -91,6 +97,7 @@ class BolnisiMetadataServiceTest {
     String jsonMetadata =
         "{\"st\":\"georgianWine\",\"d\":{\"3\":{\"s\":[\"0xf91920ef8a5d0dd645d33d3e36d96fb6ca0f13963f02693a5494c10576c8591e7fef447e10bf96c8ee4ba690f3779801b5584d44c363dbfcaec550471cbff40c\"],\"h\":\"0x7b22616c67223a224564445341227d\",\"pk\":\"0x0e459119216db26ba7fec7a66462ed4502ef5bf5e25f447ce134e0acccf2be6f\"}},\"t\":\"scm\",\"v\":\"1\",\"cid\":\"\"}";
     MetadataBolnisi response = bolnisiMetadataService.getBolnisiMetadata(jsonMetadata);
+    System.out.println(response);
 
     assertEquals("", response.getCid());
     assertFalse(response.isCidVerified());
