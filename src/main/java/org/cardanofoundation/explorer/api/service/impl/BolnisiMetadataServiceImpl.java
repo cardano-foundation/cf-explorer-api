@@ -58,8 +58,11 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   @Value("${application.api.bolnisi.off-chain}")
   private String offChainMetadataUrl;
 
-  @Value("${application.api.bolnisi.public-key}")
-  private String publicKeyUrl;
+  @Value("${application.api.bolnisi.public-key.fallback}")
+  private String publicKeyFallbackUrl;
+
+  @Value("${application.api.bolnisi.public-key.primary}")
+  private String publicKeyPrimaryUrl;
 
   @Override
   public MetadataBolnisi getBolnisiMetadata(String jsonMetadata) {
@@ -145,7 +148,8 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
    * @param metadataBolnisi The MetadataBolnisi object containing the winery data to be verified.
    */
   private void verifyPublicKey(MetadataBolnisi metadataBolnisi) {
-    String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyUrl);
+    String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyPrimaryUrl);
+    String publicKeyFallbackRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyFallbackUrl);
     Map<String, String> pKeyRedisCachedMap = new HashMap<>();
     List<CompletableFuture<Map<String, String>>> completableFutures = new ArrayList<>();
 
@@ -156,18 +160,50 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
               String pKeyCached =
                   (String)
                       redisTemplate.opsForHash().get(publicKeyRedisKey, wineryData.getWineryId());
+              String pKeyFallbackCached =
+                  (String)
+                      redisTemplate
+                          .opsForHash()
+                          .get(publicKeyFallbackRedisKey, wineryData.getWineryId());
               if (pKeyCached != null) {
                 pKeyRedisCachedMap.put(wineryData.getWineryId(), pKeyCached);
+              } else if (pKeyFallbackCached != null) {
+                pKeyRedisCachedMap.put(wineryData.getWineryId(), pKeyFallbackCached);
               } else {
                 completableFutures.add(
-                    callWebclient(publicKeyUrl, byte[].class, wineryData.getWineryId())
+                    callWebclient(publicKeyPrimaryUrl, byte[].class, wineryData.getWineryId())
                         .map(
-                            bytes ->
-                                Map.of(wineryData.getWineryId(), HexUtil.encodeHexString(bytes)))
+                            bytes -> {
+                              String pKey = HexUtil.encodeHexString(bytes);
+                              redisTemplate
+                                  .opsForHash()
+                                  .putIfAbsent(publicKeyRedisKey, wineryData.getWineryId(), pKey);
+                              redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.DAYS);
+                              return Map.of(wineryData.getWineryId(), pKey);
+                            })
+                        .onErrorResume(
+                            ex -> {
+                              log.warn("Primary URL failed, attempting fallback URL", ex);
+                              return callWebclient(
+                                      publicKeyFallbackUrl, byte[].class, wineryData.getWineryId())
+                                  .map(
+                                      fallbackBytes -> {
+                                        String pKey = HexUtil.encodeHexString(fallbackBytes);
+                                        redisTemplate
+                                            .opsForHash()
+                                            .putIfAbsent(
+                                                publicKeyFallbackRedisKey,
+                                                wineryData.getWineryId(),
+                                                pKey);
+                                        redisTemplate.expire(
+                                            publicKeyFallbackRedisKey, 1, TimeUnit.DAYS);
+                                        return Map.of(wineryData.getWineryId(), pKey);
+                                      });
+                            })
                         .toFuture()
                         .exceptionally(
                             ex -> {
-                              log.error("Error while getting public key from external api", ex);
+                              log.error("Error while getting public key from external API", ex);
                               wineryData.setPKeyVerified(false);
                               wineryData.setExternalApiAvailable(false);
                               return null;
@@ -189,10 +225,6 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
         .forEach(
             wineryData -> {
               String pKeyOnChain = wineryPkeyMap.get(wineryData.getWineryId());
-              redisTemplate
-                  .opsForHash()
-                  .putIfAbsent(publicKeyRedisKey, wineryData.getWineryId(), pKeyOnChain);
-              redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.DAYS);
               boolean isPKeyVerified =
                   pKeyOnChain != null
                       && removePrefixHexString(wineryData.getPublicKey())
@@ -385,9 +417,11 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   @PostConstruct
   public void init() {
     String offChainMetaDataRedisKey = getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
-    String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyUrl);
+    String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyPrimaryUrl);
+    String publicKeyFallbackRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyFallbackUrl);
 
     redisTemplate.delete(offChainMetaDataRedisKey);
     redisTemplate.delete(publicKeyRedisKey);
+    redisTemplate.delete(publicKeyFallbackRedisKey);
   }
 }
