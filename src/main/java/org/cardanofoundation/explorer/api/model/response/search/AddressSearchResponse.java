@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AddressSearchResponse {
   private String address;
+  private String stakeAddressView;
   private boolean isPaymentAddress = false;
   private boolean isStakeAddress = false;
 }

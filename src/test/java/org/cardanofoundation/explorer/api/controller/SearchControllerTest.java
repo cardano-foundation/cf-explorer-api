@@ -58,7 +58,7 @@ public class SearchControllerTest {
     response.setValidTokenName(false);
     response.setTx("tx");
     response.setBlock("block");
-    response.setAddress(new AddressSearchResponse("address", false, true));
+    response.setAddress(new AddressSearchResponse("address", null, false, true));
 
     when(searchService.search(anyString())).thenReturn(response);
 
@@ -70,5 +70,27 @@ public class SearchControllerTest {
         .andExpect(jsonPath("$.address.stakeAddress").value(true));
 
     verify(searchService).search(anyString());
+  }
+
+  @Test
+  void testSearchStakingLifecycle() throws Exception {
+    String query = "Ae2tdPwUPEZFSi1cTyL1ZL6bgixhc2vSy5heg6Zg9uP7PpumkAJ82Qprt8b";
+    SearchResponse response = new SearchResponse();
+    response.setAddress(
+        new AddressSearchResponse(
+            "Ae2tdPwUPEZFSi1cTyL1ZL6bgixhc2vSy5heg6Zg9uP7PpumkAJ82Qprt8b", null, true, false));
+
+    when(searchService.searchForStakingLifecycle(anyString())).thenReturn(response);
+
+    mockMvc
+        .perform(get("/api/v1/search/staking-lifecycle").param("query", query))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").exists())
+        .andExpect(jsonPath("$.address.stakeAddressView").isEmpty())
+        .andExpect(jsonPath("$.address.stakeAddress").value(false))
+        .andExpect(jsonPath("$.address.address").value(query))
+        .andExpect(jsonPath("$.address.paymentAddress").value(true));
+
+    verify(searchService).searchForStakingLifecycle(anyString());
   }
 }

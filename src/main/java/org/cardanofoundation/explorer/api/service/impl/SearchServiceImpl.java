@@ -14,11 +14,7 @@ import org.springframework.util.CollectionUtils;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant.NetworkType;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
-import org.cardanofoundation.explorer.api.model.response.search.AddressSearchResponse;
-import org.cardanofoundation.explorer.api.model.response.search.PoolSearchResponse;
-import org.cardanofoundation.explorer.api.model.response.search.ScriptSearchResponse;
-import org.cardanofoundation.explorer.api.model.response.search.SearchResponse;
-import org.cardanofoundation.explorer.api.model.response.search.TokenSearchResponse;
+import org.cardanofoundation.explorer.api.model.response.search.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
@@ -64,6 +60,19 @@ public class SearchServiceImpl implements SearchService {
     searchPool(query, searchResponse);
     searchScriptHash(query, searchResponse);
     searchDRep(query, searchResponse);
+    return searchResponse;
+  }
+
+  @Override
+  public SearchResponse searchForStakingLifecycle(String query) {
+    String rawQuery = query;
+    query = query.trim().toLowerCase();
+    SearchResponse searchResponse = new SearchResponse();
+    if (query.isBlank() || query.isEmpty()) {
+      return searchResponse;
+    }
+    searchPool(query, searchResponse);
+    searchAddress(rawQuery, searchResponse);
     return searchResponse;
   }
 
@@ -128,7 +137,8 @@ public class SearchServiceImpl implements SearchService {
       var stakeAddress = stakeAddressRepository.findByView(query);
       stakeAddress.ifPresent(
           address ->
-              searchResponse.setAddress(new AddressSearchResponse(address.getView(), false, true)));
+              searchResponse.setAddress(
+                  new AddressSearchResponse(address.getView(), address.getView(), false, true)));
     } else {
       final int ADDRESS_MIN_LENGTH = 56;
       if (query.length() < ADDRESS_MIN_LENGTH) {
@@ -136,8 +146,12 @@ public class SearchServiceImpl implements SearchService {
       }
       try {
         if (checkNetworkAddress(query)) {
-          AddressUtils.checkStakeAddress(query);
-          searchResponse.setAddress(new AddressSearchResponse(query, true, false));
+          String stakeAddress = AddressUtils.checkStakeAddress(query);
+          if (Objects.nonNull(stakeAddress)) {
+            searchResponse.setAddress(new AddressSearchResponse(query, stakeAddress, true, false));
+          } else {
+            searchResponse.setAddress(new AddressSearchResponse(query, null, true, false));
+          }
         }
       } catch (Exception e) {
         // ignore
