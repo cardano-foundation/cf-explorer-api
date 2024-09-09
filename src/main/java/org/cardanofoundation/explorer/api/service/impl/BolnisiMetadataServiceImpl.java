@@ -149,8 +149,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
    */
   private void verifyPublicKey(MetadataBolnisi metadataBolnisi) {
     String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyPrimaryUrl);
-    // other fallback urls if needed
-    List<String> publicKeyFallbackUrls = List.of(publicKeyFallbackUrl);
+    String publicKeyFallbackRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyFallbackUrl);
     Map<String, String> pKeyRedisCachedMap = new HashMap<>();
     List<CompletableFuture<Map<String, String>>> completableFutures = new ArrayList<>();
 
@@ -161,76 +160,47 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
               String pKeyCached =
                   (String)
                       redisTemplate.opsForHash().get(publicKeyRedisKey, wineryData.getWineryId());
+              String pKeyFallbackCached =
+                  (String)
+                      redisTemplate.opsForHash().get(publicKeyFallbackRedisKey, wineryData.getWineryId());
               if (pKeyCached != null) {
                 pKeyRedisCachedMap.put(wineryData.getWineryId(), pKeyCached);
+              } else if (pKeyFallbackCached != null) {
+                pKeyRedisCachedMap.put(wineryData.getWineryId(), pKeyFallbackCached);
               } else {
-                boolean pKeyFound = false;
-                for (String fallbackUrl : publicKeyFallbackUrls) {
-                  String fallbackRedisKey = getRedisKey(BOLNISI_METADATA_KEY + fallbackUrl);
-                  String pKeyFallbackCached =
-                      (String)
-                          redisTemplate.opsForHash().get(fallbackRedisKey, wineryData.getWineryId());
-                  if (pKeyFallbackCached != null) {
-                    pKeyRedisCachedMap.put(wineryData.getWineryId(), pKeyFallbackCached);
-                    pKeyFound = true;
-                    break;
-                  }
-                }
-
-                if (!pKeyFound) {
-                  CompletableFuture<Map<String, String>> future =
-                      callWebclient(publicKeyPrimaryUrl, byte[].class, wineryData.getWineryId())
-                          .map(bytes -> {
-                            String pKey = HexUtil.encodeHexString(bytes);
-                            redisTemplate
-                                    .opsForHash()
-                                    .putIfAbsent(publicKeyRedisKey, wineryData.getWineryId(), pKey);
-                            redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.DAYS);
-                            return Map.of(wineryData.getWineryId(), pKey);
-                          })
-                          .toFuture()
-                          .exceptionally(ex -> {
-                            log.warn("Primary URL failed, attempting fallback URLs", ex);
-                            return null;
-                          });
-
-                  // Iterate through fallback URLs if primary fails
-                  for (String fallbackUrl : publicKeyFallbackUrls) {
-                    future = future.thenCompose(result -> {
-                      if (result != null) {
-                        // primary URL succeeded, skip fallbacks
-                        return CompletableFuture.completedFuture(result);
-                      }
-                      String fallbackRedisKey = getRedisKey(BOLNISI_METADATA_KEY + fallbackUrl);
-                      return callWebclient(fallbackUrl, byte[].class, wineryData.getWineryId())
-                          .map(bytes -> {
-                            String pKey = HexUtil.encodeHexString(bytes);
-                            redisTemplate
-                                    .opsForHash()
-                                    .putIfAbsent(fallbackRedisKey, wineryData.getWineryId(), pKey);
-                            redisTemplate.expire(fallbackRedisKey, 1, TimeUnit.DAYS);
-                            return Map.of(wineryData.getWineryId(), pKey);
-                          })
-                          .toFuture()
-                          .exceptionally(fallbackEx -> {
-                            log.warn("Fallback URL failed: {}", fallbackUrl, fallbackEx);
-                            return null;
-                          });
-                    });
-                  }
-
-                  // if all fallbacks fail
-                  future = future.exceptionally(ex -> {
-                    log.error("Error while getting public key from external API after all attempts", ex);
-                    wineryData.setPKeyVerified(false);
-                    wineryData.setExternalApiAvailable(false);
-                    return null;
-                  });
-
-                  completableFutures.add(future);
-                }
+                completableFutures.add(
+                  callWebclient(publicKeyPrimaryUrl, byte[].class, wineryData.getWineryId())
+                      .map(bytes -> {
+                        String pKey = HexUtil.encodeHexString(bytes);
+                        redisTemplate
+                            .opsForHash()
+                            .putIfAbsent(publicKeyRedisKey, wineryData.getWineryId(), pKey);
+                        redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.DAYS);
+                        return Map.of(wineryData.getWineryId(), pKey);
+                      })
+                      .onErrorResume(ex -> {
+                        log.warn("Primary URL failed, attempting fallback URL", ex);
+                        return callWebclient(publicKeyFallbackUrl, byte[].class, wineryData.getWineryId())
+                            .map(fallbackBytes -> {
+                              String pKey = HexUtil.encodeHexString(fallbackBytes);
+                              redisTemplate
+                                  .opsForHash()
+                                  .putIfAbsent(publicKeyFallbackRedisKey, wineryData.getWineryId(), pKey);
+                              redisTemplate.expire(publicKeyFallbackRedisKey, 1, TimeUnit.DAYS);
+                              return Map.of(wineryData.getWineryId(), pKey);
+                            });
+                      })
+                      .toFuture()
+                      .exceptionally(ex -> {
+                        log.error("Error while getting public key from external API", ex);
+                        wineryData.setPKeyVerified(false);
+                        wineryData.setExternalApiAvailable(false);
+                        return null;
+                      })
+                );
               }
-            });
+            }
+        );
 
     Map<String, String> wineryPkeyMap =
         completableFutures.stream()
@@ -439,10 +409,10 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   public void init() {
     String offChainMetaDataRedisKey = getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
     String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyPrimaryUrl);
-    List<String> fallbackRedisKeys = List.of(getRedisKey(BOLNISI_METADATA_KEY + publicKeyFallbackUrl));
+    String publicKeyFallbackRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyFallbackUrl);
 
     redisTemplate.delete(offChainMetaDataRedisKey);
     redisTemplate.delete(publicKeyRedisKey);
-    redisTemplate.delete(fallbackRedisKeys);
+    redisTemplate.delete(publicKeyFallbackRedisKey);
   }
 }
