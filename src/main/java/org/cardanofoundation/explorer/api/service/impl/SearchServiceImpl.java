@@ -1,11 +1,14 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant.NetworkType;
+import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolInfoProjection;
 import org.cardanofoundation.explorer.api.model.response.search.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
@@ -64,16 +68,16 @@ public class SearchServiceImpl implements SearchService {
   }
 
   @Override
-  public SearchResponse searchForStakingLifecycle(String query) {
+  public SearchStakingLifecycle searchForStakingLifecycle(String query, Pageable pageable) {
     String rawQuery = query;
     query = query.trim().toLowerCase();
-    SearchResponse searchResponse = new SearchResponse();
+    SearchStakingLifecycle response = new SearchStakingLifecycle();
     if (query.isBlank() || query.isEmpty()) {
-      return searchResponse;
+      return response;
     }
-    searchPool(query, searchResponse);
-    searchAddress(rawQuery, searchResponse);
-    return searchResponse;
+    searchPoolWithPaging(query, response, pageable);
+    searchAddress(rawQuery, response);
+    return response;
   }
 
   private void searchDRep(String query, SearchResponse searchResponse) {
@@ -159,6 +163,62 @@ public class SearchServiceImpl implements SearchService {
     }
   }
 
+  private void searchAddress(String query, SearchStakingLifecycle response) {
+    if (query.startsWith(CommonConstant.STAKE_ADDRESS_PREFIX)) {
+      var stakeAddress = stakeAddressRepository.findByView(query);
+      stakeAddress.ifPresent(
+          address ->
+              response.setAddress(
+                  new AddressSearchResponse(address.getView(), address.getView(), false, true)));
+    } else {
+      final int ADDRESS_MIN_LENGTH = 56;
+      if (query.length() < ADDRESS_MIN_LENGTH) {
+        return;
+      }
+      try {
+        if (checkNetworkAddress(query)) {
+          String stakeAddress = AddressUtils.checkStakeAddress(query);
+          if (Objects.nonNull(stakeAddress)) {
+            response.setAddress(new AddressSearchResponse(query, stakeAddress, true, false));
+          } else {
+            response.setAddress(new AddressSearchResponse(query, null, true, false));
+          }
+        }
+      } catch (Exception e) {
+        // ignore
+      }
+    }
+  }
+
+  private void searchPoolWithPaging(
+      String query, SearchStakingLifecycle response, Pageable pageable) {
+    var pool = poolHashRepository.getPoolInfo(query);
+    if (Objects.nonNull(pool)) {
+      Page<PoolSearchResponse> poolPage =
+          new PageImpl<>(
+              List.of(
+                  new PoolSearchResponse(pool.getPoolName(), pool.getPoolView(), pool.getIcon())),
+              pageable,
+              1);
+      response.setPoolList(new BaseFilterResponse<>(poolPage));
+    } else {
+      Page<PoolInfoProjection> poolList = poolHashRepository.findByPoolNameLike(query, pageable);
+
+      List<PoolSearchResponse> list =
+          poolList.stream()
+              .filter(Objects::nonNull)
+              .map(
+                  poolInfo ->
+                      new PoolSearchResponse(
+                          poolInfo.getPoolName(), poolInfo.getPoolView(), poolInfo.getIcon()))
+              .toList();
+      response.setPoolList(new BaseFilterResponse<>(poolList, list));
+      if (!CollectionUtils.isEmpty(list)) {
+        response.setValidPoolName(true);
+      }
+    }
+  }
+
   /**
    * Check address is valid in this network
    *
@@ -181,13 +241,13 @@ public class SearchServiceImpl implements SearchService {
     } else {
       Pageable pageable = PageRequest.of(0, 2);
       var poolList = poolHashRepository.findByPoolNameLike(query, pageable);
-      if (poolList.size() == 1) {
-        PoolInfoProjection poolInfo = poolList.get(0);
+      if (poolList.getTotalElements() == 1) {
+        PoolInfoProjection poolInfo = poolList.getContent().get(0);
         searchResponse.setPool(
             new PoolSearchResponse(
                 poolInfo.getPoolName(), poolInfo.getPoolView(), poolInfo.getIcon()));
       }
-      if (!CollectionUtils.isEmpty(poolList)) {
+      if (!CollectionUtils.isEmpty(poolList.getContent())) {
         searchResponse.setValidPoolName(true);
       }
     }

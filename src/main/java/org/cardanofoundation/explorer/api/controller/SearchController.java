@@ -1,5 +1,7 @@
 package org.cardanofoundation.explorer.api.controller;
 
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
 
 import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.search.SearchResponse;
+import org.cardanofoundation.explorer.api.model.response.search.SearchStakingLifecycle;
 import org.cardanofoundation.explorer.api.service.SearchService;
+import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 
 @RestController
 @RequestMapping("/api/v1/search")
@@ -41,8 +48,10 @@ public class SearchController {
       description =
           "Search like for a pool ticker, regular pool ids, addresses (grab by stake key)",
       tags = {"search"})
-  public SearchResponse searchForStakingLifecycle(
-      @RequestParam @Parameter(description = "Query param for search") String query) {
-    return searchService.searchForStakingLifecycle(query);
+  public SearchStakingLifecycle searchForStakingLifecycle(
+      @RequestParam @Parameter(description = "Query param for search") String query,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 20) @Valid
+          Pagination pagination) {
+    return searchService.searchForStakingLifecycle(query, pagination.toPageable());
   }
 }

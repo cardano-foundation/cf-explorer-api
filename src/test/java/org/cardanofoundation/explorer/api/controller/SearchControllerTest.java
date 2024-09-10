@@ -26,6 +26,7 @@ import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.search.AddressSearchResponse;
 import org.cardanofoundation.explorer.api.model.response.search.SearchResponse;
+import org.cardanofoundation.explorer.api.model.response.search.SearchStakingLifecycle;
 import org.cardanofoundation.explorer.api.service.SearchService;
 
 @WebMvcTest(SearchController.class)
@@ -75,12 +76,12 @@ public class SearchControllerTest {
   @Test
   void testSearchStakingLifecycle() throws Exception {
     String query = "Ae2tdPwUPEZFSi1cTyL1ZL6bgixhc2vSy5heg6Zg9uP7PpumkAJ82Qprt8b";
-    SearchResponse response = new SearchResponse();
+    SearchStakingLifecycle response = new SearchStakingLifecycle();
     response.setAddress(
         new AddressSearchResponse(
             "Ae2tdPwUPEZFSi1cTyL1ZL6bgixhc2vSy5heg6Zg9uP7PpumkAJ82Qprt8b", null, true, false));
 
-    when(searchService.searchForStakingLifecycle(anyString())).thenReturn(response);
+    when(searchService.searchForStakingLifecycle(anyString(), any())).thenReturn(response);
 
     mockMvc
         .perform(get("/api/v1/search/staking-lifecycle").param("query", query))
@@ -91,6 +92,6 @@ public class SearchControllerTest {
         .andExpect(jsonPath("$.address.address").value(query))
         .andExpect(jsonPath("$.address.paymentAddress").value(true));
 
-    verify(searchService).searchForStakingLifecycle(anyString());
+    verify(searchService).searchForStakingLifecycle(anyString(), any());
   }
 }
