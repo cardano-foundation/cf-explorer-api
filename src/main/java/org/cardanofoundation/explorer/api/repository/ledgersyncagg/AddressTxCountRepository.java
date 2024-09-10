@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.repository.ledgersyncagg;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,6 @@ import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCoun
 public interface AddressTxCountRepository extends JpaRepository<AddressTxCount, String> {
 
   List<AddressTxCount> findAllByAddressIn(Collection<String> addressList);
+
+  Optional<AddressTxCount> findByAddress(String address);
 }
