@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
-import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.CertData;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +22,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.CertData;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.WineryData;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
@@ -89,9 +89,9 @@ public class TxController {
   @Operation(summary = "Get certificate data by tx hash detail")
   public ResponseEntity<CertData> getCertDataByTxHash(
       @PathVariable
-      @Parameter(description = "The hash identifier of the transaction.")
-      @LengthValid(CommonConstant.TX_HASH_LENGTH)
-      String hash,
+          @Parameter(description = "The hash identifier of the transaction.")
+          @LengthValid(CommonConstant.TX_HASH_LENGTH)
+          String hash,
       @PathVariable @Parameter(description = "The certificate number") String certNo) {
     return ResponseEntity.ok(bolnisiMetadataService.getCertData(hash, certNo));
   }

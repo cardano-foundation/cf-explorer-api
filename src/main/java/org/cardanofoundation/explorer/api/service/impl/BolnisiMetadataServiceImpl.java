@@ -175,7 +175,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   }
 
   @Override
-  public CertData getCertData(String txHash, String certNo){
+  public CertData getCertData(String txHash, String certNo) {
     List<TxMetadata> txMetadataList =
         txMetadataRepository.findAllByTxHash(txHash).stream()
             .filter(txMetadata -> txMetadata.getKey().equals(BigInteger.valueOf(1904)))
