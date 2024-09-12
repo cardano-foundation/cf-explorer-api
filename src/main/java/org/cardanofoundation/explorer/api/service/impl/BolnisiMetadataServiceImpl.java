@@ -30,10 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
 
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
-import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.CertData;
-import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.LotData;
-import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
-import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.WineryData;
+import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.util.CidUtils;
@@ -64,6 +61,9 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
   @Value("${application.api.bolnisi.public-key.primary}")
   private String publicKeyPrimaryUrl;
+
+  @Value("${application.api.bolnisi.public-key.conformity-cert}")
+  private String publicKeyConformityCertUrl;
 
   @Override
   public MetadataBolnisi getBolnisiMetadata(String jsonMetadata) {
@@ -137,23 +137,28 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
         return metadataBolnisi;
       }
 
-      // Map off-chain metadata to CertData and mark signature as verified
-      List<CertData> certs = metadataBolnisi.getCertData();
-      certNumbers.forEach(
-          certNo ->
-              certs.forEach(
-                  cert -> {
-                    // todo: verify signature
-                    boolean isSignatureVerified = true;
-                    // todo: verify pKey
-                    boolean isPKeyVerified = true;
+      verifyPKeyConformityCert(metadataBolnisi);
 
-                    cert.setCertNo(certNo);
-                    cert.setOffChainData(offChainMetadata.get(certNo));
-                    cert.setSignatureVerified(isSignatureVerified);
-                    cert.setPKeyVerified(isPKeyVerified);
-                  }));
-      metadataBolnisi.setCertData(certs);
+      // Map off-chain metadata to CertData and mark signature as verified
+      CertData certData = metadataBolnisi.getCertData();
+      List<CertDetailsData> certs = certData.getCerts();
+      for (int i = 0; i < certs.size(); i++) {
+        String certNo = certNumbers.get(i);
+        CertDetailsData cert = certs.get(i);
+
+        boolean isSignatureVerified =
+            certData.isPKeyVerified()
+                && JwsUtils.verifySignatureWithEd25519(
+                    certData.getPublicKey(),
+                    cert.getSignature(),
+                    JsonUtil.getPrettyJson(offChainMetadata.get(certNo)));
+
+        cert.setCertNo(certNo);
+        cert.setOffChainData(offChainMetadata.get(certNo));
+        cert.setSignatureVerified(isSignatureVerified);
+      }
+      certData.setCerts(certs);
+      metadataBolnisi.setCertData(certData);
     }
     return metadataBolnisi;
   }
@@ -175,7 +180,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   }
 
   @Override
-  public CertData getCertData(String txHash, String certNo) {
+  public CertDetailsData getCertDetailsData(String txHash, String certNo) {
     List<TxMetadata> txMetadataList =
         txMetadataRepository.findAllByTxHash(txHash).stream()
             .filter(txMetadata -> txMetadata.getKey().equals(BigInteger.valueOf(1904)))
@@ -183,7 +188,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
     return txMetadataList.stream()
         .map(txMetadata -> getBolnisiMetadata(txMetadata.getJson()))
-        .map(MetadataBolnisi::getCertData)
+        .map(metadataBolnisi -> metadataBolnisi.getCertData().getCerts())
         .flatMap(List::stream)
         .filter(certData -> certData.getCertNo().equals(certNo))
         .findFirst()
@@ -287,6 +292,40 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
             });
   }
 
+  private void verifyPKeyConformityCert(MetadataBolnisi metadataBolnisi) {
+    CertData certData = metadataBolnisi.getCertData();
+
+    String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyConformityCertUrl);
+    String pKeyCached =
+        (String) redisTemplate.opsForHash().get(publicKeyRedisKey, metadataBolnisi.getCid());
+
+    String pKeyOnChain =
+        pKeyCached != null
+            ? pKeyCached
+            : callWebclient(publicKeyConformityCertUrl, byte[].class)
+                .map(HexUtil::encodeHexString)
+                .onErrorResume(
+                    ex -> {
+                      log.error("Error while getting public key from external API", ex);
+                      certData.setPKeyVerified(false);
+                      certData.setExternalApiAvailable(false);
+                      return Mono.empty();
+                    })
+                .block();
+
+    if (pKeyOnChain != null) {
+      redisTemplate
+          .opsForHash()
+          .putIfAbsent(publicKeyRedisKey, metadataBolnisi.getCid(), pKeyOnChain);
+      redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.DAYS);
+    }
+
+    certData.setPKeyVerified(
+        pKeyOnChain != null
+            && removePrefixHexString(certData.getPublicKey())
+                .equals(removePrefixHexString(pKeyOnChain)));
+  }
+
   /**
    * Parses JSON metadata and constructs a MetadataBolnisi object based on the parsed data. This
    * method assumes that the input JSON contains a field named "st" which indicates the type of
@@ -317,24 +356,27 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       metadataBolnisiBuilder.tag(t);
       if (st.equals("georgianWine")) {
         if (t.equals("conformityCert")) {
-          List<CertData> certDataList = new ArrayList<>();
+          List<CertDetailsData> certDetailsDataList = new ArrayList<>();
           if (metadataNode.get("s").isArray()) {
             metadataNode
                 .get("s")
                 .forEach(
                     signature -> {
-                      CertData certData =
-                          CertData.builder()
+                      CertDetailsData certs =
+                          CertDetailsData.builder()
                               .signature(removePrefixHexString(signature.asText()))
-                              .isExternalApiAvailable(true)
-                              .publicKey(removePrefixHexString(metadataNode.get("pk").asText()))
-                              .header(removePrefixHexString(metadataNode.get("h").asText()))
                               .build();
-                      certDataList.add(certData);
+                      certDetailsDataList.add(certs);
                     });
           }
-          // todo: find tx with multiple cert
-          metadataBolnisiBuilder.certData(certDataList);
+
+          metadataBolnisiBuilder.certData(
+              CertData.builder()
+                  .certs(certDetailsDataList)
+                  .isExternalApiAvailable(true)
+                  .publicKey(removePrefixHexString(metadataNode.get("pk").asText()))
+                  .header(removePrefixHexString(metadataNode.get("h").asText()))
+                  .build());
         } else if (t.equals("scm")) {
           List<WineryData> wineryDataList = new ArrayList<>();
           // for each wineryId in the metadataNode of key "d"
