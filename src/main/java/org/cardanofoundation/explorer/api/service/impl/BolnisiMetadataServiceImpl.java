@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
 
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.CertData;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.LotData;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.MetadataBolnisi;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.WineryData;
@@ -73,50 +74,87 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       return metadataBolnisi;
     }
 
-    // retrieves off-chain metadata using getOffChainMetadata
-    Map<String, List<Object>> offChainMetadata = getOffChainMetadata(metadataBolnisi);
+    if (metadataBolnisi.getTag().equals("scm")) {
+      // retrieves off-chain metadata using getOffChainMetadata
+      Map<String, List<Object>> offChainMetadata =
+          getOffChainMetadataForWineryData(metadataBolnisi);
 
-    // Verify the CID against the pretty-printed JSON of the off-chain metadata.
-    boolean isCidVerified =
-        CidUtils.verifyCid(metadataBolnisi.getCid(), JsonUtil.getPrettyJson(offChainMetadata));
-    if (!isCidVerified) {
-      return metadataBolnisi;
-    }
-    metadataBolnisi.setCidVerified(true);
+      // Verify the CID against the pretty-printed JSON of the off-chain metadata.
+      boolean isCidVerified =
+          CidUtils.verifyCid(metadataBolnisi.getCid(), JsonUtil.getPrettyJson(offChainMetadata));
+      if (!isCidVerified) {
+        return metadataBolnisi;
+      }
+      metadataBolnisi.setCidVerified(true);
 
-    verifyPublicKey(metadataBolnisi);
+      verifyPublicKey(metadataBolnisi);
 
-    Map<String, WineryData> wineryDataMap =
-        metadataBolnisi.getWineryData().stream()
-            .collect(Collectors.toMap(WineryData::getWineryId, Function.identity()));
+      Map<String, WineryData> wineryDataMap =
+          metadataBolnisi.getWineryData().stream()
+              .collect(Collectors.toMap(WineryData::getWineryId, Function.identity()));
 
-    // For each piece of off-chain metadata,
-    // it verifies the signature of each lot against the public key and updates the LotData objects
-    // accordingly.
-    offChainMetadata.forEach(
-        (key, value) -> {
-          WineryData wineryData = wineryDataMap.get(key);
+      // For each piece of off-chain metadata,
+      // it verifies the signature of each lot against the public key and updates the LotData
+      // objects
+      // accordingly.
+      offChainMetadata.forEach(
+          (key, value) -> {
+            WineryData wineryData = wineryDataMap.get(key);
 
-          if (wineryData != null) {
-            List<LotData> lots = wineryData.getLots();
-            for (int i = 0; i < lots.size(); i++) {
-              boolean isSignatureVerified =
-                  wineryData.isPKeyVerified()
-                      && JwsUtils.verifySignatureWithEd25519(
-                          wineryData.getPublicKey(),
-                          lots.get(i).getSignature(),
-                          JsonUtil.getPrettyJson(value.get(i)));
+            if (wineryData != null) {
+              List<LotData> lots = wineryData.getLots();
+              for (int i = 0; i < lots.size(); i++) {
+                boolean isSignatureVerified =
+                    wineryData.isPKeyVerified()
+                        && JwsUtils.verifySignatureWithEd25519(
+                            wineryData.getPublicKey(),
+                            lots.get(i).getSignature(),
+                            JsonUtil.getPrettyJson(value.get(i)));
 
-              LotData lotData = lots.get(i);
-              lotData.setOffChainData(value.get(i));
-              lotData.setSignatureVerified(isSignatureVerified);
+                LotData lotData = lots.get(i);
+                lotData.setOffChainData(value.get(i));
+                lotData.setSignatureVerified(isSignatureVerified);
+              }
+              wineryData.setLots(lots);
+              wineryDataMap.put(key, wineryData);
             }
-            wineryData.setLots(lots);
-            wineryDataMap.put(key, wineryData);
-          }
-        });
+          });
 
-    metadataBolnisi.setWineryData(new ArrayList<>(wineryDataMap.values()));
+      metadataBolnisi.setWineryData(new ArrayList<>(wineryDataMap.values()));
+    } else if (metadataBolnisi.getTag().equals("conformityCert")) {
+      // retrieves off-chain metadata
+      Map<String, Object> offChainMetadata = getOffChainMetadataForCertData(metadataBolnisi);
+
+      // Extract certificate data list and certificate numbers
+      List<Object> certDataList = new ArrayList<>(offChainMetadata.values());
+      List<String> certNumbers = new ArrayList<>(offChainMetadata.keySet());
+
+      // Verify the CID against the pretty-printed JSON of the off-chain metadata.
+      boolean isCidVerified =
+          CidUtils.verifyCid(metadataBolnisi.getCid(), JsonUtil.getPrettyJson(certDataList));
+      metadataBolnisi.setCidVerified(isCidVerified);
+      if (!isCidVerified) {
+        return metadataBolnisi;
+      }
+
+      // Map off-chain metadata to CertData and mark signature as verified
+      List<CertData> certs = metadataBolnisi.getCertData();
+      certNumbers.forEach(
+          certNo ->
+              certs.forEach(
+                  cert -> {
+                    // todo: verify signature
+                    boolean isSignatureVerified = true;
+                    // todo: verify pKey
+                    boolean isPKeyVerified = true;
+
+                    cert.setCertNo(certNo);
+                    cert.setOffChainData(offChainMetadata.get(certNo));
+                    cert.setSignatureVerified(isSignatureVerified);
+                    cert.setPKeyVerified(isPKeyVerified);
+                  }));
+      metadataBolnisi.setCertData(certs);
+    }
     return metadataBolnisi;
   }
 
@@ -132,6 +170,22 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
         .map(MetadataBolnisi::getWineryData)
         .flatMap(List::stream)
         .filter(wineryData -> wineryData.getWineryId().equals(wineryId))
+        .findFirst()
+        .orElse(null);
+  }
+
+  @Override
+  public CertData getCertData(String txHash, String certNo){
+    List<TxMetadata> txMetadataList =
+        txMetadataRepository.findAllByTxHash(txHash).stream()
+            .filter(txMetadata -> txMetadata.getKey().equals(BigInteger.valueOf(1904)))
+            .toList();
+
+    return txMetadataList.stream()
+        .map(txMetadata -> getBolnisiMetadata(txMetadata.getJson()))
+        .map(MetadataBolnisi::getCertData)
+        .flatMap(List::stream)
+        .filter(certData -> certData.getCertNo().equals(certNo))
         .findFirst()
         .orElse(null);
   }
@@ -259,44 +313,67 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       String cid = metadataNode.get("cid").asText();
       metadataBolnisiBuilder.cid(cid);
       String st = metadataNode.get("st").asText();
+      String t = metadataNode.get("t").asText();
+      metadataBolnisiBuilder.tag(t);
       if (st.equals("georgianWine")) {
-        List<WineryData> wineryDataList = new ArrayList<>();
-        // for each wineryId in the metadataNode of key "d"
-        metadataNode
-            .get("d")
-            .fieldNames()
-            .forEachRemaining(
-                wineryId -> {
-                  // get wineryNode from the metadataNode of key "d" with wineryId
-                  JsonNode wineryNode = metadataNode.get("d").get(wineryId);
-                  List<LotData> lots = new ArrayList<>();
+        if (t.equals("conformityCert")) {
+          List<CertData> certDataList = new ArrayList<>();
+          if (metadataNode.get("s").isArray()) {
+            metadataNode
+                .get("s")
+                .forEach(
+                    signature -> {
+                      CertData certData =
+                          CertData.builder()
+                              .signature(removePrefixHexString(signature.asText()))
+                              .isExternalApiAvailable(true)
+                              .publicKey(removePrefixHexString(metadataNode.get("pk").asText()))
+                              .header(removePrefixHexString(metadataNode.get("h").asText()))
+                              .build();
+                      certDataList.add(certData);
+                    });
+          }
+          // todo: find tx with multiple cert
+          metadataBolnisiBuilder.certData(certDataList);
+        } else if (t.equals("scm")) {
+          List<WineryData> wineryDataList = new ArrayList<>();
+          // for each wineryId in the metadataNode of key "d"
+          metadataNode
+              .get("d")
+              .fieldNames()
+              .forEachRemaining(
+                  wineryId -> {
+                    // get wineryNode from the metadataNode of key "d" with wineryId
+                    JsonNode wineryNode = metadataNode.get("d").get(wineryId);
+                    List<LotData> lots = new ArrayList<>();
 
-                  // get signature from the wineryNode of key "s"
-                  if (wineryNode.get("s").isArray()) {
-                    // put all signatures into lots
-                    wineryNode
-                        .get("s")
-                        .forEach(
-                            signature -> {
-                              LotData lotData =
-                                  LotData.builder()
-                                      .signature(removePrefixHexString(signature.asText()))
-                                      .build();
-                              lots.add(lotData);
-                            });
-                  }
+                    // get signature from the wineryNode of key "s"
+                    if (wineryNode.get("s").isArray()) {
+                      // put all signatures into lots
+                      wineryNode
+                          .get("s")
+                          .forEach(
+                              signature -> {
+                                LotData lotData =
+                                    LotData.builder()
+                                        .signature(removePrefixHexString(signature.asText()))
+                                        .build();
+                                lots.add(lotData);
+                              });
+                    }
 
-                  WineryData wineryData =
-                      WineryData.builder()
-                          .wineryId(wineryId)
-                          .isExternalApiAvailable(true)
-                          .publicKey(removePrefixHexString(wineryNode.get("pk").asText()))
-                          .header(removePrefixHexString(wineryNode.get("h").asText()))
-                          .lots(lots)
-                          .build();
-                  wineryDataList.add(wineryData);
-                });
-        metadataBolnisiBuilder.wineryData(wineryDataList);
+                    WineryData wineryData =
+                        WineryData.builder()
+                            .wineryId(wineryId)
+                            .isExternalApiAvailable(true)
+                            .publicKey(removePrefixHexString(wineryNode.get("pk").asText()))
+                            .header(removePrefixHexString(wineryNode.get("h").asText()))
+                            .lots(lots)
+                            .build();
+                    wineryDataList.add(wineryData);
+                  });
+          metadataBolnisiBuilder.wineryData(wineryDataList);
+        }
       } else {
         metadataBolnisiBuilder.isOnChainMetadataValid(false);
       }
@@ -323,7 +400,8 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
    *     off-chain metadata. Returns null if the CID is empty or if no metadata could be retrieved.
    */
   @SuppressWarnings("unchecked")
-  public Map<String, List<Object>> getOffChainMetadata(MetadataBolnisi metadataBolnisi) {
+  public Map<String, List<Object>> getOffChainMetadataForWineryData(
+      MetadataBolnisi metadataBolnisi) {
     if (StringUtils.isEmpty(metadataBolnisi.getCid())) {
       return null;
     }
@@ -364,6 +442,64 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
     }
 
     return offChainMetadata;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Map<String, Object> getOffChainMetadataForCertData(MetadataBolnisi metadataBolnisi) {
+    // Ensure the CID is present before proceeding
+    if (StringUtils.isEmpty(metadataBolnisi.getCid())) {
+      return null;
+    }
+
+    // Try to fetch from Redis first
+    String offChainRedisKey = getRedisKey(BOLNISI_METADATA_KEY + offChainMetadataUrl);
+    Object metadataRedisCached =
+        redisTemplate.opsForHash().get(offChainRedisKey, metadataBolnisi.getCid());
+
+    if (metadataRedisCached != null) {
+      return (Map<String, Object>) metadataRedisCached;
+    }
+
+    // Fetch from the external API if Redis cache is empty
+    List<LinkedHashMap<String, Object>> offChainMetadataList =
+        callWebclient(offChainMetadataUrl, String.class, metadataBolnisi.getCid())
+            .flatMap(
+                actualOffChainURL ->
+                    callWebclient(actualOffChainURL.replace("%2F", "/"), List.class))
+            .doOnSuccess(
+                linkedHashMap -> {
+                  if (CollectionUtils.isEmpty(linkedHashMap)) {
+                    metadataBolnisi.setCidVerified(false);
+                    metadataBolnisi.setWineryData(null);
+                  }
+                })
+            .onErrorComplete(
+                throwable -> {
+                  log.error("Error while getting bolnisi off-chain metadata", throwable);
+                  metadataBolnisi.setExternalApiAvailable(false);
+                  metadataBolnisi.setCidVerified(false);
+                  metadataBolnisi.setWineryData(null);
+                  return true;
+                })
+            .block();
+
+    Map<String, Object> offChainMetadataMap = new HashMap<>();
+    if (offChainMetadataList != null) {
+      // Populate the map with certificate_number as key and the json object as value
+      for (LinkedHashMap<String, Object> certificate : offChainMetadataList) {
+        String certificateNumber = (String) certificate.get("certificate_number");
+        if (certificateNumber != null) {
+          offChainMetadataMap.put(certificateNumber, certificate);
+        }
+      }
+
+      redisTemplate
+          .opsForHash()
+          .put(offChainRedisKey, metadataBolnisi.getCid(), offChainMetadataMap);
+      redisTemplate.expire(offChainRedisKey, 1, TimeUnit.DAYS);
+    }
+
+    return offChainMetadataMap;
   }
 
   /**

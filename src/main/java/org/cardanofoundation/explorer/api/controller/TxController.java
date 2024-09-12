@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.CertData;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -81,6 +82,18 @@ public class TxController {
           String hash,
       @PathVariable @Parameter(description = "The winery id") String wineryId) {
     return ResponseEntity.ok(bolnisiMetadataService.getWineryData(hash, wineryId));
+  }
+
+  @GetMapping("/{hash}/certData/{certNo}")
+  @LogMessage
+  @Operation(summary = "Get certificate data by tx hash detail")
+  public ResponseEntity<CertData> getCertDataByTxHash(
+      @PathVariable
+      @Parameter(description = "The hash identifier of the transaction.")
+      @LengthValid(CommonConstant.TX_HASH_LENGTH)
+      String hash,
+      @PathVariable @Parameter(description = "The certificate number") String certNo) {
+    return ResponseEntity.ok(bolnisiMetadataService.getCertData(hash, certNo));
   }
 
   @GetMapping("/current")
