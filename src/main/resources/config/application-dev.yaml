@@ -144,6 +144,7 @@ application:
     public-key:
       primary: ${API_BOLNISI_PUBLIC_KEY_PRIMARY_URL:https://cardano.mepa.gov.ge/api/v1/publickeys/winery/{wineryId}/v/0}
       fallback: ${API_BOLNISI_PUBLIC_KEY_FALLBACK_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
+      conformity-cert: ${API_BOLNISI_PUBLIC_KEY_CONFORMITY_CERT_URL:https://cardano.mepa.gov.ge/api/v1/publickeys/nwa/v/0}
 
 springdoc:
   api-docs.path: /apidocs
