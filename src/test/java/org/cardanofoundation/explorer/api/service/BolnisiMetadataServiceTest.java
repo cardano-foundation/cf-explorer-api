@@ -64,14 +64,15 @@ class BolnisiMetadataServiceTest {
     ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyFallbackUrl", publicKeyUrl);
     ReflectionTestUtils.setField(
         bolnisiMetadataService, "publicKeyPrimaryUrl", publicKeyPrimaryUrl);
-    ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyConformityCertUrl", publicKeyConformityCertUrl);
+    ReflectionTestUtils.setField(
+        bolnisiMetadataService, "publicKeyConformityCertUrl", publicKeyConformityCertUrl);
   }
 
   @Test
   void
       getBolnisiMetadata_whenReadingOnChainMetadataThrownException_shouldReturnInvalidBolnisiMetadata() {
     String jsonMetadata =
-        "{\"st\":\"georgianWine\",\"s\":[\"0xc5930c5cfac4e0ac457a9acd58d1eea7d48cd1672f9b3f849de2fdf9aac519f99df1e5cf4caf4f7813e1b73320ac9fac47f8ec821079eb6413d5db91fbcbb900\"],\"t\":\"conformityCertRevoke\",\"v\":\"1\",\"h\":\"0x7b22616c67223a224564445341227d\",\"pk\":\"0x19e50c2eb8c3a888a61b4d79163b057b7018075c67cd5755570d815de4c7dafe\",\"cid\":\"zCT5htke8aQRiirxnPtebY4SjpaMpCZzCnN7xMaA62KQdbYvw9V1\"}";
+        "{\"st\":\"georgianWine\",\"s\":[\"0xc5930c5cfac4e0ac457a9acd58d1eea7d48cd1672f9b3f849de2fdf9aac519f99df1e5cf4caf4f7813e1b73320ac9fac47f8ec821079eb6413d5db91fbcbb900\"],\"t\":\"conformity\",\"v\":\"1\",\"h\":\"0x7b22616c67223a224564445341227d\",\"pk\":\"0x19e50c2eb8c3a888a61b4d79163b057b7018075c67cd5755570d815de4c7dafe\",\"cid\":\"zCT5htke8aQRiirxnPtebY4SjpaMpCZzCnN7xMaA62KQdbYvw9V1\"}";
     MetadataBolnisi response = bolnisiMetadataService.getBolnisiMetadata(jsonMetadata);
 
     assertEquals("zCT5htke8aQRiirxnPtebY4SjpaMpCZzCnN7xMaA62KQdbYvw9V1", response.getCid());
@@ -83,7 +84,7 @@ class BolnisiMetadataServiceTest {
   @Test
   void getBolnisiMetadata_whenOnChainMetadataInvalid_shouldReturnInvalidBolnisiMetadata() {
     String jsonMetadata =
-        "{\"st\":\"georgianWine\",\"s\":[\"0xc5930c5cfac4e0ac457a9acd58d1eea7d48cd1672f9b3f849de2fdf9aac519f99df1e5cf4caf4f7813e1b73320ac9fac47f8ec821079eb6413d5db91fbcbb900\"],\"t\":\"conformityCertRevoke\",\"v\":\"1\",\"h\":\"0x7b22616c67223a224564445341227d\",\"pk\":\"0x19e50c2eb8c3a888a61b4d79163b057b7018075c67cd5755570d815de4c7dafe\",\"cid\":\"zCT5htke8aQRiirxnPtebY4SjpaMpCZzCnN7xMaA62KQdbYvw9V1\"}";
+        "{\"st\":\"georgianWine\",\"s\":[\"0xc5930c5cfac4e0ac457a9acd58d1eea7d48cd1672f9b3f849de2fdf9aac519f99df1e5cf4caf4f7813e1b73320ac9fac47f8ec821079eb6413d5db91fbcbb900\"],\"t\":\"conformity\",\"v\":\"1\",\"h\":\"0x7b22616c67223a224564445341227d\",\"pk\":\"0x19e50c2eb8c3a888a61b4d79163b057b7018075c67cd5755570d815de4c7dafe\",\"cid\":\"zCT5htke8aQRiirxnPtebY4SjpaMpCZzCnN7xMaA62KQdbYvw9V1\"}";
     MetadataBolnisi response = bolnisiMetadataService.getBolnisiMetadata(jsonMetadata);
 
     assertEquals("zCT5htke8aQRiirxnPtebY4SjpaMpCZzCnN7xMaA62KQdbYvw9V1", response.getCid());
