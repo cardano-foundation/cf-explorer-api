@@ -1,13 +1,21 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import reactor.core.publisher.Mono;
 
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
+import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
+import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.micar.AddressCarbonEmissionResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
@@ -17,6 +25,7 @@ import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressTxCount;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +33,13 @@ public class MiCARServiceImpl implements MiCARService {
   private final StakeAddressTxCountRepository stakeAddressTxCountRepository;
   private final AddressTxCountRepository addressTxCountRepository;
   private final StakeAddressRepository stakeAddressRepository;
+  private final WebClient webClient;
+
+  @Value("${application.api.micar.overview}")
+  private String apiMicarOverviewUrl;
+
+  @Value("${application.api.micar.historical}")
+  private String apiMicarHistoricalUrl;
 
   @Override
   public AddressCarbonEmissionResponse getCarbonEmissionsByAddressAndPool(String address) {
@@ -70,5 +86,35 @@ public class MiCARServiceImpl implements MiCARService {
         return AddressCarbonEmissionResponse.builder().build();
       }
     }
+  }
+
+  @SingletonCall(typeToken = TypeTokenGson.MICAR, expireAfterSeconds = 200)
+  public Object getCarbonEmissionsOverview(String responseType, String key) {
+    return webClient
+        .get()
+        .uri(String.format(apiMicarOverviewUrl, responseType, key))
+        .acceptCharset(StandardCharsets.UTF_8)
+        .retrieve()
+        .onStatus(
+            status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse ->
+                Mono.error(new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+        .bodyToMono(Object.class)
+        .block();
+  }
+
+  @SingletonCall(typeToken = TypeTokenGson.MICAR, expireAfterSeconds = 200)
+  public Object getCarbonEmissionsHistorical(String key) {
+    return webClient
+        .get()
+        .uri(String.format(apiMicarHistoricalUrl, key))
+        .acceptCharset(StandardCharsets.UTF_8)
+        .retrieve()
+        .onStatus(
+            status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse ->
+                Mono.error(new BusinessException(BusinessCode.EXTERNAL_API_IS_NOT_AVAILABLE)))
+        .bodyToMono(Object.class)
+        .block();
   }
 }
