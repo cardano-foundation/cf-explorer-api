@@ -4,4 +4,8 @@ import org.cardanofoundation.explorer.api.model.response.micar.AddressCarbonEmis
 
 public interface MiCARService {
   AddressCarbonEmissionResponse getCarbonEmissionsByAddressAndPool(String address);
+
+  Object getCarbonEmissionsOverview(String responseType, String key);
+
+  Object getCarbonEmissionsHistorical(String key);
 }
