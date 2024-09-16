@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,5 +35,26 @@ public class MiCARController {
                   " The address or stake address for which the carbon emissions are to be calculated.")
           String address) {
     return ResponseEntity.ok(miCARService.getCarbonEmissionsByAddressAndPool(address));
+  }
+
+  @GetMapping("/carbon-emission/overview")
+  @LogMessage
+  @Operation(
+      summary = "Get the carbon emissions overview",
+      description = "Get the carbon emissions overview",
+      tags = {"MiCar"})
+  public ResponseEntity<Object> getOverviewCarbonEmissions(
+      @RequestParam String responseType, @RequestParam String key) {
+    return ResponseEntity.ok(miCARService.getCarbonEmissionsOverview(responseType, key));
+  }
+
+  @GetMapping("/carbon-emission/historical")
+  @LogMessage
+  @Operation(
+      summary = "Get the carbon emissions historical",
+      description = "Get the carbon emissions historical",
+      tags = {"MiCar"})
+  public ResponseEntity<Object> getHistoricalCarbonEmissions(@RequestParam String key) {
+    return ResponseEntity.ok(miCARService.getCarbonEmissionsHistorical(key));
   }
 }
