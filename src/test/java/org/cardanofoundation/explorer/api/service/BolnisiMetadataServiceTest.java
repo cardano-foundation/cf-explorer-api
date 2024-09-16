@@ -43,6 +43,8 @@ class BolnisiMetadataServiceTest {
       "https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/{cid}";
   final String publicKeyUrl =
       "https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}";
+  final String publicKeyPrimaryUrl =
+      "https://cardano.mepa.gov.ge/api/v1/publickeys/winery/{wineryId}/v/0";
   @Mock private TxMetadataRepository txMetadataRepository;
   @Mock private WebClient webClient;
   @Mock private WebClient.RequestHeadersSpec requestHeadersMock;
@@ -58,7 +60,9 @@ class BolnisiMetadataServiceTest {
     ReflectionTestUtils.setField(bolnisiMetadataService, "network", network);
     ReflectionTestUtils.setField(
         bolnisiMetadataService, "offChainMetadataUrl", offChainMetadataUrl);
-    ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyUrl", publicKeyUrl);
+    ReflectionTestUtils.setField(bolnisiMetadataService, "publicKeyFallbackUrl", publicKeyUrl);
+    ReflectionTestUtils.setField(
+        bolnisiMetadataService, "publicKeyPrimaryUrl", publicKeyPrimaryUrl);
   }
 
   @Test
