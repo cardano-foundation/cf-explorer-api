@@ -17,6 +17,10 @@ public class CommonConstant {
     public static final String SANCHONET = "sanchonet";
   }
 
+  public static final class MiCAR {
+    public static final Double CO2_EMISSION_PER_TX = 0.000018987;
+  }
+
   public static final int SCALE = 6;
 
   public static final Integer ZERO = 0;
