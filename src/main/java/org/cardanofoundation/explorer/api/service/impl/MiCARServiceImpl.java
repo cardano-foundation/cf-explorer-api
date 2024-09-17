@@ -89,10 +89,10 @@ public class MiCARServiceImpl implements MiCARService {
   }
 
   @SingletonCall(typeToken = TypeTokenGson.MICAR, expireAfterSeconds = 200)
-  public Object getCarbonEmissionsOverview(String responseType, String key) {
+  public Object getCarbonEmissionsOverview() {
     return webClient
         .get()
-        .uri(String.format(apiMicarOverviewUrl, responseType, key))
+        .uri(apiMicarOverviewUrl)
         .acceptCharset(StandardCharsets.UTF_8)
         .retrieve()
         .onStatus(
@@ -104,10 +104,10 @@ public class MiCARServiceImpl implements MiCARService {
   }
 
   @SingletonCall(typeToken = TypeTokenGson.MICAR, expireAfterSeconds = 200)
-  public Object getCarbonEmissionsHistorical(String key) {
+  public Object getCarbonEmissionsHistorical() {
     return webClient
         .get()
-        .uri(String.format(apiMicarHistoricalUrl, key))
+        .uri(apiMicarHistoricalUrl)
         .acceptCharset(StandardCharsets.UTF_8)
         .retrieve()
         .onStatus(
