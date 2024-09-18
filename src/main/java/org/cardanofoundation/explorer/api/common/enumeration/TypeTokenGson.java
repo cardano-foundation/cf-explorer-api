@@ -23,7 +23,9 @@ public enum TypeTokenGson {
   TOKEN_DETAIL(() -> new TypeToken<TokenResponse>() {}.getType()),
   NEWS(() -> new TypeToken<>() {}.getType()),
   BOLNISI_METADATA(() -> new TypeToken<MetadataBolnisi>() {}.getType()),
-  TX_CHART(() -> new TypeToken<List<TxGraph>>() {}.getType());
+  TX_CHART(() -> new TypeToken<List<TxGraph>>() {}.getType()),
+  MICAR(() -> new TypeToken<>() {}.getType()),
+  ;
 
   private final Supplier<Type> type;
 }
