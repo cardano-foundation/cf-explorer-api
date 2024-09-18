@@ -38,11 +38,7 @@ public class MiCARServiceImpl implements MiCARService {
       Optional<StakeAddressTxCount> stakeAddressTxCount =
           stakeAddressTxCountRepository.findByStakeAddress(stakeAddress.get().getView());
       if (stakeAddressTxCount.isEmpty()) {
-        return AddressCarbonEmissionResponse.builder()
-            .stakeAddress(address)
-            .txCount(0L)
-            .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
-            .build();
+        return AddressCarbonEmissionResponse.builder().build();
       }
       return AddressCarbonEmissionResponse.builder()
           .stakeAddress(address)
@@ -54,11 +50,7 @@ public class MiCARServiceImpl implements MiCARService {
         AddressUtils.checkStakeAddress(address);
         Optional<AddressTxCount> addressTxCount = addressTxCountRepository.findByAddress(address);
         if (addressTxCount.isEmpty()) {
-          return AddressCarbonEmissionResponse.builder()
-              .address(address)
-              .txCount(0L)
-              .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
-              .build();
+          return AddressCarbonEmissionResponse.builder().build();
         } else {
           return AddressCarbonEmissionResponse.builder()
               .address(address)
