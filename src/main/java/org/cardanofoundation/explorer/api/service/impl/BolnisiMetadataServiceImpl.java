@@ -121,7 +121,8 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
           });
 
       metadataBolnisi.setWineryData(new ArrayList<>(wineryDataMap.values()));
-    } else if (metadataBolnisi.getTag().equals("conformityCert")) {
+    } else if (metadataBolnisi.getTag().equals("conformityCert")
+        || metadataBolnisi.getTag().equals("conformityCertRevoke")) {
       // retrieves off-chain metadata
       Map<String, Object> offChainMetadata = getOffChainMetadataForCertData(metadataBolnisi);
 
@@ -355,7 +356,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       String t = metadataNode.get("t").asText();
       metadataBolnisiBuilder.tag(t);
       if (st.equals("georgianWine")) {
-        if (t.equals("conformityCert")) {
+        if (t.equals("conformityCert") || t.equals("conformityCertRevoke")) {
           List<CertDetailsData> certDetailsDataList = new ArrayList<>();
           if (metadataNode.get("s").isArray()) {
             metadataNode
