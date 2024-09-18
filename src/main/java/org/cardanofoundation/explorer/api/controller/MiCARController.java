@@ -43,9 +43,8 @@ public class MiCARController {
       summary = "Get the carbon emissions overview",
       description = "Get the carbon emissions overview",
       tags = {"MiCar"})
-  public ResponseEntity<Object> getOverviewCarbonEmissions(
-      @RequestParam String responseType, @RequestParam String key) {
-    return ResponseEntity.ok(miCARService.getCarbonEmissionsOverview(responseType, key));
+  public ResponseEntity<Object> getOverviewCarbonEmissions() {
+    return ResponseEntity.ok(miCARService.getCarbonEmissionsOverview());
   }
 
   @GetMapping("/carbon-emission/historical")
@@ -54,7 +53,7 @@ public class MiCARController {
       summary = "Get the carbon emissions historical",
       description = "Get the carbon emissions historical",
       tags = {"MiCar"})
-  public ResponseEntity<Object> getHistoricalCarbonEmissions(@RequestParam String key) {
-    return ResponseEntity.ok(miCARService.getCarbonEmissionsHistorical(key));
+  public ResponseEntity<Object> getHistoricalCarbonEmissions() {
+    return ResponseEntity.ok(miCARService.getCarbonEmissionsHistorical());
   }
 }

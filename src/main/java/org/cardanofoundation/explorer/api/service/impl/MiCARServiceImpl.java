@@ -41,6 +41,9 @@ public class MiCARServiceImpl implements MiCARService {
   @Value("${application.api.micar.historical}")
   private String apiMicarHistoricalUrl;
 
+  @Value("${application.api.micar.public-key}")
+  private String micarPublicKey;
+
   @Override
   public AddressCarbonEmissionResponse getCarbonEmissionsByAddressAndPool(String address) {
     if (Objects.isNull(address)) {
@@ -81,10 +84,10 @@ public class MiCARServiceImpl implements MiCARService {
   }
 
   @SingletonCall(typeToken = TypeTokenGson.MICAR, expireAfterSeconds = 200)
-  public Object getCarbonEmissionsOverview(String responseType, String key) {
+  public Object getCarbonEmissionsOverview() {
     return webClient
         .get()
-        .uri(String.format(apiMicarOverviewUrl, responseType, key))
+        .uri(apiMicarOverviewUrl, micarPublicKey)
         .acceptCharset(StandardCharsets.UTF_8)
         .retrieve()
         .onStatus(
@@ -96,10 +99,10 @@ public class MiCARServiceImpl implements MiCARService {
   }
 
   @SingletonCall(typeToken = TypeTokenGson.MICAR, expireAfterSeconds = 200)
-  public Object getCarbonEmissionsHistorical(String key) {
+  public Object getCarbonEmissionsHistorical() {
     return webClient
         .get()
-        .uri(String.format(apiMicarHistoricalUrl, key))
+        .uri(apiMicarHistoricalUrl, micarPublicKey)
         .acceptCharset(StandardCharsets.UTF_8)
         .retrieve()
         .onStatus(

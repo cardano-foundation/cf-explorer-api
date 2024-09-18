@@ -123,8 +123,10 @@ application:
     interval-time: ${API_NEWS_CACHE_TIME:120}
     base-url: ${API_NEWS_URL}
   api.micar:
-    overview: ${API_MICAR_OVERVIEW:https://v2.api.carbon-ratings.com/mica/overview/ada?responseType=%s&key=%s}
-    historical: ${API_MICAR_HISTORICAL:https://v2.api.carbon-ratings.com/currencies/ada/emissions/network?key=%s}
+    public-key: ${API_MICAR_KEY:zy5ZrBDZpv420Oi3WIPwXP}
+    overview: ${API_MICAR_OVERVIEW:https://v2.api.carbon-ratings.com/mica/overview/ada?responseType=recent&key={publicKey}}
+    historical: ${API_MICAR_HISTORICAL:https://v2.api.carbon-ratings.com/currencies/ada/emissions/network?key={publicKey}}
+
   api:
     check-reward:
       base-url: ${API_CHECK_REWARD_URL:http://localhost:8888/api/v1/rewards/fetch}
