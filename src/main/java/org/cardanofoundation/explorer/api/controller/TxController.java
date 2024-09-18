@@ -22,6 +22,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
 import org.cardanofoundation.explorer.api.config.LogMessage;
+import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.CertDetailsData;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.WineryData;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
@@ -81,6 +82,18 @@ public class TxController {
           String hash,
       @PathVariable @Parameter(description = "The winery id") String wineryId) {
     return ResponseEntity.ok(bolnisiMetadataService.getWineryData(hash, wineryId));
+  }
+
+  @GetMapping("/{hash}/certData/{certNo}")
+  @LogMessage
+  @Operation(summary = "Get certificate data by tx hash detail")
+  public ResponseEntity<CertDetailsData> getCertDataByTxHash(
+      @PathVariable
+          @Parameter(description = "The hash identifier of the transaction.")
+          @LengthValid(CommonConstant.TX_HASH_LENGTH)
+          String hash,
+      @PathVariable @Parameter(description = "The certificate number") String certNo) {
+    return ResponseEntity.ok(bolnisiMetadataService.getCertDetailsData(hash, certNo));
   }
 
   @GetMapping("/current")
