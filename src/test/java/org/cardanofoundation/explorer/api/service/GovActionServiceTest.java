@@ -737,6 +737,50 @@ public class GovActionServiceTest {
   }
 
   @Test
+  public void testGetAuthorsByAnchor_withSeveralFieldsMightBeNull() {
+    String anchorUrl = "https://raw.githubusercontent.com/carloslodelar/proposals/main/pv10.json";
+    String anchorHash = "ffa226f3863aca006172d559cf46bb8b883a47233962ae2fc94c158d7de6fa81";
+    when(offChainVoteGovActionDataRepository.getRawDataByAnchorUrlAndAnchorHash(
+            anyString(), anyString()))
+        .thenReturn(getRawData2());
+
+    var actual =
+        governanceActionService.getAuthorsByAnchor(
+            "https://raw.githubusercontent.com/carloslodelar/proposals/main/pv10.json",
+            "ffa226f3863aca006172d559cf46bb8b883a47233962ae2fc94c158d7de6fa81",
+            PageRequest.of(0, 10));
+    verify(offChainVoteGovActionDataRepository)
+        .getRawDataByAnchorUrlAndAnchorHash(anchorUrl, anchorHash);
+    Assertions.assertEquals(1, actual.getTotalItems());
+    Assertions.assertEquals("The Ancient Kraken", actual.getData().get(0).getName());
+    Assertions.assertNull(actual.getData().get(0).getSignature());
+    Assertions.assertNull(actual.getData().get(0).getPublicKey());
+    Assertions.assertNull(actual.getData().get(0).getWitnessAlgorithm());
+  }
+
+  @Test
+  public void testGetAuthorsByAnchor_withSeveralFieldsMightBeNull1() {
+    String anchorUrl = "https://raw.githubusercontent.com/carloslodelar/proposals/main/pv10.json";
+    String anchorHash = "ffa226f3863aca006172d559cf46bb8b883a47233962ae2fc94c158d7de6fa81";
+    when(offChainVoteGovActionDataRepository.getRawDataByAnchorUrlAndAnchorHash(
+            anyString(), anyString()))
+        .thenReturn(getRawData3());
+
+    var actual =
+        governanceActionService.getAuthorsByAnchor(
+            "https://raw.githubusercontent.com/carloslodelar/proposals/main/pv10.json",
+            "ffa226f3863aca006172d559cf46bb8b883a47233962ae2fc94c158d7de6fa81",
+            PageRequest.of(0, 10));
+    verify(offChainVoteGovActionDataRepository)
+        .getRawDataByAnchorUrlAndAnchorHash(anchorUrl, anchorHash);
+    Assertions.assertEquals(1, actual.getTotalItems());
+    Assertions.assertEquals("The Ancient Kraken", actual.getData().get(0).getName());
+    Assertions.assertNull(actual.getData().get(0).getSignature());
+    Assertions.assertNull(actual.getData().get(0).getPublicKey());
+    Assertions.assertEquals("ed25519", actual.getData().get(0).getWitnessAlgorithm());
+  }
+
+  @Test
   public void testGetAuthorsByAnchor_withRawDataIsNull() {
     String anchorUrl = "anchorUrl";
     String anchorHash = "anchorHash";
@@ -1084,6 +1128,179 @@ public class GovActionServiceTest {
         + "      \"@value\": \"Info for what should ryan buy with treasury\"\n"
         + "    }\n"
         + "  }\n"
+        + "}";
+  }
+
+  private String getRawData2() {
+    return "{\n"
+        + "  \"@context\": {\n"
+        + "    \"@language\": \"en-us\",\n"
+        + "    \"CIP100\": \"https://github.com/cardano-foundation/CIPs/blob/master/CIP-0100/README.md#\",\n"
+        + "    \"CIP108\": \"https://github.com/cardano-foundation/CIPs/blob/master/CIP-0108/README.md#\",\n"
+        + "    \"CIP119\": \"https://github.com/cardano-foundation/CIPs/blob/master/CIP-0119/README.md#\",\n"
+        + "    \"hashAlgorithm\": \"CIP100:hashAlgorithm\",\n"
+        + "    \"body\": {\n"
+        + "      \"@id\": \"CIP119:body\",\n"
+        + "      \"@context\": {\n"
+        + "        \"references\": {\n"
+        + "          \"@id\": \"CIP119:references\",\n"
+        + "          \"@container\": \"@set\",\n"
+        + "          \"@context\": {\n"
+        + "            \"GovernanceMetadata\": \"CIP100:GovernanceMetadataReference\",\n"
+        + "            \"Other\": \"CIP100:OtherReference\",\n"
+        + "            \"label\": \"CIP100:reference-label\",\n"
+        + "            \"uri\": \"CIP100:reference-uri\",\n"
+        + "            \"referenceHash\": {\n"
+        + "              \"@id\": \"CIP108:referenceHash\",\n"
+        + "              \"@context\": {\n"
+        + "                \"hashDigest\": \"CIP108:hashDigest\",\n"
+        + "                \"hashAlgorithm\": \"CIP100:hashAlgorithm\"\n"
+        + "              }\n"
+        + "            }\n"
+        + "          }\n"
+        + "        },\n"
+        + "        \"comment\": \"CIP100:comment\",\n"
+        + "        \"externalUpdates\": {\n"
+        + "          \"@id\": \"CIP100:externalUpdates\",\n"
+        + "          \"@context\": {\n"
+        + "            \"title\": \"CIP100:update-title\",\n"
+        + "            \"uri\": \"CIP100:update-uri\"\n"
+        + "          }\n"
+        + "        },\n"
+        + "        \"paymentAddress\": \"CIP119:paymentAddress\",\n"
+        + "        \"givenName\": \"CIP119:givenName\",\n"
+        + "        \"image\": {\n"
+        + "          \"@id\": \"CIP119:image\",\n"
+        + "          \"@context\": {\n"
+        + "            \"ImageObject\": \"https://schema.org/ImageObject\"\n"
+        + "          }\n"
+        + "        },\n"
+        + "        \"objectives\": \"CIP119:objectives\",\n"
+        + "        \"motivations\": \"CIP119:motivations\",\n"
+        + "        \"qualifications\": \"CIP119:qualifications\",\n"
+        + "        \"title\": \"CIP108:title\",\n"
+        + "        \"abstract\": \"CIP108:abstract\",\n"
+        + "        \"rationale\": \"CIP108:rationale\"\n"
+        + "      }\n"
+        + "    },\n"
+        + "    \"authors\": {\n"
+        + "      \"@id\": \"CIP100:authors\",\n"
+        + "      \"@container\": \"@set\",\n"
+        + "      \"@context\": {\n"
+        + "        \"name\": \"http://xmlns.com/foaf/0.1/name\",\n"
+        + "        \"witness\": {\n"
+        + "          \"@id\": \"CIP100:witness\",\n"
+        + "          \"@context\": {\n"
+        + "            \"witnessAlgorithm\": \"CIP100:witnessAlgorithm\",\n"
+        + "            \"publicKey\": \"CIP100:publicKey\",\n"
+        + "            \"signature\": \"CIP100:signature\"\n"
+        + "          }\n"
+        + "        }\n"
+        + "      }\n"
+        + "    }\n"
+        + "  },\n"
+        + "  \"hashAlgorithm\": \"blake2b-256\",\n"
+        + "  \"body\": {\n"
+        + "    \"title\": \"A Simple Info Action\",\n"
+        + "    \"abstract\": \"This should do nothing. The drep will vote on it.\",\n"
+        + "    \"motivations\": \"We need to test things\",\n"
+        + "    \"rationale\": \"Without this how can we test things?\",\n"
+        + "    \"paymentAddress\": \"addr_test1qrvnxkaylr4upwxfxctpxpcumj0fl6fdujdc72j8sgpraa9l4gu9er4t0w7udjvt2pqngddn6q4h8h3uv38p8p9cq82qav4lmp\",\n"
+        + "    \"givenName\": \"Logical Mechanism Info Action\"\n"
+        + "  },\n"
+        + "  \"authors\": [\n"
+        + "    {\n"
+        + "      \"name\": \"The Ancient Kraken\"\n"
+        + "    }\n"
+        + "  ]\n"
+        + "}";
+  }
+
+  private String getRawData3() {
+    return "{\n"
+        + "  \"@context\": {\n"
+        + "    \"@language\": \"en-us\",\n"
+        + "    \"CIP100\": \"https://github.com/cardano-foundation/CIPs/blob/master/CIP-0100/README.md#\",\n"
+        + "    \"CIP108\": \"https://github.com/cardano-foundation/CIPs/blob/master/CIP-0108/README.md#\",\n"
+        + "    \"CIP119\": \"https://github.com/cardano-foundation/CIPs/blob/master/CIP-0119/README.md#\",\n"
+        + "    \"hashAlgorithm\": \"CIP100:hashAlgorithm\",\n"
+        + "    \"body\": {\n"
+        + "      \"@id\": \"CIP119:body\",\n"
+        + "      \"@context\": {\n"
+        + "        \"references\": {\n"
+        + "          \"@id\": \"CIP119:references\",\n"
+        + "          \"@container\": \"@set\",\n"
+        + "          \"@context\": {\n"
+        + "            \"GovernanceMetadata\": \"CIP100:GovernanceMetadataReference\",\n"
+        + "            \"Other\": \"CIP100:OtherReference\",\n"
+        + "            \"label\": \"CIP100:reference-label\",\n"
+        + "            \"uri\": \"CIP100:reference-uri\",\n"
+        + "            \"referenceHash\": {\n"
+        + "              \"@id\": \"CIP108:referenceHash\",\n"
+        + "              \"@context\": {\n"
+        + "                \"hashDigest\": \"CIP108:hashDigest\",\n"
+        + "                \"hashAlgorithm\": \"CIP100:hashAlgorithm\"\n"
+        + "              }\n"
+        + "            }\n"
+        + "          }\n"
+        + "        },\n"
+        + "        \"comment\": \"CIP100:comment\",\n"
+        + "        \"externalUpdates\": {\n"
+        + "          \"@id\": \"CIP100:externalUpdates\",\n"
+        + "          \"@context\": {\n"
+        + "            \"title\": \"CIP100:update-title\",\n"
+        + "            \"uri\": \"CIP100:update-uri\"\n"
+        + "          }\n"
+        + "        },\n"
+        + "        \"paymentAddress\": \"CIP119:paymentAddress\",\n"
+        + "        \"givenName\": \"CIP119:givenName\",\n"
+        + "        \"image\": {\n"
+        + "          \"@id\": \"CIP119:image\",\n"
+        + "          \"@context\": {\n"
+        + "            \"ImageObject\": \"https://schema.org/ImageObject\"\n"
+        + "          }\n"
+        + "        },\n"
+        + "        \"objectives\": \"CIP119:objectives\",\n"
+        + "        \"motivations\": \"CIP119:motivations\",\n"
+        + "        \"qualifications\": \"CIP119:qualifications\",\n"
+        + "        \"title\": \"CIP108:title\",\n"
+        + "        \"abstract\": \"CIP108:abstract\",\n"
+        + "        \"rationale\": \"CIP108:rationale\"\n"
+        + "      }\n"
+        + "    },\n"
+        + "    \"authors\": {\n"
+        + "      \"@id\": \"CIP100:authors\",\n"
+        + "      \"@container\": \"@set\",\n"
+        + "      \"@context\": {\n"
+        + "        \"name\": \"http://xmlns.com/foaf/0.1/name\",\n"
+        + "        \"witness\": {\n"
+        + "          \"@id\": \"CIP100:witness\",\n"
+        + "          \"@context\": {\n"
+        + "            \"witnessAlgorithm\": \"CIP100:witnessAlgorithm\",\n"
+        + "            \"publicKey\": \"CIP100:publicKey\",\n"
+        + "            \"signature\": \"CIP100:signature\"\n"
+        + "          }\n"
+        + "        }\n"
+        + "      }\n"
+        + "    }\n"
+        + "  },\n"
+        + "  \"hashAlgorithm\": \"blake2b-256\",\n"
+        + "  \"body\": {\n"
+        + "    \"title\": \"A Simple Info Action\",\n"
+        + "    \"abstract\": \"This should do nothing. The drep will vote on it.\",\n"
+        + "    \"motivations\": \"We need to test things\",\n"
+        + "    \"rationale\": \"Without this how can we test things?\",\n"
+        + "    \"paymentAddress\": \"addr_test1qrvnxkaylr4upwxfxctpxpcumj0fl6fdujdc72j8sgpraa9l4gu9er4t0w7udjvt2pqngddn6q4h8h3uv38p8p9cq82qav4lmp\",\n"
+        + "    \"givenName\": \"Logical Mechanism Info Action\"\n"
+        + "  },\n"
+        + "  \"authors\": [\n"
+        + "    {\n"
+        + "      \"name\": \"The Ancient Kraken\",\n"
+        + "      \"witness\": {\n"
+        + "        \"witnessAlgorithm\": \"ed25519\"\n"
+        + "      }\n"
+        + "    }\n"
+        + "  ]\n"
         + "}";
   }
 }
