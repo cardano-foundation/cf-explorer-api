@@ -75,7 +75,7 @@ public class SearchServiceImpl implements SearchService {
     if (query.isBlank() || query.isEmpty()) {
       return response;
     }
-    searchPoolWithPaging(query, response, pageable);
+    searchPoolIdAndHash(query, response, pageable);
     searchAddress(rawQuery, response);
     return response;
   }
@@ -190,7 +190,7 @@ public class SearchServiceImpl implements SearchService {
     }
   }
 
-  private void searchPoolWithPaging(
+  private void searchPoolIdAndHash(
       String query, SearchStakingLifecycle response, Pageable pageable) {
     var pool = poolHashRepository.getPoolInfo(query);
     if (Objects.nonNull(pool)) {
@@ -201,21 +201,6 @@ public class SearchServiceImpl implements SearchService {
               pageable,
               1);
       response.setPoolList(new BaseFilterResponse<>(poolPage));
-    } else {
-      Page<PoolInfoProjection> poolList = poolHashRepository.findByPoolNameLike(query, pageable);
-
-      List<PoolSearchResponse> list =
-          poolList.stream()
-              .filter(Objects::nonNull)
-              .map(
-                  poolInfo ->
-                      new PoolSearchResponse(
-                          poolInfo.getPoolName(), poolInfo.getPoolView(), poolInfo.getIcon()))
-              .toList();
-      response.setPoolList(new BaseFilterResponse<>(poolList, list));
-      if (!CollectionUtils.isEmpty(list)) {
-        response.setValidPoolName(true);
-      }
     }
   }
 
