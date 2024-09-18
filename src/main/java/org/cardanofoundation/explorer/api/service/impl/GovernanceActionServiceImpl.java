@@ -529,10 +529,19 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
               .map(
                   author ->
                       AuthorResponse.builder()
-                          .name(author.getName())
-                          .publicKey(author.getWitness().getPublicKey())
-                          .witnessAlgorithm(author.getWitness().getWitnessAlgorithm())
-                          .signature(author.getWitness().getSignature())
+                          .name(Objects.nonNull(author.getName()) ? author.getName() : null)
+                          .publicKey(
+                              Objects.nonNull(author.getWitness())
+                                  ? author.getWitness().getPublicKey()
+                                  : null)
+                          .witnessAlgorithm(
+                              Objects.nonNull(author.getWitness())
+                                  ? author.getWitness().getWitnessAlgorithm()
+                                  : null)
+                          .signature(
+                              Objects.nonNull(author.getWitness())
+                                  ? author.getWitness().getSignature()
+                                  : null)
                           .build())
               .collect(Collectors.toList());
       authorResponses.sort(Comparator.comparing(AuthorResponse::getName));
