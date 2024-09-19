@@ -14,10 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.service.impl.MiCARServiceImpl;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressTxCount;
 
@@ -29,6 +31,7 @@ public class MiCARServiceTest {
 
   @Mock private StakeAddressTxCountRepository stakeAddressTxCountRepository;
   @Mock private StakeAddressRepository stakeAddressRepository;
+  @Mock private AddressRepository addressRepository;
 
   @Test
   void testGetCarbonEmissionsByAddress_matchingAddress() {
@@ -36,6 +39,8 @@ public class MiCARServiceTest {
         "addr1q8elqhkuvtyelgcedpup58r893awhg3l87a4rz5d5acatuj9y84nruafrmta2rewd5l46g8zxy4l49ly8kye79ddr3ksqal35g";
 
     AddressTxCount addressTxCount = AddressTxCount.builder().address(address).txCount(20L).build();
+    when(addressRepository.findFirstByAddress(anyString()))
+        .thenReturn(Optional.of(Address.builder().address(address).build()));
     when(addressTxCountRepository.findByAddress(anyString()))
         .thenReturn(Optional.of(addressTxCount));
 
