@@ -45,8 +45,7 @@ public class SearchController {
   @LogMessage
   @Operation(
       summary = "Search for staking lifecycle",
-      description =
-          "Search like for a pool ticker, regular pool ids, addresses (grab by stake key)",
+      description = "Search like for regular pool ids, pool hash or addresses (grab by stake key)",
       tags = {"search"})
   public SearchStakingLifecycle searchForStakingLifecycle(
       @RequestParam @Parameter(description = "Query param for search") String query,
