@@ -368,7 +368,7 @@ public class StakeKeyServiceTest {
         .thenReturn(StakeFilterResponse.builder().build());
 
     var response = stakeKeyService.getTopDelegators(pageable);
-    assertEquals(response.getTotalItems(), 10);
+    assertEquals(response.getTotalItems(), 1);
     assertEquals(response.getTotalPages(), 1);
     assertEquals(response.getCurrentPage(), 0);
     assertEquals(response.getData().get(0).getBalance(), BigInteger.ONE);

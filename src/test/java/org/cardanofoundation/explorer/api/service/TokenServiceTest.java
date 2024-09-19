@@ -1,11 +1,7 @@
 package org.cardanofoundation.explorer.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -43,12 +39,7 @@ import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
+import org.cardanofoundation.explorer.api.model.response.token.*;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
@@ -96,13 +87,16 @@ class TokenServiceTest {
 
   @Test
   void testFilterToken_WhenQueryEmpty() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
     // Setup
     when(aggregatedDataCacheService.getTokenCount()).thenReturn(1);
     when(scriptRepository.findAllByHashIn(List.of("policy")))
         .thenReturn(List.of(Script.builder().type(ScriptType.TIMELOCK).hash("policy").build()));
 
     final TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
-    when(tokenProjection.getId()).thenReturn(0L);
+    when(tokenProjection.getUnit()).thenReturn("unit1");
     when(tokenProjection.getPolicy()).thenReturn("policy");
 
     when(multiAssetRepository.findMultiAssets(any(Pageable.class)))
@@ -111,6 +105,8 @@ class TokenServiceTest {
         TokenFilterResponse.builder()
             .id(0L)
             .name("name")
+            .txCount(20)
+            .unit("unit1")
             .policy("policy")
             .metadata(TokenMetadataResponse.builder().url("url").build())
             .build();
@@ -120,15 +116,14 @@ class TokenServiceTest {
 
     final TokenInfo tokenInfo =
         TokenInfo.builder()
-            .multiAssetId(0L)
+            .updatedSlot(100L)
+            .unit("unit1")
             .numberOfHolders(100L)
             .volume24h(new BigInteger("100"))
-            .updateTime(Timestamp.valueOf(LocalDateTime.now()))
             .build();
 
     final List<TokenInfo> tokenInfos = List.of(tokenInfo);
-    when(tokenInfoRepository.findTokenInfosByMultiAssetIdIn(anyCollection()))
-        .thenReturn(tokenInfos);
+    when(tokenInfoRepository.findTokenInfosByUnitIn(anyCollection())).thenReturn(tokenInfos);
 
     // Run the test
     final BaseFilterResponse<TokenFilterResponse> result =
@@ -136,16 +131,19 @@ class TokenServiceTest {
 
     // Verify the results
     assertEquals("url", result.getData().get(0).getMetadata().getUrl());
-    assertEquals("100", result.getData().get(0).getVolumeIn24h());
     assertEquals(100, result.getData().get(0).getNumberOfHolders());
+    assertEquals(20, result.getData().get(0).getTxCount());
   }
 
   @Test
   void testFilterToken_WhenQueryNotEmpty() {
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
     // Setup
     when(aggregatedDataCacheService.getTokenCount()).thenReturn(1);
     TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
-    when(tokenProjection.getId()).thenReturn(0L);
+    when(tokenProjection.getUnit()).thenReturn("unit");
     when(tokenProjection.getPolicy()).thenReturn("policy");
 
     when(scriptRepository.findAllByHashIn(List.of("policy")))
@@ -157,9 +155,10 @@ class TokenServiceTest {
 
     final TokenFilterResponse tokenFilterResponse =
         TokenFilterResponse.builder()
-            .id(0L)
+            .unit("unit")
             .name("name")
             .policy("policy")
+            .txCount(20)
             .fingerprint("fingerprint")
             .metadata(
                 TokenMetadataResponse.builder()
@@ -176,15 +175,14 @@ class TokenServiceTest {
 
     final TokenInfo tokenInfo =
         TokenInfo.builder()
-            .multiAssetId(0L)
+            .unit("unit")
             .numberOfHolders(100L)
             .volume24h(new BigInteger("100"))
-            .updateTime(Timestamp.valueOf(LocalDateTime.now()))
+            .updatedSlot(100L)
             .build();
 
     final List<TokenInfo> tokenInfos = List.of(tokenInfo);
-    when(tokenInfoRepository.findTokenInfosByMultiAssetIdIn(anyCollection()))
-        .thenReturn(tokenInfos);
+    when(tokenInfoRepository.findTokenInfosByUnitIn(anyCollection())).thenReturn(tokenInfos);
 
     // Run the test
     final BaseFilterResponse<TokenFilterResponse> result =
@@ -192,8 +190,8 @@ class TokenServiceTest {
 
     // Verify the results
     assertEquals("ticker", result.getData().get(0).getMetadata().getTicker());
-    assertEquals("100", result.getData().get(0).getVolumeIn24h());
     assertEquals(100, result.getData().get(0).getNumberOfHolders());
+    assertEquals(20, result.getData().get(0).getTxCount());
   }
 
   @Test
@@ -214,19 +212,21 @@ class TokenServiceTest {
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
 
+    when(multiAssetRepository.getTokenTxCount(anyString())).thenReturn(Optional.of(15L));
+
+    TokenInfo tokenInfo =
+        TokenInfo.builder()
+            .unit("unit")
+            .totalVolume(BigInteger.TEN)
+            .numberOfHolders(100L)
+            .volume24h(BigInteger.ZERO)
+            .updatedSlot(100L)
+            .build();
+
+    when(tokenInfoRepository.findTokenInfoByUnit(anyString())).thenReturn(Optional.of(tokenInfo));
     // Configure TokenMapper.fromMultiAssetToResponse(...).
     final TokenResponse tokenResponse = new TokenResponse();
     when(tokenMapper.fromMultiAssetToResponse(any())).thenReturn(tokenResponse);
-
-    final TokenInfo tokenInfo =
-        TokenInfo.builder()
-            .multiAssetId(0L)
-            .numberOfHolders(100L)
-            .volume24h(new BigInteger("100"))
-            .updateTime(Timestamp.valueOf(LocalDateTime.now()))
-            .build();
-
-    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
 
     final AssetMetadata metadata =
         AssetMetadata.builder()
@@ -263,15 +263,21 @@ class TokenServiceTest {
 
     // Verify the results
     assertEquals(100, result.getNumberOfHolders());
-    assertEquals("100", result.getVolumeIn24h());
+    assertEquals("0", result.getVolumeIn24h());
     assertEquals(TokenType.NFT, result.getTokenType());
     assertNull(result.getMetadataJson());
     assertEquals(latestTimestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
+    assertEquals(15, result.getTxCount());
   }
 
   @Test
   void testGetTokenDetail_WhenTokenFoundAndMetadataJsonNotContainVersionKeyAndTokenTypeIsNFT() {
+    // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
+
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset =
@@ -293,13 +299,15 @@ class TokenServiceTest {
 
     final TokenInfo tokenInfo =
         TokenInfo.builder()
-            .multiAssetId(0L)
+            .unit("unit")
             .numberOfHolders(100L)
             .volume24h(new BigInteger("100"))
-            .updateTime(Timestamp.valueOf(LocalDateTime.now()))
+            .updatedSlot(cardanoConverters.time().toSlot(LocalDateTime.now()))
             .build();
 
-    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
+    when(multiAssetRepository.getTokenTxCount(anyString())).thenReturn(Optional.of(20L));
+
+    when(tokenInfoRepository.findTokenInfoByUnit(any())).thenReturn(Optional.of(tokenInfo));
 
     final AssetMetadata metadata =
         AssetMetadata.builder()
@@ -314,11 +322,6 @@ class TokenServiceTest {
     final TokenMetadataResponse tokenMetadataResponse =
         new TokenMetadataResponse("url", "ticker", 0, "logo", "description");
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
-
-    // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
-    CardanoConverters cardanoConverters =
-        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
-    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
 
     final long latestEpochTime = 1715133010;
     final LocalDateTime latestEpochDateTime =
@@ -342,10 +345,16 @@ class TokenServiceTest {
     assertEquals(TokenType.NFT, result.getTokenType());
     assertEquals(latestTimestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
+    assertEquals(20, result.getTxCount());
   }
 
   @Test
   void testGetTokenDetail_WhenTokenFoundAndMetadataJsonContainsVersionKeyAndTokenTypeIsNFT() {
+    // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
+    CardanoConverters cardanoConverters =
+        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
+    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
+
     // Setup
     // Configure MultiAssetRepository.findByFingerprint(...).
     final MultiAsset multiAsset =
@@ -367,13 +376,14 @@ class TokenServiceTest {
 
     final TokenInfo tokenInfo =
         TokenInfo.builder()
-            .multiAssetId(0L)
+            .unit("unit")
             .numberOfHolders(100L)
             .volume24h(new BigInteger("100"))
-            .updateTime(Timestamp.valueOf(LocalDateTime.now()))
+            .updatedSlot(cardanoConverters.time().toSlot(LocalDateTime.now()))
             .build();
+    when(multiAssetRepository.getTokenTxCount(anyString())).thenReturn(Optional.of(25L));
 
-    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
+    when(tokenInfoRepository.findTokenInfoByUnit(any())).thenReturn(Optional.of(tokenInfo));
 
     final AssetMetadata metadata =
         AssetMetadata.builder()
@@ -388,11 +398,6 @@ class TokenServiceTest {
     final TokenMetadataResponse tokenMetadataResponse =
         new TokenMetadataResponse("url", "ticker", 0, "logo", "description");
     when(assetMetadataMapper.fromAssetMetadata(metadata)).thenReturn(tokenMetadataResponse);
-
-    // Configure MultiAssetRepository.getLastActivityTimeOfToken(...).
-    CardanoConverters cardanoConverters =
-        ClasspathConversionsFactory.createConverters(NetworkType.MAINNET);
-    ReflectionTestUtils.setField(tokenService, "cardanoConverters", cardanoConverters);
 
     final long latestEpochTime = 1715133010;
     final LocalDateTime latestEpochDateTime =
@@ -416,6 +421,7 @@ class TokenServiceTest {
         result.getMetadataJson());
     assertEquals(latestTimestamp, result.getTokenLastActivity());
     assertEquals(tokenMetadataResponse, result.getMetadata());
+    assertEquals(25, result.getTxCount());
   }
 
   @Test
@@ -468,9 +474,9 @@ class TokenServiceTest {
             .fingerprint("fingerprint")
             .build();
 
-    final TokenInfo tokenInfo = TokenInfo.builder().multiAssetId(0L).numberOfHolders(1L).build();
+    final TokenInfo tokenInfo = TokenInfo.builder().unit("unit").numberOfHolders(1L).build();
 
-    when(tokenInfoRepository.findTokenInfoByMultiAssetId(any())).thenReturn(Optional.of(tokenInfo));
+    when(tokenInfoRepository.findTokenInfoByUnit(any())).thenReturn(Optional.of(tokenInfo));
 
     final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
     when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
