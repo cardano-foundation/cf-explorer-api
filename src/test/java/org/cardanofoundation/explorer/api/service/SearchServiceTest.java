@@ -1,11 +1,13 @@
 package org.cardanofoundation.explorer.api.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -59,6 +61,9 @@ public class SearchServiceTest {
     Integer epochNo = 1;
     Epoch epoch = Epoch.builder().id(1L).no(epochNo).build();
 
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+    when(poolHashRepository.findByPoolNameLike(any(), any())).thenReturn(new PageImpl<>(List.of()));
+
     when(epochRepository.findFirstByNo(epochNo)).thenReturn(Optional.of(epoch));
     var actual = searchService.search(query);
 
@@ -71,6 +76,9 @@ public class SearchServiceTest {
     Long blockNo = 1L;
     Block block = Block.builder().blockNo(blockNo).build();
 
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+    when(poolHashRepository.findByPoolNameLike(any(), any())).thenReturn(new PageImpl<>(List.of()));
+
     when(blockRepository.findFirstByBlockNo(blockNo)).thenReturn(Optional.of(block));
     var actual = searchService.search(query);
 
@@ -82,6 +90,9 @@ public class SearchServiceTest {
     String query = "hash";
     Tx tx = Tx.builder().id(1L).hash(query).build();
 
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+    when(poolHashRepository.findByPoolNameLike(any(), any())).thenReturn(new PageImpl<>(List.of()));
+
     when(txRepository.findByHash(query)).thenReturn(Optional.of(tx));
     var actual = searchService.search(query);
 
@@ -92,6 +103,9 @@ public class SearchServiceTest {
   void testSearch_thenReturnMatchMultiAssets_MatchToken() {
     String query = "token";
     MultiAsset multiAsset = MultiAsset.builder().fingerprint(query).build();
+
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+    when(poolHashRepository.findByPoolNameLike(any(), any())).thenReturn(new PageImpl<>(List.of()));
 
     when(multiAssetRepository.findByFingerprint(query)).thenReturn(Optional.of(multiAsset));
     var actual = searchService.search(query);
@@ -105,6 +119,9 @@ public class SearchServiceTest {
     MultiAsset multiAsset = MultiAsset.builder().nameView(query).fingerprint("fingerprint").build();
     List<MultiAsset> list = List.of(multiAsset);
 
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+    when(poolHashRepository.findByPoolNameLike(any(), any())).thenReturn(new PageImpl<>(List.of()));
+
     when(multiAssetRepository.findByNameViewLike(query, PageRequest.of(0, 2))).thenReturn(list);
     var actual = searchService.search(query);
 
@@ -116,6 +133,9 @@ public class SearchServiceTest {
   @Test
   void testSearch_thenReturnMatchAddress_isStakeAddress() {
     String query = "stakeAddress";
+
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+    when(poolHashRepository.findByPoolNameLike(any(), any())).thenReturn(new PageImpl<>(List.of()));
 
     StakeAddress stakeAddress = StakeAddress.builder().view(query).build();
 
@@ -133,7 +153,7 @@ public class SearchServiceTest {
     when(poolInfoProjection.getPoolView()).thenReturn(query);
 
     when(poolHashRepository.findByPoolNameLike(query, PageRequest.of(0, 2)))
-        .thenReturn(List.of(poolInfoProjection));
+        .thenReturn(new PageImpl<>(List.of(poolInfoProjection)));
 
     var actual = searchService.search(query);
 
@@ -146,11 +166,43 @@ public class SearchServiceTest {
     String query = "query";
     Script script = Script.builder().hash(query).type(ScriptType.PLUTUSV3).build();
 
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+    when(poolHashRepository.findByPoolNameLike(any(), any())).thenReturn(new PageImpl<>(List.of()));
     when(scriptRepository.findByHash(query)).thenReturn(Optional.of(script));
     var actual = searchService.search(query);
 
     Assertions.assertEquals(actual.getScript().getScriptHash(), query);
     Assertions.assertEquals(actual.getScript().isSmartContract(), true);
     Assertions.assertEquals(actual.getScript().isNativeScript(), false);
+  }
+
+  @Test
+  void testSearchLifeCycle_thenReturnAddress() {
+    String query =
+        "addr1q9cp6hfrsvqc0jn9eeskdtk3l7usqaa35lm925f7usqtzhnsr4wj8qcpsl9xtnnpv6hdrlaeqpmmrflk24gnaeqqk90qjgxgeq";
+
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+
+    var actual = searchService.searchForStakingLifecycle(query, PageRequest.of(0, 2));
+    Assertions.assertEquals(actual.getAddress().getAddress(), query);
+    Assertions.assertTrue(actual.getAddress().isPaymentAddress());
+    Assertions.assertFalse(actual.getAddress().isStakeAddress());
+  }
+
+  @Test
+  void testSearchLifeCycle_thenReturnStakeAddress() {
+    String query = "stake1u9cp6hfrsvqc0jn9eeskdtk3l7usqaa35lm925f7usqtzhsy472z0";
+
+    when(poolHashRepository.getPoolInfo(any())).thenReturn(null);
+
+    when(stakeAddressRepository.findByView(any()))
+        .thenReturn(Optional.of(StakeAddress.builder().view(query).build()));
+
+    var actual = searchService.searchForStakingLifecycle(query, PageRequest.of(0, 2));
+
+    Assertions.assertEquals(actual.getAddress().getAddress(), query);
+    Assertions.assertEquals(actual.getAddress().getStakeAddressView(), query);
+    Assertions.assertFalse(actual.getAddress().isPaymentAddress());
+    Assertions.assertTrue(actual.getAddress().isStakeAddress());
   }
 }
