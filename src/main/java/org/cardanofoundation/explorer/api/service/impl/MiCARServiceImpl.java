@@ -18,11 +18,13 @@ import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCal
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.micar.AddressCarbonEmissionResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.service.MiCARService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
+import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressTxCount;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
@@ -44,6 +46,8 @@ public class MiCARServiceImpl implements MiCARService {
   @Value("${application.api.micar.public-key}")
   private String micarPublicKey;
 
+  private final AddressRepository addressRepository;
+
   @Override
   public AddressCarbonEmissionResponse getCarbonEmissionsByAddressAndPool(String address) {
     if (Objects.isNull(address)) {
@@ -56,27 +60,24 @@ public class MiCARServiceImpl implements MiCARService {
       }
       Optional<StakeAddressTxCount> stakeAddressTxCount =
           stakeAddressTxCountRepository.findByStakeAddress(stakeAddress.get().getView());
-      if (stakeAddressTxCount.isEmpty()) {
-        return AddressCarbonEmissionResponse.builder().build();
-      }
       return AddressCarbonEmissionResponse.builder()
           .stakeAddress(address)
-          .txCount(stakeAddressTxCount.get().getTxCount())
+          .txCount(stakeAddressTxCount.orElseGet(StakeAddressTxCount::new).getTxCount())
           .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
           .build();
     } else {
       try {
         AddressUtils.checkStakeAddress(address);
-        Optional<AddressTxCount> addressTxCount = addressTxCountRepository.findByAddress(address);
-        if (addressTxCount.isEmpty()) {
+        Optional<Address> addr = addressRepository.findFirstByAddress(address);
+        if (addr.isEmpty()) {
           return AddressCarbonEmissionResponse.builder().build();
-        } else {
-          return AddressCarbonEmissionResponse.builder()
-              .address(address)
-              .txCount(addressTxCount.get().getTxCount())
-              .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
-              .build();
         }
+        Optional<AddressTxCount> addressTxCount = addressTxCountRepository.findByAddress(address);
+        return AddressCarbonEmissionResponse.builder()
+            .address(address)
+            .txCount(addressTxCount.orElseGet(AddressTxCount::new).getTxCount())
+            .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
+            .build();
       } catch (Exception e) {
         return AddressCarbonEmissionResponse.builder().build();
       }
