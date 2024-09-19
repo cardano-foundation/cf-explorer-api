@@ -184,7 +184,7 @@ public interface PoolHashRepository extends JpaRepository<PoolHash, Long> {
               + "(SELECT max(pod2.id) FROM PoolOfflineData pod2 WHERE ph.id = pod2.pool.id ) "
               + "WHERE LOWER(pod.poolName) LIKE CONCAT('%', :query, '%') OR "
               + "LOWER(pod.tickerName) LIKE CONCAT('%', :query, '%') ")
-  List<PoolInfoProjection> findByPoolNameLike(@Param("query") String query, Pageable pageable);
+  Page<PoolInfoProjection> findByPoolNameLike(@Param("query") String query, Pageable pageable);
 
   @Query(
       value =
