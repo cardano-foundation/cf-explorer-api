@@ -35,7 +35,6 @@ import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
@@ -48,7 +47,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetReposi
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -74,7 +72,6 @@ public class TokenServiceImpl implements TokenService {
   private final MultiAssetRepository multiAssetRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final AssetMetadataRepository assetMetadataRepository;
-  private final LatestTokenBalanceRepository latestTokenBalanceRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final ScriptRepository scriptRepository;
 
@@ -237,30 +234,6 @@ public class TokenServiceImpl implements TokenService {
   public BaseFilterResponse<TokenMintTxResponse> getMintTxs(String tokenId, Pageable pageable) {
     Page<MaTxMint> maTxMints = maTxMintRepository.findByIdent(tokenId, pageable);
     return new BaseFilterResponse<>(maTxMints.map(maTxMintMapper::fromMaTxMintToTokenMintTx));
-  }
-
-  @Override
-  public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
-    MultiAsset multiAsset =
-        multiAssetRepository
-            .findByFingerprint(tokenId)
-            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-
-    long numberOfHolders =
-        tokenInfoRepository
-            .findTokenInfoByUnit(multiAsset.getUnit())
-            .map(TokenInfo::getNumberOfHolders)
-            .orElse(0L);
-
-    List<TokenAddressResponse> tokenAddressResponses =
-        latestTokenBalanceRepository.getTopHolderOfToken(multiAsset.getUnit(), pageable).stream()
-            .map(tokenMapper::fromAddressTokenProjection)
-            .collect(Collectors.toList());
-
-    Page<TokenAddressResponse> tokenAddressResponsePage =
-        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolders);
-
-    return new BaseFilterResponse<>(tokenAddressResponsePage);
   }
 
   @Override
