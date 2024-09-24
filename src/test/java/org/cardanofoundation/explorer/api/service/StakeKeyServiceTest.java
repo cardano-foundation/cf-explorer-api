@@ -32,7 +32,6 @@ import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
 import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
@@ -51,13 +50,11 @@ import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmou
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopStakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.impl.StakeKeyServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopStakeAddressBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,7 +81,6 @@ public class StakeKeyServiceTest {
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
   @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
   @Mock private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
-  @Mock private TopStakeAddressBalanceRepository topStakeAddressBalanceRepository;
 
   @Test
   void testGetDataForStakeKeyRegistration_thenReturn() {
@@ -336,76 +332,6 @@ public class StakeKeyServiceTest {
     assertEquals(response.getData().get(1).getBlockIndex(), 1);
     assertEquals(response.getData().get(0).getBlockNo(), 2L);
     assertEquals(response.getData().get(0).getBlockIndex(), 2);
-  }
-
-  @Test
-  void getTopDelegators_whenRewardDataAvailable_shouldReturnRewardData() {
-    Pageable pageable = PageRequest.of(0, 10);
-    StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
-    when(sap.getStakeAddress()).thenReturn("address");
-    when(sap.getId()).thenReturn(1L);
-    StakeWithdrawalProjection swp = Mockito.mock(StakeWithdrawalProjection.class);
-    when(swp.getStakeAddressId()).thenReturn(1L);
-    when(swp.getAmount()).thenReturn(BigInteger.ONE);
-    StakeRewardProjection srp = Mockito.mock(StakeRewardProjection.class);
-    when(srp.getStakeAddressId()).thenReturn(1L);
-    when(srp.getAmount()).thenReturn(BigInteger.ONE);
-    StakeDelegationProjection sdp = Mockito.mock(StakeDelegationProjection.class);
-    when(sdp.getStakeAddress()).thenReturn("address");
-
-    TopStakeAddressBalance topStakeAddressBalance =
-        TopStakeAddressBalance.builder().address("address").quantity(BigInteger.ONE).build();
-
-    when(fetchRewardDataService.useKoios()).thenReturn(true);
-    when(topStakeAddressBalanceRepository.findAll()).thenReturn(List.of(topStakeAddressBalance));
-
-    when(stakeAddressRepository.findStakeAddressOrderByBalance(any())).thenReturn(List.of(sap));
-    when(fetchRewardDataService.checkRewardAvailable(List.of("address"))).thenReturn(true);
-    when(withdrawalRepository.getRewardWithdrawnByAddrIn(any())).thenReturn(List.of(swp));
-    when(rewardRepository.getTotalRewardByStakeAddressIn(any())).thenReturn(List.of(srp));
-    when(delegationRepository.findPoolDataByAddressIn(Set.of("address"))).thenReturn(List.of(sdp));
-    when(stakeAddressMapper.fromStakeAddressAndDelegationProjection(any(), any()))
-        .thenReturn(StakeFilterResponse.builder().build());
-
-    var response = stakeKeyService.getTopDelegators(pageable);
-    assertEquals(response.getTotalItems(), 1);
-    assertEquals(response.getTotalPages(), 1);
-    assertEquals(response.getCurrentPage(), 0);
-    assertEquals(response.getData().get(0).getBalance(), BigInteger.ONE);
-  }
-
-  @Test
-  void getTopDelegators_whenRewardDataNotAvailable_shouldReturnEmptyRewardData() {
-    Pageable pageable = PageRequest.of(0, 10);
-
-    TopStakeAddressBalance topStakeAddressBalance =
-        TopStakeAddressBalance.builder()
-            .address("stake1ux7n7hxpt43f4au4w3dmwudk9u25yp7xsrvdj0426fs297sys3lyx")
-            .quantity(BigInteger.ONE)
-            .build();
-
-    StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
-
-    when(topStakeAddressBalanceRepository.findAll()).thenReturn(List.of(topStakeAddressBalance));
-    when(stakeAddressRepository.findStakeAddressOrderByBalance(any())).thenReturn(List.of(sap));
-    when(fetchRewardDataService.useKoios()).thenReturn(false);
-
-    var response = stakeKeyService.getTopDelegators(pageable);
-    assertNull(response.getData());
-  }
-
-  @Test
-  void testGetTopDelegators_thenReturnKoiosFetchRewardError() {
-    Pageable pageable = PageRequest.of(0, 10);
-    StakeAddressProjection sap = Mockito.mock(StakeAddressProjection.class);
-    when(sap.getStakeAddress()).thenReturn("address");
-
-    when(stakeAddressRepository.findStakeAddressOrderByBalance(any())).thenReturn(List.of(sap));
-    when(fetchRewardDataService.checkRewardAvailable(List.of("address"))).thenReturn(false);
-    when(fetchRewardDataService.fetchReward(List.of("address"))).thenReturn(false);
-    when(fetchRewardDataService.useKoios()).thenReturn(true);
-
-    assertThrows(FetchRewardException.class, () -> stakeKeyService.getTopDelegators(pageable));
   }
 
   @Test
