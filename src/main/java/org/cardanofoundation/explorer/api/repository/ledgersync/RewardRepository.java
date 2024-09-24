@@ -2,7 +2,6 @@ package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Repository;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.*;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.lifecycle.StakeRewardResponse;
-import org.cardanofoundation.explorer.api.projection.StakeRewardProjection;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Reward;
@@ -142,15 +140,6 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
       Pageable pageable);
 
   Boolean existsByPoolAndType(@Param("pool") PoolHash pool, @Param("type") RewardType type);
-
-  @Query(
-      "SELECT SUM(r.amount) as amount, r.stakeAddressId as stakeAddressId"
-          + " FROM Reward r "
-          + " WHERE r.spendableEpoch <= (SELECT max(no) FROM Epoch)"
-          + " AND r.stakeAddressId IN :stakeAddressIds"
-          + " GROUP BY r.stakeAddressId")
-  List<StakeRewardProjection> getTotalRewardByStakeAddressIn(
-      @Param("stakeAddressIds") Collection<Long> stakeAddressIds);
 
   @Query(
       "SELECT reward.type FROM Reward reward "

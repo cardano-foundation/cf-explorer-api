@@ -36,9 +36,7 @@ import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.interceptor.AuthInterceptor;
 import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenMetadataResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
@@ -143,44 +141,6 @@ class TokenControllerTest {
             .perform(
                 get(
                         "/api/v1/tokens/{tokenId}/mints",
-                        "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
-                    .accept(MediaType.APPLICATION_JSON))
-            .andReturn()
-            .getResponse();
-
-    // Verify the results
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-  }
-
-  @Test
-  void testGetTopHolders() throws Exception {
-    // Setup
-    final TokenMetadataResponse metadataResponse = new TokenMetadataResponse();
-    metadataResponse.setLogo("logo");
-    metadataResponse.setUrl("url");
-    metadataResponse.setDecimals(1000);
-    metadataResponse.setTicker("ticker");
-
-    final BaseFilterResponse<TokenAddressResponse> filterResponse =
-        new BaseFilterResponse<>(
-            new PageImpl<>(
-                List.of(
-                    TokenAddressResponse.builder()
-                        .name("484f534b59")
-                        .displayName("HOSKY")
-                        .address("Ae2tdPwUPEYxA9ADeqSQkY9jAa9PJSTQVczRrVi68PsViqvdsWVLvVMJTQh")
-                        .policy("a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235")
-                        .quantity(BigInteger.valueOf(100L))
-                        .metadata(metadataResponse)
-                        .build())));
-    when(tokenService.getTopHolders(anyString(), any(Pageable.class))).thenReturn(filterResponse);
-
-    // Run the test
-    final MockHttpServletResponse response =
-        mockMvc
-            .perform(
-                get(
-                        "/api/v1/tokens/{tokenId}/top_holders",
                         "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9")
                     .accept(MediaType.APPLICATION_JSON))
             .andReturn()
