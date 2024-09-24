@@ -18,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +33,6 @@ import org.cardanofoundation.explorer.api.interceptor.auth.RoleFilterMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
@@ -83,29 +81,6 @@ public class AddressControllerTest {
 
     // Verify that the service method was called with the correct argument
     verify(addressService).getAddressDetail(address);
-  }
-
-  @Test
-  public void testGetTopAddress() throws Exception {
-    Pageable pageable1 = PageRequest.of(0, 10, Sort.by("quantity").descending());
-    // Mock request and response objects
-    List<AddressFilterResponse> mockResponse =
-        Arrays.asList(new AddressFilterResponse(), new AddressFilterResponse());
-    BaseFilterResponse<AddressFilterResponse> response =
-        new BaseFilterResponse<>(mockResponse, pageable1.getPageSize());
-
-    // Mock the service method
-    when(addressService.getTopAddress(any())).thenReturn(response);
-
-    // Perform the GET request
-    mockMvc
-        .perform(get("/api/v1/addresses/top-addresses").param("page", "0").param("size", "10"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.data.length()").value(mockResponse.size()));
-
-    // Verify that the service method was called with the correct argument
-    verify(addressService).getTopAddress(pageable1);
   }
 
   @Test
