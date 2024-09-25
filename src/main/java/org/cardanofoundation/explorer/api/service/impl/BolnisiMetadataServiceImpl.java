@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.*;
+import org.cardanofoundation.explorer.api.model.response.BolnisiProjectNumberResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.util.CidUtils;
@@ -194,6 +195,17 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
         .filter(certData -> certData.getCertNo().equals(certNo))
         .findFirst()
         .orElse(null);
+  }
+
+  @Override
+  public BolnisiProjectNumberResponse getBolnisiProjectNumber() {
+    BolnisiProjectNumberResponse response = new BolnisiProjectNumberResponse();
+    // Hardcoded values for the number of bottles, wineries, and certificates
+    // TODO
+    response.setNumberOfBottles(BigInteger.valueOf(71683));
+    response.setNumberOfWineries(BigInteger.valueOf(29));
+    response.setNumberOfCertificates(BigInteger.valueOf(1));
+    return response;
   }
 
   /**
