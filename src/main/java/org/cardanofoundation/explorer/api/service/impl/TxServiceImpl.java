@@ -39,8 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import com.bloxbean.cardano.client.api.util.AssetUtil;
 import com.bloxbean.cardano.client.crypto.Blake2bUtil;
-import com.bloxbean.cardano.client.util.AssetUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -262,7 +262,7 @@ public class TxServiceImpl implements TxService {
   @Override
   public BaseFilterResponse<TxFilterResponse> getAll(Pageable pageable) {
     Page<Tx> txPage = txRepository.findAllTx(pageable);
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, true));
   }
 
   @Override
@@ -275,7 +275,7 @@ public class TxServiceImpl implements TxService {
     } catch (NumberFormatException e) {
       txPage = txRepository.findByBlockHash(blockId, pageable);
     }
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, false));
   }
 
   @Override
@@ -434,7 +434,7 @@ public class TxServiceImpl implements TxService {
 
     Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount.getTxCount());
 
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, false));
   }
 
   @Override
@@ -471,7 +471,8 @@ public class TxServiceImpl implements TxService {
    * @param txPage list tx in page
    * @return list tx response
    */
-  private List<TxFilterResponse> mapDataFromTxListToResponseList(Page<Tx> txPage) {
+  private List<TxFilterResponse> mapDataFromTxListToResponseList(
+      Page<Tx> txPage, boolean isGetAllTx) {
     if (CollectionUtils.isEmpty(txPage.getContent())) {
       return new ArrayList<>();
     }
@@ -480,18 +481,24 @@ public class TxServiceImpl implements TxService {
     List<Block> blocks = blockRepository.findAllByIdIn(blockIdList);
     Map<Long, Block> blockMap =
         blocks.stream().collect(Collectors.toMap(Block::getId, Function.identity()));
-    // get addresses input
-    Set<Long> txIdSet = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
-    List<AddressInputOutputProjection> txInList =
-        txOutRepository.findAddressInputListByTxId(txIdSet);
-    Map<Long, List<AddressInputOutputProjection>> addressInMap =
-        txInList.stream().collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
 
-    // get addresses output
-    List<AddressInputOutputProjection> txOutList =
-        txOutRepository.findAddressOutputListByTxId(txIdSet);
-    Map<Long, List<AddressInputOutputProjection>> addressOutMap =
-        txOutList.stream().collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
+    Map<Long, List<AddressInputOutputProjection>> addressInMap = Collections.emptyMap();
+    Map<Long, List<AddressInputOutputProjection>> addressOutMap = Collections.emptyMap();
+
+    if (!isGetAllTx) {
+      // get addresses input
+      Set<Long> txIdSet = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
+      List<AddressInputOutputProjection> txInList =
+          txOutRepository.findAddressInputListByTxId(txIdSet);
+      addressInMap =
+          txInList.stream().collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
+
+      // get addresses output
+      List<AddressInputOutputProjection> txOutList =
+          txOutRepository.findAddressOutputListByTxId(txIdSet);
+      addressOutMap =
+          txOutList.stream().collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
+    }
 
     List<TxFilterResponse> txFilterResponses = new ArrayList<>();
     for (Tx tx : txPage.getContent()) {
@@ -500,21 +507,17 @@ public class TxServiceImpl implements TxService {
         tx.setBlock(blockMap.get(tx.getBlockId()));
       }
       TxFilterResponse txResponse = txMapper.txToTxFilterResponse(tx);
-      if (addressOutMap.containsKey(txId)) {
+      if (!isGetAllTx) {
         txResponse.setAddressesOutput(
-            addressOutMap.get(tx.getId()).stream()
+            addressOutMap.getOrDefault(txId, Collections.emptyList()).stream()
                 .map(AddressInputOutputProjection::getAddress)
                 .collect(Collectors.toList()));
-      } else {
-        txResponse.setAddressesOutput(new ArrayList<>());
-      }
-      if (addressInMap.containsKey(txId)) {
         txResponse.setAddressesInput(
-            addressInMap.get(tx.getId()).stream()
+            addressInMap.getOrDefault(txId, Collections.emptyList()).stream()
                 .map(AddressInputOutputProjection::getAddress)
                 .collect(Collectors.toList()));
       } else {
-        txResponse.setAddressesInput(new ArrayList<>());
+        txResponse.setTotalOutput(null);
       }
       txFilterResponses.add(txResponse);
     }
