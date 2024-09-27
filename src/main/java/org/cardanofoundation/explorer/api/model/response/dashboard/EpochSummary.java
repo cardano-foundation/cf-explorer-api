@@ -1,6 +1,5 @@
 package org.cardanofoundation.explorer.api.model.response.dashboard;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -29,7 +28,6 @@ public class EpochSummary {
   @JsonSerialize(using = JackSonDateTimeSerializer.class)
   private LocalDateTime endTime;
 
-  private BigInteger circulatingSupply;
   private Integer blkCount;
   private Double syncingProgress;
   private EpochStatus status;
