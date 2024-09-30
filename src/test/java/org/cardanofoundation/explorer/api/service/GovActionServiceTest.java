@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -68,6 +67,7 @@ public class GovActionServiceTest {
   @Mock CommitteeRepository committeeRepository;
   @Mock ProtocolParamService protocolParamService;
   @Mock RedisTemplate<String, Integer> redisTemplate;
+  @Mock FetchRewardDataService fetchRewardDataService;
 
   @Mock ValueOperations valueOperations;
 
@@ -470,13 +470,15 @@ public class GovActionServiceTest {
     when(latestVotingProcedureProjection1.getVote()).thenReturn(Vote.NO);
 
     when(delegationRepository.getStakeAddressDelegatorsByPoolIds(any()))
-        .thenReturn(Set.of("view1", "view2", "view3"));
+        .thenReturn(List.of("view1", "view2", "view3"));
     when(stakeAddressBalanceRepository.sumBalanceByStakeAddressIn(any()))
         .thenReturn(BigInteger.valueOf(110));
 
     when(latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
             any(), any(), any(), any()))
         .thenReturn(List.of(latestVotingProcedureProjection, latestVotingProcedureProjection1));
+
+    when(fetchRewardDataService.useKoios()).thenReturn(false);
 
     var actual =
         governanceActionService.getVotingChartByGovActionTxHashAndIndex(txHash, index, voterType);
