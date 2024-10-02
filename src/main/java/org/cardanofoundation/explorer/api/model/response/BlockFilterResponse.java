@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.model.response;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 import lombok.Getter;
@@ -22,12 +21,6 @@ public class BlockFilterResponse implements Serializable {
   private String hash;
 
   private LocalDateTime time;
-
-  private Long txCount;
-
-  private BigInteger totalFees;
-
-  private BigInteger totalOutput;
 
   private String slotLeader;
 }
