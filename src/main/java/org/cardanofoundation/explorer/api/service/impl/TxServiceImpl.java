@@ -262,7 +262,7 @@ public class TxServiceImpl implements TxService {
   @Override
   public BaseFilterResponse<TxFilterResponse> getAll(Pageable pageable) {
     Page<Tx> txPage = txRepository.findAllTx(pageable);
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, true));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   @Override
@@ -275,7 +275,7 @@ public class TxServiceImpl implements TxService {
     } catch (NumberFormatException e) {
       txPage = txRepository.findByBlockHash(blockId, pageable);
     }
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, false));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   @Override
@@ -365,7 +365,6 @@ public class TxServiceImpl implements TxService {
           txFilterResponse.setEpochSlotNo(block.getEpochSlotNo());
           txFilterResponse.setFee(tx.getFee());
           txFilterResponse.setBalance(balance);
-          txFilterResponse.setTotalOutput(tx.getOutSum());
           txFilterResponse.setTokens(
               getTokenQuantityChangeResponse(
                   tokenQuantityChange, unitMultiAssetMap, fingerprintAssetMetadataMap));
@@ -434,7 +433,7 @@ public class TxServiceImpl implements TxService {
 
     Page<Tx> txPage = new PageImpl<>(txs, pageable, tokenTxCount.getTxCount());
 
-    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage, false));
+    return new BaseFilterResponse<>(txPage, mapDataFromTxListToResponseList(txPage));
   }
 
   @Override
@@ -471,8 +470,7 @@ public class TxServiceImpl implements TxService {
    * @param txPage list tx in page
    * @return list tx response
    */
-  private List<TxFilterResponse> mapDataFromTxListToResponseList(
-      Page<Tx> txPage, boolean isGetAllTx) {
+  private List<TxFilterResponse> mapDataFromTxListToResponseList(Page<Tx> txPage) {
     if (CollectionUtils.isEmpty(txPage.getContent())) {
       return new ArrayList<>();
     }
@@ -482,46 +480,10 @@ public class TxServiceImpl implements TxService {
     Map<Long, Block> blockMap =
         blocks.stream().collect(Collectors.toMap(Block::getId, Function.identity()));
 
-    Map<Long, List<AddressInputOutputProjection>> addressInMap = Collections.emptyMap();
-    Map<Long, List<AddressInputOutputProjection>> addressOutMap = Collections.emptyMap();
-
-    if (!isGetAllTx) {
-      // get addresses input
-      Set<Long> txIdSet = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
-      List<AddressInputOutputProjection> txInList =
-          txOutRepository.findAddressInputListByTxId(txIdSet);
-      addressInMap =
-          txInList.stream().collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
-
-      // get addresses output
-      List<AddressInputOutputProjection> txOutList =
-          txOutRepository.findAddressOutputListByTxId(txIdSet);
-      addressOutMap =
-          txOutList.stream().collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
-    }
-
-    List<TxFilterResponse> txFilterResponses = new ArrayList<>();
-    for (Tx tx : txPage.getContent()) {
-      Long txId = tx.getId();
-      if (blockMap.containsKey(tx.getBlockId())) {
-        tx.setBlock(blockMap.get(tx.getBlockId()));
-      }
-      TxFilterResponse txResponse = txMapper.txToTxFilterResponse(tx);
-      if (!isGetAllTx) {
-        txResponse.setAddressesOutput(
-            addressOutMap.getOrDefault(txId, Collections.emptyList()).stream()
-                .map(AddressInputOutputProjection::getAddress)
-                .collect(Collectors.toList()));
-        txResponse.setAddressesInput(
-            addressInMap.getOrDefault(txId, Collections.emptyList()).stream()
-                .map(AddressInputOutputProjection::getAddress)
-                .collect(Collectors.toList()));
-      } else {
-        txResponse.setTotalOutput(null);
-      }
-      txFilterResponses.add(txResponse);
-    }
-    return txFilterResponses;
+    return txPage.getContent().stream()
+        .peek(tx -> tx.setBlock(blockMap.get(tx.getBlockId())))
+        .map(txMapper::txToTxFilterResponse)
+        .collect(Collectors.toList());
   }
 
   private Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset(
