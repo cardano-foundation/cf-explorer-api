@@ -60,7 +60,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.service.impl.TxServiceImpl;
-import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.TxIOProjectionImpl;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
