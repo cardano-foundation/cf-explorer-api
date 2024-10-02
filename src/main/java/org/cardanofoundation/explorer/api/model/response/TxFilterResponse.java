@@ -24,10 +24,7 @@ public class TxFilterResponse implements Serializable {
   private Integer epochSlotNo;
   private Integer slot;
   private LocalDateTime time;
-  private List<String> addressesInput;
-  private List<String> addressesOutput;
   private BigInteger fee;
-  private BigInteger totalOutput;
   private BigInteger balance;
   private List<TokenAddressResponse> tokens = new ArrayList<>();
 }
