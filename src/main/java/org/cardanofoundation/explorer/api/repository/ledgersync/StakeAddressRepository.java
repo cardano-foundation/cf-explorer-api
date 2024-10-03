@@ -11,23 +11,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 
 public interface StakeAddressRepository extends JpaRepository<StakeAddress, Long> {
 
   Optional<StakeAddress> findByView(@Param("aLong") String aLong);
-
-  @Query(
-      value =
-          "SELECT sa.id as id, sa.view as stakeAddress"
-              + " FROM StakeAddress sa"
-              + " WHERE sa.view IN :stakeAddresses "
-              + " AND EXISTS (SELECT d FROM Delegation d WHERE d.address = sa)"
-              + " AND (SELECT max(sr.txId) FROM StakeRegistration sr WHERE sr.addr = sa) >"
-              + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = sa)")
-  List<StakeAddressProjection> findStakeAddressOrderByBalance(
-      @Param("stakeAddresses") Collection<String> stakeAddresses);
 
   @Query(
       value =
