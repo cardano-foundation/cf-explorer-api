@@ -22,7 +22,6 @@ import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
-import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.StakeAnalyticResponse;
 import org.cardanofoundation.explorer.api.model.response.address.*;
@@ -45,18 +44,15 @@ import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmou
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeTxBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopStakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DateUtils;
-import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.RewardType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeDeregistration;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeRegistration;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressBalance;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopStakeAddressBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -77,7 +73,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final TreasuryRepository treasuryRepository;
   private final ReserveRepository reserveRepository;
   private final PoolUpdateRepository poolUpdateRepository;
-  private final StakeAddressMapper stakeAddressMapper;
   private final EpochRepository epochRepository;
   private final TxRepository txRepository;
   private final StakeTxBalanceRepository stakeTxBalanceRepository;
@@ -88,7 +83,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
-  private final TopStakeAddressBalanceRepository topStakeAddressBalanceRepository;
   private final CardanoConverters cardanoConverters;
 
   @Override
@@ -295,74 +289,6 @@ public class StakeKeyServiceImpl implements StakeKeyService {
         new PageImpl<>(
             instantaneousRewards.subList(start, end), pageable, instantaneousRewards.size());
     return new BaseFilterResponse<>(page);
-  }
-
-  @Override
-  public BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable) {
-    List<TopStakeAddressBalance> latestStakeAddressBalances =
-        topStakeAddressBalanceRepository.findAll();
-
-    Map<String, BigInteger> stakeAddressBalanceMap =
-        StreamUtil.toMap(
-            latestStakeAddressBalances,
-            TopStakeAddressBalance::getAddress,
-            TopStakeAddressBalance::getQuantity);
-
-    var stakeAddressDelegatorList =
-        stakeAddressRepository.findStakeAddressOrderByBalance(stakeAddressBalanceMap.keySet());
-
-    Set<String> stakeAddressDelegatorSet =
-        StreamUtil.mapApplySet(stakeAddressDelegatorList, StakeAddressProjection::getStakeAddress);
-
-    if (!fetchRewardDataService.useKoios()) {
-      return new BaseFilterResponse<>();
-    }
-
-    if (!fetchRewardDataService.checkRewardAvailable(stakeAddressDelegatorSet.stream().toList())) {
-      boolean fetchRewardResponse =
-          fetchRewardDataService.fetchReward(stakeAddressDelegatorSet.stream().toList());
-      if (!fetchRewardResponse) {
-        throw new FetchRewardException(BusinessCode.FETCH_REWARD_ERROR);
-      }
-    }
-    var stakeIdList =
-        StreamUtil.mapApplySet(stakeAddressDelegatorList, StakeAddressProjection::getId);
-    var stakeWithdrawals = withdrawalRepository.getRewardWithdrawnByAddrIn(stakeIdList);
-    var mapStakeWithdrawnByStakeId =
-        StreamUtil.toMap(
-            stakeWithdrawals,
-            StakeWithdrawalProjection::getStakeAddressId,
-            StakeWithdrawalProjection::getAmount);
-    var stakeTotalRewards = rewardRepository.getTotalRewardByStakeAddressIn(stakeIdList);
-    var mapStakeAvailableRewardsByStakeId =
-        StreamUtil.toMap(
-            stakeTotalRewards,
-            StakeRewardProjection::getStakeAddressId,
-            StakeRewardProjection::getAmount);
-    var poolData = delegationRepository.findPoolDataByAddressIn(stakeAddressDelegatorSet);
-    var mapPoolByStakeAddress =
-        StreamUtil.toMap(poolData, StakeDelegationProjection::getStakeAddress);
-
-    List<StakeFilterResponse> content = new ArrayList<>();
-    for (var stake : stakeAddressDelegatorList) {
-      StakeDelegationProjection delegation = mapPoolByStakeAddress.get(stake.getStakeAddress());
-      StakeFilterResponse stakeResponse =
-          stakeAddressMapper.fromStakeAddressAndDelegationProjection(stake, delegation);
-      stakeResponse.setPoolName(delegation.getPoolData());
-      var stakeWithdrawn = mapStakeWithdrawnByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
-      var stakeTotalReward =
-          mapStakeAvailableRewardsByStakeId.getOrDefault(stake.getId(), BigInteger.ZERO);
-      var availableReward = stakeTotalReward.subtract(stakeWithdrawn);
-      var stakeBalance =
-          stakeAddressBalanceMap.getOrDefault(stake.getStakeAddress(), BigInteger.ZERO);
-      if (availableReward.compareTo(BigInteger.ZERO) < 0) {
-        availableReward = BigInteger.ZERO;
-      }
-      stakeResponse.setBalance(stakeBalance.add(availableReward));
-      content.add(stakeResponse);
-    }
-    content.sort(Comparator.comparing(StakeFilterResponse::getBalance).reversed());
-    return new BaseFilterResponse<>(BaseFilterResponse.getPageImpl(content, pageable));
   }
 
   @Override

@@ -12,7 +12,6 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressFilterRe
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
@@ -87,14 +86,6 @@ public interface StakeKeyService {
    */
   BaseFilterResponse<StakeInstantaneousRewardsProjection> getInstantaneousRewards(
       String stakeKey, Pageable pageable);
-
-  /**
-   * Get top delegators
-   *
-   * @param pageable page information
-   * @return return list active stake address sort by balance
-   */
-  BaseFilterResponse<StakeFilterResponse> getTopDelegators(Pageable pageable);
 
   /**
    * Get all address of stake key
