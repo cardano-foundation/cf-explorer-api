@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.model.response.PotsOverviewResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.PotsService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AdaPots;
 
@@ -25,6 +27,8 @@ public class PotsServiceImpl implements PotsService {
 
   private final AdaPotsRepository adaPotsRepository;
 
+  private final FetchRewardDataService fetchRewardDataService;
+
   @Override
   public PotsOverviewResponse getPotsOverview() {
     Optional<Integer> currentEpoch = epochRepository.findCurrentEpochNo();
@@ -32,6 +36,11 @@ public class PotsServiceImpl implements PotsService {
     if (currentEpoch.isEmpty()) {
       log.info("Current epoch is empty");
       return PotsOverviewResponse.builder().epoch(null).build();
+    }
+    Integer currentEpochValue = currentEpoch.get();
+    boolean useKoiOs = fetchRewardDataService.useKoios();
+    if (useKoiOs && !fetchRewardDataService.checkAdaPots(currentEpochValue)) {
+      fetchRewardDataService.fetchAdaPots(List.of(currentEpochValue));
     }
     AdaPots adaPots = adaPotsRepository.findByEpochNo(currentEpoch.get());
     if (Objects.isNull(adaPots)) {
