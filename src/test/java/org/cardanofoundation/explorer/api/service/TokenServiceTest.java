@@ -40,21 +40,16 @@ import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
 import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
-import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
@@ -70,8 +65,6 @@ class TokenServiceTest {
   @Mock private MultiAssetRepository multiAssetRepository;
   @Mock private MaTxMintRepository maTxMintRepository;
   @Mock private AssetMetadataRepository assetMetadataRepository;
-  @Mock private LatestTokenBalanceRepository latestTokenBalanceRepository;
-  @Mock private AddressRepository addressRepository;
   @Mock private AddressTxAmountRepository addressTxAmountRepository;
   @Mock private TokenInfoRepository tokenInfoRepository;
   @Mock private TokenMapper tokenMapper;
@@ -79,7 +72,6 @@ class TokenServiceTest {
   @Mock private AssetMetadataMapper assetMetadataMapper;
   @Mock private AggregateAddressTokenRepository aggregateAddressTokenRepository;
 
-  @Mock private StakeAddressRepository stakeAddressRepository;
   @Mock private AggregatedDataCacheService aggregatedDataCacheService;
   @Mock private ScriptRepository scriptRepository;
 
@@ -458,55 +450,6 @@ class TokenServiceTest {
 
     // Verify the results
     assertEquals(tokenMintTxResponse, result.getData().get(0));
-  }
-
-  @Test
-  void testGetTopHolders_WhenTokenFound() {
-    // Setup
-    // Configure MultiAssetRepository.findByFingerprint(...).
-    final MultiAsset multiAsset =
-        MultiAsset.builder()
-            .id(0L)
-            .policy("policy")
-            .name("name")
-            .nameView("nameView")
-            .unit("unit")
-            .fingerprint("fingerprint")
-            .build();
-
-    final TokenInfo tokenInfo = TokenInfo.builder().unit("unit").numberOfHolders(1L).build();
-
-    when(tokenInfoRepository.findTokenInfoByUnit(any())).thenReturn(Optional.of(tokenInfo));
-
-    final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
-    when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-
-    final TokenAddressResponse tokenAddressResponse =
-        TokenAddressResponse.builder().address("address").quantity(BigInteger.TEN).build();
-
-    when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
-        .thenReturn(tokenAddressResponse);
-
-    when(latestTokenBalanceRepository.getTopHolderOfToken(anyString(), any(Pageable.class)))
-        .thenReturn(
-            List.of(
-                AddressTokenProjectionImpl.builder()
-                    .address("address")
-                    .quantity(BigInteger.TEN)
-                    .build()));
-
-    var response = tokenService.getTopHolders("tokenId", PageRequest.of(0, 1));
-
-    assertEquals(1, response.getTotalItems());
-    assertEquals("address", response.getData().get(0).getAddress());
-    assertEquals(BigInteger.TEN, response.getData().get(0).getQuantity());
-  }
-
-  @Test
-  void testGetTopHolders_WhenTokenNotFound() {
-    when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(Optional.empty());
-    assertThrows(
-        BusinessException.class, () -> tokenService.getTopHolders("tokenId", PageRequest.of(0, 1)));
   }
 
   @Test

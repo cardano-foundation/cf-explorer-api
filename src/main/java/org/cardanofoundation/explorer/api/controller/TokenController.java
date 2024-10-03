@@ -27,7 +27,6 @@ import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.BaseEntity_;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance_;
 import org.cardanofoundation.explorer.common.validation.length.LengthValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
@@ -81,25 +80,6 @@ public class TokenController {
           @Valid
           Pagination pagination) {
     return ResponseEntity.ok(tokenService.getMintTxs(tokenId, pagination.toPageable()));
-  }
-
-  @GetMapping("/{tokenId}/top_holders")
-  @LogMessage
-  @Operation(summary = "Filter holders by token")
-  public ResponseEntity<BaseFilterResponse<TokenAddressResponse>> getTopHolders(
-      @PathVariable
-          @PrefixedValid(CommonConstant.PREFIXED_TOKEN_FINGERPRINT)
-          @LengthValid(CommonConstant.TOKEN_FINGERPRINT_LENGTH)
-          @Parameter(description = "The CIP14 fingerprint for the MultiAsset.")
-          String tokenId,
-      @ParameterObject
-          @PaginationValid
-          @PaginationDefault(
-              sort = {LatestTokenBalance_.QUANTITY},
-              direction = Sort.Direction.DESC)
-          @Valid
-          Pagination pagination) {
-    return ResponseEntity.ok(tokenService.getTopHolders(tokenId, pagination.toPageable()));
   }
 
   @GetMapping("/{tokenId}/txs")
