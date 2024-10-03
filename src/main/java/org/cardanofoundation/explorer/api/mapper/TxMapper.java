@@ -19,7 +19,6 @@ public interface TxMapper {
   @Mapping(target = "blockNo", source = "block.blockNo")
   @Mapping(target = "blockHash", source = "block.hash")
   @Mapping(target = "time", source = "block.time")
-  @Mapping(target = "totalOutput", source = "outSum")
   TxFilterResponse txToTxFilterResponse(Tx tx);
 
   @Mapping(target = "tx.hash", source = "hash")
@@ -29,7 +28,6 @@ public interface TxMapper {
   @Mapping(target = "tx.epochNo", source = "block.epochNo")
   @Mapping(target = "tx.time", source = "block.time")
   @Mapping(target = "tx.fee", source = "fee")
-  @Mapping(target = "tx.totalOutput", source = "outSum")
   @Mapping(target = "tx.slotNo", source = "block.slotNo")
   TxResponse txToTxResponse(Tx tx);
 
