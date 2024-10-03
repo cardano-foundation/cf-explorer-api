@@ -2,8 +2,6 @@ package org.cardanofoundation.explorer.api.service;
 
 import static org.mockito.Mockito.when;
 
-import java.math.BigInteger;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,13 +30,7 @@ class WebSocketServiceTest {
   @Test
   void getCurrentBlockInfoMessage_shouldReturnResponse() {
     Block blockPrepared = Block.builder().blockNo(1L).hash("hash").txCount(100L).build();
-    EpochSummary epochSummaryPrepared =
-        EpochSummary.builder()
-            .no(1)
-            .totalSlot(100)
-            .slot(1)
-            .circulatingSupply(BigInteger.TEN)
-            .build();
+    EpochSummary epochSummaryPrepared = EpochSummary.builder().no(1).totalSlot(100).slot(1).build();
 
     BlockSyncInfo blockSyncInfo =
         BlockSyncInfo.builder()
@@ -65,13 +57,7 @@ class WebSocketServiceTest {
   void getBatchBlockInfoMessage_shouldReturnResponse() {
     BlockSyncMessage blockSyncMessage =
         BlockSyncMessage.builder().lastBlockNo(1L).hasTx(true).lastBlockHash("hash").build();
-    EpochSummary epochSummaryPrepared =
-        EpochSummary.builder()
-            .no(1)
-            .totalSlot(100)
-            .slot(1)
-            .circulatingSupply(BigInteger.TEN)
-            .build();
+    EpochSummary epochSummaryPrepared = EpochSummary.builder().no(1).totalSlot(100).slot(1).build();
     BlockSyncInfo blockSyncInfo =
         BlockSyncInfo.builder()
             .blockNo(blockSyncMessage.getLastBlockNo())
