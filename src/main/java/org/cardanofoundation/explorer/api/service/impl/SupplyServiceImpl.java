@@ -1,6 +1,7 @@
 package org.cardanofoundation.explorer.api.service.impl;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
+import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.SupplyService;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AdaPots;
 
@@ -23,6 +25,8 @@ public class SupplyServiceImpl implements SupplyService {
   private final AdaPotsRepository adaPotsRepository;
 
   private final EpochRepository epochRepository;
+
+  private final FetchRewardDataService fetchRewardDataService;
 
   public Long getSupplyCirculating() {
 
@@ -58,6 +62,11 @@ public class SupplyServiceImpl implements SupplyService {
     if (currentEpoch.isEmpty()) {
       log.info("Current epoch is empty");
       return AdaPots.builder().build();
+    }
+    Integer currentEpochValue = currentEpoch.get();
+    boolean useKoiOs = fetchRewardDataService.useKoios();
+    if (useKoiOs && !fetchRewardDataService.checkAdaPots(currentEpochValue)) {
+      fetchRewardDataService.fetchAdaPots(List.of(currentEpochValue));
     }
     return adaPotsRepository.findByEpochNo(currentEpoch.get());
   }

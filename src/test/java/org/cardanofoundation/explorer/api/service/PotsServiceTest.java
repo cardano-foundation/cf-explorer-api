@@ -26,6 +26,8 @@ public class PotsServiceTest {
 
   @Mock private AdaPotsRepository adaPotsRepository;
 
+  @Mock private FetchRewardDataService fetchRewardDataService;
+
   @InjectMocks private PotsServiceImpl potsService;
 
   @Test
@@ -48,7 +50,8 @@ public class PotsServiceTest {
     int currentEpoch = 200;
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(currentEpoch));
     when(adaPotsRepository.findByEpochNo(currentEpoch)).thenReturn(null);
-
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.fetchAdaPots(anyList())).thenReturn(true);
     // Act
     PotsOverviewResponse response = potsService.getPotsOverview();
 
@@ -72,6 +75,8 @@ public class PotsServiceTest {
 
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(currentEpoch));
     when(adaPotsRepository.findByEpochNo(currentEpoch)).thenReturn(adaPots);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.fetchAdaPots(anyList())).thenReturn(true);
 
     // Act
     PotsOverviewResponse response = potsService.getPotsOverview();
