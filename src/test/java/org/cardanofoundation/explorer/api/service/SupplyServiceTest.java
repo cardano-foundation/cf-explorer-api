@@ -25,6 +25,8 @@ public class SupplyServiceTest {
 
   @Mock private EpochRepository epochRepository;
 
+  @Mock private FetchRewardDataService fetchRewardDataService;
+
   @InjectMocks private SupplyServiceImpl supplyService;
 
   @Test
@@ -48,6 +50,8 @@ public class SupplyServiceTest {
     AdaPots adaPots = AdaPots.builder().epochNo(currentEpoch).reserves(null).treasury(null).build();
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(currentEpoch));
     when(adaPotsRepository.findByEpochNo(currentEpoch)).thenReturn(adaPots);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.fetchAdaPots(anyList())).thenReturn(true);
 
     // Act
     Long circulatingSupply = supplyService.getSupplyCirculating();
@@ -69,6 +73,8 @@ public class SupplyServiceTest {
 
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(currentEpoch));
     when(adaPotsRepository.findByEpochNo(currentEpoch)).thenReturn(adaPots);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.fetchAdaPots(anyList())).thenReturn(true);
 
     BigInteger expectedCirculatingSupply =
         CommonConstant.TOTAL_ADA
@@ -106,6 +112,8 @@ public class SupplyServiceTest {
     AdaPots adaPots = AdaPots.builder().epochNo(currentEpoch).reserves(null).build();
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(currentEpoch));
     when(adaPotsRepository.findByEpochNo(currentEpoch)).thenReturn(adaPots);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.fetchAdaPots(anyList())).thenReturn(true);
 
     // Act
     Long supplyTotal = supplyService.getSupplyTotal();
@@ -125,6 +133,8 @@ public class SupplyServiceTest {
 
     when(epochRepository.findCurrentEpochNo()).thenReturn(Optional.of(currentEpoch));
     when(adaPotsRepository.findByEpochNo(currentEpoch)).thenReturn(adaPots);
+    when(fetchRewardDataService.useKoios()).thenReturn(true);
+    when(fetchRewardDataService.fetchAdaPots(anyList())).thenReturn(true);
 
     BigInteger expectedSupplyTotal =
         CommonConstant.TOTAL_ADA
