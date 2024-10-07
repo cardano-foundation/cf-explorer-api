@@ -16,6 +16,7 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.DRepInfo;
 @Mapper(componentModel = "spring")
 public interface DRepMapper {
   @Mapping(target = "createdAt", expression = "java(fromLong(dRepInfo.getCreatedAt()))")
+  @Mapping(target = "votingParticipation", source = "govParticipationRate")
   DRepDetailsResponse fromDrepInfo(DRepInfo dRepInfo);
 
   @Mapping(
