@@ -36,8 +36,6 @@ import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationVoteRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.service.impl.DRepServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepActionType;
@@ -51,8 +49,6 @@ public class DRepServiceTest {
   @Mock DRepRegistrationRepository dRepRegistrationRepository;
   @Mock DrepInfoRepository drepInfoRepository;
   @Mock VotingProcedureRepository votingProcedureRepository;
-  @Mock LatestVotingProcedureRepository latestVotingProcedureRepository;
-  @Mock GovernanceActionRepository governanceActionRepository;
   @Mock EpochService epochService;
   @Mock DelegationVoteRepository delegationVoteRepository;
   @InjectMocks DRepServiceImpl dRepCertificateService;
@@ -112,9 +108,6 @@ public class DRepServiceTest {
             .createdAt(1000L)
             .build();
     when(drepInfoRepository.findByDRepHashOrDRepId(drepHash)).thenReturn(Optional.of(dRepInfo));
-    when(governanceActionRepository.countGovActionThatAllowedToVoteByBlockTimeGreaterThan(
-            dRepInfo.getCreatedAt()))
-        .thenReturn(0L);
 
     var actual = dRepCertificateService.getDRepDetails(drepHash);
 

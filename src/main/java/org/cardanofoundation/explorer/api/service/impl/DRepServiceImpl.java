@@ -41,8 +41,6 @@ import org.cardanofoundation.explorer.api.projection.VotingProcedureProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DRepRegistrationRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationVoteRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.GovernanceActionRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.LatestVotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.VotingProcedureRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.DRepService;
@@ -67,8 +65,6 @@ public class DRepServiceImpl implements DRepService {
   private final DrepInfoRepository drepInfoRepository;
   private final DelegationVoteRepository delegationVoteRepository;
   private final FetchRewardDataService fetchRewardDataService;
-  private final LatestVotingProcedureRepository latestVotingProcedureRepository;
-  private final GovernanceActionRepository governanceActionRepository;
   private final DRepMapper dRepMapper;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
 
@@ -156,19 +152,7 @@ public class DRepServiceImpl implements DRepService {
         drepInfoRepository
             .findByDRepHashOrDRepId(dRepHashOrDRepId)
             .orElseThrow(() -> new BusinessException(BusinessCode.DREP_NOT_FOUND));
-    DRepDetailsResponse response = dRepMapper.fromDrepInfo(dRepInfo);
-    Long createdAtOfDRep = dRepInfo.getCreatedAt();
-    Long count =
-        latestVotingProcedureRepository.countVoteByVoterHash(
-            dRepInfo.getDrepHash(), createdAtOfDRep);
-    Long totalGovActionAllowedToVote =
-        governanceActionRepository.countGovActionThatAllowedToVoteByBlockTimeGreaterThan(
-            createdAtOfDRep);
-    response.setVotingParticipation(
-        totalGovActionAllowedToVote == 0
-            ? null
-            : (float) (count * 1.0 / totalGovActionAllowedToVote));
-    return response;
+    return dRepMapper.fromDrepInfo(dRepInfo);
   }
 
   @Override
