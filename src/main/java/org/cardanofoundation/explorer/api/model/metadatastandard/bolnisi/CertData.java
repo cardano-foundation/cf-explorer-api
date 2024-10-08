@@ -13,12 +13,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetadataBolnisi {
-  private String cid;
-  private String tag;
-  private boolean isCidVerified;
+public class CertData {
+  private List<CertDetailsData> certs;
+  private boolean isPKeyVerified;
   private boolean isExternalApiAvailable;
-  private List<WineryData> wineryData;
-  private CertData certData;
-  @JsonIgnore private boolean isOnChainMetadataValid;
+  @JsonIgnore private String publicKey;
+  @JsonIgnore private String header;
 }

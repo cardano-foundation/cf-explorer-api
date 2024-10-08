@@ -122,6 +122,11 @@ application:
   api.news:
     interval-time: ${API_NEWS_CACHE_TIME:120}
     base-url: ${API_NEWS_URL}
+  api.micar:
+    public-key: ${API_MICAR_KEY:zy5ZrBDZpv420Oi3WIPwXP}
+    overview: ${API_MICAR_OVERVIEW:https://v2.api.carbon-ratings.com/mica/overview/ada?responseType=recent&key={publicKey}}
+    historical: ${API_MICAR_HISTORICAL:https://v2.api.carbon-ratings.com/currencies/ada/emissions/network?key={publicKey}}
+
   api:
     check-reward:
       base-url: ${API_CHECK_REWARD_URL:http://localhost:8888/api/v1/rewards/fetch}
@@ -141,7 +146,10 @@ application:
     inserted-time-threshold: ${INSERTED_TIME_THRESHOLD_IN_SECOND:2400}
   api.bolnisi:
     off-chain: ${API_BOLNISI_OFFCHAIN_URL:https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/{cid}}
-    public-key: ${API_BOLNISI_PUBLIC_KEY_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
+    public-key:
+      primary: ${API_BOLNISI_PUBLIC_KEY_PRIMARY_URL:https://cardano.mepa.gov.ge/api/v1/publickeys/winery/{wineryId}/v/0}
+      fallback: ${API_BOLNISI_PUBLIC_KEY_FALLBACK_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
+      conformity-cert: ${API_BOLNISI_PUBLIC_KEY_CONFORMITY_CERT_URL:https://cardano.mepa.gov.ge/api/v1/publickeys/nwa/v/0}
 
 springdoc:
   api-docs.path: /apidocs

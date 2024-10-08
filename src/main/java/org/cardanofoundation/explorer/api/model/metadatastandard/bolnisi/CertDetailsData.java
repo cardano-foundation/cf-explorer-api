@@ -1,7 +1,5 @@
 package org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,12 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetadataBolnisi {
-  private String cid;
-  private String tag;
-  private boolean isCidVerified;
-  private boolean isExternalApiAvailable;
-  private List<WineryData> wineryData;
-  private CertData certData;
-  @JsonIgnore private boolean isOnChainMetadataValid;
+public class CertDetailsData {
+  private String signature;
+  private Object offChainData;
+  private boolean isSignatureVerified;
+  @JsonIgnore private String certNo;
 }
