@@ -39,8 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import com.bloxbean.cardano.client.api.util.AssetUtil;
 import com.bloxbean.cardano.client.crypto.Blake2bUtil;
-import com.bloxbean.cardano.client.util.AssetUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -365,7 +365,6 @@ public class TxServiceImpl implements TxService {
           txFilterResponse.setEpochSlotNo(block.getEpochSlotNo());
           txFilterResponse.setFee(tx.getFee());
           txFilterResponse.setBalance(balance);
-          txFilterResponse.setTotalOutput(tx.getOutSum());
           txFilterResponse.setTokens(
               getTokenQuantityChangeResponse(
                   tokenQuantityChange, unitMultiAssetMap, fingerprintAssetMetadataMap));
@@ -480,45 +479,11 @@ public class TxServiceImpl implements TxService {
     List<Block> blocks = blockRepository.findAllByIdIn(blockIdList);
     Map<Long, Block> blockMap =
         blocks.stream().collect(Collectors.toMap(Block::getId, Function.identity()));
-    // get addresses input
-    Set<Long> txIdSet = txPage.getContent().stream().map(Tx::getId).collect(Collectors.toSet());
-    List<AddressInputOutputProjection> txInList =
-        txOutRepository.findAddressInputListByTxId(txIdSet);
-    Map<Long, List<AddressInputOutputProjection>> addressInMap =
-        txInList.stream().collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
 
-    // get addresses output
-    List<AddressInputOutputProjection> txOutList =
-        txOutRepository.findAddressOutputListByTxId(txIdSet);
-    Map<Long, List<AddressInputOutputProjection>> addressOutMap =
-        txOutList.stream().collect(Collectors.groupingBy(AddressInputOutputProjection::getTxId));
-
-    List<TxFilterResponse> txFilterResponses = new ArrayList<>();
-    for (Tx tx : txPage.getContent()) {
-      Long txId = tx.getId();
-      if (blockMap.containsKey(tx.getBlockId())) {
-        tx.setBlock(blockMap.get(tx.getBlockId()));
-      }
-      TxFilterResponse txResponse = txMapper.txToTxFilterResponse(tx);
-      if (addressOutMap.containsKey(txId)) {
-        txResponse.setAddressesOutput(
-            addressOutMap.get(tx.getId()).stream()
-                .map(AddressInputOutputProjection::getAddress)
-                .collect(Collectors.toList()));
-      } else {
-        txResponse.setAddressesOutput(new ArrayList<>());
-      }
-      if (addressInMap.containsKey(txId)) {
-        txResponse.setAddressesInput(
-            addressInMap.get(tx.getId()).stream()
-                .map(AddressInputOutputProjection::getAddress)
-                .collect(Collectors.toList()));
-      } else {
-        txResponse.setAddressesInput(new ArrayList<>());
-      }
-      txFilterResponses.add(txResponse);
-    }
-    return txFilterResponses;
+    return txPage.getContent().stream()
+        .peek(tx -> tx.setBlock(blockMap.get(tx.getBlockId())))
+        .map(txMapper::txToTxFilterResponse)
+        .collect(Collectors.toList());
   }
 
   private Pair<Map<String, AssetMetadata>, Map<Long, MultiAsset>> getMapMetadataAndMapAsset(

@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -61,7 +60,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.service.impl.TxServiceImpl;
-import org.cardanofoundation.explorer.api.test.projection.AddressInputOutputProjectionImpl;
 import org.cardanofoundation.explorer.api.test.projection.TxIOProjectionImpl;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Tx;
@@ -191,28 +189,7 @@ class TxServiceTest {
     final Page<Tx> txs = new PageImpl<>(List.of(tx));
     when(txRepository.findAllTx(any(Pageable.class))).thenReturn(txs);
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(Block.builder().id(0L).build()));
-    when(txOutRepository.findAddressInputListByTxId(any()))
-        .thenReturn(
-            List.of(
-                AddressInputOutputProjectionImpl.builder()
-                    .txId(0L)
-                    .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
-                    .build()));
-    when(txOutRepository.findAddressOutputListByTxId(any()))
-        .thenReturn(
-            List.of(
-                AddressInputOutputProjectionImpl.builder()
-                    .txId(0L)
-                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-                    .build()));
-
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
-
-    final TxFilterResponse expect = new TxFilterResponse();
-    expect.setAddressesInput(
-        List.of("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc"));
-    expect.setAddressesOutput(
-        List.of("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq"));
 
     // Run the test
     final BaseFilterResponse<TxFilterResponse> result = txService.getAll(PageRequest.of(0, 1));
@@ -220,8 +197,6 @@ class TxServiceTest {
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
     assertEquals(1, result.getData().size());
-    assertEquals(expect.getAddressesInput(), result.getData().get(0).getAddressesInput());
-    assertEquals(expect.getAddressesOutput(), result.getData().get(0).getAddressesOutput());
   }
 
   @Test
@@ -251,23 +226,8 @@ class TxServiceTest {
     tx.setTxMetadataHash(txMetadataHash);
     final Page<Tx> txs = new PageImpl<>(List.of(tx));
     when(txRepository.findAllTx(any(Pageable.class))).thenReturn(txs);
-
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(new Block()));
-    when(txOutRepository.findAddressInputListByTxId(any())).thenReturn(Collections.emptyList());
-    when(txOutRepository.findAddressOutputListByTxId(any()))
-        .thenReturn(
-            List.of(
-                AddressInputOutputProjectionImpl.builder()
-                    .txId(0L)
-                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-                    .build()));
-
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
-
-    final TxFilterResponse expect = new TxFilterResponse();
-    expect.setAddressesInput(List.of());
-    expect.setAddressesOutput(
-        List.of("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq"));
 
     // Run the test
     final BaseFilterResponse<TxFilterResponse> result = txService.getAll(PageRequest.of(0, 1));
@@ -275,8 +235,6 @@ class TxServiceTest {
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
     assertEquals(1, result.getData().size());
-    assertEquals(expect.getAddressesInput(), result.getData().get(0).getAddressesInput());
-    assertEquals(expect.getAddressesOutput(), result.getData().get(0).getAddressesOutput());
   }
 
   @Test
@@ -296,22 +254,8 @@ class TxServiceTest {
     tx.setTxMetadataHash(txMetadataHash);
     final Page<Tx> txs = new PageImpl<>(List.of(tx));
     when(txRepository.findAllTx(any(Pageable.class))).thenReturn(txs);
-
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(new Block()));
-    when(txOutRepository.findAddressInputListByTxId(any()))
-        .thenReturn(
-            List.of(
-                AddressInputOutputProjectionImpl.builder()
-                    .txId(0L)
-                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-                    .build()));
-    when(txOutRepository.findAddressOutputListByTxId(any())).thenReturn(Collections.emptyList());
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
-
-    final TxFilterResponse expect = new TxFilterResponse();
-    expect.setAddressesInput(
-        List.of("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq"));
-    expect.setAddressesOutput(List.of());
 
     // Run the test
     final BaseFilterResponse<TxFilterResponse> result = txService.getAll(PageRequest.of(0, 1));
@@ -319,8 +263,6 @@ class TxServiceTest {
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
     assertEquals(1, result.getData().size());
-    assertEquals(expect.getAddressesInput(), result.getData().get(0).getAddressesInput());
-    assertEquals(expect.getAddressesOutput(), result.getData().get(0).getAddressesOutput());
   }
 
   @Test
@@ -340,29 +282,7 @@ class TxServiceTest {
     tx.setTxMetadataHash(txMetadataHash);
     final Page<Tx> txs = new PageImpl<>(List.of(tx));
     when(txRepository.findByBlockNo(eq(0L), any(Pageable.class))).thenReturn(txs);
-
     when(blockRepository.findAllByIdIn(any())).thenReturn(List.of(block));
-    when(txOutRepository.findAddressInputListByTxId(any()))
-        .thenReturn(
-            List.of(
-                AddressInputOutputProjectionImpl.builder()
-                    .txId(0L)
-                    .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
-                    .build()));
-    when(txOutRepository.findAddressOutputListByTxId(any()))
-        .thenReturn(
-            List.of(
-                AddressInputOutputProjectionImpl.builder()
-                    .txId(0L)
-                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-                    .build()));
-
-    final TxFilterResponse expect = new TxFilterResponse();
-    expect.setAddressesInput(
-        List.of("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc"));
-    expect.setAddressesOutput(
-        List.of("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq"));
-
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
 
     // Run the test
@@ -372,8 +292,6 @@ class TxServiceTest {
     // Verify the results
     verify(txMapper, times(1)).txToTxFilterResponse(tx);
     assertEquals(1, result.getData().size());
-    assertEquals(expect.getAddressesInput(), result.getData().get(0).getAddressesInput());
-    assertEquals(expect.getAddressesOutput(), result.getData().get(0).getAddressesOutput());
   }
 
   @Test
@@ -409,23 +327,7 @@ class TxServiceTest {
     tx.setTxMetadataHash(txMetadataHash);
     final Page<Tx> txs = new PageImpl<>(List.of(tx));
     when(txRepository.findByBlockHash(blockId, PageRequest.of(0, 1))).thenReturn(txs);
-
     when(blockRepository.findAllByIdIn(Set.of(0L))).thenReturn(List.of(new Block()));
-    when(txOutRepository.findAddressInputListByTxId(Set.of(0L)))
-        .thenReturn(
-            List.of(
-                AddressInputOutputProjectionImpl.builder()
-                    .txId(0L)
-                    .address("Ae2tdPwUPEZLC5VMKspod9dcf5PtUtvobxd3THtoxfR9uuzcqDghef9oiTc")
-                    .build()));
-    when(txOutRepository.findAddressOutputListByTxId(any()))
-        .thenReturn(
-            List.of(
-                AddressInputOutputProjectionImpl.builder()
-                    .txId(0L)
-                    .address("Ae2tdPwUPEZJAUCigmqNN4Lh5sZ3E2FZn75EjVbdEKVxAirKzh4zHkdYpBq")
-                    .build()));
-
     when(txMapper.txToTxFilterResponse(any())).thenReturn(new TxFilterResponse());
     final BaseFilterResponse<TxFilterResponse> result =
         txService.getTransactionsByBlock(blockId, PageRequest.of(0, 1));

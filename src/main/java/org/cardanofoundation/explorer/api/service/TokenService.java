@@ -38,15 +38,6 @@ public interface TokenService {
   BaseFilterResponse<TokenMintTxResponse> getMintTxs(String tokenId, Pageable pageable);
 
   /**
-   * Get top holders by token
-   *
-   * @param tokenId token id (fingerprint)
-   * @param pageable page information
-   * @return list addresses hold token in this page
-   */
-  BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable);
-
-  /**
    * Analysis volume of token
    *
    * @param tokenId token id (fingerprint)

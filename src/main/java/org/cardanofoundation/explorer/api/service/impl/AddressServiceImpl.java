@@ -16,8 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +28,6 @@ import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceData;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
@@ -41,7 +38,6 @@ import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmou
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DataUtil;
@@ -51,7 +47,6 @@ import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AggregateAddressTxBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopAddressBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -60,7 +55,6 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 public class AddressServiceImpl implements AddressService {
 
   private final AddressRepository addressRepository;
-  private final TopAddressBalanceRepository topAddressBalanceRepository;
   private final LatestTokenBalanceRepository latestTokenBalanceRepository;
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
@@ -242,35 +236,6 @@ public class AddressServiceImpl implements AddressService {
     } else {
       response.setLowestBalance(fromBalance);
     }
-  }
-
-  @Override
-  public BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable) {
-    List<TopAddressBalance> latestAddressBalances =
-        topAddressBalanceRepository.findAllLatestAddressBalance(pageable);
-    Page<TopAddressBalance> latestAddressBalancePage =
-        new PageImpl<>(latestAddressBalances, pageable, pageable.getPageSize());
-
-    Map<String, Long> addressTxCountMap =
-        addressTxCountRepository
-            .findAllByAddressIn(
-                latestAddressBalancePage.stream().map(TopAddressBalance::getAddress).toList())
-            .stream()
-            .collect(Collectors.toMap(AddressTxCount::getAddress, AddressTxCount::getTxCount));
-
-    List<AddressFilterResponse> addressFilterResponses =
-        latestAddressBalancePage.stream()
-            .map(
-                latestAddressBalance ->
-                    AddressFilterResponse.builder()
-                        .address(latestAddressBalance.getAddress())
-                        .balance(latestAddressBalance.getQuantity())
-                        .txCount(
-                            addressTxCountMap.getOrDefault(latestAddressBalance.getAddress(), 0L))
-                        .build())
-            .collect(Collectors.toList());
-
-    return new BaseFilterResponse<>(latestAddressBalancePage, addressFilterResponses);
   }
 
   /**

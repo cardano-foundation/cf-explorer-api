@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 
@@ -35,14 +34,6 @@ public interface AddressService {
    * @return list contract information in this page
    */
   //  BaseFilterResponse<ContractFilterResponse> getContracts(Pageable pageable);
-
-  /**
-   * Get top address
-   *
-   * @param pageable page information
-   * @return return list address sort by balance
-   */
-  BaseFilterResponse<AddressFilterResponse> getTopAddress(Pageable pageable);
 
   /**
    * Get list token by display name
