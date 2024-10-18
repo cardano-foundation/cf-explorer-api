@@ -155,10 +155,9 @@ public class EpochServiceImpl implements EpochService {
                   modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime());
               epoch.setStartTime(startTime);
               epoch.setEndTime(startTime.plusDays(epochDays));
-              String uniqueAccountRedisKey =
-                  String.join(
-                      UNDERSCORE, getRedisKey(UNIQUE_ACCOUNTS_KEY), epoch.getNo().toString());
-              epoch.setAccount(redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue());
+              epoch.setRewardsDistributed(null);
+              epoch.setOutSum(null);
+              epoch.setTxCount(null);
             });
     return new BaseFilterResponse<>(pageResponse);
   }

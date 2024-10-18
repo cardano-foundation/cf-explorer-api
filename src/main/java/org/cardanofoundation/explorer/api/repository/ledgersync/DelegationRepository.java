@@ -115,22 +115,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
           + " (SELECT COALESCE(max(sd.txId), 0) FROM StakeDeregistration sd WHERE sd.addr = :address)")
   Optional<StakeDelegationProjection> findPoolDataByAddress(@Param("address") StakeAddress address);
 
-  @Query(
-      "SELECT poolHash.view as poolId, poolOfflineData.poolName as poolData,"
-          + " poolOfflineData.tickerName as tickerName, stake.view as stakeAddress"
-          + " FROM Delegation delegation"
-          + " INNER JOIN StakeAddress stake ON stake.id = delegation.address.id"
-          + " INNER JOIN PoolHash poolHash ON delegation.poolHash = poolHash"
-          + " LEFT JOIN PoolOfflineData poolOfflineData ON poolOfflineData.id ="
-          + " (SELECT max(pod.id) FROM PoolOfflineData pod WHERE pod.pool = poolHash)"
-          + " WHERE delegation.id IN "
-          + " (SELECT max(d.id) FROM Delegation d "
-          + " INNER JOIN StakeAddress sa ON d.address = sa"
-          + " WHERE sa.view IN :addresses"
-          + " GROUP BY sa.view )")
-  List<StakeDelegationProjection> findPoolDataByAddressIn(
-      @Param("addresses") Set<String> addresses);
-
   Boolean existsByAddress(@Param("stakeAddress") StakeAddress stakeAddress);
 
   @Query(
@@ -176,6 +160,6 @@ public interface DelegationRepository extends JpaRepository<Delegation, Long> {
                       join StakeAddress sa on sa.id = d.stakeAddressId
                       where d.poolHash.hashRaw in :poolHashes
               """)
-  List<String> getStakeAddressDelegatorsByPoolIds(
+  Set<String> getStakeAddressDelegatorsByPoolIds(
       @Param("poolHashes") Collection<String> poolHashes);
 }

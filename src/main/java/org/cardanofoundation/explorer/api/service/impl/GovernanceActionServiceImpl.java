@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -45,10 +44,8 @@ import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
-import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
-import org.cardanofoundation.explorer.api.util.BatchUtils;
 import org.cardanofoundation.explorer.api.util.ProtocolParamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.CommitteeState;
 import org.cardanofoundation.explorer.common.entity.enumeration.DRepStatus;
@@ -82,8 +79,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final OffChainVoteGovActionDataRepository offChainVoteGovActionDataRepository;
   private final LatestVotingProcedureMapper latestVotingProcedureMapper;
   private final CommitteeRepository committeeRepository;
-  private final FetchRewardDataService fetchRewardDataService;
-  private final PoolInfoRepository poolInfoRepository;
 
   private final RedisTemplate<String, Integer> redisTemplate;
 
@@ -94,8 +89,6 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   public long epochDays;
 
   public static final String MIN_TIME = "1970-01-01 00:00:00";
-
-  private static final Integer DEFAULT_BATCH_SIZE = 2000;
 
   @Override
   public BaseFilterResponse<GovernanceActionResponse> getGovernanceActions(
@@ -734,37 +727,14 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 Collectors.toMap(
                     PoolOverviewProjection::getPoolHash, PoolOverviewProjection::getPoolId));
 
-    BigInteger totalActiveVoteStake =
-        getTotalActiveStakeByPoolHashesIn(
-            poolHashByPoolIdMap.keySet().stream().toList(), govActionDetailsProjection.getEpoch());
+    BigInteger totalActiveVoteStake = getTotalActiveStakeByPoolIds(poolHashByPoolIdMap.keySet());
 
-    List<CompletableFuture<List<LatestVotingProcedureProjection>>> futures = new ArrayList<>();
-    List<String> poolHashes = new ArrayList<>(poolHashByPoolIdMap.keySet());
-    int COLLECTION_SIZE = poolHashes.size();
-    for (int startBatchIdx = 0;
-        startBatchIdx < COLLECTION_SIZE;
-        startBatchIdx += DEFAULT_BATCH_SIZE) {
-      int endBatchIdx = Math.min(startBatchIdx + DEFAULT_BATCH_SIZE, COLLECTION_SIZE);
-      List<String> batchList = poolHashes.subList(startBatchIdx, endBatchIdx);
-      futures.add(
-          getLatestVotingProcedureProjection(
-              govActionDetailsProjection.getTxHash(),
-              govActionDetailsProjection.getIndex(),
-              batchList,
-              List.of(VoterType.STAKING_POOL_KEY_HASH)));
-    }
-
-    CompletableFuture<List<LatestVotingProcedureProjection>> allFutures =
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(
-                v ->
-                    futures.stream()
-                        .map(CompletableFuture::join)
-                        .filter(Objects::nonNull)
-                        .flatMap(List::stream)
-                        .toList());
-
-    List<LatestVotingProcedureProjection> latestVotingProcedureProjections = allFutures.join();
+    List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
+        latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
+            govActionDetailsProjection.getTxHash(),
+            govActionDetailsProjection.getIndex(),
+            poolHashByPoolIdMap.keySet().stream().toList(),
+            List.of(VoterType.STAKING_POOL_KEY_HASH));
 
     Map<Vote, List<LatestVotingProcedureProjection>> voteCount =
         latestVotingProcedureProjections.stream()
@@ -776,11 +746,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
                 Collectors.toMap(
                     Map.Entry::getKey,
                     entry ->
-                        getTotalActiveStakeByPoolHashesIn(
+                        getTotalActiveStakeByPoolIds(
                             entry.getValue().stream()
                                 .map(LatestVotingProcedureProjection::getVoterHash)
-                                .collect(Collectors.toList()),
-                            govActionDetailsProjection.getEpoch())));
+                                .collect(Collectors.toList()))));
 
     votingChartResponse.setActiveVoteStake(totalActiveVoteStake);
     votingChartResponse.setTotalYesVoteStake(voteStake.getOrDefault(Vote.YES, BigInteger.ZERO));
@@ -788,38 +757,9 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     votingChartResponse.setAbstainVoteStake(voteStake.getOrDefault(Vote.ABSTAIN, BigInteger.ZERO));
   }
 
-  private CompletableFuture<List<LatestVotingProcedureProjection>>
-      getLatestVotingProcedureProjection(
-          String txHash, Integer index, List<String> voterHash, List<VoterType> voterType) {
-    return CompletableFuture.supplyAsync(
-        () ->
-            latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
-                txHash, index, voterHash, voterType));
-  }
-
-  private BigInteger getTotalActiveStakeByPoolHashesIn(List<String> poolIds, Integer epochNo) {
-
-    if (fetchRewardDataService.useKoios()) {
-      return BatchUtils.processInBatches(
-          DEFAULT_BATCH_SIZE,
-          poolIds,
-          poolIdList -> sumBalanceByPoolIdInWithKoi0s(poolIdList, epochNo));
-    }
-    // without using koios profile
-    List<String> stakeView = delegationRepository.getStakeAddressDelegatorsByPoolIds(poolIds);
-    return BatchUtils.processInBatches(
-        DEFAULT_BATCH_SIZE, stakeView, this::sumBalanceByStakeAddressIn);
-  }
-
-  private CompletableFuture<BigInteger> sumBalanceByPoolIdInWithKoi0s(
-      Collection<String> poolHashes, Integer epochNo) {
-    return CompletableFuture.supplyAsync(
-        () -> poolInfoRepository.getTotalActiveStakeByPoolIdIn(poolHashes, epochNo));
-  }
-
-  private CompletableFuture<BigInteger> sumBalanceByStakeAddressIn(Collection<String> stakeView) {
-    return CompletableFuture.supplyAsync(
-        () -> stakeAddressBalanceRepository.sumBalanceByStakeAddressIn(stakeView));
+  private BigInteger getTotalActiveStakeByPoolIds(Collection<String> poolIds) {
+    Set<String> stakeView = delegationRepository.getStakeAddressDelegatorsByPoolIds(poolIds);
+    return stakeAddressBalanceRepository.sumBalanceByStakeAddressIn(stakeView);
   }
 
   // TODO: Active vote stake of DRep type is not available.
@@ -877,32 +817,12 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     List<String> dRepHashes =
         dRepInfoProjections.stream().map(DRepInfoProjection::getDrepHash).toList();
 
-    List<CompletableFuture<List<LatestVotingProcedureProjection>>> futures = new ArrayList<>();
-    int COLLECTION_SIZE = dRepHashes.size();
-    for (int startBatchIdx = 0;
-        startBatchIdx < COLLECTION_SIZE;
-        startBatchIdx += DEFAULT_BATCH_SIZE) {
-      int endBatchIdx = Math.min(startBatchIdx + DEFAULT_BATCH_SIZE, COLLECTION_SIZE);
-      List<String> batchList = dRepHashes.subList(startBatchIdx, endBatchIdx);
-      futures.add(
-          getLatestVotingProcedureProjection(
-              govActionDetailsProjection.getTxHash(),
-              govActionDetailsProjection.getIndex(),
-              batchList,
-              List.of(VoterType.DREP_KEY_HASH, VoterType.DREP_SCRIPT_HASH)));
-    }
-
-    CompletableFuture<List<LatestVotingProcedureProjection>> allFutures =
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(
-                v ->
-                    futures.stream()
-                        .map(CompletableFuture::join)
-                        .filter(Objects::nonNull)
-                        .flatMap(List::stream)
-                        .toList());
-
-    List<LatestVotingProcedureProjection> latestVotingProcedureProjections = allFutures.join();
+    List<LatestVotingProcedureProjection> latestVotingProcedureProjections =
+        latestVotingProcedureRepository.findByGovActionTxHashAndGovActionIndex(
+            govActionDetailsProjection.getTxHash(),
+            govActionDetailsProjection.getIndex(),
+            dRepHashes,
+            List.of(VoterType.DREP_KEY_HASH, VoterType.DREP_SCRIPT_HASH));
 
     Map<Vote, List<LatestVotingProcedureProjection>> voteCount =
         latestVotingProcedureProjections.stream()

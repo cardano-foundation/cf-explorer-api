@@ -19,14 +19,11 @@ import org.cardanofoundation.explorer.api.config.LogMessage;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.TxFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressChartBalanceResponse;
-import org.cardanofoundation.explorer.api.model.response.address.AddressFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.service.AddressService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount_;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance_;
-import org.cardanofoundation.explorer.common.validation.pagination.PageZeroValid;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -57,24 +54,6 @@ public class AddressController {
                       + " Will be Base58 for Byron era addresses and Bech32 for Shelley era.")
           String address) {
     return ResponseEntity.ok(addressService.getAddressDetail(address));
-  }
-
-  @GetMapping("/top-addresses")
-  @LogMessage
-  @Operation(
-      summary = "Get top address by balance",
-      tags = {"address"})
-  public ResponseEntity<BaseFilterResponse<AddressFilterResponse>> getTopAddress(
-      @ParameterObject
-          @PaginationDefault(
-              size = 20,
-              sort = {LatestTokenBalance_.QUANTITY},
-              direction = Sort.Direction.DESC)
-          @PaginationValid
-          @PageZeroValid
-          @Valid
-          Pagination pagination) {
-    return ResponseEntity.ok(addressService.getTopAddress(pagination.toPageable()));
   }
 
   @GetMapping("/analytics/{address}/{type}")

@@ -40,23 +40,16 @@ import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.*;
-import org.cardanofoundation.explorer.api.projection.AddressTokenProjection;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
-import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.service.impl.TokenServiceImpl;
-import org.cardanofoundation.explorer.api.test.projection.AddressTokenProjectionImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
-import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
@@ -70,16 +63,12 @@ class TokenServiceTest {
   @Mock private MultiAssetRepository multiAssetRepository;
   @Mock private MaTxMintRepository maTxMintRepository;
   @Mock private AssetMetadataRepository assetMetadataRepository;
-  @Mock private LatestTokenBalanceRepository latestTokenBalanceRepository;
-  @Mock private AddressRepository addressRepository;
   @Mock private AddressTxAmountRepository addressTxAmountRepository;
-  @Mock private TokenInfoRepository tokenInfoRepository;
   @Mock private TokenMapper tokenMapper;
   @Mock private MaTxMintMapper maTxMintMapper;
   @Mock private AssetMetadataMapper assetMetadataMapper;
   @Mock private AggregateAddressTokenRepository aggregateAddressTokenRepository;
 
-  @Mock private StakeAddressRepository stakeAddressRepository;
   @Mock private AggregatedDataCacheService aggregatedDataCacheService;
   @Mock private ScriptRepository scriptRepository;
 
@@ -96,7 +85,6 @@ class TokenServiceTest {
         .thenReturn(List.of(Script.builder().type(ScriptType.TIMELOCK).hash("policy").build()));
 
     final TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
-    when(tokenProjection.getUnit()).thenReturn("unit1");
     when(tokenProjection.getPolicy()).thenReturn("policy");
 
     when(multiAssetRepository.findMultiAssets(any(Pageable.class)))
@@ -114,24 +102,12 @@ class TokenServiceTest {
     when(assetMetadataMapper.fromTokenProjectionToTokenFilterResponse(tokenProjection))
         .thenReturn(tokenFilterResponse);
 
-    final TokenInfo tokenInfo =
-        TokenInfo.builder()
-            .updatedSlot(100L)
-            .unit("unit1")
-            .numberOfHolders(100L)
-            .volume24h(new BigInteger("100"))
-            .build();
-
-    final List<TokenInfo> tokenInfos = List.of(tokenInfo);
-    when(tokenInfoRepository.findTokenInfosByUnitIn(anyCollection())).thenReturn(tokenInfos);
-
     // Run the test
     final BaseFilterResponse<TokenFilterResponse> result =
         tokenService.filterToken("", PageRequest.of(0, 1));
 
     // Verify the results
     assertEquals("url", result.getData().get(0).getMetadata().getUrl());
-    assertEquals(100, result.getData().get(0).getNumberOfHolders());
     assertEquals(20, result.getData().get(0).getTxCount());
   }
 
@@ -143,7 +119,6 @@ class TokenServiceTest {
     // Setup
     when(aggregatedDataCacheService.getTokenCount()).thenReturn(1);
     TokenProjection tokenProjection = Mockito.mock(TokenProjection.class);
-    when(tokenProjection.getUnit()).thenReturn("unit");
     when(tokenProjection.getPolicy()).thenReturn("policy");
 
     when(scriptRepository.findAllByHashIn(List.of("policy")))
@@ -173,24 +148,12 @@ class TokenServiceTest {
     when(assetMetadataMapper.fromTokenProjectionToTokenFilterResponse(tokenProjection))
         .thenReturn(tokenFilterResponse);
 
-    final TokenInfo tokenInfo =
-        TokenInfo.builder()
-            .unit("unit")
-            .numberOfHolders(100L)
-            .volume24h(new BigInteger("100"))
-            .updatedSlot(100L)
-            .build();
-
-    final List<TokenInfo> tokenInfos = List.of(tokenInfo);
-    when(tokenInfoRepository.findTokenInfosByUnitIn(anyCollection())).thenReturn(tokenInfos);
-
     // Run the test
     final BaseFilterResponse<TokenFilterResponse> result =
         tokenService.filterToken("name", PageRequest.of(0, 1));
 
     // Verify the results
     assertEquals("ticker", result.getData().get(0).getMetadata().getTicker());
-    assertEquals(100, result.getData().get(0).getNumberOfHolders());
     assertEquals(20, result.getData().get(0).getTxCount());
   }
 
@@ -214,16 +177,6 @@ class TokenServiceTest {
 
     when(multiAssetRepository.getTokenTxCount(anyString())).thenReturn(Optional.of(15L));
 
-    TokenInfo tokenInfo =
-        TokenInfo.builder()
-            .unit("unit")
-            .totalVolume(BigInteger.TEN)
-            .numberOfHolders(100L)
-            .volume24h(BigInteger.ZERO)
-            .updatedSlot(100L)
-            .build();
-
-    when(tokenInfoRepository.findTokenInfoByUnit(anyString())).thenReturn(Optional.of(tokenInfo));
     // Configure TokenMapper.fromMultiAssetToResponse(...).
     final TokenResponse tokenResponse = new TokenResponse();
     when(tokenMapper.fromMultiAssetToResponse(any())).thenReturn(tokenResponse);
@@ -262,8 +215,6 @@ class TokenServiceTest {
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
 
     // Verify the results
-    assertEquals(100, result.getNumberOfHolders());
-    assertEquals("0", result.getVolumeIn24h());
     assertEquals(TokenType.NFT, result.getTokenType());
     assertNull(result.getMetadataJson());
     assertEquals(latestTimestamp, result.getTokenLastActivity());
@@ -297,17 +248,7 @@ class TokenServiceTest {
     final TokenResponse tokenResponse = new TokenResponse();
     when(tokenMapper.fromMultiAssetToResponse(any())).thenReturn(tokenResponse);
 
-    final TokenInfo tokenInfo =
-        TokenInfo.builder()
-            .unit("unit")
-            .numberOfHolders(100L)
-            .volume24h(new BigInteger("100"))
-            .updatedSlot(cardanoConverters.time().toSlot(LocalDateTime.now()))
-            .build();
-
     when(multiAssetRepository.getTokenTxCount(anyString())).thenReturn(Optional.of(20L));
-
-    when(tokenInfoRepository.findTokenInfoByUnit(any())).thenReturn(Optional.of(tokenInfo));
 
     final AssetMetadata metadata =
         AssetMetadata.builder()
@@ -337,8 +278,6 @@ class TokenServiceTest {
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
 
     // Verify the results
-    assertEquals(100, result.getNumberOfHolders());
-    assertEquals("100", result.getVolumeIn24h());
     assertEquals(
         "{\"0495e7467b9f8285ef79fca99fe1ed85ca19faba5b7d4dd425c3d884\":{\"ElephantSecretAvatars215\":{\"image\":\"ipfs://QmNvjyj4o7p7UXMEbxnx9ZY5ZLFMJcy9sjMXaTiFRgC4nJ\",\"name\":\"ElephantSecretAvatars#0215\",\"files\":[{\"src\":\"ipfs://QmaRoAcJcHunUsEEE1FSiPm5SWe47PQbexwQpHZdbTLzde\",\"name\":\"ElephantSecretAvatars#0215\",\"mediaType\":\"model/gltf-binary\"}],\"Animation\":\"Idle\",\"Skin\":\"Pink\",\"mediaType\":\"image/png\"}}}",
         result.getMetadataJson());
@@ -374,16 +313,7 @@ class TokenServiceTest {
     final TokenResponse tokenResponse = new TokenResponse();
     when(tokenMapper.fromMultiAssetToResponse(any())).thenReturn(tokenResponse);
 
-    final TokenInfo tokenInfo =
-        TokenInfo.builder()
-            .unit("unit")
-            .numberOfHolders(100L)
-            .volume24h(new BigInteger("100"))
-            .updatedSlot(cardanoConverters.time().toSlot(LocalDateTime.now()))
-            .build();
     when(multiAssetRepository.getTokenTxCount(anyString())).thenReturn(Optional.of(25L));
-
-    when(tokenInfoRepository.findTokenInfoByUnit(any())).thenReturn(Optional.of(tokenInfo));
 
     final AssetMetadata metadata =
         AssetMetadata.builder()
@@ -413,8 +343,6 @@ class TokenServiceTest {
     final TokenResponse result = tokenService.getTokenDetail("tokenId");
 
     // Verify the results
-    assertEquals(100, result.getNumberOfHolders());
-    assertEquals("100", result.getVolumeIn24h());
     assertEquals(TokenType.NFT, result.getTokenType());
     assertEquals(
         "{\"2aec93fa65aaedaf2fc0aa46c3ace89c0c8e091ed5f39b8f8127e664\":{\"Promises2239\":{\"Candidate\":\"RichardTrixson\",\"image\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"Series\":\"CampaignMaterials\",\"Promise\":\"Correct\",\"Number\":\"2239\",\"Banner\":\"Modern\",\"Asset\":\"Promises2239\",\"files\":[{\"src\":\"ipfs://QmbWvwzLjwfKYqdbhar5KPzphAJQ1yZJ1xGbMi6C7A91CZ\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"},{\"src\":\"ipfs://QmTWuebKD7FC8kKh8tBoPsVedyhJg38g92dBopnb7fM98C\",\"name\":\"Promises2239\",\"mediaType\":\"image/jpeg\"}],\"Collection\":\"OldMoney\",\"mediaType\":\"image/jpeg\",\"Name\":\"Promises\"}},\"version\":\"1.0\"}",
@@ -458,55 +386,6 @@ class TokenServiceTest {
 
     // Verify the results
     assertEquals(tokenMintTxResponse, result.getData().get(0));
-  }
-
-  @Test
-  void testGetTopHolders_WhenTokenFound() {
-    // Setup
-    // Configure MultiAssetRepository.findByFingerprint(...).
-    final MultiAsset multiAsset =
-        MultiAsset.builder()
-            .id(0L)
-            .policy("policy")
-            .name("name")
-            .nameView("nameView")
-            .unit("unit")
-            .fingerprint("fingerprint")
-            .build();
-
-    final TokenInfo tokenInfo = TokenInfo.builder().unit("unit").numberOfHolders(1L).build();
-
-    when(tokenInfoRepository.findTokenInfoByUnit(any())).thenReturn(Optional.of(tokenInfo));
-
-    final Optional<MultiAsset> multiAssetOpt = Optional.of(multiAsset);
-    when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(multiAssetOpt);
-
-    final TokenAddressResponse tokenAddressResponse =
-        TokenAddressResponse.builder().address("address").quantity(BigInteger.TEN).build();
-
-    when(tokenMapper.fromAddressTokenProjection(any(AddressTokenProjection.class)))
-        .thenReturn(tokenAddressResponse);
-
-    when(latestTokenBalanceRepository.getTopHolderOfToken(anyString(), any(Pageable.class)))
-        .thenReturn(
-            List.of(
-                AddressTokenProjectionImpl.builder()
-                    .address("address")
-                    .quantity(BigInteger.TEN)
-                    .build()));
-
-    var response = tokenService.getTopHolders("tokenId", PageRequest.of(0, 1));
-
-    assertEquals(1, response.getTotalItems());
-    assertEquals("address", response.getData().get(0).getAddress());
-    assertEquals(BigInteger.TEN, response.getData().get(0).getQuantity());
-  }
-
-  @Test
-  void testGetTopHolders_WhenTokenNotFound() {
-    when(multiAssetRepository.findByFingerprint(anyString())).thenReturn(Optional.empty());
-    assertThrows(
-        BusinessException.class, () -> tokenService.getTopHolders("tokenId", PageRequest.of(0, 1)));
   }
 
   @Test
