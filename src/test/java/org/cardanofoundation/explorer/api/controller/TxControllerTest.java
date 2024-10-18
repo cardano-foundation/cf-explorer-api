@@ -75,16 +75,7 @@ class TxControllerTest {
     txFilterResponse.setEpochNo(426);
     txFilterResponse.setEpochSlotNo(292728);
     txFilterResponse.setSlot(98961528);
-    txFilterResponse.setAddressesInput(
-        List.of(
-            "addr1q8a93gl3y6x6znttql04tsypq9z639zsg92vjtg8zsph99c7a3tcm47sf26y374klwh989vg9rfh6a7c7rp8lqm8zzws4vuqg3",
-            "addr1zxgx3far7qygq0k6epa0zcvcvrevmn0ypsnfsue94nsn3tvpw288a4x0xf8pxgcntelxmyclq83s0ykeehchz2wtspks905plm"));
-    txFilterResponse.setAddressesOutput(
-        List.of(
-            "addr1zxgx3far7qygq0k6epa0zcvcvrevmn0ypsnfsue94nsn3tvpw288a4x0xf8pxgcntelxmyclq83s0ykeehchz2wtspks905plm",
-            "addr1q8a93gl3y6x6znttql04tsypq9z639zsg92vjtg8zsph99c7a3tcm47sf26y374klwh989vg9rfh6a7c7rp8lqm8zzws4vuqg3"));
     txFilterResponse.setFee(BigInteger.valueOf(315142));
-    txFilterResponse.setTotalOutput(BigInteger.valueOf(24451790));
     txFilterResponse.setTokens(new ArrayList<>());
     txFilterResponse.setTime(LocalDateTime.parse("2007-12-03T10:15:30"));
     final BaseFilterResponse<TxFilterResponse> response =

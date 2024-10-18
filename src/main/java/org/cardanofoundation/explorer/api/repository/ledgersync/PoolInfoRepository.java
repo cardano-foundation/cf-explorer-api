@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -36,11 +35,4 @@ public interface PoolInfoRepository extends JpaRepository<PoolInfo, Long> {
 
   @Query(value = "SELECT SUM(pi.activeStake) FROM PoolInfo pi WHERE pi.fetchedAtEpoch = :epochNo")
   BigInteger getTotalActiveStake(@Param("epochNo") Integer epochNo);
-
-  @Query(
-      """
-    SELECT SUM(pi.activeStake) FROM PoolInfo pi WHERE pi.pool.hashRaw IN :poolHashes AND pi.fetchedAtEpoch = :epochNo
-    """)
-  BigInteger getTotalActiveStakeByPoolIdIn(
-      @Param("poolHashes") Collection<String> poolHashes, @Param("epochNo") Integer epochNo);
 }

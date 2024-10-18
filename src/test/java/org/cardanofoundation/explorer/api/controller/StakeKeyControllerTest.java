@@ -39,7 +39,6 @@ import org.cardanofoundation.explorer.api.model.response.address.AddressFilterRe
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.address.StakeAddressRewardDistribution;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeAnalyticRewardResponse;
-import org.cardanofoundation.explorer.api.model.response.stake.StakeFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.stake.StakeTxResponse;
 import org.cardanofoundation.explorer.api.projection.StakeDelegationProjection;
 import org.cardanofoundation.explorer.api.projection.StakeHistoryProjection;
@@ -219,19 +218,6 @@ public class StakeKeyControllerTest {
             get("/api/v1/stakes/{stakeKey}/instantaneous-rewards", stakeKey)
                 .param("page", "0")
                 .param("size", "10"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").exists());
-  }
-
-  @Test
-  void testGetTopDelegators_thenReturn() throws Exception {
-    Pageable pageable = PageRequest.of(0, 10);
-    BaseFilterResponse<StakeFilterResponse> response = new BaseFilterResponse<>();
-
-    when(stakeService.getTopDelegators(pageable)).thenReturn(response);
-
-    mockMvc
-        .perform(get("/api/v1/stakes/top-delegators").param("page", "0").param("size", "10"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").exists());
   }

@@ -2,7 +2,6 @@ package org.cardanofoundation.explorer.api.repository.ledgersync;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,14 +95,6 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
       @Param("stakeAddress") StakeAddress stakeAddress, @Param("txId") Long txId);
 
   Boolean existsByAddr(@Param("stakeAddress") StakeAddress stakeAddress);
-
-  @Query(
-      "SELECT w.stakeAddressId as stakeAddressId, SUM(w.amount) as amount"
-          + " FROM Withdrawal w"
-          + " WHERE w.stakeAddressId IN :stakeIds"
-          + " GROUP BY w.stakeAddressId")
-  List<StakeWithdrawalProjection> getRewardWithdrawnByAddrIn(
-      @Param("stakeIds") Collection<Long> stakeIds);
 
   @Query(
       "SELECT COALESCE(SUM(w.amount), 0) FROM Withdrawal w "

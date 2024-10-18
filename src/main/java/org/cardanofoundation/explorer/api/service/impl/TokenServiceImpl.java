@@ -2,10 +2,8 @@ package org.cardanofoundation.explorer.api.service.impl;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,20 +33,17 @@ import org.cardanofoundation.explorer.api.mapper.AssetMetadataMapper;
 import org.cardanofoundation.explorer.api.mapper.MaTxMintMapper;
 import org.cardanofoundation.explorer.api.mapper.TokenMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
-import org.cardanofoundation.explorer.api.model.response.token.TokenAddressResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenMintTxResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenResponse;
 import org.cardanofoundation.explorer.api.model.response.token.TokenVolumeAnalyticsResponse;
 import org.cardanofoundation.explorer.api.projection.TokenProjection;
-import org.cardanofoundation.explorer.api.repository.explorer.TokenInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AssetMetadataRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MaTxMintRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTokenRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.service.TokenService;
 import org.cardanofoundation.explorer.api.service.cache.AggregatedDataCacheService;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -56,7 +51,6 @@ import org.cardanofoundation.explorer.api.util.MetadataCIP25Utils;
 import org.cardanofoundation.explorer.api.util.MetadataCIP60Utils;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
-import org.cardanofoundation.explorer.common.entity.explorer.TokenInfo;
 import org.cardanofoundation.explorer.common.entity.ledgersync.AssetMetadata;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MaTxMint;
 import org.cardanofoundation.explorer.common.entity.ledgersync.MultiAsset;
@@ -74,7 +68,6 @@ public class TokenServiceImpl implements TokenService {
   private final MultiAssetRepository multiAssetRepository;
   private final MaTxMintRepository maTxMintRepository;
   private final AssetMetadataRepository assetMetadataRepository;
-  private final LatestTokenBalanceRepository latestTokenBalanceRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final ScriptRepository scriptRepository;
 
@@ -83,7 +76,6 @@ public class TokenServiceImpl implements TokenService {
   private final AssetMetadataMapper assetMetadataMapper;
   private final AggregateAddressTokenRepository aggregateAddressTokenRepository;
   private final AggregatedDataCacheService aggregatedDataCacheService;
-  private final TokenInfoRepository tokenInfoRepository;
   private final CardanoConverters cardanoConverters;
   private static final int MAX_TOTAL_ELEMENTS = 1000;
 
@@ -120,11 +112,6 @@ public class TokenServiceImpl implements TokenService {
     }
     Page<TokenFilterResponse> multiAssetResponsesList =
         multiAssets.map(assetMetadataMapper::fromTokenProjectionToTokenFilterResponse);
-    List<String> multiAssetIds =
-        StreamUtil.mapApply(multiAssets.getContent(), TokenProjection::getUnit);
-    List<TokenInfo> tokenInfos = tokenInfoRepository.findTokenInfosByUnitIn(multiAssetIds);
-    Map<String, TokenInfo> tokenInfoMap =
-        StreamUtil.toMap(tokenInfos, TokenInfo::getUnit, Function.identity());
 
     Map<String, Script> scriptMap =
         scriptRepository
@@ -135,31 +122,13 @@ public class TokenServiceImpl implements TokenService {
             .stream()
             .collect(Collectors.toMap(Script::getHash, Function.identity()));
 
-    LocalDateTime now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     multiAssetResponsesList.forEach(
         ma -> {
-          TokenInfo tokenInfo = tokenInfoMap.getOrDefault(ma.getUnit(), null);
           Script script = scriptMap.get(ma.getPolicy());
           if (Objects.nonNull(script)) {
             ma.setPolicyIsNativeScript(ScriptType.TIMELOCK.equals(script.getType()));
           } else {
             ma.setPolicyIsNativeScript(true);
-          }
-
-          if (tokenInfo == null) {
-            ma.setNumberOfHolders(0L);
-            ma.setTotalVolume(String.valueOf(BigInteger.ZERO));
-            ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
-          } else {
-            LocalDateTime updatedTime =
-                cardanoConverters.slot().slotToTime(tokenInfo.getUpdatedSlot());
-            if (updatedTime.plusDays(1).isBefore(now)) {
-              ma.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
-            } else {
-              ma.setVolumeIn24h(String.valueOf(tokenInfo.getVolume24h()));
-            }
-            ma.setTotalVolume(String.valueOf(tokenInfo.getTotalVolume()));
-            ma.setNumberOfHolders(tokenInfo.getNumberOfHolders());
           }
         });
 
@@ -198,24 +167,6 @@ public class TokenServiceImpl implements TokenService {
     Long tokenTxCount =
         multiAssetRepository.getTokenTxCount(multiAsset.getFingerprint()).orElse(0L);
     tokenResponse.setTxCount(tokenTxCount.intValue());
-    var tokenInfo = tokenInfoRepository.findTokenInfoByUnit(multiAsset.getUnit());
-    var now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
-
-    if (tokenInfo.isEmpty()) {
-      tokenResponse.setNumberOfHolders(0L);
-      tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
-      tokenResponse.setTotalVolume(String.valueOf(BigInteger.ZERO));
-    } else {
-      LocalDateTime updatedTime =
-          cardanoConverters.slot().slotToTime(tokenInfo.get().getUpdatedSlot());
-      if (updatedTime.plusDays(1).isBefore(now)) {
-        tokenResponse.setVolumeIn24h(String.valueOf(BigInteger.ZERO));
-      } else {
-        tokenResponse.setVolumeIn24h(String.valueOf(tokenInfo.get().getVolume24h()));
-      }
-      tokenResponse.setTotalVolume(String.valueOf(tokenInfo.get().getTotalVolume()));
-      tokenResponse.setNumberOfHolders(tokenInfo.get().getNumberOfHolders());
-    }
 
     AssetMetadata assetMetadata =
         assetMetadataRepository
@@ -237,30 +188,6 @@ public class TokenServiceImpl implements TokenService {
   public BaseFilterResponse<TokenMintTxResponse> getMintTxs(String tokenId, Pageable pageable) {
     Page<MaTxMint> maTxMints = maTxMintRepository.findByIdent(tokenId, pageable);
     return new BaseFilterResponse<>(maTxMints.map(maTxMintMapper::fromMaTxMintToTokenMintTx));
-  }
-
-  @Override
-  public BaseFilterResponse<TokenAddressResponse> getTopHolders(String tokenId, Pageable pageable) {
-    MultiAsset multiAsset =
-        multiAssetRepository
-            .findByFingerprint(tokenId)
-            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-
-    long numberOfHolders =
-        tokenInfoRepository
-            .findTokenInfoByUnit(multiAsset.getUnit())
-            .map(TokenInfo::getNumberOfHolders)
-            .orElse(0L);
-
-    List<TokenAddressResponse> tokenAddressResponses =
-        latestTokenBalanceRepository.getTopHolderOfToken(multiAsset.getUnit(), pageable).stream()
-            .map(tokenMapper::fromAddressTokenProjection)
-            .collect(Collectors.toList());
-
-    Page<TokenAddressResponse> tokenAddressResponsePage =
-        new PageImpl<>(tokenAddressResponses, pageable, numberOfHolders);
-
-    return new BaseFilterResponse<>(tokenAddressResponsePage);
   }
 
   @Override

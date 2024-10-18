@@ -1,7 +1,6 @@
 package org.cardanofoundation.explorer.api.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -39,14 +38,12 @@ import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmou
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.TopAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.impl.AddressServiceImpl;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Script;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.TopAddressBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +52,6 @@ class AddressServiceTest {
   @Mock AddressRepository addressRepository;
   @Mock ScriptRepository scriptRepository;
   @Mock LatestTokenBalanceRepository latestTokenBalanceRepository;
-  @Mock TopAddressBalanceRepository topAddressBalanceRepository;
   @Mock MultiAssetRepository multiAssetRepository;
   @Mock AddressTxCountRepository addressTxCountRepository;
   @Mock AddressTxAmountRepository addressTxAmountRepository;
@@ -239,27 +235,6 @@ class AddressServiceTest {
 
     var response = addressService.getAddressAnalytics(addr, type);
     Assertions.assertNotNull(response);
-  }
-
-  @Test
-  void getTopAddress_shouldReturn() {
-    Pageable pageable = PageRequest.of(0, 10);
-    TopAddressBalance topAddressBalance =
-        TopAddressBalance.builder().address("addr1").quantity(BigInteger.TEN).build();
-
-    AddressTxCount addressTxCount = AddressTxCount.builder().address("addr1").txCount(1L).build();
-
-    when(topAddressBalanceRepository.findAllLatestAddressBalance(pageable))
-        .thenReturn(List.of(topAddressBalance));
-
-    when(addressTxCountRepository.findAllByAddressIn(anyList()))
-        .thenReturn(List.of(addressTxCount));
-
-    var response = addressService.getTopAddress(pageable);
-    Assertions.assertEquals(1, response.getData().size());
-    Assertions.assertEquals(BigInteger.TEN, response.getData().get(0).getBalance());
-    Assertions.assertEquals(1L, response.getData().get(0).getTxCount());
-    Assertions.assertEquals("addr1", response.getData().get(0).getAddress());
   }
 
   @Test

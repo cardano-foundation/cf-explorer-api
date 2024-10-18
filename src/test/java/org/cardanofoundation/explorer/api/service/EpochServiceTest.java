@@ -414,8 +414,6 @@ class EpochServiceTest {
         .thenReturn(List.of(Epoch.builder().no(1).rewardsDistributed(BigInteger.ONE).build()));
     when(epochMapper.epochToEpochResponse(epoch))
         .thenReturn(EpochResponse.builder().no(1).startTime(now).endTime(now).build());
-    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
-    when(hashOperations.size(anyString())).thenReturn(1L);
     when(blockRepository.findLatestBlock())
         .thenReturn(
             Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));

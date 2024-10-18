@@ -342,32 +342,10 @@ public class BlockServiceImpl implements BlockService {
     Map<Long, SlotLeader> slotLeaderMap =
         slotLeaders.stream().collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
 
-    List<Tx> txList = txRepository.findByBlockIn(blocks.toList());
-
-    // create map with key: block_id, value : total output of block
-    Map<Long, BigInteger> blockTotalOutputMap =
-        txList.stream()
-            .collect(
-                Collectors.groupingBy(
-                    tx -> tx.getBlock().getId(),
-                    Collectors.reducing(BigInteger.ZERO, Tx::getOutSum, BigInteger::add)));
-    // create map with key: block_id, value : total fee of block
-    Map<Long, BigInteger> blockTotalFeeMap =
-        txList.stream()
-            .collect(
-                Collectors.groupingBy(
-                    tx -> tx.getBlock().getId(),
-                    Collectors.reducing(BigInteger.ZERO, Tx::getFee, BigInteger::add)));
-
     List<BlockFilterResponse> blockFilterResponseList = new ArrayList<>();
-
     for (Block block : blocks) {
       block.setSlotLeader(slotLeaderMap.get(block.getSlotLeaderId()));
       BlockFilterResponse blockResponse = blockMapper.blockToBlockFilterResponse(block);
-      var totalOutput = blockTotalOutputMap.get(block.getId());
-      var totalFees = blockTotalFeeMap.get(block.getId());
-      blockResponse.setTotalOutput(Objects.requireNonNullElse(totalOutput, BigInteger.ZERO));
-      blockResponse.setTotalFees(Objects.requireNonNullElse(totalFees, BigInteger.ZERO));
       blockFilterResponseList.add(blockResponse);
     }
     return new BaseFilterResponse<>(blocks, blockFilterResponseList);
