@@ -167,6 +167,7 @@ public class BlockServiceTest {
     when(blockMapper.blockToBlockFilterResponse(any(Block.class)))
         .thenReturn(new BlockFilterResponse());
     when(slotLeaderRepository.findByIdIn(anyList())).thenReturn(Collections.emptyList());
+    when(txRepository.findByBlockIn(anyList())).thenReturn(txList);
 
     // Call the service method
     BaseFilterResponse<BlockFilterResponse> response = blockService.filterBlock(pageable);
@@ -175,6 +176,7 @@ public class BlockServiceTest {
     verify(blockRepository).findAllBlock(pageable);
     verify(blockMapper).blockToBlockFilterResponse(any(Block.class));
     verify(slotLeaderRepository).findByIdIn(anyList());
+    verify(txRepository).findByBlockIn(anyList());
     assertEquals(response.getData().size(), 1);
     assertEquals(response.getTotalItems(), 1);
   }
@@ -192,6 +194,7 @@ public class BlockServiceTest {
     when(blockMapper.blockToBlockFilterResponse(any(Block.class)))
         .thenReturn(new BlockFilterResponse());
     when(slotLeaderRepository.findByIdIn(anyList())).thenReturn(Collections.emptyList());
+    when(txRepository.findByBlockIn(anyList())).thenReturn(Collections.emptyList());
 
     // Call the service method
     BaseFilterResponse<BlockFilterResponse> response = blockService.getBlockByEpoch(no, pageable);
@@ -200,6 +203,7 @@ public class BlockServiceTest {
     verify(blockRepository).findBlockByEpochNo(epochNo, pageable);
     verify(blockMapper).blockToBlockFilterResponse(any(Block.class));
     verify(slotLeaderRepository).findByIdIn(anyList());
+    verify(txRepository).findByBlockIn(anyList());
     assertEquals(response.getData().size(), 1);
     assertEquals(response.getTotalItems(), 1);
   }

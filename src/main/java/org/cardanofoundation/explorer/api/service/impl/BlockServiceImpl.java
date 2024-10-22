@@ -128,7 +128,7 @@ public class BlockServiceImpl implements BlockService {
     } else {
       blockPage = blockRepository.findAllBlock(pageable);
     }
-    return mapperBlockToBlockFilterResponse(blockPage);
+    return mapperBlockToBlockFilterResponse(blockPage, true);
   }
 
   /**
@@ -306,7 +306,7 @@ public class BlockServiceImpl implements BlockService {
     try {
       Integer epochNo = Integer.parseInt(no);
       Page<Block> blocks = blockRepository.findBlockByEpochNo(epochNo, pageable);
-      return mapperBlockToBlockFilterResponse(blocks);
+      return mapperBlockToBlockFilterResponse(blocks, false);
     } catch (NumberFormatException e) {
       throw new NoContentException(BusinessCode.EPOCH_NOT_FOUND);
     }
@@ -334,7 +334,7 @@ public class BlockServiceImpl implements BlockService {
    * @return list block information in this page
    */
   private BaseFilterResponse<BlockFilterResponse> mapperBlockToBlockFilterResponse(
-      Page<Block> blocks) {
+      Page<Block> blocks, boolean isGetAllBlock) {
     // get slot leader for block
     List<SlotLeader> slotLeaders =
         slotLeaderRepository.findByIdIn(
@@ -342,10 +342,36 @@ public class BlockServiceImpl implements BlockService {
     Map<Long, SlotLeader> slotLeaderMap =
         slotLeaders.stream().collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
 
+    List<Tx> txList = txRepository.findByBlockIn(blocks.toList());
+
+    // create map with key: block_id, value : total output of block
+    Map<Long, BigInteger> blockTotalOutputMap =
+        txList.stream()
+            .collect(
+                Collectors.groupingBy(
+                    tx -> tx.getBlock().getId(),
+                    Collectors.reducing(BigInteger.ZERO, Tx::getOutSum, BigInteger::add)));
+    // create map with key: block_id, value : total fee of block
+    Map<Long, BigInteger> blockTotalFeeMap =
+        txList.stream()
+            .collect(
+                Collectors.groupingBy(
+                    tx -> tx.getBlock().getId(),
+                    Collectors.reducing(BigInteger.ZERO, Tx::getFee, BigInteger::add)));
+
     List<BlockFilterResponse> blockFilterResponseList = new ArrayList<>();
+
     for (Block block : blocks) {
       block.setSlotLeader(slotLeaderMap.get(block.getSlotLeaderId()));
       BlockFilterResponse blockResponse = blockMapper.blockToBlockFilterResponse(block);
+      if (!isGetAllBlock) {
+        var totalOutput = blockTotalOutputMap.get(block.getId());
+        var totalFees = blockTotalFeeMap.get(block.getId());
+        blockResponse.setTotalOutput(Objects.requireNonNullElse(totalOutput, BigInteger.ZERO));
+        blockResponse.setTotalFees(Objects.requireNonNullElse(totalFees, BigInteger.ZERO));
+      } else {
+        blockResponse.setTxCount(null);
+      }
       blockFilterResponseList.add(blockResponse);
     }
     return new BaseFilterResponse<>(blocks, blockFilterResponseList);
