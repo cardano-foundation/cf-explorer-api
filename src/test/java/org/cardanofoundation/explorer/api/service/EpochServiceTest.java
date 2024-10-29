@@ -415,6 +415,9 @@ class EpochServiceTest {
             Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
 
+    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+    when(hashOperations.size(any())).thenReturn(0l);
+
     var response = epochService.getAllEpoch(pageable);
     Assertions.assertEquals(response.getTotalItems(), 1);
     Assertions.assertEquals(response.getTotalPages(), 1);
