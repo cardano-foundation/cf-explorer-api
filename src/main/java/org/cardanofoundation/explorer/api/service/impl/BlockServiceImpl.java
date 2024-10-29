@@ -128,7 +128,7 @@ public class BlockServiceImpl implements BlockService {
     } else {
       blockPage = blockRepository.findAllBlock(pageable);
     }
-    return mapperBlockToBlockFilterResponse(blockPage, true);
+    return mapperBlockToBlockFilterResponse(blockPage, false);
   }
 
   /**
