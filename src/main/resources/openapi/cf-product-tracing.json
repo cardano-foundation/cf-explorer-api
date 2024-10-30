@@ -1,0 +1,163 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8081",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Product Tracing Controller",
+      "description": "APIs for Product Tracing"
+    }
+  ],
+  "paths": {
+    "/productaggregation": {
+      "get": {
+        "tags": [
+          "Product Tracing Controller"
+        ],
+        "summary": "All Product Aggregations",
+        "description": "Get all product aggregations",
+        "operationId": "getAllProductAggregations",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All product aggregations found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductAggregationRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/productaggregation/{slot}": {
+      "get": {
+        "tags": [
+          "Product Tracing Controller"
+        ],
+        "summary": "Product Aggregation for Slot",
+        "description": "Get the product aggregation for a specific slot",
+        "operationId": "getProductAggregationForSlot",
+        "parameters": [
+          {
+            "name": "slot",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product aggregation found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductAggregationRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product aggregation not found"
+          }
+        }
+      }
+    },
+    "/productaggregation/latest": {
+      "get": {
+        "tags": [
+          "Product Tracing Controller"
+        ],
+        "summary": "Latest Product Aggregation",
+        "description": "Get the latest product aggregation",
+        "operationId": "getLatestProductAggregation",
+        "responses": {
+          "200": {
+            "description": "Latest product aggregation found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductAggregationRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Latest product aggregation not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProductAggregationRecord": {
+        "type": "object",
+        "properties": {
+          "certificates": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "producers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "units": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "slot": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    }
+  }
+}

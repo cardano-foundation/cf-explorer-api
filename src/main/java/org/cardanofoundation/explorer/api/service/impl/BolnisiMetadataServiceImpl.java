@@ -20,16 +20,20 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.example.api.model.ProductAggregationRecord;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
 
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
+import org.cardanofoundation.explorer.api.mapper.ProductAggMapper;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.*;
 import org.cardanofoundation.explorer.api.model.response.BolnisiProjectNumberResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.TxMetadataRepository;
@@ -50,9 +54,13 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
   private final TxMetadataRepository txMetadataRepository;
   private final WebClient webClient;
   private final RedisTemplate<String, Object> redisTemplate;
+  private final ProductAggMapper productAggMapper;
 
   @Value("${application.network}")
   private String network;
+
+  @Value("${application.api.product-aggregator.latest-url}")
+  private String latestProductAggregation;
 
   @Value("${application.api.bolnisi.off-chain}")
   private String offChainMetadataUrl;
@@ -199,13 +207,10 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
   @Override
   public BolnisiProjectNumberResponse getBolnisiProjectNumber() {
-    BolnisiProjectNumberResponse response = new BolnisiProjectNumberResponse();
-    // Hardcoded values for the number of bottles, wineries, and certificates
-    // TODO
-    response.setNumberOfBottles(BigInteger.valueOf(71683));
-    response.setNumberOfWineries(BigInteger.valueOf(29));
-    response.setNumberOfCertificates(BigInteger.valueOf(1));
-    return response;
+    RestTemplate template = new RestTemplate();
+    ResponseEntity<ProductAggregationRecord> productAggResponseEntity =
+        template.getForEntity(latestProductAggregation, ProductAggregationRecord.class);
+    return productAggMapper.toBolnisiProjectResponse(productAggResponseEntity.getBody());
   }
 
   /**
