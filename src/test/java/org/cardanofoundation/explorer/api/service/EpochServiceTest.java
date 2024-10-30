@@ -417,14 +417,16 @@ class EpochServiceTest {
     when(blockRepository.findLatestBlock())
         .thenReturn(
             Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
+    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+    when(hashOperations.size(anyString())).thenReturn(1L);
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
 
     var response = epochService.getAllEpoch(pageable);
-    Assertions.assertEquals(response.getTotalItems(), 1);
-    Assertions.assertEquals(response.getTotalPages(), 1);
-    Assertions.assertEquals(response.getCurrentPage(), 0);
-    Assertions.assertEquals(response.getData().get(0).getNo(), 1);
-    Assertions.assertEquals(response.getData().get(0).getStatus(), EpochStatus.FINISHED);
+    Assertions.assertEquals(1, response.getTotalItems());
+    Assertions.assertEquals(1, response.getTotalPages());
+    Assertions.assertEquals(0, response.getCurrentPage());
+    Assertions.assertEquals(1, response.getData().get(0).getNo());
+    Assertions.assertEquals(EpochStatus.FINISHED, response.getData().get(0).getStatus());
     Assertions.assertEquals(response.getData().get(0).getStartTime().format(dtf), now.format(dtf));
     Assertions.assertEquals(response.getData().get(0).getEndTime().format(dtf), now.format(dtf));
   }
