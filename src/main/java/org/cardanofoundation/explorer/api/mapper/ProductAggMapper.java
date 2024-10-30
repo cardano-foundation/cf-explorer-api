@@ -9,9 +9,9 @@ import org.cardanofoundation.explorer.api.model.response.BolnisiProjectNumberRes
 @Mapper(componentModel = "spring")
 public interface ProductAggMapper {
 
-  @Mapping(target = "certificates", source = "productAggregationRecord.certificates")
-  @Mapping(target = "producers", source = "productAggregationRecord.producers")
-  @Mapping(target = "units", source = "productAggregationRecord.units")
+  @Mapping(target = "numberOfCertificates", source = "productAggregationRecord.certificates")
+  @Mapping(target = "numberOfWineries", source = "productAggregationRecord.producers")
+  @Mapping(target = "numberOfBottles", source = "productAggregationRecord.units")
   BolnisiProjectNumberResponse toBolnisiProjectResponse(
       ProductAggregationRecord productAggregationRecord);
 }
