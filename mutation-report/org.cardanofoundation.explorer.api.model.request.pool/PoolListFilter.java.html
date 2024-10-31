@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>PoolListFilter.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.cardanofoundation.explorer.api.model.request.pool;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.math.BigInteger;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.AllArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.EqualsAndHashCode;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Getter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.NoArgsConstructor;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.Setter;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import lombok.experimental.SuperBuilder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Getter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@Setter</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>@NoArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>@AllArgsConstructor</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_16'/>
+16
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_16'>18</a>
+<span>
+1. minPledge : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minPledge &rarr; NO_COVERAGE<br/>
+2. toString : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::toString &rarr; NO_COVERAGE<br/>
+3. minSaturation : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minSaturation &rarr; NO_COVERAGE<br/>
+4. maxPoolSize : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxPoolSize &rarr; NO_COVERAGE<br/>
+5. minPoolSize : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minPoolSize &rarr; NO_COVERAGE<br/>
+6. minVotingPower : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minVotingPower &rarr; NO_COVERAGE<br/>
+7. minGovParticipationRate : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minGovParticipationRate &rarr; NO_COVERAGE<br/>
+8. maxPledge : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxPledge &rarr; NO_COVERAGE<br/>
+9. maxSaturation : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxSaturation &rarr; NO_COVERAGE<br/>
+10. maxGovParticipationRate : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxGovParticipationRate &rarr; NO_COVERAGE<br/>
+11. minBlockLifetime : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minBlockLifetime &rarr; NO_COVERAGE<br/>
+12. maxBlockLifetime : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxBlockLifetime &rarr; NO_COVERAGE<br/>
+13. maxVotingPower : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxVotingPower &rarr; NO_COVERAGE<br/>
+14. build : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilderImpl::build &rarr; KILLED<br/>
+15. self : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilderImpl::self &rarr; KILLED<br/>
+16. isShowRetired : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::isShowRetired &rarr; KILLED<br/>
+17. query : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::query &rarr; KILLED<br/>
+18. builder : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::builder &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@SuperBuilder</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_17'/>
+17
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_17'>108</a>
+<span>
+1. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+2. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+3. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+4. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+5. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+6. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+7. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+8. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+9. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+10. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+11. equals : replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+12. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+13. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+14. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+15. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+16. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+17. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+18. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+19. equals : negated conditional &rarr; NO_COVERAGE<br/>
+20. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+21. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+22. equals : negated conditional &rarr; NO_COVERAGE<br/>
+23. equals : negated conditional &rarr; NO_COVERAGE<br/>
+24. equals : negated conditional &rarr; NO_COVERAGE<br/>
+25. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+26. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+27. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+28. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+29. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+30. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+31. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+32. equals : negated conditional &rarr; SURVIVED<br/>
+33. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+34. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+35. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+36. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+37. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+38. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+39. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+40. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+41. equals : negated conditional &rarr; NO_COVERAGE<br/>
+42. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+43. equals : negated conditional &rarr; NO_COVERAGE<br/>
+44. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+45. equals : negated conditional &rarr; NO_COVERAGE<br/>
+46. equals : negated conditional &rarr; NO_COVERAGE<br/>
+47. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+48. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+49. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+50. equals : negated conditional &rarr; NO_COVERAGE<br/>
+51. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+52. equals : negated conditional &rarr; NO_COVERAGE<br/>
+53. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+54. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+55. equals : negated conditional &rarr; NO_COVERAGE<br/>
+56. equals : negated conditional &rarr; NO_COVERAGE<br/>
+57. equals : negated conditional &rarr; NO_COVERAGE<br/>
+58. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+59. equals : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE<br/>
+60. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+61. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+62. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+63. equals : negated conditional &rarr; NO_COVERAGE<br/>
+64. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+65. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+66. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+67. hashCode : replaced int return with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::hashCode &rarr; NO_COVERAGE<br/>
+68. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+69. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+70. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+71. hashCode : Replaced integer addition with subtraction &rarr; NO_COVERAGE<br/>
+72. canEqual : replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::canEqual &rarr; SURVIVED<br/>
+73. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+74. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+75. hashCode : Replaced integer multiplication with division &rarr; NO_COVERAGE<br/>
+76. hashCode : negated conditional &rarr; NO_COVERAGE<br/>
+77. equals : negated conditional &rarr; KILLED<br/>
+78. equals : negated conditional &rarr; KILLED<br/>
+79. equals : negated conditional &rarr; KILLED<br/>
+80. equals : negated conditional &rarr; KILLED<br/>
+81. equals : negated conditional &rarr; KILLED<br/>
+82. equals : replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; KILLED<br/>
+83. equals : negated conditional &rarr; KILLED<br/>
+84. equals : negated conditional &rarr; KILLED<br/>
+85. equals : negated conditional &rarr; KILLED<br/>
+86. equals : negated conditional &rarr; KILLED<br/>
+87. equals : negated conditional &rarr; KILLED<br/>
+88. equals : negated conditional &rarr; KILLED<br/>
+89. equals : negated conditional &rarr; KILLED<br/>
+90. equals : negated conditional &rarr; KILLED<br/>
+91. equals : negated conditional &rarr; KILLED<br/>
+92. equals : negated conditional &rarr; KILLED<br/>
+93. equals : negated conditional &rarr; KILLED<br/>
+94. equals : negated conditional &rarr; KILLED<br/>
+95. equals : negated conditional &rarr; KILLED<br/>
+96. equals : negated conditional &rarr; KILLED<br/>
+97. canEqual : replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::canEqual &rarr; KILLED<br/>
+98. equals : negated conditional &rarr; KILLED<br/>
+99. equals : negated conditional &rarr; KILLED<br/>
+100. equals : negated conditional &rarr; KILLED<br/>
+101. equals : negated conditional &rarr; KILLED<br/>
+102. equals : negated conditional &rarr; KILLED<br/>
+103. equals : negated conditional &rarr; KILLED<br/>
+104. equals : negated conditional &rarr; KILLED<br/>
+105. equals : negated conditional &rarr; KILLED<br/>
+106. equals : negated conditional &rarr; KILLED<br/>
+107. equals : negated conditional &rarr; KILLED<br/>
+108. equals : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>@EqualsAndHashCode</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class PoolListFilter {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_19'/>
+19
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_19'>1</a>
+<span>
+1. getQuery : replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getQuery &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  String query;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_21'/>
+21
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_21'>1</a>
+<span>
+1. getMaxPoolSize : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxPoolSize &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  BigInteger maxPoolSize;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_23'/>
+23
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_23'>1</a>
+<span>
+1. getMinPoolSize : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinPoolSize &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  BigInteger minPoolSize;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_25'/>
+25
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_25'>1</a>
+<span>
+1. getMinPledge : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinPledge &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  BigInteger minPledge;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_27'/>
+27
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_27'>1</a>
+<span>
+1. getMaxPledge : replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxPledge &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  BigInteger maxPledge;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_29'/>
+29
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_29'>1</a>
+<span>
+1. getMinSaturation : replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinSaturation &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Double minSaturation;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_31'/>
+31
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_31'>1</a>
+<span>
+1. getMaxSaturation : replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxSaturation &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Double maxSaturation;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_33'/>
+33
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_33'>1</a>
+<span>
+1. getMinBlockLifetime : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinBlockLifetime &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Integer minBlockLifetime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_35'/>
+35
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_35'>1</a>
+<span>
+1. getMaxBlockLifetime : replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxBlockLifetime &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Integer maxBlockLifetime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_37'/>
+37
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_37'>1</a>
+<span>
+1. getMinVotingPower : replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinVotingPower &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Double minVotingPower;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_39'/>
+39
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_39'>1</a>
+<span>
+1. getMaxVotingPower : replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxVotingPower &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Double maxVotingPower;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_41'/>
+41
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_41'>1</a>
+<span>
+1. getMinGovParticipationRate : replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinGovParticipationRate &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Double minGovParticipationRate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_43'/>
+43
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_43'>1</a>
+<span>
+1. getMaxGovParticipationRate : replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxGovParticipationRate &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Double maxGovParticipationRate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_45'/>
+45
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_45'>2</a>
+<span>
+1. getIsShowRetired : replaced Boolean return with True for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getIsShowRetired &rarr; SURVIVED<br/>
+2. getIsShowRetired : replaced Boolean return with False for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getIsShowRetired &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>  Boolean isShowRetired;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@679d1375_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_16'>16</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_16'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>minPledge<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minPledge &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>build<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilderImpl::build &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>toString<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::toString &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>minSaturation<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minSaturation &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>maxPoolSize<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxPoolSize &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>minPoolSize<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minPoolSize &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>self<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilderImpl::self &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>minVotingPower<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minVotingPower &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>minGovParticipationRate<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minGovParticipationRate &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>isShowRetired<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::isShowRetired &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>maxPledge<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxPledge &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>maxSaturation<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxSaturation &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>maxGovParticipationRate<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxGovParticipationRate &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>minBlockLifetime<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::minBlockLifetime &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>maxBlockLifetime<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxBlockLifetime &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>query<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForPoolTable_withSearch()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::query &rarr; KILLED</p> <p class='KILLED'><span class='pop'>17.<span><b>17</b><br/><b>Location : </b>builder<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::builder &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>18.<span><b>18</b><br/><b>Location : </b>maxVotingPower<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter$PoolListFilterBuilder::maxVotingPower &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_17'>17</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_17'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>6.<span><b>6</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>7.<span><b>7</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>8.<span><b>8</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>9.<span><b>9</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>10.<span><b>10</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>11.<span><b>11</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>12.<span><b>12</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>13.<span><b>13</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>14.<span><b>14</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>15.<span><b>15</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>16.<span><b>16</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>17.<span><b>17</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>18.<span><b>18</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>19.<span><b>19</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>20.<span><b>20</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>21.<span><b>21</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>22.<span><b>22</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>23.<span><b>23</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>24.<span><b>24</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>25.<span><b>25</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>26.<span><b>26</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>27.<span><b>27</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>28.<span><b>28</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>29.<span><b>29</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>30.<span><b>30</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>31.<span><b>31</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>32.<span><b>32</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>33.<span><b>33</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>34.<span><b>34</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>35.<span><b>35</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>36.<span><b>36</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>37.<span><b>37</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>38.<span><b>38</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>39.<span><b>39</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>40.<span><b>40</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='SURVIVED'><span class='pop'>41.<span><b>41</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>42.<span><b>42</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>43.<span><b>43</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>44.<span><b>44</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>45.<span><b>45</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>46.<span><b>46</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>47.<span><b>47</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>48.<span><b>48</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>49.<span><b>49</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>50.<span><b>50</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>51.<span><b>51</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>52.<span><b>52</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>53.<span><b>53</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>54.<span><b>54</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>55.<span><b>55</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>56.<span><b>56</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>57.<span><b>57</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>58.<span><b>58</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>59.<span><b>59</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>60.<span><b>60</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>61.<span><b>61</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>62.<span><b>62</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>63.<span><b>63</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>64.<span><b>64</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>65.<span><b>65</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>66.<span><b>66</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>67.<span><b>67</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>68.<span><b>68</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>69.<span><b>69</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>70.<span><b>70</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>71.<span><b>71</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>72.<span><b>72</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>73.<span><b>73</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>74.<span><b>74</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>75.<span><b>75</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>76.<span><b>76</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>77.<span><b>77</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> replaced boolean return with false for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::canEqual &rarr; KILLED</p> <p class='KILLED'><span class='pop'>78.<span><b>78</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>79.<span><b>79</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>80.<span><b>80</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>81.<span><b>81</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>82.<span><b>82</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>83.<span><b>83</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>84.<span><b>84</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::equals &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>85.<span><b>85</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>86.<span><b>86</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>87.<span><b>87</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>88.<span><b>88</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>89.<span><b>89</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>90.<span><b>90</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>91.<span><b>91</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>92.<span><b>92</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>93.<span><b>93</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>94.<span><b>94</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>95.<span><b>95</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> replaced int return with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::hashCode &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>96.<span><b>96</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>97.<span><b>97</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>98.<span><b>98</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>99.<span><b>99</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer addition with subtraction &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>100.<span><b>100</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>101.<span><b>101</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>102.<span><b>102</b><br/><b>Location : </b>canEqual<br/><b>Killed by : </b>none</span></span> replaced boolean return with true for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::canEqual &rarr; SURVIVED</p> <p class='NO_COVERAGE'><span class='pop'>103.<span><b>103</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>104.<span><b>104</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>105.<span><b>105</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='NO_COVERAGE'><span class='pop'>106.<span><b>106</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> Replaced integer multiplication with division &rarr; NO_COVERAGE</p> <p class='KILLED'><span class='pop'>107.<span><b>107</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()]</span></span> negated conditional &rarr; KILLED</p> <p class='NO_COVERAGE'><span class='pop'>108.<span><b>108</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> negated conditional &rarr; NO_COVERAGE</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_19'>19</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_19'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getQuery<br/><b>Killed by : </b>none</span></span> replaced return value with &#34;&#34; for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getQuery &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_21'>21</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_21'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMaxPoolSize<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxPoolSize &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_23'>23</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_23'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMinPoolSize<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinPoolSize &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_25'>25</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_25'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMinPledge<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinPledge &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_27'>27</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_27'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMaxPledge<br/><b>Killed by : </b>none</span></span> replaced return value with null for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxPledge &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_29'>29</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_29'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMinSaturation<br/><b>Killed by : </b>none</span></span> replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinSaturation &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_31'>31</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_31'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMaxSaturation<br/><b>Killed by : </b>none</span></span> replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxSaturation &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_33'>33</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_33'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMinBlockLifetime<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinBlockLifetime &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_35'>35</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_35'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMaxBlockLifetime<br/><b>Killed by : </b>none</span></span> replaced Integer return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxBlockLifetime &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_37'>37</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_37'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMinVotingPower<br/><b>Killed by : </b>none</span></span> replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinVotingPower &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_39'>39</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_39'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMaxVotingPower<br/><b>Killed by : </b>none</span></span> replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxVotingPower &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_41'>41</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_41'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMinGovParticipationRate<br/><b>Killed by : </b>none</span></span> replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMinGovParticipationRate &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_43'>43</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_43'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMaxGovParticipationRate<br/><b>Killed by : </b>none</span></span> replaced Double return value with 0 for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getMaxGovParticipationRate &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@679d1375_45'>45</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@679d1375_45'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getIsShowRetired<br/><b>Killed by : </b>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForPoolTable_withoutSearch()]</span></span> replaced Boolean return with False for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getIsShowRetired &rarr; KILLED</p> <p class='SURVIVED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>getIsShowRetired<br/><b>Killed by : </b>none</span></span> replaced Boolean return with True for org/cardanofoundation/explorer/api/model/request/pool/PoolListFilter::getIsShowRetired &rarr; SURVIVED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForPoolTable_withSearch()] (478 ms)</li><li>org.cardanofoundation.explorer.api.controller.DelegationControllerTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.controller.DelegationControllerTest]/[method:testGetDataForPoolTable()] (196 ms)</li><li>org.cardanofoundation.explorer.api.service.DelegationServiceTest.[engine:junit-jupiter]/[class:org.cardanofoundation.explorer.api.service.DelegationServiceTest]/[method:testGetDataForPoolTable_withoutSearch()] (4119 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.14.2
+
+</body>
+</html>
