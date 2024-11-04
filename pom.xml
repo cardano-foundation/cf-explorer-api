@@ -480,8 +480,8 @@
                             <inputSpec>${project.basedir}/src/main/resources/openapi/cf-product-tracing.json
                             </inputSpec>
                             <generatorName>spring</generatorName>
-                            <modelPackage>com.example.api.model</modelPackage>
-                            <apiPackage>com.example.api.client</apiPackage>
+                            <modelPackage>org.cardanofoundation.cf-product-tracing-aggregator</modelPackage>
+                            <apiPackage>org.cardanofoundation.cf-product-tracing-aggregator</apiPackage>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <generateApis>false</generateApis>
                             <configOptions>

@@ -1,9 +1,9 @@
 package org.cardanofoundation.explorer.api.mapper;
 
-import com.example.api.model.ProductAggregationRecord;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import org.cardanofoundation.cf_product_tracing_aggregator.ProductAggregationRecord;
 import org.cardanofoundation.explorer.api.model.response.BolnisiProjectNumberResponse;
 
 @Mapper(componentModel = "spring")
