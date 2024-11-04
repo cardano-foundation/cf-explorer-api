@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "7720f14b-e73a-40f0-9b37-aa50a8b204ed",
 		"name": "Cardano Explorer API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "32834089"
 	},
 	"item": [
@@ -28,13 +28,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "POST",
 								"header": [
@@ -51,18 +47,7 @@
 									"mode": "raw",
 									"raw": "//Acount dev site\n// {\n//   \"type\": 0,\n//   \"email\": \"hanh.luu@sotatek.com\",\n//   \"password\": \"Test1234@\"\n// }\n\n// uat site\n{\n  \"type\": 0,\n  \"email\": \"duc.phung@sotatek.com\",\n  \"password\": \"Minhduc123@\"\n}\n"
 								},
-								"url": {
-									"raw": "{{baseUrl-Auth}}/api/v1/auth/sign-in",
-									"host": [
-										"{{baseUrl-Auth}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"sign-in"
-									]
-								}
+								"url": "{{baseUrl-Auth}}/api/v1/auth/sign-in"
 							},
 							"response": []
 						}
@@ -121,10 +106,6 @@
 											"  pm.expect(jsonData.endTime).to.include(moment(jsonData.endTime).format('YYYY/MM/DD HH:mm:ss'));\r",
 											"});\r",
 											"\r",
-											"pm.test(\"Check data type of circulatingSupply\", () => {\r",
-											"  pm.expect(jsonData.circulatingSupply).to.be.a(\"number\");\r",
-											"});\r",
-											"\r",
 											"pm.test(\"Check data type of blkCount\", () => {\r",
 											"  pm.expect(jsonData.blkCount).to.be.a(\"number\");\r",
 											"});\r",
@@ -154,18 +135,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/epochs/current",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"epochs",
-										"current"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/epochs/current"
 							},
 							"response": [
 								{
@@ -183,18 +153,7 @@
 												"value": "*/*"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/epochs/current",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"epochs",
-												"current"
-											]
-										}
+										"url": "{{baseUrl}}/api/v1/epochs/current"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1362,18 +1321,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/txs/current",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"txs",
-										"current"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/txs/current"
 							},
 							"response": [
 								{
@@ -1391,18 +1339,7 @@
 												"value": "*/*"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/txs/current",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"txs",
-												"current"
-											]
-										}
+										"url": "{{baseUrl}}/api/v1/txs/current"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1518,7 +1455,6 @@
 											"\r",
 											"    //Main compare\r",
 											"    pm.expect(result.blockNo).to.eql(pm.environment.get(\"tx_blockNo\"));\r",
-											"    pm.expect((result.totalOutput / 10 ** 6).toFixed(2)).to.eql(((pm.environment.get(\"tx_amount\")) / 10 ** 6).toFixed(2));\r",
 											"    pm.expect(result.epochNo).to.eql(pm.environment.get(\"tx_epochNo\"));\r",
 											"    pm.expect(result.epochSlotNo).to.eql(pm.environment.get(\"tx_epochSlotNo\"));\r",
 											"    pm.expect(result.slot).to.eql(pm.environment.get(\"tx_slot\"));\r",
@@ -1897,7 +1833,6 @@
 											"    pm.expect(jsonData.tx.status).to.be.a(\"string\");\r",
 											"    pm.expect(jsonData.tx.confirmation).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.tx.fee).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.tx.totalOutput).to.be.a(\"number\");\r",
 											"});\r",
 											"\r",
 											"const checkToken = (data) => {\r",
@@ -2240,13 +2175,10 @@
 											"    pm.expect(jsonData.tx.fee).to.eql(pm.environment.get(\"tx_fee\"));\r",
 											"});\r",
 											"\r",
-											"pm.test(\"Check totalOutput value\", function () {\r",
-											"    pm.expect((jsonData.tx.totalOutput / 10 ** 6).toFixed(2)).to.eql((pm.environment.get(\"tx_amount\") / 10 ** 6).toFixed(2));\r",
-											"});\r",
-											"\r",
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -2595,7 +2527,8 @@
 										"exec": [
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -2634,7 +2567,8 @@
 											"});\r",
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -2661,7 +2595,7 @@
 									"variable": [
 										{
 											"key": "range",
-											"value": "ONE_WEEK",
+											"value": "ONE_MONTH",
 											"description": "(Required) "
 										}
 									]
@@ -3196,10 +3130,7 @@
 											"    pm.expect(jsonData.data[0].epochSlotNo).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].slot).to.be.a(\"number\");\r",
 											"    pm.expect(jsonData.data[0].time).to.include(moment(jsonData.data[0].time).format('YYYY/MM/DD HH:mm:ss'));\r",
-											"    pm.expect(jsonData.data[0].addressesInput).to.be.an(\"array\");\r",
-											"    pm.expect(jsonData.data[0].addressesOutput).to.be.an(\"array\");\r",
 											"    pm.expect(jsonData.data[0].fee).to.be.a(\"number\");\r",
-											"    pm.expect(jsonData.data[0].totalOutput).to.be.a(\"number\");\r",
 											"    if (jsonData.data[0].balance){\r",
 											"       pm.expect(typeof jsonData.data[0].balance).to.be.oneOf([ 'object', 'number']); \r",
 											"    }\r",
@@ -3232,7 +3163,6 @@
 											"    pm.expect(tb_result.epochSlotNo).to.eql(tx_epochSlotNo);\r",
 											"    pm.expect(tb_result.time).to.contain(tx_time);\r",
 											"    pm.expect(tb_result.fee).to.eql(tx_fee);\r",
-											"    pm.expect(tb_result.totalOutput).to.eql(tx_amount);\r",
 											"});\r",
 											"\r",
 											"// Check default size \r",
@@ -3246,7 +3176,8 @@
 											"\r",
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -3899,13 +3830,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "POST",
 								"header": [
@@ -3989,19 +3916,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/staking-lifecycle/report/stake-key",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"staking-lifecycle",
-												"report",
-												"stake-key"
-											]
-										}
+										"url": "{{baseUrl}}/api/v1/staking-lifecycle/report/stake-key"
 									},
 									"status": "OK",
 									"code": 200,
@@ -4087,13 +4002,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -4202,13 +4113,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -4217,21 +4124,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/staking-lifecycle/report/stake-key/{{over_stakinglifecycle_id}}/detail",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"staking-lifecycle",
-										"report",
-										"stake-key",
-										"{{over_stakinglifecycle_id}}",
-										"detail"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/staking-lifecycle/report/stake-key/{{over_stakinglifecycle_id}}/detail"
 							},
 							"response": []
 						},
@@ -4319,13 +4212,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -4477,13 +4366,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -4566,13 +4451,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -4656,13 +4537,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -4744,13 +4621,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -4872,13 +4745,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5023,13 +4892,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5102,13 +4967,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5186,13 +5047,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5271,13 +5128,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5354,13 +5207,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5479,13 +5328,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5630,13 +5475,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5716,13 +5557,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5799,13 +5636,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5884,13 +5717,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -5967,13 +5796,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6091,13 +5916,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6242,13 +6063,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6328,13 +6145,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6411,13 +6224,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6496,13 +6305,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6579,13 +6384,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6702,13 +6503,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6853,13 +6650,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -6932,13 +6725,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7015,13 +6804,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7100,13 +6885,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7183,13 +6964,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7247,13 +7024,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7413,13 +7186,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7564,13 +7333,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7643,13 +7408,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7726,13 +7487,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7811,13 +7568,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -7894,13 +7647,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8019,13 +7768,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8170,13 +7915,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8249,13 +7990,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8332,13 +8069,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8417,13 +8150,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8500,13 +8229,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8645,13 +8370,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8789,13 +8510,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8870,13 +8587,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -8953,13 +8666,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9034,13 +8743,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9125,13 +8830,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9141,19 +8842,7 @@
 										"type": "text"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/staking-lifecycle/report/report-limit",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"staking-lifecycle",
-										"report",
-										"report-limit"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/staking-lifecycle/report/report-limit"
 							},
 							"response": []
 						}
@@ -9242,13 +8931,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9388,13 +9073,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9469,13 +9150,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9550,13 +9227,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9631,13 +9304,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9753,13 +9422,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -9917,13 +9582,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10008,13 +9669,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10099,13 +9756,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10190,13 +9843,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10311,13 +9960,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10458,13 +10103,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10538,13 +10179,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10618,13 +10255,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10698,13 +10331,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -10830,13 +10459,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -11005,13 +10630,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -11100,13 +10721,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -11195,13 +10812,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -11290,13 +10903,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -11567,13 +11176,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -11735,13 +11340,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -11831,13 +11432,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -11927,13 +11524,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -12024,13 +11617,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -12156,13 +11745,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -12328,13 +11913,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -12496,13 +12077,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -12592,13 +12169,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -12688,13 +12261,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -12784,13 +12353,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -13037,13 +12602,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -13197,13 +12758,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -13372,13 +12929,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -13468,13 +13021,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -13564,13 +13113,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -13660,13 +13205,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -13787,13 +13328,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -14799,18 +14336,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/stakes/analytics",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"stakes",
-										"analytics"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/stakes/analytics"
 							},
 							"response": [
 								{
@@ -14828,18 +14354,7 @@
 												"value": "*/*"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/stakes/analytics",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"stakes",
-												"analytics"
-											]
-										}
+										"url": "{{baseUrl}}/api/v1/stakes/analytics"
 									},
 									"status": "OK",
 									"code": 200,
@@ -14890,13 +14405,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -15010,13 +14521,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -19005,13 +18512,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{access_token}}"
+									}
 								},
 								"method": "POST",
 								"header": [
@@ -24712,18 +24215,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/delegations/header",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"delegations",
-										"header"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/delegations/header"
 							},
 							"response": [
 								{
@@ -24741,18 +24233,7 @@
 												"value": "*/*"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/delegations/header",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"delegations",
-												"header"
-											]
-										}
+										"url": "{{baseUrl}}/api/v1/delegations/header"
 									},
 									"status": "OK",
 									"code": 200,
@@ -29139,13 +28620,9 @@
 									"request": {
 										"auth": {
 											"type": "bearer",
-											"bearer": [
-												{
-													"key": "token",
-													"value": "{{Bearer Token}}",
-													"type": "string"
-												}
-											]
+											"bearer": {
+												"token": "{{Bearer Token}}"
+											}
 										},
 										"method": "POST",
 										"header": [
@@ -29168,18 +28645,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/pool-report/create",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"pool-report",
-												"create"
-											]
-										}
+										"url": "{{baseUrl}}/api/v1/pool-report/create"
 									},
 									"response": [
 										{
@@ -29211,18 +28677,7 @@
 														}
 													}
 												},
-												"url": {
-													"raw": "{{baseUrl}}/api/v1/pool-report/create",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"api",
-														"v1",
-														"pool-report",
-														"create"
-													]
-												}
+												"url": "{{baseUrl}}/api/v1/pool-report/create"
 											},
 											"status": "OK",
 											"code": 200,
@@ -29335,13 +28790,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -29468,13 +28919,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -29541,13 +28988,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -29615,13 +29058,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -29688,13 +29127,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -29742,13 +29177,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -29889,13 +29320,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30044,13 +29471,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30134,13 +29557,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30222,13 +29641,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30311,13 +29726,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30399,13 +29810,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30559,13 +29966,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30574,19 +29977,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/pool-report/detail/{{pool_report_reportId}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"pool-report",
-										"detail",
-										"{{pool_report_reportId}}"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/pool-report/detail/{{pool_report_reportId}}"
 							},
 							"response": [
 								{
@@ -30662,13 +30053,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30677,19 +30064,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/pool-report/detail/{{pool_report_overreportId}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"pool-report",
-										"detail",
-										"{{pool_report_overreportId}}"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/pool-report/detail/{{pool_report_overreportId}}"
 							},
 							"response": []
 						},
@@ -30772,13 +30147,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -30926,13 +30297,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31009,13 +30376,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31096,13 +30459,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31184,13 +30543,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31271,13 +30626,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31388,13 +30739,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31536,13 +30883,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31619,13 +30962,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31700,13 +31039,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31782,13 +31117,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31863,13 +31194,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -31991,13 +31318,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32146,13 +31469,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32236,13 +31555,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32324,13 +31639,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32413,13 +31724,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32501,13 +31808,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32652,13 +31955,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32811,13 +32110,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32899,13 +32194,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -32991,13 +32282,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -33084,13 +32371,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -33176,13 +32459,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -33688,13 +32967,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -33703,18 +32978,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/protocols/latest",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"protocols",
-										"latest"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/protocols/latest"
 							},
 							"response": [
 								{
@@ -33732,18 +32996,7 @@
 												"description": "Added as a part of security scheme: bearer"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/protocols/latest",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"protocols",
-												"latest"
-											]
-										}
+										"url": "{{baseUrl}}/api/v1/protocols/latest"
 									},
 									"status": "OK",
 									"code": 200,
@@ -33869,13 +33122,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -34026,13 +33275,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -34041,18 +33286,7 @@
 										"value": "*/*"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/api/v1/protocols/fixed",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"protocols",
-										"fixed"
-									]
-								}
+								"url": "{{baseUrl}}/api/v1/protocols/fixed"
 							},
 							"response": [
 								{
@@ -34070,18 +33304,7 @@
 												"description": "Added as a part of security scheme: bearer"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/api/v1/protocols/fixed",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"api",
-												"v1",
-												"protocols",
-												"fixed"
-											]
-										}
+										"url": "{{baseUrl}}/api/v1/protocols/fixed"
 									},
 									"status": "OK",
 									"code": 200,
@@ -34640,13 +33863,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -34789,13 +34008,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -34873,13 +34088,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -34957,13 +34168,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -35041,13 +34248,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -35157,13 +34360,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -35304,13 +34503,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -35485,13 +34680,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -35587,13 +34778,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -35689,13 +34876,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -35790,13 +34973,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -35921,13 +35100,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36079,13 +35254,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36228,13 +35399,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36312,13 +35479,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36396,13 +35559,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36479,13 +35638,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36672,13 +35827,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36821,13 +35972,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36905,13 +36052,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -36989,13 +36132,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -37072,13 +36211,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -37217,13 +36352,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -37398,13 +36529,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -37500,13 +36627,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -37602,13 +36725,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -37703,13 +36822,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -38389,13 +37504,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -38549,13 +37660,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -39690,13 +38797,9 @@
 							"request": {
 								"auth": {
 									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{Bearer Token}}",
-											"type": "string"
-										}
-									]
+									"bearer": {
+										"token": "{{Bearer Token}}"
+									}
 								},
 								"method": "GET",
 								"header": [
@@ -40260,15 +39363,7 @@
 										"value": "application/vnd.spring-boot.actuator.v3+json"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/actuator",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"actuator"
-									]
-								}
+								"url": "{{baseUrl}}/actuator"
 							},
 							"response": [
 								{
@@ -40286,15 +39381,7 @@
 												"value": "application/vnd.spring-boot.actuator.v3+json"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/actuator",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"actuator"
-											]
-										}
+										"url": "{{baseUrl}}/actuator"
 									},
 									"status": "OK",
 									"code": 200,
@@ -40341,16 +39428,7 @@
 										"value": "application/vnd.spring-boot.actuator.v3+json"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/actuator/health",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"actuator",
-										"health"
-									]
-								}
+								"url": "{{baseUrl}}/actuator/health"
 							},
 							"response": [
 								{
@@ -40368,16 +39446,7 @@
 												"value": "application/vnd.spring-boot.actuator.v3+json"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/actuator/health",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"actuator",
-												"health"
-											]
-										}
+										"url": "{{baseUrl}}/actuator/health"
 									},
 									"status": "OK",
 									"code": 200,
@@ -40420,17 +39489,7 @@
 										"value": "application/vnd.spring-boot.actuator.v3+json"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/actuator/health/**",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"actuator",
-										"health",
-										"**"
-									]
-								}
+								"url": "{{baseUrl}}/actuator/health/**"
 							},
 							"response": [
 								{
@@ -40448,17 +39507,7 @@
 												"value": "application/vnd.spring-boot.actuator.v3+json"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/actuator/health/**",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"actuator",
-												"health",
-												"**"
-											]
-										}
+										"url": "{{baseUrl}}/actuator/health/**"
 									},
 									"status": "OK",
 									"code": 200,
@@ -40505,16 +39554,7 @@
 										"value": "text/plain;version=0.0.4;charset=utf-8"
 									}
 								],
-								"url": {
-									"raw": "{{baseUrl}}/actuator/prometheus",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"actuator",
-										"prometheus"
-									]
-								}
+								"url": "{{baseUrl}}/actuator/prometheus"
 							},
 							"response": [
 								{
@@ -40532,16 +39572,7 @@
 												"value": "text/plain;version=0.0.4;charset=utf-8"
 											}
 										],
-										"url": {
-											"raw": "{{baseUrl}}/actuator/prometheus",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"actuator",
-												"prometheus"
-											]
-										}
+										"url": "{{baseUrl}}/actuator/prometheus"
 									},
 									"status": "OK",
 									"code": 200,
