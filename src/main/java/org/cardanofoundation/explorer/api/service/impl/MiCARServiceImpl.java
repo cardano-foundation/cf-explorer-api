@@ -6,14 +6,13 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
-import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
-import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.TypeTokenGson;
 import org.cardanofoundation.explorer.api.config.aop.singletoncache.SingletonCall;
@@ -21,6 +20,7 @@ import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.micar.AddressCarbonEmissionResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.MiCARService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
@@ -56,7 +56,9 @@ public class MiCARServiceImpl implements MiCARService {
       if (stakeAddress.isEmpty()) {
         return AddressCarbonEmissionResponse.builder().build();
       }
-      AddressTxCountRecord addressTxCountRecord = explorerAggregatorService.getTxCountForAddress(stakeAddress.get().getView())
+      AddressTxCountRecord addressTxCountRecord =
+          explorerAggregatorService
+              .getTxCountForAddress(stakeAddress.get().getView())
               .orElseGet(AddressTxCountRecord::new);
 
       return AddressCarbonEmissionResponse.builder()
@@ -71,7 +73,8 @@ public class MiCARServiceImpl implements MiCARService {
         if (addr.isEmpty()) {
           return AddressCarbonEmissionResponse.builder().build();
         }
-        Optional<AddressTxCountRecord> txCountForAddress = explorerAggregatorService.getTxCountForAddress(address);
+        Optional<AddressTxCountRecord> txCountForAddress =
+            explorerAggregatorService.getTxCountForAddress(address);
         return AddressCarbonEmissionResponse.builder()
             .address(address)
             .txCount(txCountForAddress.orElseGet(AddressTxCountRecord::new).getTxCount())

@@ -15,12 +15,11 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
-import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant.NetworkType;
@@ -40,6 +39,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmou
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.DateUtils;
@@ -133,10 +133,10 @@ public class AddressServiceImpl implements AddressService {
             .findFirstByAddress(address)
             .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
     AddressChartBalanceResponse response = new AddressChartBalanceResponse();
-    Optional<AddressTxCountRecord> txCountForAddress = explorerAggregatorService.getTxCountForAddress(address);
+    Optional<AddressTxCountRecord> txCountForAddress =
+        explorerAggregatorService.getTxCountForAddress(address);
 
-    if (txCountForAddress.isPresent()
-            && txCountForAddress.get().getTxCount().equals(0L)) {
+    if (txCountForAddress.isPresent() && txCountForAddress.get().getTxCount().equals(0L)) {
       return AddressChartBalanceResponse.builder()
           .highestBalance(BigInteger.ZERO)
           .lowestBalance(BigInteger.ZERO)

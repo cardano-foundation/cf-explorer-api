@@ -11,13 +11,12 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
-import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
@@ -46,6 +45,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmou
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeTxBalanceRepository;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
@@ -306,8 +306,11 @@ public class StakeKeyServiceImpl implements StakeKeyService {
                   response.setAddress(addressResponse.getAddress());
                   response.setBalance(addressResponse.getBalance());
 
-                  response.setTxCount(explorerAggregatorService.getTxCountForAddress(addressResponse.getAddress())
-                          .orElse(new AddressTxCountRecord()).getTxCount());
+                  response.setTxCount(
+                      explorerAggregatorService
+                          .getTxCountForAddress(addressResponse.getAddress())
+                          .orElse(new AddressTxCountRecord())
+                          .getTxCount());
                   return response;
                 });
 

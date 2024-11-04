@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
-import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -23,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.conversions.ClasspathConversionsFactory;
 import org.cardanofoundation.conversions.domain.NetworkType;
@@ -86,7 +86,7 @@ class AddressServiceTest {
     AddressResponse response = addressService.getAddressDetail(addr);
     Assertions.assertTrue(response.isAssociatedNativeScript());
     Assertions.assertEquals(
-            "4791b8567a68cab7332f158f766c536adf9cf70170079918de473826", response.getScriptHash());
+        "4791b8567a68cab7332f158f766c536adf9cf70170079918de473826", response.getScriptHash());
   }
 
   @Test
@@ -101,7 +101,7 @@ class AddressServiceTest {
     AddressResponse response = addressService.getAddressDetail(addr);
     Assertions.assertTrue(response.isAssociatedSmartContract());
     Assertions.assertEquals(
-            "002059fc75b038a85b33ba4fdfaced4bed1247fbad24c538dd45245a", response.getScriptHash());
+        "002059fc75b038a85b33ba4fdfaced4bed1247fbad24c538dd45245a", response.getScriptHash());
   }
 
   @Test
@@ -140,7 +140,8 @@ class AddressServiceTest {
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(explorerAggregatorService.getTxCountForAddress(addr)).thenReturn(Optional.of(addressTxCount));
+    when(explorerAggregatorService.getTxCountForAddress(addr))
+        .thenReturn(Optional.of(addressTxCount));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
 
@@ -167,7 +168,8 @@ class AddressServiceTest {
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
-    when(explorerAggregatorService.getTxCountForAddress(addr)).thenReturn(Optional.of(addressTxCount));
+    when(explorerAggregatorService.getTxCountForAddress(addr))
+        .thenReturn(Optional.of(addressTxCount));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
     var response = addressService.getAddressAnalytics(addr, type);
@@ -183,7 +185,8 @@ class AddressServiceTest {
     AddressTxCountRecord addressTxCount = new AddressTxCountRecord();
     addressTxCount.setAddress(addr);
     addressTxCount.setTxCount(0L);
-    when(explorerAggregatorService.getTxCountForAddress(addr)).thenReturn(Optional.of(addressTxCount));
+    when(explorerAggregatorService.getTxCountForAddress(addr))
+        .thenReturn(Optional.of(addressTxCount));
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
 
     var response = addressService.getAddressAnalytics(addr, type);
@@ -210,7 +213,8 @@ class AddressServiceTest {
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
-    when(explorerAggregatorService.getTxCountForAddress(addr)).thenReturn(Optional.of(addressTxCount));
+    when(explorerAggregatorService.getTxCountForAddress(addr))
+        .thenReturn(Optional.of(addressTxCount));
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);
@@ -237,7 +241,8 @@ class AddressServiceTest {
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
 
-    when(explorerAggregatorService.getTxCountForAddress(addr)).thenReturn(Optional.of(addressTxCount));
+    when(explorerAggregatorService.getTxCountForAddress(addr))
+        .thenReturn(Optional.of(addressTxCount));
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
     when(addressTxAmountRepository.findMinMaxBalanceByAddress(any(), any(), any(), any()))
         .thenReturn(minMaxProjection);

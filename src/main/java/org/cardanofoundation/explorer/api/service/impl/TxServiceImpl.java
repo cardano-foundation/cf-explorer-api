@@ -26,8 +26,6 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
-import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -49,6 +47,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
@@ -102,6 +101,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalReposi
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.*;
@@ -282,7 +282,8 @@ public class TxServiceImpl implements TxService {
         .findFirstByAddress(address)
         .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
-    AddressTxCountRecord addressTxCountRecord = explorerAggregatorService.getTxCountForAddress(address).orElse(new AddressTxCountRecord());
+    AddressTxCountRecord addressTxCountRecord =
+        explorerAggregatorService.getTxCountForAddress(address).orElse(new AddressTxCountRecord());
 
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByAddress(address, pageable);
@@ -294,7 +295,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-                addressTxCountRecord.getTxCount());
+            addressTxCountRecord.getTxCount());
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -314,9 +315,7 @@ public class TxServiceImpl implements TxService {
             addressTxAmounts.stream().map(AddressTxAmount::getUnit).collect(Collectors.toSet()));
 
     Map<Long, Block> blockMap =
-        blockRepository
-            .findAllByIdIn(txMap.values().stream().map(Tx::getBlockId).toList())
-            .stream()
+        blockRepository.findAllByIdIn(txMap.values().stream().map(Tx::getBlockId).toList()).stream()
             .collect(Collectors.toMap(Block::getId, Function.identity()));
 
     Map<String, MultiAsset> unitMultiAssetMap =
@@ -440,7 +439,8 @@ public class TxServiceImpl implements TxService {
         .findByView(stakeKey)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
-    AddressTxCountRecord addressTxCountRecord = explorerAggregatorService.getTxCountForAddress(stakeKey).orElse(new AddressTxCountRecord());
+    AddressTxCountRecord addressTxCountRecord =
+        explorerAggregatorService.getTxCountForAddress(stakeKey).orElse(new AddressTxCountRecord());
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
     List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
@@ -451,7 +451,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-                addressTxCountRecord.getTxCount());
+            addressTxCountRecord.getTxCount());
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
