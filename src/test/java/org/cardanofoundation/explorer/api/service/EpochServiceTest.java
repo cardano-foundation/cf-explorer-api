@@ -417,8 +417,10 @@ class EpochServiceTest {
     when(blockRepository.findLatestBlock())
         .thenReturn(
             Optional.of(Block.builder().time(Timestamp.valueOf(LocalDateTime.now())).build()));
+
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
-    when(hashOperations.size(anyString())).thenReturn(1L);
+    when(hashOperations.size(any())).thenReturn(1L);
+
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
 
     var response = epochService.getAllEpoch(pageable);
