@@ -151,7 +151,9 @@ application:
       fallback: ${API_BOLNISI_PUBLIC_KEY_FALLBACK_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
       conformity-cert: ${API_BOLNISI_PUBLIC_KEY_CONFORMITY_CERT_URL:https://cardano.mepa.gov.ge/api/v1/publickeys/nwa/v/0}
   api.product-aggregator:
-    latest-url: ${API_PRODUCT_AGGREGATOR_LATEST_URL:http://localhost:8081/productaggregation/latest}
+    latest-url: ${API_PRODUCT_AGGREGATOR_LATEST_URL:http://localhost:8081/api/v1/product-tracing-aggregator/productaggregation/latest}
+  api.explorer-aggregator:
+    base-url: ${API_PRODUCT_AGGREGATOR_BASE_URL:http://localhost:8081/api/v1/explorer-aggregator}
 
 springdoc:
   api-docs.path: /apidocs

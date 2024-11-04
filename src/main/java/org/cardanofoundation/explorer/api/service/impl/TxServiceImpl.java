@@ -26,6 +26,8 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.cfexploreraggregator.AddressTxCountRecord;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -99,16 +101,12 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.*;
 import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressTxCount;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -135,8 +133,7 @@ public class TxServiceImpl implements TxService {
   private final MaTxMintMapper maTxMintMapper;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final MultiAssetRepository multiAssetRepository;
-  private final AddressTxCountRepository addressTxCountRepository;
-  private final StakeAddressTxCountRepository stakeAddressTxCountRepository;
+  private final ExplorerAggregatorService explorerAggregatorService;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final StakeRegistrationRepository stakeRegistrationRepository;
@@ -285,8 +282,7 @@ public class TxServiceImpl implements TxService {
         .findFirstByAddress(address)
         .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
-    AddressTxCount addressTxCount =
-        addressTxCountRepository.findById(address).orElse(new AddressTxCount(address, 0L));
+    AddressTxCountRecord addressTxCountRecord = explorerAggregatorService.getTxCountForAddress(address).orElse(new AddressTxCountRecord());
 
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByAddress(address, pageable);
@@ -298,7 +294,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-            addressTxCount.getTxCount());
+                addressTxCountRecord.getTxCount());
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -319,7 +315,7 @@ public class TxServiceImpl implements TxService {
 
     Map<Long, Block> blockMap =
         blockRepository
-            .findAllByIdIn(txMap.values().stream().map(Tx::getBlockId).collect(Collectors.toList()))
+            .findAllByIdIn(txMap.values().stream().map(Tx::getBlockId).toList())
             .stream()
             .collect(Collectors.toMap(Block::getId, Function.identity()));
 
@@ -444,11 +440,7 @@ public class TxServiceImpl implements TxService {
         .findByView(stakeKey)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
-    StakeAddressTxCount addressTxCount =
-        stakeAddressTxCountRepository
-            .findById(stakeKey)
-            .orElse(new StakeAddressTxCount(stakeKey, 0L));
-
+    AddressTxCountRecord addressTxCountRecord = explorerAggregatorService.getTxCountForAddress(stakeKey).orElse(new AddressTxCountRecord());
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
     List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
@@ -459,7 +451,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-            addressTxCount.getTxCount());
+                addressTxCountRecord.getTxCount());
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -854,14 +846,6 @@ public class TxServiceImpl implements TxService {
     return contractResponses;
   }
 
-  private void setVoteContractResponse(ContractResponse contractResponse) {
-    // TODO
-  }
-
-  private void setProposeContractResponse(ContractResponse contractResponse) {
-    // TODO
-  }
-
   /**
    * Set cert contract response:
    *
@@ -1141,7 +1125,7 @@ public class TxServiceImpl implements TxService {
                 item ->
                     new TxStakeCertificate(
                         item.getAddr().getView(), CertificateType.STAKE_DEREGISTRATION))
-            .collect(Collectors.toList()));
+            .toList());
     if (!CollectionUtils.isEmpty(stakeCertificates)) {
       txResponse.setStakeCertificates(stakeCertificates);
     }
@@ -1224,7 +1208,7 @@ public class TxServiceImpl implements TxService {
                         .epoch(item.getRetiringEpoch())
                         .type(CertificateType.POOL_DEREGISTRATION)
                         .build())
-            .collect(Collectors.toList()));
+            .toList());
     if (!CollectionUtils.isEmpty(poolCertificates)) {
       txResponse.setPoolCertificates(poolCertificates);
     }

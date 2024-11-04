@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
+import org.cardanofoundation.cfexploreraggregator.AddressTxCountRecord;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,21 +21,17 @@ import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.micar.AddressCarbonEmissionResponse;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.service.MiCARService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.common.entity.ledgersync.StakeAddress;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressTxCount;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor
 public class MiCARServiceImpl implements MiCARService {
-  private final StakeAddressTxCountRepository stakeAddressTxCountRepository;
-  private final AddressTxCountRepository addressTxCountRepository;
+
+  private final ExplorerAggregatorService explorerAggregatorService;
   private final StakeAddressRepository stakeAddressRepository;
   private final WebClient webClient;
 
@@ -58,11 +56,12 @@ public class MiCARServiceImpl implements MiCARService {
       if (stakeAddress.isEmpty()) {
         return AddressCarbonEmissionResponse.builder().build();
       }
-      Optional<StakeAddressTxCount> stakeAddressTxCount =
-          stakeAddressTxCountRepository.findByStakeAddress(stakeAddress.get().getView());
+      AddressTxCountRecord addressTxCountRecord = explorerAggregatorService.getTxCountForAddress(stakeAddress.get().getView())
+              .orElseGet(AddressTxCountRecord::new);
+
       return AddressCarbonEmissionResponse.builder()
           .stakeAddress(address)
-          .txCount(stakeAddressTxCount.orElseGet(StakeAddressTxCount::new).getTxCount())
+          .txCount(addressTxCountRecord.getTxCount())
           .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
           .build();
     } else {
@@ -72,10 +71,10 @@ public class MiCARServiceImpl implements MiCARService {
         if (addr.isEmpty()) {
           return AddressCarbonEmissionResponse.builder().build();
         }
-        Optional<AddressTxCount> addressTxCount = addressTxCountRepository.findByAddress(address);
+        Optional<AddressTxCountRecord> txCountForAddress = explorerAggregatorService.getTxCountForAddress(address);
         return AddressCarbonEmissionResponse.builder()
             .address(address)
-            .txCount(addressTxCount.orElseGet(AddressTxCount::new).getTxCount())
+            .txCount(txCountForAddress.orElseGet(AddressTxCountRecord::new).getTxCount())
             .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
             .build();
       } catch (Exception e) {

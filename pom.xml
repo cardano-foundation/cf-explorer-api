@@ -473,6 +473,7 @@
                 <version>${version.openapi-generator-maven-plugin}</version>
                 <executions>
                     <execution>
+                        <id>cf-product-tracing</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -480,8 +481,26 @@
                             <inputSpec>${project.basedir}/src/main/resources/openapi/cf-product-tracing.json
                             </inputSpec>
                             <generatorName>spring</generatorName>
-                            <modelPackage>com.example.api.model</modelPackage>
-                            <apiPackage>com.example.api.client</apiPackage>
+                            <modelPackage>org.cardanofoundation.cfproducttracingaggregator</modelPackage>
+                            <apiPackage>org.cardanofoundation.cfproducttracingaggregator</apiPackage>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateApis>false</generateApis>
+                            <configOptions>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cf-explorer-aggregation</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/cf-explorer-aggregation.json
+                            </inputSpec>
+                            <generatorName>spring</generatorName>
+                            <modelPackage>org.cardanofoundation.cfexploreraggregator</modelPackage>
+                            <apiPackage>org.cardanofoundation.cfexploreraggregator</apiPackage>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <generateApis>false</generateApis>
                             <configOptions>

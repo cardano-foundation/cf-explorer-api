@@ -1,6 +1,6 @@
 package org.cardanofoundation.explorer.api.mapper;
 
-import com.example.api.model.ProductAggregationRecord;
+import org.cardanofoundation.cfproducttracingaggregator.ProductAggregationRecord;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
