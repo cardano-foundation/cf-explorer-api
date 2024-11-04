@@ -21,10 +21,8 @@ import org.cardanofoundation.cfproducttracingaggregator.ProductAggregationRecord
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
 
+import org.cardanofoundation.cf_product_tracing_aggregator.ProductAggregationRecord;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.ProductAggMapper;
 import org.cardanofoundation.explorer.api.model.metadatastandard.bolnisi.*;
@@ -207,10 +206,13 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
   @Override
   public BolnisiProjectNumberResponse getBolnisiProjectNumber() {
-    RestTemplate template = new RestTemplate();
-    ResponseEntity<ProductAggregationRecord> productAggResponseEntity =
-        template.getForEntity(latestProductAggregation, ProductAggregationRecord.class);
-    return productAggMapper.toBolnisiProjectResponse(productAggResponseEntity.getBody());
+    return webClient
+        .get()
+        .uri(latestProductAggregation)
+        .retrieve()
+        .bodyToMono(ProductAggregationRecord.class)
+        .map(productAggMapper::toBolnisiProjectResponse)
+        .block();
   }
 
   /**
