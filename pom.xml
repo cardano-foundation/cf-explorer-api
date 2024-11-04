@@ -499,8 +499,8 @@
                             <inputSpec>${project.basedir}/src/main/resources/openapi/cf-explorer-aggregation.json
                             </inputSpec>
                             <generatorName>spring</generatorName>
-                            <modelPackage>org.cardanofoundation.cfexploreraggregator</modelPackage>
-                            <apiPackage>org.cardanofoundation.cfexploreraggregator</apiPackage>
+                            <modelPackage>org.cardanofoundation.cf-explorer-aggregator</modelPackage>
+                            <apiPackage>org.cardanofoundation.cf-explorer-aggregator</apiPackage>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <generateApis>false</generateApis>
                             <configOptions>

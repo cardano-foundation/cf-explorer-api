@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.cfexploreraggregator.AddressTxCountRecord;
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;

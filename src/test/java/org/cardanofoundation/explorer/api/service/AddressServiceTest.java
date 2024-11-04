@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
-import org.cardanofoundation.cfexploreraggregator.AddressTxCountRecord;
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;

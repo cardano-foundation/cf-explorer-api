@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.cardanofoundation.cfexploreraggregator.AddressTxCountRecord;
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;

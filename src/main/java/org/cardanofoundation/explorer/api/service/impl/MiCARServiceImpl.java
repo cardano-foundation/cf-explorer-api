@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
-import org.cardanofoundation.cfexploreraggregator.AddressTxCountRecord;
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

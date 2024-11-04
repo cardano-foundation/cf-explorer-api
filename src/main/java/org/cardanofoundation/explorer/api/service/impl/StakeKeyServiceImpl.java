@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -84,6 +86,7 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
   private final CardanoConverters cardanoConverters;
+  private final ExplorerAggregatorService explorerAggregatorService;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {
@@ -302,6 +305,9 @@ public class StakeKeyServiceImpl implements StakeKeyService {
                   AddressFilterResponse response = new AddressFilterResponse();
                   response.setAddress(addressResponse.getAddress());
                   response.setBalance(addressResponse.getBalance());
+
+                  response.setTxCount(explorerAggregatorService.getTxCountForAddress(addressResponse.getAddress())
+                          .orElse(new AddressTxCountRecord()).getTxCount());
                   return response;
                 });
 

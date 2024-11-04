@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.cfexploreraggregator.AddressTxCountRecord;
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -844,6 +844,14 @@ public class TxServiceImpl implements TxService {
               }
             });
     return contractResponses;
+  }
+
+  private void setVoteContractResponse(ContractResponse contractResponse) {
+    // TODO
+  }
+
+  private void setProposeContractResponse(ContractResponse contractResponse) {
+    // TODO
   }
 
   /**

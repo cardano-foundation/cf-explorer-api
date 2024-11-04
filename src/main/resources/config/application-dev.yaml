@@ -153,7 +153,7 @@ application:
   api.product-aggregator:
     latest-url: ${API_PRODUCT_AGGREGATOR_LATEST_URL:http://localhost:8081/api/v1/product-tracing-aggregator/productaggregation/latest}
   api.explorer-aggregator:
-    base-url: ${API_PRODUCT_AGGREGATOR_BASE_URL:http://localhost:8081/api/v1/explorer-aggregator}
+    base-url: ${API_EXPLORER_AGGREGATOR_BASE_URL:http://localhost:8081/api/v1/explorer-aggregator}
 
 springdoc:
   api-docs.path: /apidocs
