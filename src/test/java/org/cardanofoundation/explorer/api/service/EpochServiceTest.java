@@ -36,7 +36,6 @@ import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
 import org.cardanofoundation.explorer.api.projection.EpochSummaryProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.service.impl.EpochServiceImpl;
@@ -54,7 +53,6 @@ class EpochServiceTest {
   @InjectMocks EpochServiceImpl epochService;
   @Mock RedisTemplate<String, Object> redisTemplate;
   @Mock HashOperations hashOperations;
-  @Mock AdaPotsRepository adaPotsRepository;
   @Mock FetchRewardDataService fetchRewardDataService;
   @Mock BlockRepository blockRepository;
 
@@ -89,7 +87,6 @@ class EpochServiceTest {
                     .startTime(Timestamp.valueOf(localDate))
                     .endTime(Timestamp.valueOf(localDate.plusDays(5)))
                     .build()));
-    when(adaPotsRepository.getReservesByEpochNo(30)).thenReturn(BigInteger.ONE);
     when(blockRepository.findLatestBlock())
         .thenReturn(
             Optional.of(
@@ -380,7 +377,6 @@ class EpochServiceTest {
             Optional.of(Epoch.builder().startTime(Timestamp.valueOf(LocalDateTime.now())).build()));
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     when(hashOperations.size(anyString())).thenReturn(1L);
-    when(adaPotsRepository.getReservesByEpochNo(1)).thenReturn(BigInteger.ONE);
     when(blockRepository.findLatestBlock())
         .thenReturn(
             Optional.of(
@@ -422,6 +418,9 @@ class EpochServiceTest {
     when(hashOperations.size(any())).thenReturn(1L);
 
     ReflectionTestUtils.setField(epochService, "network", "mainnet");
+
+    when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+    when(hashOperations.size(any())).thenReturn(0l);
 
     var response = epochService.getAllEpoch(pageable);
     Assertions.assertEquals(1, response.getTotalItems());

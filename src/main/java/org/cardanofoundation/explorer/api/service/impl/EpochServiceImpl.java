@@ -16,7 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
@@ -255,11 +254,6 @@ public class EpochServiceImpl implements EpochService {
                   fetchRewardDataService.checkAdaPots(epochSummaryProjection.getNo()))) {
                 fetchRewardDataService.fetchAdaPots(List.of(epochSummaryProjection.getNo()));
               }
-              var circulatingSupply =
-                  adaPotsRepository.getReservesByEpochNo(epochSummaryProjection.getNo());
-              if (Objects.isNull(circulatingSupply)) {
-                circulatingSupply = BigInteger.ZERO;
-              }
               return EpochSummary.builder()
                   .no(epochSummaryProjection.getNo())
                   .slot((int) slot)
@@ -275,8 +269,6 @@ public class EpochServiceImpl implements EpochService {
                           currentBlock))
                   .syncingProgress(
                       (double) currentBlock.getEpochSlotNo() / epochSummaryProjection.getMaxSlot())
-                  .circulatingSupply(
-                      CommonConstant.TOTAL_ADA.toBigInteger().subtract(circulatingSupply))
                   .blkCount(epochSummaryProjection.getBlkCount())
                   .build();
             })
