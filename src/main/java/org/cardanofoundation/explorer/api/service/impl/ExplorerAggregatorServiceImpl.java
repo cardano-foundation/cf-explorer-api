@@ -41,8 +41,4 @@ public class ExplorerAggregatorServiceImpl implements ExplorerAggregatorService 
         .block();
   }
 
-  @Override
-  public List<AddressTxCountRecord> getAllTxCount(Pageable pageable) {
-    return List.of();
-  }
 }

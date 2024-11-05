@@ -11,5 +11,4 @@ public interface ExplorerAggregatorService {
 
   Optional<AddressTxCountRecord> getTxCountForAddress(String address);
 
-  List<AddressTxCountRecord> getAllTxCount(Pageable pageable);
 }
