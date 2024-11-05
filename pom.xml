@@ -83,6 +83,7 @@
         <version.spotless-maven-plugin>2.36.0</version.spotless-maven-plugin>
         <version.google-java-format>1.15.0</version.google-java-format>
         <version.cardano-conversions-java>1.1.3</version.cardano-conversions-java>
+        <version.openapi-generator-maven-plugin>7.8.0</version.openapi-generator-maven-plugin>
     </properties>
 
     <repositories>
@@ -310,6 +311,11 @@
             <artifactId>cf-cardano-conversions-java</artifactId>
             <version>${version.cardano-conversions-java}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -461,6 +467,30 @@
                     </java>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${version.openapi-generator-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/cf-product-tracing.json
+                            </inputSpec>
+                            <generatorName>spring</generatorName>
+                            <modelPackage>org.cardanofoundation.cf-product-tracing-aggregator</modelPackage>
+                            <apiPackage>org.cardanofoundation.cf-product-tracing-aggregator</apiPackage>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateApis>false</generateApis>
+                            <configOptions>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -478,6 +508,7 @@
                     <excludes>
                         <exclude>**/*Bean.java</exclude>
                         <exclude>**/generated/*.java</exclude>
+                        <exclude>**/openapi/*.java</exclude>
                     </excludes>
                     <excludeRoots>
                         <excludeRoot>target/generated-sources/stubs</excludeRoot>
