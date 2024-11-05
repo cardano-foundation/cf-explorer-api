@@ -309,8 +309,8 @@ public class StakeKeyServiceImpl implements StakeKeyService {
                   response.setTxCount(
                       explorerAggregatorService
                           .getTxCountForAddress(addressResponse.getAddress())
-                          .orElse(new AddressTxCountRecord())
-                          .getTxCount());
+                          .map(AddressTxCountRecord::getTxCount)
+                          .orElse(0L));
                   return response;
                 });
 

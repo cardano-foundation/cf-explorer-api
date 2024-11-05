@@ -487,6 +487,11 @@
                             <generateApis>false</generateApis>
                             <configOptions>
                                 <useJakartaEe>true</useJakartaEe>
+                                <additionalModelTypeAnnotations>
+                                    @lombok.Builder
+                                    @lombok.NoArgsConstructor
+                                    @lombok.AllArgsConstructor
+                                </additionalModelTypeAnnotations>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -505,6 +510,11 @@
                             <generateApis>false</generateApis>
                             <configOptions>
                                 <useJakartaEe>true</useJakartaEe>
+                                <additionalModelTypeAnnotations>
+                                    @lombok.Builder
+                                    @lombok.NoArgsConstructor
+                                    @lombok.AllArgsConstructor
+                                </additionalModelTypeAnnotations>
                             </configOptions>
                         </configuration>
                     </execution>

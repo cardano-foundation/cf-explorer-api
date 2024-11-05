@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -81,6 +82,7 @@ public class StakeKeyServiceTest {
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
   @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
   @Mock private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
+  @Mock private ExplorerAggregatorService explorerAggregatorService;
 
   @Test
   void testGetDataForStakeKeyRegistration_thenReturn() {
@@ -343,7 +345,8 @@ public class StakeKeyServiceTest {
         AddressResponse.builder().address("address").balance(BigInteger.ONE).build();
     when(addressRepository.findByStakeAddress(stakeKey, pageable))
         .thenReturn(new PageImpl<>(List.of(addressResponse)));
-
+    when(explorerAggregatorService.getTxCountForAddress(any()))
+            .thenReturn(Optional.ofNullable(AddressTxCountRecord.builder().txCount(0L).build()));
     var response = stakeKeyService.getAddresses(stakeKey, pageable);
     assertEquals(response.getTotalItems(), 1);
     assertEquals(response.getTotalPages(), 1);

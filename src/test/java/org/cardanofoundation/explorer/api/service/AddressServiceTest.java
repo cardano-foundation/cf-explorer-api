@@ -132,9 +132,10 @@ class AddressServiceTest {
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
     Address address = Address.builder().address(addr).build();
-    AddressTxCountRecord addressTxCount = new AddressTxCountRecord();
-    addressTxCount.setAddress(addr);
-    addressTxCount.setTxCount(1L);
+    AddressTxCountRecord addressTxCount = AddressTxCountRecord.builder()
+            .address(addr)
+            .txCount(1L)
+            .build();
     MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
@@ -159,9 +160,10 @@ class AddressServiceTest {
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_MONTH;
     Address address = Address.builder().address(addr).build();
-    AddressTxCountRecord addressTxCount = new AddressTxCountRecord();
-    addressTxCount.setAddress(addr);
-    addressTxCount.setTxCount(1L);
+    AddressTxCountRecord addressTxCount = AddressTxCountRecord.builder()
+            .address(addr)
+            .txCount(1L)
+            .build();
 
     MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
@@ -182,9 +184,10 @@ class AddressServiceTest {
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
     AnalyticType type = AnalyticType.ONE_DAY;
     Address address = Address.builder().address(addr).build();
-    AddressTxCountRecord addressTxCount = new AddressTxCountRecord();
-    addressTxCount.setAddress(addr);
-    addressTxCount.setTxCount(0L);
+    AddressTxCountRecord addressTxCount = AddressTxCountRecord.builder()
+            .address(addr)
+            .txCount(0L)
+            .build();
     when(explorerAggregatorService.getTxCountForAddress(addr))
         .thenReturn(Optional.of(addressTxCount));
     when(addressRepository.findFirstByAddress(addr)).thenReturn(Optional.of(address));
@@ -206,9 +209,10 @@ class AddressServiceTest {
     AnalyticType type = AnalyticType.ONE_WEEK;
     Address address = Address.builder().address(addr).build();
 
-    AddressTxCountRecord addressTxCount = new AddressTxCountRecord();
-    addressTxCount.setAddress(addr);
-    addressTxCount.setTxCount(1L);
+    AddressTxCountRecord addressTxCount = AddressTxCountRecord.builder()
+            .address(addr)
+            .txCount(1L)
+            .build();
     MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);
     when(minMaxProjection.getMaxVal()).thenReturn(BigInteger.ZERO);
     when(minMaxProjection.getMinVal()).thenReturn(BigInteger.ZERO);
@@ -232,9 +236,10 @@ class AddressServiceTest {
     String addr =
         "addr1zy6ndumcmaesy7wj86k8jwup0vn5vewklc6jxlrrxr5tjqda8awvzhtzntme2azmkacmvtc4ggrudqxcmyl245nq5taq6yclrm";
 
-    AddressTxCountRecord addressTxCount = new AddressTxCountRecord();
-    addressTxCount.setAddress(addr);
-    addressTxCount.setTxCount(1L);
+    AddressTxCountRecord addressTxCount = AddressTxCountRecord.builder()
+            .address(addr)
+            .txCount(1L)
+            .build();
     AnalyticType type = AnalyticType.THREE_MONTH;
     Address address = Address.builder().address(addr).build();
     MinMaxProjection minMaxProjection = Mockito.mock(MinMaxProjection.class);

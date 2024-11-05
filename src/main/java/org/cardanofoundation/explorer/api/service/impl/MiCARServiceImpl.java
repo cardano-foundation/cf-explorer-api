@@ -56,14 +56,13 @@ public class MiCARServiceImpl implements MiCARService {
       if (stakeAddress.isEmpty()) {
         return AddressCarbonEmissionResponse.builder().build();
       }
-      AddressTxCountRecord addressTxCountRecord =
-          explorerAggregatorService
-              .getTxCountForAddress(stakeAddress.get().getView())
-              .orElseGet(AddressTxCountRecord::new);
+      Long txCount = explorerAggregatorService
+              .getTxCountForAddress(stakeAddress.get().getView()).map(AddressTxCountRecord::getTxCount)
+              .orElse(0L);
 
       return AddressCarbonEmissionResponse.builder()
           .stakeAddress(address)
-          .txCount(addressTxCountRecord.getTxCount())
+          .txCount(txCount)
           .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
           .build();
     } else {
@@ -73,11 +72,13 @@ public class MiCARServiceImpl implements MiCARService {
         if (addr.isEmpty()) {
           return AddressCarbonEmissionResponse.builder().build();
         }
-        Optional<AddressTxCountRecord> txCountForAddress =
-            explorerAggregatorService.getTxCountForAddress(address);
+        Long txCount = explorerAggregatorService.getTxCountForAddress(address)
+                .map(AddressTxCountRecord::getTxCount)
+                .orElse(0L);
+        
         return AddressCarbonEmissionResponse.builder()
             .address(address)
-            .txCount(txCountForAddress.orElseGet(AddressTxCountRecord::new).getTxCount())
+            .txCount(txCount)
             .carbonEmissionPerTx(CommonConstant.MiCAR.CO2_EMISSION_PER_TX)
             .build();
       } catch (Exception e) {

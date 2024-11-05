@@ -282,8 +282,9 @@ public class TxServiceImpl implements TxService {
         .findFirstByAddress(address)
         .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
-    AddressTxCountRecord addressTxCountRecord =
-        explorerAggregatorService.getTxCountForAddress(address).orElse(new AddressTxCountRecord());
+    Long txCount = explorerAggregatorService.getTxCountForAddress(address)
+            .map(AddressTxCountRecord::getTxCount)
+            .orElse(0L);
 
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByAddress(address, pageable);
@@ -295,7 +296,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-            addressTxCountRecord.getTxCount());
+      txCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -439,8 +440,9 @@ public class TxServiceImpl implements TxService {
         .findByView(stakeKey)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
-    AddressTxCountRecord addressTxCountRecord =
-        explorerAggregatorService.getTxCountForAddress(stakeKey).orElse(new AddressTxCountRecord());
+    Long txCount = explorerAggregatorService.getTxCountForAddress(stakeKey)
+            .map(AddressTxCountRecord::getTxCount)
+            .orElse(0L);
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
     List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
@@ -451,7 +453,7 @@ public class TxServiceImpl implements TxService {
         new PageImpl<>(
             mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
             pageable,
-            addressTxCountRecord.getTxCount());
+                txCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
