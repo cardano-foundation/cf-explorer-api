@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
@@ -44,6 +45,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmou
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeTxBalanceRepository;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.StakeKeyService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
@@ -61,11 +63,8 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 public class StakeKeyServiceImpl implements StakeKeyService {
 
   private final AddressRepository addressRepository;
-
   private final DelegationRepository delegationRepository;
-
   private final StakeRegistrationRepository stakeRegistrationRepository;
-
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RewardRepository rewardRepository;
@@ -76,13 +75,14 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final EpochRepository epochRepository;
   private final TxRepository txRepository;
   private final StakeTxBalanceRepository stakeTxBalanceRepository;
-
   private final PoolInfoRepository poolInfoRepository;
-
-  private final FetchRewardDataService fetchRewardDataService;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
+
+  private final FetchRewardDataService fetchRewardDataService;
+  private final ExplorerAggregatorService explorerAggregatorService;
+
   private final CardanoConverters cardanoConverters;
 
   @Override
@@ -302,6 +302,12 @@ public class StakeKeyServiceImpl implements StakeKeyService {
                   AddressFilterResponse response = new AddressFilterResponse();
                   response.setAddress(addressResponse.getAddress());
                   response.setBalance(addressResponse.getBalance());
+
+                  response.setTxCount(
+                      explorerAggregatorService
+                          .getTxCountForAddress(addressResponse.getAddress())
+                          .map(AddressTxCountRecord::getTxCount)
+                          .orElse(0L));
                   return response;
                 });
 

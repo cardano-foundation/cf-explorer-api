@@ -16,7 +16,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -27,7 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
-import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
+import org.cardanofoundation.cf_explorer_aggregator.PoolAggregationRecord;
 import org.cardanofoundation.explorer.api.common.enumeration.ProtocolParamGroup;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
@@ -45,6 +44,7 @@ import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DrepInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.GovernanceActionService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
@@ -69,23 +69,24 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
   private final DRepRegistrationRepository dRepRegistrationRepository;
   private final GovernanceActionRepository governanceActionRepository;
   private final PoolHashRepository poolHashRepository;
-  private final GovernanceActionMapper governanceActionMapper;
-  private final VotingProcedureMapper votingProcedureMapper;
   private final VotingProcedureRepository votingProcedureRepository;
   private final DrepInfoRepository drepInfoRepository;
   private final EpochParamRepository epochParamRepository;
   private final LatestVotingProcedureRepository latestVotingProcedureRepository;
   private final DelegationRepository delegationRepository;
-  private final ProtocolParamService protocolParamService;
   private final CommitteeMemberRepository committeeMemberRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
   private final OffChainVoteGovActionDataRepository offChainVoteGovActionDataRepository;
-  private final LatestVotingProcedureMapper latestVotingProcedureMapper;
   private final CommitteeRepository committeeRepository;
+
+  private final ProtocolParamService protocolParamService;
   private final FetchRewardDataService fetchRewardDataService;
   private final PoolInfoRepository poolInfoRepository;
+  private final ExplorerAggregatorService explorerAggregatorService;
 
-  private final RedisTemplate<String, Integer> redisTemplate;
+  private final GovernanceActionMapper governanceActionMapper;
+  private final VotingProcedureMapper votingProcedureMapper;
+  private final LatestVotingProcedureMapper latestVotingProcedureMapper;
 
   @Value("${application.network}")
   private String network;
@@ -453,10 +454,9 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
     EpochParam currentEpochParam = epochParamRepository.findCurrentEpochParam();
 
     Long activeDReps = drepInfoRepository.countByStatus(DRepStatus.ACTIVE);
-    Long activeSPOs =
-        Objects.requireNonNull(
-                redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_ACTIVATE + network))
-            .longValue();
+
+    PoolAggregationRecord latestPoolStatus = explorerAggregatorService.getLatestPoolAggregation();
+
     Long activeCommittees =
         committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(
             currentEpochParam.getEpochNo());
@@ -476,7 +476,10 @@ public class GovernanceActionServiceImpl implements GovernanceActionService {
 
     return GovernanceOverviewResponse.builder()
         .activeDReps(activeDReps)
-        .activeSPOs(activeSPOs)
+        .activeSPOs(
+            latestPoolStatus.getActivePools() != null
+                ? latestPoolStatus.getActivePools().longValue()
+                : 0L)
         .activeCommittees(activeCommittees)
         .totalGovActions(govActionTypeMap.values().stream().reduce(0L, Long::sum))
         .govCountMap(govActionTypeMap)

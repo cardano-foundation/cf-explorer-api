@@ -1,0 +1,430 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8082/api/v1/explorer-aggregator",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Pool Status Controller",
+      "description": "APIs for Pool Status"
+    },
+    {
+      "name": "Unique Account Controller",
+      "description": "APIs for Unique Account aggregation"
+    },
+    {
+      "name": "Address Transaction Count Controller",
+      "description": "APIs for Address Transaction Count"
+    }
+  ],
+  "paths": {
+    "/uniqueaccount": {
+      "get": {
+        "tags": [
+          "Unique Account Controller"
+        ],
+        "summary": "All Unique Account",
+        "description": "Get all unique account",
+        "operationId": "getAllUniqueAccount",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All unique account found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UniqueAccountRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/uniqueaccount/{epoch}": {
+      "get": {
+        "tags": [
+          "Unique Account Controller"
+        ],
+        "summary": "Unique Account Epoch",
+        "description": "Get the unique account for a specific epoch",
+        "operationId": "getUniqueAccount",
+        "parameters": [
+          {
+            "name": "epoch",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Unique account not found"
+          },
+          "200": {
+            "description": "Unique account found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniqueAccountRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/uniqueaccount/latest": {
+      "get": {
+        "tags": [
+          "Unique Account Controller"
+        ],
+        "summary": "Latest Unique Account",
+        "description": "Get the latest unique account",
+        "operationId": "getLatestUniqueAccount",
+        "responses": {
+          "200": {
+            "description": "Latest unique account found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniqueAccountRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/poolstatus": {
+      "get": {
+        "tags": [
+          "Pool Status Controller"
+        ],
+        "summary": "All Pool Aggregations",
+        "description": "Get all pool aggregations",
+        "operationId": "getAllPoolAggregations",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All pool aggregations found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PoolAggregationRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/poolstatus/{poolId}": {
+      "get": {
+        "tags": [
+          "Pool Status Controller"
+        ],
+        "summary": "Pool Status",
+        "description": "Get the status of a specific pool",
+        "operationId": "getPoolStatus",
+        "parameters": [
+          {
+            "name": "poolId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pool status found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoolStatusRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pool status not found"
+          }
+        }
+      }
+    },
+    "/poolstatus/latest": {
+      "get": {
+        "tags": [
+          "Pool Status Controller"
+        ],
+        "summary": "Latest Pool Aggregation",
+        "description": "Get the latest pool aggregation",
+        "operationId": "getLatestPoolAggregation",
+        "responses": {
+          "200": {
+            "description": "Latest pool aggregation found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoolAggregationRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/poolstatus/epoch/{epoch}": {
+      "get": {
+        "tags": [
+          "Pool Status Controller"
+        ],
+        "summary": "Pool Status by Epoch",
+        "description": "Get the pool status by epoch",
+        "operationId": "getPoolStatusByEpoch",
+        "parameters": [
+          {
+            "name": "epoch",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pool status by epoch found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoolAggregationRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pool status by epoch not found"
+          }
+        }
+      }
+    },
+    "/addresstxcount": {
+      "get": {
+        "tags": [
+          "Address Transaction Count Controller"
+        ],
+        "summary": "All Address Transaction Count",
+        "description": "Get all address transaction count",
+        "operationId": "getAllAddressTxCount",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All address transaction count found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AddressTxCountRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/addresstxcount/{address}": {
+      "get": {
+        "tags": [
+          "Address Transaction Count Controller"
+        ],
+        "summary": "Address Transaction Count",
+        "description": "Get the transaction count for a specific address",
+        "operationId": "getAddressTxCount",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address transaction count found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressTxCountRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Address transaction count not found"
+          }
+        }
+      }
+    },
+    "/__internal__/healthcheck": {
+      "get": {
+        "tags": [
+          "healthcheck"
+        ],
+        "operationId": "get",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UniqueAccountRecord": {
+        "type": "object",
+        "properties": {
+          "epoch": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unique_accounts": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PoolAggregationRecord": {
+        "type": "object",
+        "properties": {
+          "epoch": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active_pools": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "registered_pools": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "retired_pools": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PoolStatusRecord": {
+        "type": "object",
+        "properties": {
+          "pool_id": {
+            "type": "string"
+          },
+          "retired": {
+            "type": "boolean"
+          },
+          "updated_slot": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AddressTxCountRecord": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "tx_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "slot": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    }
+  }
+}

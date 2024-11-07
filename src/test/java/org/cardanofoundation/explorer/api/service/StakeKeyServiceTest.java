@@ -11,7 +11,6 @@ import java.util.*;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.mockito.InjectMocks;
@@ -23,6 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.conversions.ClasspathConversionsFactory;
 import org.cardanofoundation.conversions.domain.NetworkType;
@@ -30,7 +30,6 @@ import org.cardanofoundation.explorer.api.common.enumeration.AnalyticType;
 import org.cardanofoundation.explorer.api.common.enumeration.StakeAddressStatus;
 import org.cardanofoundation.explorer.api.exception.FetchRewardException;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
-import org.cardanofoundation.explorer.api.mapper.StakeAddressMapper;
 import org.cardanofoundation.explorer.api.model.response.address.AddressResponse;
 import org.cardanofoundation.explorer.api.projection.*;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
@@ -71,16 +70,16 @@ public class StakeKeyServiceTest {
   @Mock private TreasuryRepository treasuryRepository;
   @Mock private ReserveRepository reserveRepository;
   @Mock private PoolUpdateRepository poolUpdateRepository;
-  @Mock private AddressTxAmountRepository addressTxAmountRepository;
-  @Mock private StakeAddressMapper stakeAddressMapper;
   @Mock private EpochRepository epochRepository;
-  @Mock private RedisTemplate<String, Object> redisTemplate;
-  @Mock private PoolInfoRepository poolInfoRepository;
-  @Mock private FetchRewardDataService fetchRewardDataService;
   @Mock private TxRepository txRepository;
   @Mock private StakeTxBalanceRepository stakeTxBalanceRepository;
-  @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
+  @Mock private PoolInfoRepository poolInfoRepository;
   @Mock private AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
+  @Mock private AddressTxAmountRepository addressTxAmountRepository;
+  @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
+
+  @Mock private FetchRewardDataService fetchRewardDataService;
+  @Mock private ExplorerAggregatorService explorerAggregatorService;
 
   @Test
   void testGetDataForStakeKeyRegistration_thenReturn() {
@@ -343,7 +342,8 @@ public class StakeKeyServiceTest {
         AddressResponse.builder().address("address").balance(BigInteger.ONE).build();
     when(addressRepository.findByStakeAddress(stakeKey, pageable))
         .thenReturn(new PageImpl<>(List.of(addressResponse)));
-
+    when(explorerAggregatorService.getTxCountForAddress(any()))
+        .thenReturn(Optional.ofNullable(AddressTxCountRecord.builder().txCount(0L).build()));
     var response = stakeKeyService.getAddresses(stakeKey, pageable);
     assertEquals(response.getTotalItems(), 1);
     assertEquals(response.getTotalPages(), 1);

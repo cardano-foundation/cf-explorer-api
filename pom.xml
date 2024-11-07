@@ -473,6 +473,7 @@
                 <version>${version.openapi-generator-maven-plugin}</version>
                 <executions>
                     <execution>
+                        <id>cf-product-tracing</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -486,6 +487,34 @@
                             <generateApis>false</generateApis>
                             <configOptions>
                                 <useJakartaEe>true</useJakartaEe>
+                                <additionalModelTypeAnnotations>
+                                    @lombok.Builder
+                                    @lombok.NoArgsConstructor
+                                    @lombok.AllArgsConstructor
+                                </additionalModelTypeAnnotations>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cf-explorer-aggregation</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/cf-explorer-aggregation.json
+                            </inputSpec>
+                            <generatorName>spring</generatorName>
+                            <modelPackage>org.cardanofoundation.cf-explorer-aggregator</modelPackage>
+                            <apiPackage>org.cardanofoundation.cf-explorer-aggregator</apiPackage>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateApis>false</generateApis>
+                            <configOptions>
+                                <useJakartaEe>true</useJakartaEe>
+                                <additionalModelTypeAnnotations>
+                                    @lombok.Builder
+                                    @lombok.NoArgsConstructor
+                                    @lombok.AllArgsConstructor
+                                </additionalModelTypeAnnotations>
                             </configOptions>
                         </configuration>
                     </execution>

@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import org.cardanofoundation.cf_explorer_aggregator.PoolAggregationRecord;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
@@ -83,6 +84,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalReposi
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressBalanceRepository;
 import org.cardanofoundation.explorer.api.service.DelegationService;
 import org.cardanofoundation.explorer.api.service.EpochService;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.util.DataUtil;
@@ -120,6 +122,8 @@ public class DelegationServiceImpl implements DelegationService {
   private final RedisTemplate<String, Object> redisTemplate;
 
   private final FetchRewardDataService fetchRewardDataService;
+
+  private final ExplorerAggregatorService explorerAggregatorService;
 
   private final StakeAddressRepository stakeAddressRepository;
 
@@ -193,10 +197,10 @@ public class DelegationServiceImpl implements DelegationService {
   public DelegationHeaderResponse getDataForDelegationHeader() {
     EpochSummary epoch = epochService.getCurrentEpochSummary();
     Integer epochNo = epoch.getNo();
-    Object poolActiveObj =
-        redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_ACTIVATE + network);
-    Object poolInActiveObj =
-        redisTemplate.opsForValue().get(CommonConstant.REDIS_POOL_INACTIVATE + network);
+
+    PoolAggregationRecord latestPoolAggregation =
+        explorerAggregatorService.getLatestPoolAggregation();
+
     LocalDateTime endTime = epoch.getEndTime();
     Integer slot = epoch.getSlot();
     long countDownTime =
@@ -225,9 +229,8 @@ public class DelegationServiceImpl implements DelegationService {
         .epochSlotNo(slot)
         .liveStake(liveStake)
         .delegators(delegators)
-        .activePools(Objects.nonNull(poolActiveObj) ? (Integer) poolActiveObj : CommonConstant.ZERO)
-        .retiredPools(
-            Objects.nonNull(poolInActiveObj) ? (Integer) poolInActiveObj : CommonConstant.ZERO)
+        .activePools(latestPoolAggregation.getActivePools())
+        .retiredPools(latestPoolAggregation.getRetiredPools())
         .countDownEndTime(countDownTime > CommonConstant.ZERO ? countDownTime : CommonConstant.ZERO)
         .build();
   }

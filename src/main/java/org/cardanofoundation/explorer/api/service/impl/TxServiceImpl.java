@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.CertificateType;
 import org.cardanofoundation.explorer.api.common.enumeration.TxChartRange;
@@ -99,16 +100,13 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.UnconsumeTxInRep
 import org.cardanofoundation.explorer.api.repository.ledgersync.WithdrawalRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.StakeAddressTxCountRepository;
 import org.cardanofoundation.explorer.api.service.BolnisiMetadataService;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.ProtocolParamService;
 import org.cardanofoundation.explorer.api.service.TxService;
 import org.cardanofoundation.explorer.api.util.*;
 import org.cardanofoundation.explorer.common.entity.ledgersync.*;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxAmount;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.StakeAddressTxCount;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
@@ -135,8 +133,7 @@ public class TxServiceImpl implements TxService {
   private final MaTxMintMapper maTxMintMapper;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final MultiAssetRepository multiAssetRepository;
-  private final AddressTxCountRepository addressTxCountRepository;
-  private final StakeAddressTxCountRepository stakeAddressTxCountRepository;
+  private final ExplorerAggregatorService explorerAggregatorService;
   private final AssetMetadataRepository assetMetadataRepository;
   private final AssetMetadataMapper assetMetadataMapper;
   private final StakeRegistrationRepository stakeRegistrationRepository;
@@ -285,8 +282,11 @@ public class TxServiceImpl implements TxService {
         .findFirstByAddress(address)
         .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
-    AddressTxCount addressTxCount =
-        addressTxCountRepository.findById(address).orElse(new AddressTxCount(address, 0L));
+    Long txCount =
+        explorerAggregatorService
+            .getTxCountForAddress(address)
+            .map(AddressTxCountRecord::getTxCount)
+            .orElse(0L);
 
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByAddress(address, pageable);
@@ -296,9 +296,7 @@ public class TxServiceImpl implements TxService {
 
     Page<TxFilterResponse> txFilterResponsePage =
         new PageImpl<>(
-            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
-            pageable,
-            addressTxCount.getTxCount());
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts), pageable, txCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -318,9 +316,7 @@ public class TxServiceImpl implements TxService {
             addressTxAmounts.stream().map(AddressTxAmount::getUnit).collect(Collectors.toSet()));
 
     Map<Long, Block> blockMap =
-        blockRepository
-            .findAllByIdIn(txMap.values().stream().map(Tx::getBlockId).collect(Collectors.toList()))
-            .stream()
+        blockRepository.findAllByIdIn(txMap.values().stream().map(Tx::getBlockId).toList()).stream()
             .collect(Collectors.toMap(Block::getId, Function.identity()));
 
     Map<String, MultiAsset> unitMultiAssetMap =
@@ -444,11 +440,11 @@ public class TxServiceImpl implements TxService {
         .findByView(stakeKey)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
-    StakeAddressTxCount addressTxCount =
-        stakeAddressTxCountRepository
-            .findById(stakeKey)
-            .orElse(new StakeAddressTxCount(stakeKey, 0L));
-
+    Long txCount =
+        explorerAggregatorService
+            .getTxCountForAddress(stakeKey)
+            .map(AddressTxCountRecord::getTxCount)
+            .orElse(0L);
     List<TxProjection> txProjections =
         addressTxAmountRepository.findAllTxByStakeAddress(stakeKey, pageable);
     List<String> txHashes = txProjections.stream().map(TxProjection::getTxHash).toList();
@@ -457,9 +453,7 @@ public class TxServiceImpl implements TxService {
 
     Page<TxFilterResponse> txFilterResponsePage =
         new PageImpl<>(
-            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
-            pageable,
-            addressTxCount.getTxCount());
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts), pageable, txCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -1141,7 +1135,7 @@ public class TxServiceImpl implements TxService {
                 item ->
                     new TxStakeCertificate(
                         item.getAddr().getView(), CertificateType.STAKE_DEREGISTRATION))
-            .collect(Collectors.toList()));
+            .toList());
     if (!CollectionUtils.isEmpty(stakeCertificates)) {
       txResponse.setStakeCertificates(stakeCertificates);
     }
@@ -1224,7 +1218,7 @@ public class TxServiceImpl implements TxService {
                         .epoch(item.getRetiringEpoch())
                         .type(CertificateType.POOL_DEREGISTRATION)
                         .build())
-            .collect(Collectors.toList()));
+            .toList());
     if (!CollectionUtils.isEmpty(poolCertificates)) {
       txResponse.setPoolCertificates(poolCertificates);
     }

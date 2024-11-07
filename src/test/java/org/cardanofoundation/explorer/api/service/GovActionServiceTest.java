@@ -12,8 +12,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +27,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.cf_explorer_aggregator.PoolAggregationRecord;
 import org.cardanofoundation.explorer.api.mapper.GovernanceActionMapper;
 import org.cardanofoundation.explorer.api.mapper.LatestVotingProcedureMapper;
 import org.cardanofoundation.explorer.api.mapper.VotingProcedureMapper;
@@ -54,22 +53,20 @@ public class GovActionServiceTest {
 
   @Mock DRepRegistrationRepository dRepRegistrationRepository;
   @Mock GovernanceActionRepository governanceActionRepository;
-  @Mock VotingProcedureRepository votingProcedureRepository;
-  @Mock LatestVotingProcedureRepository latestVotingProcedureRepository;
   @Mock PoolHashRepository poolHashRepository;
+  @Mock VotingProcedureRepository votingProcedureRepository;
   @Mock DrepInfoRepository drepInfoRepository;
   @Mock EpochParamRepository epochParamRepository;
-  @Mock CommitteeRegistrationRepository committeeRegistrationRepository;
-  @Mock CommitteeMemberRepository committeeMemberRepository;
+  @Mock LatestVotingProcedureRepository latestVotingProcedureRepository;
   @Mock DelegationRepository delegationRepository;
+  @Mock CommitteeMemberRepository committeeMemberRepository;
   @Mock StakeAddressBalanceRepository stakeAddressBalanceRepository;
   @Mock OffChainVoteGovActionDataRepository offChainVoteGovActionDataRepository;
   @Mock CommitteeRepository committeeRepository;
-  @Mock ProtocolParamService protocolParamService;
-  @Mock RedisTemplate<String, Integer> redisTemplate;
-  @Mock FetchRewardDataService fetchRewardDataService;
 
-  @Mock ValueOperations valueOperations;
+  @Mock ProtocolParamService protocolParamService;
+  @Mock FetchRewardDataService fetchRewardDataService;
+  @Mock ExplorerAggregatorService explorerAggregatorService;
 
   @Spy
   private GovernanceActionMapper governanceActionMapper =
@@ -299,8 +296,6 @@ public class GovActionServiceTest {
 
     when(drepInfoRepository.countByStatus(any())).thenReturn(5L);
 
-    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-    when(valueOperations.get(any())).thenReturn(5);
     when(committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(any()))
         .thenReturn(5L);
     when(committeeMemberRepository.countActiveMembersByExpiredEpochGreaterThan(any()))
@@ -335,7 +330,8 @@ public class GovActionServiceTest {
 
     when(governanceActionRepository.getGovActionGroupByGovActionStatus())
         .thenReturn(List.of(projection3, projection4, projection5));
-
+    when(explorerAggregatorService.getLatestPoolAggregation())
+        .thenReturn(PoolAggregationRecord.builder().activePools(5).build());
     var actual = governanceActionService.getGovernanceOverview();
 
     Assertions.assertNotNull(actual);

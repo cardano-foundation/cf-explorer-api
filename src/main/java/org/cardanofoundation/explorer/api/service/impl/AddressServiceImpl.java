@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.cf_explorer_aggregator.AddressTxCountRecord;
 import org.cardanofoundation.conversions.CardanoConverters;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant.NetworkType;
@@ -35,16 +36,15 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.MultiAssetReposi
 import org.cardanofoundation.explorer.api.repository.ledgersync.ScriptRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxAmountRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AddressTxCountRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.AggregateAddressTxBalanceRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersyncagg.LatestTokenBalanceRepository;
 import org.cardanofoundation.explorer.api.service.AddressService;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.util.AddressUtils;
 import org.cardanofoundation.explorer.api.util.DataUtil;
 import org.cardanofoundation.explorer.api.util.DateUtils;
 import org.cardanofoundation.explorer.common.entity.enumeration.ScriptType;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.Address;
-import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AddressTxCount;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.AggregateAddressTxBalance;
 import org.cardanofoundation.explorer.common.entity.ledgersyncsagg.LatestTokenBalance;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
@@ -59,7 +59,7 @@ public class AddressServiceImpl implements AddressService {
   private final TokenMapper tokenMapper;
   private final ScriptRepository scriptRepository;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
-  private final AddressTxCountRepository addressTxCountRepository;
+  private final ExplorerAggregatorService explorerAggregatorService;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final MultiAssetRepository multiAssetRepository;
   private final CardanoConverters cardanoConverters;
@@ -133,13 +133,13 @@ public class AddressServiceImpl implements AddressService {
             .findFirstByAddress(address)
             .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
     AddressChartBalanceResponse response = new AddressChartBalanceResponse();
+    Long txCount =
+        explorerAggregatorService
+            .getTxCountForAddress(address)
+            .map(AddressTxCountRecord::getTxCount)
+            .orElse(0L);
 
-    AddressTxCount addressTxCount =
-        addressTxCountRepository
-            .findById(address)
-            .orElse(AddressTxCount.builder().address(address).txCount(0L).build());
-
-    if (Long.valueOf(0).equals(addressTxCount.getTxCount())) {
+    if (Long.valueOf(0L).equals(txCount)) {
       return AddressChartBalanceResponse.builder()
           .highestBalance(BigInteger.ZERO)
           .lowestBalance(BigInteger.ZERO)
