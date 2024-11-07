@@ -18,9 +18,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.cf_explorer_aggregator.PoolStatusRecord;
 import org.cardanofoundation.explorer.api.common.constant.CommonConstant;
 import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
@@ -49,6 +49,7 @@ import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireReposi
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolUpdateRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.RewardRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.StakeAddressRepository;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.service.PoolCertificateService;
 import org.cardanofoundation.explorer.api.service.PoolLifecycleService;
@@ -63,24 +64,16 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 public class PoolLifecycleServiceImpl implements PoolLifecycleService {
 
   private final StakeAddressRepository stakeAddressRepository;
-
   private final PoolHashRepository poolHashRepository;
-
   private final PoolUpdateRepository poolUpdateRepository;
-
   private final RewardRepository rewardRepository;
-
   private final PoolRetireRepository poolRetireRepository;
-
   private final EpochRepository epochRepository;
-
-  private final FetchRewardDataService fetchRewardDataService;
-
   private final PoolInfoRepository poolInfoRepository;
 
-  private final RedisTemplate<String, Object> redisTemplate;
-
+  private final FetchRewardDataService fetchRewardDataService;
   private final PoolCertificateService poolCertificateService;
+  private final ExplorerAggregatorService explorerAggregatorService;
 
   @Value("${application.network}")
   private String network;
@@ -491,17 +484,12 @@ public class PoolLifecycleServiceImpl implements PoolLifecycleService {
   }
 
   private String getPoolStatusFromCacheByPoolId(Long poolId) {
-    String key = CommonConstant.POOL_IDS_INACTIVATE + network;
-    Object obj = null;
-    try {
-      List<Object> objList = redisTemplate.opsForHash().multiGet(key, List.of(poolId));
-      obj = objList.get(0);
-    } catch (Exception e) {
-      log.error("Error: " + e.getMessage());
-    }
-    if (Objects.isNull(obj)) {
-      return CommonConstant.POOL_STATUS_ACTIVE;
-    }
-    return CommonConstant.POOL_STATUS_RETIRED;
+    PoolStatusRecord poolStatusRecord =
+        explorerAggregatorService
+            .getPoolStatusForPoolId(String.valueOf(poolId))
+            .orElseThrow(() -> new BusinessException(BusinessCode.POOL_NOT_FOUND));
+    return Boolean.TRUE.equals(poolStatusRecord.getRetired())
+        ? CommonConstant.POOL_STATUS_RETIRED
+        : CommonConstant.POOL_STATUS_ACTIVE;
   }
 }

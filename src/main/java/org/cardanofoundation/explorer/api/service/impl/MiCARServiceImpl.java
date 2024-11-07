@@ -56,8 +56,10 @@ public class MiCARServiceImpl implements MiCARService {
       if (stakeAddress.isEmpty()) {
         return AddressCarbonEmissionResponse.builder().build();
       }
-      Long txCount = explorerAggregatorService
-              .getTxCountForAddress(stakeAddress.get().getView()).map(AddressTxCountRecord::getTxCount)
+      Long txCount =
+          explorerAggregatorService
+              .getTxCountForAddress(stakeAddress.get().getView())
+              .map(AddressTxCountRecord::getTxCount)
               .orElse(0L);
 
       return AddressCarbonEmissionResponse.builder()
@@ -72,10 +74,12 @@ public class MiCARServiceImpl implements MiCARService {
         if (addr.isEmpty()) {
           return AddressCarbonEmissionResponse.builder().build();
         }
-        Long txCount = explorerAggregatorService.getTxCountForAddress(address)
+        Long txCount =
+            explorerAggregatorService
+                .getTxCountForAddress(address)
                 .map(AddressTxCountRecord::getTxCount)
                 .orElse(0L);
-        
+
         return AddressCarbonEmissionResponse.builder()
             .address(address)
             .txCount(txCount)

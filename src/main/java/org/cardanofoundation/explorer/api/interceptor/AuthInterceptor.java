@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.log4j.Log4j2;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -43,8 +42,6 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   private final RsaConfig rsaConfig;
 
-  private final RedisTemplate<String, Object> redisTemplate;
-
   private final AuthService authService;
 
   private List<AntPathRequestMatcher> matchers;
@@ -52,13 +49,9 @@ public class AuthInterceptor implements HandlerInterceptor {
   private Map<String, Request> authorEndpoint;
 
   public AuthInterceptor(
-      RoleFilterMapper roleFilterMapper,
-      RsaConfig rsaConfig,
-      RedisTemplate<String, Object> redisTemplate,
-      AuthService authService) {
+      RoleFilterMapper roleFilterMapper, RsaConfig rsaConfig, AuthService authService) {
     this.roleConf = roleFilterMapper;
     this.rsaConfig = rsaConfig;
-    this.redisTemplate = redisTemplate;
     this.authService = authService;
   }
 

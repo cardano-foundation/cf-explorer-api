@@ -12,10 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import org.cardanofoundation.cf_explorer_aggregator.UniqueAccountRecord;
 import org.cardanofoundation.explorer.api.common.enumeration.EpochStatus;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.exception.NoContentException;
@@ -23,10 +23,10 @@ import org.cardanofoundation.explorer.api.mapper.EpochMapper;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
 import org.cardanofoundation.explorer.api.model.response.EpochResponse;
 import org.cardanofoundation.explorer.api.model.response.dashboard.EpochSummary;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.service.EpochService;
+import org.cardanofoundation.explorer.api.service.ExplorerAggregatorService;
 import org.cardanofoundation.explorer.api.service.FetchRewardDataService;
 import org.cardanofoundation.explorer.api.util.StreamUtil;
 import org.cardanofoundation.explorer.common.entity.ledgersync.Block;
@@ -37,13 +37,12 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 @RequiredArgsConstructor
 public class EpochServiceImpl implements EpochService {
 
+  private final ExplorerAggregatorService explorerAggregatorService;
+
   private final EpochRepository epochRepository;
   private final BlockRepository blockRepository;
   private final EpochMapper epochMapper;
-  private final RedisTemplate<String, Object> redisTemplate;
   private final FetchRewardDataService fetchRewardDataService;
-  private final AdaPotsRepository adaPotsRepository;
-  private static final String UNIQUE_ACCOUNTS_KEY = "UNIQUE_ACCOUNTS";
   private static final String UNDERSCORE = "_";
 
   @Value("${application.network}")
@@ -92,10 +91,12 @@ public class EpochServiceImpl implements EpochService {
           modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, response.getStartTime());
       response.setStartTime(startTime);
       response.setEndTime(startTime.plusDays(epochDays));
-      String uniqueAccountRedisKey =
-          String.join(UNDERSCORE, getRedisKey(UNIQUE_ACCOUNTS_KEY), epoch.getNo().toString());
-      Integer account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
-      response.setAccount(account);
+
+      explorerAggregatorService
+          .getUniqueAccountForEpoch(epochNo)
+          .ifPresent(
+              uniqueAccountRecord -> response.setAccount(uniqueAccountRecord.getUniqueAccounts()));
+
       return response;
     } catch (NumberFormatException e) {
       throw new BusinessException(BusinessCode.EPOCH_NOT_FOUND);
@@ -154,10 +155,11 @@ public class EpochServiceImpl implements EpochService {
                   modifyStartTimeAndEndTimeOfEpoch(firstEpochStartTime, epoch.getStartTime());
               epoch.setStartTime(startTime);
               epoch.setEndTime(startTime.plusDays(epochDays));
-              String uniqueAccountRedisKey =
-                  String.join(
-                      UNDERSCORE, getRedisKey(UNIQUE_ACCOUNTS_KEY), epoch.getNo().toString());
-              epoch.setAccount(redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue());
+              explorerAggregatorService
+                  .getUniqueAccountForEpoch(epoch.getNo())
+                  .ifPresent(
+                      uniqueAccountRecord ->
+                          epoch.setAccount(uniqueAccountRecord.getUniqueAccounts()));
             });
     return new BaseFilterResponse<>(pageResponse);
   }
@@ -244,12 +246,12 @@ public class EpochServiceImpl implements EpochService {
               var slot =
                   currentLocalDateTime.toEpochSecond(ZoneOffset.UTC)
                       - epochStartTime.toEpochSecond(ZoneOffset.UTC);
-              String uniqueAccountRedisKey =
-                  String.join(
-                      UNDERSCORE,
-                      getRedisKey(UNIQUE_ACCOUNTS_KEY),
-                      epochSummaryProjection.getNo().toString());
-              var account = redisTemplate.opsForHash().size(uniqueAccountRedisKey).intValue();
+              int account =
+                  explorerAggregatorService
+                      .getUniqueAccountForEpoch(epochSummaryProjection.getNo())
+                      .map(UniqueAccountRecord::getUniqueAccounts)
+                      .orElse(0);
+
               if (Boolean.FALSE.equals(
                   fetchRewardDataService.checkAdaPots(epochSummaryProjection.getNo()))) {
                 fetchRewardDataService.fetchAdaPots(List.of(epochSummaryProjection.getNo()));

@@ -63,11 +63,8 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 public class StakeKeyServiceImpl implements StakeKeyService {
 
   private final AddressRepository addressRepository;
-
   private final DelegationRepository delegationRepository;
-
   private final StakeRegistrationRepository stakeRegistrationRepository;
-
   private final StakeDeRegistrationRepository stakeDeRegistrationRepository;
   private final StakeAddressRepository stakeAddressRepository;
   private final RewardRepository rewardRepository;
@@ -78,15 +75,15 @@ public class StakeKeyServiceImpl implements StakeKeyService {
   private final EpochRepository epochRepository;
   private final TxRepository txRepository;
   private final StakeTxBalanceRepository stakeTxBalanceRepository;
-
   private final PoolInfoRepository poolInfoRepository;
-
-  private final FetchRewardDataService fetchRewardDataService;
   private final AggregateAddressTxBalanceRepository aggregateAddressTxBalanceRepository;
   private final AddressTxAmountRepository addressTxAmountRepository;
   private final StakeAddressBalanceRepository stakeAddressBalanceRepository;
-  private final CardanoConverters cardanoConverters;
+
+  private final FetchRewardDataService fetchRewardDataService;
   private final ExplorerAggregatorService explorerAggregatorService;
+
+  private final CardanoConverters cardanoConverters;
 
   @Override
   public BaseFilterResponse<StakeTxResponse> getDataForStakeKeyRegistration(Pageable pageable) {

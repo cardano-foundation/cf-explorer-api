@@ -282,7 +282,9 @@ public class TxServiceImpl implements TxService {
         .findFirstByAddress(address)
         .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
 
-    Long txCount = explorerAggregatorService.getTxCountForAddress(address)
+    Long txCount =
+        explorerAggregatorService
+            .getTxCountForAddress(address)
             .map(AddressTxCountRecord::getTxCount)
             .orElse(0L);
 
@@ -294,9 +296,7 @@ public class TxServiceImpl implements TxService {
 
     Page<TxFilterResponse> txFilterResponsePage =
         new PageImpl<>(
-            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
-            pageable,
-      txCount);
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts), pageable, txCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }
@@ -440,7 +440,9 @@ public class TxServiceImpl implements TxService {
         .findByView(stakeKey)
         .orElseThrow(() -> new BusinessException(BusinessCode.STAKE_ADDRESS_NOT_FOUND));
 
-    Long txCount = explorerAggregatorService.getTxCountForAddress(stakeKey)
+    Long txCount =
+        explorerAggregatorService
+            .getTxCountForAddress(stakeKey)
             .map(AddressTxCountRecord::getTxCount)
             .orElse(0L);
     List<TxProjection> txProjections =
@@ -451,9 +453,7 @@ public class TxServiceImpl implements TxService {
 
     Page<TxFilterResponse> txFilterResponsePage =
         new PageImpl<>(
-            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts),
-            pageable,
-                txCount);
+            mapTxDataFromAddressTxAmount(txProjections, addressTxAmounts), pageable, txCount);
 
     return new BaseFilterResponse<>(txFilterResponsePage);
   }

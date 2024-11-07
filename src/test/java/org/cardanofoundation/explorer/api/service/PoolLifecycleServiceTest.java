@@ -2,6 +2,7 @@ package org.cardanofoundation.explorer.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.cf_explorer_aggregator.PoolStatusRecord;
 import org.cardanofoundation.explorer.api.common.enumeration.PoolActionType;
 import org.cardanofoundation.explorer.api.exception.BusinessCode;
 import org.cardanofoundation.explorer.api.model.response.pool.PoolCertificateHistory;
@@ -39,7 +41,6 @@ import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpd
 import org.cardanofoundation.explorer.api.model.response.pool.projection.PoolUpdateProjection;
 import org.cardanofoundation.explorer.api.model.response.pool.projection.StakeKeyProjection;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolRetireRepository;
@@ -56,24 +57,16 @@ import org.cardanofoundation.explorer.common.exception.BusinessException;
 class PoolLifecycleServiceTest {
 
   @Mock private StakeAddressRepository stakeAddressRepository;
-
   @Mock private PoolHashRepository poolHashRepository;
-
   @Mock private PoolUpdateRepository poolUpdateRepository;
-
   @Mock private RewardRepository rewardRepository;
-
   @Mock private PoolRetireRepository poolRetireRepository;
-
-  @Mock private EpochStakeRepository epochStakeRepository;
-
   @Mock private EpochRepository epochRepository;
-
   @Mock private PoolInfoRepository poolInfoRepository;
 
   @Mock private FetchRewardDataService fetchRewardDataService;
-
   @Mock private PoolCertificateService poolCertificateService;
+  @Mock private ExplorerAggregatorService explorerAggregatorService;
 
   @InjectMocks private PoolLifecycleServiceImpl poolLifecycleService;
 
@@ -129,6 +122,8 @@ class PoolLifecycleServiceTest {
     when(poolHashRepository.getPoolRegistrationByPool(Set.of(-1L), pageable))
         .thenReturn(Page.empty());
     when(poolUpdateRepository.findPoolUpdateByPool(Set.of(-1L), pageable)).thenReturn(Page.empty());
+    when(explorerAggregatorService.getPoolStatusForPoolId(anyString()))
+        .thenReturn(Optional.ofNullable(PoolStatusRecord.builder().build()));
     Assertions.assertEquals(
         0,
         poolLifecycleService
@@ -864,6 +859,8 @@ class PoolLifecycleServiceTest {
     //    when(rewardRepository.getTotalRewardByPool(
     //        "pool1h0anq89dytn6vtm0afhreyawcnn0w99w7e4s4q5w0yh3ymzh94s")).thenReturn(
     //        BigInteger.valueOf(10000));
+    when(explorerAggregatorService.getPoolStatusForPoolId(anyString()))
+        .thenReturn(Optional.ofNullable(PoolStatusRecord.builder().build()));
     when(fetchRewardDataService.useKoios()).thenReturn(false);
     Assertions.assertEquals(
         "Test",
@@ -1197,6 +1194,8 @@ class PoolLifecycleServiceTest {
         .thenReturn(BigInteger.TEN);
     when(fetchRewardDataService.checkRewardForPool(rewardAccounts)).thenReturn(false);
     when(fetchRewardDataService.fetchRewardForPool(rewardAccounts)).thenReturn(false);
+    when(explorerAggregatorService.getPoolStatusForPoolId(anyString()))
+        .thenReturn(Optional.ofNullable(PoolStatusRecord.builder().build()));
     Assertions.assertEquals(
         "Test",
         poolLifecycleService

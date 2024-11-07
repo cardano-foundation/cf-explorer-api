@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8080/api/v1/explorer-aggregator",
+      "url": "http://localhost:8082/api/v1/explorer-aggregator",
       "description": "Generated server url"
     }
   ],
@@ -172,9 +172,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Pool status not found"
-          },
           "200": {
             "description": "Pool status found",
             "content": {
@@ -184,6 +181,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Pool status not found"
           }
         }
       }
@@ -206,6 +206,42 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/poolstatus/epoch/{epoch}": {
+      "get": {
+        "tags": [
+          "Pool Status Controller"
+        ],
+        "summary": "Pool Status by Epoch",
+        "description": "Get the pool status by epoch",
+        "operationId": "getPoolStatusByEpoch",
+        "parameters": [
+          {
+            "name": "epoch",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pool status by epoch found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoolAggregationRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pool status by epoch not found"
           }
         }
       }
@@ -276,6 +312,26 @@
           },
           "404": {
             "description": "Address transaction count not found"
+          }
+        }
+      }
+    },
+    "/__internal__/healthcheck": {
+      "get": {
+        "tags": [
+          "healthcheck"
+        ],
+        "operationId": "get",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }

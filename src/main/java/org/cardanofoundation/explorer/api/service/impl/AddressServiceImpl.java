@@ -133,7 +133,11 @@ public class AddressServiceImpl implements AddressService {
             .findFirstByAddress(address)
             .orElseThrow(() -> new BusinessException(BusinessCode.ADDRESS_NOT_FOUND));
     AddressChartBalanceResponse response = new AddressChartBalanceResponse();
-    Long txCount = explorerAggregatorService.getTxCountForAddress(address).map(AddressTxCountRecord::getTxCount).orElse(0L);
+    Long txCount =
+        explorerAggregatorService
+            .getTxCountForAddress(address)
+            .map(AddressTxCountRecord::getTxCount)
+            .orElse(0L);
 
     if (Long.valueOf(0L).equals(txCount)) {
       return AddressChartBalanceResponse.builder()

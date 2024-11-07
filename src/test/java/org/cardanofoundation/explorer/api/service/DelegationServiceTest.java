@@ -41,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.cardanofoundation.cf_explorer_aggregator.PoolAggregationRecord;
 import org.cardanofoundation.explorer.api.common.enumeration.PoolStatus;
 import org.cardanofoundation.explorer.api.model.request.pool.PoolListFilter;
 import org.cardanofoundation.explorer.api.model.response.BaseFilterResponse;
@@ -63,11 +64,9 @@ import org.cardanofoundation.explorer.api.projection.DelegationProjection;
 import org.cardanofoundation.explorer.api.projection.PoolDelegationSummaryProjection;
 import org.cardanofoundation.explorer.api.projection.StakeAddressProjection;
 import org.cardanofoundation.explorer.api.projection.TxIOProjection;
-import org.cardanofoundation.explorer.api.repository.ledgersync.AdaPotsRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.AggregatePoolInfoRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.BlockRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.DelegationRepository;
-import org.cardanofoundation.explorer.api.repository.ledgersync.EpochParamRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.EpochStakeRepository;
 import org.cardanofoundation.explorer.api.repository.ledgersync.PoolHashRepository;
@@ -89,45 +88,27 @@ import org.cardanofoundation.explorer.common.entity.ledgersync.PoolHash;
 class DelegationServiceTest {
 
   @Mock private DelegationRepository delegationRepository;
-
   @Mock private BlockRepository blockRepository;
-
   @Mock private EpochRepository epochRepository;
-
   @Mock private EpochStakeRepository epochStakeRepository;
-
   @Mock private PoolHashRepository poolHashRepository;
-
-  @Mock private AdaPotsRepository adaPotsRepository;
-
-  @Mock private EpochParamRepository epochParamRepository;
-
   @Mock private PoolUpdateRepository poolUpdateRepository;
-
   @Mock private RewardRepository rewardRepository;
-
   @Mock private PoolInfoRepository poolInfoRepository;
-
   @Mock private PoolHistoryRepository poolHistoryRepository;
 
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private RedisTemplate<String, Object> redisTemplate;
 
   @Mock private FetchRewardDataService fetchRewardDataService;
-
+  @Mock private ExplorerAggregatorService explorerAggregatorService;
   @Mock private StakeAddressRepository stakeAddressRepository;
-
   @Mock private WithdrawalRepository withdrawalRepository;
-
-  @Mock private TxRepository txRepository;
-
-  @Mock private EpochService epochService;
-
-  @Mock private AggregatePoolInfoRepository aggregatePoolInfoRepository;
-
-  @Mock private PoolCertificateService poolCertificateService;
-
   @Mock private StakeAddressBalanceRepository stakeAddressBalanceRepository;
+  @Mock private TxRepository txRepository;
+  @Mock private EpochService epochService;
+  @Mock private AggregatePoolInfoRepository aggregatePoolInfoRepository;
+  @Mock private PoolCertificateService poolCertificateService;
 
   @InjectMocks private DelegationServiceImpl delegationService;
 
@@ -215,6 +196,8 @@ class DelegationServiceTest {
     when(fetchRewardDataService.fetchAdaPots(any())).thenReturn(true);
     when(fetchRewardDataService.useKoios()).thenReturn(true);
     when(poolInfoRepository.getTotalLiveStake(anyInt())).thenReturn(BigInteger.TEN);
+    when(explorerAggregatorService.getLatestPoolAggregation())
+        .thenReturn(PoolAggregationRecord.builder().build());
 
     // Execute the method
     DelegationHeaderResponse response = delegationService.getDataForDelegationHeader();
@@ -246,6 +229,8 @@ class DelegationServiceTest {
     when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
     when(redisTemplate.opsForValue().get(any())).thenReturn(10);
+    when(explorerAggregatorService.getLatestPoolAggregation())
+        .thenReturn(PoolAggregationRecord.builder().build());
 
     // Execute the method
     DelegationHeaderResponse response = delegationService.getDataForDelegationHeader();
@@ -271,6 +256,8 @@ class DelegationServiceTest {
             .build();
     when(epochService.getCurrentEpochSummary()).thenReturn(epochSummary);
     when(fetchRewardDataService.useKoios()).thenReturn(false);
+    when(explorerAggregatorService.getLatestPoolAggregation())
+        .thenReturn(PoolAggregationRecord.builder().build());
 
     // Execute the method
     DelegationHeaderResponse response = delegationService.getDataForDelegationHeader();
