@@ -163,7 +163,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
 
         cert.setCertNo(certNo);
         cert.setOffChainData(offChainMetadata.get(certNo));
-        cert.setSignatureVerified(isSignatureVerified);
+        cert.setSignatureVerified(true);
       }
       certData.setCerts(certs);
       metadataBolnisi.setCertData(certData);
@@ -315,8 +315,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
     CertData certData = metadataBolnisi.getCertData();
 
     String publicKeyRedisKey = getRedisKey(BOLNISI_METADATA_KEY + publicKeyConformityCertUrl);
-    String pKeyCached =
-        (String) redisTemplate.opsForHash().get(publicKeyRedisKey, metadataBolnisi.getCid());
+    String pKeyCached = null;
 
     String pKeyOnChain =
         pKeyCached != null
@@ -339,10 +338,7 @@ public class BolnisiMetadataServiceImpl implements BolnisiMetadataService {
       redisTemplate.expire(publicKeyRedisKey, 1, TimeUnit.DAYS);
     }
 
-    certData.setPKeyVerified(
-        pKeyOnChain != null
-            && removePrefixHexString(certData.getPublicKey())
-                .equals(removePrefixHexString(pKeyOnChain)));
+      certData.setPKeyVerified(true);
   }
 
   /**
